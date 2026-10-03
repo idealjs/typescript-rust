@@ -1,7 +1,7 @@
 use crate::checker::relater::*;
 
 #[test]
-fn relation_comparison_result_flags() {
+fn relation_comparison_result_flags() { ::tsox_core::fntrace::enter("relation_comparison_result_flags"); 
     let result = RelationComparisonResult::Succeeded;
     assert!(result.contains(RelationComparisonResult::Succeeded));
     assert!(!result.contains(RelationComparisonResult::Failed));
@@ -12,7 +12,7 @@ fn relation_comparison_result_flags() {
 }
 
 #[test]
-fn relation_cache_basic() {
+fn relation_cache_basic() { ::tsox_core::fntrace::enter("relation_cache_basic"); 
     let mut rel = Relation::new(RelationKind::Assignable);
     let key = CacheHashKey::new(1, 2);
     assert!(rel.get(&key) == RelationComparisonResult::None);
@@ -22,7 +22,7 @@ fn relation_cache_basic() {
 }
 
 #[test]
-fn relation_cache_key_distinguishes_relation_kinds() {
+fn relation_cache_key_distinguishes_relation_kinds() { ::tsox_core::fntrace::enter("relation_cache_key_distinguishes_relation_kinds"); 
     let k1 = RelationCacheKey {
         source_id: 0x1000,
         target_id: 0x2000,
@@ -46,7 +46,7 @@ fn relation_cache_key_distinguishes_relation_kinds() {
 }
 
 #[test]
-fn relation_cache_key_distinguishes_type_pointers() {
+fn relation_cache_key_distinguishes_type_pointers() { ::tsox_core::fntrace::enter("relation_cache_key_distinguishes_type_pointers"); 
     let k1 = RelationCacheKey {
         source_id: 0x1000,
         target_id: 0x2000,
@@ -63,13 +63,13 @@ fn relation_cache_key_distinguishes_type_pointers() {
 }
 
 #[test]
-fn recursion_flags_both() {
+fn recursion_flags_both() { ::tsox_core::fntrace::enter("recursion_flags_both"); 
     assert!(RECURSION_FLAGS_BOTH.contains(RecursionFlags::Source));
     assert!(RECURSION_FLAGS_BOTH.contains(RecursionFlags::Target));
 }
 
 #[test]
-fn expanding_flags() {
+fn expanding_flags() { ::tsox_core::fntrace::enter("expanding_flags"); 
     assert_eq!(ExpandingFlags::NONE.0, 0);
     assert_eq!(ExpandingFlags::SOURCE.0, 1);
     assert_eq!(ExpandingFlags::TARGET.0, 2);
@@ -77,14 +77,14 @@ fn expanding_flags() {
 }
 
 #[test]
-fn signature_check_mode_callback_alias() {
+fn signature_check_mode_callback_alias() { ::tsox_core::fntrace::enter("signature_check_mode_callback_alias"); 
     assert!(SignatureCheckMode::Callback.contains(SignatureCheckMode::BivariantCallback));
     assert!(SignatureCheckMode::Callback.contains(SignatureCheckMode::StrictCallback));
     assert_eq!(SignatureCheckMode::Callback, SIGNATURE_CHECK_MODE_CALLBACK);
 }
 
 #[test]
-fn type_arguments_related_covariant_by_default() {
+fn type_arguments_related_covariant_by_default() { ::tsox_core::fntrace::enter("type_arguments_related_covariant_by_default"); 
     let result = Ternary::True.and(Ternary::True);
     assert_eq!(result, Ternary::True);
 
@@ -96,7 +96,7 @@ fn type_arguments_related_covariant_by_default() {
 }
 
 #[test]
-fn index_signature_helpers_bit_layout() {
+fn index_signature_helpers_bit_layout() { ::tsox_core::fntrace::enter("index_signature_helpers_bit_layout"); 
     let inferable =
         ObjectFlags::JSLiteral | ObjectFlags::ObjectRestType | ObjectFlags::ReverseMapped;
     assert!(inferable.contains(ObjectFlags::JSLiteral));

@@ -36,7 +36,7 @@ pub struct VarScope {
     pub initialization_statements: Vec<Arc<Node>>,
 }
 
-pub fn get_emit_context() -> (EmitContext, impl FnOnce(&mut EmitContext)) {
+pub fn get_emit_context() -> (EmitContext, impl FnOnce(&mut EmitContext)) { ::tsox_core::fntrace::enter("get_emit_context"); 
     let mut context = EmitContext::new();
     let reset = |c: &mut EmitContext| c.reset();
     let _ = &mut context;
@@ -44,18 +44,18 @@ pub fn get_emit_context() -> (EmitContext, impl FnOnce(&mut EmitContext)) {
 }
 
 impl EmitContext {
-    pub fn factory(&self) -> NodeFactory<'_> {
+    pub fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(self)
     }
 
-    pub fn emit_nodes_try_get(&self, node: &Arc<Node>) -> Option<std::cell::Ref<'_, EmitNode>> {
+    pub fn emit_nodes_try_get(&self, node: &Arc<Node>) -> Option<std::cell::Ref<'_, EmitNode>> { ::tsox_core::fntrace::enter("emit_nodes_try_get"); 
         std::cell::Ref::filter_map(self.emit_nodes.borrow(), |m| {
             m.get(&(Arc::as_ptr(node) as *const Node))
         })
         .ok()
     }
 
-    pub fn emit_nodes_get_mut(&self, node: &Arc<Node>) -> std::cell::RefMut<'_, EmitNode> {
+    pub fn emit_nodes_get_mut(&self, node: &Arc<Node>) -> std::cell::RefMut<'_, EmitNode> { ::tsox_core::fntrace::enter("emit_nodes_get_mut"); 
         let ptr = Arc::as_ptr(node) as *const Node;
         if !self.emit_nodes.borrow().contains_key(&ptr) {
             self.emit_nodes.borrow_mut().insert(ptr, EmitNode::default());
@@ -63,12 +63,12 @@ impl EmitContext {
         std::cell::RefMut::map(self.emit_nodes.borrow_mut(), |m| m.get_mut(&ptr).unwrap())
     }
 
-    pub fn get_auto_generate_info(&self, name: &Arc<Node>) -> Option<&AutoGenerateInfo> {
+    pub fn get_auto_generate_info(&self, name: &Arc<Node>) -> Option<&AutoGenerateInfo> { ::tsox_core::fntrace::enter("get_auto_generate_info"); 
         self.auto_generate
             .get(&(Arc::as_ptr(name) as *const Node))
     }
 
-    pub fn get_node_for_generated_name(&self, name: &Arc<Node>) -> Arc<Node> {
+    pub fn get_node_for_generated_name(&self, name: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_node_for_generated_name"); 
         if let Some(auto_generate) = self.get_auto_generate_info(name) {
             if auto_generate.flags.is_node() {
                 if let Some(node) = auto_generate.node.clone() {

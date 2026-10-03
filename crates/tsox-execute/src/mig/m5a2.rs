@@ -18,7 +18,7 @@ pub struct MockWatch {
 }
 
 impl WatchCloser for MockWatch {
-    fn close(&mut self) {
+    fn close(&mut self) { ::tsox_core::fntrace::enter("close"); 
         self.closed = true;
     }
 }
@@ -30,7 +30,7 @@ pub struct MockWatchBackend {
 }
 
 impl MockWatchBackend {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             dirs: Mutex::new(HashMap::new()),
             directory_exists: false,
@@ -38,7 +38,7 @@ impl MockWatchBackend {
         }
     }
 
-    pub fn has_watches(&self) -> bool {
+    pub fn has_watches(&self) -> bool { ::tsox_core::fntrace::enter("has_watches"); 
         !self.dirs.lock().unwrap().is_empty()
     }
 
@@ -48,7 +48,7 @@ impl MockWatchBackend {
         callback: WatchCallback,
         recursive: bool,
         ignore: Option<IgnoreFn>,
-    ) -> Result<Box<dyn WatchCloser>, String> {
+    ) -> Result<Box<dyn WatchCloser>, String> { ::tsox_core::fntrace::enter("watch_directory"); 
         let closers = self.watch_directories(&[WatchDirectoryRequest {
             dir: dir.to_string(),
             callback,
@@ -61,7 +61,7 @@ impl MockWatchBackend {
     pub fn watch_directories(
         &self,
         requests: &[WatchDirectoryRequest],
-    ) -> Result<Vec<Box<dyn WatchCloser>>, String> {
+    ) -> Result<Vec<Box<dyn WatchCloser>>, String> { ::tsox_core::fntrace::enter("watch_directories"); 
         let mut dirs = self.dirs.lock().unwrap();
         for request in requests {
             if self.directory_exists && !mock_directory_exists(&request.dir) {
@@ -83,7 +83,7 @@ impl MockWatchBackend {
         Ok(closers)
     }
 
-    pub fn send_events(&self, events: &[Event]) {
+    pub fn send_events(&self, events: &[Event]) { ::tsox_core::fntrace::enter("send_events"); 
         struct Target {
             cb: WatchCallback,
             events: Vec<Event>,
@@ -130,7 +130,7 @@ impl MockWatchBackend {
         }
     }
 
-    pub fn send_overflow(&self) {
+    pub fn send_overflow(&self) { ::tsox_core::fntrace::enter("send_overflow"); 
         let mut cbs: Vec<WatchCallback> = Vec::new();
         {
             let dirs = self.dirs.lock().unwrap();
@@ -146,7 +146,7 @@ impl MockWatchBackend {
         }
     }
 
-    pub fn send_changed_paths(&self, changes: &[fs_baseline_util::FileChange]) {
+    pub fn send_changed_paths(&self, changes: &[fs_baseline_util::FileChange]) { ::tsox_core::fntrace::enter("send_changed_paths"); 
         let mut events: Vec<Event> = Vec::with_capacity(changes.len() * 2);
         let mut seen_dirs: HashSet<String> = HashSet::new();
         for c in changes {
@@ -181,7 +181,7 @@ impl MockWatchBackend {
         self.send_events(&events);
     }
 
-    pub fn watch_state(&self) -> String {
+    pub fn watch_state(&self) -> String { ::tsox_core::fntrace::enter("watch_state"); 
         let dirs = self.dirs.lock().unwrap();
 
         let mut b = String::new();
@@ -212,7 +212,7 @@ impl MockWatchBackend {
     }
 }
 
-pub fn mock_directory_exists(_dir: &str) -> bool {
+pub fn mock_directory_exists(_dir: &str) -> bool { ::tsox_core::fntrace::enter("mock_directory_exists"); 
     false
 }
 
@@ -221,7 +221,7 @@ pub struct MockWatchHandle {
 }
 
 impl WatchCloser for MockWatchHandle {
-    fn close(&mut self) {
+    fn close(&mut self) { ::tsox_core::fntrace::enter("close"); 
         self.watch.lock().unwrap().closed = true;
     }
 }
@@ -231,7 +231,7 @@ pub fn path_is_under(
     dir: &str,
     recursive: bool,
     use_case_sensitive_file_names: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("path_is_under"); 
     let mut event_path = event_path.to_string();
     let mut dir = dir.to_string();
     if !use_case_sensitive_file_names {

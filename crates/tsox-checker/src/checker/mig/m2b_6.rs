@@ -10,7 +10,7 @@ use tsox_core::diagnostics as msg;
 use tsox_frontend::ast::SymbolFlags;
 
 impl Checker {
-    pub fn get_base_types(&mut self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+    pub fn get_base_types(&mut self, t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_base_types"); 
         if !t
             .object_flags
             .intersects(OBJECT_FLAGS_CLASS_OR_INTERFACE.union(ObjectFlags::Tuple))
@@ -65,7 +65,7 @@ impl Checker {
             .unwrap_or_default()
     }
 
-    pub fn get_base_constructor_type_of_class(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_base_constructor_type_of_class(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_base_constructor_type_of_class"); 
         if let Some(resolved) = t
             .as_interface_type()
             .and_then(|i| i.resolved_base_constructor_type.get().cloned())
@@ -136,7 +136,7 @@ impl Checker {
     }
 }
 
-fn set_base_types_resolved(t: &Arc<Type>) {
+fn set_base_types_resolved(t: &Arc<Type>) { ::tsox_core::fntrace::enter("set_base_types_resolved"); 
     let mut owned = Arc::clone(t);
     let Some(owned) = Arc::get_mut(&mut owned) else { return };
     match &mut owned.data {
@@ -146,13 +146,13 @@ fn set_base_types_resolved(t: &Arc<Type>) {
     }
 }
 
-fn clear_members_resolved(t: &Arc<Type>) {
+fn clear_members_resolved(t: &Arc<Type>) { ::tsox_core::fntrace::enter("clear_members_resolved"); 
     let mut owned = Arc::clone(t);
     let Some(owned) = Arc::get_mut(&mut owned) else { return };
     owned.object_flags.remove(ObjectFlags::MembersResolved);
 }
 
-fn set_resolved_base_constructor_type(t: &Arc<Type>, base_constructor_type: Arc<Type>) {
+fn set_resolved_base_constructor_type(t: &Arc<Type>, base_constructor_type: Arc<Type>) { ::tsox_core::fntrace::enter("set_resolved_base_constructor_type"); 
     if let Some(interface) = t.as_interface_type() {
         let _ = interface.resolved_base_constructor_type.set(base_constructor_type);
     }

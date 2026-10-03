@@ -9,7 +9,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_throws_tag"); 
         let type_expression = self.try_parse_type_expression();
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
@@ -37,7 +37,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_see_tag"); 
         let name_expression = if self.is_identifier()
             || (self.token == SyntaxKind::OpenBraceToken && {
                 let mut sc = self.scanner.clone();
@@ -84,7 +84,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_implements_tag"); 
         let class_name = self.parse_expression_with_type_arguments_for_augments();
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
@@ -110,7 +110,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_augments_tag"); 
         let class_name = self.parse_expression_with_type_arguments_for_augments();
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
@@ -136,7 +136,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         target: PropertyLikeParse,
         indent: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parameter_or_property_tag"); 
         let type_expression = self.try_parse_type_expression();
         let is_name_first = type_expression.is_none();
         self.skip_whitespace_or_asterisk();
@@ -188,7 +188,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_template_tag"); 
         let constraint = if self.token == SyntaxKind::OpenBraceToken {
             Some(self.parse_jsdoc_type_expression(false))
         } else {
@@ -217,7 +217,7 @@ impl crate::parser::Parser {
         ))
     }
 
-    pub(crate) fn parse_template_tag_type_parameters(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_template_tag_type_parameters(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_template_tag_type_parameters"); 
         let pos = self.token_pos();
         let mut params = Vec::new();
         loop {
@@ -234,7 +234,7 @@ impl crate::parser::Parser {
         })
     }
 
-    pub(crate) fn parse_template_tag_type_parameter(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_template_tag_type_parameter(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_template_tag_type_parameter"); 
         let pos = self.token_pos();
 
         let modifiers = if self.token == SyntaxKind::ConstKeyword {

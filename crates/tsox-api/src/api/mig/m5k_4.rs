@@ -31,7 +31,7 @@ pub fn diagnostic_source_lines(
     file: &SourceFile,
     first_line: i32,
     last_line: i32,
-) -> Vec<DiagnosticSourceLineResponse> {
+) -> Vec<DiagnosticSourceLineResponse> { ::tsox_core::fntrace::enter("diagnostic_source_lines"); 
     let line_map = &file.line_map.line_starts;
     if line_map.is_empty() {
         return Vec::new();
@@ -65,11 +65,11 @@ pub fn diagnostic_source_lines(
     result
 }
 
-pub fn new_diagnostic_response(d: &Diagnostic) -> DiagnosticResponse {
+pub fn new_diagnostic_response(d: &Diagnostic) -> DiagnosticResponse { ::tsox_core::fntrace::enter("new_diagnostic_response"); 
     new_diagnostic_response_from_wrapped(d)
 }
 
-pub fn new_diagnostic_response_from_wrapped(d: &Diagnostic) -> DiagnosticResponse {
+pub fn new_diagnostic_response_from_wrapped(d: &Diagnostic) -> DiagnosticResponse { ::tsox_core::fntrace::enter("new_diagnostic_response_from_wrapped"); 
     let file = d.file();
     let mut pos = d.pos();
     let mut end = d.end();
@@ -131,7 +131,7 @@ pub fn new_diagnostic_response_from_wrapped(d: &Diagnostic) -> DiagnosticRespons
     resp
 }
 
-pub fn new_diagnostic_responses(diags: &[Diagnostic]) -> Option<Vec<DiagnosticResponse>> {
+pub fn new_diagnostic_responses(diags: &[Diagnostic]) -> Option<Vec<DiagnosticResponse>> { ::tsox_core::fntrace::enter("new_diagnostic_responses"); 
     if diags.is_empty() {
         return None;
     }
@@ -140,7 +140,7 @@ pub fn new_diagnostic_responses(diags: &[Diagnostic]) -> Option<Vec<DiagnosticRe
 
 pub use crate::api::mig::m5l::DiagnosticResponse;
 
-fn category_from_name(name: &str) -> Category {
+fn category_from_name(name: &str) -> Category { ::tsox_core::fntrace::enter("category_from_name"); 
     match name {
         "error" => Category::Error,
         "suggestion" => Category::Suggestion,
@@ -150,7 +150,7 @@ fn category_from_name(name: &str) -> Category {
 }
 
 impl DiagnosticResponse {
-    pub fn to_diagnostic(&self) -> Diagnostic {
+    pub fn to_diagnostic(&self) -> Diagnostic { ::tsox_core::fntrace::enter("to_diagnostic"); 
         new_diagnostic_from_text(
             None,
             TextRange::new(self.pos.max(0) as usize, self.end.max(0) as usize),
@@ -171,15 +171,15 @@ impl DiagnosticResponse {
     }
 }
 
-fn symbol_handle(symbol: &tsox_frontend::ast::Symbol) -> SymbolId {
+fn symbol_handle(symbol: &tsox_frontend::ast::Symbol) -> SymbolId { ::tsox_core::fntrace::enter("symbol_handle"); 
     symbol.id() as u32
 }
 
-fn type_handle(t: &Type) -> TypeId {
+fn type_handle(t: &Type) -> TypeId { ::tsox_core::fntrace::enter("type_handle"); 
     t.id
 }
 
-fn type_handles(types: &[Arc<Type>]) -> Option<Vec<TypeId>> {
+fn type_handles(types: &[Arc<Type>]) -> Option<Vec<TypeId>> { ::tsox_core::fntrace::enter("type_handles"); 
     if types.is_empty() {
         None
     } else {
@@ -187,7 +187,7 @@ fn type_handles(types: &[Arc<Type>]) -> Option<Vec<TypeId>> {
     }
 }
 
-fn literal_value_to_json(value: &LiteralValue) -> JsonValue {
+fn literal_value_to_json(value: &LiteralValue) -> JsonValue { ::tsox_core::fntrace::enter("literal_value_to_json"); 
     match value {
         LiteralValue::String(s) => JsonValue::String(s.clone()),
         LiteralValue::Number(n) => JsonValue::from(n.0),
@@ -197,7 +197,7 @@ fn literal_value_to_json(value: &LiteralValue) -> JsonValue {
     }
 }
 
-fn object_flags_data(t: &Type) -> Option<&tsox_checker::checker::ObjectTypeData> {
+fn object_flags_data(t: &Type) -> Option<&tsox_checker::checker::ObjectTypeData> { ::tsox_core::fntrace::enter("object_flags_data"); 
     match &t.data {
         tsox_checker::checker::TypeData::Object(data) => Some(data),
         tsox_checker::checker::TypeData::Interface(data) => Some(&data.object),
@@ -210,7 +210,7 @@ fn object_flags_data(t: &Type) -> Option<&tsox_checker::checker::ObjectTypeData>
     }
 }
 
-pub fn new_type_response(t: &Type, id: u32) -> TypeResponse {
+pub fn new_type_response(t: &Type, id: u32) -> TypeResponse { ::tsox_core::fntrace::enter("new_type_response"); 
     let mut resp = TypeResponse {
         id,
         flags: t.flags.bits(),

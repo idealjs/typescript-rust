@@ -7,7 +7,7 @@ use tsox_core::core::text::TextRange;
 // 语句以 await 上下文重解析（`await(1)` 等 CallExpression 形态转 AwaitExpression）。
 // 检测改为解析后 AST 遍历：await 标识符出现在引用位即算，函数体内部不算
 // （Go parseFunctionDeclarationOrMember 对 statementHasAwaitIdentifier 的 save/restore）。
-pub(crate) fn reparse_top_level_await(file: &mut SourceFile, diagnostics: &mut Vec<ParserDiagnostic>) {
+pub(crate) fn reparse_top_level_await(file: &mut SourceFile, diagnostics: &mut Vec<ParserDiagnostic>) { ::tsox_core::fntrace::enter("reparse_top_level_await"); 
     if file.is_declaration_file || file.external_module_indicator.is_none() {
         return;
     }
@@ -93,11 +93,11 @@ pub(crate) fn reparse_top_level_await(file: &mut SourceFile, diagnostics: &mut V
     file.has_parse_diagnostics = !diagnostics.is_empty();
 }
 
-fn statement_has_await_identifier(stmt: &Arc<Node>) -> bool {
+fn statement_has_await_identifier(stmt: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("statement_has_await_identifier"); 
     visit_for_await(stmt)
 }
 
-fn visit_for_await(node: &Arc<Node>) -> bool {
+fn visit_for_await(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("visit_for_await"); 
     if matches!(
         node.kind,
         SyntaxKind::FunctionDeclaration
@@ -122,7 +122,7 @@ fn reparse_span(
     script_kind: ScriptKind,
     span_start: usize,
     span_end: usize,
-) -> (Vec<Arc<Node>>, Vec<ParserDiagnostic>) {
+) -> (Vec<Arc<Node>>, Vec<ParserDiagnostic>) { ::tsox_core::fntrace::enter("reparse_span"); 
     let mut parser = Parser::new_with_language_variant(text.to_string(), language_variant);
     parser.set_javascript_file(matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx));
     parser.scanner.set_range(span_start, text.len());

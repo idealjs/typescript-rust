@@ -31,11 +31,11 @@ pub(crate) trait EmitContextExt07 {
 }
 
 impl EmitContextExt07 for EmitContext {
-    fn auto_generate_of(&self, _node: &Node) -> Option<()> {
+    fn auto_generate_of(&self, _node: &Node) -> Option<()> { ::tsox_core::fntrace::enter("auto_generate_of"); 
         None
     }
 
-    fn text_source_of(&self, _node: &Node) -> Option<Node> {
+    fn text_source_of(&self, _node: &Node) -> Option<Node> { ::tsox_core::fntrace::enter("text_source_of"); 
         None
     }
 }
@@ -45,30 +45,30 @@ pub(crate) trait QNode07 {
 }
 
 impl QNode07 for Node {
-    fn q_node(&self) -> &Node {
+    fn q_node(&self) -> &Node { ::tsox_core::fntrace::enter("q_node"); 
         self
     }
 }
 
 impl QNode07 for Arc<Node> {
-    fn q_node(&self) -> &Node {
+    fn q_node(&self) -> &Node { ::tsox_core::fntrace::enter("q_node"); 
         self
     }
 }
 
 impl<'a> QNode07 for TypedNode<'a> {
-    fn q_node(&self) -> &Node {
+    fn q_node(&self) -> &Node { ::tsox_core::fntrace::enter("q_node"); 
         self.node
     }
 }
 
 impl<'a> QNode07 for TypedNode6<'a> {
-    fn q_node(&self) -> &Node {
+    fn q_node(&self) -> &Node { ::tsox_core::fntrace::enter("q_node"); 
         self.node
     }
 }
 
-pub(crate) fn greatest_end07(end: usize, nodes: &[Option<&Node>]) -> usize {
+pub(crate) fn greatest_end07(end: usize, nodes: &[Option<&Node>]) -> usize { ::tsox_core::fntrace::enter("greatest_end07"); 
     let mut end = end;
     for node in nodes.iter().rev() {
         if let Some(node) = node {
@@ -81,7 +81,7 @@ pub(crate) fn greatest_end07(end: usize, nodes: &[Option<&Node>]) -> usize {
     end
 }
 
-pub(crate) fn skip_partially_emitted_expressions07(node: &Node) -> &Node {
+pub(crate) fn skip_partially_emitted_expressions07(node: &Node) -> &Node { ::tsox_core::fntrace::enter("skip_partially_emitted_expressions07"); 
     let mut node = node;
     while is_partially_emitted_expression(node) {
         match &node.data {
@@ -92,14 +92,14 @@ pub(crate) fn skip_partially_emitted_expressions07(node: &Node) -> &Node {
     node
 }
 
-pub(crate) fn is_binary_operation07(node: &Node, operator: SyntaxKind) -> bool {
+pub(crate) fn is_binary_operation07(node: &Node, operator: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_binary_operation07"); 
     match &node.data {
         NodeData::BinaryExpression(d) => d.operator_token.kind == operator,
         _ => false,
     }
 }
 
-pub(crate) fn get_type_node_precedence07(node: &Node) -> TypePrecedence {
+pub(crate) fn get_type_node_precedence07(node: &Node) -> TypePrecedence { ::tsox_core::fntrace::enter("get_type_node_precedence07"); 
     match node.kind {
         SyntaxKind::ConditionalType => TypePrecedence::Conditional,
         SyntaxKind::JSDocOptionalType | SyntaxKind::JSDocVariadicType => TypePrecedence::Jsdoc,
@@ -126,7 +126,7 @@ pub(crate) fn get_type_node_precedence07(node: &Node) -> TypePrecedence {
     }
 }
 
-pub(crate) fn can_emit_simple_arrow_head07(parent_node: &Node, parameters: &NodeList) -> bool {
+pub(crate) fn can_emit_simple_arrow_head07(parent_node: &Node, parameters: &NodeList) -> bool { ::tsox_core::fntrace::enter("can_emit_simple_arrow_head07"); 
     if parent_node.kind != SyntaxKind::ArrowFunction || parameters.nodes.len() != 1 {
         return false;
     }
@@ -162,7 +162,7 @@ pub(crate) fn can_emit_simple_arrow_head07(parent_node: &Node, parameters: &Node
 }
 
 impl Printer {
-    pub(crate) fn write_as(&mut self, text: &str, write_kind: WriteKind) {
+    pub(crate) fn write_as(&mut self, text: &str, write_kind: WriteKind) { ::tsox_core::fntrace::enter("write_as"); 
         match write_kind {
             WriteKind::None => self.writer.write(text),
             WriteKind::Parameter => self.writer.write_parameter(text),
@@ -176,51 +176,51 @@ impl Printer {
         }
     }
 
-    pub(crate) fn write(&mut self, text: &str) {
+    pub(crate) fn write(&mut self, text: &str) { ::tsox_core::fntrace::enter("write"); 
         self.write_as(text, self.write_kind);
     }
 
-    pub(crate) fn write_punctuation(&mut self, text: &str) {
+    pub(crate) fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         self.writer.write_punctuation(text);
     }
 
-    pub(crate) fn write_operator(&mut self, text: &str) {
+    pub(crate) fn write_operator(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_operator"); 
         self.writer.write_operator(text);
     }
 
-    pub(crate) fn write_keyword(&mut self, text: &str) {
+    pub(crate) fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         self.writer.write_keyword(text);
     }
 
-    pub(crate) fn write_comment(&mut self, text: &str) {
+    pub(crate) fn write_comment(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_comment"); 
         self.writer.write_comment(text);
     }
 
-    pub(crate) fn write_trailing_semicolon(&mut self) {
+    pub(crate) fn write_trailing_semicolon(&mut self) { ::tsox_core::fntrace::enter("write_trailing_semicolon"); 
         self.writer.write_trailing_semicolon(";");
     }
 
-    pub(crate) fn increase_indent(&mut self) {
+    pub(crate) fn increase_indent(&mut self) { ::tsox_core::fntrace::enter("increase_indent"); 
         self.writer.increase_indent();
     }
 
-    pub(crate) fn decrease_indent(&mut self) {
+    pub(crate) fn decrease_indent(&mut self) { ::tsox_core::fntrace::enter("decrease_indent"); 
         self.writer.decrease_indent();
     }
 
-    pub(crate) fn increase_indent_if(&mut self, indent_requested: bool) {
+    pub(crate) fn increase_indent_if(&mut self, indent_requested: bool) { ::tsox_core::fntrace::enter("increase_indent_if"); 
         if indent_requested {
             self.increase_indent();
         }
     }
 
-    pub(crate) fn decrease_indent_if(&mut self, indent_requested: bool) {
+    pub(crate) fn decrease_indent_if(&mut self, indent_requested: bool) { ::tsox_core::fntrace::enter("decrease_indent_if"); 
         if indent_requested {
             self.decrease_indent();
         }
     }
 
-    pub(crate) fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize {
+    pub(crate) fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize { ::tsox_core::fntrace::enter("write_token_text"); 
         let token_string = token_to_string(token);
         self.write_as(&token_string, write_kind);
         if position_is_synthesized(pos) {
@@ -230,7 +230,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_literal(&mut self, node: &Node, mut flags: GetLiteralTextFlags) {
+    pub(crate) fn emit_literal(&mut self, node: &Node, mut flags: GetLiteralTextFlags) { ::tsox_core::fntrace::enter("emit_literal"); 
         if self.options.never_ascii_escape {
             flags |= GetLiteralTextFlags::NEVER_ASCII_ESCAPE;
         }
@@ -246,7 +246,7 @@ impl Printer {
         node: &Node,
         source_file: Option<&Node>,
         mut flags: GetLiteralTextFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_literal_text_of_node"); 
         if is_string_literal(node) {
             if let Some(text_source_node) = self.emit_context.text_source_of(node) {
                 let text = match text_source_node.kind {
@@ -275,7 +275,7 @@ impl Printer {
         node.text().to_string()
     }
 
-    pub(crate) fn get_text_of_node(&mut self, node: &Node, include_trivia: bool) -> String {
+    pub(crate) fn get_text_of_node(&mut self, node: &Node, include_trivia: bool) -> String { ::tsox_core::fntrace::enter("get_text_of_node"); 
         if is_member_name(node) && self.emit_context.auto_generate_of(node).is_some() {
             return node.text().to_string();
         }
@@ -300,32 +300,32 @@ impl Printer {
         node.text().to_string()
     }
 
-    pub(crate) fn emit_identifier_text(&mut self, node: &Node) {
+    pub(crate) fn emit_identifier_text(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_identifier_text"); 
         let text = self.get_text_of_node(node, false);
         self.write(&text);
     }
 
-    pub(crate) fn emit_identifier_name<'a, N: QNode07 + ?Sized>(&mut self, node: &'a N) {
+    pub(crate) fn emit_identifier_name<'a, N: QNode07 + ?Sized>(&mut self, node: &'a N) { ::tsox_core::fntrace::enter("emit_identifier_name"); 
         let node = node.q_node();
         let state = self.enter_node(node);
         self.emit_identifier_text(node);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_binding_identifier<'a, N: QNode07 + ?Sized>(&mut self, node: &'a N) {
+    pub(crate) fn emit_binding_identifier<'a, N: QNode07 + ?Sized>(&mut self, node: &'a N) { ::tsox_core::fntrace::enter("emit_binding_identifier"); 
         let node = node.q_node();
         let state = self.enter_node(node);
         self.emit_identifier_text(node);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_identifier_reference(&mut self, node: &Node) {
+    pub(crate) fn emit_identifier_reference(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_identifier_reference"); 
         let state = self.enter_node(node);
         self.emit_identifier_text(node);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_binding_name(&mut self, node: &Node) {
+    pub(crate) fn emit_binding_name(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_binding_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_binding_identifier(node),
             SyntaxKind::ObjectBindingPattern => self.emit_object_binding_pattern(node),
@@ -334,7 +334,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_array_binding_pattern(&mut self, node: &Node) {
+    pub(crate) fn emit_array_binding_pattern(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_array_binding_pattern"); 
         let state = self.enter_node(node);
         let elements = match &node.data {
             NodeData::BindingPattern(d) => &d.elements,
@@ -346,7 +346,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_binding_element_node(&mut self, node: &Node) {
+    pub(crate) fn emit_binding_element_node(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_binding_element_node"); 
         let state = self.enter_node(node);
         let (dot_dot_dot_token, property_name, name, initializer) = match &node.data {
             NodeData::BindingElement(d) => (
@@ -371,7 +371,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_import_specifier_node(&mut self, node: &Node) {
+    pub(crate) fn emit_import_specifier_node(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_import_specifier_node"); 
         let state = self.enter_node(node);
         let (is_type_only, property_name, name) = match &node.data {
             NodeData::ImportSpecifier(d) => (d.is_type_only, d.property_name.as_deref(), &d.name),
@@ -391,13 +391,13 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_big_int_literal(&mut self, node: &Node) {
+    pub(crate) fn emit_big_int_literal(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_big_int_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GetLiteralTextFlags::NONE);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_computed_property_name(&mut self, node: &Node) {
+    pub(crate) fn emit_computed_property_name(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_computed_property_name"); 
         let state = self.enter_node(node);
         let expression = match &node.data {
             NodeData::ComputedPropertyName(d) => &d.expression,
@@ -409,7 +409,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_entity_name(&mut self, node: &Node) {
+    pub(crate) fn emit_entity_name(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_entity_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_reference(node),
             SyntaxKind::QualifiedName => self.emit_qualified_name(node),
@@ -420,7 +420,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_initializer(&mut self, node: Option<&Node>, equal_token_pos: usize, context_node: &Node) {
+    pub(crate) fn emit_initializer(&mut self, node: Option<&Node>, equal_token_pos: usize, context_node: &Node) { ::tsox_core::fntrace::enter("emit_initializer"); 
         let Some(node) = node else {
             return;
         };
@@ -430,11 +430,11 @@ impl Printer {
         self.emit_expression(node, OPERATOR_PRECEDENCE_DISALLOW_COMMA);
     }
 
-    pub(crate) fn emit_argument(&mut self, node: &Node) {
+    pub(crate) fn emit_argument(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_argument"); 
         self.emit_expression(node, OPERATOR_PRECEDENCE_DISALLOW_COMMA);
     }
 
-    pub(crate) fn emit_accessor_declaration(&mut self, token: SyntaxKind, node: &Node) {
+    pub(crate) fn emit_accessor_declaration(&mut self, token: SyntaxKind, node: &Node) { ::tsox_core::fntrace::enter("emit_accessor_declaration"); 
         let state = self.enter_node(node);
         let (modifiers, name, body) = match &node.data {
             NodeData::GetAccessorDeclaration(d) => (d.modifiers.as_deref(), &d.name, d.body.as_deref()),
@@ -455,7 +455,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_get_accessor_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_get_accessor_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_get_accessor_declaration"); 
         self.emit_accessor_declaration(SyntaxKind::GetKeyword, node);
     }
 }

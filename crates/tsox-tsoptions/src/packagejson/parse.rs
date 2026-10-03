@@ -3,7 +3,7 @@ use super::exports::ExportsOrImports;
 use super::fields::Fields;
 use std::collections::HashMap;
 
-pub fn parse(data: &str) -> Result<Fields, serde_json::Error> {
+pub fn parse(data: &str) -> Result<Fields, serde_json::Error> { ::tsox_core::fntrace::enter("parse"); 
     let value: serde_json::Value = serde_json::from_str(data)?;
     let obj = value
         .as_object()
@@ -65,7 +65,7 @@ pub fn parse(data: &str) -> Result<Fields, serde_json::Error> {
     Ok(fields)
 }
 
-fn parse_expected_string(v: &serde_json::Value) -> Expected<String> {
+fn parse_expected_string(v: &serde_json::Value) -> Expected<String> { ::tsox_core::fntrace::enter("parse_expected_string"); 
     let mut e = Expected::<String>::default();
     e.present = true;
     match v {
@@ -85,7 +85,7 @@ fn parse_expected_string(v: &serde_json::Value) -> Expected<String> {
     e
 }
 
-fn parse_expected_string_map(v: &serde_json::Value) -> Expected<HashMap<String, String>> {
+fn parse_expected_string_map(v: &serde_json::Value) -> Expected<HashMap<String, String>> { ::tsox_core::fntrace::enter("parse_expected_string_map"); 
     let mut e = Expected::<HashMap<String, String>>::default();
     e.present = true;
     match v {
@@ -119,7 +119,7 @@ fn parse_expected_string_map(v: &serde_json::Value) -> Expected<HashMap<String, 
     e
 }
 
-fn json_type_name(v: &serde_json::Value) -> &'static str {
+fn json_type_name(v: &serde_json::Value) -> &'static str { ::tsox_core::fntrace::enter("json_type_name"); 
     match v {
         serde_json::Value::Null => "null",
         serde_json::Value::Bool(_) => "boolean",

@@ -8,23 +8,23 @@ pub use tsox_ts_libs::bundled_libs;
 
 pub const SCHEME: &str = "bundled:///";
 
-pub fn lib_path() -> String {
+pub fn lib_path() -> String { ::tsox_core::fntrace::enter("lib_path"); 
     format!("{SCHEME}libs")
 }
 
-pub fn is_bundled(path: &str) -> bool {
+pub fn is_bundled(path: &str) -> bool { ::tsox_core::fntrace::enter("is_bundled"); 
     path.starts_with(SCHEME)
 }
 
-pub(crate) fn split_path(path: &str) -> Option<&str> {
+pub(crate) fn split_path(path: &str) -> Option<&str> { ::tsox_core::fntrace::enter("split_path"); 
     path.strip_prefix(SCHEME)
 }
 
-pub fn lib_names() -> Vec<&'static str> {
+pub fn lib_names() -> Vec<&'static str> { ::tsox_core::fntrace::enter("lib_names"); 
     bundled_libs().iter().map(|(n, _)| *n).collect()
 }
 
-pub fn lib_contents(name: &str) -> Option<&'static str> {
+pub fn lib_contents(name: &str) -> Option<&'static str> { ::tsox_core::fntrace::enter("lib_contents"); 
     bundled_libs()
         .iter()
         .find(|(n, _)| *n == name)
@@ -36,24 +36,24 @@ pub struct BundledFS {
 }
 
 impl BundledFS {
-    pub fn new(inner: Arc<dyn FS>) -> Self {
+    pub fn new(inner: Arc<dyn FS>) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { inner }
     }
 }
 
 impl FS for BundledFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.inner.use_case_sensitive_file_names()
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         if let Some(rest) = split_path(path) {
             return bundled_lib_name(rest).is_some();
         }
         self.inner.file_exists(path)
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         if let Some(rest) = split_path(path) {
             if let Some(name) = bundled_lib_name(rest) {
                 return lib_contents(name).map(|s| s.to_string());
@@ -63,35 +63,35 @@ impl FS for BundledFS {
         self.inner.read_file(path)
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         if is_bundled(path) {
             panic!("cannot write to embedded file system: {path}");
         }
         self.inner.write_file(path, data)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         if is_bundled(path) {
             panic!("cannot write to embedded file system: {path}");
         }
         self.inner.append_file(path, data)
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         if is_bundled(path) {
             panic!("cannot remove from embedded file system: {path}");
         }
         self.inner.remove(path)
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         if let Some(rest) = split_path(path) {
             return rest == "libs" || rest.is_empty();
         }
         self.inner.directory_exists(path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         if let Some(rest) = split_path(path) {
             let mut entries = Entries::default();
             if rest.is_empty() {
@@ -104,7 +104,7 @@ impl FS for BundledFS {
         self.inner.get_accessible_entries(path)
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         if let Some(rest) = split_path(path) {
             if rest.is_empty() || rest == "libs" {
                 return Some(FileInfo {
@@ -131,7 +131,7 @@ impl FS for BundledFS {
         self.inner.stat(path)
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         if is_bundled(path) {
             return path.to_string();
         }
@@ -139,7 +139,7 @@ impl FS for BundledFS {
     }
 }
 
-pub(crate) fn bundled_lib_name(rest: &str) -> Option<&'static str> {
+pub(crate) fn bundled_lib_name(rest: &str) -> Option<&'static str> { ::tsox_core::fntrace::enter("bundled_lib_name"); 
     let name = rest.strip_prefix("libs/").unwrap_or(rest);
     bundled_libs()
         .iter()

@@ -2,7 +2,7 @@ use crate::scanner::regexp::RegExpParser;
 use crate::scanner::unicode_properties;
 
 impl<'a> RegExpParser<'a> {
-    pub(super) fn scan_character_class_escape(&mut self) -> bool {
+    pub(super) fn scan_character_class_escape(&mut self) -> bool { ::tsox_core::fntrace::enter("scan_character_class_escape"); 
         let mut is_character_complement = false;
         let start = self.pos - 1;
         let ch = self.char();

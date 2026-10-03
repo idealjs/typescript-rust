@@ -2,7 +2,7 @@ use crate::core::bfs::*;
 use std::sync::Arc;
 
 #[test]
-fn simple_bfs() {
+fn simple_bfs() { crate::fntrace::enter("simple_bfs"); 
     let result = bfs_parallel(
         1i32,
         |n| if *n < 4 { vec![n + 1] } else { vec![] },
@@ -13,7 +13,7 @@ fn simple_bfs() {
 }
 
 #[test]
-fn no_result() {
+fn no_result() { crate::fntrace::enter("no_result"); 
     let result = bfs_parallel(
         1i32,
         |n| if *n < 3 { vec![n + 1] } else { vec![] },
@@ -23,7 +23,7 @@ fn no_result() {
     assert!(result.path.is_empty());
 }
 
-fn diamond_graph() -> std::collections::HashMap<String, Vec<String>> {
+fn diamond_graph() -> std::collections::HashMap<String, Vec<String>> { crate::fntrace::enter("diamond_graph"); 
     let mut g = std::collections::HashMap::new();
     g.insert("A".to_string(), vec!["B".to_string(), "C".to_string()]);
     g.insert("B".to_string(), vec!["D".to_string()]);
@@ -33,7 +33,7 @@ fn diamond_graph() -> std::collections::HashMap<String, Vec<String>> {
 }
 
 #[test]
-fn bfs_parallel_find_specific_node() {
+fn bfs_parallel_find_specific_node() { crate::fntrace::enter("bfs_parallel_find_specific_node"); 
     let graph = diamond_graph();
     let result = bfs_parallel(
         "A".to_string(),
@@ -48,7 +48,7 @@ fn bfs_parallel_find_specific_node() {
 }
 
 #[test]
-fn bfs_parallel_visit_all_nodes() {
+fn bfs_parallel_visit_all_nodes() { crate::fntrace::enter("bfs_parallel_visit_all_nodes"); 
     use std::sync::{Arc, Mutex};
     let graph = diamond_graph();
     let visited = Arc::new(Mutex::new(Vec::<String>::new()));
@@ -82,7 +82,7 @@ fn bfs_parallel_visit_all_nodes() {
 }
 
 #[test]
-fn bfs_parallel_returns_stop_over_fallback() {
+fn bfs_parallel_returns_stop_over_fallback() { crate::fntrace::enter("bfs_parallel_returns_stop_over_fallback"); 
     let graph = diamond_graph();
     let result = bfs_parallel(
         "A".to_string(),
@@ -101,7 +101,7 @@ fn bfs_parallel_returns_stop_over_fallback() {
 }
 
 #[test]
-fn bfs_parallel_early_termination() {
+fn bfs_parallel_early_termination() { crate::fntrace::enter("bfs_parallel_early_termination"); 
     let mut graph = std::collections::HashMap::new();
     graph.insert(
         "Root".to_string(),
@@ -141,7 +141,7 @@ fn bfs_parallel_early_termination() {
 }
 
 #[test]
-fn bfs_parallel_returns_fallback() {
+fn bfs_parallel_returns_fallback() { crate::fntrace::enter("bfs_parallel_returns_fallback"); 
     let graph = diamond_graph();
     let visited: Arc<SyncSet<String>> = Arc::new(SyncSet::new());
     let visited_for_search = visited.clone();

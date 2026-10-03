@@ -3,7 +3,7 @@
 use crate::checker::checker_expressions::*;
 
 impl Checker {
-    pub fn check_new_expression(&mut self, node: &Arc<Node>) {
+    pub fn check_new_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_new_expression"); 
         if let tsox_frontend::ast::NodeData::NewExpression(data) = &node.data {
             self.check_expression(&data.expression);
             if let Some(args) = &data.arguments {
@@ -46,7 +46,7 @@ impl Checker {
         }
     }
 
-    pub fn check_function_like_expression(&mut self, node: &Arc<Node>) {
+    pub fn check_function_like_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_function_like_expression"); 
         let has_grammar_error = self.check_grammar_function_like_declaration(node);
         if !has_grammar_error
             && matches!(

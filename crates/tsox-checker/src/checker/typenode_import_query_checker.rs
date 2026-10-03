@@ -3,7 +3,7 @@
 use crate::checker::typenode_import_query::*;
 
 impl Checker {
-    pub(crate) fn get_type_from_type_query_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_type_query_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_query_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -12,7 +12,7 @@ impl Checker {
         result
     }
 
-    fn module_specifier_of_external_ref(&self, module_reference: &Arc<Node>) -> Option<String> {
+    fn module_specifier_of_external_ref(&self, module_reference: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("module_specifier_of_external_ref"); 
         let tsox_frontend::ast::NodeData::ExternalModuleReference(emr) = &module_reference.data
         else {
             return None;
@@ -23,7 +23,7 @@ impl Checker {
         Some(s.text.trim_matches(['"', '\'', '`']).to_string())
     }
 
-    fn resolve_module_file_symbol_relative(&self, spec: &str) -> Option<Arc<Symbol>> {
+    fn resolve_module_file_symbol_relative(&self, spec: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_module_file_symbol_relative"); 
         // Go moduleSpecifierIsRelative：目录级文件解析只对相对说明符，
         // 裸说明符仅走 ambient/node_modules（否则同目录文件按基名误命中）
         if !(spec.starts_with("./") || spec.starts_with("../")) {
@@ -40,7 +40,7 @@ impl Checker {
     pub(crate) fn resolve_import_alias_target_symbol(
         &mut self,
         alias: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_alias_target_symbol"); 
         // import X = require("./m") 形式：目标 = 模块的 export= 符号
         if let Some(decl) = alias
             .declarations
@@ -333,7 +333,7 @@ impl Checker {
         &self,
         module_sym: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("file_module_exported_member"); 
         if !module_sym
             .declarations
             .iter()
@@ -397,7 +397,7 @@ impl Checker {
     pub(crate) fn resolve_import_alias_target_of_module(
         &mut self,
         module_sym: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_alias_target_of_module"); 
         let export_equals = module_sym
             .exports
             .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)

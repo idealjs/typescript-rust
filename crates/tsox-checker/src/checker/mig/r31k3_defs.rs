@@ -25,7 +25,7 @@ use crate::checker::utilities_token_is_identifier_or_keyword::{
 
 use super::get_index_node_for_access_expression;
 
-fn is_property_name(node: &Node) -> bool {
+fn is_property_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_property_name"); 
     matches!(
         node.kind,
         SyntaxKind::Identifier
@@ -36,7 +36,7 @@ fn is_property_name(node: &Node) -> bool {
     )
 }
 
-fn node_arc(n: &Node) -> Arc<Node> {
+fn node_arc(n: &Node) -> Arc<Node> { ::tsox_core::fntrace::enter("node_arc"); 
     let ptr: *const Node = n;
     // SAFETY: AST 节点均存活于 Arc<Node> 分配内(r23k4_defs.rs 同型桥)
     unsafe {
@@ -45,7 +45,7 @@ fn node_arc(n: &Node) -> Arc<Node> {
     }
 }
 
-fn literal_value_arg(t: &Type) -> String {
+fn literal_value_arg(t: &Type) -> String { ::tsox_core::fntrace::enter("literal_value_arg"); 
     match t.literal_value() {
         Some(LiteralValue::String(s)) => s.clone(),
         Some(LiteralValue::Number(n)) => n.to_string(),
@@ -54,7 +54,7 @@ fn literal_value_arg(t: &Type) -> String {
 }
 
 impl Checker {
-    pub fn get_property_name_from_index(&self, index_type: &Arc<Type>, access_node: Option<&Node>) -> String {
+    pub fn get_property_name_from_index(&self, index_type: &Arc<Type>, access_node: Option<&Node>) -> String { ::tsox_core::fntrace::enter("get_property_name_from_index"); 
         if is_type_usable_as_property_name(index_type) {
             return get_property_name_from_type(index_type);
         }
@@ -66,7 +66,7 @@ impl Checker {
         INTERNAL_SYMBOL_NAME_MISSING.to_string()
     }
 
-    pub fn get_suggestion_for_nonexistent_property(&mut self, name: &str, containing_type: &Arc<Type>) -> String {
+    pub fn get_suggestion_for_nonexistent_property(&mut self, name: &str, containing_type: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("get_suggestion_for_nonexistent_property"); 
         let properties = self.get_properties_of_type(containing_type);
         self.get_spelling_suggestion_for_name(name, properties, SymbolFlags::VALUE)
             .map(|s| s.name.clone())
@@ -81,7 +81,7 @@ impl Checker {
         full_index_type: &Arc<Type>,
         access_node: Option<&Node>,
         access_flags: AccessFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_property_type_for_index_type"); 
         let access_node = access_node.map(node_arc);
         let access_expression: Option<Arc<Node>> = match &access_node {
             Some(n) if is_element_access_expression(n) => Some(Arc::clone(n)),

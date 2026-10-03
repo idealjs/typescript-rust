@@ -8,11 +8,11 @@ use tsox_core::locale::Locale;
 
 pub struct AstDiagnostic(pub Arc<Diagnostic>);
 
-pub fn wrap_ast_diagnostic(d: Arc<Diagnostic>) -> AstDiagnostic {
+pub fn wrap_ast_diagnostic(d: Arc<Diagnostic>) -> AstDiagnostic { ::tsox_core::fntrace::enter("wrap_ast_diagnostic"); 
     AstDiagnostic(d)
 }
 
-pub fn wrap_ast_diagnostics(diags: Vec<Arc<Diagnostic>>) -> Vec<AstDiagnostic> {
+pub fn wrap_ast_diagnostics(diags: Vec<Arc<Diagnostic>>) -> Vec<AstDiagnostic> { ::tsox_core::fntrace::enter("wrap_ast_diagnostics"); 
     diags.into_iter().map(wrap_ast_diagnostic).collect()
 }
 
@@ -21,7 +21,7 @@ pub fn write_flattened_ast_diagnostic_message(
     diagnostic: &Diagnostic,
     newline: &str,
     locale: &Locale,
-) {
+) { ::tsox_core::fntrace::enter("write_flattened_ast_diagnostic_message"); 
     write_flattened_diagnostic_message(
         writer,
         &wrap_ast_diagnostic_owned(diagnostic),

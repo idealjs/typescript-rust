@@ -21,7 +21,7 @@ use super::m2c::r21k2_defs::{
 };
 
 impl Checker {
-    pub fn resolve_jsdoc_member_name(&mut self, name: Option<&Arc<Node>>) -> Option<Arc<Symbol>> {
+    pub fn resolve_jsdoc_member_name(&mut self, name: Option<&Arc<Node>>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_jsdoc_member_name"); 
         if let Some(name) = name {
             if is_entity_name(name) {
                 let meaning =
@@ -62,7 +62,7 @@ impl Checker {
         node: &Arc<Node>,
         candidates_out_array: Option<&mut Vec<Arc<Signature>>>,
         check_mode: CheckMode,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolve_new_expression"); 
         let Some(expression) = node.expression() else {
             return None;
         };
@@ -166,7 +166,7 @@ impl Checker {
         node: &Arc<Node>,
         candidates_out_array: Option<&mut Vec<Arc<Signature>>>,
         check_mode: CheckMode,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolve_tagged_template_expression"); 
         let tag = &node.as_tagged_template_expression().tag;
         let tag_type = self.check_expression_cached(tag);
         let apparent_type = self.get_apparent_type(&tag_type);
@@ -214,7 +214,7 @@ impl Checker {
         node: &Arc<Node>,
         candidates_out_array: Option<&mut Vec<Arc<Signature>>>,
         check_mode: CheckMode,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolve_instanceof_expression"); 
         let right = &node.as_binary_expression().right;
         let right_type = self.check_expression_cached(right);
         if !is_type_any(&right_type) {
@@ -260,7 +260,7 @@ impl Checker {
         Some(self.any_signature())
     }
 
-    pub fn resolve_untyped_call(&mut self, node: &Arc<Node>) -> Arc<Signature> {
+    pub fn resolve_untyped_call(&mut self, node: &Arc<Node>) -> Arc<Signature> { ::tsox_core::fntrace::enter("resolve_untyped_call"); 
         if self.call_like_expression_may_have_type_arguments(node) {
             self.check_source_elements(type_arguments(node));
         }
@@ -293,7 +293,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         dont_resolve_alias: bool,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_symbol_ex"); 
         if !dont_resolve_alias
             && is_non_local_alias(
                 symbol,
@@ -305,7 +305,7 @@ impl Checker {
         Arc::clone(symbol)
     }
 
-    pub fn resolve_external_module_type_by_literal(&mut self, name: &Arc<Node>) -> Arc<Type> {
+    pub fn resolve_external_module_type_by_literal(&mut self, name: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_external_module_type_by_literal"); 
         let module_sym = self.resolve_external_module_name(name);
         if let Some(module_sym) = module_sym {
             let resolved_module_symbol = self.resolve_external_module_symbol(&module_sym, false);
@@ -320,7 +320,7 @@ impl Checker {
         name: &str,
         source_node: Option<&Arc<Node>>,
         dont_resolve_alias: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_export_by_name"); 
         let export_value = module_symbol.exports.get(INTERNAL_SYMBOL_NAME_EXPORT_EQUALS);
         let export_symbol = match export_value {
             Some(export_value) => {
@@ -341,7 +341,7 @@ impl Checker {
         &mut self,
         source: &Arc<Symbol>,
         target: &Arc<Symbol>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_indirection_alias"); 
         let alias = self.resolve_alias(target);
         let result = self.get_merged_symbol(&alias);
         let target_type_only = self
@@ -357,7 +357,7 @@ impl Checker {
         result
     }
 
-    pub fn try_resolve_alias(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn try_resolve_alias(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_resolve_alias"); 
         let has_alias_target = self
             .alias_symbol_links
             .get(symbol)
@@ -382,7 +382,7 @@ impl Checker {
         ignore_errors: bool,
         is_for_augmentation: bool,
         import_attributes_type: Option<&Arc<Type>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_external_module_name_worker"); 
         if let Some(module_reference_expression) = module_reference_expression {
             if is_string_literal_like(module_reference_expression) {
                 let error_node = if !ignore_errors {
@@ -407,7 +407,7 @@ impl Checker {
         &mut self,
         file: &Arc<SourceFile>,
         error_node: Option<&Arc<Node>>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_helpers_module"); 
         let has_helpers = self
             .source_file_links
             .get(file.as_ref())
@@ -436,7 +436,7 @@ impl Checker {
             .unwrap_or_else(|| self.unknown_symbol())
     }
 
-    pub fn resolve_type_reference_members(&mut self, t: &Arc<Type>) {
+    pub fn resolve_type_reference_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_type_reference_members"); 
         let source = t.target().cloned().unwrap_or_else(|| Arc::clone(t));
         let type_parameters = source
             .as_interface_type()
@@ -461,7 +461,7 @@ impl Checker {
         source: &Arc<Type>,
         type_parameters: &[Arc<Type>],
         type_arguments: &[Arc<Type>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("resolve_object_type_members"); 
         let mut mapper: Option<Arc<TypeMapper>> = None;
         let mut members: SymbolTable;
         let mut call_signatures: Vec<Arc<Signature>>;
@@ -566,7 +566,7 @@ impl Checker {
         );
     }
 
-    pub fn resolve_union_type_members(&mut self, t: &Arc<Type>) {
+    pub fn resolve_union_type_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_union_type_members"); 
         let mut call_signature_sets: Vec<Vec<Arc<Signature>>> = Vec::new();
         for constituent in t.types().into_iter().flatten() {
             if Arc::ptr_eq(constituent, &self.global_function_type()) {
@@ -601,7 +601,7 @@ impl Checker {
         );
     }
 
-    pub fn resolve_intersection_type_members(&mut self, t: &Arc<Type>) {
+    pub fn resolve_intersection_type_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_intersection_type_members"); 
         let mut call_signatures: Vec<Arc<Signature>> = Vec::new();
         let mut construct_signatures: Vec<Arc<Signature>> = Vec::new();
         let mut index_infos: Vec<Arc<IndexInfo>> = Vec::new();
@@ -652,7 +652,7 @@ impl Checker {
         call_signatures: Vec<Arc<Signature>>,
         construct_signatures: Vec<Arc<Signature>>,
         index_infos: Vec<Arc<IndexInfo>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_structured_type_members"); 
         let call_signatures_count = call_signatures.len();
         let mut t = Arc::clone(t);
         let Some(t) = Arc::get_mut(&mut t) else { return };

@@ -17,7 +17,7 @@ pub enum ExitStatus {
 }
 
 impl ExitStatus {
-    pub fn as_i32(self) -> i32 {
+    pub fn as_i32(self) -> i32 { ::tsox_core::fntrace::enter("as_i32"); 
         self as i32
     }
 }
@@ -28,7 +28,7 @@ pub struct CommandLineResult {
 }
 
 impl std::fmt::Debug for CommandLineResult {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         f.debug_struct("CommandLineResult")
             .field("status", &self.status)
             .finish()
@@ -54,7 +54,7 @@ pub struct OsSystem {
 }
 
 impl OsSystem {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         let cwd = std::env::current_dir()
             .map(|p| tsox_core::tspath::normalize_path(&p.to_string_lossy()))
             .unwrap_or_else(|_| ".".to_string());
@@ -68,31 +68,31 @@ impl OsSystem {
 }
 
 impl Default for OsSystem {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
 impl System for OsSystem {
-    fn writer(&self) -> Box<dyn Write + Send> {
+    fn writer(&self) -> Box<dyn Write + Send> { ::tsox_core::fntrace::enter("writer"); 
         Box::new(std::io::stdout())
     }
-    fn fs(&self) -> Arc<dyn FS> {
+    fn fs(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs"); 
         Arc::clone(&self.fs) as Arc<dyn FS>
     }
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         &self.default_library_path
     }
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.cwd
     }
-    fn write_output_is_tty(&self) -> bool {
+    fn write_output_is_tty(&self) -> bool { ::tsox_core::fntrace::enter("write_output_is_tty"); 
         std::io::stdout().is_terminal()
     }
-    fn width_of_terminal(&self) -> usize {
+    fn width_of_terminal(&self) -> usize { ::tsox_core::fntrace::enter("width_of_terminal"); 
         80
     }
-    fn environment_variable(&self, name: &str) -> Option<String> {
+    fn environment_variable(&self, name: &str) -> Option<String> { ::tsox_core::fntrace::enter("environment_variable"); 
         std::env::var(name).ok()
     }
 }
@@ -100,11 +100,11 @@ impl System for OsSystem {
 pub(crate) fn compiler_diagnostic(
     message: tsox_core::diagnostics::Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("compiler_diagnostic"); 
     Diagnostic::new(None, TextRange::undefined(), message, args)
 }
 
-pub(crate) fn locale_of(options: &CompilerOptions) -> Option<Locale> {
+pub(crate) fn locale_of(options: &CompilerOptions) -> Option<Locale> { ::tsox_core::fntrace::enter("locale_of"); 
     if options.locale.is_empty() {
         None
     } else {
@@ -112,7 +112,7 @@ pub(crate) fn locale_of(options: &CompilerOptions) -> Option<Locale> {
     }
 }
 
-pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
+pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult { ::tsox_core::fntrace::enter("command_line"); 
     if let Some(first) = args.first() {
         if is_build_mode_arg(first) {
             let parsed =
@@ -135,7 +135,7 @@ pub fn command_line(sys: &dyn System, args: &[String]) -> CommandLineResult {
     tsc_compilation(sys, parsed)
 }
 
-pub(crate) fn is_build_mode_arg(arg: &str) -> bool {
+pub(crate) fn is_build_mode_arg(arg: &str) -> bool { ::tsox_core::fntrace::enter("is_build_mode_arg"); 
     matches!(
         arg.to_lowercase().as_str(),
         "-b" | "--b" | "-build" | "--build"
@@ -145,7 +145,7 @@ pub(crate) fn is_build_mode_arg(arg: &str) -> bool {
 pub(crate) fn tsc_build_compilation(
     sys: &dyn System,
     command_line: ParsedBuildCommandLine,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("tsc_build_compilation"); 
     let pretty = should_be_pretty(sys, &command_line.compiler_options);
     let locale = locale_of(&command_line.compiler_options);
 

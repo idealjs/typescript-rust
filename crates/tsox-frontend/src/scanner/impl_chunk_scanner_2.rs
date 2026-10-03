@@ -4,7 +4,7 @@ use crate::scanner::impl_chunk::*;
 
 impl Scanner {
     /// Go scan() 在 skipTrivia=false 时产出 trivia token 的分支
-    fn try_scan_trivia_token(&mut self) -> Option<SyntaxKind> {
+    fn try_scan_trivia_token(&mut self) -> Option<SyntaxKind> { ::tsox_core::fntrace::enter("try_scan_trivia_token"); 
         use SyntaxKind::*;
         if self.pos >= self.end {
             return None;
@@ -78,7 +78,7 @@ impl Scanner {
         }
     }
 
-    pub fn scan(&mut self) -> SyntaxKind {
+    pub fn scan(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan"); 
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
         self.identifier_value = None;
@@ -263,11 +263,11 @@ impl Scanner {
         token
     }
 
-    pub fn scan_template_continuation(&mut self) -> SyntaxKind {
+    pub fn scan_template_continuation(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_template_continuation"); 
         self.scan_template_continuation_ex(false)
     }
 
-    pub fn scan_template_continuation_ex(&mut self, report_escape_errors: bool) -> SyntaxKind {
+    pub fn scan_template_continuation_ex(&mut self, report_escape_errors: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_template_continuation_ex"); 
         self.preceding_line_break = false;
         self.token_flags = TOKEN_FLAGS_NONE;
         // Go ReScanTemplateToken：从 `}` 的 tokenStart 重扫，模板段 token 覆盖 `}`
@@ -318,7 +318,7 @@ impl Scanner {
         self.token
     }
 
-    pub(crate) fn scan_whitespace(&mut self) {
+    pub(crate) fn scan_whitespace(&mut self) { ::tsox_core::fntrace::enter("scan_whitespace"); 
         let bytes = self.text.as_bytes();
         while self.pos < self.end {
             let b = bytes[self.pos];
@@ -342,7 +342,7 @@ impl Scanner {
         }
     }
 
-    pub(crate) fn scan_single_line_comment(&mut self) {
+    pub(crate) fn scan_single_line_comment(&mut self) { ::tsox_core::fntrace::enter("scan_single_line_comment"); 
         let bytes = self.text.as_bytes();
         let mut p = self.pos + 2;
         while p < self.end {
@@ -355,7 +355,7 @@ impl Scanner {
         self.pos = p;
     }
 
-    pub(crate) fn scan_multi_line_comment(&mut self) {
+    pub(crate) fn scan_multi_line_comment(&mut self) { ::tsox_core::fntrace::enter("scan_multi_line_comment"); 
         let bytes = self.text.as_bytes();
         self.pos += 2;
 

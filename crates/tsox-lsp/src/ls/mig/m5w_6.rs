@@ -13,7 +13,7 @@ impl SourceDefResolver {
         module_name: &str,
         resolve_from_file: &str,
         mode: tsox_core::core::compiler_options_kinds::ResolutionMode,
-    ) -> Option<tsox_tsoptions::module::ResolvedModule> {
+    ) -> Option<tsox_tsoptions::module::ResolvedModule> { ::tsox_core::fntrace::enter("resolver_resolve_module_name"); 
         let resolver = self.resolver_borrow();
         let (resolved, _diagnostics) =
             resolver.resolve_module_name(module_name, resolve_from_file, mode, None);
@@ -23,16 +23,16 @@ impl SourceDefResolver {
     pub fn resolver_get_package_scope_for_path(
         &self,
         path: &str,
-    ) -> Option<tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry> {
+    ) -> Option<tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry> { ::tsox_core::fntrace::enter("resolver_get_package_scope_for_path"); 
         let resolver = self.resolver_borrow();
         resolver.get_package_scope_for_path(path)
     }
 
-    pub fn resolver_borrow(&self) -> std::cell::Ref<'_, tsox_tsoptions::module::Resolver> {
+    pub fn resolver_borrow(&self) -> std::cell::Ref<'_, tsox_tsoptions::module::Resolver> { ::tsox_core::fntrace::enter("resolver_borrow"); 
         self.resolver_cell.borrow()
     }
 
-    pub fn fs_file_exists(&self, path: &str) -> bool {
+    pub fn fs_file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("fs_file_exists"); 
         self.fs.file_exists(path)
     }
 
@@ -41,7 +41,7 @@ impl SourceDefResolver {
         file_name: &str,
         names: &[String],
         seen: &mut HashSet<String>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("find_declarations_in_file"); 
         if file_name.is_empty() || names.is_empty() {
             return Vec::new();
         }
@@ -73,7 +73,7 @@ impl SourceDefResolver {
         declarations
     }
 
-    pub fn get_forwarded_implementation_files(&self, source_file: &Arc<SourceFile>) -> Vec<String> {
+    pub fn get_forwarded_implementation_files(&self, source_file: &Arc<SourceFile>) -> Vec<String> { ::tsox_core::fntrace::enter("get_forwarded_implementation_files"); 
         let preferred_mode = self.infer_implied_node_format(&source_file.file_name);
 
         let mut files: Vec<String> = Vec::new();
@@ -96,7 +96,7 @@ pub fn get_source_def_checker_info(
     program: &Arc<tsox_compile::compiler::Program>,
     file: &Arc<SourceFile>,
     node: &Arc<Node>,
-) -> (Vec<Arc<Node>>, String) {
+) -> (Vec<Arc<Node>>, String) { ::tsox_core::fntrace::enter("get_source_def_checker_info"); 
     let mut c = program.get_type_checker_for_file(file);
 
     let mut declarations = crate::ls::mig::m5s::get_declarations_from_location(&mut c, node);
@@ -160,7 +160,7 @@ pub fn get_source_def_checker_info(
     (declarations, module_specifier)
 }
 
-pub fn is_default_import_name(node: &Arc<Node>) -> bool {
+pub fn is_default_import_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_default_import_name"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -173,7 +173,7 @@ pub fn is_default_import_name(node: &Arc<Node>) -> bool {
     tsox_frontend::ast::mig::m3f_4::is_default_import(&grand)
 }
 
-pub fn get_source_definition_entry_node(source_file: &Arc<SourceFile>) -> Arc<Node> {
+pub fn get_source_definition_entry_node(source_file: &Arc<SourceFile>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_source_definition_entry_node"); 
     if let NodeData::SourceFile(d) = &source_file.node.data {
         if !d.statements.nodes.is_empty() {
             return Arc::clone(&d.statements.nodes[0]);
@@ -182,14 +182,14 @@ pub fn get_source_definition_entry_node(source_file: &Arc<SourceFile>) -> Arc<No
     Arc::clone(&source_file.node)
 }
 
-pub fn get_source_definition_entry_declarations(source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> {
+pub fn get_source_definition_entry_declarations(source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_source_definition_entry_declarations"); 
     vec![get_source_definition_entry_node(source_file)]
 }
 
 pub fn get_candidate_source_declaration_names(
     original_node: Option<&Arc<Node>>,
     declaration: Option<&Arc<Node>>,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_candidate_source_declaration_names"); 
     let mut names: Vec<String> = Vec::new();
     if let Some(declaration) = declaration {
         if let Some(name) = ast::get_name_of_declaration(declaration) {
@@ -235,7 +235,7 @@ pub fn get_candidate_source_declaration_names(
 pub fn find_declaration_nodes_by_name(
     source_file: &Arc<SourceFile>,
     names: &[String],
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("find_declaration_nodes_by_name"); 
     let names = crate::ls::mig::m5w_5::core_deduplicate_strings(
         &names.iter().filter(|n| !n.is_empty()).cloned().collect::<Vec<_>>(),
     );
@@ -309,7 +309,7 @@ pub fn find_declaration_nodes_by_name(
     unique_declaration_nodes(&declarations)
 }
 
-pub fn get_container_depth(node: &Arc<Node>) -> usize {
+pub fn get_container_depth(node: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("get_container_depth"); 
     let mut depth = 0usize;
     let mut current = Some(Arc::clone(node));
     while let Some(cur) = current {
@@ -322,7 +322,7 @@ pub fn get_container_depth(node: &Arc<Node>) -> usize {
 pub fn filter_preferred_source_declarations(
     original_node: &Arc<Node>,
     declarations: &[Arc<Node>],
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("filter_preferred_source_declarations"); 
     if declarations.len() <= 1 {
         return declarations.to_vec();
     }
@@ -344,7 +344,7 @@ pub fn filter_preferred_source_declarations(
 pub fn get_property_like_source_declarations(
     original_node: &Arc<Node>,
     declarations: &[Arc<Node>],
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_property_like_source_declarations"); 
     let Some(parent) = original_node.parent() else {
         return Vec::new();
     };
@@ -373,11 +373,11 @@ pub fn get_property_like_source_declarations(
         .collect()
 }
 
-pub fn has_concrete_source_declarations(declarations: &[Arc<Node>]) -> bool {
+pub fn has_concrete_source_declarations(declarations: &[Arc<Node>]) -> bool { ::tsox_core::fntrace::enter("has_concrete_source_declarations"); 
     declarations.iter().any(is_concrete_source_declaration)
 }
 
-pub fn is_concrete_source_declaration(node: &Arc<Node>) -> bool {
+pub fn is_concrete_source_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_concrete_source_declaration"); 
     if !ast::is_declaration(node) || node.kind == SyntaxKind::ExportAssignment {
         return false;
     }
@@ -400,7 +400,7 @@ pub fn is_concrete_source_declaration(node: &Arc<Node>) -> bool {
     )
 }
 
-pub fn unique_declaration_nodes(nodes: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn unique_declaration_nodes(nodes: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("unique_declaration_nodes"); 
     let mut seen: HashSet<(u64, usize, usize)> = HashSet::new();
     let mut result = Vec::with_capacity(nodes.len());
     for node in nodes {
@@ -413,7 +413,7 @@ pub fn unique_declaration_nodes(nodes: &[Arc<Node>]) -> Vec<Arc<Node>> {
     result
 }
 
-pub fn find_closest_declaration_node(source_file: &Arc<SourceFile>, pos: usize) -> Arc<Node> {
+pub fn find_closest_declaration_node(source_file: &Arc<SourceFile>, pos: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_closest_declaration_node"); 
     let mut current = tsox_frontend::astnav::get_touching_property_name(&source_file.node, pos);
     while let Some(cur) = current {
         if ast::is_declaration(&cur) || cur.kind == SyntaxKind::ExportAssignment {
@@ -424,7 +424,7 @@ pub fn find_closest_declaration_node(source_file: &Arc<SourceFile>, pos: usize) 
     get_source_definition_entry_node(source_file)
 }
 
-pub fn find_containing_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn find_containing_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_containing_module_specifier"); 
     let mut current = Some(node.clone());
     while let Some(cur) = current {
         if ast::is_any_import_or_re_export(&cur)
@@ -446,7 +446,7 @@ pub fn get_reference_at_position(
     file: &Arc<SourceFile>,
     pos: usize,
     program: &Arc<tsox_compile::compiler::Program>,
-) -> Option<M5wFileReferenceAtPosition> {
+) -> Option<M5wFileReferenceAtPosition> { ::tsox_core::fntrace::enter("get_reference_at_position"); 
     for reference in &file.referenced_files {
         if reference.range.pos as usize <= pos && pos <= reference.range.end as usize {
             let resolved = program.get_source_file_from_reference(file, reference);
@@ -467,20 +467,20 @@ pub struct M5wFileReferenceAtPosition {
 pub fn get_file_and_start_pos_from_declaration(
     program: &Arc<tsox_compile::compiler::Program>,
     declaration: &Arc<Node>,
-) -> Option<(Arc<SourceFile>, usize)> {
+) -> Option<(Arc<SourceFile>, usize)> { ::tsox_core::fntrace::enter("get_file_and_start_pos_from_declaration"); 
     let file = m5w_source_file_of_node(program, declaration)?;
     let start_pos = m5w_declaration_start_pos(declaration);
     Some((file, start_pos))
 }
 
-pub fn m5w_declaration_start_pos(declaration: &Arc<Node>) -> usize {
+pub fn m5w_declaration_start_pos(declaration: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("m5w_declaration_start_pos"); 
     declaration.pos()
 }
 
 pub fn m5w_source_file_of_node(
     program: &Arc<tsox_compile::compiler::Program>,
     node: &Arc<Node>,
-) -> Option<Arc<SourceFile>> {
+) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("m5w_source_file_of_node"); 
     let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
     while let Some(cur) = current {
         if cur.kind == SyntaxKind::SourceFile {
@@ -495,7 +495,7 @@ pub fn m5w_source_file_of_node(
     None
 }
 
-pub fn node_root_file_id(node: &Arc<Node>) -> u64 {
+pub fn node_root_file_id(node: &Arc<Node>) -> u64 { ::tsox_core::fntrace::enter("node_root_file_id"); 
     let mut current = Arc::clone(node);
     while let Some(parent) = current.parent() {
         current = parent;
@@ -503,11 +503,11 @@ pub fn node_root_file_id(node: &Arc<Node>) -> u64 {
     current.id()
 }
 
-pub fn source_file_imports(source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> {
+pub fn source_file_imports(source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("source_file_imports"); 
     source_file.imports.clone()
 }
 
-pub fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_container_node"); 
     let mut current = node.parent();
     while let Some(parent) = current {
         if matches!(
@@ -531,7 +531,7 @@ pub fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-fn access_expression_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn access_expression_expression(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("access_expression_expression"); 
     match &node.data {
         NodeData::PropertyAccessExpression(d) => Some(d.expression.clone()),
         NodeData::ElementAccessExpression(d) => Some(d.expression.clone()),
@@ -539,7 +539,7 @@ fn access_expression_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-fn import_or_export_specifier_property_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn import_or_export_specifier_property_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_or_export_specifier_property_name"); 
     match &node.data {
         NodeData::ImportSpecifier(d) => d.property_name.clone(),
         NodeData::ExportSpecifier(d) => d.property_name.clone(),
@@ -547,7 +547,7 @@ fn import_or_export_specifier_property_name(node: &Arc<Node>) -> Option<Arc<Node
     }
 }
 
-fn get_external_module_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_external_module_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_name"); 
     match &node.data {
         NodeData::ImportDeclaration(d) => Some(d.module_specifier.clone()),
         NodeData::ExportDeclaration(d) => d.module_specifier.clone(),

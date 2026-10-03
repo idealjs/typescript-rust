@@ -5,7 +5,7 @@ use crate::checker::utilities_token_is_identifier_or_keyword::is_unit_type;
 use tsox_frontend::ast::{NodeData, SyntaxKind};
 
 impl Checker {
-    pub fn is_exhaustive_switch_statement(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_exhaustive_switch_statement(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_exhaustive_switch_statement"); 
         let key = Arc::as_ptr(node) as usize as u64;
         match self.switch_exhaustive_state.get(&key) {
             Some(&2) => return true,
@@ -20,7 +20,7 @@ impl Checker {
         exhaustive
     }
 
-    fn compute_exhaustive_switch_statement(&mut self, node: &Arc<Node>) -> bool {
+    fn compute_exhaustive_switch_statement(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("compute_exhaustive_switch_statement"); 
         let NodeData::SwitchStatement(data) = &node.data else {
             return false;
         };
@@ -59,7 +59,7 @@ impl Checker {
     }
 }
 
-fn is_literal_switch_type(t: &Arc<Type>) -> bool {
+fn is_literal_switch_type(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_literal_switch_type"); 
     if t.flags.contains(TypeFlags::Boolean) {
         return true;
     }
@@ -69,7 +69,7 @@ fn is_literal_switch_type(t: &Arc<Type>) -> bool {
     is_unit_type(t)
 }
 
-fn constituent_flags_all_unit(t: &Arc<Type>) -> bool {
+fn constituent_flags_all_unit(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("constituent_flags_all_unit"); 
     match &t.data {
         TypeData::Union(u) => u
             .union_or_intersection
@@ -80,7 +80,7 @@ fn constituent_flags_all_unit(t: &Arc<Type>) -> bool {
     }
 }
 
-fn same_unit_type(a: &Arc<Type>, b: &Arc<Type>) -> bool {
+fn same_unit_type(a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("same_unit_type"); 
     if Arc::ptr_eq(a, b) {
         return true;
     }
@@ -90,7 +90,7 @@ fn same_unit_type(a: &Arc<Type>, b: &Arc<Type>) -> bool {
     }
 }
 
-fn is_boolean_literal(t: &Arc<Type>, value: bool) -> bool {
+fn is_boolean_literal(t: &Arc<Type>, value: bool) -> bool { ::tsox_core::fntrace::enter("is_boolean_literal"); 
     matches!(
         &t.data,
         TypeData::Literal(lit) if lit.value == LiteralValue::Boolean(value)

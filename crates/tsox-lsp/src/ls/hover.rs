@@ -23,7 +23,7 @@ pub struct SymbolDisplayInfo {
 }
 
 impl LanguageService {
-    pub fn provide_hover(&self, document_uri: &DocumentUri, position: Position) -> Option<Hover> {
+    pub fn provide_hover(&self, document_uri: &DocumentUri, position: Position) -> Option<Hover> { ::tsox_core::fntrace::enter("provide_hover"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
 
         let line_map = &source_file.line_map;
@@ -86,14 +86,14 @@ impl LanguageService {
     }
 }
 
-pub fn format_quick_info(quick_info: &str) -> String {
+pub fn format_quick_info(quick_info: &str) -> String { ::tsox_core::fntrace::enter("format_quick_info"); 
     if quick_info.is_empty() {
         return String::new();
     }
     format_code_block("typescript", quick_info)
 }
 
-pub fn format_code_block(lang: &str, code: &str) -> String {
+pub fn format_code_block(lang: &str, code: &str) -> String { ::tsox_core::fntrace::enter("format_code_block"); 
     if code.is_empty() {
         return String::new();
     }
@@ -112,11 +112,11 @@ pub fn format_code_block(lang: &str, code: &str) -> String {
     result
 }
 
-fn display_parts_to_string(parts: &[SymbolDisplayPart]) -> String {
+fn display_parts_to_string(parts: &[SymbolDisplayPart]) -> String { ::tsox_core::fntrace::enter("display_parts_to_string"); 
     parts.iter().map(|p| p.text.as_str()).collect()
 }
 
-fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("get_node_for_quick_info"); 
     use tsox_frontend::ast::SyntaxKind;
     let Some(parent) = node.parent() else {
         return Arc::clone(node);
@@ -149,13 +149,13 @@ fn get_node_for_quick_info(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     Arc::clone(node)
 }
 
-fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
+fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range { ::tsox_core::fntrace::enter("node_range_to_lsp_range"); 
     let start = offset_to_position(line_map, node.pos());
     let end = offset_to_position(line_map, node.end());
     Range { start, end }
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -164,7 +164,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

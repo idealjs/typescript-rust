@@ -19,7 +19,7 @@ impl Checker {
         imported_files: &[String],
         imported_specs: &[String],
         imported_symbol_ids: &[u64],
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_type_nameability"); 
         let mut candidates = Vec::new();
         self.collect_nameability_candidates_inner(decl_type, 0, false, &mut candidates);
         for sym in candidates {
@@ -42,7 +42,7 @@ impl Checker {
         t: &Arc<Type>,
         depth: usize,
         out: &mut Vec<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_nameability_candidates"); 
         self.collect_nameability_candidates_inner(t, depth, false, out)
     }
 
@@ -52,7 +52,7 @@ impl Checker {
         depth: usize,
         from_parent_intersection: bool,
         out: &mut Vec<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_nameability_candidates_inner"); 
         if depth > MAX_WALK_DEPTH || out.len() >= MAX_CANDIDATES {
             return;
         }
@@ -127,7 +127,7 @@ impl Checker {
         imported_files: &[String],
         imported_specs: &[String],
         imported_symbol_ids: &[u64],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("report_unnameable_symbol"); 
         let Some(decl) = sym.declarations.first() else {
             return false;
         };
@@ -160,7 +160,7 @@ impl Checker {
 
     /// 模块 specifier：优先 node_modules 外层锚定的非相对形式（需可解析到同一模块），
     /// 否则退化为相对路径。指向包内被 index 再导出的文件时收敛到包根。
-    fn decl_emit_specifier_for(&self, from_file: &str, target_file: &str) -> Option<String> {
+    fn decl_emit_specifier_for(&self, from_file: &str, target_file: &str) -> Option<String> { ::tsox_core::fntrace::enter("decl_emit_specifier_for"); 
         let target = self.decl_specifier_target_file(target_file)?;
         if let Some(bare) = self.bare_specifier_for_module(&target) {
             if self.bare_specifier_resolves_to(&bare, from_file, &target) {
@@ -170,7 +170,7 @@ impl Checker {
         Some(relative_module_specifier(from_file, &target))
     }
 
-    fn decl_specifier_target_file(&self, target_file: &str) -> Option<String> {
+    fn decl_specifier_target_file(&self, target_file: &str) -> Option<String> { ::tsox_core::fntrace::enter("decl_specifier_target_file"); 
         let (dir, base) = target_file.rsplit_once('/')?;
         if base == "index.d.ts" || base == "index.ts" {
             return Some(target_file.to_string());
@@ -189,7 +189,7 @@ impl Checker {
         Some(target_file.to_string())
     }
 
-    fn bare_specifier_for_module(&self, target_file: &str) -> Option<String> {
+    fn bare_specifier_for_module(&self, target_file: &str) -> Option<String> { ::tsox_core::fntrace::enter("bare_specifier_for_module"); 
         let idx = target_file.find("/node_modules/")?;
         let rest = &target_file[idx + "/node_modules/".len()..];
         let without_ext = drop_trailing_index(&strip_module_extension(rest));
@@ -199,7 +199,7 @@ impl Checker {
         Some(without_ext)
     }
 
-    fn bare_specifier_resolves_to(&self, bare: &str, from_file: &str, target_file: &str) -> bool {
+    fn bare_specifier_resolves_to(&self, bare: &str, from_file: &str, target_file: &str) -> bool { ::tsox_core::fntrace::enter("bare_specifier_resolves_to"); 
         let resolved = self.program.resolve_external_module_path(
             bare,
             from_file,
@@ -212,7 +212,7 @@ impl Checker {
     }
 }
 
-fn strip_module_extension(path: &str) -> String {
+fn strip_module_extension(path: &str) -> String { ::tsox_core::fntrace::enter("strip_module_extension"); 
     for ext in [".d.ts", ".mts", ".cts", ".tsx", ".ts"] {
         if let Some(stripped) = path.strip_suffix(ext) {
             return stripped.to_string();
@@ -221,15 +221,15 @@ fn strip_module_extension(path: &str) -> String {
     path.to_string()
 }
 
-fn drop_trailing_index(path: &str) -> String {
+fn drop_trailing_index(path: &str) -> String { ::tsox_core::fntrace::enter("drop_trailing_index"); 
     path.strip_suffix("/index").unwrap_or(path).to_string()
 }
 
-fn module_identity(path: &str) -> String {
+fn module_identity(path: &str) -> String { ::tsox_core::fntrace::enter("module_identity"); 
     drop_trailing_index(&strip_module_extension(path))
 }
 
-fn relative_module_specifier(from_file: &str, target_file: &str) -> String {
+fn relative_module_specifier(from_file: &str, target_file: &str) -> String { ::tsox_core::fntrace::enter("relative_module_specifier"); 
     let from_dir = from_file.rsplit_once('/').map(|(d, _)| d).unwrap_or("");
     let to_identity = module_identity(target_file);
     let from_segs: Vec<&str> = from_dir.split('/').filter(|s| !s.is_empty()).collect();

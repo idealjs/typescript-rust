@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         object_type: &Arc<Type>,
         index_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_indexed_access_type"); 
         if object_type.flags.contains(TypeFlags::Any) {
             return self.any_type();
         }
@@ -173,7 +173,7 @@ impl Checker {
         &mut self,
         object_type: &Arc<Type>,
         index_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("instantiate_mapped_template_with_index"); 
         let TypeData::Mapped(m) = &object_type.data else {
             return None;
         };
@@ -253,7 +253,7 @@ impl Checker {
         &mut self,
         structured: &StructuredTypeData,
         index_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("lookup_index_signature_value"); 
         let is_string_like = index_type
             .flags
             .intersects(TypeFlags::String | TypeFlags::StringLiteral);

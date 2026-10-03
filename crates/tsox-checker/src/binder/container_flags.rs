@@ -4,7 +4,7 @@ use tsox_frontend::ast::*;
 /// 声明（类型参数、参数、局部声明）进容器节点的 locals 表（parent 不挂），
 /// 而非容器符号的 members —— 重载声明的同名类型参数必须在各自的
 /// 函数节点 locals 里隔离，进符号 members 会相互覆盖
-pub(crate) fn is_function_like_locals_container(kind: SyntaxKind) -> bool {
+pub(crate) fn is_function_like_locals_container(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_function_like_locals_container"); 
     matches!(
         kind,
         SyntaxKind::FunctionType
@@ -27,7 +27,7 @@ pub(crate) fn is_function_like_locals_container(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
+pub(crate) fn get_container_flags(kind: SyntaxKind) -> ContainerFlags { ::tsox_core::fntrace::enter("get_container_flags"); 
     match kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
             ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS
@@ -90,7 +90,7 @@ pub(crate) fn get_container_flags(kind: SyntaxKind) -> ContainerFlags {
 }
 
 #[allow(dead_code)]
-pub(crate) fn is_block_scoped_container(kind: SyntaxKind) -> bool {
+pub(crate) fn is_block_scoped_container(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_block_scoped_container"); 
     matches!(
         kind,
         SyntaxKind::Block
@@ -104,7 +104,7 @@ pub(crate) fn is_block_scoped_container(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn is_block_only_container(kind: SyntaxKind) -> bool {
+pub(crate) fn is_block_only_container(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_block_only_container"); 
     matches!(
         kind,
         SyntaxKind::Block
@@ -116,7 +116,7 @@ pub(crate) fn is_block_only_container(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn is_control_flow_jump_reset_container(kind: SyntaxKind) -> bool {
+pub(crate) fn is_control_flow_jump_reset_container(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_control_flow_jump_reset_container"); 
     matches!(
         kind,
         SyntaxKind::SourceFile
@@ -137,7 +137,7 @@ pub(crate) fn is_control_flow_jump_reset_container(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn is_var_container_kind(kind: SyntaxKind) -> bool {
+pub(crate) fn is_var_container_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_var_container_kind"); 
     matches!(
         kind,
         SyntaxKind::SourceFile
@@ -152,7 +152,7 @@ pub(crate) fn is_var_container_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn has_locals(kind: SyntaxKind) -> bool {
+pub(crate) fn has_locals(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("has_locals"); 
     matches!(
         kind,
         SyntaxKind::Block

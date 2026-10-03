@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
-    pub fn get_es_symbol_like_type_for_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_es_symbol_like_type_for_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_es_symbol_like_type_for_node"); 
         let Some(symbol) = self.valid_es_symbol_declaration_symbol(node) else {
             return self.es_symbol_type();
         };
@@ -25,7 +25,7 @@ impl Checker {
         t
     }
 
-    fn valid_es_symbol_declaration_symbol(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn valid_es_symbol_declaration_symbol(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("valid_es_symbol_declaration_symbol"); 
         match &node.data {
             NodeData::VariableDeclaration(data) => {
                 if !matches!(data.name.data, NodeData::Identifier(_)) {
@@ -69,7 +69,7 @@ impl Checker {
         self.program.symbol_map().symbol_of(node).map(Arc::clone)
     }
 
-    pub fn is_symbol_or_symbol_for_call(&self, node: &Arc<Node>) -> bool {
+    pub fn is_symbol_or_symbol_for_call(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_symbol_or_symbol_for_call"); 
         let NodeData::CallExpression(data) = &node.data else {
             return false;
         };
@@ -96,7 +96,7 @@ impl Checker {
         &mut self,
         declaration: &Arc<Node>,
         t: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("widen_unique_symbol_for_declaration"); 
         if !t.flags.contains(TypeFlags::UniqueESSymbol) {
             return Arc::clone(t);
         }
@@ -118,7 +118,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn walk_up_parenthesized_types(node: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn walk_up_parenthesized_types(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("walk_up_parenthesized_types"); 
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::ParenthesizedType {
         let Some(parent) = current.parent() else {
@@ -129,7 +129,7 @@ pub(crate) fn walk_up_parenthesized_types(node: &Arc<Node>) -> Arc<Node> {
     current
 }
 
-pub(crate) fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("walk_up_parenthesized_expressions"); 
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::ParenthesizedExpression {
         let Some(parent) = current.parent() else {

@@ -25,7 +25,7 @@ impl MetadataSerializer {
         &mut self,
         left: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_checked_value"); 
         Some(self.factory().new_logical_and_expression(
             &self.factory().new_strict_inequality_expression(
                 &self.factory().new_type_of_expression(left),
@@ -35,7 +35,7 @@ impl MetadataSerializer {
         ))
     }
 
-    pub(crate) fn equate_serialized_type_nodes(&self, left: &Arc<Node>, right: &Arc<Node>) -> bool {
+    pub(crate) fn equate_serialized_type_nodes(&self, left: &Arc<Node>, right: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("equate_serialized_type_nodes"); 
         if is_generated_identifier(&self.emit_context(), left) {
             return is_generated_identifier(&self.emit_context(), right);
         }
@@ -109,7 +109,7 @@ impl MetadataSerializer {
 pub fn get_parameters_of_decorated_declaration(
     node: &Arc<Node>,
     container: Option<&Arc<Node>>,
-) -> NodeList {
+) -> NodeList { ::tsox_core::fntrace::enter("get_parameters_of_decorated_declaration"); 
     if let Some(container) = container {
         if node.kind == SyntaxKind::GetAccessor {
             let acc =

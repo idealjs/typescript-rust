@@ -7,7 +7,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::{Node, SyntaxKind};
 
 impl Checker {
-    pub(crate) fn is_or_has_generic_conditional(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_or_has_generic_conditional(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_or_has_generic_conditional"); 
         if t.flags.contains(TypeFlags::Conditional) {
             return true;
         }
@@ -30,7 +30,7 @@ impl Checker {
         kind: SignatureKind,
         head_message: Option<&tsox_core::diagnostics::Message>,
         out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_did_you_mean_to_call_or_construct"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let signatures = self.get_signatures_of_type(source, kind);
         let saved_chain = std::mem::take(&mut self.relater_error_chain);
@@ -92,7 +92,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_arrow_function"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let tsox_frontend::ast::NodeData::ArrowFunction(data) = &node.data else {
             return false;
@@ -200,7 +200,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn create_promise_of(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn create_promise_of(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("create_promise_of"); 
         let promise_sym = self.globals.get("Promise")?.clone();
         if promise_sym.flags.contains(crate::checker::types::SymbolFlags::Interface) {
             Some(self.resolve_interface_type_ex(&promise_sym, Some(vec![Arc::clone(t)])))
@@ -211,7 +211,7 @@ impl Checker {
 
     // Go getSimplifiedTypeOrConstraint：简化型（条件已解析）优先，否则约束；
     // 无约束类型参数隐含 unknown（Go getDefaultConstraintOfTypeParameter）
-    pub(crate) fn get_simplified_type_or_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn get_simplified_type_or_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_simplified_type_or_constraint"); 
         if t.flags.contains(TypeFlags::Conditional) {
             let simplified = self.get_simplified_type_for_relation(t, false);
             if !Arc::ptr_eq(&simplified, t) {

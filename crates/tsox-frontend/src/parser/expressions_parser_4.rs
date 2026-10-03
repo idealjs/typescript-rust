@@ -3,7 +3,7 @@
 use crate::parser::expressions::*;
 
 impl Parser {
-    pub(crate) fn parse_super_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_super_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_super_expression"); 
         let pos = self.node_pos();
         let expression = self.parse_keyword_expression(SyntaxKind::SuperKeyword);
         if matches!(
@@ -29,7 +29,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_unary_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_unary_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_unary_expression"); 
         match self.token {
             SyntaxKind::PlusToken
             | SyntaxKind::MinusToken
@@ -111,7 +111,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_type_assertion(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_assertion(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_assertion"); 
         let pos = self.token_pos();
         self.next_token();
         let type_node = self.parse_type();
@@ -128,7 +128,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_postfix_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_postfix_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_postfix_expression"); 
         let operand = self.parse_left_hand_side_expression();
 
         if !self.has_preceding_line_break()
@@ -148,7 +148,7 @@ impl Parser {
         operand
     }
 
-    pub(crate) fn parse_left_hand_side_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_left_hand_side_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_left_hand_side_expression"); 
         let expr = if self.token == SyntaxKind::NewKeyword {
             self.parse_new_expression()
         } else {
@@ -157,11 +157,11 @@ impl Parser {
         self.parse_call_and_member_chain(expr, false)
     }
 
-    pub(crate) fn parse_member_chain(&mut self, expr: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn parse_member_chain(&mut self, expr: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_member_chain"); 
         self.parse_call_and_member_chain(expr, true)
     }
 
-    pub(crate) fn parse_new_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_new_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_new_expression"); 
         let pos = self.token_pos();
         self.next_token();
         let expression = if self.token == SyntaxKind::DotToken {

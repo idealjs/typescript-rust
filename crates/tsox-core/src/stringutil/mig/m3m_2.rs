@@ -4,7 +4,7 @@ use super::unicode_data::special_casing_mappings;
 use super::unicode_data::SpecialCasingCondition;
 use super::unicode_data::SpecialCasingMapping;
 
-pub fn to_lower_js(s: &str) -> String {
+pub fn to_lower_js(s: &str) -> String { crate::fntrace::enter("to_lower_js"); 
     if let Some(ascii) = to_lower_ascii(s) {
         return ascii;
     }
@@ -34,7 +34,7 @@ pub fn to_lower_js(s: &str) -> String {
     builder
 }
 
-pub fn to_upper_js(s: &str) -> String {
+pub fn to_upper_js(s: &str) -> String { crate::fntrace::enter("to_upper_js"); 
     if let Some(ascii) = to_upper_ascii(s) {
         return ascii;
     }
@@ -54,7 +54,7 @@ pub fn to_upper_js(s: &str) -> String {
     builder
 }
 
-fn to_lower_ascii(s: &str) -> Option<String> {
+fn to_lower_ascii(s: &str) -> Option<String> { crate::fntrace::enter("to_lower_ascii"); 
     let mut needs_mapping = false;
     for &ch in s.as_bytes() {
         if ch >= 0x80 {
@@ -68,7 +68,7 @@ fn to_lower_ascii(s: &str) -> Option<String> {
     Some(s.chars().map(|c| c.to_ascii_lowercase()).collect())
 }
 
-fn to_upper_ascii(s: &str) -> Option<String> {
+fn to_upper_ascii(s: &str) -> Option<String> { crate::fntrace::enter("to_upper_ascii"); 
     let mut needs_mapping = false;
     for &ch in s.as_bytes() {
         if ch >= 0x80 {
@@ -82,11 +82,11 @@ fn to_upper_ascii(s: &str) -> Option<String> {
     Some(s.chars().map(|c| c.to_ascii_uppercase()).collect())
 }
 
-fn is_final_sigma_context(cased_before: bool, s: &str, after_offset: usize) -> bool {
+fn is_final_sigma_context(cased_before: bool, s: &str, after_offset: usize) -> bool { crate::fntrace::enter("is_final_sigma_context"); 
     cased_before && !has_sigma_cased_after(s, after_offset)
 }
 
-fn has_sigma_cased_after(s: &str, start: usize) -> bool {
+fn has_sigma_cased_after(s: &str, start: usize) -> bool { crate::fntrace::enter("has_sigma_cased_after"); 
     let mut i = start;
     while i < s.len() {
         let (r, size) = decode_js_string_rune(&s[i..]);
@@ -99,11 +99,11 @@ fn has_sigma_cased_after(s: &str, start: usize) -> bool {
     false
 }
 
-fn is_sigma_cased(r: u32) -> bool {
+fn is_sigma_cased(r: u32) -> bool { crate::fntrace::enter("is_sigma_cased"); 
     is_unicode_cased(r)
 }
 
-pub fn guess_indentation(lines: &[String]) -> usize {
+pub fn guess_indentation(lines: &[String]) -> usize { crate::fntrace::enter("guess_indentation"); 
     const MAX_SMI_X86: usize = 0x3fff_ffff;
     let mut indentation = MAX_SMI_X86;
     for line in lines {
@@ -132,11 +132,11 @@ pub fn guess_indentation(lines: &[String]) -> usize {
     indentation
 }
 
-fn is_white_space_like(ch: char) -> bool {
+fn is_white_space_like(ch: char) -> bool { crate::fntrace::enter("is_white_space_like"); 
     super::super::is_white_space_like(ch)
 }
 
-pub fn get_byte_order_mark_length(text: &str) -> usize {
+pub fn get_byte_order_mark_length(text: &str) -> usize { crate::fntrace::enter("get_byte_order_mark_length"); 
     let bytes = text.as_bytes();
     if !bytes.is_empty() {
         let ch0 = bytes[0];
@@ -162,7 +162,7 @@ pub fn get_byte_order_mark_length(text: &str) -> usize {
     0
 }
 
-pub fn remove_byte_order_mark(text: &str) -> &str {
+pub fn remove_byte_order_mark(text: &str) -> &str { crate::fntrace::enter("remove_byte_order_mark"); 
     let length = get_byte_order_mark_length(text);
     if length > 0 {
         &text[length..]
@@ -171,7 +171,7 @@ pub fn remove_byte_order_mark(text: &str) -> &str {
     }
 }
 
-pub fn add_utf8_byte_order_mark(text: &str) -> String {
+pub fn add_utf8_byte_order_mark(text: &str) -> String { crate::fntrace::enter("add_utf8_byte_order_mark"); 
     if get_byte_order_mark_length(text) == 0 {
         let mut result = String::with_capacity(text.len() + 3);
         result.push('\u{FEFF}');
@@ -181,7 +181,7 @@ pub fn add_utf8_byte_order_mark(text: &str) -> String {
     text.to_string()
 }
 
-fn strip_quotes(name: &str) -> &str {
+fn strip_quotes(name: &str) -> &str { crate::fntrace::enter("strip_quotes"); 
     if name.len() < 2 {
         return name;
     }
@@ -194,11 +194,11 @@ fn strip_quotes(name: &str) -> &str {
     name
 }
 
-fn match_slash_replacer(input: &str) -> &str {
+fn match_slash_replacer(input: &str) -> &str { crate::fntrace::enter("match_slash_replacer"); 
     &input[1..]
 }
 
-pub fn unquote_string(s: &str) -> String {
+pub fn unquote_string(s: &str) -> String { crate::fntrace::enter("unquote_string"); 
     let inner = strip_quotes(s);
     let mut result = String::with_capacity(inner.len());
     let mut i = 0;
@@ -217,7 +217,7 @@ pub fn unquote_string(s: &str) -> String {
     result
 }
 
-fn next_rune_boundary(s: &str, start: usize) -> usize {
+fn next_rune_boundary(s: &str, start: usize) -> usize { crate::fntrace::enter("next_rune_boundary"); 
     let bytes = s.as_bytes();
     let mut end = start + 1;
     while end < bytes.len() && (bytes[end] & 0xC0) == 0x80 {
@@ -226,14 +226,14 @@ fn next_rune_boundary(s: &str, start: usize) -> usize {
     end
 }
 
-fn decode_rune(s: &str) -> (u32, usize) {
+fn decode_rune(s: &str) -> (u32, usize) { crate::fntrace::enter("decode_rune"); 
     match s.chars().next() {
         Some(c) => (c as u32, c.len_utf8()),
         None => (0xFFFD, 0),
     }
 }
 
-pub fn lower_first_char(s: &str) -> String {
+pub fn lower_first_char(s: &str) -> String { crate::fntrace::enter("lower_first_char"); 
     if let Some(c) = s.chars().next() {
         let mut result = String::with_capacity(s.len());
         result.extend(c.to_lowercase());
@@ -243,7 +243,7 @@ pub fn lower_first_char(s: &str) -> String {
     s.to_string()
 }
 
-pub fn truncate_by_runes(s: &str, max_length: usize) -> &str {
+pub fn truncate_by_runes(s: &str, max_length: usize) -> &str { crate::fntrace::enter("truncate_by_runes"); 
     if s.len() < max_length {
         return s;
     }
@@ -260,7 +260,7 @@ pub fn truncate_by_runes(s: &str, max_length: usize) -> &str {
     s
 }
 
-pub fn split_lines(text: &str) -> Vec<String> {
+pub fn split_lines(text: &str) -> Vec<String> { crate::fntrace::enter("split_lines"); 
     let mut lines = Vec::with_capacity(text.matches('\n').count() + 1);
     let mut start = 0;
     let mut pos = 0;
@@ -290,19 +290,19 @@ pub fn split_lines(text: &str) -> Vec<String> {
 
 pub const SURROGATE_LOW_START: u32 = 0xDC00;
 
-pub fn is_high_surrogate(ch: u32) -> bool {
+pub fn is_high_surrogate(ch: u32) -> bool { crate::fntrace::enter("is_high_surrogate"); 
     is_surrogate(ch) && ch < SURROGATE_LOW_START
 }
 
-pub fn is_low_surrogate(ch: u32) -> bool {
+pub fn is_low_surrogate(ch: u32) -> bool { crate::fntrace::enter("is_low_surrogate"); 
     is_surrogate(ch) && ch >= SURROGATE_LOW_START
 }
 
-pub fn is_surrogate(ch: u32) -> bool {
+pub fn is_surrogate(ch: u32) -> bool { crate::fntrace::enter("is_surrogate"); 
     (0xD800..=0xDFFF).contains(&ch)
 }
 
-pub fn surrogate_pair_to_code_point(high: u32, low: u32) -> u32 {
+pub fn surrogate_pair_to_code_point(high: u32, low: u32) -> u32 { crate::fntrace::enter("surrogate_pair_to_code_point"); 
     if is_high_surrogate(high) && is_low_surrogate(low) {
         (((high - 0xD800) << 10) | (low - 0xDC00)) + 0x10000
     } else {
@@ -310,7 +310,7 @@ pub fn surrogate_pair_to_code_point(high: u32, low: u32) -> u32 {
     }
 }
 
-pub fn code_point_to_surrogate_pair(ch: u32) -> (u32, u32) {
+pub fn code_point_to_surrogate_pair(ch: u32) -> (u32, u32) { crate::fntrace::enter("code_point_to_surrogate_pair"); 
     if (0x10000..=0x10FFFF).contains(&ch) {
         let ch = ch - 0x10000;
         (0xD800 + (ch >> 10), 0xDC00 + (ch & 0x3FF))
@@ -327,7 +327,7 @@ const UTF8_CONT_MASK: u8 = 0x3F;
 const SURROGATE_UTF8_BYTE1_MIN: u8 = 0xA0;
 const SURROGATE_UTF8_BYTE1_MAX: u8 = 0xBF;
 
-pub fn encode_js_string_rune(ch: u32) -> String {
+pub fn encode_js_string_rune(ch: u32) -> String { crate::fntrace::enter("encode_js_string_rune"); 
     if is_surrogate(ch) {
         let bytes = [
             SURROGATE_UTF8_LEAD,
@@ -342,7 +342,7 @@ pub fn encode_js_string_rune(ch: u32) -> String {
     }
 }
 
-pub fn decode_js_string_rune(s: &str) -> (u32, usize) {
+pub fn decode_js_string_rune(s: &str) -> (u32, usize) { crate::fntrace::enter("decode_js_string_rune"); 
     let bytes = s.as_bytes();
     if bytes.len() >= 3
         && bytes[0] == SURROGATE_UTF8_LEAD
@@ -361,7 +361,7 @@ pub fn decode_js_string_rune(s: &str) -> (u32, usize) {
     decode_rune(s)
 }
 
-pub fn combine_surrogate_pairs(s: &str) -> String {
+pub fn combine_surrogate_pairs(s: &str) -> String { crate::fntrace::enter("combine_surrogate_pairs"); 
     if !s.as_bytes().contains(&SURROGATE_UTF8_LEAD) {
         return s.to_string();
     }

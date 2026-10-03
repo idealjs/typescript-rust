@@ -13,7 +13,7 @@ use super::m5t::{is_for_rename_with_prefix_and_suffix_text, is_valid_reference_p
 use tsox_frontend::ast::mig::m3e_4::SemanticMeaning;
 use tsox_frontend::ast::mig::m3b as node_accessors;
 
-fn to_import_tracker_export_info(info: super::m5u::M5uExportInfo) -> crate::ls::import_tracker::ExportInfo {
+fn to_import_tracker_export_info(info: super::m5u::M5uExportInfo) -> crate::ls::import_tracker::ExportInfo { ::tsox_core::fntrace::enter("to_import_tracker_export_info"); 
     crate::ls::import_tracker::ExportInfo {
         exporting_module_symbol: Some(info.exporting_module_symbol),
         export_kind: match info.export_kind {
@@ -26,11 +26,11 @@ fn to_import_tracker_export_info(info: super::m5u::M5uExportInfo) -> crate::ls::
     }
 }
 
-fn node_symbol_of(checker: &tsox_checker::checker::Checker, node: &Node) -> Option<Arc<Symbol>> {
+fn node_symbol_of(checker: &tsox_checker::checker::Checker, node: &Node) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("node_symbol_of"); 
     checker.program.symbol_map().symbol_of(node).cloned()
 }
 
-pub fn get_special_search_kind(node: Option<&Arc<Node>>) -> &'static str {
+pub fn get_special_search_kind(node: Option<&Arc<Node>>) -> &'static str { ::tsox_core::fntrace::enter("get_special_search_kind"); 
     let Some(node) = node else {
         return "none";
     };
@@ -45,7 +45,7 @@ pub fn get_special_search_kind(node: Option<&Arc<Node>>) -> &'static str {
     }
 }
 
-pub fn get_merged_aliased_symbol_of_namespace_export_declaration(node: &Arc<Node>, symbol: &Arc<Symbol>, checker: &tsox_checker::checker::Checker) -> Option<Arc<Symbol>> {
+pub fn get_merged_aliased_symbol_of_namespace_export_declaration(node: &Arc<Node>, symbol: &Arc<Symbol>, checker: &tsox_checker::checker::Checker) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_merged_aliased_symbol_of_namespace_export_declaration"); 
     let parent = node.parent()?;
     if parent.kind != SyntaxKind::NamespaceExportDeclaration {
         return None;
@@ -58,7 +58,7 @@ pub fn get_merged_aliased_symbol_of_namespace_export_declaration(node: &Arc<Node
     None
 }
 
-pub fn get_possible_symbol_reference_nodes(source_file: &Arc<SourceFile>, symbol_name: &str, container: Option<&Arc<Node>>) -> Vec<Arc<Node>> {
+pub fn get_possible_symbol_reference_nodes(source_file: &Arc<SourceFile>, symbol_name: &str, container: Option<&Arc<Node>>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_possible_symbol_reference_nodes"); 
     let container = container.cloned().unwrap_or_else(|| source_file.node.clone());
     get_possible_symbol_reference_positions(source_file, symbol_name, Some(&container))
         .into_iter()
@@ -73,7 +73,7 @@ pub fn get_possible_symbol_reference_nodes(source_file: &Arc<SourceFile>, symbol
         .collect()
 }
 
-pub fn get_possible_symbol_reference_positions(source_file: &Arc<SourceFile>, symbol_name: &str, container: Option<&Arc<Node>>) -> Vec<usize> {
+pub fn get_possible_symbol_reference_positions(source_file: &Arc<SourceFile>, symbol_name: &str, container: Option<&Arc<Node>>) -> Vec<usize> { ::tsox_core::fntrace::enter("get_possible_symbol_reference_positions"); 
     let mut positions: Vec<usize> = Vec::new();
     if symbol_name.is_empty() {
         return positions;
@@ -107,20 +107,20 @@ pub fn get_possible_symbol_reference_positions(source_file: &Arc<SourceFile>, sy
     positions
 }
 
-pub fn get_references_for_non_module(_referenced_file: &Arc<SourceFile>, _program: &Arc<tsox_compile::compiler::Program>) -> Vec<ReferenceEntry> {
+pub fn get_references_for_non_module(_referenced_file: &Arc<SourceFile>, _program: &Arc<tsox_compile::compiler::Program>) -> Vec<ReferenceEntry> { ::tsox_core::fntrace::enter("get_references_for_non_module"); 
     Vec::new()
 }
 
-pub fn is_method_or_accessor(node: &Arc<Node>) -> bool {
+pub fn is_method_or_accessor(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_method_or_accessor"); 
     matches!(node.kind, SyntaxKind::MethodDeclaration | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
 }
 
-pub fn try_get_class_by_extending_identifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn try_get_class_by_extending_identifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_class_by_extending_identifier"); 
     let parent = tsox_frontend::ast::mig::m3h::climb_past_property_access(node).parent()?;
     tsox_frontend::ast::mig::m3g_3::try_get_class_extending_expression_with_type_arguments(&parent)
 }
 
-pub fn has_own_constructor(class_declaration: &Arc<Node>) -> bool {
+pub fn has_own_constructor(class_declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_own_constructor"); 
     let Some(class_symbol) =
         tsox_checker::checker::mig::m1a::r19k2_defs::symbol_of_node(class_declaration)
     else {
@@ -129,7 +129,7 @@ pub fn has_own_constructor(class_declaration: &Arc<Node>) -> bool {
     class_symbol.members.get(ast::INTERNAL_SYMBOL_NAME_CONSTRUCTOR).is_some()
 }
 
-pub fn get_reference_entries_for_shorthand_property_assignment(node: &Arc<Node>, checker: &mut tsox_checker::checker::Checker, add_reference: &mut impl FnMut(&Arc<Node>)) {
+pub fn get_reference_entries_for_shorthand_property_assignment(node: &Arc<Node>, checker: &mut tsox_checker::checker::Checker, add_reference: &mut impl FnMut(&Arc<Node>)) { ::tsox_core::fntrace::enter("get_reference_entries_for_shorthand_property_assignment"); 
     let Some(ref_symbol) = checker.get_symbol_at_location(node) else {
         return;
     };
@@ -148,12 +148,12 @@ pub fn get_reference_entries_for_shorthand_property_assignment(node: &Arc<Node>,
     }
 }
 
-fn get_meaning_from_declaration(node: &Arc<Node>) -> SemanticMeaning {
+fn get_meaning_from_declaration(node: &Arc<Node>) -> SemanticMeaning { ::tsox_core::fntrace::enter("get_meaning_from_declaration"); 
     tsox_frontend::ast::mig::m3e_4::get_meaning_from_declaration(node)
 }
 
 impl<'a> RefState<'a> {
-    pub fn get_references_at_location(&mut self, source_file: &Arc<SourceFile>, position: usize, search: &RefSearch, add_references_here: bool) {
+    pub fn get_references_at_location(&mut self, source_file: &Arc<SourceFile>, position: usize, search: &RefSearch, add_references_here: bool) { ::tsox_core::fntrace::enter("get_references_at_location"); 
         let Some(reference_location) = astnav::get_touching_property_name(&source_file.node, position) else {
             return;
         };
@@ -234,7 +234,7 @@ impl<'a> RefState<'a> {
         search: &RefSearch,
         add_references_here: bool,
         always_get_references: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("get_references_at_export_specifier"); 
         let Some(export_declaration) = export_specifier.parent().and_then(|p| p.parent()) else {
             return;
         };
@@ -298,7 +298,7 @@ impl<'a> RefState<'a> {
         }
     }
 
-    pub fn get_reference_for_shorthand_property(&mut self, reference_symbol: &Arc<Symbol>, search: &RefSearch) {
+    pub fn get_reference_for_shorthand_property(&mut self, reference_symbol: &Arc<Symbol>, search: &RefSearch) { ::tsox_core::fntrace::enter("get_reference_for_shorthand_property"); 
         if reference_symbol.flags.intersects(ast::SymbolFlags::Transient) || reference_symbol.value_declaration.is_none() {
             return;
         }
@@ -315,7 +315,7 @@ impl<'a> RefState<'a> {
         }
     }
 
-    pub fn get_import_or_export_references(&mut self, reference_location: &Arc<Node>, reference_symbol: &Arc<Symbol>, search: &RefSearch) {
+    pub fn get_import_or_export_references(&mut self, reference_location: &Arc<Node>, reference_symbol: &Arc<Symbol>, search: &RefSearch) { ::tsox_core::fntrace::enter("get_import_or_export_references"); 
         let import_or_export = super::m5u::get_import_or_export_symbol(reference_location, reference_symbol, &mut self.checker, search.coming_from == ImpExpKind::Export);
         let Some(import_or_export) = import_or_export else {
             return;
@@ -339,7 +339,7 @@ impl<'a> RefState<'a> {
     }
 }
 
-fn has_module_specifier(export_declaration: &Arc<Node>) -> bool {
+fn has_module_specifier(export_declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_module_specifier"); 
     node_accessors::module_specifier(export_declaration).is_some()
 }
 
@@ -354,7 +354,7 @@ pub fn definition_to_referenced_symbol_definition_info(
     def: &Definition,
     original_node: &Arc<Node>,
     feature: crate::ls::mig::m5s::SpanFeature,
-) -> Option<ReferencedSymbolDefinitionInfo> {
+) -> Option<ReferencedSymbolDefinitionInfo> { ::tsox_core::fntrace::enter("definition_to_referenced_symbol_definition_info"); 
     let node = def.node.clone()?;
     let file_node = ast::get_source_file_of_node(&node)?;
     let program = l.get_program();

@@ -13,11 +13,11 @@ use tsox_frontend::ast::node_data_generated::for_each_child;
 
 use crate::ls::types::CompletionItem;
 
-pub(super) fn program_build_checker(program: &Arc<Program>) -> Checker {
+pub(super) fn program_build_checker(program: &Arc<Program>) -> Checker { ::tsox_core::fntrace::enter("program_build_checker"); 
     program.build_checker()
 }
 
-pub(super) fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 {
+pub(super) fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 { ::tsox_core::fntrace::enter("symbol_to_completion_kind"); 
     const METHOD: u32 = 2;
     const FUNCTION: u32 = 3;
     const CONSTRUCTOR: u32 = 4;
@@ -87,7 +87,7 @@ pub(super) fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 {
     VARIABLE
 }
 
-pub(super) fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem {
+pub(super) fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem { ::tsox_core::fntrace::enter("symbol_to_completion_item"); 
     CompletionItem {
         label: symbol.name.clone(),
         kind: Some(symbol_to_completion_kind(symbol.flags)),
@@ -105,7 +105,7 @@ pub(super) fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem 
 }
 
 /// Go createCompletionItem：成员补全中可选成员（声明名后紧跟 `?`）label 带 `?`
-pub(super) fn member_completion_label(symbol: &Arc<Symbol>, text: &str) -> String {
+pub(super) fn member_completion_label(symbol: &Arc<Symbol>, text: &str) -> String { ::tsox_core::fntrace::enter("member_completion_label"); 
     let optional = symbol.declarations.iter().any(|d| {
         if !matches!(
             d.kind,
@@ -127,7 +127,7 @@ pub(super) fn member_completion_label(symbol: &Arc<Symbol>, text: &str) -> Strin
     }
 }
 
-pub(super) fn flags_to_detail(flags: &SymbolFlags) -> String {
+pub(super) fn flags_to_detail(flags: &SymbolFlags) -> String { ::tsox_core::fntrace::enter("flags_to_detail"); 
     if flags.contains(SymbolFlags::Function) {
         "function".to_string()
     } else if flags.contains(SymbolFlags::Class) {
@@ -155,7 +155,7 @@ pub(super) fn collect_scope_symbols_fallback(
     checker: &Checker,
     file: &Arc<SourceFile>,
     _location: &Arc<Node>,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("collect_scope_symbols_fallback"); 
     let mut result: Vec<Arc<Symbol>> = Vec::new();
     let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
 
@@ -178,7 +178,7 @@ pub(super) fn collect_declaration_symbols(
     node: &Arc<Node>,
     seen: &mut std::collections::HashSet<u64>,
     result: &mut Vec<Arc<Symbol>>,
-) {
+) { ::tsox_core::fntrace::enter("collect_declaration_symbols"); 
     if is_declaration_kind(node.kind) {
         if let Some(sym) = checker.get_symbol_at_location(node) {
             if seen.insert(sym.id()) {
@@ -193,7 +193,7 @@ pub(super) fn collect_declaration_symbols(
     });
 }
 
-pub(super) fn is_declaration_kind(kind: SyntaxKind) -> bool {
+pub(super) fn is_declaration_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_declaration_kind"); 
     matches!(
         kind,
         SyntaxKind::VariableDeclaration
@@ -217,7 +217,7 @@ pub(super) fn is_declaration_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(super) fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+pub(super) fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -245,7 +245,7 @@ pub(super) fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-pub(super) fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+pub(super) fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;

@@ -3,7 +3,7 @@
 use crate::checker::checker_classes::*;
 
 impl Checker {
-    pub(crate) fn check_class_member(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_class_member(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_member"); 
         self.check_grammar_modifiers(node);
         self.check_node_decorators(node);
         if node.kind == SyntaxKind::IndexSignature {
@@ -195,7 +195,7 @@ impl Checker {
 
     // Go checkDecorators 的表达式遍历部分（签名检查/emit helpers 不在此层）；
     // NodeCanBeDecorated 失败的节点跳过（checkGrammarModifiers 已报 TS1206）
-    pub(crate) fn check_node_decorators(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_node_decorators(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_node_decorators"); 
         if !self.node_can_be_decorated(node) {
             return;
         }

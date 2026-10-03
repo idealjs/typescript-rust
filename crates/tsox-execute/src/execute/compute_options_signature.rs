@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn compute_options_signature(options: &CompilerOptions) -> String {
+pub(crate) fn compute_options_signature(options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("compute_options_signature"); 
     let mut parts: Vec<String> = Vec::new();
     parts.push(format!("target={:?}", options.target));
     parts.push(format!("module={:?}", options.module));

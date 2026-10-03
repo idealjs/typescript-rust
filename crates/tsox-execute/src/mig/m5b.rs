@@ -73,7 +73,7 @@ pub const TRACE_END: &str = "!!! Trace end";
 
 pub type FileMap = HashMap<String, String>;
 
-pub fn get_test_lib_path_for(lib_name: &str) -> String {
+pub fn get_test_lib_path_for(lib_name: &str) -> String { ::tsox_core::fntrace::enter("get_test_lib_path_for"); 
     let lib_file = match tsox_tsoptions::mig::m5h_5::LIB_MAP
         .iter()
         .find(|(name, _)| *name == lib_name)
@@ -90,14 +90,14 @@ pub struct TestClock {
 }
 
 impl TestClock {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             start: std::time::SystemTime::now(),
             now: Mutex::new(None),
         }
     }
 
-    pub fn now(&self) -> std::time::SystemTime {
+    pub fn now(&self) -> std::time::SystemTime { ::tsox_core::fntrace::enter("now"); 
         let mut now = self.now.lock().unwrap();
         let current = match *now {
             Some(t) => t,
@@ -108,7 +108,7 @@ impl TestClock {
         advanced
     }
 
-    pub fn since_start(&self) -> std::time::Duration {
+    pub fn since_start(&self) -> std::time::Duration { ::tsox_core::fntrace::enter("since_start"); 
         self.now()
             .duration_since(self.start)
             .unwrap_or_default()
@@ -116,13 +116,13 @@ impl TestClock {
 }
 
 impl Default for TestClock {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
 impl vfstest::Clock for TestClock {
-    fn now(&self) -> std::time::SystemTime {
+    fn now(&self) -> std::time::SystemTime { ::tsox_core::fntrace::enter("now"); 
         TestClock::now(self)
     }
 }
@@ -131,7 +131,7 @@ pub fn new_tsc_system(
     files: FileMap,
     use_case_sensitive_file_names: bool,
     cwd: &str,
-) -> TestSys {
+) -> TestSys { ::tsox_core::fntrace::enter("new_tsc_system"); 
     let clock = Arc::new(TestClock::new());
     let clock_dyn: Arc<dyn vfstest::Clock> = clock.clone();
     TestSys {
@@ -151,7 +151,7 @@ pub fn new_tsc_system(
     }
 }
 
-pub fn get_file_map_with_build(mut files: FileMap, command_line_args: &[String]) -> FileMap {
+pub fn get_file_map_with_build(mut files: FileMap, command_line_args: &[String]) -> FileMap { ::tsox_core::fntrace::enter("get_file_map_with_build"); 
     let mut sys = new_test_sys(&TscInput { files: files.clone(), ..Default::default() }, false);
     crate::execute::command_line(&sys, command_line_args);
     for key in sys.fs.written_files_keys() {
@@ -162,7 +162,7 @@ pub fn get_file_map_with_build(mut files: FileMap, command_line_args: &[String])
     files
 }
 
-pub fn new_test_sys(tsc_input: &TscInput, for_incremental_correctness: bool) -> TestSys {
+pub fn new_test_sys(tsc_input: &TscInput, for_incremental_correctness: bool) -> TestSys { ::tsox_core::fntrace::enter("new_test_sys"); 
     let cwd = if tsc_input.cwd.is_empty() {
         "/home/src/workspaces/project"
     } else {
@@ -224,48 +224,48 @@ impl WatchBackend for MockWatchBackend {
         callback: WatchCallback,
         recursive: bool,
         ignore: Option<IgnoreFn>,
-    ) -> Result<Box<dyn WatchCloser>, String> {
+    ) -> Result<Box<dyn WatchCloser>, String> { ::tsox_core::fntrace::enter("watch_directory"); 
         MockWatchBackend::watch_directory(self, dir, callback, recursive, ignore)
     }
 
     fn watch_directories(
         &self,
         requests: &[WatchDirectoryRequest],
-    ) -> Result<Vec<Box<dyn WatchCloser>>, String> {
+    ) -> Result<Vec<Box<dyn WatchCloser>>, String> { ::tsox_core::fntrace::enter("watch_directories"); 
         MockWatchBackend::watch_directories(self, requests)
     }
 }
 
 impl TestSys {
-    pub fn now(&self) -> std::time::SystemTime {
+    pub fn now(&self) -> std::time::SystemTime { ::tsox_core::fntrace::enter("now"); 
         self.clock.now()
     }
 
-    pub fn fs(&self) -> Arc<dyn FS> {
+    pub fn fs(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs"); 
         Arc::clone(&self.fs.fs)
     }
 
-    pub fn default_library_path(&self) -> &str {
+    pub fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         &self.default_library_path
     }
 
-    pub fn current_directory(&self) -> &str {
+    pub fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.cwd
     }
 
-    pub fn since_start(&self) -> std::time::Duration {
+    pub fn since_start(&self) -> std::time::Duration { ::tsox_core::fntrace::enter("since_start"); 
         self.clock.since_start()
     }
 
-    pub fn fs_from_file_map(&self) -> Arc<dyn FS> {
+    pub fn fs_from_file_map(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs_from_file_map"); 
         self.fs.fs.clone()
     }
 
-    pub fn map_fs(&self) -> Arc<MapFS> {
+    pub fn map_fs(&self) -> Arc<MapFS> { ::tsox_core::fntrace::enter("map_fs"); 
         self.fs_differ.as_ref().unwrap().map_fs()
     }
 
-    pub fn ensure_lib_path_exists(&self, path: &str) {
+    pub fn ensure_lib_path_exists(&self, path: &str) { ::tsox_core::fntrace::enter("ensure_lib_path_exists"); 
         let path = format!("{}/{}", self.default_library_path, path);
         if self.fs_from_file_map().read_file(&path).is_none() {
             self.fs.default_libs_add(&path);
@@ -280,7 +280,7 @@ impl TestSys {
         command: &[String],
         dir: &str,
         mut stderr: Box<dyn Write + Send>,
-    ) -> Result<Box<dyn ReadWriteCloser>, String> {
+    ) -> Result<Box<dyn ReadWriteCloser>, String> { ::tsox_core::fntrace::enter("spawn"); 
         contentmapper_test::new_spawner()
             .spawn(command, dir, stderr.as_mut())
             .map_err(|e| e.to_string())
@@ -290,7 +290,7 @@ impl TestSys {
         &self,
         result: Option<&super::m5a::EmitResult>,
         m_times_cache: Option<&mut tsox_core::collections::syncmap::SyncMap<tsox_core::tspath::Path, std::time::SystemTime>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("on_emitted_files"); 
         let result = match result {
             Some(r) => r,
             None => return,
@@ -325,36 +325,36 @@ impl TestSys {
         }
     }
 
-    pub fn on_list_files_start(&self, w: &mut dyn Write) {
+    pub fn on_list_files_start(&self, w: &mut dyn Write) { ::tsox_core::fntrace::enter("on_list_files_start"); 
         let _ = writeln!(w, "{}", LIST_FILE_START);
     }
 
-    pub fn on_list_files_end(&self, w: &mut dyn Write) {
+    pub fn on_list_files_end(&self, w: &mut dyn Write) { ::tsox_core::fntrace::enter("on_list_files_end"); 
         let _ = writeln!(w, "{}", LIST_FILE_END);
     }
 
-    pub fn on_statistics_start(&self, w: &mut dyn Write) {
+    pub fn on_statistics_start(&self, w: &mut dyn Write) { ::tsox_core::fntrace::enter("on_statistics_start"); 
         let _ = writeln!(w, "{}", STATISTICS_START);
     }
 
-    pub fn on_statistics_end(&self, w: &mut dyn Write) {
+    pub fn on_statistics_end(&self, w: &mut dyn Write) { ::tsox_core::fntrace::enter("on_statistics_end"); 
         let _ = writeln!(w, "{}", STATISTICS_END);
     }
 
-    pub fn on_build_status_report_start(&self, w: &mut dyn Write) {
+    pub fn on_build_status_report_start(&self, w: &mut dyn Write) { ::tsox_core::fntrace::enter("on_build_status_report_start"); 
         let _ = writeln!(w, "{}", BUILD_STATUS_REPORT_START);
     }
 
-    pub fn on_build_status_report_end(&self, w: &mut dyn Write) {
+    pub fn on_build_status_report_end(&self, w: &mut dyn Write) { ::tsox_core::fntrace::enter("on_build_status_report_end"); 
         let _ = writeln!(w, "{}", BUILD_STATUS_REPORT_END);
     }
 
-    pub fn on_watch_status_report_start(&self) {
+    pub fn on_watch_status_report_start(&self) { ::tsox_core::fntrace::enter("on_watch_status_report_start"); 
         let mut w = self.writer();
         let _ = writeln!(w, "{}", WATCH_STATUS_REPORT_START);
     }
 
-    pub fn on_watch_status_report_end(&self) {
+    pub fn on_watch_status_report_end(&self) { ::tsox_core::fntrace::enter("on_watch_status_report_end"); 
         let mut w = self.writer();
         let _ = writeln!(w, "{}", WATCH_STATUS_REPORT_END);
     }
@@ -363,7 +363,7 @@ impl TestSys {
         &'a self,
         w: &'a mut dyn Write,
         locale: tsox_core::locale::Locale,
-    ) -> impl FnMut(&tsox_core::diagnostics::Message, &[String]) + 'a {
+    ) -> impl FnMut(&tsox_core::diagnostics::Message, &[String]) + 'a { ::tsox_core::fntrace::enter("get_trace"); 
         move |msg, args| {
             let _ = writeln!(w, "{}", TRACE_START);
             let arg_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
@@ -380,7 +380,7 @@ impl TestSys {
         &self,
         builder: &mut String,
         program: &incremental::Program,
-    ) {
+    ) { ::tsox_core::fntrace::enter("write_header_to_baseline"); 
         if !builder.is_empty() {
             builder.push('\n');
         }
@@ -402,12 +402,12 @@ impl TestSys {
         }
     }
 
-    pub fn watch_backend(&self) -> Arc<dyn WatchBackend> {
+    pub fn watch_backend(&self) -> Arc<dyn WatchBackend> { ::tsox_core::fntrace::enter("watch_backend"); 
         let backend: Arc<dyn WatchBackend> = self.mock_watch_backend.clone();
         backend
     }
 
-    pub fn on_program(&mut self, program: &incremental::Program) {
+    pub fn on_program(&mut self, program: &incremental::Program) { ::tsox_core::fntrace::enter("on_program"); 
         let mut program_baselines = std::mem::take(&mut self.program_baselines);
         self.write_header_to_baseline(&mut program_baselines, program);
         self.program_baselines = program_baselines;
@@ -497,7 +497,7 @@ impl TestSys {
         }
     }
 
-    pub fn baseline_programs(&mut self, baseline: &mut String, header: &str) -> String {
+    pub fn baseline_programs(&mut self, baseline: &mut String, header: &str) -> String { ::tsox_core::fntrace::enter("baseline_programs"); 
         baseline.push_str(&self.program_baselines.clone());
         self.program_baselines.clear();
         let mut result = String::new();
@@ -513,20 +513,20 @@ impl TestSys {
         result
     }
 
-    pub fn serialize_state(&mut self, baseline: &mut String) {
+    pub fn serialize_state(&mut self, baseline: &mut String) { ::tsox_core::fntrace::enter("serialize_state"); 
         self.baseline_output(baseline);
         let mut fs_baseline = Vec::new();
         self.baseline_fs_with_diff(&mut fs_baseline);
         baseline.push_str(&String::from_utf8_lossy(&fs_baseline));
     }
 
-    pub fn baseline_output(&self, baseline: &mut String) {
+    pub fn baseline_output(&self, baseline: &mut String) { ::tsox_core::fntrace::enter("baseline_output"); 
         baseline.push_str("\nOutput::\n");
         let output = self.get_output(false);
         baseline.push_str(&output);
     }
 
-    pub fn get_output(&self, for_comparing: bool) -> String {
+    pub fn get_output(&self, for_comparing: bool) -> String { ::tsox_core::fntrace::enter("get_output"); 
         let current = String::from_utf8_lossy(&self.current_write.lock().unwrap()).to_string();
         let lines: Vec<&str> = current.split('\n').collect();
         let mut transformer = OutputSanitizer {
@@ -538,14 +538,14 @@ impl TestSys {
         transformer.transform_lines()
     }
 
-    pub fn clear_output(&mut self) {
+    pub fn clear_output(&mut self) { ::tsox_core::fntrace::enter("clear_output"); 
         self.current_write.lock().unwrap().clear();
         if let Some(tracer) = &mut self.tracer {
             tracer.reset();
         }
     }
 
-    pub fn baseline_fs_with_diff(&self, baseline: &mut dyn Write) {
+    pub fn baseline_fs_with_diff(&self, baseline: &mut dyn Write) { ::tsox_core::fntrace::enter("baseline_fs_with_diff"); 
         self.fs_differ.as_ref().unwrap().baseline_fs_with_diff(baseline);
     }
 }

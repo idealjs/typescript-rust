@@ -12,7 +12,7 @@ use tsox_frontend::ast::is_static;
 pub fn get_return_type_visibility_diagnostic_message(
     node: &Arc<Node>,
     symbol_accessibility_result: &SymbolAccessibilityResult,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_return_type_visibility_diagnostic_message"); 
     match node.kind {
         SyntaxKind::ConstructSignature => select_diagnostic_based_on_module_name_no_name_check(
             symbol_accessibility_result,
@@ -68,7 +68,7 @@ pub fn get_return_type_visibility_diagnostic_message(
 pub fn get_parameter_declaration_type_visibility_diagnostic_message(
     node: &Arc<Node>,
     symbol_accessibility_result: &SymbolAccessibilityResult,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_parameter_declaration_type_visibility_diagnostic_message"); 
     let Some(parent) = node.parent() else {
         panic!("Unknown parent for parameter: None");
     };

@@ -23,7 +23,7 @@ use std::sync::Arc;
 pub struct EmitContext;
 
 impl EmitContext {
-    pub fn most_original(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn most_original(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("most_original"); 
         node.clone()
     }
 }
@@ -36,7 +36,7 @@ pub fn sibling_node_positions_are_comparable(
     emit_context: &EmitContext,
     previous_node: &Arc<Node>,
     next_node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("sibling_node_positions_are_comparable"); 
     if next_node.pos() < previous_node.end() {
         return false;
     }
@@ -74,7 +74,7 @@ pub fn sibling_node_positions_are_comparable(
     false
 }
 
-pub fn get_containing_node_array(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+pub fn get_containing_node_array(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("get_containing_node_array"); 
     let parent = node.parent()?;
 
     match node.kind {
@@ -235,7 +235,7 @@ pub fn original_nodes_have_same_parent(
     emit_context: &EmitContext,
     node_a: &Arc<Node>,
     node_b: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("original_nodes_have_same_parent"); 
     let node_a = emit_context.most_original(node_a);
     if node_a.parent().is_some() {
         let node_b = emit_context.most_original(node_b);
@@ -247,11 +247,11 @@ pub fn original_nodes_have_same_parent(
     false
 }
 
-pub fn try_get_end(node: Option<&dyn HasEnd>) -> Option<i64> {
+pub fn try_get_end(node: Option<&dyn HasEnd>) -> Option<i64> { ::tsox_core::fntrace::enter("try_get_end"); 
     node.map(|n| n.end())
 }
 
-pub fn greatest_end(end: i64, nodes: &[Option<&dyn HasEnd>]) -> i64 {
+pub fn greatest_end(end: i64, nodes: &[Option<&dyn HasEnd>]) -> i64 { ::tsox_core::fntrace::enter("greatest_end"); 
     let mut end = end;
     for node in nodes.iter().rev() {
         if let Some(node_end) = try_get_end(*node) {
@@ -263,7 +263,7 @@ pub fn greatest_end(end: i64, nodes: &[Option<&dyn HasEnd>]) -> i64 {
     end
 }
 
-pub fn skip_synthesized_parentheses(node: &Arc<Node>) -> Arc<Node> {
+pub fn skip_synthesized_parentheses(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_synthesized_parentheses"); 
     let mut node = node.clone();
     while node.kind == SyntaxKind::ParenthesizedExpression && node_is_synthesized(&node) {
         match node.expression() {
@@ -274,14 +274,14 @@ pub fn skip_synthesized_parentheses(node: &Arc<Node>) -> Arc<Node> {
     node
 }
 
-pub fn is_new_expression_without_arguments(node: &Arc<Node>) -> bool {
+pub fn is_new_expression_without_arguments(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_new_expression_without_arguments"); 
     matches!(
         &node.data,
         NodeData::NewExpression(d) if d.arguments.is_none()
     )
 }
 
-pub fn is_binary_operation(node: &Arc<Node>, token: SyntaxKind) -> bool {
+pub fn is_binary_operation(node: &Arc<Node>, token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_binary_operation"); 
     let node = skip_partially_emitted_expressions_arc(node);
     node.kind == SyntaxKind::BinaryExpression
         && matches!(
@@ -290,7 +290,7 @@ pub fn is_binary_operation(node: &Arc<Node>, token: SyntaxKind) -> bool {
         )
 }
 
-pub fn mixing_binary_operators_requires_parentheses(a: SyntaxKind, b: SyntaxKind) -> bool {
+pub fn mixing_binary_operators_requires_parentheses(a: SyntaxKind, b: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("mixing_binary_operators_requires_parentheses"); 
     if a == SyntaxKind::QuestionQuestionToken {
         return b == SyntaxKind::AmpersandAmpersandToken || b == SyntaxKind::BarBarToken;
     }
@@ -300,7 +300,7 @@ pub fn mixing_binary_operators_requires_parentheses(a: SyntaxKind, b: SyntaxKind
     false
 }
 
-pub fn is_immediately_invoked_function_expression_or_arrow_function(node: &Arc<Node>) -> bool {
+pub fn is_immediately_invoked_function_expression_or_arrow_function(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_immediately_invoked_function_expression_or_arrow_function"); 
     let node = skip_partially_emitted_expressions_arc(node);
     if !is_call_expression(&node) {
         return false;

@@ -3,7 +3,7 @@
 use crate::checker::typenode_impl_chunk::*;
 
 impl Checker {
-    fn interface_shell_residue(&self, t: &Arc<Type>) -> bool {
+    fn interface_shell_residue(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("interface_shell_residue"); 
         let Some(st) = t.as_structured() else {
             return false;
         };
@@ -28,7 +28,7 @@ impl Checker {
         })
     }
 
-    pub fn get_type_from_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_type_from_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_node"); 
         let key = (node.id() as usize, self.type_argument_stack_hash());
         if let Some(t) = self.type_node_subst_cache.get(&key) {
             let stale_shell = self
@@ -109,7 +109,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn type_argument_stack_hash(&self) -> u64 {
+    pub(crate) fn type_argument_stack_hash(&self) -> u64 { ::tsox_core::fntrace::enter("type_argument_stack_hash"); 
         use std::hash::{Hash, Hasher};
         if self.type_argument_stack.is_empty() {
             return 0;
@@ -129,7 +129,7 @@ impl Checker {
         h.finish()
     }
 
-    pub(crate) fn get_type_from_type_node_worker(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_type_node_worker(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_node_worker"); 
         match node.kind {
             SyntaxKind::AnyKeyword | SyntaxKind::JSDocAllType => self.any_type(),
             SyntaxKind::JSDocNonNullableType => {
@@ -242,7 +242,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_cached_type(&self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn get_cached_type(&self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_cached_type"); 
         if !self.type_argument_stack.is_empty() {
             return None;
         }
@@ -251,7 +251,7 @@ impl Checker {
             .and_then(|l| l.resolved_type.clone())
     }
 
-    pub(crate) fn cache_type(&mut self, node: &Arc<Node>, t: Arc<Type>) {
+    pub(crate) fn cache_type(&mut self, node: &Arc<Node>, t: Arc<Type>) { ::tsox_core::fntrace::enter("cache_type"); 
         if !self.type_argument_stack.is_empty() {
             return;
         }
@@ -266,7 +266,7 @@ impl Checker {
     /// 环断路器补写：预缓存 error 后解析途中 shell 让位会 bump
     /// heritage_degraded_events，常规 cache_type 的 epoch 守卫会跳过最终
     /// 写回，error 永驻；最终结果非 error 时强制落盘
-    pub(crate) fn cache_type_overwrite_error(&mut self, node: &Arc<Node>, t: Arc<Type>) {
+    pub(crate) fn cache_type_overwrite_error(&mut self, node: &Arc<Node>, t: Arc<Type>) { ::tsox_core::fntrace::enter("cache_type_overwrite_error"); 
         if !self.type_argument_stack.is_empty() {
             return;
         }
@@ -284,7 +284,7 @@ impl Checker {
 
     /// 环断路窗口内预缓存的 error 会永久掩盖窗口外的正确重解析；
     /// 别名/接口解析层发现 error 结果时清节点缓存放行后续重算
-    pub(crate) fn uncache_type_node(&mut self, node: &Arc<Node>) {
+    pub(crate) fn uncache_type_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("uncache_type_node"); 
         if let Some(links) = self.type_node_links.get_mut(node) {
             links.resolved_type = None;
         }

@@ -2,11 +2,11 @@ use crate::checker::types::*;
 use std::sync::Arc;
 use tsox_frontend::ast::Symbol;
 
-pub fn is_hyphenated_jsx_name(name: &str) -> bool {
+pub fn is_hyphenated_jsx_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_hyphenated_jsx_name"); 
     name.contains('-')
 }
 
-pub fn is_excess_property_check_target(t: &Type) -> bool {
+pub fn is_excess_property_check_target(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_excess_property_check_target"); 
     if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
         return false;
     }
@@ -42,16 +42,16 @@ pub fn is_excess_property_check_target(t: &Type) -> bool {
     false
 }
 
-pub fn is_object_or_instantiable_non_primitive(t: &Type) -> bool {
+pub fn is_object_or_instantiable_non_primitive(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_object_or_instantiable_non_primitive"); 
     t.flags
         .intersects(TypeFlags::Object | TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE)
 }
 
-pub fn is_non_primitive_type(t: &Type) -> bool {
+pub fn is_non_primitive_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_non_primitive_type"); 
     t.flags.contains(TypeFlags::NonPrimitive)
 }
 
-pub fn visibility_to_string(flags: tsox_frontend::ast::ModifierFlags) -> String {
+pub fn visibility_to_string(flags: tsox_frontend::ast::ModifierFlags) -> String { ::tsox_core::fntrace::enter("visibility_to_string"); 
     if flags == tsox_frontend::ast::ModifierFlags::Private {
         "private".to_string()
     } else if flags == tsox_frontend::ast::ModifierFlags::Protected {
@@ -64,7 +64,7 @@ pub fn visibility_to_string(flags: tsox_frontend::ast::ModifierFlags) -> String 
 pub fn exclude_properties(
     properties: &[Arc<Symbol>],
     excluded_properties: &std::collections::HashSet<String>,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("exclude_properties"); 
     properties
         .iter()
         .filter(|p| !excluded_properties.contains(&p.name))
@@ -72,7 +72,7 @@ pub fn exclude_properties(
         .collect()
 }
 
-pub fn should_check_as_excess_property(prop: &Symbol, container: &Symbol) -> bool {
+pub fn should_check_as_excess_property(prop: &Symbol, container: &Symbol) -> bool { ::tsox_core::fntrace::enter("should_check_as_excess_property"); 
     let prop_decl = prop.value_declaration.clone().or_else(|| prop.declarations.first().cloned());
     let container_decl = container
         .value_declaration
@@ -86,7 +86,7 @@ pub fn should_check_as_excess_property(prop: &Symbol, container: &Symbol) -> boo
     }
 }
 
-pub fn is_ignored_jsx_property(_source: &Type, _source_prop: &Symbol) -> bool {
+pub fn is_ignored_jsx_property(_source: &Type, _source_prop: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_ignored_jsx_property"); 
     false
 }
 
@@ -95,15 +95,15 @@ pub struct TypeDiscriminator {
 }
 
 impl TypeDiscriminator {
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.names.len()
     }
 
-    pub fn name(&self, index: usize) -> &str {
+    pub fn name(&self, index: usize) -> &str { ::tsox_core::fntrace::enter("name"); 
         &self.names[index]
     }
 
-    pub fn matches(&self, _index: usize, _t: &Arc<Type>) -> bool {
+    pub fn matches(&self, _index: usize, _t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("matches"); 
         false
     }
 }

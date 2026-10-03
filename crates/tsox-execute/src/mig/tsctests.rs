@@ -17,7 +17,7 @@ pub struct TscInput {
 }
 
 impl Default for TscInput {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         TscInput {
             sub_scenario: String::new(),
             command_line_args: None,
@@ -45,22 +45,22 @@ pub mod baseline {
     }
 
     impl BaselineOptions {
-        pub fn new(subfolder: &str) -> Self {
+        pub fn new(subfolder: &str) -> Self { ::tsox_core::fntrace::enter("new"); 
             BaselineOptions {
                 subfolder: subfolder.to_string(),
             }
         }
     }
 
-    pub fn local_root() -> std::path::PathBuf {
+    pub fn local_root() -> std::path::PathBuf { ::tsox_core::fntrace::enter("local_root"); 
         std::path::PathBuf::from("tests/baselines/tsctests/local")
     }
 
-    pub fn reference_root() -> std::path::PathBuf {
+    pub fn reference_root() -> std::path::PathBuf { ::tsox_core::fntrace::enter("reference_root"); 
         std::path::PathBuf::from("tests/baselines/tsctests/reference")
     }
 
-    pub fn run(file_name: &str, actual: &str, opts: &BaselineOptions) -> Result<(), String> {
+    pub fn run(file_name: &str, actual: &str, opts: &BaselineOptions) -> Result<(), String> { ::tsox_core::fntrace::enter("run"); 
         let local_path = local_root().join(&opts.subfolder).join(file_name);
         if let Some(parent) = local_path.parent() {
             std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
@@ -68,8 +68,8 @@ pub mod baseline {
         std::fs::write(&local_path, actual).map_err(|e| e.to_string())
     }
 
-    pub fn diff_text(old_name: &str, new_name: &str, expected: &str, actual: &str) -> String {
-        fn split_lines(text: &str) -> Vec<&str> {
+    pub fn diff_text(old_name: &str, new_name: &str, expected: &str, actual: &str) -> String { ::tsox_core::fntrace::enter("diff_text"); 
+        fn split_lines(text: &str) -> Vec<&str> { ::tsox_core::fntrace::enter("split_lines"); 
             if text.is_empty() {
                 Vec::new()
             } else {

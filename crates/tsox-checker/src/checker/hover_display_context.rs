@@ -5,7 +5,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::{Node, SyntaxKind};
 
 /// Go ast.IsInExpressionContext：父节点类别 + 表达式归属判定
-pub(crate) fn is_in_expression_context(node: &Arc<Node>) -> bool {
+pub(crate) fn is_in_expression_context(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_expression_context"); 
     use tsox_frontend::ast::NodeData;
     let Some(parent) = node.parent() else {
         return false;
@@ -53,7 +53,7 @@ pub(crate) fn is_in_expression_context(node: &Arc<Node>) -> bool {
 }
 
 /// Go ast.IsExpressionNode 的常用子集
-fn is_expression_node(node: &Arc<Node>) -> bool {
+fn is_expression_node(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_expression_node"); 
     use SyntaxKind::*;
     matches!(
         node.kind,
@@ -98,7 +98,7 @@ fn is_expression_node(node: &Arc<Node>) -> bool {
     )
 }
 
-fn node_initializer(parent: &Arc<Node>) -> Option<Arc<Node>> {
+fn node_initializer(parent: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_initializer"); 
     match &parent.data {
         tsox_frontend::ast::NodeData::VariableDeclaration(d) => d.initializer.clone(),
         tsox_frontend::ast::NodeData::ParameterDeclaration(d) => d.initializer.clone(),
@@ -112,7 +112,7 @@ fn node_initializer(parent: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 /// Go ast.IsThisInTypeQuery：typeof 查询中的 this（仅 this 关键字/ThisType 自身）
-pub(crate) fn is_this_in_type_query(node: &Arc<Node>) -> bool {
+pub(crate) fn is_this_in_type_query(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_this_in_type_query"); 
     if !matches!(node.kind, SyntaxKind::ThisKeyword | SyntaxKind::ThisType) {
         return false;
     }

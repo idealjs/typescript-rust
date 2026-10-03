@@ -2,7 +2,7 @@ use super::*;
 use crate::vfs::InMemoryFS;
 
 #[test]
-fn parse_basic_options() {
+fn parse_basic_options() { ::tsox_core::fntrace::enter("parse_basic_options"); 
     let args: Vec<String> = vec!["--noEmit", "--strict", "--target", "ES2020", "src/a.ts"]
         .into_iter()
         .map(String::from)
@@ -16,7 +16,7 @@ fn parse_basic_options() {
 }
 
 #[test]
-fn parse_equals_form() {
+fn parse_equals_form() { ::tsox_core::fntrace::enter("parse_equals_form"); 
     let args: Vec<String> = vec!["--target=ES2015", "--module=commonjs"]
         .into_iter()
         .map(String::from)
@@ -27,7 +27,7 @@ fn parse_equals_form() {
 }
 
 #[test]
-fn parse_short_option() {
+fn parse_short_option() { ::tsox_core::fntrace::enter("parse_short_option"); 
     let args: Vec<String> = vec!["-p", "tsconfig.json"]
         .into_iter()
         .map(String::from)
@@ -37,7 +37,7 @@ fn parse_short_option() {
 }
 
 #[test]
-fn strip_jsonc_comments() {
+fn strip_jsonc_comments() { ::tsox_core::fntrace::enter("strip_jsonc_comments"); 
     let input = r#"{ // comment
             "compilerOptions": {
                 "target": "ES5", /* block */
@@ -50,7 +50,7 @@ fn strip_jsonc_comments() {
 }
 
 #[test]
-fn parse_tsconfig_files() {
+fn parse_tsconfig_files() { ::tsox_core::fntrace::enter("parse_tsconfig_files"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -74,7 +74,7 @@ fn parse_tsconfig_files() {
 }
 
 #[test]
-fn parse_tsconfig_include_glob() {
+fn parse_tsconfig_include_glob() { ::tsox_core::fntrace::enter("parse_tsconfig_include_glob"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -98,19 +98,19 @@ fn parse_tsconfig_include_glob() {
     assert!(!parsed.file_names.iter().any(|f| f.ends_with("ignore.txt")));
 }
 
-fn has_error_containing(parsed: &ParsedCommandLine, needle: &str) -> bool {
+fn has_error_containing(parsed: &ParsedCommandLine, needle: &str) -> bool { ::tsox_core::fntrace::enter("has_error_containing"); 
     parsed.errors.iter().any(|e| {
         e.message_args.iter().any(|a| a.contains(needle))
             || e.message.map(|m| m.text.contains(needle)).unwrap_or(false)
     })
 }
 
-fn args(items: &[&str]) -> Vec<String> {
+fn args(items: &[&str]) -> Vec<String> { ::tsox_core::fntrace::enter("args"); 
     items.iter().map(|s| s.to_string()).collect()
 }
 
 #[test]
-fn test_parse_command_line_version() {
+fn test_parse_command_line_version() { ::tsox_core::fntrace::enter("test_parse_command_line_version"); 
     let parsed = parse_command_line(&args(&["--version"]), "/proj", None);
     assert!(parsed.compiler_options.version.is_true());
 
@@ -119,7 +119,7 @@ fn test_parse_command_line_version() {
 }
 
 #[test]
-fn test_parse_command_line_help() {
+fn test_parse_command_line_help() { ::tsox_core::fntrace::enter("test_parse_command_line_help"); 
     let parsed = parse_command_line(&args(&["--help"]), "/proj", None);
     assert!(parsed.compiler_options.help.is_true());
 
@@ -128,7 +128,7 @@ fn test_parse_command_line_help() {
 }
 
 #[test]
-fn test_parse_command_line_build() {
+fn test_parse_command_line_build() { ::tsox_core::fntrace::enter("test_parse_command_line_build"); 
     let parsed = parse_command_line(&args(&["--build"]), "/proj", None);
     assert!(parsed.compiler_options.build.is_true());
 
@@ -137,7 +137,7 @@ fn test_parse_command_line_build() {
 }
 
 #[test]
-fn test_parse_build_command_line_defaults_to_current_project() {
+fn test_parse_build_command_line_defaults_to_current_project() { ::tsox_core::fntrace::enter("test_parse_build_command_line_defaults_to_current_project"); 
     let parsed = parse_build_command_line(&args(&["--build"]), "/proj", None);
     assert_eq!(parsed.projects, vec!["."]);
     assert_eq!(parsed.resolved_project_paths(), vec!["/proj"]);
@@ -145,7 +145,7 @@ fn test_parse_build_command_line_defaults_to_current_project() {
 }
 
 #[test]
-fn test_parse_build_command_line_build_options() {
+fn test_parse_build_command_line_build_options() { ::tsox_core::fntrace::enter("test_parse_build_command_line_build_options"); 
     let parsed = parse_build_command_line(
         &args(&["--build", "src", "tests", "--force", "-v", "--dry"]),
         "/repo",
@@ -164,7 +164,7 @@ fn test_parse_build_command_line_build_options() {
 }
 
 #[test]
-fn test_parse_build_command_line_invalid_option_combinations() {
+fn test_parse_build_command_line_invalid_option_combinations() { ::tsox_core::fntrace::enter("test_parse_build_command_line_invalid_option_combinations"); 
     let parsed = parse_build_command_line(&args(&["--build", "--clean", "--force"]), "/proj", None);
     assert!(has_error_containing(
         &ParsedCommandLine {
@@ -185,7 +185,7 @@ fn test_parse_build_command_line_invalid_option_combinations() {
 }
 
 #[test]
-fn test_parse_command_line_watch() {
+fn test_parse_command_line_watch() { ::tsox_core::fntrace::enter("test_parse_command_line_watch"); 
     let parsed = parse_command_line(&args(&["--watch", "0.ts"]), "/proj", None);
     assert!(parsed.compiler_options.watch.is_true());
 
@@ -197,13 +197,13 @@ fn test_parse_command_line_watch() {
 }
 
 #[test]
-fn watch_options_empty_by_default() {
+fn watch_options_empty_by_default() { ::tsox_core::fntrace::enter("watch_options_empty_by_default"); 
     let parsed = parse_command_line(&args(&["--noEmit", "0.ts"]), "/proj", None);
     assert!(parsed.watch_options.is_empty());
 }
 
 #[test]
-fn watch_options_parse_enum_flags() {
+fn watch_options_parse_enum_flags() { ::tsox_core::fntrace::enter("watch_options_parse_enum_flags"); 
     let parsed = parse_command_line(
         &args(&[
             "--watchFile",
@@ -229,7 +229,7 @@ fn watch_options_parse_enum_flags() {
 }
 
 #[test]
-fn watch_options_parse_interval_and_boolean() {
+fn watch_options_parse_interval_and_boolean() { ::tsox_core::fntrace::enter("watch_options_parse_interval_and_boolean"); 
     let parsed = parse_command_line(
         &args(&[
             "--watchInterval",
@@ -246,7 +246,7 @@ fn watch_options_parse_interval_and_boolean() {
 }
 
 #[test]
-fn watch_options_parse_list_flags() {
+fn watch_options_parse_list_flags() { ::tsox_core::fntrace::enter("watch_options_parse_list_flags"); 
     let parsed = parse_command_line(
         &args(&[
             "--excludeDirectories",
@@ -263,7 +263,7 @@ fn watch_options_parse_list_flags() {
 }
 
 #[test]
-fn watch_options_invalid_enum_reports_ts6046() {
+fn watch_options_invalid_enum_reports_ts6046() { ::tsox_core::fntrace::enter("watch_options_invalid_enum_reports_ts6046"); 
     let parsed = parse_command_line(&args(&["--watchFile", "bogus", "0.ts"]), "/proj", None);
     assert!(
         parsed
@@ -276,7 +276,7 @@ fn watch_options_invalid_enum_reports_ts6046() {
 }
 
 #[test]
-fn watch_options_missing_number_value_reports_ts5080() {
+fn watch_options_missing_number_value_reports_ts5080() { ::tsox_core::fntrace::enter("watch_options_missing_number_value_reports_ts5080"); 
     let parsed = parse_command_line(&args(&["--watchInterval"]), "/proj", None);
     assert!(parsed.errors.iter().any(|d| d.code == 5080
         && d.message_args.first().map(|s| s.as_str()) == Some("watchInterval")
@@ -284,14 +284,14 @@ fn watch_options_missing_number_value_reports_ts5080() {
 }
 
 #[test]
-fn watch_options_non_numeric_interval_reports_ts5080() {
+fn watch_options_non_numeric_interval_reports_ts5080() { ::tsox_core::fntrace::enter("watch_options_non_numeric_interval_reports_ts5080"); 
     let parsed = parse_command_line(&args(&["--watchInterval", "abc", "0.ts"]), "/proj", None);
     assert!(parsed.errors.iter().any(|d| d.code == 5080));
     assert_eq!(parsed.watch_options.interval, None);
 }
 
 #[test]
-fn watch_options_build_mode_also_accepts_watch_flags() {
+fn watch_options_build_mode_also_accepts_watch_flags() { ::tsox_core::fntrace::enter("watch_options_build_mode_also_accepts_watch_flags"); 
     let parsed = parse_build_command_line(
         &args(&["--build", "--watchFile", "usefsevents", "."]),
         "/proj",
@@ -301,7 +301,7 @@ fn watch_options_build_mode_also_accepts_watch_flags() {
 }
 
 #[test]
-fn watch_options_case_insensitive_lookup() {
+fn watch_options_case_insensitive_lookup() { ::tsox_core::fntrace::enter("watch_options_case_insensitive_lookup"); 
     let parsed = parse_command_line(
         &args(&["--WATCHFILE", "usefsevents", "0.ts"]),
         "/proj",
@@ -311,7 +311,7 @@ fn watch_options_case_insensitive_lookup() {
 }
 
 #[test]
-fn watch_options_do_not_leak_into_compiler_options() {
+fn watch_options_do_not_leak_into_compiler_options() { ::tsox_core::fntrace::enter("watch_options_do_not_leak_into_compiler_options"); 
     let parsed = parse_command_line(
         &args(&["--watchFile", "usefsevents", "0.ts"]),
         "/proj",
@@ -327,7 +327,7 @@ fn watch_options_do_not_leak_into_compiler_options() {
 }
 
 #[test]
-fn test_parse_command_line_all_and_init() {
+fn test_parse_command_line_all_and_init() { ::tsox_core::fntrace::enter("test_parse_command_line_all_and_init"); 
     let parsed = parse_command_line(&args(&["--all"]), "/proj", None);
     assert!(parsed.compiler_options.all.is_true());
 
@@ -336,7 +336,7 @@ fn test_parse_command_line_all_and_init() {
 }
 
 #[test]
-fn test_parse_command_line_lib_list() {
+fn test_parse_command_line_lib_list() { ::tsox_core::fntrace::enter("test_parse_command_line_lib_list"); 
     let parsed = parse_command_line(
         &args(&["--lib", "es5,es2015.symbol.wellknown", "0.ts"]),
         "/proj",
@@ -350,7 +350,7 @@ fn test_parse_command_line_lib_list() {
 }
 
 #[test]
-fn test_parse_command_line_lib_multiple_flags() {
+fn test_parse_command_line_lib_multiple_flags() { ::tsox_core::fntrace::enter("test_parse_command_line_lib_multiple_flags"); 
     let parsed = parse_command_line(
         &args(&[
             "--module",
@@ -380,7 +380,7 @@ fn test_parse_command_line_lib_multiple_flags() {
 }
 
 #[test]
-fn test_parse_command_line_lib_empty_followed_by_option() {
+fn test_parse_command_line_lib_empty_followed_by_option() { ::tsox_core::fntrace::enter("test_parse_command_line_lib_empty_followed_by_option"); 
     let parsed = parse_command_line(&args(&["0.ts", "--lib", "--sourceMap"]), "/proj", None);
     assert!(parsed.compiler_options.lib.is_empty());
     assert!(parsed.compiler_options.source_map.is_true());
@@ -388,14 +388,14 @@ fn test_parse_command_line_lib_empty_followed_by_option() {
 }
 
 #[test]
-fn test_parse_command_line_unknown_option_error() {
+fn test_parse_command_line_unknown_option_error() { ::tsox_core::fntrace::enter("test_parse_command_line_unknown_option_error"); 
     let parsed = parse_command_line(&args(&["--unknownOpt", "0.ts"]), "/proj", None);
     assert!(has_error_containing(&parsed, "Unknown compiler option"));
     assert!(has_error_containing(&parsed, "unknownOpt"));
 }
 
 #[test]
-fn test_parse_command_line_explicit_boolean_false() {
+fn test_parse_command_line_explicit_boolean_false() { ::tsox_core::fntrace::enter("test_parse_command_line_explicit_boolean_false"); 
     let parsed = parse_command_line(
         &args(&["--strictNullChecks", "false", "0.ts"]),
         "/proj",
@@ -406,7 +406,7 @@ fn test_parse_command_line_explicit_boolean_false() {
 }
 
 #[test]
-fn test_parse_command_line_explicit_boolean_true() {
+fn test_parse_command_line_explicit_boolean_true() { ::tsox_core::fntrace::enter("test_parse_command_line_explicit_boolean_true"); 
     let parsed = parse_command_line(
         &args(&["--strictNullChecks", "true", "0.ts"]),
         "/proj",
@@ -416,27 +416,27 @@ fn test_parse_command_line_explicit_boolean_true() {
 }
 
 #[test]
-fn test_parse_command_line_implicit_boolean() {
+fn test_parse_command_line_implicit_boolean() { ::tsox_core::fntrace::enter("test_parse_command_line_implicit_boolean"); 
     let parsed = parse_command_line(&args(&["--strictNullChecks"]), "/proj", None);
     assert!(parsed.compiler_options.strict_null_checks.is_true());
 }
 
 #[test]
-fn test_parse_command_line_non_boolean_after_boolean_flag() {
+fn test_parse_command_line_non_boolean_after_boolean_flag() { ::tsox_core::fntrace::enter("test_parse_command_line_non_boolean_after_boolean_flag"); 
     let parsed = parse_command_line(&args(&["--noImplicitAny", "t", "0.ts"]), "/proj", None);
     assert!(parsed.compiler_options.no_implicit_any.is_true());
     assert_eq!(parsed.file_names, vec!["/proj/t", "/proj/0.ts"]);
 }
 
 #[test]
-fn test_parse_command_line_incremental() {
+fn test_parse_command_line_incremental() { ::tsox_core::fntrace::enter("test_parse_command_line_incremental"); 
     let parsed = parse_command_line(&args(&["--incremental", "0.ts"]), "/proj", None);
     assert!(parsed.compiler_options.incremental.is_true());
     assert_eq!(parsed.file_names, vec!["/proj/0.ts"]);
 }
 
 #[test]
-fn test_parse_command_line_ts_build_info_file() {
+fn test_parse_command_line_ts_build_info_file() { ::tsox_core::fntrace::enter("test_parse_command_line_ts_build_info_file"); 
     let parsed = parse_command_line(
         &args(&["--tsBuildInfoFile", "build.tsbuildinfo", "0.ts"]),
         "/proj",
@@ -449,14 +449,14 @@ fn test_parse_command_line_ts_build_info_file() {
 }
 
 #[test]
-fn test_parse_command_line_ts_build_info_file_null() {
+fn test_parse_command_line_ts_build_info_file_null() { ::tsox_core::fntrace::enter("test_parse_command_line_ts_build_info_file_null"); 
     let parsed = parse_command_line(&args(&["--tsBuildInfoFile", "null", "0.ts"]), "/proj", None);
     assert!(parsed.errors.is_empty());
     assert_eq!(parsed.compiler_options.ts_build_info_file, "");
 }
 
 #[test]
-fn test_parse_command_line_type_roots() {
+fn test_parse_command_line_type_roots() { ::tsox_core::fntrace::enter("test_parse_command_line_type_roots"); 
     let parsed = parse_command_line(
         &args(&["--typeRoots", "t", "bug.ts"]),
         "/home/project",
@@ -467,7 +467,7 @@ fn test_parse_command_line_type_roots() {
 }
 
 #[test]
-fn test_parse_command_line_files_in_middle() {
+fn test_parse_command_line_files_in_middle() { ::tsox_core::fntrace::enter("test_parse_command_line_files_in_middle"); 
     let parsed = parse_command_line(
         &args(&[
             "--module",
@@ -491,7 +491,7 @@ fn test_parse_command_line_files_in_middle() {
 }
 
 #[test]
-fn test_parse_command_line_module_resolution_and_jsx() {
+fn test_parse_command_line_module_resolution_and_jsx() { ::tsox_core::fntrace::enter("test_parse_command_line_module_resolution_and_jsx"); 
     let parsed = parse_command_line(
         &args(&["--moduleResolution", "node", "--jsx", "react", "0.ts"]),
         "/proj",
@@ -505,7 +505,7 @@ fn test_parse_command_line_module_resolution_and_jsx() {
 }
 
 #[test]
-fn test_response_file_does_not_panic() {
+fn test_response_file_does_not_panic() { ::tsox_core::fntrace::enter("test_response_file_does_not_panic"); 
     let parsed = parse_command_line(&args(&["@"]), "/proj", None);
     assert!(!parsed.errors.is_empty());
     assert!(has_error_containing(&parsed, "Cannot read file"));
@@ -517,7 +517,7 @@ fn test_response_file_does_not_panic() {
 }
 
 #[test]
-fn test_response_file_missing_with_fs() {
+fn test_response_file_missing_with_fs() { ::tsox_core::fntrace::enter("test_response_file_missing_with_fs"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     let parsed = parse_command_line(&args(&["@missing.rsp"]), "/proj", Some(&fs));
@@ -526,7 +526,7 @@ fn test_response_file_missing_with_fs() {
 }
 
 #[test]
-fn test_response_file_propagates_file_names() {
+fn test_response_file_propagates_file_names() { ::tsox_core::fntrace::enter("test_response_file_propagates_file_names"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file("/proj/args.rsp", "--strict\n0.ts");
@@ -537,7 +537,7 @@ fn test_response_file_propagates_file_names() {
 }
 
 #[test]
-fn test_response_file_unterminated_quoted_string() {
+fn test_response_file_unterminated_quoted_string() { ::tsox_core::fntrace::enter("test_response_file_unterminated_quoted_string"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file("/proj/args.rsp", "--outDir \"unterminated path");
@@ -561,7 +561,7 @@ fn test_response_file_unterminated_quoted_string() {
 }
 
 #[test]
-fn test_strip_jsonc_whitespace_and_empty_object() {
+fn test_strip_jsonc_whitespace_and_empty_object() { ::tsox_core::fntrace::enter("test_strip_jsonc_whitespace_and_empty_object"); 
     let stripped = strip_jsonc("   ");
     assert_eq!(stripped.trim(), "");
 
@@ -577,7 +577,7 @@ fn test_strip_jsonc_whitespace_and_empty_object() {
 }
 
 #[test]
-fn test_strip_jsonc_comments_in_object() {
+fn test_strip_jsonc_comments_in_object() { ::tsox_core::fntrace::enter("test_strip_jsonc_comments_in_object"); 
     let input = r#"{ // Excluded files
             "exclude": [
                 // Exclude d.ts
@@ -602,7 +602,7 @@ fn test_strip_jsonc_comments_in_object() {
 }
 
 #[test]
-fn test_strip_jsonc_keeps_string_content() {
+fn test_strip_jsonc_keeps_string_content() { ::tsox_core::fntrace::enter("test_strip_jsonc_keeps_string_content"); 
     let input = r#"{
             "exclude": [
                 "xx//file.d.ts"
@@ -623,7 +623,7 @@ fn test_strip_jsonc_keeps_string_content() {
 }
 
 #[test]
-fn test_strip_jsonc_trailing_comma() {
+fn test_strip_jsonc_trailing_comma() { ::tsox_core::fntrace::enter("test_strip_jsonc_trailing_comma"); 
     let input = r#"{
             "compilerOptions": {
                 "target": "ES5",
@@ -637,7 +637,7 @@ fn test_strip_jsonc_trailing_comma() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_merges_options() {
+fn test_parse_tsconfig_extends_merges_options() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_merges_options"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -669,7 +669,7 @@ fn test_parse_tsconfig_extends_merges_options() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_with_own_files_include() {
+fn test_parse_tsconfig_extends_with_own_files_include() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_with_own_files_include"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -702,7 +702,7 @@ fn test_parse_tsconfig_extends_with_own_files_include() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_circular_is_detected() {
+fn test_parse_tsconfig_extends_circular_is_detected() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_circular_is_detected"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -733,7 +733,7 @@ fn test_parse_tsconfig_extends_circular_is_detected() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_as_array_merges_all() {
+fn test_parse_tsconfig_extends_as_array_merges_all() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_as_array_merges_all"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -774,7 +774,7 @@ fn test_parse_tsconfig_extends_as_array_merges_all() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_own_overrides_extended() {
+fn test_parse_tsconfig_extends_own_overrides_extended() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_own_overrides_extended"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -803,7 +803,7 @@ fn test_parse_tsconfig_extends_own_overrides_extended() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_array_last_wins() {
+fn test_parse_tsconfig_extends_array_last_wins() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_array_last_wins"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -834,7 +834,7 @@ fn test_parse_tsconfig_extends_array_last_wins() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_command_line_overrides_own() {
+fn test_parse_tsconfig_extends_command_line_overrides_own() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_command_line_overrides_own"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -853,7 +853,7 @@ fn test_parse_tsconfig_extends_command_line_overrides_own() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_include_first_extended_wins() {
+fn test_parse_tsconfig_extends_include_first_extended_wins() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_include_first_extended_wins"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src1");
@@ -886,7 +886,7 @@ fn test_parse_tsconfig_extends_include_first_extended_wins() {
 }
 
 #[test]
-fn test_parse_tsconfig_extends_resolves_json_suffix() {
+fn test_parse_tsconfig_extends_resolves_json_suffix() { ::tsox_core::fntrace::enter("test_parse_tsconfig_extends_resolves_json_suffix"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -909,7 +909,7 @@ fn test_parse_tsconfig_extends_resolves_json_suffix() {
 }
 
 #[test]
-fn test_parse_tsconfig_full_compiler_options() {
+fn test_parse_tsconfig_full_compiler_options() { ::tsox_core::fntrace::enter("test_parse_tsconfig_full_compiler_options"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/apath");
     fs.insert_dir("/apath/src");
@@ -965,7 +965,7 @@ fn test_parse_tsconfig_full_compiler_options() {
 }
 
 #[test]
-fn test_parse_tsconfig_null_enum_options() {
+fn test_parse_tsconfig_null_enum_options() { ::tsox_core::fntrace::enter("test_parse_tsconfig_null_enum_options"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -988,7 +988,7 @@ fn test_parse_tsconfig_null_enum_options() {
 }
 
 #[test]
-fn test_parse_tsconfig_empty_types_array() {
+fn test_parse_tsconfig_empty_types_array() { ::tsox_core::fntrace::enter("test_parse_tsconfig_empty_types_array"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1010,7 +1010,7 @@ fn test_parse_tsconfig_empty_types_array() {
 }
 
 #[test]
-fn test_parse_tsconfig_include_with_exclude() {
+fn test_parse_tsconfig_include_with_exclude() { ::tsox_core::fntrace::enter("test_parse_tsconfig_include_with_exclude"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1042,7 +1042,7 @@ fn test_parse_tsconfig_include_with_exclude() {
 }
 
 #[test]
-fn test_parse_tsconfig_literal_directory_include_recurses() {
+fn test_parse_tsconfig_literal_directory_include_recurses() { ::tsox_core::fntrace::enter("test_parse_tsconfig_literal_directory_include_recurses"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1072,7 +1072,7 @@ fn test_parse_tsconfig_literal_directory_include_recurses() {
 }
 
 #[test]
-fn test_parse_tsconfig_skips_node_modules_directory() {
+fn test_parse_tsconfig_skips_node_modules_directory() { ::tsox_core::fntrace::enter("test_parse_tsconfig_skips_node_modules_directory"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/node_modules");
@@ -1093,7 +1093,7 @@ fn test_parse_tsconfig_skips_node_modules_directory() {
 }
 
 #[test]
-fn test_parse_tsconfig_files_empty_does_not_default_include() {
+fn test_parse_tsconfig_files_empty_does_not_default_include() { ::tsox_core::fntrace::enter("test_parse_tsconfig_files_empty_does_not_default_include"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1116,7 +1116,7 @@ fn test_parse_tsconfig_files_empty_does_not_default_include() {
 }
 
 #[test]
-fn test_tsconfig_no_inputs_emits_ts18003() {
+fn test_tsconfig_no_inputs_emits_ts18003() { ::tsox_core::fntrace::enter("test_tsconfig_no_inputs_emits_ts18003"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1138,7 +1138,7 @@ fn test_tsconfig_no_inputs_emits_ts18003() {
 }
 
 #[test]
-fn test_tsconfig_no_inputs_suppressed_by_files_key() {
+fn test_tsconfig_no_inputs_suppressed_by_files_key() { ::tsox_core::fntrace::enter("test_tsconfig_no_inputs_suppressed_by_files_key"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file("/proj/src/a.ts", "");
@@ -1158,7 +1158,7 @@ fn test_tsconfig_no_inputs_suppressed_by_files_key() {
 }
 
 #[test]
-fn test_tsconfig_no_inputs_suppressed_by_references_key() {
+fn test_tsconfig_no_inputs_suppressed_by_references_key() { ::tsox_core::fntrace::enter("test_tsconfig_no_inputs_suppressed_by_references_key"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1180,7 +1180,7 @@ fn test_tsconfig_no_inputs_suppressed_by_references_key() {
 }
 
 #[test]
-fn test_tsconfig_references_parsed_as_typed_project_reference() {
+fn test_tsconfig_references_parsed_as_typed_project_reference() { ::tsox_core::fntrace::enter("test_tsconfig_references_parsed_as_typed_project_reference"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/test");
@@ -1203,7 +1203,7 @@ fn test_tsconfig_references_parsed_as_typed_project_reference() {
 }
 
 #[test]
-fn test_parse_tsconfig_excludes_out_dir_by_default() {
+fn test_parse_tsconfig_excludes_out_dir_by_default() { ::tsox_core::fntrace::enter("test_parse_tsconfig_excludes_out_dir_by_default"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1227,7 +1227,7 @@ fn test_parse_tsconfig_excludes_out_dir_by_default() {
 }
 
 #[test]
-fn test_parse_tsconfig_explicit_exclude_overrides_out_dir_default() {
+fn test_parse_tsconfig_explicit_exclude_overrides_out_dir_default() { ::tsox_core::fntrace::enter("test_parse_tsconfig_explicit_exclude_overrides_out_dir_default"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/dist");
@@ -1250,7 +1250,7 @@ fn test_parse_tsconfig_explicit_exclude_overrides_out_dir_default() {
 }
 
 #[test]
-fn test_parse_tsconfig_skips_common_package_directories() {
+fn test_parse_tsconfig_skips_common_package_directories() { ::tsox_core::fntrace::enter("test_parse_tsconfig_skips_common_package_directories"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/node_modules");
@@ -1284,7 +1284,7 @@ fn test_parse_tsconfig_skips_common_package_directories() {
 }
 
 #[test]
-fn test_parse_tsconfig_skips_git_directory() {
+fn test_parse_tsconfig_skips_git_directory() { ::tsox_core::fntrace::enter("test_parse_tsconfig_skips_git_directory"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/.git");
@@ -1302,7 +1302,7 @@ fn test_parse_tsconfig_skips_git_directory() {
 }
 
 #[test]
-fn test_parse_tsconfig_missing_config_file_error() {
+fn test_parse_tsconfig_missing_config_file_error() { ::tsox_core::fntrace::enter("test_parse_tsconfig_missing_config_file_error"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     let parsed = get_parsed_command_line_of_config_file(
@@ -1316,7 +1316,7 @@ fn test_parse_tsconfig_missing_config_file_error() {
 }
 
 #[test]
-fn test_parse_tsconfig_invalid_json_error() {
+fn test_parse_tsconfig_invalid_json_error() { ::tsox_core::fntrace::enter("test_parse_tsconfig_invalid_json_error"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file("/proj/tsconfig.json", "{ this is not json");
@@ -1331,7 +1331,7 @@ fn test_parse_tsconfig_invalid_json_error() {
 }
 
 #[test]
-fn test_parse_tsconfig_command_line_overrides_config() {
+fn test_parse_tsconfig_command_line_overrides_config() { ::tsox_core::fntrace::enter("test_parse_tsconfig_command_line_overrides_config"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1350,7 +1350,7 @@ fn test_parse_tsconfig_command_line_overrides_config() {
 }
 
 #[test]
-fn test_parsed_command_line_literal_file_list_dedup() {
+fn test_parsed_command_line_literal_file_list_dedup() { ::tsox_core::fntrace::enter("test_parsed_command_line_literal_file_list_dedup"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/dev");
     fs.insert_file("/dev/a.ts", "");
@@ -1375,7 +1375,7 @@ fn test_parsed_command_line_literal_file_list_dedup() {
 }
 
 #[test]
-fn test_parsed_command_line_files_not_removed_by_exclude() {
+fn test_parsed_command_line_files_not_removed_by_exclude() { ::tsox_core::fntrace::enter("test_parsed_command_line_files_not_removed_by_exclude"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/dev");
     fs.insert_file("/dev/a.ts", "");
@@ -1398,7 +1398,7 @@ fn test_parsed_command_line_files_not_removed_by_exclude() {
 }
 
 #[test]
-fn test_parsed_command_line_literal_include_matches_files() {
+fn test_parsed_command_line_literal_include_matches_files() { ::tsox_core::fntrace::enter("test_parsed_command_line_literal_include_matches_files"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/dev");
     fs.insert_file("/dev/a.ts", "");
@@ -1420,7 +1420,7 @@ fn test_parsed_command_line_literal_include_matches_files() {
 }
 
 #[test]
-fn test_wildcard_include_dot_prefixed_with_dot_dir_exclude() {
+fn test_wildcard_include_dot_prefixed_with_dot_dir_exclude() { ::tsox_core::fntrace::enter("test_wildcard_include_dot_prefixed_with_dot_dir_exclude"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/home/projects/monorepo/apps/web");
     fs.insert_dir("/home/projects/monorepo/apps/web/app");
@@ -1452,7 +1452,7 @@ fn test_wildcard_include_dot_prefixed_with_dot_dir_exclude() {
 }
 
 #[test]
-fn test_wildcard_include_non_ascii_paths() {
+fn test_wildcard_include_non_ascii_paths() { ::tsox_core::fntrace::enter("test_wildcard_include_non_ascii_paths"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/Users/ユーザー/プロジェクト");
     fs.insert_dir("/Users/ユーザー/プロジェクト/src");
@@ -1474,7 +1474,7 @@ fn test_wildcard_include_non_ascii_paths() {
 }
 
 #[test]
-fn test_options_declarations_non_empty_and_named() {
+fn test_options_declarations_non_empty_and_named() { ::tsox_core::fntrace::enter("test_options_declarations_non_empty_and_named"); 
     assert!(!OPTIONS.is_empty());
     for o in OPTIONS.iter() {
         assert!(!o.name.is_empty(), "found an option with an empty name");
@@ -1506,7 +1506,7 @@ fn test_options_declarations_non_empty_and_named() {
 }
 
 #[test]
-fn test_option_decls_short_names_unique_or_known() {
+fn test_option_decls_short_names_unique_or_known() { ::tsox_core::fntrace::enter("test_option_decls_short_names_unique_or_known"); 
     assert_eq!(find_option("h").map(|o| o.name), Some("help"));
     assert_eq!(find_option("v").map(|o| o.name), Some("version"));
     assert_eq!(find_option("b").map(|o| o.name), Some("build"));
@@ -1517,7 +1517,7 @@ fn test_option_decls_short_names_unique_or_known() {
     assert_eq!(find_option("d").map(|o| o.name), Some("declaration"));
 }
 
-fn diag_contains(errors: &[Diagnostic], needle: &str) -> bool {
+fn diag_contains(errors: &[Diagnostic], needle: &str) -> bool { ::tsox_core::fntrace::enter("diag_contains"); 
     errors.iter().any(|e| {
         e.message_args.iter().any(|a| a.contains(needle))
             || e.message.map(|m| m.text.contains(needle)).unwrap_or(false)
@@ -1525,7 +1525,7 @@ fn diag_contains(errors: &[Diagnostic], needle: &str) -> bool {
 }
 
 #[test]
-fn test_case_insensitive_option_lookup_cli() {
+fn test_case_insensitive_option_lookup_cli() { ::tsox_core::fntrace::enter("test_case_insensitive_option_lookup_cli"); 
     let parsed = parse_command_line(&args(&["--Target", "ES2020", "0.ts"]), "/proj", None);
     assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
     assert!(!has_error_containing(&parsed, "Unknown compiler option"));
@@ -1540,13 +1540,13 @@ fn test_case_insensitive_option_lookup_cli() {
 }
 
 #[test]
-fn test_case_insensitive_short_name_lookup() {
+fn test_case_insensitive_short_name_lookup() { ::tsox_core::fntrace::enter("test_case_insensitive_short_name_lookup"); 
     let parsed = parse_command_line(&args(&["-P", "tsconfig.json"]), "/proj", None);
     assert_eq!(parsed.compiler_options.project, "tsconfig.json");
 }
 
 #[test]
-fn test_alternate_mode_build_option_in_compiler_mode() {
+fn test_alternate_mode_build_option_in_compiler_mode() { ::tsox_core::fntrace::enter("test_alternate_mode_build_option_in_compiler_mode"); 
     let parsed = parse_command_line(&args(&["--dry", "0.ts"]), "/proj", None);
     assert!(diag_contains(
         &parsed.errors,
@@ -1556,7 +1556,7 @@ fn test_alternate_mode_build_option_in_compiler_mode() {
 }
 
 #[test]
-fn test_alternate_mode_verbose_in_compiler_mode() {
+fn test_alternate_mode_verbose_in_compiler_mode() { ::tsox_core::fntrace::enter("test_alternate_mode_verbose_in_compiler_mode"); 
     let parsed = parse_command_line(&args(&["--verbose"]), "/proj", None);
     assert!(diag_contains(
         &parsed.errors,
@@ -1565,7 +1565,7 @@ fn test_alternate_mode_verbose_in_compiler_mode() {
 }
 
 #[test]
-fn test_tsconfig_only_option_on_cli_emits_diagnostic() {
+fn test_tsconfig_only_option_on_cli_emits_diagnostic() { ::tsox_core::fntrace::enter("test_tsconfig_only_option_on_cli_emits_diagnostic"); 
     let parsed = parse_command_line(&args(&["--composite", "0.ts"]), "/proj", None);
     assert!(has_error_containing(&parsed, "tsconfig.json"));
     assert!(has_error_containing(&parsed, "composite"));
@@ -1573,20 +1573,20 @@ fn test_tsconfig_only_option_on_cli_emits_diagnostic() {
 }
 
 #[test]
-fn test_tsconfig_only_boolean_accepts_false() {
+fn test_tsconfig_only_boolean_accepts_false() { ::tsox_core::fntrace::enter("test_tsconfig_only_boolean_accepts_false"); 
     let parsed = parse_command_line(&args(&["--composite", "false", "0.ts"]), "/proj", None);
     assert!(!has_error_containing(&parsed, "tsconfig.json"));
     assert!(parsed.compiler_options.composite.is_false());
 }
 
 #[test]
-fn test_tsconfig_only_boolean_accepts_null() {
+fn test_tsconfig_only_boolean_accepts_null() { ::tsox_core::fntrace::enter("test_tsconfig_only_boolean_accepts_null"); 
     let parsed = parse_command_line(&args(&["--composite", "null", "0.ts"]), "/proj", None);
     assert!(!has_error_containing(&parsed, "tsconfig.json"));
 }
 
 #[test]
-fn test_invalid_enum_value_target() {
+fn test_invalid_enum_value_target() { ::tsox_core::fntrace::enter("test_invalid_enum_value_target"); 
     let parsed = parse_command_line(&args(&["--target", "es99", "0.ts"]), "/proj", None);
     assert!(has_error_containing(&parsed, "Argument for"));
     assert!(has_error_containing(&parsed, "--target"));
@@ -1595,7 +1595,7 @@ fn test_invalid_enum_value_target() {
 }
 
 #[test]
-fn test_invalid_enum_value_module() {
+fn test_invalid_enum_value_module() { ::tsox_core::fntrace::enter("test_invalid_enum_value_module"); 
     let parsed = parse_command_line(&args(&["--module", "nonsense", "0.ts"]), "/proj", None);
     assert!(has_error_containing(&parsed, "Argument for"));
     assert!(has_error_containing(&parsed, "commonjs"));
@@ -1603,14 +1603,14 @@ fn test_invalid_enum_value_module() {
 }
 
 #[test]
-fn test_valid_enum_value_case_insensitive() {
+fn test_valid_enum_value_case_insensitive() { ::tsox_core::fntrace::enter("test_valid_enum_value_case_insensitive"); 
     let parsed = parse_command_line(&args(&["--target", "ES2020", "0.ts"]), "/proj", None);
     assert!(!has_error_containing(&parsed, "Argument for"));
     assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
 }
 
 #[test]
-fn test_min_value_violation_builders() {
+fn test_min_value_violation_builders() { ::tsox_core::fntrace::enter("test_min_value_violation_builders"); 
     let parsed = parse_build_command_line(&args(&["--build", "--builders", "0"]), "/proj", None);
     assert!(diag_contains(
         &parsed.errors,
@@ -1621,7 +1621,7 @@ fn test_min_value_violation_builders() {
 }
 
 #[test]
-fn test_min_value_accepted_builders() {
+fn test_min_value_accepted_builders() { ::tsox_core::fntrace::enter("test_min_value_accepted_builders"); 
     let parsed = parse_build_command_line(&args(&["--build", "--builders", "2"]), "/proj", None);
     assert!(!diag_contains(
         &parsed.errors,
@@ -1631,7 +1631,7 @@ fn test_min_value_accepted_builders() {
 }
 
 #[test]
-fn test_case_mismatch_in_tsconfig_json_emits_did_you_mean() {
+fn test_case_mismatch_in_tsconfig_json_emits_did_you_mean() { ::tsox_core::fntrace::enter("test_case_mismatch_in_tsconfig_json_emits_did_you_mean"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1659,7 +1659,7 @@ fn test_case_mismatch_in_tsconfig_json_emits_did_you_mean() {
 }
 
 #[test]
-fn test_tsconfig_json_correct_case_no_did_you_mean() {
+fn test_tsconfig_json_correct_case_no_did_you_mean() { ::tsox_core::fntrace::enter("test_tsconfig_json_correct_case_no_did_you_mean"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1682,7 +1682,7 @@ fn test_tsconfig_json_correct_case_no_did_you_mean() {
 }
 
 #[test]
-fn test_enum_values_declared_on_all_enum_options() {
+fn test_enum_values_declared_on_all_enum_options() { ::tsox_core::fntrace::enter("test_enum_values_declared_on_all_enum_options"); 
     for o in OPTIONS.iter().chain(BUILD_OPTIONS.iter()) {
         if o.kind == OptionKind::Enum {
             assert!(
@@ -1695,7 +1695,7 @@ fn test_enum_values_declared_on_all_enum_options() {
 }
 
 #[test]
-fn test_tsconfig_only_and_min_value_flags_set() {
+fn test_tsconfig_only_and_min_value_flags_set() { ::tsox_core::fntrace::enter("test_tsconfig_only_and_min_value_flags_set"); 
     let composite = find_option("composite").expect("composite must exist");
     assert!(composite.is_tsconfig_only);
     let paths = find_option("paths").expect("paths must exist");
@@ -1705,7 +1705,7 @@ fn test_tsconfig_only_and_min_value_flags_set() {
 }
 
 #[test]
-fn test_config_dir_substitution_out_dir() {
+fn test_config_dir_substitution_out_dir() { ::tsox_core::fntrace::enter("test_config_dir_substitution_out_dir"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1726,7 +1726,7 @@ fn test_config_dir_substitution_out_dir() {
 }
 
 #[test]
-fn test_config_dir_substitution_root_dir() {
+fn test_config_dir_substitution_root_dir() { ::tsox_core::fntrace::enter("test_config_dir_substitution_root_dir"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1743,7 +1743,7 @@ fn test_config_dir_substitution_root_dir() {
 }
 
 #[test]
-fn test_config_dir_substitution_case_insensitive_detection() {
+fn test_config_dir_substitution_case_insensitive_detection() { ::tsox_core::fntrace::enter("test_config_dir_substitution_case_insensitive_detection"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1761,7 +1761,7 @@ fn test_config_dir_substitution_case_insensitive_detection() {
 }
 
 #[test]
-fn test_config_dir_substitution_declaration_dir_and_ts_build_info() {
+fn test_config_dir_substitution_declaration_dir_and_ts_build_info() { ::tsox_core::fntrace::enter("test_config_dir_substitution_declaration_dir_and_ts_build_info"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1785,7 +1785,7 @@ fn test_config_dir_substitution_declaration_dir_and_ts_build_info() {
 }
 
 #[test]
-fn test_config_dir_substitution_root_dirs_array() {
+fn test_config_dir_substitution_root_dirs_array() { ::tsox_core::fntrace::enter("test_config_dir_substitution_root_dirs_array"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1807,7 +1807,7 @@ fn test_config_dir_substitution_root_dirs_array() {
 }
 
 #[test]
-fn test_config_dir_substitution_paths() {
+fn test_config_dir_substitution_paths() { ::tsox_core::fntrace::enter("test_config_dir_substitution_paths"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1835,7 +1835,7 @@ fn test_config_dir_substitution_paths() {
 }
 
 #[test]
-fn test_config_dir_substitution_include() {
+fn test_config_dir_substitution_include() { ::tsox_core::fntrace::enter("test_config_dir_substitution_include"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1858,7 +1858,7 @@ fn test_config_dir_substitution_include() {
 }
 
 #[test]
-fn test_config_dir_substitution_files() {
+fn test_config_dir_substitution_files() { ::tsox_core::fntrace::enter("test_config_dir_substitution_files"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file("/proj/main.ts", "");
@@ -1880,7 +1880,7 @@ fn test_config_dir_substitution_files() {
 }
 
 #[test]
-fn test_config_dir_substitution_exclude() {
+fn test_config_dir_substitution_exclude() { ::tsox_core::fntrace::enter("test_config_dir_substitution_exclude"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -1910,7 +1910,7 @@ fn test_config_dir_substitution_exclude() {
 }
 
 #[test]
-fn test_config_dir_substitution_with_extends() {
+fn test_config_dir_substitution_with_extends() { ::tsox_core::fntrace::enter("test_config_dir_substitution_with_extends"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/base");
@@ -1941,7 +1941,7 @@ fn test_config_dir_substitution_with_extends() {
 }
 
 #[test]
-fn test_config_dir_not_substituted_for_non_prefix() {
+fn test_config_dir_not_substituted_for_non_prefix() { ::tsox_core::fntrace::enter("test_config_dir_not_substituted_for_non_prefix"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -1963,7 +1963,7 @@ fn test_config_dir_not_substituted_for_non_prefix() {
 }
 
 #[test]
-fn test_extends_inherited_include_path_rewriting() {
+fn test_extends_inherited_include_path_rewriting() { ::tsox_core::fntrace::enter("test_extends_inherited_include_path_rewriting"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/base");
@@ -1988,7 +1988,7 @@ fn test_extends_inherited_include_path_rewriting() {
 }
 
 #[test]
-fn test_extends_inherited_include_absolute_not_rewritten() {
+fn test_extends_inherited_include_absolute_not_rewritten() { ::tsox_core::fntrace::enter("test_extends_inherited_include_absolute_not_rewritten"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/base");
@@ -2016,7 +2016,7 @@ fn test_extends_inherited_include_absolute_not_rewritten() {
 }
 
 #[test]
-fn test_extends_inherited_include_config_dir_not_rewritten() {
+fn test_extends_inherited_include_config_dir_not_rewritten() { ::tsox_core::fntrace::enter("test_extends_inherited_include_config_dir_not_rewritten"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/base");
@@ -2045,7 +2045,7 @@ fn test_extends_inherited_include_config_dir_not_rewritten() {
 }
 
 #[test]
-fn test_extends_inherited_exclude_path_rewriting() {
+fn test_extends_inherited_exclude_path_rewriting() { ::tsox_core::fntrace::enter("test_extends_inherited_exclude_path_rewriting"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/base");
@@ -2082,7 +2082,7 @@ fn test_extends_inherited_exclude_path_rewriting() {
 }
 
 #[test]
-fn test_extends_inherited_files_path_rewriting() {
+fn test_extends_inherited_files_path_rewriting() { ::tsox_core::fntrace::enter("test_extends_inherited_files_path_rewriting"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/base");
@@ -2114,7 +2114,7 @@ fn test_extends_inherited_files_path_rewriting() {
 }
 
 #[test]
-fn test_extends_own_include_overrides_inherited() {
+fn test_extends_own_include_overrides_inherited() { ::tsox_core::fntrace::enter("test_extends_own_include_overrides_inherited"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/base");
@@ -2147,7 +2147,7 @@ fn test_extends_own_include_overrides_inherited() {
 }
 
 #[test]
-fn test_extends_null_clears_inherited_tristate() {
+fn test_extends_null_clears_inherited_tristate() { ::tsox_core::fntrace::enter("test_extends_null_clears_inherited_tristate"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -2172,7 +2172,7 @@ fn test_extends_null_clears_inherited_tristate() {
 }
 
 #[test]
-fn test_extends_null_clears_inherited_string_field() {
+fn test_extends_null_clears_inherited_string_field() { ::tsox_core::fntrace::enter("test_extends_null_clears_inherited_string_field"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -2197,7 +2197,7 @@ fn test_extends_null_clears_inherited_string_field() {
 }
 
 #[test]
-fn test_extends_null_clears_inherited_enum_field() {
+fn test_extends_null_clears_inherited_enum_field() { ::tsox_core::fntrace::enter("test_extends_null_clears_inherited_enum_field"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -2223,7 +2223,7 @@ fn test_extends_null_clears_inherited_enum_field() {
 }
 
 #[test]
-fn test_extends_null_does_not_override_command_line() {
+fn test_extends_null_does_not_override_command_line() { ::tsox_core::fntrace::enter("test_extends_null_does_not_override_command_line"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -2245,7 +2245,7 @@ fn test_extends_null_does_not_override_command_line() {
 }
 
 #[test]
-fn test_extends_null_only_clears_specified_field() {
+fn test_extends_null_only_clears_specified_field() { ::tsox_core::fntrace::enter("test_extends_null_only_clears_specified_field"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -2275,7 +2275,7 @@ fn test_extends_null_only_clears_specified_field() {
 }
 
 #[test]
-fn test_extends_null_with_multiple_fields() {
+fn test_extends_null_with_multiple_fields() { ::tsox_core::fntrace::enter("test_extends_null_with_multiple_fields"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -2311,7 +2311,7 @@ fn test_extends_null_with_multiple_fields() {
 }
 
 #[test]
-fn test_extends_diamond_inheritance() {
+fn test_extends_diamond_inheritance() { ::tsox_core::fntrace::enter("test_extends_diamond_inheritance"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -2344,7 +2344,7 @@ fn test_extends_diamond_inheritance() {
 }
 
 #[test]
-fn test_extends_diamond_no_duplicate_errors() {
+fn test_extends_diamond_no_duplicate_errors() { ::tsox_core::fntrace::enter("test_extends_diamond_no_duplicate_errors"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
 
@@ -2374,7 +2374,7 @@ fn test_extends_diamond_no_duplicate_errors() {
 }
 
 #[test]
-fn test_extends_cache_cycle_not_cached() {
+fn test_extends_cache_cycle_not_cached() { ::tsox_core::fntrace::enter("test_extends_cache_cycle_not_cached"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.json", r#"{ "extends": "./b.json" }"#);
@@ -2396,7 +2396,7 @@ fn test_extends_cache_cycle_not_cached() {
 }
 
 #[test]
-fn test_extends_bare_specifier_file_form() {
+fn test_extends_bare_specifier_file_form() { ::tsox_core::fntrace::enter("test_extends_bare_specifier_file_form"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/node_modules");
@@ -2419,7 +2419,7 @@ fn test_extends_bare_specifier_file_form() {
 }
 
 #[test]
-fn test_extends_bare_specifier_directory_form() {
+fn test_extends_bare_specifier_directory_form() { ::tsox_core::fntrace::enter("test_extends_bare_specifier_directory_form"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/node_modules");
@@ -2443,7 +2443,7 @@ fn test_extends_bare_specifier_directory_form() {
 }
 
 #[test]
-fn test_extends_bare_specifier_package_json_tsconfig_field() {
+fn test_extends_bare_specifier_package_json_tsconfig_field() { ::tsox_core::fntrace::enter("test_extends_bare_specifier_package_json_tsconfig_field"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/node_modules");
@@ -2476,7 +2476,7 @@ fn test_extends_bare_specifier_package_json_tsconfig_field() {
 }
 
 #[test]
-fn test_extends_bare_specifier_scoped_package() {
+fn test_extends_bare_specifier_scoped_package() { ::tsox_core::fntrace::enter("test_extends_bare_specifier_scoped_package"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/node_modules");
@@ -2504,7 +2504,7 @@ fn test_extends_bare_specifier_scoped_package() {
 }
 
 #[test]
-fn test_extends_bare_specifier_ancestor_walk() {
+fn test_extends_bare_specifier_ancestor_walk() { ::tsox_core::fntrace::enter("test_extends_bare_specifier_ancestor_walk"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/node_modules");
@@ -2533,7 +2533,7 @@ fn test_extends_bare_specifier_ancestor_walk() {
 }
 
 #[test]
-fn test_extends_bare_specifier_not_found() {
+fn test_extends_bare_specifier_not_found() { ::tsox_core::fntrace::enter("test_extends_bare_specifier_not_found"); 
     let fs = InMemoryFS::new();
     fs.insert_dir("/proj");
     fs.insert_file(

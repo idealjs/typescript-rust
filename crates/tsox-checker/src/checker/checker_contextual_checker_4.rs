@@ -8,7 +8,7 @@ impl Checker {
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
         name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_block_scoped_variable_used_before_declaration"); 
         if self.is_declared_as_plain_var(symbol) {
             return;
         }
@@ -154,7 +154,7 @@ impl Checker {
         &self,
         var_decl: &Arc<Node>,
         usage: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_immediately_used_in_initializer_of"); 
         let Some(list) = var_decl.parent() else {
             return false;
         };
@@ -174,7 +174,7 @@ impl Checker {
                 .is_some_and(|e| self.is_same_scope_descendent_of(usage, &e))
     }
 
-    fn is_same_scope_descendent_of(&self, initial: &Arc<Node>, target: &Arc<Node>) -> bool {
+    fn is_same_scope_descendent_of(&self, initial: &Arc<Node>, target: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_same_scope_descendent_of"); 
         let mut cur = Some(Arc::clone(initial));
         while let Some(n) = cur {
             if Arc::ptr_eq(&n, target) {
@@ -192,7 +192,7 @@ impl Checker {
     }
 }
 
-fn is_async_or_generator_function(n: &Arc<Node>) -> bool {
+fn is_async_or_generator_function(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_async_or_generator_function"); 
     let (modifiers, asterisk) = match &n.data {
         tsox_frontend::ast::NodeData::FunctionExpression(d) => (&d.modifiers, &d.asterisk_token),
         tsox_frontend::ast::NodeData::ArrowFunction(d) => (&d.modifiers, &None),
@@ -204,7 +204,7 @@ fn is_async_or_generator_function(n: &Arc<Node>) -> bool {
             .is_some_and(|m| m.modifier_flags.contains(ModifierFlags::Async))
 }
 
-fn ancestor_of_kind(start: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+fn ancestor_of_kind(start: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("ancestor_of_kind"); 
     let mut cur = Some(Arc::clone(start));
     while let Some(n) = cur {
         if n.kind == kind {

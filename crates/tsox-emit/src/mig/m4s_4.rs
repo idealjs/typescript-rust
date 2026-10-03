@@ -39,7 +39,7 @@ pub struct Printer<'a> {
 }
 
 impl<'a> Printer<'a> {
-    pub fn write_comment_range(&mut self, comment: CommentRange) {
+    pub fn write_comment_range(&mut self, comment: CommentRange) { ::tsox_core::fntrace::enter("write_comment_range"); 
         let source_file = match &self.current_source_file {
             Some(file) => file.clone(),
             None => return,
@@ -55,7 +55,7 @@ impl<'a> Printer<'a> {
         );
     }
 
-    pub fn write_delimiter(&mut self, format: ListFormat) {
+    pub fn write_delimiter(&mut self, format: ListFormat) { ::tsox_core::fntrace::enter("write_delimiter"); 
         let delimiters = format.0 & LF_DELIMITERS_MASK;
         if delimiters == LF_NONE {
         } else if delimiters == LF_COMMA_DELIMITED {
@@ -73,11 +73,11 @@ impl<'a> Printer<'a> {
         }
     }
 
-    pub fn write_keyword(&mut self, text: &str) {
+    pub fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         self.writer.write_keyword(text);
     }
 
-    pub fn write_line(&mut self) {
+    pub fn write_line(&mut self) { ::tsox_core::fntrace::enter("write_line"); 
         self.writer.write_line();
     }
 
@@ -86,7 +86,7 @@ impl<'a> Printer<'a> {
         parent_node: &Arc<Node>,
         prev_child_node: &Arc<Node>,
         next_child_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("write_line_or_space"); 
         if self.should_emit_on_single_line(parent_node) {
             self.write_space();
         } else if self.preserve_source_newlines {
@@ -101,13 +101,13 @@ impl<'a> Printer<'a> {
         }
     }
 
-    pub fn write_line_repeat(&mut self, count: usize) {
+    pub fn write_line_repeat(&mut self, count: usize) { ::tsox_core::fntrace::enter("write_line_repeat"); 
         for _ in 0..count {
             self.write_line();
         }
     }
 
-    pub fn write_line_separators_after(&mut self, node: &Arc<Node>, parent: &Arc<Node>) {
+    pub fn write_line_separators_after(&mut self, node: &Arc<Node>, parent: &Arc<Node>) { ::tsox_core::fntrace::enter("write_line_separators_after"); 
         if self.preserve_source_newlines {
             let trailing_newlines = self.get_closing_line_terminator_count(
                 Some(parent),
@@ -125,7 +125,7 @@ impl<'a> Printer<'a> {
         &mut self,
         node: &Arc<Node>,
         parent: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("write_line_separators_and_indent_before"); 
         if self.preserve_source_newlines {
             let leading_newlines =
                 self.get_leading_line_terminator_count(Some(parent), Some(node), ListFormat(LF_NONE));
@@ -137,7 +137,7 @@ impl<'a> Printer<'a> {
         false
     }
 
-    pub fn write_lines(&mut self, text: &str) {
+    pub fn write_lines(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_lines"); 
         let lines = split_lines(text);
         let indentation = guess_indentation(&lines);
         for line in lines {
@@ -149,7 +149,7 @@ impl<'a> Printer<'a> {
         }
     }
 
-    pub fn write_lines_and_indent(&mut self, line_count: usize, write_space_if_not_indenting: bool) {
+    pub fn write_lines_and_indent(&mut self, line_count: usize, write_space_if_not_indenting: bool) { ::tsox_core::fntrace::enter("write_lines_and_indent"); 
         if line_count > 0 {
             self.increase_indent();
             self.write_line_repeat(line_count);
@@ -158,38 +158,38 @@ impl<'a> Printer<'a> {
         }
     }
 
-    pub fn write_literal(&mut self, text: &str) {
+    pub fn write_literal(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_literal"); 
         self.writer.write_literal(text);
     }
 
-    pub fn write_operator(&mut self, text: &str) {
+    pub fn write_operator(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_operator"); 
         self.writer.write_operator(text);
     }
 
-    pub fn write_parameter(&mut self, text: &str) {
+    pub fn write_parameter(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_parameter"); 
         self.writer.write_parameter(text);
     }
 
-    pub fn write_property(&mut self, text: &str) {
+    pub fn write_property(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_property"); 
         self.writer.write_property(text);
     }
 
-    pub fn write_punctuation(&mut self, text: &str) {
+    pub fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         self.writer.write_punctuation(text);
     }
 
-    pub fn write_space(&mut self) {
+    pub fn write_space(&mut self) { ::tsox_core::fntrace::enter("write_space"); 
         self.writer.write_space(" ");
     }
 
-    pub fn write_symbol(&mut self, text: &str, opt_symbol: Option<&Symbol>) {
+    pub fn write_symbol(&mut self, text: &str, opt_symbol: Option<&Symbol>) { ::tsox_core::fntrace::enter("write_symbol"); 
         match opt_symbol {
             None => self.write(text),
             Some(symbol) => self.writer.write_symbol(text, Some(symbol)),
         }
     }
 
-    pub fn write_synthesized_comment(&mut self, comment: SynthesizedComment) {
+    pub fn write_synthesized_comment(&mut self, comment: SynthesizedComment) { ::tsox_core::fntrace::enter("write_synthesized_comment"); 
         let text = format_synthesized_comment(&comment);
         let kind = if comment.kind == SyntaxKind::MultiLineCommentTrivia {
             CommentRangeKind::MultiLine
@@ -209,7 +209,7 @@ impl<'a> Printer<'a> {
         );
     }
 
-    pub fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize {
+    pub fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize { ::tsox_core::fntrace::enter("write_token_text"); 
         let token_string = token_to_string(token);
         self.write_as(&token_string, write_kind);
         if position_is_synthesized(pos) {
@@ -219,7 +219,7 @@ impl<'a> Printer<'a> {
         }
     }
 
-    pub fn write_trailing_semicolon(&mut self) {
+    pub fn write_trailing_semicolon(&mut self) { ::tsox_core::fntrace::enter("write_trailing_semicolon"); 
         self.writer.write_trailing_semicolon(";");
     }
 }

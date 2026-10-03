@@ -27,7 +27,7 @@ pub struct ResolverHost<'a> {
 }
 
 impl ResolverHost<'_> {
-    pub fn trace(&self, _msg: &str) {}
+    pub fn trace(&self, _msg: &str) { ::tsox_core::fntrace::enter("trace"); }
 }
 
 pub struct ExtendedConfigCacheEntry {
@@ -37,7 +37,7 @@ pub struct ExtendedConfigCacheEntry {
 }
 
 impl ExtendedConfigCacheEntry {
-    pub fn extended_file_names(&self) -> Vec<String> {
+    pub fn extended_file_names(&self) -> Vec<String> { ::tsox_core::fntrace::enter("extended_file_names"); 
         match &self.extended_result {
             Some(extended_result) => extended_result.extended_source_files.clone(),
             None => Vec::new(),
@@ -48,14 +48,14 @@ impl ExtendedConfigCacheEntry {
 pub fn command_line_option_name_map_get(
     map: &'static CommandLineOptionNameMap,
     name: &str,
-) -> Option<&'static OptionDecl> {
+) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("command_line_option_name_map_get"); 
     map.get(name).or_else(|| map.get(&name.to_lowercase()))
 }
 
 pub fn command_line_option_name_map_get_spelling_suggestion(
     map: &'static CommandLineOptionNameMap,
     name: &str,
-) -> Option<&'static OptionDecl> {
+) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("command_line_option_name_map_get_spelling_suggestion"); 
     tsox_core::core::mig::m3j_2::get_spelling_suggestion(
         name,
         map.options_names.values(),
@@ -69,7 +69,7 @@ pub fn for_each_property_assignment<T>(
     key: &str,
     key2: Option<&str>,
     callback: &mut dyn FnMut(&Node) -> Option<T>,
-) -> Option<T> {
+) -> Option<T> { ::tsox_core::fntrace::enter("for_each_property_assignment"); 
     let object_literal = object_literal?;
     let properties = match &object_literal.data {
         NodeData::ObjectLiteralExpression(data) => &data.properties,
@@ -97,14 +97,14 @@ pub fn for_each_ts_config_prop_array<T>(
     ts_config_source_file: Option<&SourceFile>,
     prop_key: &str,
     callback: &mut dyn FnMut(&Node) -> Option<T>,
-) -> Option<T> {
+) -> Option<T> { ::tsox_core::fntrace::enter("for_each_ts_config_prop_array"); 
     let object_literal = get_ts_config_object_literal_expression(ts_config_source_file)?;
     for_each_property_assignment(Some(object_literal), prop_key, None, callback)
 }
 
 pub fn get_callback_for_finding_property_assignment_by_value(
     value: &str,
-) -> impl Fn(&Node) -> Option<Arc<Node>> + '_ {
+) -> impl Fn(&Node) -> Option<Arc<Node>> + '_ { ::tsox_core::fntrace::enter("get_callback_for_finding_property_assignment_by_value"); 
     move |property: &Node| {
         if is_array_literal_expression(property) {
             let elements = match &property.data {
@@ -125,19 +125,19 @@ pub fn get_options_syntax_by_array_element_value(
     object_literal: Option<&Node>,
     prop_key: &str,
     element_value: &str,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_options_syntax_by_array_element_value"); 
     let callback = get_callback_for_finding_property_assignment_by_value(element_value);
     for_each_property_assignment(object_literal, prop_key, None, &mut |property| callback(property))
 }
 
-pub fn property_initializer(property: &Node) -> Option<Arc<Node>> {
+pub fn property_initializer(property: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("property_initializer"); 
     match &property.data {
         NodeData::PropertyAssignment(data) => Some(data.initializer.clone()),
         _ => None,
     }
 }
 
-fn skip_trivia(_text: &str, pos: usize) -> usize {
+fn skip_trivia(_text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_trivia"); 
     pos
 }
 
@@ -145,7 +145,7 @@ pub fn new_tsconfig_source_file_from_file_path(
     config_file_name: &str,
     config_path: &str,
     config_source_text: &str,
-) -> TsConfigSourceFile {
+) -> TsConfigSourceFile { ::tsox_core::fntrace::enter("new_tsconfig_source_file_from_file_path"); 
     let source_file = tsox_frontend::parser::Parser::parse_source_file_text(
         config_file_name,
         config_source_text.to_string(),
@@ -161,7 +161,7 @@ pub fn parse_config_file_text_to_json(
     file_name: &str,
     path: &str,
     json_text: &str,
-) -> (Option<JsonValue>, Vec<Diagnostic>) {
+) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("parse_config_file_text_to_json"); 
     let (json_source_file, parse_diagnostics) =
         tsox_frontend::parser::Parser::parse_source_file_text_with_diagnostics(
             file_name,

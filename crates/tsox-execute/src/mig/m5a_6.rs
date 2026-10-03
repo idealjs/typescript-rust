@@ -14,7 +14,7 @@ pub fn generate_option_output(
     option: &OptionDecl,
     right_align_of_left: usize,
     left_align_of_right: usize,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("generate_option_output"); 
     let mut text: Vec<String> = Vec::new();
     let colors = create_colors(sys);
 
@@ -100,7 +100,7 @@ pub fn generate_option_output(
 pub fn format_default_value(
     default_value: Option<&dyn std::fmt::Debug>,
     option: Option<&OptionDecl>,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("format_default_value"); 
     let Some(option) = option else {
         return "undefined".to_string();
     };
@@ -130,7 +130,7 @@ pub struct ValueCandidate {
 pub fn show_additional_info_output(
     value_candidates: Option<&ValueCandidate>,
     option: &OptionDecl,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("show_additional_info_output"); 
     if option.is_command_line_only {
         return false;
     }
@@ -146,7 +146,7 @@ pub fn get_value_candidate(
     _sys: &dyn System,
     locale: &Locale,
     option: &OptionDecl,
-) -> Option<ValueCandidate> {
+) -> Option<ValueCandidate> { ::tsox_core::fntrace::enter("get_value_candidate"); 
     if option.kind == OptionKind::ListOrElement {
         panic!("no value candidate for list or element");
     }
@@ -165,7 +165,7 @@ pub fn get_value_candidate(
     })
 }
 
-pub fn get_possible_values(option: &OptionDecl) -> String {
+pub fn get_possible_values(option: &OptionDecl) -> String { ::tsox_core::fntrace::enter("get_possible_values"); 
     match option.kind {
         OptionKind::String => "string".to_string(),
         OptionKind::Number => "number".to_string(),
@@ -199,7 +199,7 @@ pub fn get_possible_values(option: &OptionDecl) -> String {
     }
 }
 
-fn opt_value_eq(a: &OptValue, b: &OptValue) -> bool {
+fn opt_value_eq(a: &OptValue, b: &OptValue) -> bool { ::tsox_core::fntrace::enter("opt_value_eq"); 
     match (a, b) {
         (OptValue::Bool(x), OptValue::Bool(y)) => x == y,
         (OptValue::Str(x), OptValue::Str(y)) => x == y,
@@ -218,7 +218,7 @@ pub fn get_pretty_output(
     left_align_of_right: usize,
     terminal_width: usize,
     color_left: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_pretty_output"); 
     let mut res: Vec<String> = Vec::with_capacity(4);
     let mut is_first_line = true;
     let mut remain_right = right;
@@ -247,7 +247,7 @@ pub fn get_pretty_output(
     res
 }
 
-pub fn get_display_name_text_of_option(option: &OptionDecl) -> String {
+pub fn get_display_name_text_of_option(option: &OptionDecl) -> String { ::tsox_core::fntrace::enter("get_display_name_text_of_option"); 
     match option.short_name {
         Some(short) if !short.is_empty() => format!("--{}, -{short}", option.name),
         _ => format!("--{}", option.name),

@@ -3,7 +3,7 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
-    pub fn signature_to_string(&mut self, sig: &Arc<Signature>) -> String {
+    pub fn signature_to_string(&mut self, sig: &Arc<Signature>) -> String { ::tsox_core::fntrace::enter("signature_to_string"); 
         let params: Vec<String> = sig.parameters.iter().map(|p| p.name.clone()).collect();
         let return_type = self.get_return_type_of_signature(sig);
         let return_str = match return_type {
@@ -19,7 +19,7 @@ impl Checker {
     pub(crate) fn tuple_expanded_params(
         &mut self,
         sig: &Signature,
-    ) -> Option<Vec<(String, Arc<Type>, bool, bool)>> {
+    ) -> Option<Vec<(String, Arc<Type>, bool, bool)>> { ::tsox_core::fntrace::enter("tuple_expanded_params"); 
         if !sig.has_rest_parameter() || sig.parameters.is_empty() {
             return None;
         }
@@ -75,7 +75,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_call_signatures_related_to"); 
         let source_sigs = self.get_signatures_of_type(source, SignatureKind::Call);
         let target_sigs = self.get_signatures_of_type(target, SignatureKind::Call);
 
@@ -103,11 +103,11 @@ impl Checker {
             .is_true()
     }
 
-    pub(crate) fn signature_display_colon(&mut self, sig: &Arc<Signature>, prefix: &str) -> String {
+    pub(crate) fn signature_display_colon(&mut self, sig: &Arc<Signature>, prefix: &str) -> String { ::tsox_core::fntrace::enter("signature_display_colon"); 
         self.signature_display_sep(sig, prefix, ": ")
     }
 
-    pub(crate) fn signature_display_arrow(&mut self, sig: &Arc<Signature>, prefix: &str) -> String {
+    pub(crate) fn signature_display_arrow(&mut self, sig: &Arc<Signature>, prefix: &str) -> String { ::tsox_core::fntrace::enter("signature_display_arrow"); 
         self.signature_display_sep(sig, prefix, " => ")
     }
 
@@ -116,7 +116,7 @@ impl Checker {
         sig: &Arc<Signature>,
         prefix: &str,
         sep: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("signature_display_sep"); 
         let params: Vec<String> = if let Some(expanded) = self.tuple_expanded_params(sig) {
             expanded
                 .iter()
@@ -204,7 +204,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_construct_signatures_related_to"); 
         let source_sigs = self.get_signatures_of_type(source, SignatureKind::Construct);
         let target_sigs = self.get_signatures_of_type(target, SignatureKind::Construct);
 
@@ -240,7 +240,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_function_type_related_to"); 
         if !self.is_call_signatures_related_to(source, target, relation) {
             return false;
         }

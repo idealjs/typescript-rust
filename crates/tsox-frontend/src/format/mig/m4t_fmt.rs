@@ -29,7 +29,7 @@ pub fn format_node_given_indentation(
     language_variant: LanguageVariant,
     initial_indentation: i64,
     delta: i64,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_node_given_indentation"); 
     let text_range = TextRange::new(node.pos(), node.end());
     crate::format::span::format_span(
         file,
@@ -49,7 +49,7 @@ pub fn get_actual_indentation_for_list_item_before_comma(
     comma_token: &Arc<Node>,
     source_file: &SourceFile,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_actual_indentation_for_list_item_before_comma"); 
     let parent = match comma_token.parent() {
         Some(p) => p,
         None => return -1,
@@ -80,7 +80,7 @@ pub fn get_comment_indent(
     position: usize,
     options: &FormatCodeSettings,
     enclosing_comment_range: &CommentRange,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_comment_indent"); 
     let tab_size = options.editor_settings.tab_size;
     let previous_line = get_ecma_line_of_position(source_file, position) as i64 - 1;
     let comment_start_line = get_ecma_line_of_position(source_file, enclosing_comment_range.pos) as i64;
@@ -120,7 +120,7 @@ pub fn get_comment_indent(
 pub fn get_leading_comment_ranges_of_node(
     node: &Arc<Node>,
     file: &SourceFile,
-) -> Vec<CommentRange> {
+) -> Vec<CommentRange> { ::tsox_core::fntrace::enter("get_leading_comment_ranges_of_node"); 
     if node.kind == SyntaxKind::JsxText {
         return Vec::new();
     }
@@ -131,7 +131,7 @@ pub fn get_range_of_enclosing_comment(
     source_file: &SourceFile,
     position: usize,
     preceding_token: Option<&Arc<Node>>,
-) -> Option<CommentRange> {
+) -> Option<CommentRange> { ::tsox_core::fntrace::enter("get_range_of_enclosing_comment"); 
     let token_at_position = get_token_at_position(&source_file.node, position)?;
     let mut token_at_position = token_at_position;
     let jsdoc = find_ancestor(&token_at_position, |n| n.kind == SyntaxKind::JSDoc);
@@ -172,7 +172,7 @@ pub fn get_block_indent(
     source_file: &SourceFile,
     position: usize,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_block_indent"); 
     let mut current = position;
     while current > 0 {
         let ch = source_file.text[current..].chars().next().unwrap_or('\u{FFFD}');
@@ -204,7 +204,7 @@ pub fn next_token_is_curly_brace_on_same_line_as_cursor(
     current: &Arc<Node>,
     line_at_position: usize,
     source_file: &SourceFile,
-) -> NextTokenKind {
+) -> NextTokenKind { ::tsox_core::fntrace::enter("next_token_is_curly_brace_on_same_line_as_cursor"); 
     let next_token = find_next_token(&source_file.node, current.end());
     let Some(next_token) = next_token else {
         return NextTokenKind::Unknown;
@@ -223,7 +223,7 @@ pub fn next_token_is_curly_brace_on_same_line_as_cursor(
     NextTokenKind::Unknown
 }
 
-fn position_belongs_to_node(node: &Arc<Node>, position: usize, source_file: &SourceFile) -> bool {
+fn position_belongs_to_node(node: &Arc<Node>, position: usize, source_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("position_belongs_to_node"); 
     get_start_of_node(node, source_file, true) <= position && position < node.end()
 }
 
@@ -234,7 +234,7 @@ pub fn get_smart_indent(
     line_at_position: usize,
     assume_new_line_before_close_brace: bool,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_smart_indent"); 
     let mut previous: Option<Arc<Node>> = None;
     let mut current = Some(preceding_token.clone());
 
@@ -285,14 +285,14 @@ pub fn get_smart_indent(
 pub fn get_start_line_and_character_for_node(
     n: &Arc<Node>,
     source_file: &SourceFile,
-) -> (usize, usize) {
+) -> (usize, usize) { ::tsox_core::fntrace::enter("get_start_line_and_character_for_node"); 
     get_ecma_line_and_byte_offset_of_position(
         source_file,
         get_token_pos_of_node(n, source_file, false),
     )
 }
 
-pub fn get_start_line_for_node(n: &Arc<Node>, source_file: &SourceFile) -> usize {
+pub fn get_start_line_for_node(n: &Arc<Node>, source_file: &SourceFile) -> usize { ::tsox_core::fntrace::enter("get_start_line_for_node"); 
     get_ecma_line_of_position(source_file, get_token_pos_of_node(n, source_file, false))
 }
 
@@ -300,16 +300,16 @@ pub fn get_list_by_position(
     pos: usize,
     node: Option<&Arc<Node>>,
     source_file: &SourceFile,
-) -> Option<(Field, Arc<crate::ast::node::NodeList>)> {
+) -> Option<(Field, Arc<crate::ast::node::NodeList>)> { ::tsox_core::fntrace::enter("get_list_by_position"); 
     let node = node?;
     get_list_by_range(pos, pos, node, source_file)
 }
 
-fn get_ecma_line_of_position(source_file: &SourceFile, position: usize) -> usize {
+fn get_ecma_line_of_position(source_file: &SourceFile, position: usize) -> usize { ::tsox_core::fntrace::enter("get_ecma_line_of_position"); 
     source_file.line_map.line_at(position)
 }
 
-fn get_ecma_line_starts(source_file: &SourceFile) -> Vec<usize> {
+fn get_ecma_line_starts(source_file: &SourceFile) -> Vec<usize> { ::tsox_core::fntrace::enter("get_ecma_line_starts"); 
     source_file
         .line_map
         .line_starts
@@ -321,7 +321,7 @@ fn get_ecma_line_starts(source_file: &SourceFile) -> Vec<usize> {
 fn get_ecma_line_and_byte_offset_of_position(
     source_file: &SourceFile,
     position: usize,
-) -> (usize, usize) {
+) -> (usize, usize) { ::tsox_core::fntrace::enter("get_ecma_line_and_byte_offset_of_position"); 
     let line = source_file.line_map.line_at(position);
     let line_start = source_file.line_map.line_starts[line] as usize;
     (line, position - line_start)

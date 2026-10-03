@@ -45,7 +45,7 @@ struct CompilationOutput {
     input_files: Vec<(String, String)>,
 }
 
-fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
+fn compile_test_case(content: &TestCaseContent) -> CompilationOutput { ::tsox_core::fntrace::enter("compile_test_case"); 
     let fs = InMemoryFS::new();
     let mut file_names: Vec<String> = Vec::new();
     let mut input_files: Vec<(String, String)> = Vec::new();
@@ -123,7 +123,7 @@ fn compile_test_case(content: &TestCaseContent) -> CompilationOutput {
     }
 }
 
-fn remove_test_path_prefixes(text: &str) -> String {
+fn remove_test_path_prefixes(text: &str) -> String { ::tsox_core::fntrace::enter("remove_test_path_prefixes"); 
     text.replace("/.src/", "")
         .replace("/.ts/", "")
         .replace("/.lib/", "")
@@ -131,7 +131,7 @@ fn remove_test_path_prefixes(text: &str) -> String {
 
 const CRLF: &str = "\r\n";
 
-fn format_error_baseline(output: &CompilationOutput) -> String {
+fn format_error_baseline(output: &CompilationOutput) -> String { ::tsox_core::fntrace::enter("format_error_baseline"); 
     if output.diagnostics.is_empty() {
         return String::new();
     }
@@ -312,7 +312,7 @@ fn format_error_baseline(output: &CompilationOutput) -> String {
 fn apply_test_settings(
     options: &mut CompilerOptions,
     settings: &std::collections::HashMap<String, String>,
-) {
+) { ::tsox_core::fntrace::enter("apply_test_settings"); 
     for (key, value) in settings {
         let v = value.trim();
         match key.as_str() {
@@ -373,7 +373,7 @@ fn apply_test_settings(
     }
 }
 
-fn parse_tristate(v: &str) -> Tristate {
+fn parse_tristate(v: &str) -> Tristate { ::tsox_core::fntrace::enter("parse_tristate"); 
     match v.trim().to_lowercase().as_str() {
         "true" | "1" | "yes" => Tristate::True,
         "false" | "0" | "no" => Tristate::False,
@@ -381,7 +381,7 @@ fn parse_tristate(v: &str) -> Tristate {
     }
 }
 
-fn parse_target(v: &str) -> Option<ScriptTarget> {
+fn parse_target(v: &str) -> Option<ScriptTarget> { ::tsox_core::fntrace::enter("parse_target"); 
     match v.trim().to_lowercase().as_str() {
         "es5" => Some(ScriptTarget::ES5),
         "es6" | "es2015" => Some(ScriptTarget::ES2015),
@@ -397,7 +397,7 @@ fn parse_target(v: &str) -> Option<ScriptTarget> {
     }
 }
 
-fn parse_module(v: &str) -> Option<ModuleKind> {
+fn parse_module(v: &str) -> Option<ModuleKind> { ::tsox_core::fntrace::enter("parse_module"); 
     match v.trim().to_lowercase().as_str() {
         "none" => Some(ModuleKind::None),
         "commonjs" => Some(ModuleKind::CommonJS),
@@ -415,7 +415,7 @@ fn parse_module(v: &str) -> Option<ModuleKind> {
     }
 }
 
-fn parse_module_resolution(v: &str) -> Option<ModuleResolutionKind> {
+fn parse_module_resolution(v: &str) -> Option<ModuleResolutionKind> { ::tsox_core::fntrace::enter("parse_module_resolution"); 
     match v.trim().to_lowercase().as_str() {
         "classic" => Some(ModuleResolutionKind::Classic),
         "node" | "node10" => Some(ModuleResolutionKind::Node10),
@@ -426,7 +426,7 @@ fn parse_module_resolution(v: &str) -> Option<ModuleResolutionKind> {
     }
 }
 
-fn parse_jsx(v: &str) -> Option<JsxEmit> {
+fn parse_jsx(v: &str) -> Option<JsxEmit> { ::tsox_core::fntrace::enter("parse_jsx"); 
     match v.trim().to_lowercase().as_str() {
         "preserve" => Some(JsxEmit::Preserve),
         "react" => Some(JsxEmit::React),
@@ -437,7 +437,7 @@ fn parse_jsx(v: &str) -> Option<JsxEmit> {
     }
 }
 
-fn normalize_option_path(v: &str) -> String {
+fn normalize_option_path(v: &str) -> String { ::tsox_core::fntrace::enter("normalize_option_path"); 
     let v = v.trim();
     if v.starts_with('/') || v.starts_with('\\') {
         v.to_string()
@@ -447,7 +447,7 @@ fn normalize_option_path(v: &str) -> String {
 }
 
 #[allow(dead_code)]
-fn normalize_abs_path(name: &str, current_dir: &str) -> String {
+fn normalize_abs_path(name: &str, current_dir: &str) -> String { ::tsox_core::fntrace::enter("normalize_abs_path"); 
     if name.starts_with('/') {
         name.to_string()
     } else {
@@ -455,7 +455,7 @@ fn normalize_abs_path(name: &str, current_dir: &str) -> String {
     }
 }
 
-fn print_flush(msg: &str) {
+fn print_flush(msg: &str) { ::tsox_core::fntrace::enter("print_flush"); 
     print!("{msg}");
     let _ = std::io::stdout().flush();
 }
@@ -467,7 +467,7 @@ fn process_batch(
     is_submodule: bool,
     no_write: bool,
     ts_ref_dir: Option<&str>,
-) -> (usize, usize, usize, usize, usize, Vec<String>) {
+) -> (usize, usize, usize, usize, usize, Vec<String>) { ::tsox_core::fntrace::enter("process_batch"); 
     let mut pass = 0usize;
     let mut fail = 0usize;
     let mut new_baseline = 0usize;
@@ -608,7 +608,7 @@ fn run_compiler_baselines(
     max_tests: Option<usize>,
     no_write: bool,
     ts_ref_dir: Option<&str>,
-) {
+) { ::tsox_core::fntrace::enter("run_compiler_baselines"); 
     let ts_file_re = Regex::new(r"\.tsx?$").unwrap();
     let files = baseline::enumerate_test_files(test_dir, &ts_file_re);
 
@@ -753,7 +753,7 @@ fn run_compiler_baselines(
     ));
 }
 
-fn main() {
+fn main() { ::tsox_core::fntrace::enter("main"); 
     let handle = std::thread::Builder::new()
         .stack_size(256 * 1024 * 1024)
         .spawn(main_inner)
@@ -761,7 +761,7 @@ fn main() {
     handle.join().unwrap();
 }
 
-fn main_inner() {
+fn main_inner() { ::tsox_core::fntrace::enter("main_inner"); 
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
     let args: Vec<String> = std::env::args().collect();
@@ -927,7 +927,7 @@ impl ChildWaitTimeout for std::process::Child {
     fn wait_timeout(
         &mut self,
         duration: Duration,
-    ) -> std::io::Result<Option<std::process::ExitStatus>> {
+    ) -> std::io::Result<Option<std::process::ExitStatus>> { ::tsox_core::fntrace::enter("wait_timeout"); 
         let start = Instant::now();
         loop {
             match self.try_wait()? {

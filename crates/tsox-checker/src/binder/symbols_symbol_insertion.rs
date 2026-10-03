@@ -3,7 +3,7 @@
 use crate::binder::symbols::*;
 
 impl Binder {
-    pub(crate) fn module_member_is_exported(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn module_member_is_exported(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("module_member_is_exported"); 
         node.kind == SyntaxKind::ExportSpecifier
             || self
                 .get_combined_modifier_flags(node)
@@ -21,7 +21,7 @@ impl Binder {
         symbol: &Arc<Symbol>,
         name: &str,
         var_hoist_container: &Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("insert_symbol_into_container"); 
         if let Some(container) = &self.container {
             // Go bindBlockScopedDeclaration：块作用域声明的目标由
             // blockScopeContainer 决定（catch/嵌套块内 let/const 入块容器

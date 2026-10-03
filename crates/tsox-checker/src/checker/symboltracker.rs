@@ -146,7 +146,7 @@ pub struct SymbolTrackerImpl {
 }
 
 impl SymbolTrackerImpl {
-    pub fn new(context: SharedNodeBuilderContext, tracker: Option<Box<dyn SymbolTracker>>) -> Self {
+    pub fn new(context: SharedNodeBuilderContext, tracker: Option<Box<dyn SymbolTracker>>) -> Self { ::tsox_core::fntrace::enter("new"); 
         SymbolTrackerImpl {
             context,
             inner: tracker,
@@ -154,7 +154,7 @@ impl SymbolTrackerImpl {
         }
     }
 
-    fn on_diagnostic_reported(&self) {
+    fn on_diagnostic_reported(&self) { ::tsox_core::fntrace::enter("on_diagnostic_reported"); 
         self.context.borrow_mut().reported_diagnostic = true;
     }
 }
@@ -165,7 +165,7 @@ impl SymbolTracker for SymbolTrackerImpl {
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("track_symbol"); 
         if !self.disable_track_symbol {
             if let Some(ref mut inner) = self.inner {
                 if inner.track_symbol(symbol, enclosing_declaration, meaning) {
@@ -188,42 +188,42 @@ impl SymbolTracker for SymbolTrackerImpl {
         false
     }
 
-    fn report_inaccessible_this_error(&mut self) {
+    fn report_inaccessible_this_error(&mut self) { ::tsox_core::fntrace::enter("report_inaccessible_this_error"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_inaccessible_this_error();
         }
     }
 
-    fn report_private_in_base_of_class_expression(&mut self, property_name: &str) {
+    fn report_private_in_base_of_class_expression(&mut self, property_name: &str) { ::tsox_core::fntrace::enter("report_private_in_base_of_class_expression"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_private_in_base_of_class_expression(property_name);
         }
     }
 
-    fn report_inaccessible_unique_symbol_error(&mut self) {
+    fn report_inaccessible_unique_symbol_error(&mut self) { ::tsox_core::fntrace::enter("report_inaccessible_unique_symbol_error"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_inaccessible_unique_symbol_error();
         }
     }
 
-    fn report_cyclic_structure_error(&mut self) {
+    fn report_cyclic_structure_error(&mut self) { ::tsox_core::fntrace::enter("report_cyclic_structure_error"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_cyclic_structure_error();
         }
     }
 
-    fn report_likely_unsafe_import_required_error(&mut self, specifier: &str, symbol_name: &str) {
+    fn report_likely_unsafe_import_required_error(&mut self, specifier: &str, symbol_name: &str) { ::tsox_core::fntrace::enter("report_likely_unsafe_import_required_error"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_likely_unsafe_import_required_error(specifier, symbol_name);
         }
     }
 
-    fn report_truncation_error(&mut self) {
+    fn report_truncation_error(&mut self) { ::tsox_core::fntrace::enter("report_truncation_error"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_truncation_error();
@@ -235,43 +235,43 @@ impl SymbolTracker for SymbolTrackerImpl {
         containing_file: Option<&Arc<SourceFile>>,
         parent_symbol: &Arc<Symbol>,
         augmenting_symbol: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_nonlocal_augmentation"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_nonlocal_augmentation(containing_file, parent_symbol, augmenting_symbol);
         }
     }
 
-    fn report_non_serializable_property(&mut self, property_name: &str) {
+    fn report_non_serializable_property(&mut self, property_name: &str) { ::tsox_core::fntrace::enter("report_non_serializable_property"); 
         self.on_diagnostic_reported();
         if let Some(ref mut inner) = self.inner {
             inner.report_non_serializable_property(property_name);
         }
     }
 
-    fn report_inference_fallback(&mut self, node: &Arc<Node>) {
+    fn report_inference_fallback(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("report_inference_fallback"); 
         if let Some(ref mut inner) = self.inner {
             inner.report_inference_fallback(node);
         }
     }
 
-    fn push_error_fallback_node(&mut self, node: &Arc<Node>) {
+    fn push_error_fallback_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_error_fallback_node"); 
         if let Some(ref mut inner) = self.inner {
             inner.push_error_fallback_node(node);
         }
     }
 
-    fn pop_error_fallback_node(&mut self) {
+    fn pop_error_fallback_node(&mut self) { ::tsox_core::fntrace::enter("pop_error_fallback_node"); 
         if let Some(ref mut inner) = self.inner {
             inner.pop_error_fallback_node();
         }
     }
 
-    fn as_any(&self) -> &dyn std::any::Any {
+    fn as_any(&self) -> &dyn std::any::Any { ::tsox_core::fntrace::enter("as_any"); 
         self
     }
 
-    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any { ::tsox_core::fntrace::enter("as_any_mut"); 
         self
     }
 }

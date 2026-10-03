@@ -15,7 +15,7 @@ use crate::project::logging_log_tree::LogTree;
 use crate::project::mig::m5d::LogTreeMigExt;
 use crate::project::session_watch_request_timeout::Session;
 
-pub fn api_state_clone(s: &APIState) -> APIState {
+pub fn api_state_clone(s: &APIState) -> APIState { ::tsox_core::fntrace::enter("api_state_clone"); 
     APIState {
         open_projects: s.open_projects.clone(),
         open_files: s.open_files.clone(),
@@ -23,12 +23,12 @@ pub fn api_state_clone(s: &APIState) -> APIState {
 }
 
 impl APIState {
-    pub fn clone_state(&self) -> APIState {
+    pub fn clone_state(&self) -> APIState { ::tsox_core::fntrace::enter("clone_state"); 
         api_state_clone(self)
     }
 }
 
-fn clone_config_file_registry(r: &ConfigFileRegistry) -> ConfigFileRegistry {
+fn clone_config_file_registry(r: &ConfigFileRegistry) -> ConfigFileRegistry { ::tsox_core::fntrace::enter("clone_config_file_registry"); 
     ConfigFileRegistry {
         configs: r.configs.clone(),
         config_file_names: r.config_file_names.clone(),
@@ -41,7 +41,7 @@ impl ProjectCollection {
         &self,
         current_directory: String,
         use_case_sensitive_file_names: bool,
-    ) -> ProjectCollection {
+    ) -> ProjectCollection { ::tsox_core::fntrace::enter("clone_collection"); 
         ProjectCollection {
             to_path: Box::new(move |file_name: &str| {
                 tsox_core::tspath::to_path(file_name, &current_directory, use_case_sensitive_file_names)
@@ -62,11 +62,11 @@ impl ProjectCollection {
         }
     }
 
-    fn to_path_ref(&self) -> &Box<dyn Fn(&str) -> Path + Send + Sync> {
+    fn to_path_ref(&self) -> &Box<dyn Fn(&str) -> Path + Send + Sync> { ::tsox_core::fntrace::enter("to_path_ref"); 
         &self.to_path
     }
 
-    pub fn fill_configured_projects<'a>(&'a self, projects: &mut Vec<&'a Project>) {
+    pub fn fill_configured_projects<'a>(&'a self, projects: &mut Vec<&'a Project>) { ::tsox_core::fntrace::enter("fill_configured_projects"); 
         let mut collected: Vec<&Project> = self
             .configured_projects
             .values()
@@ -76,7 +76,7 @@ impl ProjectCollection {
         projects.extend(collected);
     }
 
-    pub fn projects_by_path(&self) -> Vec<(Path, &Project)> {
+    pub fn projects_by_path(&self) -> Vec<(Path, &Project)> { ::tsox_core::fntrace::enter("projects_by_path"); 
         let mut projects: Vec<(Path, &Project)> = Vec::with_capacity(
             self.configured_projects.len() + usize::from(self.inferred_project.is_some()),
         );
@@ -94,7 +94,7 @@ impl ProjectCollection {
         projects
     }
 
-    pub fn get_projects_containing_file(&self, path: &Path) -> Vec<&Project> {
+    pub fn get_projects_containing_file(&self, path: &Path) -> Vec<&Project> { ::tsox_core::fntrace::enter("get_projects_containing_file"); 
         let mut projects = Vec::new();
         let mut configured: Vec<&Project> = Vec::new();
         self.fill_configured_projects(&mut configured);
@@ -111,7 +111,7 @@ impl ProjectCollection {
         projects
     }
 
-    pub fn get_open_configured_projects(&self) -> HashSet<Path> {
+    pub fn get_open_configured_projects(&self) -> HashSet<Path> { ::tsox_core::fntrace::enter("get_open_configured_projects"); 
         let mut open_projects = HashSet::with_capacity(self.configured_projects.len());
         for path in &self.open_files {
             if let Some(project_path) = self.file_default_projects.get(path) {
@@ -131,7 +131,7 @@ impl ProjectCollection {
         open_projects
     }
 
-    pub fn find_default_configured_project(&self, path: &Path) -> Option<&Project> {
+    pub fn find_default_configured_project(&self, path: &Path) -> Option<&Project> { ::tsox_core::fntrace::enter("find_default_configured_project"); 
         let config_file_name = self
             .config_file_registry
             .as_ref()?
@@ -148,7 +148,7 @@ impl ProjectCollection {
         config_file_name: &str,
         visited: &mut HashSet<*const Project>,
         fallback: Option<&'a Project>,
-    ) -> Option<&'a Project> {
+    ) -> Option<&'a Project> { ::tsox_core::fntrace::enter("find_default_configured_project_worker"); 
         let config_file_path = (self.to_path)(config_file_name);
         let project = self.configured_projects.get(&config_file_path)?;
 
@@ -242,7 +242,7 @@ pub fn find_default_configured_project_from_program_inclusion<'a>(
     path: &Path,
     project_paths: &[Path],
     get_project: &dyn Fn(&Path) -> Option<&'a Project>,
-) -> (Path, bool) {
+) -> (Path, bool) { ::tsox_core::fntrace::enter("find_default_configured_project_from_program_inclusion"); 
     let _ = file_name;
     let mut containing_projects: Vec<Path> = Vec::new();
     let mut first_configured_project: Option<Path> = None;
@@ -288,19 +288,19 @@ pub fn find_default_configured_project_from_program_inclusion<'a>(
     )
 }
 
-pub fn open_file_paths_mig(overlays: &HashMap<Path, Arc<Overlay>>) -> HashSet<Path> {
+pub fn open_file_paths_mig(overlays: &HashMap<Path, Arc<Overlay>>) -> HashSet<Path> { ::tsox_core::fntrace::enter("open_file_paths_mig"); 
     overlays.keys().cloned().collect()
 }
 
 impl Session {
-    pub fn get_current_directory(&self) -> String {
+    pub fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.options.current_directory.clone()
     }
 
     pub fn get_language_service_and_projects_for_file(
         &self,
         uri: &lsproto::DocumentUri,
-    ) -> Result<(Arc<Project>, Arc<LanguageService>, Vec<Project>), String> {
+    ) -> Result<(Arc<Project>, Arc<LanguageService>, Vec<Project>), String> { ::tsox_core::fntrace::enter("get_language_service_and_projects_for_file"); 
         let (snapshot, project, default_ls) =
             self.get_snapshot_and_default_project(uri, false)?;
         let all_projects = snapshot
@@ -321,7 +321,7 @@ impl Session {
         &self,
         project: &Project,
         uri: &lsproto::DocumentUri,
-    ) -> Option<LanguageService> {
+    ) -> Option<LanguageService> { ::tsox_core::fntrace::enter("get_language_service_for_project_with_file"); 
         let snapshot = self.snapshot().expect("snapshot");
         let project = snapshot
             .project_collection
@@ -341,7 +341,7 @@ impl Session {
     pub fn get_current_language_service_with_auto_imports(
         &self,
         uri: &lsproto::DocumentUri,
-    ) -> Result<LanguageService, String> {
+    ) -> Result<LanguageService, String> { ::tsox_core::fntrace::enter("get_current_language_service_with_auto_imports"); 
         let base_snapshot = self.snapshot().expect("snapshot");
         let snapshot = self.get_snapshot_with_auto_imports(&base_snapshot, uri);
         let project = snapshot.get_default_project(uri);

@@ -11,7 +11,7 @@ use tsox_frontend::scanner;
 
 use super::m5s_3::{ImpExpKind, RefSearch, RefState};
 
-pub fn new_node_entry(node: &Arc<Node>) -> ReferenceEntry {
+pub fn new_node_entry(node: &Arc<Node>) -> ReferenceEntry { ::tsox_core::fntrace::enter("new_node_entry"); 
     let mut entry = ReferenceEntry {
         kind: EntryKind::Node,
         node: Some(core_or_else(node.name().cloned(), || node.clone())),
@@ -24,17 +24,17 @@ pub fn new_node_entry(node: &Arc<Node>) -> ReferenceEntry {
     entry
 }
 
-pub fn new_node_entry_with_kind(node: &Arc<Node>, kind: EntryKind) -> ReferenceEntry {
+pub fn new_node_entry_with_kind(node: &Arc<Node>, kind: EntryKind) -> ReferenceEntry { ::tsox_core::fntrace::enter("new_node_entry_with_kind"); 
     let mut entry = new_node_entry(node);
     entry.kind = kind;
     entry
 }
 
-pub fn core_or_else<T: Clone>(value: Option<T>, fallback: impl FnOnce() -> T) -> T {
+pub fn core_or_else<T: Clone>(value: Option<T>, fallback: impl FnOnce() -> T) -> T { ::tsox_core::fntrace::enter("core_or_else"); 
     value.unwrap_or_else(fallback)
 }
 
-pub fn get_range_of_node(node: &Arc<Node>, source_file: Option<&Arc<SourceFile>>, end_node: Option<&Arc<Node>>) -> TextRange {
+pub fn get_range_of_node(node: &Arc<Node>, source_file: Option<&Arc<SourceFile>>, end_node: Option<&Arc<Node>>) -> TextRange { ::tsox_core::fntrace::enter("get_range_of_node"); 
     let Some(source_file) = source_file else {
         unimplemented!("getRangeOfNode 的 sourceFile==nil 分支依赖 Node 到 SourceFile 的回映射,全仓尚无真实实现")
     };
@@ -53,7 +53,7 @@ pub fn get_range_of_node(node: &Arc<Node>, source_file: Option<&Arc<SourceFile>>
     TextRange::new(start, end)
 }
 
-pub fn is_valid_reference_position(node: &Arc<Node>, search_symbol_name: &str) -> bool {
+pub fn is_valid_reference_position(node: &Arc<Node>, search_symbol_name: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_reference_position"); 
     match node.kind {
         SyntaxKind::PrivateIdentifier => node.text().len() == search_symbol_name.len(),
         SyntaxKind::Identifier => node.text().len() == search_symbol_name.len(),
@@ -84,7 +84,7 @@ pub fn is_valid_reference_position(node: &Arc<Node>, search_symbol_name: &str) -
     }
 }
 
-pub fn is_for_rename_with_prefix_and_suffix_text(options: &RefOptions) -> bool {
+pub fn is_for_rename_with_prefix_and_suffix_text(options: &RefOptions) -> bool { ::tsox_core::fntrace::enter("is_for_rename_with_prefix_and_suffix_text"); 
     options.use_ == ReferenceUse::Rename && options.use_aliases_for_rename
 }
 
@@ -93,7 +93,7 @@ pub fn skip_past_export_or_import_specifier_or_union(
     node: Option<&Arc<Node>>,
     checker: &mut tsox_checker::checker::Checker,
     use_local_symbol_for_export_specifier: bool,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("skip_past_export_or_import_specifier_or_union"); 
     let node = node?;
     let parent = node.parent();
     if let Some(parent) = &parent {
@@ -118,7 +118,7 @@ pub fn skip_past_export_or_import_specifier_or_union(
         })
 }
 
-pub fn get_symbol_scope(symbol: &Arc<Symbol>, checker: &tsox_checker::checker::Checker) -> Option<Arc<Node>> {
+pub fn get_symbol_scope(symbol: &Arc<Symbol>, checker: &tsox_checker::checker::Checker) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_symbol_scope"); 
     let value_declaration = symbol.value_declaration.clone();
     if let Some(value_declaration) = value_declaration {
         if value_declaration.kind == SyntaxKind::FunctionExpression || value_declaration.kind == SyntaxKind::ClassExpression {
@@ -181,7 +181,7 @@ pub fn get_symbol_scope(symbol: &Arc<Symbol>, checker: &tsox_checker::checker::C
     scope
 }
 
-pub fn is_definition_visible(checker: &mut tsox_checker::checker::Checker, declaration: &Arc<Node>) -> bool {
+pub fn is_definition_visible(checker: &mut tsox_checker::checker::Checker, declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_definition_visible"); 
     if checker.is_declaration_visible(declaration) {
         return true;
     }
@@ -215,7 +215,7 @@ pub fn is_definition_visible(checker: &mut tsox_checker::checker::Checker, decla
     }
 }
 
-pub fn is_declaration_of_symbol(node: Option<&Arc<Node>>, target: &Arc<Symbol>, program: &tsox_compile::compiler::Program) -> bool {
+pub fn is_declaration_of_symbol(node: Option<&Arc<Node>>, target: &Arc<Symbol>, program: &tsox_compile::compiler::Program) -> bool { ::tsox_core::fntrace::enter("is_declaration_of_symbol"); 
     let Some(node) = node else {
         return false;
     };
@@ -239,7 +239,7 @@ pub fn is_declaration_of_symbol(node: Option<&Arc<Node>>, target: &Arc<Symbol>, 
     }
 }
 
-fn is_external_or_commonjs_module_source_file(node: &Arc<Node>) -> bool {
+fn is_external_or_commonjs_module_source_file(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_or_commonjs_module_source_file"); 
     match super::m5u::node_as_source_file(node) {
         Some(file) => file.external_module_indicator.is_some() || file.common_js_module_indicator.is_some(),
         None => false,

@@ -8,18 +8,18 @@ pub fn position_is_asi_candidate(
     _pos: usize,
     _context: Option<&Arc<Node>>,
     _file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("position_is_asi_candidate"); 
     false
 }
 
-pub fn syntax_may_be_asi_candidate(kind: SyntaxKind) -> bool {
+pub fn syntax_may_be_asi_candidate(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("syntax_may_be_asi_candidate"); 
     syntax_requires_trailing_comma_or_semicolon_or_asi(kind)
         || syntax_requires_trailing_function_block_or_semicolon_or_asi(kind)
         || syntax_requires_trailing_module_block_or_semicolon_or_asi(kind)
         || syntax_requires_trailing_semicolon_or_asi(kind)
 }
 
-pub fn syntax_requires_trailing_comma_or_semicolon_or_asi(kind: SyntaxKind) -> bool {
+pub fn syntax_requires_trailing_comma_or_semicolon_or_asi(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("syntax_requires_trailing_comma_or_semicolon_or_asi"); 
     matches!(
         kind,
         SyntaxKind::CallSignature
@@ -30,7 +30,7 @@ pub fn syntax_requires_trailing_comma_or_semicolon_or_asi(kind: SyntaxKind) -> b
     )
 }
 
-pub fn syntax_requires_trailing_function_block_or_semicolon_or_asi(kind: SyntaxKind) -> bool {
+pub fn syntax_requires_trailing_function_block_or_semicolon_or_asi(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("syntax_requires_trailing_function_block_or_semicolon_or_asi"); 
     matches!(
         kind,
         SyntaxKind::FunctionDeclaration
@@ -41,11 +41,11 @@ pub fn syntax_requires_trailing_function_block_or_semicolon_or_asi(kind: SyntaxK
     )
 }
 
-pub fn syntax_requires_trailing_module_block_or_semicolon_or_asi(kind: SyntaxKind) -> bool {
+pub fn syntax_requires_trailing_module_block_or_semicolon_or_asi(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("syntax_requires_trailing_module_block_or_semicolon_or_asi"); 
     matches!(kind, SyntaxKind::ModuleDeclaration)
 }
 
-pub fn syntax_requires_trailing_semicolon_or_asi(kind: SyntaxKind) -> bool {
+pub fn syntax_requires_trailing_semicolon_or_asi(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("syntax_requires_trailing_semicolon_or_asi"); 
     matches!(
         kind,
         SyntaxKind::VariableStatement
@@ -66,6 +66,6 @@ pub fn syntax_requires_trailing_semicolon_or_asi(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn node_is_asi_candidate(_node: &Arc<Node>, _file: &SourceFile) -> bool {
+pub fn node_is_asi_candidate(_node: &Arc<Node>, _file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("node_is_asi_candidate"); 
     false
 }

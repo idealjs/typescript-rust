@@ -8,7 +8,7 @@ impl Checker {
         source: &TypePredicate,
         target: &TypePredicate,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_type_predicate_related_to"); 
         if source.kind != target.kind {
             return Ternary::False;
         }
@@ -33,7 +33,7 @@ impl Checker {
         target: Arc<Type>,
         relation: RelationKind,
         _report_errors: bool,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_types"); 
         if self.is_type_related_to(&source, &target, relation) {
             Ternary::True
         } else {
@@ -41,7 +41,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn signature_is_method_or_constructor(&self, sig: &Arc<Signature>) -> bool {
+    pub(crate) fn signature_is_method_or_constructor(&self, sig: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("signature_is_method_or_constructor"); 
         let Some(decl) = sig.declaration.as_ref() else {
             return false;
         };
@@ -57,7 +57,7 @@ impl Checker {
         target: &Arc<Type>,
         kind: SignatureKind,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("signatures_related_to"); 
         if Arc::ptr_eq(source, &self.any_function_type()) {
             return Ternary::True;
         }
@@ -201,7 +201,7 @@ impl Checker {
         &self,
         source_signature: &Arc<Signature>,
         target_signature: &Arc<Signature>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("constructor_visibilities_are_compatible"); 
         let Some(source_declaration) = source_signature.declaration.as_ref() else {
             return true;
         };
@@ -231,7 +231,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         kind: SignatureKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("signatures_identical_to"); 
         let source_sigs = self.get_signatures_of_type(source, kind);
         let target_sigs = self.get_signatures_of_type(target, kind);
         if source_sigs.len() != target_sigs.len() {
@@ -261,7 +261,7 @@ impl Checker {
         _partial_match: bool,
         _ignore_this_types: bool,
         ignore_return_types: bool,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_signatures_identical"); 
         if source.type_parameters.len() != target.type_parameters.len() {
             return Ternary::False;
         }
@@ -318,7 +318,7 @@ impl Checker {
         self.compare_signatures_related(&source, target, mode, RelationKind::Identity)
     }
 
-    pub fn has_effective_rest_parameter(&mut self, sig: &Arc<Signature>) -> bool {
+    pub fn has_effective_rest_parameter(&mut self, sig: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("has_effective_rest_parameter"); 
         if !sig.has_rest_parameter() {
             return false;
         }
@@ -334,7 +334,7 @@ impl Checker {
         true
     }
 
-    pub fn get_parameter_count(&mut self, sig: &Arc<Signature>) -> usize {
+    pub fn get_parameter_count(&mut self, sig: &Arc<Signature>) -> usize { ::tsox_core::fntrace::enter("get_parameter_count"); 
         let length = sig.parameters.len();
         if !sig.has_rest_parameter() {
             return length;
@@ -356,7 +356,7 @@ impl Checker {
         length
     }
 
-    pub fn get_min_argument_count(&mut self, sig: &Arc<Signature>) -> usize {
+    pub fn get_min_argument_count(&mut self, sig: &Arc<Signature>) -> usize { ::tsox_core::fntrace::enter("get_min_argument_count"); 
         if sig.resolved_min_argument_count != -1 {
             return sig.resolved_min_argument_count.max(0) as usize;
         }
@@ -400,7 +400,7 @@ impl Checker {
         mc.max(0) as usize
     }
 
-    pub fn get_type_at_position(&mut self, sig: &Arc<Signature>, pos: usize) -> Arc<Type> {
+    pub fn get_type_at_position(&mut self, sig: &Arc<Signature>, pos: usize) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_at_position"); 
         self.try_get_type_at_position(sig, pos)
             .unwrap_or_else(|| self.any_type())
     }

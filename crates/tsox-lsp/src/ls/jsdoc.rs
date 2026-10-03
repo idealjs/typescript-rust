@@ -19,23 +19,23 @@ impl LanguageService {
         &self,
         _checker: &Checker,
         _symbol: &Arc<Symbol>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_symbol_documentation_comment"); 
         String::new()
     }
 
-    pub fn get_symbol_jsdoc_tags(&self, _symbol: &Arc<Symbol>) -> Vec<JSDocTagInfo> {
+    pub fn get_symbol_jsdoc_tags(&self, _symbol: &Arc<Symbol>) -> Vec<JSDocTagInfo> { ::tsox_core::fntrace::enter("get_symbol_jsdoc_tags"); 
         Vec::new()
     }
 }
 
-pub fn get_jsdoc(_node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_jsdoc(_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc"); 
     None
 }
 
-pub fn get_jsdoc_or_tag(_checker: &Checker, _node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_jsdoc_or_tag(_checker: &Checker, _node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_or_tag"); 
     None
 }
 
-pub fn contains_typedef_tag(_jsdoc: &Arc<Node>) -> bool {
+pub fn contains_typedef_tag(_jsdoc: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("contains_typedef_tag"); 
     false
 }

@@ -3,7 +3,7 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
-    pub fn is_type_identical_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_identical_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_identical_to"); 
         let source = if crate::checker::is_fresh_literal_type(source) {
             self.get_regular_type_of_literal_type(source)
         } else {
@@ -66,40 +66,40 @@ impl Checker {
         }
     }
 
-    pub fn is_type_assignable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_assignable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_assignable_to"); 
         if Arc::ptr_eq(source, target) {
             return true;
         }
         self.is_type_related_to(source, target, RelationKind::Assignable)
     }
 
-    pub fn is_type_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_subtype_of"); 
         if Arc::ptr_eq(source, target) {
             return true;
         }
         self.is_type_related_to(source, target, RelationKind::Subtype)
     }
 
-    pub fn is_type_strict_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_strict_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_strict_subtype_of"); 
         if Arc::ptr_eq(source, target) {
             return true;
         }
         self.is_type_related_to(source, target, RelationKind::StrictSubtype)
     }
 
-    pub fn is_type_comparable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_comparable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_comparable_to"); 
         if Arc::ptr_eq(source, target) {
             return true;
         }
         self.is_type_related_to(source, target, RelationKind::Comparable)
     }
 
-    pub fn are_types_comparable(&mut self, type1: &Arc<Type>, type2: &Arc<Type>) -> bool {
+    pub fn are_types_comparable(&mut self, type1: &Arc<Type>, type2: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("are_types_comparable"); 
         self.is_type_comparable_to(type1, type2) || self.is_type_comparable_to(type2, type1)
     }
 
     // 空成员且带接口/类符号：解析重入期返回的未完成实例（非 `{}` 字面量）
-    pub(crate) fn side_is_incomplete_shell(&self, t: &Arc<Type>, _id: u32) -> bool {
+    pub(crate) fn side_is_incomplete_shell(&self, t: &Arc<Type>, _id: u32) -> bool { ::tsox_core::fntrace::enter("side_is_incomplete_shell"); 
         t.as_structured().is_some_and(|s| {
             s.members.entries.is_empty()
                 && t.symbol
@@ -118,7 +118,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_related_to"); 
         let source = if crate::checker::is_fresh_literal_type(source) {
             self.get_regular_type_of_literal_type(source)
         } else {
@@ -343,7 +343,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn canonical_relation_type_id(&mut self, t: &Arc<Type>) -> u32 {
+    pub(crate) fn canonical_relation_type_id(&mut self, t: &Arc<Type>) -> u32 { ::tsox_core::fntrace::enter("canonical_relation_type_id"); 
         if let (TypeData::Object(o), Some(sym)) = (&t.data, t.symbol.as_ref())
             && !o.type_arguments.is_empty()
         {
@@ -362,7 +362,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn chain_message_key(&self, index: usize) -> Option<&'static str> {
+    pub(crate) fn chain_message_key(&self, index: usize) -> Option<&'static str> { ::tsox_core::fntrace::enter("chain_message_key"); 
         let len = self.relater_error_chain.len();
         if len <= index {
             return None;
@@ -370,7 +370,7 @@ impl Checker {
         Some(self.relater_error_chain[len - 1 - index].message.key)
     }
 
-    pub(crate) fn chain_args(&self, index: usize) -> Option<&[String]> {
+    pub(crate) fn chain_args(&self, index: usize) -> Option<&[String]> { ::tsox_core::fntrace::enter("chain_args"); 
         let len = self.relater_error_chain.len();
         if len <= index {
             return None;
@@ -379,7 +379,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn substitution_base_or_self(t: &Arc<Type>) -> Arc<Type> {
+pub(crate) fn substitution_base_or_self(t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("substitution_base_or_self"); 
     if t.flags.contains(TypeFlags::Substitution)
         && let TypeData::Substitution(sub) = &t.data
         && let Some(base) = &sub.base_type

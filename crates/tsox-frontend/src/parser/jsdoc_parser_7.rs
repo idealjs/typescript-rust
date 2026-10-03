@@ -4,7 +4,7 @@ use crate::parser::binary_precedence::is_keyword;
 use crate::parser::jsdoc::*;
 
 impl crate::parser::Parser {
-    pub(crate) fn parse_jsdoc_identifier_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_identifier_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_identifier_name"); 
         // JSDoc 标签名允许关键字（@this/@class 等），沿用词法名判定
         if !(self.token == SyntaxKind::Identifier || is_keyword(self.token)) {
             if let Some(msg) = diagnostic {
@@ -30,7 +30,7 @@ impl crate::parser::Parser {
         ))
     }
 
-    pub(crate) fn parse_jsdoc_entity_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_entity_name(&mut self, diagnostic: Option<Message>) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_entity_name"); 
         let mut node = self.parse_jsdoc_identifier_name(diagnostic);
         while self.parse_optional_jsdoc(SyntaxKind::DotToken) {
             let right = self.parse_jsdoc_identifier_name(diagnostic);
@@ -48,7 +48,7 @@ impl crate::parser::Parser {
         node
     }
 
-    pub(crate) fn parse_jsdoc_name_reference(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_name_reference(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_name_reference"); 
         let pos = self.token_pos();
         let has_brace = self.parse_optional_jsdoc(SyntaxKind::OpenBraceToken);
         let entity_name = self.parse_jsdoc_link_name();
@@ -67,7 +67,7 @@ impl crate::parser::Parser {
         ))
     }
 
-    pub(crate) fn parse_jsdoc_link_name(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_link_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_link_name"); 
         if !is_identifier_or_keyword_token(self.token) {
             return self.create_missing_node(
                 SyntaxKind::Identifier,
@@ -121,7 +121,7 @@ impl crate::parser::Parser {
     pub(crate) fn parse_jsdoc_type_name_with_namespace(
         &mut self,
         nested: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_jsdoc_type_name_with_namespace"); 
         if !is_identifier_or_keyword_token(self.token) {
             return None;
         }
@@ -152,7 +152,7 @@ impl crate::parser::Parser {
     pub(crate) fn parse_bracket_name_in_property_and_param_tag(
         &mut self,
         target: PropertyLikeParse,
-    ) -> (Arc<Node>, bool) {
+    ) -> (Arc<Node>, bool) { ::tsox_core::fntrace::enter("parse_bracket_name_in_property_and_param_tag"); 
         let is_bracketed = self.parse_optional_jsdoc(SyntaxKind::OpenBracketToken);
         if is_bracketed {
             self.skip_whitespace();
@@ -185,7 +185,7 @@ impl crate::parser::Parser {
 }
 
 impl crate::parser::Parser {
-    pub(crate) fn parse_jsdoc_link(&mut self, start: usize) -> Option<Arc<Node>> {
+    pub(crate) fn parse_jsdoc_link(&mut self, start: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_jsdoc_link"); 
         let saved_scanner = self.scanner.clone();
         let saved_token = self.token;
 
@@ -258,7 +258,7 @@ impl crate::parser::Parser {
         )))
     }
 
-    pub(crate) fn parse_jsdoc_link_prefix(&mut self) -> (String, bool) {
+    pub(crate) fn parse_jsdoc_link_prefix(&mut self) -> (String, bool) { ::tsox_core::fntrace::enter("parse_jsdoc_link_prefix"); 
         self.skip_whitespace_or_asterisk();
         if self.token != SyntaxKind::OpenBraceToken {
             return ("NONE".to_string(), false);

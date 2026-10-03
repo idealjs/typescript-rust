@@ -5,7 +5,7 @@ use crate::ast::utilities_types::is_type_node;
 use crate::ast::node_data_generated::is_jsdoc_type_expression;
 use std::sync::Arc;
 
-pub fn is_jsdoc_type_expression_or_child(node: &Node) -> bool {
+pub fn is_jsdoc_type_expression_or_child(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_type_expression_or_child"); 
     if is_jsdoc_type_expression(node) {
         return true;
     }

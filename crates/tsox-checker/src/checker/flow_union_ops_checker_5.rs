@@ -8,7 +8,7 @@ impl Checker {
         declared: &Arc<Type>,
         assigned: &Arc<Type>,
         evolving: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("reduced_assignment_type"); 
         if evolving {
             return Arc::clone(assigned);
         }
@@ -29,7 +29,7 @@ impl Checker {
         &mut self,
         declared: &Arc<Type>,
         assigned: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assignment_reduced_type"); 
         if Arc::ptr_eq(declared, assigned) {
             return Arc::clone(declared);
         }
@@ -53,7 +53,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_maybe_assignable_to"); 
         if !source.is_union() {
             return self.is_type_assignable_to(source, target);
         }
@@ -66,7 +66,7 @@ impl Checker {
             .any(|t| self.is_type_assignable_to(t, target))
     }
 
-    pub(crate) fn initial_type_of_declaration(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn initial_type_of_declaration(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("initial_type_of_declaration"); 
         match &expr.data {
             NodeData::VariableDeclaration(vd) => {
                 if let Some(init) = &vd.initializer {
@@ -205,7 +205,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn binding_element_property_name(element: &Arc<Node>) -> Option<String> {
+    pub(crate) fn binding_element_property_name(element: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("binding_element_property_name"); 
         let NodeData::BindingElement(be) = &element.data else {
             return None;
         };
@@ -215,14 +215,14 @@ impl Checker {
         be.name.as_ref().map(|n| n.text().to_string())
     }
 
-    pub(crate) fn binding_element_name_node(element: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn binding_element_name_node(element: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("binding_element_name_node"); 
         let NodeData::BindingElement(be) = &element.data else {
             return None;
         };
         be.property_name.clone().or_else(|| be.name.clone())
     }
 
-    pub(crate) fn in_ambient_declaration_context(&self) -> bool {
+    pub(crate) fn in_ambient_declaration_context(&self) -> bool { ::tsox_core::fntrace::enter("in_ambient_declaration_context"); 
         self.ambient_context_depth > 0
             || self
                 .current_file
@@ -231,7 +231,7 @@ impl Checker {
     }
 
     /// Go getApparentType：原始类型装箱显示为全局接口声明型（渲染名 Number 等）
-    pub(crate) fn boxed_declared_type_for_display(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn boxed_declared_type_for_display(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("boxed_declared_type_for_display"); 
         use crate::checker::types::TYPE_FLAGS_ENUM_LIKE;
         let name = if t.flags.intersects(
             TypeFlags::String
@@ -267,7 +267,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn binding_element_index(pattern: &Arc<Node>, element: &Arc<Node>) -> Option<usize> {
+    pub(crate) fn binding_element_index(pattern: &Arc<Node>, element: &Arc<Node>) -> Option<usize> { ::tsox_core::fntrace::enter("binding_element_index"); 
         let NodeData::BindingPattern(data) = &pattern.data else {
             return None;
         };
@@ -282,7 +282,7 @@ impl Checker {
         parent_type: &Arc<Type>,
         index: usize,
         error_node: Option<&Arc<Node>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("destructured_array_element_type"); 
         if parent_type.is_union() {
             // Go 解构位元素逐联合成分按下标取（联合元组各成分各自取元素），
             // 整体走 array-like 会拍平全部位置的元素
@@ -308,7 +308,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn for_in_or_of_statement_of(decl: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn for_in_or_of_statement_of(decl: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("for_in_or_of_statement_of"); 
         let list = decl.parent()?;
         if list.kind != SyntaxKind::VariableDeclarationList {
             return None;
@@ -324,7 +324,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn for_in_expression_of(decl: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn for_in_expression_of(decl: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("for_in_expression_of"); 
         let stmt = Self::for_in_or_of_statement_of(decl)?;
         if stmt.kind != SyntaxKind::ForInStatement {
             return None;
@@ -339,7 +339,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_property_of_type"); 
         if self.is_no_infer_type(t)
             && let TypeData::Substitution(sub) = &t.data
             && let Some(base) = sub.base_type.clone()
@@ -557,7 +557,7 @@ impl Checker {
         None
     }
 
-    fn global_object_member(&mut self, name: &str) -> Option<Arc<Symbol>> {
+    fn global_object_member(&mut self, name: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("global_object_member"); 
         let obj_sym = self.globals.get("Object").cloned()?;
         let obj_type = self.get_declared_type_of_symbol(&obj_sym);
         obj_type
@@ -569,7 +569,7 @@ impl Checker {
         &mut self,
         tuple: &crate::checker::types::TupleTypeData,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("tuple_base_type_member"); 
         let mut elements: Vec<Arc<Type>> = Vec::new();
         for e in &tuple.element_infos {
             let Some(ty) = &e.type_ else { continue };
@@ -599,7 +599,7 @@ impl Checker {
             .and_then(|s| s.members.get(name).cloned())
     }
 
-    pub(crate) fn unresolved_interface_symbol_of(&self, t: &Arc<Type>) -> Option<Arc<Symbol>> {
+    pub(crate) fn unresolved_interface_symbol_of(&self, t: &Arc<Type>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("unresolved_interface_symbol_of"); 
         if !t.flags.contains(crate::checker::types::TypeFlags::Object) {
             return None;
         }
@@ -620,7 +620,7 @@ impl Checker {
     }
 
     // 索引签名命中的合成属性（Go getPropertySymbolForIndexInfo）
-    fn synthetic_property_of_type(&mut self, name: &str, t: Arc<Type>) -> Arc<Symbol> {
+    fn synthetic_property_of_type(&mut self, name: &str, t: Arc<Type>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("synthetic_property_of_type"); 
         let sym = Arc::new(Symbol::new(SymbolFlags::Property, name.to_string()));
         self.value_symbol_links.insert(
             &sym,
@@ -634,7 +634,7 @@ impl Checker {
 }
 
 
-fn type_contains_widening_member(t: &Arc<Type>) -> bool {
+fn type_contains_widening_member(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_contains_widening_member"); 
     if t
         .object_flags
         .intersects(crate::checker::types::ObjectFlags::ContainsWideningType)

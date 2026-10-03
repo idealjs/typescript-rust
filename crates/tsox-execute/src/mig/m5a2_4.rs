@@ -7,7 +7,7 @@ use super::m5a2_3::{
     ReadableBuildInfoFilePendingEmit, ReadableBuildInfoResolvedRoot, ReadableBuildInfoSemanticDiagnostic,
 };
 
-pub fn to_readable_build_info(build_info: &BuildInfo, build_info_text: &str) -> String {
+pub fn to_readable_build_info(build_info: &BuildInfo, build_info_text: &str) -> String { ::tsox_core::fntrace::enter("to_readable_build_info"); 
     let mut readable = ReadableBuildInfo {
         build_info,
         version: build_info.version.clone(),
@@ -46,18 +46,18 @@ pub fn to_readable_build_info(build_info: &BuildInfo, build_info_text: &str) -> 
 }
 
 impl<'a> ReadableBuildInfo<'a> {
-    pub fn to_file_path(&self, file_id: BuildInfoFileId) -> String {
+    pub fn to_file_path(&self, file_id: BuildInfoFileId) -> String { ::tsox_core::fntrace::enter("to_file_path"); 
         self.build_info.file_names[(file_id - 1) as usize].clone()
     }
 
-    pub fn to_file_path_set(&self, file_id_list_id: BuildInfoFileIdListId) -> Vec<String> {
+    pub fn to_file_path_set(&self, file_id_list_id: BuildInfoFileIdListId) -> Vec<String> { ::tsox_core::fntrace::enter("to_file_path_set"); 
         self.file_ids_list[(file_id_list_id - 1) as usize].clone()
     }
 
     pub fn to_readable_build_info_diagnostic(
         &self,
         diagnostics: &[Box<BuildInfoDiagnostic>],
-    ) -> Vec<Box<ReadableBuildInfoDiagnostic>> {
+    ) -> Vec<Box<ReadableBuildInfoDiagnostic>> { ::tsox_core::fntrace::enter("to_readable_build_info_diagnostic"); 
         diagnostics
             .iter()
             .map(|d| {
@@ -90,14 +90,14 @@ impl<'a> ReadableBuildInfo<'a> {
     pub fn to_readable_build_info_diagnostics_of_file(
         &self,
         diagnostics: &BuildInfoDiagnosticsOfFile,
-    ) -> ReadableBuildInfoDiagnosticsOfFile {
+    ) -> ReadableBuildInfoDiagnosticsOfFile { ::tsox_core::fntrace::enter("to_readable_build_info_diagnostics_of_file"); 
         ReadableBuildInfoDiagnosticsOfFile {
             file: self.to_file_path(diagnostics.file_id),
             diagnostics: self.to_readable_build_info_diagnostic(&diagnostics.diagnostics),
         }
     }
 
-    pub fn set_file_infos(&mut self) {
+    pub fn set_file_infos(&mut self) { ::tsox_core::fntrace::enter("set_file_infos"); 
         self.file_infos = self
             .build_info
             .file_infos
@@ -122,7 +122,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_root(&mut self) {
+    pub fn set_root(&mut self) { ::tsox_core::fntrace::enter("set_root"); 
         self.root = self
             .build_info
             .root
@@ -145,7 +145,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_file_ids_list(&mut self) {
+    pub fn set_file_ids_list(&mut self) { ::tsox_core::fntrace::enter("set_file_ids_list"); 
         self.file_ids_list = self
             .build_info
             .file_ids_list
@@ -154,7 +154,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_referenced_map(&mut self) {
+    pub fn set_referenced_map(&mut self) { ::tsox_core::fntrace::enter("set_referenced_map"); 
         if !self.build_info.referenced_map.is_empty() {
             let mut referenced_map =
                 tsox_core::collections::ordered_map::OrderedMap::new();
@@ -168,7 +168,7 @@ impl<'a> ReadableBuildInfo<'a> {
         }
     }
 
-    pub fn set_change_file_set(&mut self) {
+    pub fn set_change_file_set(&mut self) { ::tsox_core::fntrace::enter("set_change_file_set"); 
         self.change_file_set = self
             .build_info
             .change_file_set
@@ -177,7 +177,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_semantic_diagnostics(&mut self) {
+    pub fn set_semantic_diagnostics(&mut self) { ::tsox_core::fntrace::enter("set_semantic_diagnostics"); 
         self.semantic_diagnostics_per_file = self
             .build_info
             .semantic_diagnostics_per_file
@@ -202,7 +202,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_emit_diagnostics(&mut self) {
+    pub fn set_emit_diagnostics(&mut self) { ::tsox_core::fntrace::enter("set_emit_diagnostics"); 
         self.emit_diagnostics_per_file = self
             .build_info
             .emit_diagnostics_per_file
@@ -211,7 +211,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_affected_files_pending_emit(&mut self) {
+    pub fn set_affected_files_pending_emit(&mut self) { ::tsox_core::fntrace::enter("set_affected_files_pending_emit"); 
         if self.build_info.affected_files_pending_emit.is_empty() {
             return;
         }
@@ -239,7 +239,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_emit_signatures(&mut self) {
+    pub fn set_emit_signatures(&mut self) { ::tsox_core::fntrace::enter("set_emit_signatures"); 
         self.emit_signatures = self
             .build_info
             .emit_signatures
@@ -254,7 +254,7 @@ impl<'a> ReadableBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_resolved_root(&mut self) {
+    pub fn set_resolved_root(&mut self) { ::tsox_core::fntrace::enter("set_resolved_root"); 
         self.resolved_root = self
             .build_info
             .resolved_root

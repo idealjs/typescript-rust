@@ -3,7 +3,7 @@
 use crate::checker::checker_expressions::*;
 
 impl Checker {
-    pub(crate) fn check_identifier_reference(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_identifier_reference(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_identifier_reference"); 
         let name = match &node.data {
             tsox_frontend::ast::NodeData::Identifier(data) => data.text.as_str(),
             _ => return,
@@ -353,7 +353,7 @@ impl Checker {
 }
 
 impl Checker {
-    fn value_meaning_resolves(&mut self, node: &Arc<Node>) -> bool {
+    fn value_meaning_resolves(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("value_meaning_resolves"); 
         let Some(mut s) = self.resolve_identifier_with_meaning(node, SymbolFlags::VALUE) else {
             return false;
         };
@@ -373,7 +373,7 @@ impl Checker {
         s.flags.intersects(SymbolFlags::VALUE)
     }
 
-    pub(crate) fn is_es2015_or_later_constructor_name(name: &str) -> bool {
+    pub(crate) fn is_es2015_or_later_constructor_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_es2015_or_later_constructor_name"); 
         matches!(
             name,
             "Promise" | "Symbol" | "Map" | "WeakMap" | "Set" | "WeakSet"
@@ -381,7 +381,7 @@ impl Checker {
     }
 }
 
-fn is_type_position_use_site(node: &Arc<Node>) -> bool {
+fn is_type_position_use_site(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_position_use_site"); 
     let mut cur = node.parent();
     while let Some(p) = cur {
         match p.kind {
@@ -397,7 +397,7 @@ fn is_type_position_use_site(node: &Arc<Node>) -> bool {
 
 impl Checker {
     // Go isExportAssignmentExpressionName（utilities.go）
-    pub(crate) fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_export_assignment_expression_name"); 
         let mut current = Some(Arc::clone(node));
         while let Some(c) = &current
             && matches!(
@@ -419,7 +419,7 @@ impl Checker {
     pub(crate) fn primitive_heritage_message(
         node: &Arc<Node>,
         name: &str,
-    ) -> Option<tsox_core::diagnostics::Message> {
+    ) -> Option<tsox_core::diagnostics::Message> { ::tsox_core::fntrace::enter("primitive_heritage_message"); 
         let primitive = matches!(name, "any" | "string" | "number" | "boolean" | "never" | "unknown");
         if !primitive {
             return None;

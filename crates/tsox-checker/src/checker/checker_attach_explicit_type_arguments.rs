@@ -2,7 +2,7 @@
 
 use crate::checker::checker::*;
 
-pub(crate) fn attach_explicit_type_arguments(t: &Arc<Type>, args: Vec<Arc<Type>>) -> Arc<Type> {
+pub(crate) fn attach_explicit_type_arguments(t: &Arc<Type>, args: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("attach_explicit_type_arguments"); 
     if let TypeData::Object(o) = &t.data {
         let mut rebuilt = Type::new(
             t.flags,
@@ -30,7 +30,7 @@ pub(crate) fn attach_explicit_type_arguments(t: &Arc<Type>, args: Vec<Arc<Type>>
     Arc::clone(t)
 }
 
-pub(crate) fn qualified_name_text(name: &Arc<Node>) -> String {
+pub(crate) fn qualified_name_text(name: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("qualified_name_text"); 
     match &name.data {
         tsox_frontend::ast::NodeData::QualifiedName(d) => {
             format!("{}.{}", qualified_name_text(&d.left), d.right.text())
@@ -39,7 +39,7 @@ pub(crate) fn qualified_name_text(name: &Arc<Node>) -> String {
     }
 }
 
-pub(crate) fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> {
+pub(crate) fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> { ::tsox_core::fntrace::enter("levenshtein_with_max"); 
     let s1: Vec<char> = s1.chars().collect();
     let s2: Vec<char> = s2.chars().collect();
     let big = max + 0.01;
@@ -86,7 +86,7 @@ pub(crate) fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> 
     Some(res)
 }
 
-pub(crate) fn relative_emit_specifier(from_file: &str, symbol_file: &str) -> String {
+pub(crate) fn relative_emit_specifier(from_file: &str, symbol_file: &str) -> String { ::tsox_core::fntrace::enter("relative_emit_specifier"); 
     let from_dir = {
         let dir = from_file.rsplit_once('/').map(|(d, _)| d).unwrap_or("");
         dir.trim_end_matches('/').to_string()
@@ -135,7 +135,7 @@ pub(crate) fn relative_emit_specifier(from_file: &str, symbol_file: &str) -> Str
 pub(crate) fn module_format_is_esm_for_require_check(
     path: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("module_format_is_esm_for_require_check"); 
     use tsox_core::core::compiler_options::ModuleKind;
     let lower = path.to_ascii_lowercase();
     if lower.ends_with(".d.ts") {
@@ -147,7 +147,7 @@ pub(crate) fn module_format_is_esm_for_require_check(
 pub(crate) fn importer_is_cjs_for_require_check(
     path: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("importer_is_cjs_for_require_check"); 
     use tsox_core::core::compiler_options::ModuleKind;
     let lower = path.to_ascii_lowercase();
     if lower.ends_with(".d.ts") {
@@ -156,12 +156,12 @@ pub(crate) fn importer_is_cjs_for_require_check(
     tsox_tsoptions::tsoptions::implied_node_format_of_file(path, read_file) == ModuleKind::CommonJS
 }
 
-pub(crate) fn module_is_instantiated(node: &Arc<Node>, preserve_const_enums: bool) -> bool {
+pub(crate) fn module_is_instantiated(node: &Arc<Node>, preserve_const_enums: bool) -> bool { ::tsox_core::fntrace::enter("module_is_instantiated"); 
     let state = module_instance_state(node, &mut Vec::new());
     state == 2 || (preserve_const_enums && state == 1)
 }
 
-pub(crate) fn module_instance_state(node: &Arc<Node>, visited: &mut Vec<usize>) -> u8 {
+pub(crate) fn module_instance_state(node: &Arc<Node>, visited: &mut Vec<usize>) -> u8 { ::tsox_core::fntrace::enter("module_instance_state"); 
     let id = Arc::as_ptr(node) as usize;
 
     if visited.contains(&id) {
@@ -173,7 +173,7 @@ pub(crate) fn module_instance_state(node: &Arc<Node>, visited: &mut Vec<usize>) 
     state
 }
 
-pub(crate) fn module_instance_state_worker(node: &Arc<Node>, visited: &mut Vec<usize>) -> u8 {
+pub(crate) fn module_instance_state_worker(node: &Arc<Node>, visited: &mut Vec<usize>) -> u8 { ::tsox_core::fntrace::enter("module_instance_state_worker"); 
     match &node.data {
         tsox_frontend::ast::NodeData::InterfaceDeclaration(_)
         | tsox_frontend::ast::NodeData::TypeAliasDeclaration(_) => 0,

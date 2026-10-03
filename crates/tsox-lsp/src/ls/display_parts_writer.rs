@@ -35,7 +35,7 @@ pub struct DisplayPartsWriter {
     last_written: String,
 }
 
-pub fn new_display_parts_writer(vs_capability: bool) -> DisplayPartsWriter {
+pub fn new_display_parts_writer(vs_capability: bool) -> DisplayPartsWriter { ::tsox_core::fntrace::enter("new_display_parts_writer"); 
     DisplayPartsWriter {
         builder: String::new(),
         runs: Vec::new(),
@@ -45,7 +45,7 @@ pub fn new_display_parts_writer(vs_capability: bool) -> DisplayPartsWriter {
 }
 
 impl DisplayPartsWriter {
-    pub fn add_run(&mut self, classification: &str, text: &str) {
+    pub fn add_run(&mut self, classification: &str, text: &str) { ::tsox_core::fntrace::enter("add_run"); 
         if text.is_empty() {
             return;
         }
@@ -59,11 +59,11 @@ impl DisplayPartsWriter {
         self.builder.push_str(text);
     }
 
-    pub fn write_classified(&mut self, text: &str, classification: &str) {
+    pub fn write_classified(&mut self, text: &str, classification: &str) { ::tsox_core::fntrace::enter("write_classified"); 
         self.add_run(classification, text);
     }
 
-    pub fn write_from(&mut self, other: &DisplayPartsWriter) {
+    pub fn write_from(&mut self, other: &DisplayPartsWriter) { ::tsox_core::fntrace::enter("write_from"); 
         self.builder.push_str(&other.builder);
         if self.vs_capability {
             self.runs.extend(other.runs.iter().cloned());
@@ -73,21 +73,21 @@ impl DisplayPartsWriter {
         }
     }
 
-    pub fn get_runs(&self) -> &[VsClassifiedTextRun] {
+    pub fn get_runs(&self) -> &[VsClassifiedTextRun] { ::tsox_core::fntrace::enter("get_runs"); 
         &self.runs
     }
 
-    pub fn as_string(&self) -> &str {
+    pub fn as_string(&self) -> &str { ::tsox_core::fntrace::enter("as_string"); 
         &self.builder
     }
 
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self) { ::tsox_core::fntrace::enter("clear"); 
         self.last_written.clear();
         self.builder.clear();
         self.runs.clear();
     }
 
-    pub fn has_trailing_whitespace(&self) -> bool {
+    pub fn has_trailing_whitespace(&self) -> bool { ::tsox_core::fntrace::enter("has_trailing_whitespace"); 
         if self.builder.is_empty() {
             return false;
         }
@@ -98,71 +98,71 @@ impl DisplayPartsWriter {
             .unwrap_or(false)
     }
 
-    pub fn write(&mut self, s: &str) {
+    pub fn write(&mut self, s: &str) { ::tsox_core::fntrace::enter("write"); 
         self.add_run(classification_type_name::TEXT, s);
     }
 
-    pub fn write_comment(&mut self, text: &str) {
+    pub fn write_comment(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_comment"); 
         self.add_run(classification_type_name::TEXT, text);
     }
 
-    pub fn write_keyword(&mut self, text: &str) {
+    pub fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         self.add_run(classification_type_name::KEYWORD, text);
     }
 
-    pub fn write_line(&mut self) {
+    pub fn write_line(&mut self) { ::tsox_core::fntrace::enter("write_line"); 
         self.add_run(classification_type_name::WHITE_SPACE, " ");
     }
 
-    pub fn write_line_force(&mut self, _force: bool) {
+    pub fn write_line_force(&mut self, _force: bool) { ::tsox_core::fntrace::enter("write_line_force"); 
         self.add_run(classification_type_name::WHITE_SPACE, " ");
     }
 
-    pub fn write_literal(&mut self, s: &str) {
+    pub fn write_literal(&mut self, s: &str) { ::tsox_core::fntrace::enter("write_literal"); 
         self.add_run(classification_type_name::STRING, s);
     }
 
-    pub fn write_operator(&mut self, text: &str) {
+    pub fn write_operator(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_operator"); 
         self.add_run(classification_type_name::OPERATOR, text);
     }
 
-    pub fn write_parameter(&mut self, text: &str) {
+    pub fn write_parameter(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_parameter"); 
         self.add_run(classification_type_name::PARAMETER_NAME, text);
     }
 
-    pub fn write_property(&mut self, text: &str) {
+    pub fn write_property(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_property"); 
         self.add_run(classification_type_name::PROPERTY_NAME, text);
     }
 
-    pub fn write_punctuation(&mut self, text: &str) {
+    pub fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         self.add_run(classification_type_name::PUNCTUATION, text);
     }
 
-    pub fn write_space(&mut self, text: &str) {
+    pub fn write_space(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_space"); 
         self.add_run(classification_type_name::WHITE_SPACE, text);
     }
 
-    pub fn write_string_literal(&mut self, text: &str) {
+    pub fn write_string_literal(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_string_literal"); 
         self.add_run(classification_type_name::STRING, text);
     }
 
-    pub fn write_symbol(&mut self, text: &str, symbol: &Symbol) {
+    pub fn write_symbol(&mut self, text: &str, symbol: &Symbol) { ::tsox_core::fntrace::enter("write_symbol"); 
         let classification = classification_for_symbol(symbol);
         self.add_run(classification, text);
     }
 
-    pub fn write_trailing_semicolon(&mut self, text: &str) {
+    pub fn write_trailing_semicolon(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_trailing_semicolon"); 
         self.add_run(classification_type_name::PUNCTUATION, text);
     }
 }
 
 impl std::fmt::Display for DisplayPartsWriter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         f.write_str(&self.builder)
     }
 }
 
-pub fn classification_for_symbol(symbol: &Symbol) -> &'static str {
+pub fn classification_for_symbol(symbol: &Symbol) -> &'static str { ::tsox_core::fntrace::enter("classification_for_symbol"); 
     use tsox_frontend::ast::SymbolFlags;
     let flags = symbol.flags;
     if flags.contains(SymbolFlags::VARIABLE) {
@@ -213,7 +213,7 @@ pub fn classification_for_symbol(symbol: &Symbol) -> &'static str {
     classification_type_name::TEXT
 }
 
-pub fn is_first_declaration_of_symbol_parameter(symbol: &Symbol) -> bool {
+pub fn is_first_declaration_of_symbol_parameter(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_first_declaration_of_symbol_parameter"); 
     use tsox_frontend::ast::SyntaxKind;
     symbol
         .declarations

@@ -13,7 +13,7 @@ pub const SIGNATURE_HELP_NODE_BUILDER_FLAGS: u32 = 0;
 
 const ELEMENT_FLAGS_NON_REQUIRED_BITS: u32 = 0b1110;
 
-fn m5w_nil_node() -> Arc<Node> {
+fn m5w_nil_node() -> Arc<Node> { ::tsox_core::fntrace::enter("m5w_nil_node"); 
     Arc::new(Node::new(
         SyntaxKind::MissingDeclaration,
         NodeData::MissingDeclaration(tsox_frontend::ast::MissingDeclarationData {
@@ -28,7 +28,7 @@ pub struct M5wCallInvocation {
 }
 
 impl Default for M5wCallInvocation {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         M5wCallInvocation {
             node: m5w_nil_node(),
         }
@@ -41,7 +41,7 @@ pub struct M5wTypeArgsInvocation {
 }
 
 impl Default for M5wTypeArgsInvocation {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         M5wTypeArgsInvocation {
             called: m5w_nil_node(),
         }
@@ -56,7 +56,7 @@ pub struct M5wContextualInvocation {
 }
 
 impl Default for M5wContextualInvocation {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         M5wContextualInvocation {
             signature: None,
             node: m5w_nil_node(),
@@ -124,7 +124,7 @@ pub struct M5wSignatureHelpParameter {
 
 pub fn get_enclosing_declaration_from_invocation(
     invocation: &M5wInvocation,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_enclosing_declaration_from_invocation"); 
     if let Some(call) = &invocation.call_invocation {
         return Some(call.node.clone());
     }
@@ -136,7 +136,7 @@ pub fn get_enclosing_declaration_from_invocation(
 
 pub fn get_expression_from_invocation(
     argument_info: &M5wArgumentListInfo,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_expression_from_invocation"); 
     if let Some(call) = &argument_info.invocation.call_invocation {
         return Some(tsox_frontend::ast::mig::x4ast::get_invoked_expression(&call.node));
     }
@@ -147,7 +147,7 @@ pub fn get_expression_from_invocation(
         .map(|t| t.called.clone())
 }
 
-pub fn call_or_new_expression_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn call_or_new_expression_expression(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("call_or_new_expression_expression"); 
     match &node.data {
         NodeData::CallExpression(d) => Some(d.expression.clone()),
         NodeData::NewExpression(d) => Some(d.expression.clone()),
@@ -155,7 +155,7 @@ pub fn call_or_new_expression_expression(node: &Arc<Node>) -> Option<Arc<Node>> 
     }
 }
 
-pub fn call_or_new_expression_type_argument_list(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+pub fn call_or_new_expression_type_argument_list(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("call_or_new_expression_type_argument_list"); 
     match &node.data {
         NodeData::CallExpression(d) => d.type_arguments.clone(),
         NodeData::NewExpression(d) => d.type_arguments.clone(),
@@ -169,7 +169,7 @@ pub fn get_candidate_or_type_info(
     source_file: &Arc<SourceFile>,
     starting_token: &Arc<Node>,
     only_use_syntactic_owners: bool,
-) -> Option<M5wCandidateOrTypeInfo> {
+) -> Option<M5wCandidateOrTypeInfo> { ::tsox_core::fntrace::enter("get_candidate_or_type_info"); 
     if let Some(call) = &info.invocation.call_invocation {
         if only_use_syntactic_owners
             && !is_syntactic_owner(starting_token, &call.node, source_file)
@@ -240,7 +240,7 @@ pub fn is_syntactic_owner(
     starting_token: &Arc<Node>,
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_syntactic_owner"); 
     if !tsox_frontend::ast::mig::m3f_4::is_call_or_new_expression(node) {
         return false;
     }
@@ -264,7 +264,7 @@ pub fn contains_preceding_token(
     starting_token: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     container: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("contains_preceding_token"); 
     let pos = starting_token.pos();
     let mut current_parent = starting_token.parent();
     while let Some(parent) = current_parent {
@@ -281,7 +281,7 @@ pub fn contains_preceding_token(
 pub fn get_children_from_non_js_doc_node(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_children_from_non_js_doc_node"); 
     let mut child_nodes: Vec<Arc<Node>> = Vec::new();
     ast::for_each_child(node, |child: &Arc<Node>| {
         child_nodes.push(Arc::clone(child));
@@ -335,7 +335,7 @@ pub fn get_containing_argument_info(
     checker: &mut Checker,
     is_manually_invoked: bool,
     position: usize,
-) -> Option<M5wArgumentListInfo> {
+) -> Option<M5wArgumentListInfo> { ::tsox_core::fntrace::enter("get_containing_argument_info"); 
     let mut first_argument_info: Option<M5wArgumentListInfo> = None;
     let mut current = Some(node.clone());
     while let Some(n) = current {
@@ -376,14 +376,14 @@ pub fn get_immediately_containing_argument_or_contextual_parameter_info(
     position: usize,
     source_file: &Arc<SourceFile>,
     checker: &mut Checker,
-) -> Option<M5wArgumentListInfo> {
+) -> Option<M5wArgumentListInfo> { ::tsox_core::fntrace::enter("get_immediately_containing_argument_or_contextual_parameter_info"); 
     if let Some(result) = super::m5w_2::try_get_parameter_info(node, source_file, checker) {
         return Some(result);
     }
     super::m5w_2::get_immediately_containing_argument_info(node, position, source_file, checker)
 }
 
-pub fn get_spread_element_count(node: &Node, c: &mut Checker) -> usize {
+pub fn get_spread_element_count(node: &Node, c: &mut Checker) -> usize { ::tsox_core::fntrace::enter("get_spread_element_count"); 
     let expression = match &node.data {
         NodeData::SpreadElement(d) => d.expression.clone(),
         _ => return 0,
@@ -414,7 +414,7 @@ pub fn get_token_from_node_list(
     node_list: Option<&Arc<NodeList>>,
     node_list_parent: Option<&Arc<Node>>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_token_from_node_list"); 
     let (Some(node_list), Some(node_list_parent)) = (node_list, node_list_parent) else {
         return Vec::new();
     };
@@ -447,7 +447,7 @@ pub fn get_token_from_node_list(
     tokens
 }
 
-pub fn get_highest_binary(b: &Arc<Node>) -> Arc<Node> {
+pub fn get_highest_binary(b: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_highest_binary"); 
     if let Some(parent) = b.parent() {
         if let NodeData::BinaryExpression(_) = &parent.data {
             return get_highest_binary(&parent);
@@ -456,7 +456,7 @@ pub fn get_highest_binary(b: &Arc<Node>) -> Arc<Node> {
     Arc::clone(b)
 }
 
-pub fn count_binary_expression_parameters(b: &Node) -> usize {
+pub fn count_binary_expression_parameters(b: &Node) -> usize { ::tsox_core::fntrace::enter("count_binary_expression_parameters"); 
     if let NodeData::BinaryExpression(d) = &b.data {
         if let NodeData::BinaryExpression(_) = &d.left.data {
             return count_binary_expression_parameters(&d.left) + 1;

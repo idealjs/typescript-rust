@@ -19,13 +19,13 @@ use crate::mig::m4h_8::r36k26_defs::EmitContextCommentRangeR36k26;
 use crate::mig::m4l_6::TypeEraserTransformer;
 use crate::printer::{EmitContext, NodeFactory};
 
-fn k3_rest_helper() -> &'static Arc<EmitHelper> {
+fn k3_rest_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("k3_rest_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(rest_helper()))
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_partially_emitted_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_partially_emitted_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_partially_emitted_expression"); 
         Arc::new(Node::new(
             SyntaxKind::PartiallyEmittedExpression,
             NodeData::PartiallyEmittedExpression(ndg::PartiallyEmittedExpressionData {
@@ -42,7 +42,7 @@ impl<'a> NodeFactory<'a> {
         postfix_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(ndg::PropertyDeclarationData {
@@ -65,7 +65,7 @@ impl<'a> NodeFactory<'a> {
         exclamation_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_variable_declaration_node"); 
         let mut updated = Node::new(
             SyntaxKind::VariableDeclaration,
             NodeData::VariableDeclaration(ndg::VariableDeclarationData {
@@ -85,7 +85,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         token: SyntaxKind,
         types: &NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_heritage_clause"); 
         let mut updated = Node::new(
             SyntaxKind::HeritageClause,
             NodeData::HeritageClause(ndg::HeritageClauseData {
@@ -104,7 +104,7 @@ impl<'a> NodeFactory<'a> {
         expression: &Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
         arguments: &NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_new_expression"); 
         let mut updated = Node::new(
             SyntaxKind::NewExpression,
             NodeData::NewExpression(ndg::NewExpressionData {
@@ -126,7 +126,7 @@ impl<'a> NodeFactory<'a> {
         tag_name: &Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
         attributes: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_jsx_self_closing_element"); 
         let mut updated = Node::new(
             SyntaxKind::JsxSelfClosingElement,
             NodeData::JsxSelfClosingElement(ndg::JsxSelfClosingElementData {
@@ -146,7 +146,7 @@ impl<'a> NodeFactory<'a> {
         tag_name: &Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
         attributes: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_jsx_opening_element"); 
         let mut updated = Node::new(
             SyntaxKind::JsxOpeningElement,
             NodeData::JsxOpeningElement(ndg::JsxOpeningElementData {
@@ -166,7 +166,7 @@ impl<'a> NodeFactory<'a> {
         elements: &[Arc<Node>],
         computed_temp_variables: &[Arc<Node>],
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_rest_helper"); 
         self.emit_context
             .request_emit_helper(k3_rest_helper());
         let mut property_names: Vec<Arc<Node>> = Vec::new();
@@ -216,7 +216,7 @@ impl<'a> NodeFactory<'a> {
 pub fn visit_accessor_declaration_k3(
     tx: &mut TypeEraserTransformer,
     node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_accessor_declaration_k3"); 
     let is_get = node.kind == SyntaxKind::GetAccessor;
     if tsox_frontend::ast::node_is_missing(node.body())
         && node.has_syntactic_modifier(ModifierFlags::Ambient)

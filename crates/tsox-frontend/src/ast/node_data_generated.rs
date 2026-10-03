@@ -1396,7 +1396,7 @@ pub enum NodeData {
 pub fn for_each_child<F>(node: &Node, mut visitor: F) -> bool
 where
     F: FnMut(&Arc<Node>) -> bool,
-{
+{ ::tsox_core::fntrace::enter("for_each_child"); 
     match &node.data {
         NodeData::QualifiedName(data) => {
             if visitor(&data.left) {
@@ -3645,7 +3645,7 @@ where
     false
 }
 
-pub fn node_text(node: &Node) -> &str {
+pub fn node_text(node: &Node) -> &str { ::tsox_core::fntrace::enter("node_text"); 
     match &node.data {
         NodeData::Identifier(d) => &d.text,
         NodeData::PrivateIdentifier(d) => &d.text,
@@ -3662,7 +3662,7 @@ pub fn node_text(node: &Node) -> &str {
     }
 }
 
-pub fn node_expression(node: &Node) -> Option<&Arc<Node>> {
+pub fn node_expression(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node_expression"); 
     match &node.data {
         NodeData::ComputedPropertyName(d) => Some(&d.expression),
         NodeData::Decorator(d) => Some(&d.expression),
@@ -3701,7 +3701,7 @@ pub fn node_expression(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn node_name(node: &Node) -> Option<&Arc<Node>> {
+pub fn node_name(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node_name"); 
     match &node.data {
         NodeData::VariableDeclaration(d) => Some(&d.name),
         NodeData::ParameterDeclaration(d) => Some(&d.name),
@@ -3748,7 +3748,7 @@ pub fn node_name(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn node_type(node: &Node) -> Option<&Arc<Node>> {
+pub fn node_type(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node_type"); 
     match &node.data {
         NodeData::ArrayTypeNode(d) => Some(&d.element_type),
         NodeData::ParenthesizedTypeNode(d) => Some(&d.type_node),
@@ -3781,7 +3781,7 @@ pub fn node_type(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn is_token(node: &Node) -> bool {
+pub fn is_token(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_token"); 
     match node.kind {
         SyntaxKind::Unknown
         | SyntaxKind::EndOfFile
@@ -3954,276 +3954,276 @@ pub fn is_token(node: &Node) -> bool {
     }
 }
 
-pub fn is_identifier(node: &Node) -> bool {
+pub fn is_identifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_identifier"); 
     node.kind == SyntaxKind::Identifier
 }
 
-pub fn is_private_identifier(node: &Node) -> bool {
+pub fn is_private_identifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_private_identifier"); 
     node.kind == SyntaxKind::PrivateIdentifier
 }
 
-pub fn is_qualified_name(node: &Node) -> bool {
+pub fn is_qualified_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_qualified_name"); 
     node.kind == SyntaxKind::QualifiedName
 }
 
-pub fn is_computed_property_name(node: &Node) -> bool {
+pub fn is_computed_property_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_computed_property_name"); 
     node.kind == SyntaxKind::ComputedPropertyName
 }
 
-pub fn is_decorator(node: &Node) -> bool {
+pub fn is_decorator(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_decorator"); 
     node.kind == SyntaxKind::Decorator
 }
 
-pub fn is_empty_statement(node: &Node) -> bool {
+pub fn is_empty_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_empty_statement"); 
     node.kind == SyntaxKind::EmptyStatement
 }
 
-pub fn is_if_statement(node: &Node) -> bool {
+pub fn is_if_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_if_statement"); 
     node.kind == SyntaxKind::IfStatement
 }
 
-pub fn is_do_statement(node: &Node) -> bool {
+pub fn is_do_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_do_statement"); 
     node.kind == SyntaxKind::DoStatement
 }
 
-pub fn is_while_statement(node: &Node) -> bool {
+pub fn is_while_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_while_statement"); 
     node.kind == SyntaxKind::WhileStatement
 }
 
-pub fn is_for_statement(node: &Node) -> bool {
+pub fn is_for_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_for_statement"); 
     node.kind == SyntaxKind::ForStatement
 }
 
-pub fn is_for_in_or_of_statement(node: &Node) -> bool {
+pub fn is_for_in_or_of_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_for_in_or_of_statement"); 
     match node.kind {
         SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => true,
         _ => false,
     }
 }
 
-pub fn is_break_statement(node: &Node) -> bool {
+pub fn is_break_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_break_statement"); 
     node.kind == SyntaxKind::BreakStatement
 }
 
-pub fn is_continue_statement(node: &Node) -> bool {
+pub fn is_continue_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_continue_statement"); 
     node.kind == SyntaxKind::ContinueStatement
 }
 
-pub fn is_return_statement(node: &Node) -> bool {
+pub fn is_return_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_return_statement"); 
     node.kind == SyntaxKind::ReturnStatement
 }
 
-pub fn is_with_statement(node: &Node) -> bool {
+pub fn is_with_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_with_statement"); 
     node.kind == SyntaxKind::WithStatement
 }
 
-pub fn is_switch_statement(node: &Node) -> bool {
+pub fn is_switch_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_switch_statement"); 
     node.kind == SyntaxKind::SwitchStatement
 }
 
-pub fn is_case_block(node: &Node) -> bool {
+pub fn is_case_block(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_case_block"); 
     node.kind == SyntaxKind::CaseBlock
 }
 
-pub fn is_case_or_default_clause(node: &Node) -> bool {
+pub fn is_case_or_default_clause(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_case_or_default_clause"); 
     match node.kind {
         SyntaxKind::CaseClause | SyntaxKind::DefaultClause => true,
         _ => false,
     }
 }
 
-pub fn is_throw_statement(node: &Node) -> bool {
+pub fn is_throw_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_throw_statement"); 
     node.kind == SyntaxKind::ThrowStatement
 }
 
-pub fn is_try_statement(node: &Node) -> bool {
+pub fn is_try_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_try_statement"); 
     node.kind == SyntaxKind::TryStatement
 }
 
-pub fn is_catch_clause(node: &Node) -> bool {
+pub fn is_catch_clause(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_catch_clause"); 
     node.kind == SyntaxKind::CatchClause
 }
 
-pub fn is_debugger_statement(node: &Node) -> bool {
+pub fn is_debugger_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_debugger_statement"); 
     node.kind == SyntaxKind::DebuggerStatement
 }
 
-pub fn is_labeled_statement(node: &Node) -> bool {
+pub fn is_labeled_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_labeled_statement"); 
     node.kind == SyntaxKind::LabeledStatement
 }
 
-pub fn is_expression_statement(node: &Node) -> bool {
+pub fn is_expression_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_statement"); 
     node.kind == SyntaxKind::ExpressionStatement
 }
 
-pub fn is_block(node: &Node) -> bool {
+pub fn is_block(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_block"); 
     node.kind == SyntaxKind::Block
 }
 
-pub fn is_variable_statement(node: &Node) -> bool {
+pub fn is_variable_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_variable_statement"); 
     node.kind == SyntaxKind::VariableStatement
 }
 
-pub fn is_variable_declaration(node: &Node) -> bool {
+pub fn is_variable_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration"); 
     node.kind == SyntaxKind::VariableDeclaration
 }
 
-pub fn is_variable_declaration_list(node: &Node) -> bool {
+pub fn is_variable_declaration_list(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_list"); 
     node.kind == SyntaxKind::VariableDeclarationList
 }
 
-pub fn is_binding_pattern(node: &Node) -> bool {
+pub fn is_binding_pattern(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_binding_pattern"); 
     match node.kind {
         SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern => true,
         _ => false,
     }
 }
 
-pub fn is_parameter_declaration(node: &Node) -> bool {
+pub fn is_parameter_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_parameter_declaration"); 
     node.kind == SyntaxKind::Parameter
 }
 
-pub fn is_binding_element(node: &Node) -> bool {
+pub fn is_binding_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_binding_element"); 
     node.kind == SyntaxKind::BindingElement
 }
 
-pub fn is_missing_declaration(node: &Node) -> bool {
+pub fn is_missing_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_missing_declaration"); 
     node.kind == SyntaxKind::MissingDeclaration
 }
 
-pub fn is_function_declaration(node: &Node) -> bool {
+pub fn is_function_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_declaration"); 
     node.kind == SyntaxKind::FunctionDeclaration
 }
 
-pub fn is_class_declaration(node: &Node) -> bool {
+pub fn is_class_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_declaration"); 
     node.kind == SyntaxKind::ClassDeclaration
 }
 
-pub fn is_class_expression(node: &Node) -> bool {
+pub fn is_class_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_expression"); 
     node.kind == SyntaxKind::ClassExpression
 }
 
-pub fn is_heritage_clause(node: &Node) -> bool {
+pub fn is_heritage_clause(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_heritage_clause"); 
     node.kind == SyntaxKind::HeritageClause
 }
 
-pub fn is_interface_declaration(node: &Node) -> bool {
+pub fn is_interface_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_interface_declaration"); 
     node.kind == SyntaxKind::InterfaceDeclaration
 }
 
-pub fn is_type_alias_declaration(node: &Node) -> bool {
+pub fn is_type_alias_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_alias_declaration"); 
     node.kind == SyntaxKind::TypeAliasDeclaration
 }
 
-pub fn is_enum_member(node: &Node) -> bool {
+pub fn is_enum_member(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_enum_member"); 
     node.kind == SyntaxKind::EnumMember
 }
 
-pub fn is_enum_declaration(node: &Node) -> bool {
+pub fn is_enum_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_enum_declaration"); 
     node.kind == SyntaxKind::EnumDeclaration
 }
 
-pub fn is_module_block(node: &Node) -> bool {
+pub fn is_module_block(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_block"); 
     node.kind == SyntaxKind::ModuleBlock
 }
 
-pub fn is_not_emitted_statement(node: &Node) -> bool {
+pub fn is_not_emitted_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_not_emitted_statement"); 
     node.kind == SyntaxKind::NotEmittedStatement
 }
 
-pub fn is_not_emitted_type_element(node: &Node) -> bool {
+pub fn is_not_emitted_type_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_not_emitted_type_element"); 
     node.kind == SyntaxKind::NotEmittedTypeElement
 }
 
-pub fn is_import_declaration(node: &Node) -> bool {
+pub fn is_import_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_declaration"); 
     node.kind == SyntaxKind::ImportDeclaration
 }
 
-pub fn is_external_module_reference(node: &Node) -> bool {
+pub fn is_external_module_reference(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_external_module_reference"); 
     node.kind == SyntaxKind::ExternalModuleReference
 }
 
-pub fn is_namespace_import(node: &Node) -> bool {
+pub fn is_namespace_import(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_namespace_import"); 
     node.kind == SyntaxKind::NamespaceImport
 }
 
-pub fn is_named_imports(node: &Node) -> bool {
+pub fn is_named_imports(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_named_imports"); 
     node.kind == SyntaxKind::NamedImports
 }
 
-pub fn is_export_assignment(node: &Node) -> bool {
+pub fn is_export_assignment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_export_assignment"); 
     node.kind == SyntaxKind::ExportAssignment
 }
 
-pub fn is_namespace_export_declaration(node: &Node) -> bool {
+pub fn is_namespace_export_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_namespace_export_declaration"); 
     node.kind == SyntaxKind::NamespaceExportDeclaration
 }
 
-pub fn is_namespace_export(node: &Node) -> bool {
+pub fn is_namespace_export(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_namespace_export"); 
     node.kind == SyntaxKind::NamespaceExport
 }
 
-pub fn is_named_exports(node: &Node) -> bool {
+pub fn is_named_exports(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_named_exports"); 
     node.kind == SyntaxKind::NamedExports
 }
 
-pub fn is_export_specifier(node: &Node) -> bool {
+pub fn is_export_specifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_export_specifier"); 
     node.kind == SyntaxKind::ExportSpecifier
 }
 
-pub fn is_call_signature_declaration(node: &Node) -> bool {
+pub fn is_call_signature_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_call_signature_declaration"); 
     node.kind == SyntaxKind::CallSignature
 }
 
-pub fn is_construct_signature_declaration(node: &Node) -> bool {
+pub fn is_construct_signature_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_construct_signature_declaration"); 
     node.kind == SyntaxKind::ConstructSignature
 }
 
-pub fn is_constructor_declaration(node: &Node) -> bool {
+pub fn is_constructor_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_constructor_declaration"); 
     node.kind == SyntaxKind::Constructor
 }
 
-pub fn is_get_accessor_declaration(node: &Node) -> bool {
+pub fn is_get_accessor_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_get_accessor_declaration"); 
     node.kind == SyntaxKind::GetAccessor
 }
 
-pub fn is_set_accessor_declaration(node: &Node) -> bool {
+pub fn is_set_accessor_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_set_accessor_declaration"); 
     node.kind == SyntaxKind::SetAccessor
 }
 
-pub fn is_index_signature_declaration(node: &Node) -> bool {
+pub fn is_index_signature_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_index_signature_declaration"); 
     node.kind == SyntaxKind::IndexSignature
 }
 
-pub fn is_method_signature_declaration(node: &Node) -> bool {
+pub fn is_method_signature_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_method_signature_declaration"); 
     node.kind == SyntaxKind::MethodSignature
 }
 
-pub fn is_method_declaration(node: &Node) -> bool {
+pub fn is_method_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_method_declaration"); 
     node.kind == SyntaxKind::MethodDeclaration
 }
 
-pub fn is_property_signature_declaration(node: &Node) -> bool {
+pub fn is_property_signature_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_property_signature_declaration"); 
     node.kind == SyntaxKind::PropertySignature
 }
 
-pub fn is_property_declaration(node: &Node) -> bool {
+pub fn is_property_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_property_declaration"); 
     node.kind == SyntaxKind::PropertyDeclaration
 }
 
-pub fn is_semicolon_class_element(node: &Node) -> bool {
+pub fn is_semicolon_class_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_semicolon_class_element"); 
     node.kind == SyntaxKind::SemicolonClassElement
 }
 
-pub fn is_class_static_block_declaration(node: &Node) -> bool {
+pub fn is_class_static_block_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_static_block_declaration"); 
     node.kind == SyntaxKind::ClassStaticBlockDeclaration
 }
 
-pub fn is_omitted_expression(node: &Node) -> bool {
+pub fn is_omitted_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_omitted_expression"); 
     node.kind == SyntaxKind::OmittedExpression
 }
 
-pub fn is_keyword_expression(node: &Node) -> bool {
+pub fn is_keyword_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_keyword_expression"); 
     match node.kind {
         SyntaxKind::NullKeyword
         | SyntaxKind::TrueKeyword
@@ -4235,147 +4235,147 @@ pub fn is_keyword_expression(node: &Node) -> bool {
     }
 }
 
-pub fn is_string_literal(node: &Node) -> bool {
+pub fn is_string_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_string_literal"); 
     node.kind == SyntaxKind::StringLiteral
 }
 
-pub fn is_numeric_literal(node: &Node) -> bool {
+pub fn is_numeric_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_numeric_literal"); 
     node.kind == SyntaxKind::NumericLiteral
 }
 
-pub fn is_big_int_literal(node: &Node) -> bool {
+pub fn is_big_int_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_big_int_literal"); 
     node.kind == SyntaxKind::BigIntLiteral
 }
 
-pub fn is_regular_expression_literal(node: &Node) -> bool {
+pub fn is_regular_expression_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_regular_expression_literal"); 
     node.kind == SyntaxKind::RegularExpressionLiteral
 }
 
-pub fn is_no_substitution_template_literal(node: &Node) -> bool {
+pub fn is_no_substitution_template_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_no_substitution_template_literal"); 
     node.kind == SyntaxKind::NoSubstitutionTemplateLiteral
 }
 
-pub fn is_binary_expression(node: &Node) -> bool {
+pub fn is_binary_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_binary_expression"); 
     node.kind == SyntaxKind::BinaryExpression
 }
 
-pub fn is_prefix_unary_expression(node: &Node) -> bool {
+pub fn is_prefix_unary_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_prefix_unary_expression"); 
     node.kind == SyntaxKind::PrefixUnaryExpression
 }
 
-pub fn is_postfix_unary_expression(node: &Node) -> bool {
+pub fn is_postfix_unary_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_postfix_unary_expression"); 
     node.kind == SyntaxKind::PostfixUnaryExpression
 }
 
-pub fn is_yield_expression(node: &Node) -> bool {
+pub fn is_yield_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_yield_expression"); 
     node.kind == SyntaxKind::YieldExpression
 }
 
-pub fn is_arrow_function(node: &Node) -> bool {
+pub fn is_arrow_function(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_arrow_function"); 
     node.kind == SyntaxKind::ArrowFunction
 }
 
-pub fn is_function_expression(node: &Node) -> bool {
+pub fn is_function_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_expression"); 
     node.kind == SyntaxKind::FunctionExpression
 }
 
-pub fn is_as_expression(node: &Node) -> bool {
+pub fn is_as_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_as_expression"); 
     node.kind == SyntaxKind::AsExpression
 }
 
-pub fn is_satisfies_expression(node: &Node) -> bool {
+pub fn is_satisfies_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_satisfies_expression"); 
     node.kind == SyntaxKind::SatisfiesExpression
 }
 
-pub fn is_conditional_expression(node: &Node) -> bool {
+pub fn is_conditional_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_conditional_expression"); 
     node.kind == SyntaxKind::ConditionalExpression
 }
 
-pub fn is_property_access_expression(node: &Node) -> bool {
+pub fn is_property_access_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_property_access_expression"); 
     node.kind == SyntaxKind::PropertyAccessExpression
 }
 
-pub fn is_element_access_expression(node: &Node) -> bool {
+pub fn is_element_access_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_element_access_expression"); 
     node.kind == SyntaxKind::ElementAccessExpression
 }
 
-pub fn is_call_expression(node: &Node) -> bool {
+pub fn is_call_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_call_expression"); 
     node.kind == SyntaxKind::CallExpression
 }
 
-pub fn is_new_expression(node: &Node) -> bool {
+pub fn is_new_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_new_expression"); 
     node.kind == SyntaxKind::NewExpression
 }
 
-pub fn is_meta_property(node: &Node) -> bool {
+pub fn is_meta_property(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_meta_property"); 
     node.kind == SyntaxKind::MetaProperty
 }
 
-pub fn is_non_null_expression(node: &Node) -> bool {
+pub fn is_non_null_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_non_null_expression"); 
     node.kind == SyntaxKind::NonNullExpression
 }
 
-pub fn is_spread_element(node: &Node) -> bool {
+pub fn is_spread_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_spread_element"); 
     node.kind == SyntaxKind::SpreadElement
 }
 
-pub fn is_template_expression(node: &Node) -> bool {
+pub fn is_template_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_expression"); 
     node.kind == SyntaxKind::TemplateExpression
 }
 
-pub fn is_template_span(node: &Node) -> bool {
+pub fn is_template_span(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_span"); 
     node.kind == SyntaxKind::TemplateSpan
 }
 
-pub fn is_tagged_template_expression(node: &Node) -> bool {
+pub fn is_tagged_template_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_tagged_template_expression"); 
     node.kind == SyntaxKind::TaggedTemplateExpression
 }
 
-pub fn is_parenthesized_expression(node: &Node) -> bool {
+pub fn is_parenthesized_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_parenthesized_expression"); 
     node.kind == SyntaxKind::ParenthesizedExpression
 }
 
-pub fn is_array_literal_expression(node: &Node) -> bool {
+pub fn is_array_literal_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_array_literal_expression"); 
     node.kind == SyntaxKind::ArrayLiteralExpression
 }
 
-pub fn is_object_literal_expression(node: &Node) -> bool {
+pub fn is_object_literal_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_object_literal_expression"); 
     node.kind == SyntaxKind::ObjectLiteralExpression
 }
 
-pub fn is_spread_assignment(node: &Node) -> bool {
+pub fn is_spread_assignment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_spread_assignment"); 
     node.kind == SyntaxKind::SpreadAssignment
 }
 
-pub fn is_property_assignment(node: &Node) -> bool {
+pub fn is_property_assignment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_property_assignment"); 
     node.kind == SyntaxKind::PropertyAssignment
 }
 
-pub fn is_shorthand_property_assignment(node: &Node) -> bool {
+pub fn is_shorthand_property_assignment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_shorthand_property_assignment"); 
     node.kind == SyntaxKind::ShorthandPropertyAssignment
 }
 
-pub fn is_delete_expression(node: &Node) -> bool {
+pub fn is_delete_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_delete_expression"); 
     node.kind == SyntaxKind::DeleteExpression
 }
 
-pub fn is_type_of_expression(node: &Node) -> bool {
+pub fn is_type_of_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_of_expression"); 
     node.kind == SyntaxKind::TypeOfExpression
 }
 
-pub fn is_void_expression(node: &Node) -> bool {
+pub fn is_void_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_void_expression"); 
     node.kind == SyntaxKind::VoidExpression
 }
 
-pub fn is_await_expression(node: &Node) -> bool {
+pub fn is_await_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_await_expression"); 
     node.kind == SyntaxKind::AwaitExpression
 }
 
-pub fn is_type_assertion(node: &Node) -> bool {
+pub fn is_type_assertion(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_assertion"); 
     node.kind == SyntaxKind::TypeAssertionExpression
 }
 
-pub fn is_keyword_type_node(node: &Node) -> bool {
+pub fn is_keyword_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_keyword_type_node"); 
     match node.kind {
         SyntaxKind::AnyKeyword
         | SyntaxKind::BigIntKeyword
@@ -4393,366 +4393,366 @@ pub fn is_keyword_type_node(node: &Node) -> bool {
     }
 }
 
-pub fn is_union_type_node(node: &Node) -> bool {
+pub fn is_union_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_union_type_node"); 
     node.kind == SyntaxKind::UnionType
 }
 
-pub fn is_intersection_type_node(node: &Node) -> bool {
+pub fn is_intersection_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_intersection_type_node"); 
     node.kind == SyntaxKind::IntersectionType
 }
 
-pub fn is_conditional_type_node(node: &Node) -> bool {
+pub fn is_conditional_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_conditional_type_node"); 
     node.kind == SyntaxKind::ConditionalType
 }
 
-pub fn is_type_operator_node(node: &Node) -> bool {
+pub fn is_type_operator_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_operator_node"); 
     node.kind == SyntaxKind::TypeOperator
 }
 
-pub fn is_infer_type_node(node: &Node) -> bool {
+pub fn is_infer_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_infer_type_node"); 
     node.kind == SyntaxKind::InferType
 }
 
-pub fn is_array_type_node(node: &Node) -> bool {
+pub fn is_array_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_array_type_node"); 
     node.kind == SyntaxKind::ArrayType
 }
 
-pub fn is_indexed_access_type_node(node: &Node) -> bool {
+pub fn is_indexed_access_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_indexed_access_type_node"); 
     node.kind == SyntaxKind::IndexedAccessType
 }
 
-pub fn is_type_reference_node(node: &Node) -> bool {
+pub fn is_type_reference_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_reference_node"); 
     node.kind == SyntaxKind::TypeReference
 }
 
-pub fn is_expression_with_type_arguments(node: &Node) -> bool {
+pub fn is_expression_with_type_arguments(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_with_type_arguments"); 
     node.kind == SyntaxKind::ExpressionWithTypeArguments
 }
 
-pub fn is_literal_type_node(node: &Node) -> bool {
+pub fn is_literal_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_literal_type_node"); 
     node.kind == SyntaxKind::LiteralType
 }
 
-pub fn is_this_type_node(node: &Node) -> bool {
+pub fn is_this_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_this_type_node"); 
     node.kind == SyntaxKind::ThisType
 }
 
-pub fn is_type_predicate_node(node: &Node) -> bool {
+pub fn is_type_predicate_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_predicate_node"); 
     node.kind == SyntaxKind::TypePredicate
 }
 
-pub fn is_import_attribute(node: &Node) -> bool {
+pub fn is_import_attribute(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_attribute"); 
     node.kind == SyntaxKind::ImportAttribute
 }
 
-pub fn is_import_attributes(node: &Node) -> bool {
+pub fn is_import_attributes(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_attributes"); 
     node.kind == SyntaxKind::ImportAttributes
 }
 
-pub fn is_type_query_node(node: &Node) -> bool {
+pub fn is_type_query_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_query_node"); 
     node.kind == SyntaxKind::TypeQuery
 }
 
-pub fn is_mapped_type_node(node: &Node) -> bool {
+pub fn is_mapped_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_mapped_type_node"); 
     node.kind == SyntaxKind::MappedType
 }
 
-pub fn is_type_literal_node(node: &Node) -> bool {
+pub fn is_type_literal_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_literal_node"); 
     node.kind == SyntaxKind::TypeLiteral
 }
 
-pub fn is_tuple_type_node(node: &Node) -> bool {
+pub fn is_tuple_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_tuple_type_node"); 
     node.kind == SyntaxKind::TupleType
 }
 
-pub fn is_named_tuple_member(node: &Node) -> bool {
+pub fn is_named_tuple_member(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_named_tuple_member"); 
     node.kind == SyntaxKind::NamedTupleMember
 }
 
-pub fn is_optional_type_node(node: &Node) -> bool {
+pub fn is_optional_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_optional_type_node"); 
     node.kind == SyntaxKind::OptionalType
 }
 
-pub fn is_rest_type_node(node: &Node) -> bool {
+pub fn is_rest_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_rest_type_node"); 
     node.kind == SyntaxKind::RestType
 }
 
-pub fn is_parenthesized_type_node(node: &Node) -> bool {
+pub fn is_parenthesized_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_parenthesized_type_node"); 
     node.kind == SyntaxKind::ParenthesizedType
 }
 
-pub fn is_function_type_node(node: &Node) -> bool {
+pub fn is_function_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_type_node"); 
     node.kind == SyntaxKind::FunctionType
 }
 
-pub fn is_constructor_type_node(node: &Node) -> bool {
+pub fn is_constructor_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_constructor_type_node"); 
     node.kind == SyntaxKind::ConstructorType
 }
 
-pub fn is_template_head(node: &Node) -> bool {
+pub fn is_template_head(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_head"); 
     node.kind == SyntaxKind::TemplateHead
 }
 
-pub fn is_template_middle(node: &Node) -> bool {
+pub fn is_template_middle(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_middle"); 
     node.kind == SyntaxKind::TemplateMiddle
 }
 
-pub fn is_template_tail(node: &Node) -> bool {
+pub fn is_template_tail(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_tail"); 
     node.kind == SyntaxKind::TemplateTail
 }
 
-pub fn is_template_literal_type_node(node: &Node) -> bool {
+pub fn is_template_literal_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_literal_type_node"); 
     node.kind == SyntaxKind::TemplateLiteralType
 }
 
-pub fn is_template_literal_type_span(node: &Node) -> bool {
+pub fn is_template_literal_type_span(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_literal_type_span"); 
     node.kind == SyntaxKind::TemplateLiteralTypeSpan
 }
 
-pub fn is_synthetic_expression(node: &Node) -> bool {
+pub fn is_synthetic_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_synthetic_expression"); 
     node.kind == SyntaxKind::SyntheticExpression
 }
 
-pub fn is_partially_emitted_expression(node: &Node) -> bool {
+pub fn is_partially_emitted_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_partially_emitted_expression"); 
     node.kind == SyntaxKind::PartiallyEmittedExpression
 }
 
-pub fn is_jsx_element(node: &Node) -> bool {
+pub fn is_jsx_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_element"); 
     node.kind == SyntaxKind::JsxElement
 }
 
-pub fn is_jsx_attributes(node: &Node) -> bool {
+pub fn is_jsx_attributes(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_attributes"); 
     node.kind == SyntaxKind::JsxAttributes
 }
 
-pub fn is_jsx_namespaced_name(node: &Node) -> bool {
+pub fn is_jsx_namespaced_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_namespaced_name"); 
     node.kind == SyntaxKind::JsxNamespacedName
 }
 
-pub fn is_jsx_opening_element(node: &Node) -> bool {
+pub fn is_jsx_opening_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_opening_element"); 
     node.kind == SyntaxKind::JsxOpeningElement
 }
 
-pub fn is_jsx_self_closing_element(node: &Node) -> bool {
+pub fn is_jsx_self_closing_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_self_closing_element"); 
     node.kind == SyntaxKind::JsxSelfClosingElement
 }
 
-pub fn is_jsx_fragment(node: &Node) -> bool {
+pub fn is_jsx_fragment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_fragment"); 
     node.kind == SyntaxKind::JsxFragment
 }
 
-pub fn is_jsx_opening_fragment(node: &Node) -> bool {
+pub fn is_jsx_opening_fragment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_opening_fragment"); 
     node.kind == SyntaxKind::JsxOpeningFragment
 }
 
-pub fn is_jsx_closing_fragment(node: &Node) -> bool {
+pub fn is_jsx_closing_fragment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_closing_fragment"); 
     node.kind == SyntaxKind::JsxClosingFragment
 }
 
-pub fn is_jsx_attribute(node: &Node) -> bool {
+pub fn is_jsx_attribute(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_attribute"); 
     node.kind == SyntaxKind::JsxAttribute
 }
 
-pub fn is_jsx_spread_attribute(node: &Node) -> bool {
+pub fn is_jsx_spread_attribute(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_spread_attribute"); 
     node.kind == SyntaxKind::JsxSpreadAttribute
 }
 
-pub fn is_jsx_closing_element(node: &Node) -> bool {
+pub fn is_jsx_closing_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_closing_element"); 
     node.kind == SyntaxKind::JsxClosingElement
 }
 
-pub fn is_jsx_expression(node: &Node) -> bool {
+pub fn is_jsx_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_expression"); 
     node.kind == SyntaxKind::JsxExpression
 }
 
-pub fn is_jsx_text(node: &Node) -> bool {
+pub fn is_jsx_text(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_text"); 
     node.kind == SyntaxKind::JsxText
 }
 
-pub fn is_syntax_list(node: &Node) -> bool {
+pub fn is_syntax_list(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_syntax_list"); 
     node.kind == SyntaxKind::SyntaxList
 }
 
-pub fn is_jsdoc(node: &Node) -> bool {
+pub fn is_jsdoc(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc"); 
     node.kind == SyntaxKind::JSDoc
 }
 
-pub fn is_jsdoc_type_expression(node: &Node) -> bool {
+pub fn is_jsdoc_type_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_type_expression"); 
     node.kind == SyntaxKind::JSDocTypeExpression
 }
 
-pub fn is_jsdoc_non_nullable_type(node: &Node) -> bool {
+pub fn is_jsdoc_non_nullable_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_non_nullable_type"); 
     node.kind == SyntaxKind::JSDocNonNullableType
 }
 
-pub fn is_jsdoc_nullable_type(node: &Node) -> bool {
+pub fn is_jsdoc_nullable_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_nullable_type"); 
     node.kind == SyntaxKind::JSDocNullableType
 }
 
-pub fn is_jsdoc_all_type(node: &Node) -> bool {
+pub fn is_jsdoc_all_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_all_type"); 
     node.kind == SyntaxKind::JSDocAllType
 }
 
-pub fn is_jsdoc_variadic_type(node: &Node) -> bool {
+pub fn is_jsdoc_variadic_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_variadic_type"); 
     node.kind == SyntaxKind::JSDocVariadicType
 }
 
-pub fn is_jsdoc_optional_type(node: &Node) -> bool {
+pub fn is_jsdoc_optional_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_optional_type"); 
     node.kind == SyntaxKind::JSDocOptionalType
 }
 
-pub fn is_jsdoc_type_tag(node: &Node) -> bool {
+pub fn is_jsdoc_type_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_type_tag"); 
     node.kind == SyntaxKind::JSDocTypeTag
 }
 
-pub fn is_jsdoc_unknown_tag(node: &Node) -> bool {
+pub fn is_jsdoc_unknown_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_unknown_tag"); 
     node.kind == SyntaxKind::JSDocUnknownTag
 }
 
-pub fn is_jsdoc_template_tag(node: &Node) -> bool {
+pub fn is_jsdoc_template_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_template_tag"); 
     node.kind == SyntaxKind::JSDocTemplateTag
 }
 
-pub fn is_jsdoc_return_tag(node: &Node) -> bool {
+pub fn is_jsdoc_return_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_return_tag"); 
     node.kind == SyntaxKind::JSDocReturnTag
 }
 
-pub fn is_jsdoc_public_tag(node: &Node) -> bool {
+pub fn is_jsdoc_public_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_public_tag"); 
     node.kind == SyntaxKind::JSDocPublicTag
 }
 
-pub fn is_jsdoc_private_tag(node: &Node) -> bool {
+pub fn is_jsdoc_private_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_private_tag"); 
     node.kind == SyntaxKind::JSDocPrivateTag
 }
 
-pub fn is_jsdoc_protected_tag(node: &Node) -> bool {
+pub fn is_jsdoc_protected_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_protected_tag"); 
     node.kind == SyntaxKind::JSDocProtectedTag
 }
 
-pub fn is_jsdoc_readonly_tag(node: &Node) -> bool {
+pub fn is_jsdoc_readonly_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_readonly_tag"); 
     node.kind == SyntaxKind::JSDocReadonlyTag
 }
 
-pub fn is_jsdoc_override_tag(node: &Node) -> bool {
+pub fn is_jsdoc_override_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_override_tag"); 
     node.kind == SyntaxKind::JSDocOverrideTag
 }
 
-pub fn is_jsdoc_deprecated_tag(node: &Node) -> bool {
+pub fn is_jsdoc_deprecated_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_deprecated_tag"); 
     node.kind == SyntaxKind::JSDocDeprecatedTag
 }
 
-pub fn is_jsdoc_see_tag(node: &Node) -> bool {
+pub fn is_jsdoc_see_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_see_tag"); 
     node.kind == SyntaxKind::JSDocSeeTag
 }
 
-pub fn is_jsdoc_implements_tag(node: &Node) -> bool {
+pub fn is_jsdoc_implements_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_implements_tag"); 
     node.kind == SyntaxKind::JSDocImplementsTag
 }
 
-pub fn is_jsdoc_augments_tag(node: &Node) -> bool {
+pub fn is_jsdoc_augments_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_augments_tag"); 
     node.kind == SyntaxKind::JSDocAugmentsTag
 }
 
-pub fn is_jsdoc_satisfies_tag(node: &Node) -> bool {
+pub fn is_jsdoc_satisfies_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_satisfies_tag"); 
     node.kind == SyntaxKind::JSDocSatisfiesTag
 }
 
-pub fn is_jsdoc_throws_tag(node: &Node) -> bool {
+pub fn is_jsdoc_throws_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_throws_tag"); 
     node.kind == SyntaxKind::JSDocThrowsTag
 }
 
-pub fn is_jsdoc_this_tag(node: &Node) -> bool {
+pub fn is_jsdoc_this_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_this_tag"); 
     node.kind == SyntaxKind::JSDocThisTag
 }
 
-pub fn is_jsdoc_import_tag(node: &Node) -> bool {
+pub fn is_jsdoc_import_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_import_tag"); 
     node.kind == SyntaxKind::JSDocImportTag
 }
 
-pub fn is_jsdoc_callback_tag(node: &Node) -> bool {
+pub fn is_jsdoc_callback_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_callback_tag"); 
     node.kind == SyntaxKind::JSDocCallbackTag
 }
 
-pub fn is_jsdoc_overload_tag(node: &Node) -> bool {
+pub fn is_jsdoc_overload_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_overload_tag"); 
     node.kind == SyntaxKind::JSDocOverloadTag
 }
 
-pub fn is_jsdoc_typedef_tag(node: &Node) -> bool {
+pub fn is_jsdoc_typedef_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_typedef_tag"); 
     node.kind == SyntaxKind::JSDocTypedefTag
 }
 
-pub fn is_jsdoc_signature(node: &Node) -> bool {
+pub fn is_jsdoc_signature(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_signature"); 
     node.kind == SyntaxKind::JSDocSignature
 }
 
-pub fn is_jsdoc_name_reference(node: &Node) -> bool {
+pub fn is_jsdoc_name_reference(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_name_reference"); 
     node.kind == SyntaxKind::JSDocNameReference
 }
 
-pub fn is_source_file(node: &Node) -> bool {
+pub fn is_source_file(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_source_file"); 
     node.kind == SyntaxKind::SourceFile
 }
 
-pub fn is_module_declaration(node: &Node) -> bool {
+pub fn is_module_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_declaration"); 
     node.kind == SyntaxKind::ModuleDeclaration
 }
 
-pub fn is_import_equals_declaration(node: &Node) -> bool {
+pub fn is_import_equals_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_equals_declaration"); 
     node.kind == SyntaxKind::ImportEqualsDeclaration
 }
 
-pub fn is_export_declaration(node: &Node) -> bool {
+pub fn is_export_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_export_declaration"); 
     node.kind == SyntaxKind::ExportDeclaration
 }
 
-pub fn is_import_type_node(node: &Node) -> bool {
+pub fn is_import_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_type_node"); 
     node.kind == SyntaxKind::ImportType
 }
 
-pub fn is_import_clause(node: &Node) -> bool {
+pub fn is_import_clause(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_clause"); 
     node.kind == SyntaxKind::ImportClause
 }
 
-pub fn is_import_specifier(node: &Node) -> bool {
+pub fn is_import_specifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_specifier"); 
     node.kind == SyntaxKind::ImportSpecifier
 }
 
-pub fn is_jsdoc_text(node: &Node) -> bool {
+pub fn is_jsdoc_text(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_text"); 
     node.kind == SyntaxKind::JSDocText
 }
 
-pub fn is_jsdoc_link(node: &Node) -> bool {
+pub fn is_jsdoc_link(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_link"); 
     node.kind == SyntaxKind::JSDocLink
 }
 
-pub fn is_jsdoc_link_plain(node: &Node) -> bool {
+pub fn is_jsdoc_link_plain(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_link_plain"); 
     node.kind == SyntaxKind::JSDocLinkPlain
 }
 
-pub fn is_jsdoc_link_code(node: &Node) -> bool {
+pub fn is_jsdoc_link_code(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_link_code"); 
     node.kind == SyntaxKind::JSDocLinkCode
 }
 
-pub fn is_type_parameter_declaration(node: &Node) -> bool {
+pub fn is_type_parameter_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_parameter_declaration"); 
     node.kind == SyntaxKind::TypeParameter
 }
 
-pub fn is_synthetic_reference_expression(node: &Node) -> bool {
+pub fn is_synthetic_reference_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_synthetic_reference_expression"); 
     node.kind == SyntaxKind::SyntheticReferenceExpression
 }
 
-pub fn is_jsdoc_type_literal(node: &Node) -> bool {
+pub fn is_jsdoc_type_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_type_literal"); 
     node.kind == SyntaxKind::JSDocTypeLiteral
 }
 
-pub fn is_jsdoc_parameter_or_property_tag(node: &Node) -> bool {
+pub fn is_jsdoc_parameter_or_property_tag(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_parameter_or_property_tag"); 
     match node.kind {
         SyntaxKind::JSDocParameterTag | SyntaxKind::JSDocPropertyTag => true,
         _ => false,
     }
 }
 
-pub fn is_trivia_kind(kind: SyntaxKind) -> bool {
+pub fn is_trivia_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_trivia_kind"); 
     match kind {
         SyntaxKind::SingleLineCommentTrivia
         | SyntaxKind::MultiLineCommentTrivia
@@ -4763,29 +4763,29 @@ pub fn is_trivia_kind(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_literal_kind(kind: SyntaxKind) -> bool {
+pub fn is_literal_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_literal_kind"); 
     (kind as i16) >= (SyntaxKind::NumericLiteral as i16)
         && (kind as i16) <= (SyntaxKind::NoSubstitutionTemplateLiteral as i16)
 }
 
-pub fn is_pseudo_literal_kind(kind: SyntaxKind) -> bool {
+pub fn is_pseudo_literal_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_pseudo_literal_kind"); 
     match kind {
         SyntaxKind::TemplateHead | SyntaxKind::TemplateMiddle | SyntaxKind::TemplateTail => true,
         _ => false,
     }
 }
 
-pub fn is_punctuation_kind(kind: SyntaxKind) -> bool {
+pub fn is_punctuation_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_punctuation_kind"); 
     (kind as i16) >= (SyntaxKind::OpenBraceToken as i16)
         && (kind as i16) <= (SyntaxKind::CaretEqualsToken as i16)
 }
 
-pub fn is_keyword_kind(kind: SyntaxKind) -> bool {
+pub fn is_keyword_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword_kind"); 
     (kind as i16) >= (SyntaxKind::BreakKeyword as i16)
         && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
 }
 
-pub fn is_modifier_kind(kind: SyntaxKind) -> bool {
+pub fn is_modifier_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_modifier_kind"); 
     match kind {
         SyntaxKind::AbstractKeyword
         | SyntaxKind::AccessorKeyword
@@ -4806,7 +4806,7 @@ pub fn is_modifier_kind(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_keyword_type_kind(kind: SyntaxKind) -> bool {
+pub fn is_keyword_type_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword_type_kind"); 
     match kind {
         SyntaxKind::AnyKeyword
         | SyntaxKind::BigIntKeyword
@@ -4824,7 +4824,7 @@ pub fn is_keyword_type_kind(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_keyword_expression_kind(kind: SyntaxKind) -> bool {
+pub fn is_keyword_expression_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword_expression_kind"); 
     match kind {
         SyntaxKind::NullKeyword
         | SyntaxKind::TrueKeyword
@@ -4836,12 +4836,12 @@ pub fn is_keyword_expression_kind(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_token_kind(kind: SyntaxKind) -> bool {
+pub fn is_token_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_token_kind"); 
     (kind as i16) >= (SyntaxKind::Unknown as i16)
         && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
 }
 
-pub fn is_jsx_token_kind(kind: SyntaxKind) -> bool {
+pub fn is_jsx_token_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_jsx_token_kind"); 
     match kind {
         SyntaxKind::LessThanSlashToken
         | SyntaxKind::EndOfFile
@@ -4854,26 +4854,26 @@ pub fn is_jsx_token_kind(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_jsdoc_node_kind(kind: SyntaxKind) -> bool {
+pub fn is_jsdoc_node_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_node_kind"); 
     (kind as i16) >= (SyntaxKind::JSDocTypeExpression as i16)
         && (kind as i16) <= (SyntaxKind::JSDocImportTag as i16)
 }
 
-pub fn is_import_phase_modifier_kind(kind: SyntaxKind) -> bool {
+pub fn is_import_phase_modifier_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_import_phase_modifier_kind"); 
     match kind {
         SyntaxKind::TypeKeyword | SyntaxKind::DeferKeyword => true,
         _ => false,
     }
 }
 
-pub fn is_postfix_unary_operator(kind: SyntaxKind) -> bool {
+pub fn is_postfix_unary_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_postfix_unary_operator"); 
     match kind {
         SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken => true,
         _ => false,
     }
 }
 
-pub fn is_prefix_unary_operator(kind: SyntaxKind) -> bool {
+pub fn is_prefix_unary_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_prefix_unary_operator"); 
     match kind {
         SyntaxKind::PlusToken
         | SyntaxKind::MinusToken
@@ -4885,7 +4885,7 @@ pub fn is_prefix_unary_operator(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_assignment_operator(kind: SyntaxKind) -> bool {
+pub fn is_assignment_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_assignment_operator"); 
     match kind {
         SyntaxKind::EqualsToken
         | SyntaxKind::PlusEqualsToken
@@ -4907,7 +4907,7 @@ pub fn is_assignment_operator(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_binary_operator(kind: SyntaxKind) -> bool {
+pub fn is_binary_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_binary_operator"); 
     match kind {
         SyntaxKind::QuestionQuestionToken
         | SyntaxKind::AsteriskAsteriskToken
@@ -4955,21 +4955,21 @@ pub fn is_binary_operator(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_exponentiation_operator(kind: SyntaxKind) -> bool {
+pub fn is_exponentiation_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_exponentiation_operator"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken => true,
         _ => false,
     }
 }
 
-pub fn is_multiplicative_operator(kind: SyntaxKind) -> bool {
+pub fn is_multiplicative_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_multiplicative_operator"); 
     match kind {
         SyntaxKind::AsteriskToken | SyntaxKind::SlashToken | SyntaxKind::PercentToken => true,
         _ => false,
     }
 }
 
-pub fn is_multiplicative_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_multiplicative_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_multiplicative_operator_or_higher"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken
         | SyntaxKind::AsteriskToken
@@ -4979,14 +4979,14 @@ pub fn is_multiplicative_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_additive_operator(kind: SyntaxKind) -> bool {
+pub fn is_additive_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_additive_operator"); 
     match kind {
         SyntaxKind::PlusToken | SyntaxKind::MinusToken => true,
         _ => false,
     }
 }
 
-pub fn is_additive_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_additive_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_additive_operator_or_higher"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken
         | SyntaxKind::AsteriskToken
@@ -4998,7 +4998,7 @@ pub fn is_additive_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_shift_operator(kind: SyntaxKind) -> bool {
+pub fn is_shift_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_shift_operator"); 
     match kind {
         SyntaxKind::LessThanLessThanToken
         | SyntaxKind::GreaterThanGreaterThanToken
@@ -5007,7 +5007,7 @@ pub fn is_shift_operator(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_shift_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_shift_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_shift_operator_or_higher"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken
         | SyntaxKind::AsteriskToken
@@ -5022,7 +5022,7 @@ pub fn is_shift_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_relational_operator(kind: SyntaxKind) -> bool {
+pub fn is_relational_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_relational_operator"); 
     match kind {
         SyntaxKind::LessThanToken
         | SyntaxKind::LessThanEqualsToken
@@ -5034,7 +5034,7 @@ pub fn is_relational_operator(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_relational_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_relational_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_relational_operator_or_higher"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken
         | SyntaxKind::AsteriskToken
@@ -5055,7 +5055,7 @@ pub fn is_relational_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_equality_operator(kind: SyntaxKind) -> bool {
+pub fn is_equality_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_equality_operator"); 
     match kind {
         SyntaxKind::EqualsEqualsToken
         | SyntaxKind::EqualsEqualsEqualsToken
@@ -5065,7 +5065,7 @@ pub fn is_equality_operator(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_equality_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_equality_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_equality_operator_or_higher"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken
         | SyntaxKind::AsteriskToken
@@ -5090,14 +5090,14 @@ pub fn is_equality_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_bitwise_operator(kind: SyntaxKind) -> bool {
+pub fn is_bitwise_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_bitwise_operator"); 
     match kind {
         SyntaxKind::AmpersandToken | SyntaxKind::BarToken | SyntaxKind::CaretToken => true,
         _ => false,
     }
 }
 
-pub fn is_bitwise_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_bitwise_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_bitwise_operator_or_higher"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken
         | SyntaxKind::AsteriskToken
@@ -5125,14 +5125,14 @@ pub fn is_bitwise_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_logical_operator(kind: SyntaxKind) -> bool {
+pub fn is_logical_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_logical_operator"); 
     match kind {
         SyntaxKind::AmpersandAmpersandToken | SyntaxKind::BarBarToken => true,
         _ => false,
     }
 }
 
-pub fn is_logical_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_logical_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_logical_operator_or_higher"); 
     match kind {
         SyntaxKind::AsteriskAsteriskToken
         | SyntaxKind::AsteriskToken
@@ -5162,7 +5162,7 @@ pub fn is_logical_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_compound_assignment_operator(kind: SyntaxKind) -> bool {
+pub fn is_compound_assignment_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_compound_assignment_operator"); 
     match kind {
         SyntaxKind::PlusEqualsToken
         | SyntaxKind::MinusEqualsToken
@@ -5183,7 +5183,7 @@ pub fn is_compound_assignment_operator(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_assignment_operator_or_higher(kind: SyntaxKind) -> bool {
+pub fn is_assignment_operator_or_higher(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_assignment_operator_or_higher"); 
     match kind {
         SyntaxKind::QuestionQuestionToken
         | SyntaxKind::AsteriskAsteriskToken
@@ -5230,7 +5230,7 @@ pub fn is_assignment_operator_or_higher(kind: SyntaxKind) -> bool {
     }
 }
 
-pub fn is_logical_or_coalescing_assignment_operator(kind: SyntaxKind) -> bool {
+pub fn is_logical_or_coalescing_assignment_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_logical_or_coalescing_assignment_operator"); 
     match kind {
         SyntaxKind::AmpersandAmpersandEqualsToken
         | SyntaxKind::BarBarEqualsToken

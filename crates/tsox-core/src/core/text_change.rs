@@ -7,14 +7,14 @@ pub struct TextChange {
 }
 
 impl TextChange {
-    pub fn new(range: TextRange, new_text: impl Into<String>) -> Self {
+    pub fn new(range: TextRange, new_text: impl Into<String>) -> Self { crate::fntrace::enter("new"); 
         Self {
             range,
             new_text: new_text.into(),
         }
     }
 
-    pub fn apply_to(&self, text: &str) -> String {
+    pub fn apply_to(&self, text: &str) -> String { crate::fntrace::enter("apply_to"); 
         let pos = self.range.pos();
         let end = self.range.end();
         let mut result = String::with_capacity(text.len() + self.new_text.len());
@@ -25,7 +25,7 @@ impl TextChange {
     }
 }
 
-pub fn apply_bulk_edits(text: &str, edits: &[TextChange]) -> String {
+pub fn apply_bulk_edits(text: &str, edits: &[TextChange]) -> String { crate::fntrace::enter("apply_bulk_edits"); 
     let mut result = String::with_capacity(text.len());
     let mut last_end = 0;
     for edit in edits {

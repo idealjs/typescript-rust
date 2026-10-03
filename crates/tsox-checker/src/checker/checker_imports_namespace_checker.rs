@@ -3,7 +3,7 @@
 use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
-    pub(crate) fn enclosing_function_is_generator(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn enclosing_function_is_generator(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("enclosing_function_is_generator"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             let in_name_of_current = tsox_frontend::ast::node_data_generated::node_name(&n)
@@ -48,7 +48,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn get_array_element_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_array_element_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_array_element_type"); 
         match &t.data {
             crate::checker::TypeData::Object(obj) => {
                 if let Some(elem) = obj.type_arguments.first() {
@@ -64,7 +64,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_empty_array_literal(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_empty_array_literal(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_empty_array_literal"); 
         matches!(
             &node.data,
             tsox_frontend::ast::NodeData::ArrayLiteralExpression(d) if d.elements.is_empty()
@@ -75,7 +75,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("get_missing_required_properties"); 
         let Some(target_struct) = target.as_structured() else {
             return Vec::new();
         };
@@ -106,7 +106,7 @@ impl Checker {
         missing
     }
 
-    pub(crate) fn get_property_name_from_node(&self, node: &Arc<Node>) -> String {
+    pub(crate) fn get_property_name_from_node(&self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_property_name_from_node"); 
         match &node.data {
             NodeData::Identifier(id) => id.text.clone(),
             NodeData::StringLiteral(s) => s.text.clone(),
@@ -137,7 +137,7 @@ impl Checker {
     /// 成员声明位的名字（Go lateBindMember 语义）：早绑定名之外，
     /// 计算名为实体名表达式且其类型可用作属性名（string/number 字面量、
     /// unique symbol）时，以类型推导的名字入表
-    pub(crate) fn member_declaration_name(&mut self, name: &Arc<Node>) -> String {
+    pub(crate) fn member_declaration_name(&mut self, name: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("member_declaration_name"); 
         // Go getDeclarationName：BigIntLiteral 不属 IsPropertyNameLiteral，
         // 名落 InternalSymbolNameMissing，成员不入容器符号表
         if name.kind == tsox_frontend::ast::SyntaxKind::BigIntLiteral {
@@ -168,7 +168,7 @@ impl Checker {
         &mut self,
         object_type: &Arc<Type>,
         name: &str,
-    ) -> Option<std::sync::Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<std::sync::Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_constituent_property"); 
         let apparent = self.get_apparent_type(object_type);
         let parts: Vec<Arc<Type>> = if apparent
             .flags
@@ -189,7 +189,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn loop_has_escaping_break(n: &Arc<Node>, direct: bool) -> bool {
+    pub(crate) fn loop_has_escaping_break(n: &Arc<Node>, direct: bool) -> bool { ::tsox_core::fntrace::enter("loop_has_escaping_break"); 
         match n.kind {
             SyntaxKind::BreakStatement => {
                 matches!(
@@ -228,8 +228,8 @@ impl Checker {
         }
     }
 
-    pub(crate) fn function_body_has_explicit_return(body: &Arc<Node>) -> bool {
-        fn walk(n: &Arc<Node>) -> bool {
+    pub(crate) fn function_body_has_explicit_return(body: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("function_body_has_explicit_return"); 
+        fn walk(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("walk"); 
             match n.kind {
                 SyntaxKind::ReturnStatement => return true,
 
@@ -255,7 +255,7 @@ impl Checker {
         walk(body)
     }
 
-    pub(crate) fn has_same_named_type_symbol(&self, name: &str) -> bool {
+    pub(crate) fn has_same_named_type_symbol(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("has_same_named_type_symbol"); 
         let type_meaning = SymbolFlags::Interface
             | SymbolFlags::Class
             | SymbolFlags::TypeParameter

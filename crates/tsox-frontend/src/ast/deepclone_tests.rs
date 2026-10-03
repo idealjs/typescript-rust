@@ -3,7 +3,7 @@ use super::deep_clone_node;
 use super::for_each_child;
 use std::sync::Arc;
 
-fn collect_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn collect_children(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_children"); 
     let mut children = Vec::new();
     for_each_child(node, |child| {
         children.push(Arc::clone(child));
@@ -12,7 +12,7 @@ fn collect_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
     children
 }
 
-fn assert_same_structure(original: &Arc<Node>, clone: &Arc<Node>) {
+fn assert_same_structure(original: &Arc<Node>, clone: &Arc<Node>) { ::tsox_core::fntrace::enter("assert_same_structure"); 
     assert_eq!(original.kind, clone.kind, "kind mismatch");
     assert_eq!(
         original.pos(),
@@ -40,7 +40,7 @@ fn assert_same_structure(original: &Arc<Node>, clone: &Arc<Node>) {
 }
 
 #[test]
-fn test_deep_clone_node_sanity_check() {
+fn test_deep_clone_node_sanity_check() { ::tsox_core::fntrace::enter("test_deep_clone_node_sanity_check"); 
     let cases: &[(&str, &str)] = &[
         ("StringLiteral#1", ";\"test\""),
         ("StringLiteral#2", ";'test'"),

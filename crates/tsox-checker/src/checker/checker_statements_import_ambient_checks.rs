@@ -5,7 +5,7 @@ use crate::checker::checker_statements::*;
 impl Checker {
     // Go checkExportAssignment isExportEquals 分支：
     // esm 实现文件与 esm 模式声明文件禁止 export=
-    pub(crate) fn emit_implied_node_format_for_file(&self, file_name: &str) -> ModuleKind {
+    pub(crate) fn emit_implied_node_format_for_file(&self, file_name: &str) -> ModuleKind { ::tsox_core::fntrace::enter("emit_implied_node_format_for_file"); 
         use tsox_core::core::compiler_options::ModuleKind as M;
         let emit_kind = self.compiler_options.get_emit_module_kind();
         match emit_kind {
@@ -31,7 +31,7 @@ impl Checker {
 
     // Go getEmitSyntaxForUsageLocation：import 语句所在文件按 emit 格式归为
     // CJS/ESM/None，None 表示无法确定（合成 default 检查继续走声明文件规则）
-    pub(crate) fn usage_emit_mode_for_import(&self, file_name: &str) -> ModuleKind {
+    pub(crate) fn usage_emit_mode_for_import(&self, file_name: &str) -> ModuleKind { ::tsox_core::fntrace::enter("usage_emit_mode_for_import"); 
         use tsox_core::core::compiler_options::ModuleKind as M;
         let emit = self.program.get_emit_module_format_of_file(file_name);
         if emit == M::CommonJS {
@@ -43,7 +43,7 @@ impl Checker {
         }
     }
 
-    pub fn check_export_assignment_grammar(&mut self, node: &Arc<Node>) {
+    pub fn check_export_assignment_grammar(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_export_assignment_grammar"); 
         let tsox_frontend::ast::NodeData::ExportAssignment(d) = &node.data else {
             return;
         };
@@ -100,7 +100,7 @@ impl Checker {
     }
 
     // Go checkImportEqualsDeclaration：ESM 目标实现文件禁止 import = require
-    pub fn check_import_equals_esm_grammar(&mut self, node: &Arc<Node>) {
+    pub fn check_import_equals_esm_grammar(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_equals_esm_grammar"); 
         let tsox_frontend::ast::NodeData::ImportEqualsDeclaration(d) = &node.data else {
             return;
         };
@@ -135,7 +135,7 @@ impl Checker {
         );
     }
 
-    pub fn check_import_declaration_grammar(&mut self, node: &Arc<Node>) {
+    pub fn check_import_declaration_grammar(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_declaration_grammar"); 
         let tsox_frontend::ast::NodeData::ImportDeclaration(d) = &node.data else {
             return;
         };
@@ -153,7 +153,7 @@ impl Checker {
         }
     }
 
-    pub fn check_import_ambient_rules(&mut self, node: &Arc<Node>) {
+    pub fn check_import_ambient_rules(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_ambient_rules"); 
         if self.ambient_context_depth == 0 {
             let emit_format_cjs = self.current_file.as_ref().is_some_and(|f| {
                 self.program.get_emit_module_format_of_file(&f.file_name)

@@ -20,7 +20,7 @@ impl LanguageService {
         source_file: &Arc<SourceFile>,
         program: &Arc<Program>,
         _kind: &str,
-    ) -> std::collections::HashMap<String, Vec<TextEdit>> {
+    ) -> std::collections::HashMap<String, Vec<TextEdit>> { ::tsox_core::fntrace::enter("organize_imports"); 
         let line_map = &source_file.line_map;
         let text = &source_file.text;
 
@@ -99,7 +99,7 @@ struct ImportInfo {
     text: String,
 }
 
-fn collect_import_declarations(file_node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn collect_import_declarations(file_node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_import_declarations"); 
     let mut imports = Vec::new();
     if let NodeData::SourceFile(data) = &file_node.data {
         for stmt in &data.statements.nodes {
@@ -111,14 +111,14 @@ fn collect_import_declarations(file_node: &Arc<Node>) -> Vec<Arc<Node>> {
     imports
 }
 
-fn get_module_specifier(node: &Arc<Node>) -> String {
+fn get_module_specifier(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_module_specifier"); 
     if let NodeData::ImportDeclaration(data) = &node.data {
         return data.module_specifier.text().to_string();
     }
     String::new()
 }
 
-fn is_type_only_import(node: &Arc<Node>) -> bool {
+fn is_type_only_import(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_only_import"); 
     if let NodeData::ImportDeclaration(data) = &node.data {
         if let Some(ref clause) = data.import_clause {
             if let NodeData::ImportClause(ic) = &clause.data {
@@ -129,7 +129,7 @@ fn is_type_only_import(node: &Arc<Node>) -> bool {
     false
 }
 
-fn is_import_used(program: &Arc<Program>, source_file: &Arc<SourceFile>, imp: &Arc<Node>) -> bool {
+fn is_import_used(program: &Arc<Program>, source_file: &Arc<SourceFile>, imp: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_import_used"); 
     let mut checker = program.build_checker();
 
     if let NodeData::ImportDeclaration(data) = &imp.data {
@@ -153,7 +153,7 @@ fn is_import_used(program: &Arc<Program>, source_file: &Arc<SourceFile>, imp: &A
     false
 }
 
-fn collect_imported_identifiers(clause: &Arc<Node>) -> Vec<Arc<Node>> {
+fn collect_imported_identifiers(clause: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_imported_identifiers"); 
     let mut result = Vec::new();
     match &clause.data {
         NodeData::ImportClause(data) => {
@@ -185,7 +185,7 @@ fn collect_imported_identifiers(clause: &Arc<Node>) -> Vec<Arc<Node>> {
 pub fn group_by_newline_contiguous(
     source_file: &Arc<SourceFile>,
     imports: &[Arc<Node>],
-) -> Vec<Vec<Arc<Node>>> {
+) -> Vec<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("group_by_newline_contiguous"); 
     let text = &source_file.text;
     let mut groups: Vec<Vec<Arc<Node>>> = Vec::new();
 
@@ -207,7 +207,7 @@ pub fn group_by_newline_contiguous(
     groups
 }
 
-fn has_blank_line_between(text: &str, start: usize, end: usize) -> bool {
+fn has_blank_line_between(text: &str, start: usize, end: usize) -> bool { ::tsox_core::fntrace::enter("has_blank_line_between"); 
     if start >= end || end > text.len() {
         return false;
     }
@@ -215,7 +215,7 @@ fn has_blank_line_between(text: &str, start: usize, end: usize) -> bool {
     between.lines().filter(|l| l.trim().is_empty()).count() > 1
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -224,7 +224,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

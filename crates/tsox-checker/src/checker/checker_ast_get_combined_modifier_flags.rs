@@ -2,7 +2,7 @@
 
 use crate::checker::checker::*;
 
-pub(crate) fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags {
+pub(crate) fn ast_get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("ast_get_combined_modifier_flags"); 
     let current = Checker::get_root_declaration(node);
     let mut flags = current.syntactic_modifier_flags();
     if current.kind == SyntaxKind::VariableDeclaration {
@@ -25,7 +25,7 @@ impl Checker {
         &mut self,
         target: *const Symbol,
         property: TypeResolutionProperty,
-    ) {
+    ) { ::tsox_core::fntrace::enter("mark_type_resolution_cycle"); 
         if let Some(idx) = self
             .type_resolution_stack
             .iter()
@@ -41,7 +41,7 @@ impl Checker {
         &mut self,
         target: *const Symbol,
         property: TypeResolutionProperty,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("push_type_resolution"); 
         let cycle_start = self
             .type_resolution_stack
             .iter()
@@ -65,14 +65,14 @@ impl Checker {
         }
     }
 
-    pub fn pop_type_resolution(&mut self) -> bool {
+    pub fn pop_type_resolution(&mut self) -> bool { ::tsox_core::fntrace::enter("pop_type_resolution"); 
         self.type_resolution_stack
             .pop()
             .map(|entry| entry.result)
             .unwrap_or(true)
     }
 
-    pub fn is_resolving(&self, target: *const Symbol, property: TypeResolutionProperty) -> bool {
+    pub fn is_resolving(&self, target: *const Symbol, property: TypeResolutionProperty) -> bool { ::tsox_core::fntrace::enter("is_resolving"); 
         self.type_resolution_stack
             .iter()
             .any(|entry| entry.target == target && entry.property == property)

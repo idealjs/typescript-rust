@@ -3,7 +3,7 @@ use crate::emitter::commonjs::*;
 pub(crate) fn rewrite_import_extensions_tracked(
     text: &str,
     src_offsets: &[u32],
-) -> (String, Vec<u32>) {
+) -> (String, Vec<u32>) { ::tsox_core::fntrace::enter("rewrite_import_extensions_tracked"); 
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
     let mut out_text = String::with_capacity(text.len());
@@ -67,7 +67,7 @@ pub(crate) fn copy_string_literal_tracked(
     start: usize,
     out_text: &mut String,
     out_offsets: &mut Vec<u32>,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("copy_string_literal_tracked"); 
     let mut i = start;
     if chars[i] == 'f' {
         for _ in 0..5 {

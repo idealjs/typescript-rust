@@ -7,7 +7,7 @@ use tsox_core::diagnostics::Message;
 impl Checker {
     // Go checkGrammarModuleElementContext：模块元素出现在 SourceFile/
     // ModuleBlock/ModuleDeclaration 之外时报错并中止后续检查
-    fn grammar_module_element_context_holds(&mut self, node: &Arc<Node>, message: &Message) -> bool {
+    fn grammar_module_element_context_holds(&mut self, node: &Arc<Node>, message: &Message) -> bool { ::tsox_core::fntrace::enter("grammar_module_element_context_holds"); 
         let ok = node.parent().is_some_and(|p| {
             matches!(
                 p.kind,
@@ -23,7 +23,7 @@ impl Checker {
     // Go checkModuleDeclaration/checkImportDeclaration/checkImportEqualsDeclaration/
     // checkExportDeclaration/checkExportAssignment 的上下文文法入口，返回 false
     // 表示非法上下文已报错需中止
-    pub fn check_module_element_context(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_module_element_context(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_module_element_context"); 
         let message = match &node.data {
             NodeData::ImportDeclaration(_) | NodeData::ImportEqualsDeclaration(_) => {
                 &msgs::AN_IMPORT_DECLARATION_CAN_ONLY_BE_USED_AT_THE_TOP_LEVEL_OF_A_NAMESPACE_OR_MODULE
@@ -53,7 +53,7 @@ impl Checker {
     // Go checkExternalImportOrExportDeclaration：模块名非字符串字面量报
     // TS1141；非文件级且非 ambient 外部模块内的导入/导出报 TS1147/TS1194。
     // 两处 Go 均用普通 c.error（非 grammarErrorOnNode），文件带解析错误时仍报
-    pub fn check_external_import_or_export_declaration(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_external_import_or_export_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_external_import_or_export_declaration"); 
         let module_name = match &node.data {
             NodeData::ImportDeclaration(d) => Some(Arc::clone(&d.module_specifier)),
             NodeData::ExportDeclaration(d) => d.module_specifier.clone(),
@@ -94,7 +94,7 @@ impl Checker {
 
     // Go checkExportDeclaration：namespace 内具名导出声明报 TS1194
     //（ambient 命名空间内无 from 的导出除外）
-    pub fn check_export_declaration_namespace(&mut self, node: &Arc<Node>) {
+    pub fn check_export_declaration_namespace(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_export_declaration_namespace"); 
         let NodeData::ExportDeclaration(d) = &node.data else {
             return;
         };
@@ -125,14 +125,14 @@ impl Checker {
     }
 }
 
-fn module_name_is_missing(module_name: &Arc<Node>) -> bool {
+fn module_name_is_missing(module_name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("module_name_is_missing"); 
     module_name.loc.pos() >= module_name.loc.end()
 }
 
 impl Checker {
     // Go checkExternalModuleNameInGlobalScope：非法上下文中止后仍解析模块名，
     // 未解析报 TS2307（副作用导入与函数内容器跳过）
-    pub fn check_external_module_name_in_global_scope(&mut self, node: &Arc<Node>) {
+    pub fn check_external_module_name_in_global_scope(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_external_module_name_in_global_scope"); 
         let mut container = node.parent();
         while let Some(c) = &container
             && c.kind == SyntaxKind::Block
@@ -220,8 +220,8 @@ impl Checker {
 
 // Go binder：块内 declare module 仍声明进文件容器符号表；移植侧落入块
 // locals，此处按语法兜底检索同名 ambient 模块声明
-fn file_has_ambient_module_named(file: &Arc<Node>, spec: &str) -> bool {
-    fn walk(stmts: &[Arc<Node>], spec: &str) -> bool {
+fn file_has_ambient_module_named(file: &Arc<Node>, spec: &str) -> bool { ::tsox_core::fntrace::enter("file_has_ambient_module_named"); 
+    fn walk(stmts: &[Arc<Node>], spec: &str) -> bool { ::tsox_core::fntrace::enter("walk"); 
         for stmt in stmts {
             if let NodeData::ModuleDeclaration(md) = &stmt.data
                 && md.name.kind == SyntaxKind::StringLiteral

@@ -3,15 +3,15 @@
 use super::*;
 
 impl ExtendedConfigCache {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self::default()
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.entries.len()
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.entries.is_empty()
     }
 
@@ -22,7 +22,7 @@ impl ExtendedConfigCache {
         current_dir: &str,
         fs: &dyn FS,
         resolution_stack: &[String],
-    ) -> ParsedCommandLine {
+    ) -> ParsedCommandLine { ::tsox_core::fntrace::enter("get_or_parse"); 
         if resolution_stack.iter().any(|p| p == resolved_path) {
             return get_parsed_command_line_of_config_file_with_stack(
                 config_file_name,
@@ -73,7 +73,7 @@ pub struct ParsedBuildCommandLine {
 }
 
 impl ParsedBuildCommandLine {
-    pub fn resolved_project_paths(&self) -> Vec<String> {
+    pub fn resolved_project_paths(&self) -> Vec<String> { ::tsox_core::fntrace::enter("resolved_project_paths"); 
         self.projects
             .iter()
             .map(|project| {
@@ -83,7 +83,7 @@ impl ParsedBuildCommandLine {
     }
 }
 
-pub(crate) fn err(text: impl Into<String>) -> Diagnostic {
+pub(crate) fn err(text: impl Into<String>) -> Diagnostic { ::tsox_core::fntrace::enter("err"); 
     Diagnostic::new(None, TextRange::undefined(), new_ad_hoc_message(""), vec![]).with_text(text)
 }
 
@@ -91,7 +91,7 @@ pub fn parse_command_line(
     args: &[String],
     current_dir: &str,
     fs: Option<&dyn FS>,
-) -> ParsedCommandLine {
+) -> ParsedCommandLine { ::tsox_core::fntrace::enter("parse_command_line"); 
     let (options, watch_options_map, file_names, errors) =
         parse_command_line_worker(args, current_dir, fs, find_option, ParseMode::Compiler);
 
@@ -145,7 +145,7 @@ pub fn parse_build_command_line(
     args: &[String],
     current_dir: &str,
     fs: Option<&dyn FS>,
-) -> ParsedBuildCommandLine {
+) -> ParsedBuildCommandLine { ::tsox_core::fntrace::enter("parse_build_command_line"); 
     let (options, watch_options_map, mut projects, mut errors) =
         parse_command_line_worker(args, current_dir, fs, find_build_option, ParseMode::Build);
 

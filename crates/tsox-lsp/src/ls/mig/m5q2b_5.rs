@@ -22,7 +22,7 @@ pub fn get_jsdoc_parameter_completions(
     options: &core::compiler_options::CompilerOptions,
     preferences: &UserPreferences,
     tag_name_only: bool,
-) -> Vec<crate::ls::types_completion::CompletionItem> {
+) -> Vec<crate::ls::types_completion::CompletionItem> { ::tsox_core::fntrace::enter("get_jsdoc_parameter_completions"); 
     let Some(current_token) = astnav::get_token_at_position(&file.node, position) else {
         return Vec::new();
     };
@@ -171,7 +171,7 @@ pub fn get_jsdoc_parameter_completions(
     items
 }
 
-fn parameter_dot_dot_dot_token(param: &Node) -> Option<&Arc<Node>> {
+fn parameter_dot_dot_dot_token(param: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("parameter_dot_dot_dot_token"); 
     match &param.data {
         ast::NodeData::ParameterDeclaration(d) => d.dot_dot_dot_token.as_ref(),
         _ => None,

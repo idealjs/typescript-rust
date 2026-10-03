@@ -34,7 +34,7 @@ pub fn bfs_parallel<N>(
 ) -> BfsResult<N>
 where
     N: Clone + Eq + Hash + Send + Sync + 'static,
-{
+{ crate::fntrace::enter("bfs_parallel"); 
     let visited: Arc<SyncSet<N>> = Arc::new(SyncSet::new());
     bfs_parallel_ex(start, neighbors, visit, |_| (), visited, |n| n.clone())
 }
@@ -50,7 +50,7 @@ pub fn bfs_parallel_ex<N, K>(
 where
     N: Clone + Send + Sync + 'static,
     K: Eq + Hash + Clone + Send + Sync + 'static,
-{
+{ crate::fntrace::enter("bfs_parallel_ex"); 
     let neighbors = Arc::new(neighbors);
     let visit = Arc::new(visit);
     let preprocess = Arc::new(preprocess_level);
@@ -202,7 +202,7 @@ where
     }
 }
 
-fn create_path<N: Clone>(job: &Arc<Job<N>>) -> Vec<N> {
+fn create_path<N: Clone>(job: &Arc<Job<N>>) -> Vec<N> { crate::fntrace::enter("create_path"); 
     let mut path = Vec::new();
     let mut current = Some(job.clone());
     while let Some(j) = current {
@@ -212,7 +212,7 @@ fn create_path<N: Clone>(job: &Arc<Job<N>>) -> Vec<N> {
     path
 }
 
-fn update_min(a: &AtomicUsize, candidate: usize) -> bool {
+fn update_min(a: &AtomicUsize, candidate: usize) -> bool { crate::fntrace::enter("update_min"); 
     loop {
         let current = a.load(Ordering::SeqCst);
         if current < candidate {

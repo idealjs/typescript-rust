@@ -20,7 +20,7 @@ pub fn new_supplemental_references_transformer(
     source_file: &SourceFile,
     declaration_file_path: String,
     force_declaration_paths: bool,
-) -> SupplementalReferencesTransformer {
+) -> SupplementalReferencesTransformer { ::tsox_core::fntrace::enter("new_supplemental_references_transformer"); 
     SupplementalReferencesTransformer {
         host,
         supplemental_files: source_file.supplemental_source_files(),
@@ -33,7 +33,7 @@ impl SupplementalReferencesTransformer {
     pub fn transform_source_file<'a>(
         &'a self,
         source_file: &'a mut SourceFile,
-    ) -> &'a mut SourceFile {
+    ) -> &'a mut SourceFile { ::tsox_core::fntrace::enter("transform_source_file"); 
         for supplemental in &self.supplemental_files {
             if !self
                 .host
@@ -66,7 +66,7 @@ impl SupplementalReferencesTransformer {
         source_file
     }
 
-    pub fn get_diagnostics(&self) -> Vec<Diagnostic> {
+    pub fn get_diagnostics(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_diagnostics"); 
         Vec::new()
     }
 }

@@ -28,11 +28,11 @@ use super::m4m_2::{is_generated_identifier, is_simple_inlineable_expression};
 use super::m4m_4::move_range_past_modifiers;
 use tsox_frontend::ast::mig::m3b::members as node_members;
 
-fn node_key(node: &Arc<Node>) -> usize {
+fn node_key(node: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("node_key"); 
     Arc::as_ptr(node) as usize
 }
 
-fn decorators_of(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn decorators_of(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("decorators_of"); 
     node.modifiers()
         .map(|m| {
             m.list
@@ -59,34 +59,34 @@ impl super::m4g::r33k7_defs::ReferenceResolver for LegacyDecoratorsReferenceReso
         &self,
         node: &Arc<Node>,
         prefix_locals: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_export_container"); 
         self.inner.get_referenced_export_container(node, prefix_locals)
     }
 
-    fn get_referenced_import_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_import_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_import_declaration"); 
         self.inner.get_referenced_import_declaration(node)
     }
 
-    fn get_referenced_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declaration"); 
         self.inner.get_referenced_value_declaration(node)
     }
 
-    fn get_referenced_value_declarations(&self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    fn get_referenced_value_declarations(&self, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declarations"); 
         self.inner.get_referenced_value_declarations(node)
     }
 
-    fn get_element_access_expression_name(&self, expression: &Arc<Node>) -> String {
+    fn get_element_access_expression_name(&self, expression: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_element_access_expression_name"); 
         self.inner.get_element_access_expression_name(expression)
     }
 
-    fn get_referenced_member_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_member_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_member_value_declaration"); 
         self.inner.get_referenced_member_value_declaration(node)
     }
 }
 
 pub fn new_legacy_decorators_transformer(
     opts: &super::m3m::TransformOptions,
-) -> Option<Box<super::m3m::Transformer>> {
+) -> Option<Box<super::m3m::Transformer>> { ::tsox_core::fntrace::enter("new_legacy_decorators_transformer"); 
     let _tx = LegacyDecoratorsTransformer {
         language_version: opts.compiler_options.get_emit_script_target(),
         reference_resolver: Arc::new(LegacyDecoratorsReferenceResolver {
@@ -97,7 +97,7 @@ pub fn new_legacy_decorators_transformer(
         emit_context: opts.context.clone(),
         substitution_visitor: Some(tsox_frontend::ast::visitor::NodeVisitor::default()),
     };
-    fn legacy_decorators_visit(_tx: &mut super::m3m::Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn legacy_decorators_visit(_tx: &mut super::m3m::Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("legacy_decorators_visit"); 
         Some(node)
     }
     Some(Box::new(super::m3m::Transformer::new(
@@ -106,13 +106,13 @@ pub fn new_legacy_decorators_transformer(
     )))
 }
 
-pub fn decorator_contains_private_identifier_in_expression(decorator: &Arc<Node>) -> bool {
+pub fn decorator_contains_private_identifier_in_expression(decorator: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("decorator_contains_private_identifier_in_expression"); 
     decorator
         .subtree_facts()
         .contains(SubtreeContainsPrivateIdentifierInExpression)
 }
 
-pub fn elide_nodes(f: &NodeFactory, nodes: Option<&NodeList>) -> Option<Arc<NodeList>> {
+pub fn elide_nodes(f: &NodeFactory, nodes: Option<&NodeList>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("elide_nodes"); 
     let nodes = nodes?;
     let mut replacement = f.new_node_list(Vec::new());
     if let Some(r) = Arc::get_mut(&mut replacement) {
@@ -121,7 +121,7 @@ pub fn elide_nodes(f: &NodeFactory, nodes: Option<&NodeList>) -> Option<Arc<Node
     Some(replacement)
 }
 
-pub fn elide_modifiers(f: &NodeFactory, nodes: Option<&NodeList>) -> Option<Arc<ModifierList>> {
+pub fn elide_modifiers(f: &NodeFactory, nodes: Option<&NodeList>) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("elide_modifiers"); 
     let nodes = nodes?;
     let mut replacement = f.new_modifier_list(Vec::<Arc<Node>>::new());
     if let Some(r) = Arc::get_mut(&mut replacement) {
@@ -131,7 +131,7 @@ pub fn elide_modifiers(f: &NodeFactory, nodes: Option<&NodeList>) -> Option<Arc<
 }
 
 impl LegacyDecoratorsTransformer {
-    pub fn get_class_alias_if_needed(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_class_alias_if_needed(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_class_alias_if_needed"); 
         if !self.has_internal_static_reference(node) {
             return None;
         }
@@ -150,14 +150,14 @@ impl LegacyDecoratorsTransformer {
         Some(class_alias)
     }
 
-    pub fn get_constructor_decoration_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_constructor_decoration_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_constructor_decoration_statement"); 
         let expression = self.generate_constructor_decoration_expression(node)?;
         let result = self.factory().new_expression_statement(&expression);
         self.emit_context().set_original(&result, node);
         Some(result)
     }
 
-    pub fn generate_constructor_decoration_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn generate_constructor_decoration_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("generate_constructor_decoration_expression"); 
         let all_decorators = get_all_decorators_of_class(node, true);
         let has_alias = self
             .enclosing_classes
@@ -200,7 +200,7 @@ impl LegacyDecoratorsTransformer {
         &mut self,
         node: &Arc<Node>,
         is_static: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_class_element_decoration_statements"); 
         let exprs = self.generate_class_element_decoration_expressions(node, is_static);
         exprs
             .into_iter()
@@ -212,7 +212,7 @@ impl LegacyDecoratorsTransformer {
         &mut self,
         node: &Arc<Node>,
         is_static: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("generate_class_element_decoration_expressions"); 
         let members = get_decorated_class_elements(node, is_static);
         let mut expressions = Vec::new();
         for member in members {
@@ -227,7 +227,7 @@ impl LegacyDecoratorsTransformer {
         &mut self,
         node: &Arc<Node>,
         member: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("generate_class_element_decoration_expression"); 
         let all_decorators = get_all_decorators_of_class_element(member, node, true);
         let decorator_expressions = self.transform_all_decorators_of_declaration(all_decorators.as_ref());
         if decorator_expressions.is_empty() {
@@ -250,14 +250,14 @@ impl LegacyDecoratorsTransformer {
         Some(helper)
     }
 
-    pub fn get_class_member_prefix(&mut self, node: &Arc<Node>, member: &Arc<Node>) -> Arc<Node> {
+    pub fn get_class_member_prefix(&mut self, node: &Arc<Node>, member: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_class_member_prefix"); 
         if is_static(member) {
             return self.factory().get_declaration_name(node);
         }
         self.get_class_prototype(node)
     }
 
-    pub fn get_class_prototype(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_class_prototype(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_class_prototype"); 
         self.factory().new_property_access_expression(
             &self.factory().get_declaration_name(node),
             None,
@@ -267,7 +267,7 @@ impl LegacyDecoratorsTransformer {
     }
 }
 
-pub fn get_all_decorators_of_class(node: &Arc<Node>, use_legacy_decorators: bool) -> Option<AllDecorators> {
+pub fn get_all_decorators_of_class(node: &Arc<Node>, use_legacy_decorators: bool) -> Option<AllDecorators> { ::tsox_core::fntrace::enter("get_all_decorators_of_class"); 
     let decorators = decorators_of(node);
     let parameters = if use_legacy_decorators {
         get_first_constructor_with_body(node)
@@ -289,7 +289,7 @@ pub fn get_all_decorators_of_class_element(
     member: &Arc<Node>,
     parent: &Arc<Node>,
     use_legacy_decorators: bool,
-) -> Option<AllDecorators> {
+) -> Option<AllDecorators> { ::tsox_core::fntrace::enter("get_all_decorators_of_class_element"); 
     match member.kind {
         SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => {
             if !use_legacy_decorators {
@@ -307,7 +307,7 @@ pub fn get_all_decorators_of_accessors(
     accessor: &Arc<Node>,
     parent: &Arc<Node>,
     use_legacy_decorators: bool,
-) -> Option<AllDecorators> {
+) -> Option<AllDecorators> { ::tsox_core::fntrace::enter("get_all_decorators_of_accessors"); 
     if accessor.body().is_none() {
         return None;
     }
@@ -354,7 +354,7 @@ pub fn get_all_decorators_of_accessors(
     })
 }
 
-pub fn get_all_decorators_of_property(property: &Arc<Node>) -> Option<AllDecorators> {
+pub fn get_all_decorators_of_property(property: &Arc<Node>) -> Option<AllDecorators> { ::tsox_core::fntrace::enter("get_all_decorators_of_property"); 
     let decorators = decorators_of(property);
     if decorators.is_empty() {
         return None;
@@ -365,7 +365,7 @@ pub fn get_all_decorators_of_property(property: &Arc<Node>) -> Option<AllDecorat
     })
 }
 
-pub fn get_all_decorators_of_method(method: &Arc<Node>, use_legacy_decorators: bool) -> Option<AllDecorators> {
+pub fn get_all_decorators_of_method(method: &Arc<Node>, use_legacy_decorators: bool) -> Option<AllDecorators> { ::tsox_core::fntrace::enter("get_all_decorators_of_method"); 
     if method.body().is_none() {
         return None;
     }
@@ -384,7 +384,7 @@ pub fn get_all_decorators_of_method(method: &Arc<Node>, use_legacy_decorators: b
     })
 }
 
-pub fn get_decorated_class_elements(node: &Arc<Node>, is_static: bool) -> Vec<Arc<Node>> {
+pub fn get_decorated_class_elements(node: &Arc<Node>, is_static: bool) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_decorated_class_elements"); 
     let members = node_members(node);
     if members.is_empty() {
         return Vec::new();

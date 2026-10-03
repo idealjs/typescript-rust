@@ -8,7 +8,7 @@ pub(crate) fn emit_statement<S: EmitSink>(
     comment_cuts: &[(usize, usize)],
     replacements: &[(usize, usize, &str, Option<usize>)],
     sink: &mut S,
-) {
+) { ::tsox_core::fntrace::enter("emit_statement"); 
     let mut cuts: Vec<(usize, usize)> = Vec::new();
     collect_type_cuts(node, source, &mut cuts);
 

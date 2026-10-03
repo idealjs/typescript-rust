@@ -31,7 +31,7 @@ use crate::checker::types::*;
 use tsox_frontend::ast::{Diagnostic, Node, NodeData, SyntaxKind};
 
 impl Checker {
-    pub fn check_type_parameter_lists_identical(&mut self, symbol: &Arc<Symbol>) {
+    pub fn check_type_parameter_lists_identical(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("check_type_parameter_lists_identical"); 
         if symbol.declarations.len() == 1 {
             return;
         }
@@ -65,7 +65,7 @@ impl Checker {
         }
     }
 
-    pub fn check_type_for_duplicate_index_signatures(&mut self, node: &Arc<Node>) {
+    pub fn check_type_for_duplicate_index_signatures(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_for_duplicate_index_signatures"); 
         let node_symbol = match self.get_symbol_of_declaration(node) {
             Some(s) => s,
             None => return,
@@ -102,7 +102,7 @@ impl Checker {
         }
     }
 
-    pub fn check_variable_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_variable_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_variable_statement"); 
         let declaration_list = match &node.data {
             NodeData::VariableStatement(data) => Arc::clone(&data.declaration_list),
             _ => return,
@@ -115,7 +115,7 @@ impl Checker {
         self.check_variable_declaration_list(&declaration_list);
     }
 
-    pub fn check_variable_like_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_variable_like_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_variable_like_declaration"); 
         self.check_decorators(node);
         let name = match tsox_frontend::ast::node_data_generated::node_name(node) {
             Some(n) => n,
@@ -169,7 +169,7 @@ impl Checker {
         name: &Arc<Node>,
         _type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_variable_like_declaration_not_binding_element_tail"); 
         if is_binding_pattern(name) {
             for element in tsox_frontend::ast::mig::m3b::elements(name) {
                 self.check_source_element(element);
@@ -397,7 +397,7 @@ impl Checker {
         first_type: &Arc<Type>,
         next_declaration: &Arc<Node>,
         next_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_next_variable_or_property_declaration_must_have_same_type"); 
         let next_declaration_name = get_name_of_declaration(next_declaration).unwrap();
         let message = if is_property_declaration(next_declaration)
             || is_property_signature_declaration(next_declaration)
@@ -419,7 +419,7 @@ impl Checker {
         }
     }
 
-    pub fn check_var_declared_names_not_shadowed(&mut self, node: &Arc<Node>) {
+    pub fn check_var_declared_names_not_shadowed(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_var_declared_names_not_shadowed"); 
         let name = match tsox_frontend::ast::node_data_generated::node_name(node) {
             Some(n) => n,
             None => return,
@@ -435,7 +435,7 @@ impl Checker {
         let local_symbol = self.get_symbol_of_declaration(node);
     }
 
-    pub fn check_type_alias_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_type_alias_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_alias_declaration"); 
         self.check_grammar_modifiers(node);
         let name = tsox_frontend::ast::node_data_generated::node_name(node).unwrap();
         self.check_type_name_is_reserved(name, TYPE_ALIAS_NAME_CANNOT_BE_0);
@@ -472,7 +472,7 @@ impl Checker {
         self.register_for_unused_identifiers_check(node);
     }
 
-    pub fn check_type_name_is_reserved(&mut self, name: &Arc<Node>, message: tsox_core::diagnostics::Message) {
+    pub fn check_type_name_is_reserved(&mut self, name: &Arc<Node>, message: tsox_core::diagnostics::Message) { ::tsox_core::fntrace::enter("check_type_name_is_reserved"); 
         let text = node_text(name);
         match text {
             "any" | "unknown" | "never" | "number" | "bigint" | "boolean" | "string" | "symbol"
@@ -483,7 +483,7 @@ impl Checker {
         }
     }
 
-    pub fn check_weak_map_set_collision(&mut self, node: &Arc<Node>) {
+    pub fn check_weak_map_set_collision(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_weak_map_set_collision"); 
         let Some(enclosing_block_scope) = get_enclosing_block_scope_container(node) else {
             return;
         };
@@ -500,19 +500,19 @@ impl Checker {
         }
     }
 
-    pub fn check_type_of_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_type_of_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_type_of_expression"); 
         let expression = node_expression(node).unwrap();
         self.check_expression(expression);
         self.typeof_type.get().cloned().unwrap()
     }
 
-    pub fn check_void_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_void_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_void_expression"); 
         self.check_node_deferred(node);
         self.undefined_widening_type.clone()
     }
 }
 
-fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool {
+fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_initialized_to_require"); 
     let node = if is_binding_element(node) {
         match node.parent().and_then(|p| p.parent()) {
             Some(gp) => gp,

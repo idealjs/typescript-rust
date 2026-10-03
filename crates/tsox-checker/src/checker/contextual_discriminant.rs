@@ -11,7 +11,7 @@ const TRUE: i8 = 1;
 const FALSE: i8 = 0;
 const MAYBE: i8 = -1;
 
-fn type_flags_primitive() -> TypeFlags {
+fn type_flags_primitive() -> TypeFlags { ::tsox_core::fntrace::enter("type_flags_primitive"); 
     TypeFlags::from_bits_truncate(
         crate::checker::types::TYPE_FLAGS_STRING_LIKE.bits()
             | crate::checker::types::TYPE_FLAGS_NUMBER_LIKE.bits()
@@ -25,7 +25,7 @@ fn type_flags_primitive() -> TypeFlags {
     )
 }
 
-fn distributed(t: &Arc<Type>) -> Vec<Arc<Type>> {
+fn distributed(t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("distributed"); 
     match &t.data {
         TypeData::Union(u) => u.union_or_intersection.types.to_vec(),
         _ => vec![Arc::clone(t)],
@@ -39,7 +39,7 @@ enum DiscriminantItem {
 }
 
 impl DiscriminantItem {
-    fn name(&self, checker: &Checker) -> Option<String> {
+    fn name(&self, checker: &Checker) -> Option<String> { ::tsox_core::fntrace::enter("name"); 
         let node = match self {
             DiscriminantItem::PropertyAssignment(n) | DiscriminantItem::ShorthandProperty(n) => n,
             DiscriminantItem::MissingMember => return None,
@@ -49,7 +49,7 @@ impl DiscriminantItem {
 }
 
 impl Checker {
-    fn node_property_name(&self, node: &Arc<Node>) -> Option<String> {
+    fn node_property_name(&self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("node_property_name"); 
         let name = match &node.data {
             NodeData::PropertyAssignment(d) => &d.name,
             NodeData::ShorthandPropertyAssignment(d) => &d.name,
@@ -66,7 +66,7 @@ impl Checker {
     /// Go isDiscriminantProperty（relater.go:1078）：联合的合成属性上
     /// NonUniform+Literal 且属性型非泛型即为判别式属性（IsDiscriminant
     /// 计算缓存省略，符号每查询重建）
-    pub(crate) fn is_discriminant_property(&mut self, t: &Arc<Type>, name: &str) -> bool {
+    pub(crate) fn is_discriminant_property(&mut self, t: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_discriminant_property"); 
         if !t.is_union() {
             return false;
         }
@@ -92,7 +92,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         contextual_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("discriminate_contextual_type_by_object_members"); 
         let memo_key = (node.id(), contextual_type.id);
         if let Some(cached) = self.discriminated_contextual_types.get(&memo_key) {
             return Arc::clone(cached);
@@ -156,7 +156,7 @@ impl Checker {
         &mut self,
         target: &Arc<Type>,
         items: Vec<(DiscriminantItem, String)>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("discriminate_type_by_discriminable_items"); 
         let Some(types) = target.types() else {
             return Arc::clone(target);
         };
@@ -210,7 +210,7 @@ impl Checker {
 
     /// Go getReducedType（checker.go:22161）：本处仅用于成分预过滤，
     /// never 交叉归约外联合内部归约（ContainsIntersections）未移植
-    fn discriminant_reduced_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn discriminant_reduced_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("discriminant_reduced_type"); 
         if t.flags.contains(TypeFlags::Intersection) && self.is_never_intersection(t) {
             return self.never_type();
         }
@@ -222,7 +222,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_of_property_or_index_signature"); 
         if let Some(prop) = self.get_property_of_type(t, name) {
             return Some(self.get_type_of_symbol(&prop));
         }
@@ -239,7 +239,7 @@ impl Checker {
     /// 取初始化式**上下文无关**型（getContextFreeTypeOfExpression——判别式
     /// 限定于不依赖上下文型的表达式即为此递归断路），简写属性取名标识符
     /// 型，缺席成员以 undefined 参与判定
-    fn discriminant_item_matches(&mut self, item: &DiscriminantItem, t: &Arc<Type>) -> bool {
+    fn discriminant_item_matches(&mut self, item: &DiscriminantItem, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("discriminant_item_matches"); 
         let prop_type = match item {
             DiscriminantItem::PropertyAssignment(p) => match &p.data {
                 NodeData::PropertyAssignment(pa) => {

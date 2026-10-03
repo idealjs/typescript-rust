@@ -10,7 +10,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         s: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("apply_mapped_over_type"); 
         // 原始类型/any/unknown/泛型载体：直接透传（Go: primitive no mapping）
         if !s.flags.intersects(TypeFlags::Object | TypeFlags::Intersection)
             && !self.type_is_generic(s)
@@ -105,7 +105,7 @@ impl Checker {
         info: &TupleElementInfo,
         element_types: &mut Vec<Arc<Type>>,
         element_infos: &mut Vec<TupleElementInfo>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("spread_variadic_tuple_element"); 
         let rest_info = |labeled: &Option<Arc<Node>>| TupleElementInfo {
             label: None,
             flags: ElementFlags::Rest,
@@ -155,7 +155,7 @@ impl Checker {
         &mut self,
         element_types: Vec<Arc<Type>>,
         element_infos: &[TupleElementInfo],
-    ) -> (Vec<Arc<Type>>, Vec<TupleElementInfo>) {
+    ) -> (Vec<Arc<Type>>, Vec<TupleElementInfo>) { ::tsox_core::fntrace::enter("normalize_variadic_tuple_elements"); 
         let has_variadic = element_infos
             .iter()
             .any(|ei| ei.flags.contains(ElementFlags::Variadic));
@@ -187,7 +187,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         constraint: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("expand_mapped_by_constraint"); 
         let constituents: Vec<Arc<Type>> = if constraint.flags.contains(TypeFlags::Union) {
             constraint.types().map(|ts| ts.to_vec()).unwrap_or_default()
         } else {
@@ -295,7 +295,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         key: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("mapped_template_at"); 
         let Some(decl) = m.declaration.clone() else {
             return self.any_type();
         };
@@ -315,7 +315,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         key: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("mapped_member_name"); 
         let decl = m.declaration.clone()?;
         let NodeData::MappedTypeNode(md) = &decl.data else {
             return None;
@@ -335,7 +335,7 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
         key: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_mapped_node"); 
         let decl = m.declaration.clone();
         self.resolve_mapped_decl_node(decl.as_ref(), node, key, chain)
     }
@@ -346,7 +346,7 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
         key: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_mapped_decl_node"); 
         let tp_node = decl.and_then(|d| match &d.data {
             NodeData::MappedTypeNode(md) => Some(Arc::clone(&md.type_parameter)),
             _ => None,
@@ -398,7 +398,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         chain: &[(Vec<Arc<Type>>, Vec<Arc<Type>>)],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("apply_template_subst_chain"); 
         let mut result = Arc::clone(t);
         for (ps, ss) in chain {
             result = self.substitute_infer_type_parameters(&result, ps, ss);

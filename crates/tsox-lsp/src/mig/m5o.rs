@@ -33,7 +33,7 @@ mod lsproto {
         pub const SourceSortImportsTs: CodeActionKind = CodeActionKind("source.sortImports.ts");
         pub const SourceFixAllTs: CodeActionKind = CodeActionKind("source.fixAll.ts");
 
-        pub fn as_str(&self) -> &'static str {
+        pub fn as_str(&self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
             self.0
         }
     }
@@ -70,7 +70,7 @@ pub const CONTENT_MAPPER_CALL_HIERARCHY_REGISTRATION_ID: &str = "content-mapper-
 pub const CONTENT_MAPPER_WILL_RENAME_FILES_REGISTRATION_ID: &str =
     "content-mapper-will-rename-files";
 
-pub fn supported_code_action_kinds() -> Vec<&'static str> {
+pub fn supported_code_action_kinds() -> Vec<&'static str> { ::tsox_core::fntrace::enter("supported_code_action_kinds"); 
     vec![
         lsproto::CodeActionKind::QuickFix.as_str(),
         lsproto::CodeActionKind::SourceOrganizeImportsTs.as_str(),
@@ -81,7 +81,7 @@ pub fn supported_code_action_kinds() -> Vec<&'static str> {
 }
 
 impl Server {
-    pub fn supports_content_mapper_registration(&self, id: &str) -> bool {
+    pub fn supports_content_mapper_registration(&self, id: &str) -> bool { ::tsox_core::fntrace::enter("supports_content_mapper_registration"); 
         let caps = &self.client_capabilities.text_document;
         match id {
             CONTENT_MAPPER_DID_OPEN_REGISTRATION_ID
@@ -144,7 +144,7 @@ impl Server {
     }
 }
 
-pub fn value_or_zero<T: Clone + Default>(value: Option<&T>) -> T {
+pub fn value_or_zero<T: Clone + Default>(value: Option<&T>) -> T { ::tsox_core::fntrace::enter("value_or_zero"); 
     match value {
         None => T::default(),
         Some(v) => v.clone(),
@@ -152,7 +152,7 @@ pub fn value_or_zero<T: Clone + Default>(value: Option<&T>) -> T {
 }
 
 impl Server {
-    pub fn write_loop(&self) -> Result<(), LspError> {
+    pub fn write_loop(&self) -> Result<(), LspError> { ::tsox_core::fntrace::enter("write_loop"); 
         loop {
             let msg = self.outgoing_queue.get();
             let Some(msg) = msg else {
@@ -183,7 +183,7 @@ impl Server {
 }
 
 impl Server {
-    pub fn remove_api_session(&self, id: &str) {
+    pub fn remove_api_session(&self, id: &str) { ::tsox_core::fntrace::enter("remove_api_session"); 
         self.api_sessions.lock().unwrap().remove(id);
     }
 }
@@ -195,20 +195,20 @@ pub fn new_alias_resolver_m5o(
     module_resolver: Option<Arc<tsox_tsoptions::module::Resolver>>,
     to_path: Box<dyn Fn(&str) -> Path + Send + Sync>,
     on_failed_ambient_module_lookup: Box<dyn Fn(&dyn HasFileName, &str) + Send + Sync>,
-) -> AliasResolver {
+) -> AliasResolver { ::tsox_core::fntrace::enter("new_alias_resolver_m5o"); 
     AliasResolver::new(root_files, symlinks, host, module_resolver, to_path, on_failed_ambient_module_lookup)
 }
 
 impl AliasResolver {
-    pub fn common_source_directory(&self) -> String {
+    pub fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         unimplemented!()
     }
 
-    pub fn content_mapper_extensions(&self) -> Vec<String> {
+    pub fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions"); 
         Vec::new()
     }
 
-    pub fn file_exists(&self, _file_name: &str) -> bool {
+    pub fn file_exists(&self, _file_name: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         unimplemented!()
     }
 
@@ -216,26 +216,26 @@ impl AliasResolver {
         &self,
         _source_file: &dyn HasFileName,
         _usage_location: &Arc<tsox_frontend::ast::Node>,
-    ) -> ResolutionMode {
+    ) -> ResolutionMode { ::tsox_core::fntrace::enter("get_emit_syntax_for_usage_location"); 
         ModuleKind::ESNext
     }
 
-    pub fn get_global_typings_cache_location(&self) -> String {
+    pub fn get_global_typings_cache_location(&self) -> String { ::tsox_core::fntrace::enter("get_global_typings_cache_location"); 
         unimplemented!()
     }
 
-    pub fn get_implied_node_format_for_emit(&self, _source_file: &dyn HasFileName) -> ModuleKind {
+    pub fn get_implied_node_format_for_emit(&self, _source_file: &dyn HasFileName) -> ModuleKind { ::tsox_core::fntrace::enter("get_implied_node_format_for_emit"); 
         ModuleKind::ESNext
     }
 
-    pub fn get_import_helpers_import_specifier(&self, _path: &Path) -> Option<tsox_frontend::ast::Node> {
+    pub fn get_import_helpers_import_specifier(&self, _path: &Path) -> Option<tsox_frontend::ast::Node> { ::tsox_core::fntrace::enter("get_import_helpers_import_specifier"); 
         unimplemented!()
     }
 
     pub fn get_jsx_runtime_import_specifier(
         &self,
         _path: &Path,
-    ) -> (String, Option<tsox_frontend::ast::Node>) {
+    ) -> (String, Option<tsox_frontend::ast::Node>) { ::tsox_core::fntrace::enter("get_jsx_runtime_import_specifier"); 
         unimplemented!()
     }
 
@@ -243,43 +243,43 @@ impl AliasResolver {
         &self,
         _file: &dyn HasFileName,
         _module_specifier: &Arc<tsox_frontend::ast::Node>,
-    ) -> ResolutionMode {
+    ) -> ResolutionMode { ::tsox_core::fntrace::enter("get_mode_for_usage_location"); 
         ModuleKind::ESNext
     }
 
-    pub fn get_nearest_ancestor_directory_with_package_json(&self, _dirname: &str) -> String {
+    pub fn get_nearest_ancestor_directory_with_package_json(&self, _dirname: &str) -> String { ::tsox_core::fntrace::enter("get_nearest_ancestor_directory_with_package_json"); 
         unimplemented!()
     }
 
     pub fn get_package_json_info(
         &self,
         _pkg_json_path: &str,
-    ) -> Option<tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry> {
+    ) -> Option<tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_json_info"); 
         unimplemented!()
     }
 
     pub fn get_project_reference_from_output_dts(
         &self,
         _path: &Path,
-    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> {
+    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_output_dts"); 
         unimplemented!()
     }
 
     pub fn get_project_reference_from_source(
         &self,
         _path: &Path,
-    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> {
+    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_source"); 
         unimplemented!()
     }
 
     pub fn get_redirect_for_resolution(
         &self,
         _file: &dyn HasFileName,
-    ) -> Option<tsox_tsoptions::tsoptions::ParsedCommandLine> {
+    ) -> Option<tsox_tsoptions::tsoptions::ParsedCommandLine> { ::tsox_core::fntrace::enter("get_redirect_for_resolution"); 
         unimplemented!()
     }
 
-    pub fn get_redirect_targets(&self, _path: &Path) -> Vec<String> {
+    pub fn get_redirect_targets(&self, _path: &Path) -> Vec<String> { ::tsox_core::fntrace::enter("get_redirect_targets"); 
         unimplemented!()
     }
 
@@ -287,35 +287,35 @@ impl AliasResolver {
         &self,
         _file: &dyn HasFileName,
         _module_specifier: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<tsox_tsoptions::module::ResolvedModule>> {
+    ) -> Option<Arc<tsox_tsoptions::module::ResolvedModule>> { ::tsox_core::fntrace::enter("get_resolved_module_from_module_specifier"); 
         unimplemented!()
     }
 
     pub fn get_resolved_modules(
         &self,
-    ) -> Option<HashMap<Path, crate::ls::autoimport::ModeAwareCache<Arc<tsox_tsoptions::module::ResolvedModule>>>> {
+    ) -> Option<HashMap<Path, crate::ls::autoimport::ModeAwareCache<Arc<tsox_tsoptions::module::ResolvedModule>>>> { ::tsox_core::fntrace::enter("get_resolved_modules"); 
         None
     }
 
     pub fn get_source_file_meta_data(
         &self,
         _path: &Path,
-    ) -> tsox_frontend::ast::mig::x4ast::SourceFileMetaData {
+    ) -> tsox_frontend::ast::mig::x4ast::SourceFileMetaData { ::tsox_core::fntrace::enter("get_source_file_meta_data"); 
         unimplemented!()
     }
 
     pub fn get_source_of_project_reference_if_output_included(
         &self,
         _file: &dyn HasFileName,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_source_of_project_reference_if_output_included"); 
         unimplemented!()
     }
 
-    pub fn get_symlink_cache(&self) -> tsox_core::symlinks::KnownSymlinks {
+    pub fn get_symlink_cache(&self) -> tsox_core::symlinks::KnownSymlinks { ::tsox_core::fntrace::enter("get_symlink_cache"); 
         unimplemented!()
     }
 
-    pub fn is_source_from_project_reference(&self, _path: &Path) -> bool {
+    pub fn is_source_from_project_reference(&self, _path: &Path) -> bool { ::tsox_core::fntrace::enter("is_source_from_project_reference"); 
         unimplemented!()
     }
 
@@ -323,7 +323,7 @@ impl AliasResolver {
         &self,
         _source_file: &tsox_frontend::ast::SourceFile,
         _force_dts_emit: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("source_file_may_be_emitted"); 
         unimplemented!()
     }
 }

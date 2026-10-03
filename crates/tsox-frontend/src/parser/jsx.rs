@@ -4,7 +4,7 @@ impl Parser {
     pub(crate) fn parse_jsx_element_or_fragment(
         &mut self,
         in_expression_context: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsx_element_or_fragment"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::LessThanToken);
 
@@ -102,7 +102,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_jsx_type_arguments(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_jsx_type_arguments(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_jsx_type_arguments"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::LessThanToken);
         let args = self.parse_delimited_list(ParsingContext::TypeArguments, Parser::parse_type);
@@ -115,7 +115,7 @@ impl Parser {
         })
     }
 
-    pub(crate) fn parse_jsx_name(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsx_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsx_name"); 
         let pos = self.token_pos();
 
         self.scan_jsx_identifier();
@@ -151,7 +151,7 @@ impl Parser {
         name
     }
 
-    pub(crate) fn parse_jsx_attributes(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsx_attributes(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsx_attributes"); 
         let pos = self.token_pos();
         let list = self.parse_list(ParsingContext::JsxAttributes, Parser::parse_jsx_attribute);
         Arc::new(Node::with_loc(
@@ -163,7 +163,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_jsx_attribute(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsx_attribute(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsx_attribute"); 
         let pos = self.token_pos();
         if self.token == SyntaxKind::OpenBraceToken {
             self.next_token();
@@ -218,7 +218,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_jsx_expression(&mut self, in_expression_context: bool) -> Arc<Node> {
+    pub(crate) fn parse_jsx_expression(&mut self, in_expression_context: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsx_expression"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let dot_dot_dot_token =
@@ -257,7 +257,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_jsx_children(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_jsx_children(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_jsx_children"); 
         let pos = self.token_pos();
         let mut children = Vec::new();
         loop {
@@ -281,7 +281,7 @@ impl Parser {
         })
     }
 
-    pub(crate) fn parse_jsx_text(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsx_text(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsx_text"); 
         let pos = self.token_pos();
         let text = self.scanner.token_text().to_string();
         let end = self.token_end();
@@ -297,7 +297,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_jsx_closing_element(&mut self, in_expression_context: bool) -> Arc<Node> {
+    pub(crate) fn parse_jsx_closing_element(&mut self, in_expression_context: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsx_closing_element"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::LessThanSlashToken);
         // Go parseJsxTagName 对非标识符 token 产零宽 missing 名且不消费，

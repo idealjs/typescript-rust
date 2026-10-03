@@ -12,21 +12,21 @@ use tsox_frontend::ast::node_node::Node;
 use tsox_frontend::ast::syntax_kind_generated::SyntaxKind;
 
 impl DeclarationTransformer {
-    fn resolver_is_declaration_visible(&self, node: &Arc<Node>) -> bool {
+    fn resolver_is_declaration_visible(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("resolver_is_declaration_visible"); 
         crate::mig::m4e::r39k01_defs::R39K01EmitResolverExt::is_declaration_visible(
             &self.resolver,
             node,
         )
     }
 
-    fn resolver_is_import_required_by_augmentation(&self, decl: &Arc<Node>) -> bool {
+    fn resolver_is_import_required_by_augmentation(&self, decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("resolver_is_import_required_by_augmentation"); 
         crate::mig::m4e::r39k01_defs::R39K01EmitResolverExt::is_import_required_by_augmentation(
             &self.resolver,
             decl,
         )
     }
 
-    pub fn transform_import_equals_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_import_equals_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_import_equals_declaration"); 
         if !self.resolver_is_declaration_visible(decl) {
             return None;
         }
@@ -60,7 +60,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn transform_import_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_import_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_import_declaration"); 
         let d = decl.as_import_declaration();
         if d.import_clause.is_none() {
             let module_specifier = self
@@ -194,7 +194,7 @@ impl DeclarationTransformer {
 pub fn get_referenced_files(
     tx: &DeclarationTransformer,
     output_file_path: &str,
-) -> Vec<FileReference> {
+) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_referenced_files"); 
     let mut results = Vec::new();
     for ReferencedFilePair {
         file: source_file,
@@ -245,7 +245,7 @@ pub fn get_referenced_files(
     results
 }
 
-pub fn get_lib_references(tx: &DeclarationTransformer) -> Vec<FileReference> {
+pub fn get_lib_references(tx: &DeclarationTransformer) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_lib_references"); 
     tx.raw_lib_reference_directives
         .iter()
         .filter(|r| r.preserve)
@@ -258,7 +258,7 @@ pub fn get_lib_references(tx: &DeclarationTransformer) -> Vec<FileReference> {
         .collect()
 }
 
-pub fn get_type_references(tx: &DeclarationTransformer) -> Vec<FileReference> {
+pub fn get_type_references(tx: &DeclarationTransformer) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_type_references"); 
     tx.raw_type_reference_directives
         .iter()
         .filter(|r| r.preserve)

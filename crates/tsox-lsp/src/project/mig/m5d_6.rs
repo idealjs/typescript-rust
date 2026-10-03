@@ -26,7 +26,7 @@ impl ProjectCollectionBuilderMig<'_> {
         old_preferences: &UserPreferences,
         new_preferences: &UserPreferences,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_change_user_preferences"); 
         if user_preferences_locale_equal(old_preferences, new_preferences) {
             return;
         }
@@ -55,7 +55,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         project_tree_request: &ProjectTreeRequest,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_request_project_trees"); 
         let current_projects: Vec<Path> = self.configured_projects.keys();
         let mut seen_projects: HashSet<Path> = HashSet::new();
         for project_id in current_projects {
@@ -85,7 +85,7 @@ impl ProjectCollectionBuilderMig<'_> {
         project_tree_request: &ProjectTreeRequest,
         seen_projects: &mut HashSet<Path>,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("ensure_project_tree"); 
         if !seen_projects.insert(entry.key().clone()) {
             return;
         }
@@ -113,7 +113,7 @@ impl ProjectCollectionBuilderMig<'_> {
         }
     }
 
-    fn retain_project_and_references(&self, to_remove: &mut HashSet<Path>, project: &Project) {
+    fn retain_project_and_references(&self, to_remove: &mut HashSet<Path>, project: &Project) { ::tsox_core::fntrace::enter("retain_project_and_references"); 
         to_remove.remove(&project.config_file_path);
         if let Some(program) = project.get_program() {
             program.range_resolved_project_reference(
@@ -131,7 +131,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         retain: &HashSet<Path>,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("cleanup_configured_projects"); 
         let mut to_remove_projects: HashSet<Path> = HashSet::new();
         self.configured_projects.range(|entry: &MapEntry<Path, Box<Project>>| {
             to_remove_projects.insert(entry.key().clone());
@@ -192,7 +192,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         project: MapEntry<Path, Box<Project>>,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("delete_configured_project"); 
         let project_path = project.value().config_file_path.clone();
         let project_entry = project.value();
         if let Some(logger) = logger {
@@ -221,7 +221,7 @@ impl ProjectCollectionBuilderMig<'_> {
         paths: &[Path],
         change_type: lsproto::FileChangeType,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("mark_files_changed"); 
         let mut dirty = false;
         let mut dirty_file_path = Path::default();
         let should_change = {
@@ -287,7 +287,7 @@ impl ProjectCollectionBuilderMig<'_> {
         _p: &Project,
         _path: &Path,
         _change_type: lsproto::FileChangeType,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("host_seen_file"); 
         todo!("requires project.host.sourceFS seen-file queries")
     }
 
@@ -295,7 +295,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         config_change_result: &ChangeFileResult,
         logger: Option<&LogTree>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("mark_projects_affected_by_config_changes"); 
         for project_path in &config_change_result.affected_projects {
             let entry = if project_path.as_str() == crate::project::project::INFERRED_PROJECT_NAME {
                 None
@@ -350,7 +350,7 @@ impl ProjectCollectionBuilderMig<'_> {
         paths: &[Path],
         refresh_all: bool,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("refresh_content_mapper_project_for_changes"); 
         let project = entry.value();
         let project = project.as_ref();
         if project.program.is_none() || project.content_mapper_watched_files.is_none() {
@@ -387,7 +387,7 @@ impl ProjectCollectionBuilderMig<'_> {
         old_program: Option<&Program>,
         new_program: Option<&Program>,
         project_path: &Path,
-    ) {
+    ) { ::tsox_core::fntrace::enter("release_dropped_project_references"); 
         let old_program = match old_program {
             Some(p) => p,
             None => return,
@@ -416,7 +416,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         entry: &MapEntry<Path, Box<Project>>,
         logger: Option<&LogTree>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("update_program"); 
         let config_file_name = entry
             .value()
             .as_ref()
@@ -518,6 +518,6 @@ impl ProjectCollectionBuilderMig<'_> {
     }
 }
 
-fn user_preferences_locale_equal(_old: &UserPreferences, _new: &UserPreferences) -> bool {
+fn user_preferences_locale_equal(_old: &UserPreferences, _new: &UserPreferences) -> bool { ::tsox_core::fntrace::enter("user_preferences_locale_equal"); 
     todo!("UserPreferences.locale \u{5b57}\u{6bb5}\u{672a}\u{79fb}\u{690d}\u{ff08}Go: oldPreferences.Locale == newPreferences.Locale\u{ff09}")
 }

@@ -2,7 +2,7 @@
 
 use tsox_frontend::ast::{Node, SyntaxKind};
 
-pub fn mixing_binary_operators_requires_parentheses(a: SyntaxKind, b: SyntaxKind) -> bool {
+pub fn mixing_binary_operators_requires_parentheses(a: SyntaxKind, b: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("mixing_binary_operators_requires_parentheses"); 
     if a == SyntaxKind::QuestionQuestionToken {
         return b == SyntaxKind::AmpersandAmpersandToken || b == SyntaxKind::BarBarToken;
     }

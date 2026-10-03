@@ -9,7 +9,7 @@ impl Checker {
         _node: &Arc<Node>,
         type_name: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_reference_arguments"); 
         let params: Vec<Arc<Node>> = symbol
             .declarations
             .iter()
@@ -328,7 +328,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<(String, Arc<Type>, Arc<Type>)> {
+    ) -> Option<(String, Arc<Type>, Arc<Type>)> { ::tsox_core::fntrace::enter("first_incompatible_property_types"); 
         for prop in self.get_properties_of_type(target) {
             let Some(src_prop) = self.get_property_of_type(source, &prop.name) else {
                 continue;

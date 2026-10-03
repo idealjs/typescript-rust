@@ -56,7 +56,7 @@ pub struct CallHierarchyIncomingCallsResponse {
     pub call_hierarchy_incoming_calls: Option<Vec<CallHierarchyIncomingCall>>,
 }
 
-pub fn combine_v_s_references(results: &[VSReferencesResponse]) -> VSReferencesResponse {
+pub fn combine_v_s_references(results: &[VSReferencesResponse]) -> VSReferencesResponse { ::tsox_core::fntrace::enter("combine_v_s_references"); 
     let mut combined: Vec<VSReferenceItem> = Vec::new();
     let mut next_id: i32 = 0;
     for resp in results {
@@ -79,7 +79,7 @@ pub fn combine_v_s_references(results: &[VSReferencesResponse]) -> VSReferencesR
     }
 }
 
-pub fn combine_incoming_calls(results: &[CallHierarchyIncomingCallsResponse]) -> CallHierarchyIncomingCallsResponse {
+pub fn combine_incoming_calls(results: &[CallHierarchyIncomingCallsResponse]) -> CallHierarchyIncomingCallsResponse { ::tsox_core::fntrace::enter("combine_incoming_calls"); 
     let mut combined: Vec<CallHierarchyIncomingCall> = Vec::new();
     let mut seen_calls: HashSet<String> = HashSet::new();
     for resp in results {
@@ -117,7 +117,7 @@ pub fn handle_cross_project<Resp>(
     implementations: bool,
     options: SymbolEntryTransformOptions,
     default_project_data: Option<&SymbolAndEntriesData>,
-) -> Result<Resp, LspError> {
+) -> Result<Resp, LspError> { ::tsox_core::fntrace::enter("handle_cross_project"); 
     let mut symbol_and_entries_to_resp = symbol_and_entries_to_resp;
 
     let default_project = orchestrator.get_default_project();

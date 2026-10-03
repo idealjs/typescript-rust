@@ -1,6 +1,6 @@
 use crate::jsonrpc::jsonrpc::Id as JsonrpcId;
 
-pub fn new_id(int_val: Option<i32>, str_val: Option<&str>) -> JsonrpcId {
+pub fn new_id(int_val: Option<i32>, str_val: Option<&str>) -> JsonrpcId { ::tsox_core::fntrace::enter("new_id"); 
     if let Some(s) = str_val {
         return JsonrpcId::new_string(s);
     }

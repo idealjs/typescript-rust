@@ -27,7 +27,7 @@ impl Checker {
         require_optional_properties: bool,
         match_discriminant_properties: bool,
         mut props_out: Option<&mut Vec<Arc<Symbol>>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_unmatched_properties_worker"); 
         let properties = self.get_properties_of_type(target);
         for target_prop in properties {
             if is_static_private_identifier_property(&target_prop) {
@@ -71,7 +71,7 @@ impl Checker {
         None
     }
 
-    pub fn get_variances_worker(&mut self, symbol: &Arc<Symbol>, type_parameters: &[Arc<Type>]) -> Vec<VarianceFlags> {
+    pub fn get_variances_worker(&mut self, symbol: &Arc<Symbol>, type_parameters: &[Arc<Type>]) -> Vec<VarianceFlags> { ::tsox_core::fntrace::enter("get_variances_worker"); 
         let variances_unset = self
             .variance_links
             .get(symbol)
@@ -193,7 +193,7 @@ impl Checker {
             .unwrap_or_default()
     }
 
-    pub fn get_variance_stack_index(&self, symbol: &Arc<Symbol>) -> isize {
+    pub fn get_variance_stack_index(&self, symbol: &Arc<Symbol>) -> isize { ::tsox_core::fntrace::enter("get_variance_stack_index"); 
         let key = Arc::as_ptr(symbol) as usize;
         match self.variance_stack.iter().position(|k| *k == key) {
             Some(i) => i as isize,
@@ -201,7 +201,7 @@ impl Checker {
         }
     }
 
-    fn is_marker_type_assignable_to(&mut self, source: &Option<Arc<Type>>, target: &Option<Arc<Type>>) -> bool {
+    fn is_marker_type_assignable_to(&mut self, source: &Option<Arc<Type>>, target: &Option<Arc<Type>>) -> bool { ::tsox_core::fntrace::enter("is_marker_type_assignable_to"); 
         match (source, target) {
             (Some(s), Some(t)) => self.is_type_assignable_to(s, t),
             _ => false,
@@ -209,7 +209,7 @@ impl Checker {
     }
 }
 
-fn type_flags_unit() -> TypeFlags {
+fn type_flags_unit() -> TypeFlags { ::tsox_core::fntrace::enter("type_flags_unit"); 
     TypeFlags::StringLiteral
         .union(TypeFlags::NumberLiteral)
         .union(TypeFlags::BigIntLiteral)
@@ -219,7 +219,7 @@ fn type_flags_unit() -> TypeFlags {
 }
 
 impl Checker {
-    pub fn get_undefined_stripped_target_if_needed(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Arc<Type> {
+    pub fn get_undefined_stripped_target_if_needed(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_undefined_stripped_target_if_needed"); 
         if source.flags.intersects(TypeFlags::Union)
             && target.flags.intersects(TypeFlags::Union)
             && let (Some(sts), Some(tts)) = (source.types(), target.types())
@@ -232,7 +232,7 @@ impl Checker {
     }
 }
 
-pub fn is_conversion_or_interface_implementation_message(message: &tsox_core::diagnostics::Message) -> bool {
+pub fn is_conversion_or_interface_implementation_message(message: &tsox_core::diagnostics::Message) -> bool { ::tsox_core::fntrace::enter("is_conversion_or_interface_implementation_message"); 
     use tsox_core::diagnostics::*;
     message == &CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1
         || message == &CLASS_0_INCORRECTLY_IMPLEMENTS_CLASS_1_DID_YOU_MEAN_TO_EXTEND_1_AND_INHERIT_ITS_MEMBERS_AS_A_SUBCLASS

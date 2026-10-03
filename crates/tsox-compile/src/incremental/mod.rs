@@ -38,7 +38,7 @@ impl BuildInfo {
         root: &str,
         options_hash: &str,
         references: &[String],
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         let file_names = files
             .iter()
             .map(|(path, content)| {
@@ -60,7 +60,7 @@ impl BuildInfo {
         }
     }
 
-    pub fn write_to_file(&self, path: &str) -> std::io::Result<()> {
+    pub fn write_to_file(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_to_file"); 
         let json = serde_json::to_string(self)?;
         if let Some(parent) = Path::new(path).parent() {
             std::fs::create_dir_all(parent)?;
@@ -68,7 +68,7 @@ impl BuildInfo {
         std::fs::write(path, json)
     }
 
-    pub fn read_from_file(path: &str) -> Option<Self> {
+    pub fn read_from_file(path: &str) -> Option<Self> { ::tsox_core::fntrace::enter("read_from_file"); 
         let content = std::fs::read_to_string(path).ok()?;
         serde_json::from_str(&content).ok()
     }
@@ -77,7 +77,7 @@ impl BuildInfo {
         &self,
         current_files: &[(String, String)],
         current_options_hash: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_up_to_date"); 
         if self.optionsHash != current_options_hash {
             return false;
         }
@@ -107,7 +107,7 @@ impl BuildInfo {
         tsconfig_path: &str,
         out_dir: &str,
         ts_build_info_file: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_ts_build_info_file_path"); 
         if !ts_build_info_file.is_empty() {
             return ts_build_info_file.to_string();
         }
@@ -123,7 +123,7 @@ impl BuildInfo {
     }
 }
 
-pub(crate) fn sha256_hex(input: &str) -> String {
+pub(crate) fn sha256_hex(input: &str) -> String { ::tsox_core::fntrace::enter("sha256_hex"); 
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
@@ -132,7 +132,7 @@ pub(crate) fn sha256_hex(input: &str) -> String {
     format!("{:016x}", hasher.finish())
 }
 
-pub fn compute_options_hash(options_json: &str) -> String {
+pub fn compute_options_hash(options_json: &str) -> String { ::tsox_core::fntrace::enter("compute_options_hash"); 
     sha256_hex(options_json)
 }
 

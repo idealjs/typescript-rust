@@ -2,7 +2,7 @@
 
 use crate::ast::{Node, NodeList, SyntaxKind};
 
-pub fn get_text_of_jsdoc_comment(comment: Option<&NodeList>) -> String {
+pub fn get_text_of_jsdoc_comment(comment: Option<&NodeList>) -> String { ::tsox_core::fntrace::enter("get_text_of_jsdoc_comment"); 
     let Some(comment) = comment else {
         return String::new();
     };

@@ -4,7 +4,7 @@ use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SourceFile;
 use tsox_frontend::ast::SyntaxKind;
 
-pub fn position_belongs_to_node(candidate: &Arc<Node>, position: usize, file: &SourceFile) -> bool {
+pub fn position_belongs_to_node(candidate: &Arc<Node>, position: usize, file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("position_belongs_to_node"); 
     assert!(
         candidate.pos() <= position,
         "Expected candidate.pos <= position"
@@ -12,7 +12,7 @@ pub fn position_belongs_to_node(candidate: &Arc<Node>, position: usize, file: &S
     position < candidate.end() || !is_completed_node(candidate, file)
 }
 
-pub fn is_completed_node(_node: &Arc<Node>, _source_file: &SourceFile) -> bool {
+pub fn is_completed_node(_node: &Arc<Node>, _source_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_completed_node"); 
     true
 }
 
@@ -20,7 +20,7 @@ pub fn node_ends_with(
     _n: &Arc<Node>,
     _expected_last_token: SyntaxKind,
     _source_file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("node_ends_with"); 
     false
 }
 
@@ -28,6 +28,6 @@ pub fn has_child_of_kind(
     _containing_node: &Arc<Node>,
     _kind: SyntaxKind,
     _source_file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_child_of_kind"); 
     false
 }

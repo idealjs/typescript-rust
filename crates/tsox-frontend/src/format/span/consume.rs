@@ -20,7 +20,7 @@ impl FormatSpanWorker {
         dynamic_indentation: &IndenterRef,
         container: &Arc<Node>,
         is_list_end_token: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("consume_token_and_advance_scanner"); 
         let last_trivia_was_new_line = scanner.last_trailing_trivia_was_new_line();
         let Some(token) = current_token_info.token.clone() else {
             return;

@@ -3,7 +3,7 @@
 use crate::checker::checker_symbol_types::*;
 
 impl Checker {
-    pub(crate) fn attach_class_statics(&mut self, ctor_type: &Arc<Type>, node: &Arc<Node>) {
+    pub(crate) fn attach_class_statics(&mut self, ctor_type: &Arc<Type>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("attach_class_statics"); 
         let node_id = node.id();
         if self.class_statics_resolution_stack.contains(&node_id)
             || self.class_statics_resolution_stack.len() >= 200
@@ -171,7 +171,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn extends_element_of(&self, class_node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn extends_element_of(&self, class_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("extends_element_of"); 
         let heritage = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
             tsox_frontend::ast::NodeData::ClassExpression(data) => data.heritage_clauses.clone(),
@@ -187,7 +187,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn extends_expression_of(&self, class_node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn extends_expression_of(&self, class_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("extends_expression_of"); 
         let element = self.extends_element_of(class_node)?;
         match &element.data {
             tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) => {

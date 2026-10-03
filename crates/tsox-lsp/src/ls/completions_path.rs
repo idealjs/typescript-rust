@@ -20,12 +20,12 @@ pub(super) struct ModuleCompletionSet {
 }
 
 impl ModuleCompletionSet {
-    pub(super) fn add(&mut self, name: String) {
+    pub(super) fn add(&mut self, name: String) { ::tsox_core::fntrace::enter("add"); 
         if !name.is_empty() && !self.names.contains(&name) {
             self.names.push(name);
         }
     }
-    pub(super) fn labels(mut self) -> Vec<String> {
+    pub(super) fn labels(mut self) -> Vec<String> { ::tsox_core::fntrace::enter("labels"); 
         self.names.sort();
         self.names
     }
@@ -37,7 +37,7 @@ pub(super) fn non_relative_module_labels(
     program: &Arc<Program>,
     file_name: &str,
     literal_value: &str,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("non_relative_module_labels"); 
     let fragment = literal_value.replace('\\', "/");
     let script_dir = match file_name.rfind('/') {
         Some(0) => "/".to_string(),
@@ -144,7 +144,7 @@ pub(super) fn non_relative_module_labels(
 }
 
 /// fragment（如 `@scope/pkg/sub`）对应的 node_modules 下包目录
-fn package_directory_of(fragment: &str, node_modules: &str) -> Option<String> {
+fn package_directory_of(fragment: &str, node_modules: &str) -> Option<String> { ::tsox_core::fntrace::enter("package_directory_of"); 
     let mut components: Vec<&str> = fragment.split('/').filter(|c| !c.is_empty()).collect();
     let mut package_path = components.first().copied()?.to_string();
     components.remove(0);
@@ -161,7 +161,7 @@ fn exports_lookup(
     fragment: &str,
     package_dir: &str,
     result: &mut ModuleCompletionSet,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("exports_lookup"); 
     let Some(fields) = read_package_json(service, package_dir) else {
         return false;
     };
@@ -205,7 +205,7 @@ fn exports_lookup(
 }
 
 /// Go getPatternFromFirstMatchingCondition：default/types/import 或首个子键
-fn patterns_of_condition(value: &JsonValue) -> Vec<String> {
+fn patterns_of_condition(value: &JsonValue) -> Vec<String> { ::tsox_core::fntrace::enter("patterns_of_condition"); 
     if value.value_type == JsonValueType::String {
         return vec![value.as_string().to_string()];
     }
@@ -235,7 +235,7 @@ fn directory_fragment_entries(
     fragment: &str,
     node_modules: &str,
     result: &mut ModuleCompletionSet,
-) {
+) { ::tsox_core::fntrace::enter("directory_fragment_entries"); 
     let mut frag = fragment.to_string();
     if !tsp::has_trailing_directory_separator(&frag) {
         frag = tsp::get_directory_path(&frag);
@@ -264,7 +264,7 @@ fn directory_fragment_entries(
     }
 }
 
-pub(super) fn get_fragment_directory(fragment: &str) -> String {
+pub(super) fn get_fragment_directory(fragment: &str) -> String { ::tsox_core::fntrace::enter("get_fragment_directory"); 
     if !fragment.contains('/') {
         return String::new();
     }
@@ -275,14 +275,14 @@ pub(super) fn get_fragment_directory(fragment: &str) -> String {
     }
 }
 
-fn module_resolution_uses_node_modules(program: &Arc<Program>) -> bool {
+fn module_resolution_uses_node_modules(program: &Arc<Program>) -> bool { ::tsox_core::fntrace::enter("module_resolution_uses_node_modules"); 
     matches!(
         program.options().get_module_resolution_kind(),
         ModuleResolutionKind::Node16 | ModuleResolutionKind::NodeNext | ModuleResolutionKind::Bundler
     )
 }
 
-pub(super) fn string_extensions(program: &Arc<Program>) -> Vec<String> {
+pub(super) fn string_extensions(program: &Arc<Program>) -> Vec<String> { ::tsox_core::fntrace::enter("string_extensions"); 
     let mut exts: Vec<String> = Vec::new();
     // Go getSupportedExtensionsForModuleResolution：环境模块 `*.ext` 声明的
     // 扩展名（declare module "*.ruhroh"）先入列
@@ -307,7 +307,7 @@ pub(super) fn string_extensions(program: &Arc<Program>) -> Vec<String> {
 }
 
 /// 默认 ImportModuleSpecifierEnding=minimal：JS/TS 实现扩展名剥离
-pub(super) fn completion_file_name(name: &str) -> String {
+pub(super) fn completion_file_name(name: &str) -> String { ::tsox_core::fntrace::enter("completion_file_name"); 
     for ext in [
         ".d.ts", ".ts", ".tsx", ".js", ".jsx", ".mts", ".cts", ".mjs", ".cjs",
     ] {
@@ -318,17 +318,17 @@ pub(super) fn completion_file_name(name: &str) -> String {
     name.to_string()
 }
 
-pub(super) fn read_package_json(service: &LanguageService, package_dir: &str) -> Option<packagejson::Fields> {
+pub(super) fn read_package_json(service: &LanguageService, package_dir: &str) -> Option<packagejson::Fields> { ::tsox_core::fntrace::enter("read_package_json"); 
     let path = tsp::combine_paths(package_dir, &["package.json"]);
     let content = service.read_file(&path)?;
     packagejson::parse(&content).ok()
 }
 
-fn normalize_join(base: &str, fragment: &str) -> String {
+fn normalize_join(base: &str, fragment: &str) -> String { ::tsox_core::fntrace::enter("normalize_join"); 
     tsp::normalize_path(&tsp::combine_paths(base, &[fragment]))
 }
 
-pub(super) fn nearest_package_json_dir(service: &LanguageService, from: &str) -> Option<String> {
+pub(super) fn nearest_package_json_dir(service: &LanguageService, from: &str) -> Option<String> { ::tsox_core::fntrace::enter("nearest_package_json_dir"); 
     let mut dir = from.trim_end_matches('/').to_string();
     loop {
         if service
@@ -346,7 +346,7 @@ pub(super) fn nearest_package_json_dir(service: &LanguageService, from: &str) ->
 }
 
 /// 程序内环境模块声明名（`declare module "name"`）
-fn ambient_module_names(program: &Arc<Program>) -> Vec<String> {
+fn ambient_module_names(program: &Arc<Program>) -> Vec<String> { ::tsox_core::fntrace::enter("ambient_module_names"); 
     let mut names: Vec<String> = Vec::new();
     for file in program.source_files() {
         let is_dts = file.file_name.ends_with(".d.ts");
@@ -374,7 +374,7 @@ fn ambient_module_names(program: &Arc<Program>) -> Vec<String> {
 }
 
 /// Go UnmangleScopedPackageName：`@types/a__b` 目录名还原为 `@a/b`
-fn unmangle_scoped_package_name(dir_name: &str) -> String {
+fn unmangle_scoped_package_name(dir_name: &str) -> String { ::tsox_core::fntrace::enter("unmangle_scoped_package_name"); 
     match dir_name.find("__") {
         Some(idx) => format!("@{}/{}", &dir_name[..idx], &dir_name[idx + 2..]),
         None => dir_name.to_string(),
@@ -389,7 +389,7 @@ fn imports_lookup(
     fragment: &str,
     directory: &str,
     result: &mut ModuleCompletionSet,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("imports_lookup"); 
     let Some(fields) = read_package_json(service, directory) else {
         return false;
     };

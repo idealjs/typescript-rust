@@ -21,11 +21,11 @@ pub enum JsonValueType {
 }
 
 impl JsonValue {
-    pub fn is_present(&self) -> bool {
+    pub fn is_present(&self) -> bool { ::tsox_core::fntrace::enter("is_present"); 
         self.value_type != JsonValueType::NotPresent
     }
 
-    pub fn is_falsy(&self) -> bool {
+    pub fn is_falsy(&self) -> bool { ::tsox_core::fntrace::enter("is_falsy"); 
         match self.value_type {
             JsonValueType::NotPresent | JsonValueType::Null => true,
             JsonValueType::String => self.string_value.as_deref() == Some(""),
@@ -35,19 +35,19 @@ impl JsonValue {
         }
     }
 
-    pub fn as_string(&self) -> &str {
+    pub fn as_string(&self) -> &str { ::tsox_core::fntrace::enter("as_string"); 
         self.string_value.as_deref().unwrap_or("")
     }
 
-    pub fn as_array(&self) -> &[JsonValue] {
+    pub fn as_array(&self) -> &[JsonValue] { ::tsox_core::fntrace::enter("as_array"); 
         self.array_value.as_deref().unwrap_or(&[])
     }
 
-    pub fn as_object(&self) -> &[(String, JsonValue)] {
+    pub fn as_object(&self) -> &[(String, JsonValue)] { ::tsox_core::fntrace::enter("as_object"); 
         self.object_value.as_deref().unwrap_or(&[])
     }
 
-    pub fn get(&self, key: &str) -> Option<&JsonValue> {
+    pub fn get(&self, key: &str) -> Option<&JsonValue> { ::tsox_core::fntrace::enter("get"); 
         self.object_value
             .as_ref()?
             .iter()
@@ -57,7 +57,7 @@ impl JsonValue {
 }
 
 impl From<serde_json::Value> for JsonValue {
-    fn from(v: serde_json::Value) -> JsonValue {
+    fn from(v: serde_json::Value) -> JsonValue { ::tsox_core::fntrace::enter("from"); 
         match v {
             serde_json::Value::Null => JsonValue {
                 value_type: JsonValueType::Null,

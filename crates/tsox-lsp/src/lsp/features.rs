@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 use std::sync::Arc;
 
 impl LspServer {
-    pub(super) fn handle_hover(&self, params: &Value) -> Value {
+    pub(super) fn handle_hover(&self, params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_hover"); 
         let uri = params
             .get("textDocument")
             .and_then(|td| td.get("uri"))
@@ -61,7 +61,7 @@ impl LspServer {
         })
     }
 
-    pub(super) fn handle_definition(&self, params: &Value) -> Value {
+    pub(super) fn handle_definition(&self, params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_definition"); 
         let uri = params
             .get("textDocument")
             .and_then(|td| td.get("uri"))
@@ -142,7 +142,7 @@ impl LspServer {
         json!([])
     }
 
-    pub(super) fn handle_completion(&self, params: &Value) -> Value {
+    pub(super) fn handle_completion(&self, params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_completion"); 
         let uri = params
             .get("textDocument")
             .and_then(|td| td.get("uri"))
@@ -265,7 +265,7 @@ impl LspServer {
     }
 }
 
-fn completion_item_kind(flags: &tsox_frontend::ast::SymbolFlags) -> i32 {
+fn completion_item_kind(flags: &tsox_frontend::ast::SymbolFlags) -> i32 { ::tsox_core::fntrace::enter("completion_item_kind"); 
     use tsox_frontend::ast::SymbolFlags as F;
     if flags.contains(F::FunctionScopedVariable | F::BlockScopedVariable)
         || flags.contains(F::Function)

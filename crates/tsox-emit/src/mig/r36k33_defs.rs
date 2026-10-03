@@ -10,7 +10,7 @@ pub trait R36K33NodeAsExt {
 }
 
 impl R36K33NodeAsExt for Node {
-    fn as_binding_pattern(&self) -> &BindingPatternData {
+    fn as_binding_pattern(&self) -> &BindingPatternData { ::tsox_core::fntrace::enter("as_binding_pattern"); 
         match &self.data {
             NodeData::BindingPattern(d) => d,
             _ => panic!("AsBindingPattern on wrong node kind"),

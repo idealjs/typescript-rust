@@ -5,7 +5,7 @@ use super::*;
 pub(crate) fn tsc_compilation(
     sys: &dyn System,
     command_line: ParsedCommandLine,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("tsc_compilation"); 
     let pretty = should_be_pretty(sys, &command_line.compiler_options);
     let locale = locale_of(&command_line.compiler_options);
 

@@ -48,11 +48,11 @@ interface Symbol {
     readonly [Symbol.toStringTag]: string;
 }";
 
-pub fn transpile_module(input: &str, options: TranspileOptions) -> TranspileOutput {
+pub fn transpile_module(input: &str, options: TranspileOptions) -> TranspileOutput { ::tsox_core::fntrace::enter("transpile_module"); 
     transpile_worker(input, options, false)
 }
 
-pub fn transpile_declaration(input: &str, options: TranspileOptions) -> TranspileOutput {
+pub fn transpile_declaration(input: &str, options: TranspileOptions) -> TranspileOutput { ::tsox_core::fntrace::enter("transpile_declaration"); 
     transpile_worker(input, options, true)
 }
 
@@ -60,7 +60,7 @@ pub fn transpile_worker(
     input: &str,
     options: TranspileOptions,
     declaration: bool,
-) -> TranspileOutput {
+) -> TranspileOutput { ::tsox_core::fntrace::enter("transpile_worker"); 
     let mut opts = options.compiler_options.clone();
 
     opts.incremental = Tristate::Unknown;
@@ -174,7 +174,7 @@ pub fn transpile_worker(
     }
 }
 
-pub(crate) fn default_lib_file_name(options: &CompilerOptions) -> String {
+pub(crate) fn default_lib_file_name(options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("default_lib_file_name"); 
     let names = crate::compiler::default_lib_file_names(options);
     names
         .first()

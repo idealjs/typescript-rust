@@ -3,7 +3,7 @@
 use crate::checker::checker_classes::*;
 
 impl Checker {
-    pub(crate) fn check_private_name_conflicts(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_private_name_conflicts(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_private_name_conflicts"); 
         let class_node = node.parent();
         if let Some(cls) = &class_node
             && matches!(

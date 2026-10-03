@@ -130,11 +130,11 @@ pub fn new_project_collection_builder<'a>(
 }
 
 impl ProjectCollectionBuilderMig<'_> {
-    pub fn to_path_of(&self, file_name: &str) -> Path {
+    pub fn to_path_of(&self, file_name: &str) -> Path { ::tsox_core::fntrace::enter("to_path_of"); 
         (self.to_path)(file_name)
     }
 
-    pub fn for_each_project(&self, mut f: impl FnMut(&MapEntry<Path, Box<Project>>) -> bool) {
+    pub fn for_each_project(&self, mut f: impl FnMut(&MapEntry<Path, Box<Project>>) -> bool) { ::tsox_core::fntrace::enter("for_each_project"); 
         let mut keep_going = true;
         self.configured_projects.range(|entry: &MapEntry<Path, Box<Project>>| {
             keep_going = f(entry);
@@ -148,16 +148,16 @@ impl ProjectCollectionBuilderMig<'_> {
         }
     }
 
-    pub fn inferred_project_entry(&self) -> &MapEntry<Path, Box<Project>> {
+    pub fn inferred_project_entry(&self) -> &MapEntry<Path, Box<Project>> { ::tsox_core::fntrace::enter("inferred_project_entry"); 
         todo!("DirtyBox is not a MapEntry; integration must unify dirty.Value semantics")
     }
 
-    pub fn cleanup_inferred_project(&mut self, logger: Option<&LogTree>) {
+    pub fn cleanup_inferred_project(&mut self, logger: Option<&LogTree>) { ::tsox_core::fntrace::enter("cleanup_inferred_project"); 
         let roots = self.collect_inferred_project_roots();
         self.update_inferred_project_roots(roots, logger);
     }
 
-    pub fn did_change_content_mapper_contributions(&mut self, logger: Option<&LogTree>) {
+    pub fn did_change_content_mapper_contributions(&mut self, logger: Option<&LogTree>) { ::tsox_core::fntrace::enter("did_change_content_mapper_contributions"); 
         self.cleanup_inferred_project(logger);
         if self.inferred_project.value().is_some() {
             let entry = self.inferred_project_entry().clone();
@@ -169,7 +169,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         file_name: &str,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("ensure_inferred_project_includes_closed_file"); 
         let mut inferred_project_files = self.collect_inferred_project_roots();
         inferred_project_files.push(file_name.to_string());
         self.update_inferred_project_roots(inferred_project_files, logger);
@@ -179,7 +179,7 @@ impl ProjectCollectionBuilderMig<'_> {
         }
     }
 
-    pub fn collect_inferred_project_roots(&mut self) -> Vec<String> {
+    pub fn collect_inferred_project_roots(&mut self) -> Vec<String> { ::tsox_core::fntrace::enter("collect_inferred_project_roots"); 
         let mut inferred_project_files: Vec<String> = Vec::new();
         let overlays: Vec<(Path, String)> = self
             .fs
@@ -201,7 +201,7 @@ impl ProjectCollectionBuilderMig<'_> {
     pub fn append_api_opened_inferred_roots(
         &mut self,
         mut inferred_project_files: Vec<String>,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("append_api_opened_inferred_roots"); 
         let open_files: Vec<(Path, String)> = self
             .api_state
             .open_files
@@ -222,7 +222,7 @@ impl ProjectCollectionBuilderMig<'_> {
         inferred_project_files
     }
 
-    pub fn cleanup_all_configured_projects(&mut self, logger: Option<&LogTree>) {
+    pub fn cleanup_all_configured_projects(&mut self, logger: Option<&LogTree>) { ::tsox_core::fntrace::enter("cleanup_all_configured_projects"); 
         let keys: Vec<Path> = self.configured_projects.keys();
         for key in keys {
             if let Some(entry) = self.configured_projects.load(&key) {
@@ -236,7 +236,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         _file_name: &str,
         path: &Path,
-    ) -> Option<MapEntry<Path, Box<Project>>> {
+    ) -> Option<MapEntry<Path, Box<Project>>> { ::tsox_core::fntrace::enter("find_default_project"); 
         if let Some(configured_project) = self.find_default_configured_project_entry(path) {
             return Some(configured_project);
         }
@@ -262,7 +262,7 @@ impl ProjectCollectionBuilderMig<'_> {
     pub fn find_default_configured_project_entry(
         &self,
         path: &Path,
-    ) -> Option<MapEntry<Path, Box<Project>>> {
+    ) -> Option<MapEntry<Path, Box<Project>>> { ::tsox_core::fntrace::enter("find_default_configured_project_entry"); 
         None
     }
 
@@ -270,7 +270,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         file_name: &str,
         path: &Path,
-    ) -> Option<MapEntry<Path, Box<Project>>> {
+    ) -> Option<MapEntry<Path, Box<Project>>> { ::tsox_core::fntrace::enter("find_default_configured_project"); 
         if let Some(key) = self.file_default_projects.get(path) {
             if key.as_str() != INFERRED_PROJECT_NAME {
                 if let Some(entry) = self.configured_projects.load(key) {
@@ -317,7 +317,7 @@ impl ProjectCollectionBuilderMig<'_> {
         path: &Path,
         load_kind: ProjectLoadKind,
         logger: Option<&LogTree>,
-    ) -> SearchResult {
+    ) -> SearchResult { ::tsox_core::fntrace::enter("find_or_create_default_configured_project_for_file"); 
         if let Some(key) = self.file_default_projects.get(path).cloned() {
             if key.as_str() == INFERRED_PROJECT_NAME {
                 return SearchResult {
@@ -367,7 +367,7 @@ impl ProjectCollectionBuilderMig<'_> {
         visited: &mut HashSet<SearchNodeKey>,
         fallback: Option<SearchResult>,
         logger: Option<&LogTree>,
-    ) -> SearchResult {
+    ) -> SearchResult { ::tsox_core::fntrace::enter("find_or_create_default_configured_project_worker"); 
         let _ = (file_name, path, config_file_name, load_kind, visited, fallback, logger);
         todo!("BreadthFirstSearchParallelEx over searchNode pending core BFS helper alignment")
     }
@@ -377,7 +377,7 @@ impl ProjectCollectionBuilderMig<'_> {
         file_name: &str,
         path: &Path,
         logger: Option<&LogTree>,
-    ) -> SearchResult {
+    ) -> SearchResult { ::tsox_core::fntrace::enter("ensure_configured_project_and_ancestors_for_file"); 
         let mut result =
             self.find_or_create_default_configured_project_for_file(file_name, path, ProjectLoadKind::Create, logger);
         if result.project.is_some() && self.fs.is_open_file(path) {
@@ -392,7 +392,7 @@ impl ProjectCollectionBuilderMig<'_> {
         path: &Path,
         open_result: &mut SearchResult,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("create_ancestor_tree"); 
         let mut next_project = open_result
             .project
             .as_ref()
@@ -447,13 +447,13 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         entry: &MapEntry<Path, Box<Project>>,
         apply: impl FnOnce(&mut Project),
-    ) {
+    ) { ::tsox_core::fntrace::enter("change_entry"); 
         let key = entry.key().clone();
         self.configured_projects
             .change(&key, |value: &mut Box<Project>| apply(value.as_mut()));
     }
 
-    fn project_collection_builder_seed(&self) -> crate::project::project_collection_builder::ProjectCollectionBuilder {
+    fn project_collection_builder_seed(&self) -> crate::project::project_collection_builder::ProjectCollectionBuilder { ::tsox_core::fntrace::enter("project_collection_builder_seed"); 
         crate::project::project_collection_builder::ProjectCollectionBuilder::new(
             self.new_snapshot_id,
             self.compiler_options_for_inferred_projects.as_ref(),
@@ -467,7 +467,7 @@ impl ProjectCollectionBuilderMig<'_> {
         config_file_path: &Path,
         load_kind: ProjectLoadKind,
         logger: Option<&LogTree>,
-    ) -> Option<MapEntry<Path, Box<Project>>> {
+    ) -> Option<MapEntry<Path, Box<Project>>> { ::tsox_core::fntrace::enter("find_or_create_project"); 
         if load_kind == ProjectLoadKind::Find {
             return self.configured_projects.load(config_file_path);
         }
@@ -485,7 +485,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         root_file_names: Vec<String>,
         logger: Option<&LogTree>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("update_inferred_project_roots"); 
         let root_file_names: Vec<String> = root_file_names
             .into_iter()
             .filter(|f| self.is_supported_in_inferred_project(f))
@@ -512,7 +512,7 @@ impl ProjectCollectionBuilderMig<'_> {
         &mut self,
         project: &Project,
         logger: Option<&LogTree>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("seed_inferred_project_for_program"); 
         if project.program.is_none() {
             return;
         }
@@ -544,7 +544,7 @@ impl ProjectCollectionBuilderMig<'_> {
         config_file_parsing_diagnostics: Vec<tsox_frontend::ast::Diagnostic>,
         content_mappers: Vec<tsox_compile::mig::m3l_cm::Mapper>,
         logger: Option<&LogTree>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("update_inferred_project"); 
         if root_file_names.is_empty() {
             if self.inferred_project.value().is_some() {
                 if let Some(logger) = logger {
@@ -575,7 +575,7 @@ impl ProjectCollectionBuilderMig<'_> {
         config_file_parsing_diagnostics: Vec<tsox_frontend::ast::Diagnostic>,
         content_mappers: Vec<tsox_compile::mig::m3l_cm::Mapper>,
         logger: Option<&LogTree>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("update_or_create_inferred_project"); 
         let project = match self.inferred_project.value().as_ref() {
             None => {
                 let mut project = new_inferred_project(
@@ -639,7 +639,7 @@ impl ProjectCollectionBuilderMig<'_> {
         changed
     }
 
-    pub fn is_supported_in_inferred_project(&self, file_name: &str) -> bool {
+    pub fn is_supported_in_inferred_project(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_supported_in_inferred_project"); 
         if tsox_core::tspath::is_dynamic_file_name(file_name)
             || tsox_core::core::mig::m3j::get_script_kind_from_file_name(file_name)
                 != tsox_core::core::mig::m3j::ScriptKind::Unknown
@@ -664,7 +664,7 @@ impl ProjectCollectionBuilderMig<'_> {
 pub fn project_references_equal(
     a: &[ProjectReference],
     b: &[ProjectReference],
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("project_references_equal"); 
     a.len() == b.len()
         && a.iter()
             .zip(b.iter())
@@ -683,7 +683,7 @@ pub struct SearchNodeKey {
     pub load_kind: ProjectLoadKind,
 }
 
-pub fn log_change_file_result(_result: &ChangeFileResult, _logger: Option<&LogTree>) {}
+pub fn log_change_file_result(_result: &ChangeFileResult, _logger: Option<&LogTree>) { ::tsox_core::fntrace::enter("log_change_file_result"); }
 
 pub struct ChangeFileResult {
     pub affected_projects: HashSet<Path>,
@@ -691,13 +691,13 @@ pub struct ChangeFileResult {
 }
 
 impl Clone for Project {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         self.clone_shallow()
     }
 }
 
 impl<K: Clone + Eq + std::hash::Hash, V: Clone> Clone for MapEntry<K, V> {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         MapEntry {
             key: self.key.clone(),
             original: self.original.clone(),
@@ -715,11 +715,11 @@ pub trait DirtyMapMigExt<K: Clone + Eq + std::hash::Hash, V: Clone> {
 }
 
 impl<K: Clone + Eq + std::hash::Hash, V: Clone> DirtyMapMigExt<K, V> for DirtyMap<K, V> {
-    fn load(&self, key: &K) -> Option<MapEntry<K, V>> {
+    fn load(&self, key: &K) -> Option<MapEntry<K, V>> { ::tsox_core::fntrace::enter("load"); 
         self.get(key)
     }
 
-    fn keys(&self) -> Vec<K> {
+    fn keys(&self) -> Vec<K> { ::tsox_core::fntrace::enter("keys"); 
         let mut keys = Vec::new();
         self.range(|entry| {
             keys.push(entry.key().clone());
@@ -728,7 +728,7 @@ impl<K: Clone + Eq + std::hash::Hash, V: Clone> DirtyMapMigExt<K, V> for DirtyMa
         keys
     }
 
-    fn load_or_store(&mut self, key: K, value: V) -> Option<MapEntry<K, V>> {
+    fn load_or_store(&mut self, key: K, value: V) -> Option<MapEntry<K, V>> { ::tsox_core::fntrace::enter("load_or_store"); 
         if let Some(existing) = self.get(&key) {
             return Some(existing);
         }
@@ -744,7 +744,7 @@ impl ConfigFileRegistryBuilder {
         _file_name: &str,
         _path: &Path,
         _logger: Option<&LogTree>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_config_file_name_for_file"); 
         todo!("getConfigFileNameForFile requires computeConfigFileName fs walk pending port")
     }
 
@@ -754,15 +754,15 @@ impl ConfigFileRegistryBuilder {
         _path: &Path,
         _config_file_name: &str,
         _logger: Option<&LogTree>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_ancestor_config_file_name"); 
         todo!("getAncestorConfigFileName requires forEachConfigFileNameFor pending port")
     }
 
-    pub fn retain_config_for_project(&self, _config_file_path: &Path, _project_path: &Path) {
+    pub fn retain_config_for_project(&self, _config_file_path: &Path, _project_path: &Path) { ::tsox_core::fntrace::enter("retain_config_for_project"); 
         todo!("retainConfigForProject requires configFileEntry refcount cache pending port")
     }
 
-    pub fn release_config_for_project(&self, _config_file_path: &Path, _project_path: &Path) {
+    pub fn release_config_for_project(&self, _config_file_path: &Path, _project_path: &Path) { ::tsox_core::fntrace::enter("release_config_for_project"); 
         todo!("releaseConfigForProject requires configFileEntry refcount cache pending port")
     }
 
@@ -772,12 +772,12 @@ impl ConfigFileRegistryBuilder {
         _path: &Path,
         _project: &Project,
         _logger: Option<&LogTree>,
-    ) -> Option<ParsedCommandLine> {
+    ) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("acquire_config_for_project"); 
         todo!("acquireConfigForProject requires findOrAcquireConfigForFile pending port")
     }
 }
 
-pub fn client_capabilities_relative_pattern_support(ctx: &ResolvedClientCapabilitiesContext) -> bool {
+pub fn client_capabilities_relative_pattern_support(ctx: &ResolvedClientCapabilitiesContext) -> bool { ::tsox_core::fntrace::enter("client_capabilities_relative_pattern_support"); 
     crate::mig::m5m::get_client_capabilities(ctx)
         .raw
         .as_object()
@@ -791,6 +791,6 @@ pub fn client_capabilities_relative_pattern_support(ctx: &ResolvedClientCapabili
         .unwrap_or(false)
 }
 
-pub fn debug_structural_equal<T: std::fmt::Debug>(a: &T, b: &T) -> bool {
+pub fn debug_structural_equal<T: std::fmt::Debug>(a: &T, b: &T) -> bool { ::tsox_core::fntrace::enter("debug_structural_equal"); 
     format!("{a:?}") == format!("{b:?}")
 }

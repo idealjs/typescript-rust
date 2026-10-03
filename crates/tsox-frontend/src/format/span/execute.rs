@@ -10,7 +10,7 @@ use crate::format::span::FormatSpanWorker;
 use super::super::util;
 
 impl FormatSpanWorker {
-    pub(super) fn run(&mut self, scanner: &mut FormattingScanner) -> Vec<crate::format::TextChange> {
+    pub(super) fn run(&mut self, scanner: &mut FormattingScanner) -> Vec<crate::format::TextChange> { ::tsox_core::fntrace::enter("run"); 
         self.indentation_on_last_indented_line = -1;
         self.last_indented_line = -1;
         self.formatting_context = crate::format::rule_context::FormattingContext::new(
@@ -110,7 +110,7 @@ impl FormatSpanWorker {
     }
 
     /// Go execute() 末尾的 trailing-pair 连续性检查与补编辑。
-    fn process_trailing_pair(&mut self, scanner: &mut FormattingScanner) {
+    fn process_trailing_pair(&mut self, scanner: &mut FormattingScanner) { ::tsox_core::fntrace::enter("process_trailing_pair"); 
         let previous = match &self.previous_range {
             Some(r) if !self.previous_range_is_zero() => r.clone(),
             _ => return,
@@ -156,7 +156,7 @@ impl FormatSpanWorker {
 }
 
 impl FormatSpanWorker {
-    pub(super) fn previous_range_is_zero(&self) -> bool {
+    pub(super) fn previous_range_is_zero(&self) -> bool { ::tsox_core::fntrace::enter("previous_range_is_zero"); 
         match &self.previous_range {
             None => true,
             Some(r) => r.loc.pos() == 0 && r.loc.end() == 0 && r.kind == SyntaxKind::Unknown,
@@ -165,7 +165,7 @@ impl FormatSpanWorker {
 }
 
 impl crate::format::scanner::FormatSpanWorkerLike for super::FormatSpanWorker {
-    fn execute(&mut self, scanner: &mut FormattingScanner) -> Vec<crate::format::TextChange> {
+    fn execute(&mut self, scanner: &mut FormattingScanner) -> Vec<crate::format::TextChange> { ::tsox_core::fntrace::enter("execute"); 
         self.run(scanner)
     }
 }

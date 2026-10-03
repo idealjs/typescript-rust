@@ -21,7 +21,7 @@ pub struct AstDecoder {
     pub node_lists: Vec<Option<NodeList>>,
 }
 
-pub fn decode_source_file(data: &[u8]) -> Result<Arc<Node>, String> {
+pub fn decode_source_file(data: &[u8]) -> Result<Arc<Node>, String> { ::tsox_core::fntrace::enter("decode_source_file"); 
     let node = decode_nodes(data)?;
     if node.kind != SyntaxKind::SourceFile {
         return Err(format!("expected SourceFile root, got {:?}", node.kind));
@@ -29,12 +29,12 @@ pub fn decode_source_file(data: &[u8]) -> Result<Arc<Node>, String> {
     Ok(node)
 }
 
-pub fn decode_nodes(data: &[u8]) -> Result<Arc<Node>, String> {
+pub fn decode_nodes(data: &[u8]) -> Result<Arc<Node>, String> { ::tsox_core::fntrace::enter("decode_nodes"); 
     let mut d = new_ast_decoder(data)?;
     d.decode()
 }
 
-pub fn new_ast_decoder(data: &[u8]) -> Result<AstDecoder, String> {
+pub fn new_ast_decoder(data: &[u8]) -> Result<AstDecoder, String> { ::tsox_core::fntrace::enter("new_ast_decoder"); 
     if data.len() < HEADER_SIZE {
         return Err(format!("data too short for header: {} bytes", data.len()));
     }
@@ -77,22 +77,22 @@ pub fn new_ast_decoder(data: &[u8]) -> Result<AstDecoder, String> {
 }
 
 impl AstDecoder {
-    pub fn alloc_node_slice(&mut self, capacity: usize) -> Vec<Option<Arc<Node>>> {
+    pub fn alloc_node_slice(&mut self, capacity: usize) -> Vec<Option<Arc<Node>>> { ::tsox_core::fntrace::enter("alloc_node_slice"); 
         Vec::with_capacity(capacity)
     }
 
-    pub fn node_field(&self, i: usize, field: usize) -> u32 {
+    pub fn node_field(&self, i: usize, field: usize) -> u32 { ::tsox_core::fntrace::enter("node_field"); 
         read_le32(&self.raw, self.node_off as usize + i * NODE_SIZE + field)
     }
 
-    pub fn get_string(&self, idx: u32) -> String {
+    pub fn get_string(&self, idx: u32) -> String { ::tsox_core::fntrace::enter("get_string"); 
         let off_base = self.str_table as usize + idx as usize * 4;
         let start = read_le32(&self.raw, off_base) as usize;
         let end = read_le32(&self.raw, off_base + 4) as usize;
         String::from_utf8_lossy(&self.all_string_data[start..end]).into_owned()
     }
 
-    pub fn collect_children(&mut self, i: usize) -> Vec<usize> {
+    pub fn collect_children(&mut self, i: usize) -> Vec<usize> { ::tsox_core::fntrace::enter("collect_children"); 
         self.child_buf.clear();
         if i + 1 >= self.node_count {
             return std::mem::take(&mut self.child_buf);
@@ -110,7 +110,7 @@ impl AstDecoder {
         std::mem::take(&mut self.child_buf)
     }
 
-    pub fn decode(&mut self) -> Result<Arc<Node>, String> {
+    pub fn decode(&mut self) -> Result<Arc<Node>, String> { ::tsox_core::fntrace::enter("decode"); 
         if self.node_count < 2 {
             return Err("no nodes to decode".to_string());
         }
@@ -137,33 +137,33 @@ impl AstDecoder {
             .ok_or_else(|| "missing root node".to_string())
     }
 
-    pub fn get_modifier_list(&self, ci: usize) -> Option<ModifierList> {
+    pub fn get_modifier_list(&self, ci: usize) -> Option<ModifierList> { ::tsox_core::fntrace::enter("get_modifier_list"); 
         let nl = self.node_lists.get(ci)?.as_ref()?;
         Some(new_modifier_list_from(&nl.nodes))
     }
 
-    pub fn node_at(&self, ci: usize) -> Option<Arc<Node>> {
+    pub fn node_at(&self, ci: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_at"); 
         if ci == 0 {
             return None;
         }
         self.nodes.get(ci)?.clone()
     }
 
-    pub fn node_list_at(&self, ci: usize) -> Option<NodeList> {
+    pub fn node_list_at(&self, ci: usize) -> Option<NodeList> { ::tsox_core::fntrace::enter("node_list_at"); 
         if ci == 0 {
             return None;
         }
         self.node_lists.get(ci)?.clone()
     }
 
-    pub fn modifier_list_at(&self, ci: usize) -> Option<ModifierList> {
+    pub fn modifier_list_at(&self, ci: usize) -> Option<ModifierList> { ::tsox_core::fntrace::enter("modifier_list_at"); 
         if ci == 0 {
             return None;
         }
         self.get_modifier_list(ci)
     }
 
-    pub fn create_node(&self, kind: u32, data: u32, child_indices: Vec<usize>) -> Result<Arc<Node>, String> {
+    pub fn create_node(&self, kind: u32, data: u32, child_indices: Vec<usize>) -> Result<Arc<Node>, String> { ::tsox_core::fntrace::enter("create_node"); 
         let data_type = data & NODE_DATA_TYPE_MASK;
         let _common_data = ((data >> 24) & 0x3f) as u8;
         match data_type {
@@ -177,7 +177,7 @@ impl AstDecoder {
         &self,
         data: u32,
         child_indices: Vec<usize>,
-    ) -> Result<Arc<Node>, String> {
+    ) -> Result<Arc<Node>, String> { ::tsox_core::fntrace::enter("decode_extended_data_source_file"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let file_name_idx = read_le32(&self.raw, ext_off + 4);
@@ -203,7 +203,7 @@ impl AstDecoder {
         Ok(new_source_file_node(stmts, end_of_file))
     }
 
-    pub fn decode_extended_data_template_head(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_template_head(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_template_head"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let raw_text_idx = read_le32(&self.raw, ext_off + 4);
@@ -211,7 +211,7 @@ impl AstDecoder {
         new_string_like_node(SyntaxKind::TemplateHead, &self.get_string(text_idx), &self.get_string(raw_text_idx))
     }
 
-    pub fn decode_extended_data_template_middle(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_template_middle(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_template_middle"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let raw_text_idx = read_le32(&self.raw, ext_off + 4);
@@ -219,7 +219,7 @@ impl AstDecoder {
         new_string_like_node(SyntaxKind::TemplateMiddle, &self.get_string(text_idx), &self.get_string(raw_text_idx))
     }
 
-    pub fn decode_extended_data_template_tail(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_template_tail(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_template_tail"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let raw_text_idx = read_le32(&self.raw, ext_off + 4);
@@ -227,50 +227,50 @@ impl AstDecoder {
         new_string_like_node(SyntaxKind::TemplateTail, &self.get_string(text_idx), &self.get_string(raw_text_idx))
     }
 
-    pub fn decode_extended_data_string_literal(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_string_literal(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_string_literal"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let _flags = read_le32(&self.raw, ext_off + 4);
         new_string_like_node(SyntaxKind::StringLiteral, &self.get_string(text_idx), "")
     }
 
-    pub fn decode_extended_data_numeric_literal(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_numeric_literal(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_numeric_literal"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let _flags = read_le32(&self.raw, ext_off + 4);
         new_string_like_node(SyntaxKind::NumericLiteral, &self.get_string(text_idx), "")
     }
 
-    pub fn decode_extended_data_big_int_literal(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_big_int_literal(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_big_int_literal"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let _flags = read_le32(&self.raw, ext_off + 4);
         new_string_like_node(SyntaxKind::BigIntLiteral, &self.get_string(text_idx), "")
     }
 
-    pub fn decode_extended_data_regular_expression_literal(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_regular_expression_literal(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_regular_expression_literal"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let _flags = read_le32(&self.raw, ext_off + 4);
         new_string_like_node(SyntaxKind::RegularExpressionLiteral, &self.get_string(text_idx), "")
     }
 
-    pub fn decode_extended_data_no_substitution_template_literal(&self, data: u32) -> Arc<Node> {
+    pub fn decode_extended_data_no_substitution_template_literal(&self, data: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("decode_extended_data_no_substitution_template_literal"); 
         let ext_off = self.ext_data as usize + (data & NODE_DATA_STRING_INDEX_MASK) as usize;
         let text_idx = read_le32(&self.raw, ext_off);
         let _flags = read_le32(&self.raw, ext_off + 4);
         new_string_like_node(SyntaxKind::NoSubstitutionTemplateLiteral, &self.get_string(text_idx), "")
     }
 
-    pub fn single_child(&self, child_indices: &[usize]) -> Option<Arc<Node>> {
+    pub fn single_child(&self, child_indices: &[usize]) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("single_child"); 
         child_indices.first().and_then(|ci| self.nodes[*ci].clone())
     }
 
-    pub fn single_node_list_child(&self, child_indices: &[usize]) -> Option<NodeList> {
+    pub fn single_node_list_child(&self, child_indices: &[usize]) -> Option<NodeList> { ::tsox_core::fntrace::enter("single_node_list_child"); 
         child_indices.first().and_then(|ci| self.node_lists[*ci].clone())
     }
 
-    fn decode_children_node(&self, kind: u32, data: u32, child_indices: Vec<usize>) -> Result<Arc<Node>, String> {
+    fn decode_children_node(&self, kind: u32, data: u32, child_indices: Vec<usize>) -> Result<Arc<Node>, String> { ::tsox_core::fntrace::enter("decode_children_node"); 
         let _ = (kind, data, child_indices);
         Ok(new_children_node(kind))
     }
@@ -281,12 +281,12 @@ pub struct ChildIterator {
     pub pos: usize,
 }
 
-pub fn new_child_iter(indices: Vec<usize>) -> ChildIterator {
+pub fn new_child_iter(indices: Vec<usize>) -> ChildIterator { ::tsox_core::fntrace::enter("new_child_iter"); 
     ChildIterator { indices, pos: 0 }
 }
 
 impl ChildIterator {
-    pub fn next(&mut self) -> usize {
+    pub fn next(&mut self) -> usize { ::tsox_core::fntrace::enter("next"); 
         if self.pos >= self.indices.len() {
             return 0;
         }
@@ -295,7 +295,7 @@ impl ChildIterator {
         ci
     }
 
-    pub fn next_if(&mut self, mask: u8, bit: u8) -> usize {
+    pub fn next_if(&mut self, mask: u8, bit: u8) -> usize { ::tsox_core::fntrace::enter("next_if"); 
         if mask & (1 << bit) == 0 {
             return 0;
         }
@@ -303,34 +303,34 @@ impl ChildIterator {
     }
 }
 
-pub fn read_le32(data: &[u8], offset: usize) -> u32 {
+pub fn read_le32(data: &[u8], offset: usize) -> u32 { ::tsox_core::fntrace::enter("read_le32"); 
     if offset + 4 > data.len() {
         return 0;
     }
     u32::from_le_bytes([data[offset], data[offset + 1], data[offset + 2], data[offset + 3]])
 }
 
-pub fn decode_node_common_data_synthetic_expression(_common_data: u8) -> ! {
+pub fn decode_node_common_data_synthetic_expression(_common_data: u8) -> ! { ::tsox_core::fntrace::enter("decode_node_common_data_synthetic_expression"); 
     panic!("SyntheticExpression should never be decoded");
 }
 
-fn new_token_node(kind: SyntaxKind) -> Arc<Node> {
+fn new_token_node(kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_token_node"); 
     Arc::new(Node::new(kind, tsox_frontend::ast::node_data_generated::NodeData::Token))
 }
 
-fn new_source_file_node(_stmts: Option<NodeList>, _end_of_file: Option<Arc<Node>>) -> Arc<Node> {
+fn new_source_file_node(_stmts: Option<NodeList>, _end_of_file: Option<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_source_file_node"); 
     Arc::new(Node::new(SyntaxKind::SourceFile, tsox_frontend::ast::node_data_generated::NodeData::Token))
 }
 
-fn new_string_like_node(kind: SyntaxKind, _text: &str, _raw_text: &str) -> Arc<Node> {
+fn new_string_like_node(kind: SyntaxKind, _text: &str, _raw_text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_like_node"); 
     Arc::new(Node::new(kind, tsox_frontend::ast::node_data_generated::NodeData::Token))
 }
 
-fn new_children_node(kind: u32) -> Arc<Node> {
+fn new_children_node(kind: u32) -> Arc<Node> { ::tsox_core::fntrace::enter("new_children_node"); 
     let kind = unsafe { std::mem::transmute::<i16, SyntaxKind>(kind as i16) };
     Arc::new(Node::new(kind, tsox_frontend::ast::node_data_generated::NodeData::Token))
 }
 
-fn new_modifier_list_from(_nodes: &[Arc<Node>]) -> ModifierList {
+fn new_modifier_list_from(_nodes: &[Arc<Node>]) -> ModifierList { ::tsox_core::fntrace::enter("new_modifier_list_from"); 
     ModifierList::default()
 }

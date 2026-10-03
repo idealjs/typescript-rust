@@ -6,7 +6,7 @@ use tsox_frontend::ast::node_data_generated::NodeData;
 
 use crate::emitter::statement_emit::*;
 
-pub(crate) fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
+pub(crate) fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) { ::tsox_core::fntrace::enter("collect_type_cuts"); 
     match node.kind {
         SyntaxKind::JsxElement
         | SyntaxKind::JsxSelfClosingElement
@@ -241,7 +241,7 @@ pub(crate) fn collect_type_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize
     }
 }
 
-pub(crate) fn collect_modifier_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) {
+pub(crate) fn collect_modifier_cuts(node: &Node, source: &str, cuts: &mut Vec<(usize, usize)>) { ::tsox_core::fntrace::enter("collect_modifier_cuts"); 
     let modifiers = node.modifier_nodes();
     if modifiers.is_empty() {
         return;
@@ -270,7 +270,7 @@ pub(crate) fn cut_implements_clauses(
     heritage_clauses: Option<&NodeList>,
     source: &str,
     cuts: &mut Vec<(usize, usize)>,
-) {
+) { ::tsox_core::fntrace::enter("cut_implements_clauses"); 
     let clauses = match heritage_clauses {
         Some(c) => c,
         None => return,

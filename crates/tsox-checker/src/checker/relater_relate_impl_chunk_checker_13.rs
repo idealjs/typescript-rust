@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         pos: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("try_get_type_at_position"); 
         if let Some(overrides) = &sig.instantiated_parameter_types {
             let rest_offset = if sig.has_rest_parameter() { 1 } else { 0 };
             let param_count = overrides.len().saturating_sub(rest_offset);
@@ -71,7 +71,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         pos: usize,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_rest_or_any_type_at_position"); 
         let rest_type = self.get_rest_type_at_position(sig, pos);
         if let Some(rt) = &rest_type {
             if self.is_array_type(rt) {
@@ -90,7 +90,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         pos: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_rest_type_at_position"); 
         let parameter_count = self.get_parameter_count(sig);
         let has_rest = sig.has_rest_parameter();
         // Go getRestTypeAtPosition：rest 位本身返回 rest 数组；越过后返回
@@ -142,7 +142,7 @@ impl Checker {
         Some(self.create_tuple_type_ex(element_types, infos, false))
     }
 
-    pub fn get_effective_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+    pub fn get_effective_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_effective_rest_type"); 
         if !sig.has_rest_parameter() {
             return None;
         }
@@ -155,7 +155,7 @@ impl Checker {
         Some(rest_type)
     }
 
-    pub fn get_non_array_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+    pub fn get_non_array_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_non_array_rest_type"); 
         if !sig.has_rest_parameter() {
             return None;
         }
@@ -176,14 +176,14 @@ impl Checker {
         None
     }
 
-    pub(crate) fn get_array_element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn get_array_element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_array_element_type_of"); 
         if self.is_array_type(t) {
             return Some(self.get_array_element_type(t));
         }
         None
     }
 
-    pub fn is_top_signature(&mut self, sig: &Arc<Signature>) -> bool {
+    pub fn is_top_signature(&mut self, sig: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("is_top_signature"); 
         if !sig.type_parameters.is_empty() {
             return false;
         }
@@ -221,18 +221,18 @@ impl Checker {
         }
     }
 
-    pub fn get_this_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+    pub fn get_this_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_this_type_of_signature"); 
         let this_param = sig.this_parameter.as_ref()?;
         let links = self.value_symbol_links.get(this_param)?;
         links.resolved_type.clone()
     }
 
-    pub fn get_non_circular_return_type_of_signature(&self, sig: &Arc<Signature>) -> Arc<Type> {
+    pub fn get_non_circular_return_type_of_signature(&self, sig: &Arc<Signature>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_circular_return_type_of_signature"); 
         self.get_return_type_of_signature(sig)
             .unwrap_or_else(|| self.any_type())
     }
 
-    pub fn get_erased_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> {
+    pub fn get_erased_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_erased_signature"); 
         if sig.type_parameters.is_empty() {
             return Arc::clone(sig);
         }
@@ -255,7 +255,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         type_args: &[Arc<Type>],
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_signature_instantiation"); 
         if type_args.is_empty() || sig.type_parameters.is_empty() {
             return Arc::clone(sig);
         }

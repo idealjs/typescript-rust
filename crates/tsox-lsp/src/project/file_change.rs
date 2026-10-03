@@ -18,7 +18,7 @@ pub enum FileChangeKind {
 }
 
 impl FileChangeKind {
-    pub fn is_watch_kind(&self) -> bool {
+    pub fn is_watch_kind(&self) -> bool { ::tsox_core::fntrace::enter("is_watch_kind"); 
         matches!(
             self,
             FileChangeKind::WatchCreate | FileChangeKind::WatchChange | FileChangeKind::WatchDelete
@@ -41,7 +41,7 @@ pub struct FileChange {
 }
 
 impl Default for FileChange {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         FileChange {
             kind: FileChangeKind::Change,
             uri: lsproto::DocumentUri::default(),
@@ -71,7 +71,7 @@ pub struct FileChangeSummary {
 }
 
 impl FileChangeSummary {
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         !self.invalidate_all
             && self.opened.0.is_empty()
             && self.reopened.0.is_empty()
@@ -81,19 +81,19 @@ impl FileChangeSummary {
             && self.deleted.is_empty()
     }
 
-    pub fn has_excessive_watch_events(&self) -> bool {
+    pub fn has_excessive_watch_events(&self) -> bool { ::tsox_core::fntrace::enter("has_excessive_watch_events"); 
         self.invalidate_all
             || (self.created.len() + self.deleted.len() + self.changed.len())
                 > EXCESSIVE_CHANGE_THRESHOLD
     }
 
-    pub fn has_excessive_non_create_watch_events(&self) -> bool {
+    pub fn has_excessive_non_create_watch_events(&self) -> bool { ::tsox_core::fntrace::enter("has_excessive_non_create_watch_events"); 
         self.invalidate_all
             || (self.deleted.len() + self.changed.len()) > EXCESSIVE_CHANGE_THRESHOLD
     }
 }
 
-pub fn merge_file_change_summary(dst: &mut FileChangeSummary, src: &FileChangeSummary) {
+pub fn merge_file_change_summary(dst: &mut FileChangeSummary, src: &FileChangeSummary) { ::tsox_core::fntrace::enter("merge_file_change_summary"); 
     if src.is_empty() {
         return;
     }

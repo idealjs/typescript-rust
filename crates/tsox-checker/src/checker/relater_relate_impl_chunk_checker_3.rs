@@ -3,7 +3,7 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
-    pub(crate) fn constraint_of_indexed_access(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn constraint_of_indexed_access(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("constraint_of_indexed_access"); 
         let ia = match &t.data {
             TypeData::IndexedAccess(ia) => ia,
             _ => return None,
@@ -105,7 +105,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         depth: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("reduce_type_for_constraint"); 
         if depth == 0 {
             return None;
         }
@@ -145,7 +145,7 @@ impl Checker {
     pub(crate) fn indexed_access_constraint_for_chain(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("indexed_access_constraint_for_chain"); 
         let ia = match &t.data {
             TypeData::IndexedAccess(ia) => ia,
             _ => return None,
@@ -172,7 +172,7 @@ impl Checker {
         None
     }
 
-    fn chain_simplified_or_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    fn chain_simplified_or_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("chain_simplified_or_constraint"); 
         if t.flags.contains(TypeFlags::Index) || matches!(&t.data, TypeData::Index(_)) {
             let parts = vec![
                 self.string_type(),
@@ -196,7 +196,7 @@ impl Checker {
         &mut self,
         object: &Arc<Type>,
         index: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("chain_indexed_access"); 
         if object.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
             return Some(Arc::clone(object));
         }
@@ -222,7 +222,7 @@ impl Checker {
         self.try_get_indexed_access_type(object, index, AccessFlags::None)
     }
 
-    fn chain_is_generic_type(&self, t: &Arc<Type>) -> bool {
+    fn chain_is_generic_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("chain_is_generic_type"); 
         if t.flags
             .intersects(TypeFlags::TypeParameter | TypeFlags::Index | TypeFlags::IndexedAccess)
         {

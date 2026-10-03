@@ -32,7 +32,7 @@ impl LanguageService {
     pub fn documentation_location_mapper(
         &self,
         feature: super::m5s::SpanFeature,
-    ) -> impl Fn(&Arc<SourceFile>, TextRange) -> (Location, SpanFidelity) + '_ {
+    ) -> impl Fn(&Arc<SourceFile>, TextRange) -> (Location, SpanFidelity) + '_ { ::tsox_core::fntrace::enter("documentation_location_mapper"); 
         move |file, file_range| self.source_file_range_to_lsp_location_for_feature(file, file_range, feature)
     }
 
@@ -44,7 +44,7 @@ impl LanguageService {
         content_format: &str,
         vc: Option<&mut tsox_checker::checker::mig::m2f::VerbosityContext>,
         vs_capability: bool,
-    ) -> (String, String, String, Vec<VSClassifiedTextRun>) {
+    ) -> (String, String, String, Vec<VSClassifiedTextRun>) { ::tsox_core::fntrace::enter("get_quick_info_and_documentation_for_symbol"); 
         let info = get_quick_info_and_declaration_at_location(
             c,
             symbol,
@@ -94,7 +94,7 @@ pub fn get_quick_info_and_declaration_at_location(
     vc: Option<&mut tsox_checker::checker::mig::m2f::VerbosityContext>,
     vs_capability: bool,
     meaning: u32,
-) -> SymbolDisplayInfo {
+) -> SymbolDisplayInfo { ::tsox_core::fntrace::enter("get_quick_info_and_declaration_at_location"); 
     let container = crate::ls::utilities::get_container_node(node);
     let mut dpw = DisplayPartsWriter::new(vs_capability);
     let source_file = ast::get_source_file_of_node(node);
@@ -138,7 +138,7 @@ pub fn get_quick_info_and_declaration_at_location(
     }
 }
 
-fn core_or_first_declaration(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+fn core_or_first_declaration(symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("core_or_first_declaration"); 
     symbol
         .value_declaration
         .clone()
@@ -151,12 +151,12 @@ fn write_type_classified(
     t: &Arc<tsox_checker::checker::Type>,
     _enclosing: Option<&Arc<Node>>,
     flags: TypeFormatFlags,
-) {
+) { ::tsox_core::fntrace::enter("write_type_classified"); 
     let flags = flags.union(TypeFormatFlags::MULTILINE_OBJECT_LITERALS);
     dpw.raw_write(&c.type_to_string_ex(t, flags));
 }
 
-pub fn should_get_type(node: &Arc<Node>) -> bool {
+pub fn should_get_type(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_get_type"); 
     match node.kind {
         SyntaxKind::Identifier => {
             !(node.flags.contains(ast::NodeFlags::JSDoc) && is_declaration_name(node))
@@ -178,11 +178,11 @@ pub fn type_parameter_to_string(
     t: &Arc<tsox_checker::checker::Type>,
     enclosing_declaration: Option<&Arc<Node>>,
     vc: Option<&mut tsox_checker::checker::mig::m2f::VerbosityContext>,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("type_parameter_to_string"); 
     c.type_parameter_to_string_ex(t, enclosing_declaration, vc)
 }
 
-pub fn contains_typedef_tag(jsdoc: &Arc<Node>) -> bool {
+pub fn contains_typedef_tag(jsdoc: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("contains_typedef_tag"); 
     if jsdoc.kind == SyntaxKind::JSDoc {
         if let Some(tags) = jsdoc_tags(jsdoc) {
             for tag in &tags.nodes {
@@ -203,7 +203,7 @@ pub fn documentation_from_signature(
     location: &Arc<Node>,
     content_format: &str,
     comment_only: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("documentation_from_signature"); 
     let Some(node) = node else {
         return String::new();
     };
@@ -234,7 +234,7 @@ pub fn documentation_from_alias(
     node: &Arc<Node>,
     content_format: &str,
     comment_only: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("documentation_from_alias"); 
     let Some(symbol) = symbol else {
         return String::new();
     };
@@ -280,7 +280,7 @@ pub fn documentation_from_root_symbols(
     node: &Arc<Node>,
     content_format: &str,
     comment_only: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("documentation_from_root_symbols"); 
     let Some(symbol) = symbol else {
         return String::new();
     };
@@ -322,7 +322,7 @@ pub fn get_documentation_from_declaration(
     location: &Arc<Node>,
     content_format: &str,
     comment_only: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_documentation_from_declaration"); 
     let Some(declaration) = declaration else {
         return String::new();
     };
@@ -433,7 +433,7 @@ pub fn get_documentation_from_declaration(
     b
 }
 
-pub fn write_code(b: &mut String, lang: &str, code: &str) {
+pub fn write_code(b: &mut String, lang: &str, code: &str) { ::tsox_core::fntrace::enter("write_code"); 
     if code.is_empty() {
         return;
     }
@@ -462,7 +462,7 @@ pub fn write_comments(
     c: &mut Checker,
     comments: &[Arc<Node>],
     is_markdown: bool,
-) {
+) { ::tsox_core::fntrace::enter("write_comments"); 
     for comment in comments {
         match comment.kind {
             SyntaxKind::JSDocText => b.push_str(&comment.text()),
@@ -482,7 +482,7 @@ pub fn write_jsdoc_link(
     link: &Arc<Node>,
     quote: bool,
     is_markdown: bool,
-) {
+) { ::tsox_core::fntrace::enter("write_jsdoc_link"); 
     let name = link.name();
     let text = link.text().trim().to_string();
     let Some(name) = name else {
@@ -522,7 +522,7 @@ pub fn write_name_link(
     text: &str,
     quote: bool,
     is_markdown: bool,
-) {
+) { ::tsox_core::fntrace::enter("write_name_link"); 
     let declarations = super::m5s::get_declarations_from_location(c, name);
     if let Some(declaration) = declarations.first()
         && let Some(file) = c.get_source_file_of_node(declaration)
@@ -553,7 +553,7 @@ pub fn write_name_link(
     write_quoted_string(b, &format!("{}{}", get_entity_name_string(name), suffix), quote && is_markdown);
 }
 
-pub fn trim_comment_prefix(text: &str) -> &str {
+pub fn trim_comment_prefix(text: &str) -> &str { ::tsox_core::fntrace::enter("trim_comment_prefix"); 
     text.trim_start_matches(' ')
         .strip_prefix('|')
         .unwrap_or(text.trim_start_matches(' '))
@@ -561,7 +561,7 @@ pub fn trim_comment_prefix(text: &str) -> &str {
         .trim_start_matches(' ')
 }
 
-pub fn write_markdown_link(b: &mut String, text: &str, uri: &str, quote: bool) {
+pub fn write_markdown_link(b: &mut String, text: &str, uri: &str, quote: bool) { ::tsox_core::fntrace::enter("write_markdown_link"); 
     b.push('[');
     write_quoted_string(b, text, quote);
     b.push_str("](");
@@ -569,14 +569,14 @@ pub fn write_markdown_link(b: &mut String, text: &str, uri: &str, quote: bool) {
     b.push(')');
 }
 
-pub fn write_optional_entity_name(b: &mut String, name: Option<&Arc<Node>>) {
+pub fn write_optional_entity_name(b: &mut String, name: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("write_optional_entity_name"); 
     if let Some(name) = name {
         b.push(' ');
         write_quoted_string(b, &get_entity_name_string(name), true);
     }
 }
 
-pub fn write_quoted_string(b: &mut String, s: &str, quote: bool) {
+pub fn write_quoted_string(b: &mut String, s: &str, quote: bool) { ::tsox_core::fntrace::enter("write_quoted_string"); 
     if quote && !s.contains('`') {
         b.push('`');
         b.push_str(s);
@@ -586,13 +586,13 @@ pub fn write_quoted_string(b: &mut String, s: &str, quote: bool) {
     }
 }
 
-pub fn get_entity_name_string(name: &Arc<Node>) -> String {
+pub fn get_entity_name_string(name: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_entity_name_string"); 
     let mut b = String::new();
     write_entity_name_parts(&mut b, name);
     b
 }
 
-pub fn write_entity_name_parts(b: &mut String, node: &Arc<Node>) {
+pub fn write_entity_name_parts(b: &mut String, node: &Arc<Node>) { ::tsox_core::fntrace::enter("write_entity_name_parts"); 
     match node.kind {
         SyntaxKind::Identifier => b.push_str(&node.text()),
         SyntaxKind::QualifiedName => {
@@ -634,7 +634,7 @@ pub fn get_documentation_for_symbol(
     declaration: Option<&Arc<Node>>,
     content_format: &str,
     comment_only: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_documentation_for_symbol"); 
     let documentation = documentation_from_signature(
         get_mapped_location,
         c,
@@ -660,7 +660,7 @@ pub fn get_documentation_for_symbol(
     documentation_from_alias(get_mapped_location, c, symbol, node, content_format, comment_only)
 }
 
-fn get_call_or_new_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_call_or_new_expression(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_call_or_new_expression"); 
     if node.kind == SyntaxKind::SourceFile {
         return None;
     }
@@ -680,7 +680,7 @@ fn get_call_or_new_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub fn get_jsdoc_or_tag(c: &mut Checker, node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_jsdoc_or_tag(c: &mut Checker, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_or_tag"); 
     get_jsdoc_or_tag_with_seen(c, node, &mut std::collections::HashSet::new())
 }
 
@@ -688,7 +688,7 @@ fn get_jsdoc_or_tag_with_seen(
     c: &mut Checker,
     node: &Arc<Node>,
     seen: &mut std::collections::HashSet<usize>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_or_tag_with_seen"); 
     if let Some(jsdoc) = get_jsdoc(c, node) {
         return Some(jsdoc);
     }
@@ -770,7 +770,7 @@ fn get_matching_jsdoc_tag(
     name: &str,
     match_fn: fn(&Arc<Node>, &str) -> bool,
     seen: &mut std::collections::HashSet<usize>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_matching_jsdoc_tag"); 
     let jsdoc = get_jsdoc_or_tag_with_seen(c, node, seen)?;
     if jsdoc.kind != SyntaxKind::JSDoc {
         return None;
@@ -788,7 +788,7 @@ fn get_jsdoc_parameter_tag_by_position(
     c: &mut Checker,
     param: &Arc<Node>,
     seen: &mut std::collections::HashSet<usize>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_parameter_tag_by_position"); 
     let parent = param.parent()?;
     let param_index = parent.parameters()?.nodes.iter().position(|p| Arc::ptr_eq(p, param))?;
     let jsdoc = get_jsdoc_or_tag_with_seen(c, &parent, seen)?;
@@ -808,33 +808,33 @@ fn get_jsdoc_parameter_tag_by_position(
     None
 }
 
-fn is_matching_parameter_tag(tag: &Arc<Node>, name: &str) -> bool {
+fn is_matching_parameter_tag(tag: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_matching_parameter_tag"); 
     tag.kind == SyntaxKind::JSDocParameterTag && is_node_with_name(tag, name)
 }
 
-fn is_matching_template_tag(tag: &Arc<Node>, name: &str) -> bool {
+fn is_matching_template_tag(tag: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_matching_template_tag"); 
     tag.kind == SyntaxKind::JSDocTemplateTag
         && tag_type_parameters(tag).iter().any(|tp| is_node_with_name(tp, name))
 }
 
-fn is_node_with_name(node: &Arc<Node>, name: &str) -> bool {
+fn is_node_with_name(node: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_node_with_name"); 
     node.name()
         .is_some_and(|n| ast::is_identifier(n) && n.text() == name)
 }
 
-fn get_jsdoc(c: &Checker, node: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_jsdoc(c: &Checker, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc"); 
     let file = c.get_source_file_of_node(node)?;
     node.jsdoc(&file).last().cloned()
 }
 
-fn jsdoc_tags(jsdoc: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::NodeList>> {
+fn jsdoc_tags(jsdoc: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("jsdoc_tags"); 
     match &jsdoc.data {
         NodeData::JSDoc(d) => d.tags.as_ref(),
         _ => None,
     }
 }
 
-fn jsdoc_comment_list(node: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::NodeList>> {
+fn jsdoc_comment_list(node: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("jsdoc_comment_list"); 
     match &node.data {
         NodeData::JSDoc(d) => Some(&d.comment),
         NodeData::JSDocUnknownTag(d) => d.comment.as_ref(),
@@ -862,13 +862,13 @@ fn jsdoc_comment_list(node: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::NodeL
     }
 }
 
-fn jsdoc_comment_nodes(node: &Arc<Node>) -> &[Arc<Node>] {
+fn jsdoc_comment_nodes(node: &Arc<Node>) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("jsdoc_comment_nodes"); 
     jsdoc_comment_list(node)
         .map(|l| l.nodes.as_slice())
         .unwrap_or(&[])
 }
 
-fn tag_tag_name(tag: &Arc<Node>) -> Option<&Arc<Node>> {
+fn tag_tag_name(tag: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("tag_tag_name"); 
     match &tag.data {
         NodeData::JSDocUnknownTag(d) => Some(&d.tag_name),
         NodeData::JSDocAugmentsTag(d) => Some(&d.tag_name),
@@ -895,7 +895,7 @@ fn tag_tag_name(tag: &Arc<Node>) -> Option<&Arc<Node>> {
     }
 }
 
-fn tag_class_name(tag: &Arc<Node>) -> Option<&Arc<Node>> {
+fn tag_class_name(tag: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("tag_class_name"); 
     match &tag.data {
         NodeData::JSDocAugmentsTag(d) => Some(&d.class_name),
         NodeData::JSDocImplementsTag(d) => Some(&d.class_name),
@@ -903,21 +903,21 @@ fn tag_class_name(tag: &Arc<Node>) -> Option<&Arc<Node>> {
     }
 }
 
-fn tag_name_expression(tag: &Arc<Node>) -> Option<&Arc<Node>> {
+fn tag_name_expression(tag: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("tag_name_expression"); 
     match &tag.data {
         NodeData::JSDocSeeTag(d) => Some(&d.name_expression),
         _ => None,
     }
 }
 
-fn tag_type_parameters(tag: &Arc<Node>) -> &Arc<tsox_frontend::ast::NodeList> {
+fn tag_type_parameters(tag: &Arc<Node>) -> &Arc<tsox_frontend::ast::NodeList> { ::tsox_core::fntrace::enter("tag_type_parameters"); 
     match &tag.data {
         NodeData::JSDocTemplateTag(d) => &d.type_parameters,
         _ => panic!("tag_type_parameters on non-template tag"),
     }
 }
 
-pub fn is_const_type_reference(node: &Arc<Node>) -> bool {
+pub fn is_const_type_reference(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_const_type_reference"); 
     match &node.data {
         tsox_frontend::ast::NodeData::TypeReferenceNode(d) => {
             d.type_arguments.is_none() && ast::is_identifier(&d.type_name) && d.type_name.text() == "const"
@@ -926,7 +926,7 @@ pub fn is_const_type_reference(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_in_expression_context(node: &Arc<Node>) -> bool {
+pub fn is_in_expression_context(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_expression_context"); 
     let Some(parent) = node.parent() else {
         return false;
     };

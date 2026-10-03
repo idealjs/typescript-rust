@@ -5,19 +5,19 @@ use crate::scanner::is_line_break;
 use crate::scanner::TOKEN_FLAGS_SINGLE_QUOTE;
 use tsox_core::core::tristate::Tristate;
 
-pub(crate) fn is_declare_modifier(modifier: &Node) -> bool {
+pub(crate) fn is_declare_modifier(modifier: &Node) -> bool { ::tsox_core::fntrace::enter("is_declare_modifier"); 
     modifier.kind == SyntaxKind::DeclareKeyword
 }
 
-pub(crate) fn is_export_modifier(modifier: &Node) -> bool {
+pub(crate) fn is_export_modifier(modifier: &Node) -> bool { ::tsox_core::fntrace::enter("is_export_modifier"); 
     modifier.kind == SyntaxKind::ExportKeyword
 }
 
-pub(crate) fn is_async_modifier(modifier: &Node) -> bool {
+pub(crate) fn is_async_modifier(modifier: &Node) -> bool { ::tsox_core::fntrace::enter("is_async_modifier"); 
     modifier.kind == SyntaxKind::AsyncKeyword
 }
 
-pub(crate) fn is_double_quoted_string(node: &Node) -> bool {
+pub(crate) fn is_double_quoted_string(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_double_quoted_string"); 
     if !is_string_literal(node) {
         return false;
     }
@@ -27,16 +27,16 @@ pub(crate) fn is_double_quoted_string(node: &Node) -> bool {
     }
 }
 
-pub(crate) fn is_type_heritage_clause(is_interface: bool, token: SyntaxKind) -> bool {
+pub(crate) fn is_type_heritage_clause(is_interface: bool, token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_type_heritage_clause"); 
     is_interface && token == SyntaxKind::ExtendsKeyword
         || !is_interface && token == SyntaxKind::ImplementsKeyword
 }
 
-pub(crate) fn modifier_list_has_async(modifiers: &ModifierList) -> bool {
+pub(crate) fn modifier_list_has_async(modifiers: &ModifierList) -> bool { ::tsox_core::fntrace::enter("modifier_list_has_async"); 
     modifiers.list.nodes.iter().any(|n| is_async_modifier(n))
 }
 
-pub(crate) fn is_valid_heritage_type_reference_expression(node: &Node) -> bool {
+pub(crate) fn is_valid_heritage_type_reference_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_valid_heritage_type_reference_expression"); 
     if is_identifier(node) {
         return !(node.pos() == node.end() && (node.pos() as i32) >= 0 && node.kind != SyntaxKind::EndOfFile);
     }
@@ -51,11 +51,11 @@ pub(crate) fn is_valid_heritage_type_reference_expression(node: &Node) -> bool {
     }
 }
 
-pub(crate) fn match_str(text: &str, pos: usize, s: &str) -> bool {
+pub(crate) fn match_str(text: &str, pos: usize, s: &str) -> bool { ::tsox_core::fntrace::enter("match_str"); 
     text[pos..].starts_with(s)
 }
 
-pub(crate) fn line_end_pos(text: &str, pos: usize) -> usize {
+pub(crate) fn line_end_pos(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("line_end_pos"); 
     let mut pos = pos;
     for ch in text[pos..].chars() {
         if is_line_break(ch) {
@@ -74,7 +74,7 @@ impl JSDocScannerInfo {
     pub(crate) const HAS_DEPRECATED_TAG: JSDocScannerInfo = JSDocScannerInfo(2);
     pub(crate) const HAS_SEE_OR_LINK: JSDocScannerInfo = JSDocScannerInfo(4);
 
-    pub(crate) fn has_jsdoc(self) -> bool {
+    pub(crate) fn has_jsdoc(self) -> bool { ::tsox_core::fntrace::enter("has_jsdoc"); 
         self.0 & Self::HAS_JSDOC.0 != 0
     }
 }
@@ -96,7 +96,7 @@ pub(crate) struct ParserState {
 }
 
 impl Parser {
-    pub(crate) fn mark(&self) -> ParserState {
+    pub(crate) fn mark(&self) -> ParserState { ::tsox_core::fntrace::enter("mark"); 
         ParserState {
             scanner: self.scanner.clone(),
             token: self.token,
@@ -113,7 +113,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn rewind(&mut self, state: ParserState) {
+    pub(crate) fn rewind(&mut self, state: ParserState) { ::tsox_core::fntrace::enter("rewind"); 
         self.token = state.token;
         self.language_variant = state.language_variant;
         self.javascript_file = state.javascript_file;
@@ -128,29 +128,29 @@ impl Parser {
         self.scanner = state.scanner;
     }
 
-    pub(crate) fn look_ahead(&mut self, callback: impl FnOnce(&mut Parser) -> bool) -> bool {
+    pub(crate) fn look_ahead(&mut self, callback: impl FnOnce(&mut Parser) -> bool) -> bool { ::tsox_core::fntrace::enter("look_ahead"); 
         let state = self.mark();
         let result = callback(self);
         self.rewind(state);
         result
     }
 
-    pub(crate) fn next_token_without_check(&mut self) -> SyntaxKind {
+    pub(crate) fn next_token_without_check(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("next_token_without_check"); 
         self.token = self.scanner.scan();
         self.token
     }
 
-    pub(crate) fn next_token_jsdoc(&mut self) -> SyntaxKind {
+    pub(crate) fn next_token_jsdoc(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("next_token_jsdoc"); 
         self.token = self.scanner.scan_jsdoc_token();
         self.token
     }
 
-    pub(crate) fn next_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind {
+    pub(crate) fn next_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("next_jsdoc_comment_text_token"); 
         self.token = self.scanner.scan_jsdoc_comment_text_token(in_backticks);
         self.token
     }
 
-    pub(crate) fn jsdoc_scanner_info(&self) -> JSDocScannerInfo {
+    pub(crate) fn jsdoc_scanner_info(&self) -> JSDocScannerInfo { ::tsox_core::fntrace::enter("jsdoc_scanner_info"); 
         if !self.scanner.has_preceding_jsdoc_comment() {
             return JSDocScannerInfo::NONE;
         }
@@ -164,16 +164,16 @@ impl Parser {
         info
     }
 
-    pub(crate) fn is_implements_clause(&mut self) -> bool {
+    pub(crate) fn is_implements_clause(&mut self) -> bool { ::tsox_core::fntrace::enter("is_implements_clause"); 
         self.token == SyntaxKind::ImplementsKeyword
             && self.look_ahead(|p| is_identifier_or_keyword(p.next_token()))
     }
 
-    pub(crate) fn is_heritage_clause(&self) -> bool {
+    pub(crate) fn is_heritage_clause(&self) -> bool { ::tsox_core::fntrace::enter("is_heritage_clause"); 
         self.token == SyntaxKind::ExtendsKeyword || self.token == SyntaxKind::ImplementsKeyword
     }
 
-    pub(crate) fn is_heritage_clause_extends_or_implements_keyword(&mut self) -> bool {
+    pub(crate) fn is_heritage_clause_extends_or_implements_keyword(&mut self) -> bool { ::tsox_core::fntrace::enter("is_heritage_clause_extends_or_implements_keyword"); 
         self.is_heritage_clause()
             && self.look_ahead(|p| {
                 p.next_token();
@@ -181,17 +181,17 @@ impl Parser {
             })
     }
 
-    pub(crate) fn is_import_attribute_name(&self) -> bool {
+    pub(crate) fn is_import_attribute_name(&self) -> bool { ::tsox_core::fntrace::enter("is_import_attribute_name"); 
         is_identifier_or_keyword(self.token) || self.token == SyntaxKind::StringLiteral
     }
 
-    pub(crate) fn is_parameter_name_start(&self) -> bool {
+    pub(crate) fn is_parameter_name_start(&self) -> bool { ::tsox_core::fntrace::enter("is_parameter_name_start"); 
         self.is_binding_identifier()
             || self.token == SyntaxKind::OpenBracketToken
             || self.token == SyntaxKind::OpenBraceToken
     }
 
-    pub(crate) fn is_start_of_expression_statement(&self) -> bool {
+    pub(crate) fn is_start_of_expression_statement(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_expression_statement"); 
         self.token != SyntaxKind::OpenBraceToken
             && self.token != SyntaxKind::FunctionKeyword
             && self.token != SyntaxKind::ClassKeyword
@@ -199,7 +199,7 @@ impl Parser {
             && self.is_start_of_expression()
     }
 
-    pub(crate) fn is_start_of_function_type_or_constructor_type(&mut self) -> bool {
+    pub(crate) fn is_start_of_function_type_or_constructor_type(&mut self) -> bool { ::tsox_core::fntrace::enter("is_start_of_function_type_or_constructor_type"); 
         self.token == SyntaxKind::LessThanToken
             || self.token == SyntaxKind::OpenParenToken
                 && self.look_ahead(|p| p.next_is_unambiguously_start_of_function_type())
@@ -208,12 +208,12 @@ impl Parser {
                 && self.look_ahead(|p| p.next_token() == SyntaxKind::NewKeyword)
     }
 
-    pub(crate) fn is_template_start_of_tagged_template(&self) -> bool {
+    pub(crate) fn is_template_start_of_tagged_template(&self) -> bool { ::tsox_core::fntrace::enter("is_template_start_of_tagged_template"); 
         self.token == SyntaxKind::NoSubstitutionTemplateLiteral
             || self.token == SyntaxKind::TemplateHead
     }
 
-    pub(crate) fn is_update_expression(&self) -> bool {
+    pub(crate) fn is_update_expression(&self) -> bool { ::tsox_core::fntrace::enter("is_update_expression"); 
         match self.token {
             SyntaxKind::PlusToken
             | SyntaxKind::MinusToken
@@ -228,12 +228,12 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_valid_heritage_clause_object_literal(&mut self) -> bool {
+    pub(crate) fn is_valid_heritage_clause_object_literal(&mut self) -> bool { ::tsox_core::fntrace::enter("is_valid_heritage_clause_object_literal"); 
         self.look_ahead(|p| p.next_is_valid_heritage_clause_object_literal())
     }
 
     /// Go nextIsValidHeritageClauseObjectLiteral
-    pub(crate) fn next_is_valid_heritage_clause_object_literal(&mut self) -> bool {
+    pub(crate) fn next_is_valid_heritage_clause_object_literal(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_valid_heritage_clause_object_literal"); 
         if self.next_token() == SyntaxKind::CloseBraceToken {
             let next = self.next_token();
             return next == SyntaxKind::CommaToken
@@ -244,7 +244,7 @@ impl Parser {
         true
     }
 
-    pub(crate) fn is_parenthesized_arrow_function_expression(&mut self) -> Tristate {
+    pub(crate) fn is_parenthesized_arrow_function_expression(&mut self) -> Tristate { ::tsox_core::fntrace::enter("is_parenthesized_arrow_function_expression"); 
         if self.token == SyntaxKind::OpenParenToken
             || self.token == SyntaxKind::LessThanToken
             || self.token == SyntaxKind::AsyncKeyword
@@ -260,7 +260,7 @@ impl Parser {
         Tristate::False
     }
 
-    pub(crate) fn next_is_parenthesized_arrow_function_expression(&mut self) -> Tristate {
+    pub(crate) fn next_is_parenthesized_arrow_function_expression(&mut self) -> Tristate { ::tsox_core::fntrace::enter("next_is_parenthesized_arrow_function_expression"); 
         if self.token == SyntaxKind::AsyncKeyword {
             self.next_token();
             if self.has_preceding_line_break() {
@@ -349,7 +349,7 @@ impl Parser {
         Tristate::Unknown
     }
 
-    pub(crate) fn next_is_un_parenthesized_async_arrow_function(&mut self) -> bool {
+    pub(crate) fn next_is_un_parenthesized_async_arrow_function(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_un_parenthesized_async_arrow_function"); 
         if self.token != SyntaxKind::AsyncKeyword {
             return false;
         }
@@ -364,26 +364,26 @@ impl Parser {
         !self.has_preceding_line_break() && self.token == SyntaxKind::EqualsGreaterThanToken
     }
 
-    pub(crate) fn next_is_not_dot(&mut self) -> bool {
+    pub(crate) fn next_is_not_dot(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_not_dot"); 
         self.next_token() != SyntaxKind::DotToken
     }
 
-    pub(crate) fn next_is_start_of_expression(&mut self) -> bool {
+    pub(crate) fn next_is_start_of_expression(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_start_of_expression"); 
         self.next_token();
         self.is_start_of_expression()
     }
 
-    pub(crate) fn next_is_start_of_type(&mut self) -> bool {
+    pub(crate) fn next_is_start_of_type(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_start_of_type"); 
         self.next_token();
         self.is_start_of_type_ex(false)
     }
 
-    pub(crate) fn next_is_start_of_type_of_import_type(&mut self) -> bool {
+    pub(crate) fn next_is_start_of_type_of_import_type(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_start_of_type_of_import_type"); 
         self.next_token();
         self.token == SyntaxKind::ImportKeyword
     }
 
-    pub(crate) fn make_satisfies_expression(&mut self, expression: &Arc<Node>, type_node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn make_satisfies_expression(&mut self, expression: &Arc<Node>, type_node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("make_satisfies_expression"); 
         let pos = expression.pos();
         let end = type_node.end();
         Arc::new(Node::with_loc(
@@ -396,7 +396,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn make_as_expression(&mut self, left: &Arc<Node>, right: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn make_as_expression(&mut self, left: &Arc<Node>, right: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("make_as_expression"); 
         let pos = left.pos();
         let end = right.end();
         Arc::new(Node::with_loc(
@@ -415,7 +415,7 @@ impl Parser {
         operator_token: Arc<Node>,
         right: &Arc<Node>,
         pos: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("make_binary_expression"); 
         let end = right.end();
         Arc::new(Node::with_loc(
             SyntaxKind::BinaryExpression,

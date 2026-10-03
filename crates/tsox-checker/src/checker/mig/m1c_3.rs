@@ -20,7 +20,7 @@ use crate::checker::types::*;
 use tsox_frontend::ast::{Diagnostic, Node, NodeData, SyntaxKind};
 
 impl Checker {
-    pub fn check_yield_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_yield_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_yield_expression"); 
         self.check_grammar_yield_expression(node);
         let yield_expression_type = match node_expression(node).cloned() {
             Some(expr) => self.check_expression_ex(&expr, CheckMode::Normal),
@@ -111,7 +111,7 @@ impl Checker {
         }
     }
 
-    pub fn container_seems_to_be_empty_dom_element(&self, containing_type: &Arc<Type>) -> bool {
+    pub fn container_seems_to_be_empty_dom_element(&self, containing_type: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("container_seems_to_be_empty_dom_element"); 
         !self.compiler_options.lib.iter().any(|l| l == "lib.dom.d.ts")
             && every_contained_type(containing_type, &has_common_dom_type_name)
             && self.is_empty_object_type(containing_type)
@@ -122,7 +122,7 @@ impl Checker {
         location: &Arc<Node>,
         message: &'static str,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("error"); 
         let source_file = self.get_source_file_of_node(location);
         let diagnostic = Diagnostic::new(
             source_file,
@@ -139,7 +139,7 @@ impl Checker {
         location: &Arc<Node>,
         message: tsox_core::diagnostics::Message,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("error_message"); 
         let source_file = self.get_source_file_of_node(location);
         let diagnostic = Diagnostic::new(source_file, location.loc, message, args.to_vec());
         self.diagnostics.add(diagnostic);
@@ -151,7 +151,7 @@ impl Checker {
         location: &Arc<Node>,
         message: &'static str,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("add_suggestion"); 
         let source_file = self.get_source_file_of_node(location);
         let diagnostic = Diagnostic::new(
             source_file,
@@ -168,7 +168,7 @@ impl Checker {
         location: &Arc<Node>,
         message: tsox_core::diagnostics::Message,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("add_suggestion_message"); 
         let source_file = self.get_source_file_of_node(location);
         let diagnostic = Diagnostic::new(source_file, location.loc, message, args.to_vec());
         self.suggestion_diagnostics.add(diagnostic);
@@ -180,7 +180,7 @@ impl Checker {
         location: &Arc<Node>,
         source_file: &Option<Arc<Node>>,
         diagnostic: &Arc<Diagnostic>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_suggestion_for_async"); 
         let _ = location;
         let _ = source_file;
         self.suggestion_diagnostics.add((**diagnostic).clone());
@@ -191,7 +191,7 @@ impl Checker {
         location: &Arc<Node>,
         message: &'static str,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("error_skipped_on_no_emit"); 
         if !self.compiler_options.no_emit.is_true() {
             return self.error(location, message, args);
         }
@@ -203,7 +203,7 @@ impl Checker {
         location: &Arc<Node>,
         message: tsox_core::diagnostics::Message,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("error_skipped_on_no_emit_message"); 
         if !self.compiler_options.no_emit.is_true() {
             return self.error_message(location, message, args);
         }
@@ -216,7 +216,7 @@ impl Checker {
         location: &Arc<Node>,
         message: &'static str,
         args: &[String],
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_or_suggestion"); 
         let diagnostic = if is_error {
             self.error(location, message, args)
         } else {
@@ -233,7 +233,7 @@ impl Checker {
         location: &Arc<Node>,
         message: tsox_core::diagnostics::Message,
         args: &[String],
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_or_suggestion_message"); 
         let diagnostic = if is_error {
             self.error_message(location, message, args)
         } else {
@@ -250,7 +250,7 @@ impl Checker {
         maybe_missing_await: bool,
         message: &'static str,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("error_and_maybe_suggest_await"); 
         let diagnostic = self.error(location, message, args);
         if let (Some(diagnostic), true) = (&diagnostic, maybe_missing_await) {
             let source_file = get_source_file_of_node(location);
@@ -265,7 +265,7 @@ impl Checker {
         maybe_missing_await: bool,
         message: tsox_core::diagnostics::Message,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("error_and_maybe_suggest_await_message"); 
         let diagnostic = self.error_message(location, message, args);
         if let (Some(diagnostic), true) = (&diagnostic, maybe_missing_await) {
             let source_file = get_source_file_of_node(location);
@@ -279,7 +279,7 @@ pub fn create_diagnostic_for_node(
     node: &Arc<Node>,
     message: &'static str,
     args: &[String],
-) -> Arc<Diagnostic> {
+) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("create_diagnostic_for_node"); 
     Arc::new(Diagnostic::new(
         None,
         node.loc,
@@ -292,11 +292,11 @@ pub fn create_diagnostic_for_node_message(
     node: &Arc<Node>,
     message: tsox_core::diagnostics::Message,
     args: &[String],
-) -> Arc<Diagnostic> {
+) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("create_diagnostic_for_node_message"); 
     Arc::new(Diagnostic::new(None, node.loc, message, args.to_vec()))
 }
 
-pub fn has_common_dom_type_name(t: &Arc<Type>) -> bool {
+pub fn has_common_dom_type_name(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_common_dom_type_name"); 
     let symbol = match &t.symbol {
         Some(s) => s,
         None => return false,
@@ -308,7 +308,7 @@ pub fn has_common_dom_type_name(t: &Arc<Type>) -> bool {
         || (name.starts_with("HTML") && name.ends_with("Element"))
 }
 
-pub fn every_contained_type(t: &Arc<Type>, f: &dyn Fn(&Arc<Type>) -> bool) -> bool {
+pub fn every_contained_type(t: &Arc<Type>, f: &dyn Fn(&Arc<Type>) -> bool) -> bool { ::tsox_core::fntrace::enter("every_contained_type"); 
     match &t.data {
         TypeData::Union(data) => data
             .union_or_intersection
@@ -319,11 +319,11 @@ pub fn every_contained_type(t: &Arc<Type>, f: &dyn Fn(&Arc<Type>) -> bool) -> bo
     }
 }
 
-pub fn contains_type(types: &[Arc<Type>], t: &Arc<Type>) -> bool {
+pub fn contains_type(types: &[Arc<Type>], t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("contains_type"); 
     types.iter().any(|x| x.id == t.id)
 }
 
-pub fn count_types(t: &Arc<Type>) -> usize {
+pub fn count_types(t: &Arc<Type>) -> usize { ::tsox_core::fntrace::enter("count_types"); 
     match &t.data {
         TypeData::Union(data) => data
             .union_or_intersection
@@ -335,6 +335,6 @@ pub fn count_types(t: &Arc<Type>) -> usize {
     }
 }
 
-pub fn compare_type_ids(t1: &Arc<Type>, t2: &Arc<Type>) -> std::cmp::Ordering {
+pub fn compare_type_ids(t1: &Arc<Type>, t2: &Arc<Type>) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_type_ids"); 
     t1.id.cmp(&t2.id)
 }

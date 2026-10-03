@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tsox_frontend::ast::*;
 
-pub(crate) fn collect_binding_elements<'a>(node: &'a Arc<Node>, out: &mut Vec<&'a Arc<Node>>) {
+pub(crate) fn collect_binding_elements<'a>(node: &'a Arc<Node>, out: &mut Vec<&'a Arc<Node>>) { ::tsox_core::fntrace::enter("collect_binding_elements"); 
     if let NodeData::BindingPattern(pattern) = &node.data {
         for el in pattern.elements.iter() {
             out.push(el);
@@ -18,7 +18,7 @@ pub(crate) fn collect_binding_elements<'a>(node: &'a Arc<Node>, out: &mut Vec<&'
     }
 }
 
-pub(crate) fn fn_like_body_present(parent: &Arc<Node>) -> bool {
+pub(crate) fn fn_like_body_present(parent: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("fn_like_body_present"); 
     match &parent.data {
         NodeData::FunctionDeclaration(d) => d.body.is_some(),
         NodeData::MethodDeclaration(d) => d.body.is_some(),
@@ -30,11 +30,11 @@ pub(crate) fn fn_like_body_present(parent: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn clause_statements_empty(clause: &Arc<Node>) -> bool {
+pub(crate) fn clause_statements_empty(clause: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("clause_statements_empty"); 
     matches!(&clause.data, NodeData::CaseOrDefaultClause(d) if d.statements.nodes.is_empty())
 }
 
-pub(crate) fn is_assignment_operator(kind: SyntaxKind) -> bool {
+pub(crate) fn is_assignment_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_assignment_operator"); 
     matches!(
         kind,
         SyntaxKind::EqualsToken

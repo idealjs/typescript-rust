@@ -68,7 +68,7 @@ pub enum EnumLiteralValue {
 }
 
 impl Clone for EnumLiteralValue {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         match self {
             EnumLiteralValue::Str(s) => EnumLiteralValue::Str(s.clone()),
             EnumLiteralValue::Num(n) => EnumLiteralValue::Num(*n),
@@ -77,7 +77,7 @@ impl Clone for EnumLiteralValue {
 }
 
 impl PartialEq for EnumLiteralValue {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         match (self, other) {
             (EnumLiteralValue::Str(a), EnumLiteralValue::Str(b)) => a == b,
             (EnumLiteralValue::Num(a), EnumLiteralValue::Num(b)) => a.to_bits() == b.to_bits(),
@@ -89,7 +89,7 @@ impl PartialEq for EnumLiteralValue {
 impl Eq for EnumLiteralValue {}
 
 impl std::hash::Hash for EnumLiteralValue {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { ::tsox_core::fntrace::enter("hash"); 
         match self {
             EnumLiteralValue::Str(s) => {
                 std::hash::Hash::hash(&0u8, state);
@@ -103,7 +103,7 @@ impl std::hash::Hash for EnumLiteralValue {
     }
 }
 
-fn literal_value_of(value: &EnumLiteralValue) -> LiteralValue {
+fn literal_value_of(value: &EnumLiteralValue) -> LiteralValue { ::tsox_core::fntrace::enter("literal_value_of"); 
     match value {
         EnumLiteralValue::Str(s) => LiteralValue::String(s.clone()),
         EnumLiteralValue::Num(n) => LiteralValue::Number(tsox_core::jsnum::Number::from(*n)),
@@ -111,7 +111,7 @@ fn literal_value_of(value: &EnumLiteralValue) -> LiteralValue {
 }
 
 impl Checker {
-    pub fn get_entity_name_for_extending_interface(&self, node: &Node) -> Option<Arc<Node>> {
+    pub fn get_entity_name_for_extending_interface(&self, node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_entity_name_for_extending_interface"); 
         match node.kind {
             SyntaxKind::Identifier | SyntaxKind::QualifiedName | SyntaxKind::PropertyAccessExpression => {
                 let parent = node.parent()?;
@@ -134,14 +134,14 @@ impl Checker {
         None
     }
 
-    pub fn get_extract_string_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_extract_string_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_extract_string_type"); 
         if let Some(extract_type_alias) = self.get_global_extract_symbol() {
             return self.get_type_alias_instantiation(&extract_type_alias, &[Arc::clone(t), self.string_type()], None);
         }
         self.string_type()
     }
 
-    pub fn get_enum_literal_type(&mut self, value: EnumLiteralValue, enum_symbol: &Arc<Symbol>, symbol: Option<Arc<Symbol>>) -> Arc<Type> {
+    pub fn get_enum_literal_type(&mut self, value: EnumLiteralValue, enum_symbol: &Arc<Symbol>, symbol: Option<Arc<Symbol>>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_enum_literal_type"); 
         let flags = match &value {
             EnumLiteralValue::Str(_) => TypeFlags::ENUM_LITERAL | TypeFlags::STRING_LITERAL,
             EnumLiteralValue::Num(n) => {
@@ -173,7 +173,7 @@ impl Checker {
         t
     }
 
-    pub fn get_error_node_for_call_node(node: &Node) -> &Node {
+    pub fn get_error_node_for_call_node(node: &Node) -> &Node { ::tsox_core::fntrace::enter("get_error_node_for_call_node"); 
         if is_call_expression(node) {
             if let Some(expr) = node.expression() {
                 if is_property_access_expression(expr) {
@@ -187,7 +187,7 @@ impl Checker {
         node
     }
 
-    pub fn get_exact_optional_unassignable_properties(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Vec<Arc<Symbol>> {
+    pub fn get_exact_optional_unassignable_properties(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_exact_optional_unassignable_properties"); 
         if is_tuple_type(source) && is_tuple_type(target) {
             return Vec::new();
         }
@@ -203,7 +203,7 @@ impl Checker {
             .collect()
     }
 
-    pub fn get_external_module_file_from_declaration(&mut self, declaration: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_external_module_file_from_declaration(&mut self, declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_file_from_declaration"); 
         let module_declaration_name = if declaration.kind == SyntaxKind::ModuleDeclaration {
             declaration.name().filter(|n| is_string_literal(n)).cloned()
         } else {
@@ -226,7 +226,7 @@ impl Checker {
         Some(decl)
     }
 
-    pub fn get_external_module_member(&mut self, node: &Arc<Node>, specifier: &Arc<Node>, dont_resolve_alias: bool) -> Option<Arc<Symbol>> {
+    pub fn get_external_module_member(&mut self, node: &Arc<Node>, specifier: &Arc<Node>, dont_resolve_alias: bool) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_external_module_member"); 
         let mut module_specifier = get_external_module_require_argument(node);
         if module_specifier.is_none() {
             module_specifier = get_external_module_name(node);
@@ -331,14 +331,14 @@ impl Checker {
         None
     }
 
-    pub fn get_flow_type_of_destructuring(&mut self, node: &Arc<Node>, declared_type: &Arc<Type>) -> Arc<Type> {
+    pub fn get_flow_type_of_destructuring(&mut self, node: &Arc<Node>, declared_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_flow_type_of_destructuring"); 
         match self.get_synthetic_element_access(node) {
             Some(reference) => self.get_flow_type_of_reference(&reference, declared_type),
             None => Arc::clone(declared_type),
         }
     }
 
-    pub fn get_flow_type_of_property(&mut self, reference: &Arc<Node>, prop: Option<&Arc<Symbol>>) -> Arc<Type> {
+    pub fn get_flow_type_of_property(&mut self, reference: &Arc<Node>, prop: Option<&Arc<Symbol>>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_flow_type_of_property"); 
         let mut initial_type = self.undefined_type();
         if let Some(prop) = prop
             && let Some(value_declaration) = prop.value_declaration.as_ref()
@@ -352,7 +352,7 @@ impl Checker {
         self.get_flow_type_of_reference_ex(reference, &self.auto_type(), Some(&initial_type), None)
     }
 
-    pub fn get_for_in_variable_symbol(&mut self, node: &Node) -> Option<Arc<Symbol>> {
+    pub fn get_for_in_variable_symbol(&mut self, node: &Node) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_for_in_variable_symbol"); 
         let initializer = node.initializer()?;
         if is_variable_declaration_list(initializer) {
             let declarations = &initializer.as_variable_declaration_list().declarations.nodes;
@@ -367,7 +367,7 @@ impl Checker {
         None
     }
 
-    pub fn get_fully_qualified_name(&mut self, symbol: &Arc<Symbol>, containing_location: Option<&Node>) -> String {
+    pub fn get_fully_qualified_name(&mut self, symbol: &Arc<Symbol>, containing_location: Option<&Node>) -> String { ::tsox_core::fntrace::enter("get_fully_qualified_name"); 
         if let Some(parent) = symbol.parent() {
             return format!("{}.{}", self.get_fully_qualified_name(&parent, containing_location), self.symbol_to_string(symbol));
         }
@@ -378,7 +378,7 @@ impl Checker {
         )
     }
 
-    pub fn get_generic_object_flags(&mut self, t: &Arc<Type>) -> ObjectFlags {
+    pub fn get_generic_object_flags(&mut self, t: &Arc<Type>) -> ObjectFlags { ::tsox_core::fntrace::enter("get_generic_object_flags"); 
         let mut combined_flags = ObjectFlags::empty();
         if t.flags.intersects(TypeFlags::UNION_OR_INTERSECTION | TypeFlags::SUBSTITUTION) {
             if !t.object_flags.contains(ObjectFlags::IS_GENERIC_TYPE_COMPUTED) {
@@ -407,7 +407,7 @@ impl Checker {
         combined_flags
     }
 
-    pub fn get_global_import_meta_expression_type(&mut self) -> Arc<Type> {
+    pub fn get_global_import_meta_expression_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_global_import_meta_expression_type"); 
         if deferred_global_import_meta_expression_type_get(self).is_none() {
             // Create a synthetic type `ImportMetaExpression { meta: MetaProperty }`
             let mut symbol = self.new_symbol(SymbolFlags::empty(), "ImportMetaExpression");
@@ -425,21 +425,21 @@ impl Checker {
         deferred_global_import_meta_expression_type_get(self).unwrap()
     }
 
-    pub fn get_global_non_nullable_type_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_global_non_nullable_type_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_global_non_nullable_type_instantiation"); 
         if let Some(alias) = self.get_global_non_nullable_type_alias_or_nil() {
             return self.get_type_alias_instantiation(&alias, &[Arc::clone(t)], None);
         }
         self.get_intersection_type(vec![Arc::clone(t), self.empty_object_type()])
     }
 
-    pub fn get_global_strict_function_type(&mut self, name: &str) -> Arc<Type> {
+    pub fn get_global_strict_function_type(&mut self, name: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("get_global_strict_function_type"); 
         if self.strict_bind_call_apply {
             return self.get_global_type(name, 0, true);
         }
         self.global_function_type()
     }
 
-    pub fn get_global_type(&mut self, name: &str, arity: usize, report_errors: bool) -> Arc<Type> {
+    pub fn get_global_type(&mut self, name: &str, arity: usize, report_errors: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("get_global_type"); 
         let symbol = self.get_global_symbol(
             name,
             SymbolFlags::TYPE,
@@ -477,12 +477,12 @@ impl Checker {
         self.empty_object_type()
     }
 
-    pub fn get_global_type_alias_resolver(&self, name: &str, arity: usize, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Option<Arc<Symbol>> + Send> {
+    pub fn get_global_type_alias_resolver(&self, name: &str, arity: usize, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Option<Arc<Symbol>> + Send> { ::tsox_core::fntrace::enter("get_global_type_alias_resolver"); 
         let name = name.to_string();
         Box::new(move |c: &mut Checker| c.get_global_type_alias_symbol(&name, arity, report_errors))
     }
 
-    pub fn get_global_type_alias_symbol(&mut self, name: &str, arity: usize, report_errors: bool) -> Option<Arc<Symbol>> {
+    pub fn get_global_type_alias_symbol(&mut self, name: &str, arity: usize, report_errors: bool) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_global_type_alias_symbol"); 
         let symbol = self.get_global_symbol(
             name,
             SymbolFlags::TypeAlias,
@@ -505,26 +505,26 @@ impl Checker {
         Some(symbol)
     }
 
-    pub fn get_global_type_resolver(&self, name: &str, arity: usize, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Arc<Type> + Send> {
+    pub fn get_global_type_resolver(&self, name: &str, arity: usize, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Arc<Type> + Send> { ::tsox_core::fntrace::enter("get_global_type_resolver"); 
         let name = name.to_string();
         Box::new(move |c: &mut Checker| c.get_global_type(&name, arity, report_errors))
     }
 
-    pub fn get_global_type_symbol_resolver(&self, name: &str, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Option<Arc<Symbol>> + Send> {
+    pub fn get_global_type_symbol_resolver(&self, name: &str, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Option<Arc<Symbol>> + Send> { ::tsox_core::fntrace::enter("get_global_type_symbol_resolver"); 
         let name = name.to_string();
         Box::new(move |c: &mut Checker| {
             c.get_global_symbol(name.as_str(), SymbolFlags::TYPE, if report_errors { Some(&CANNOT_FIND_GLOBAL_TYPE_0) } else { None })
         })
     }
 
-    pub fn get_global_types_resolver(&self, names: &[String], arity: usize, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Vec<Arc<Type>> + Send> {
+    pub fn get_global_types_resolver(&self, names: &[String], arity: usize, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Vec<Arc<Type>> + Send> { ::tsox_core::fntrace::enter("get_global_types_resolver"); 
         let names: Vec<String> = names.to_vec();
         Box::new(move |c: &mut Checker| {
             names.iter().map(|name| c.get_global_type(name, arity, report_errors)).collect()
         })
     }
 
-    pub fn get_global_value_symbol_resolver(&self, name: &str, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Option<Arc<Symbol>> + Send> {
+    pub fn get_global_value_symbol_resolver(&self, name: &str, report_errors: bool) -> Box<dyn Fn(&mut Checker) -> Option<Arc<Symbol>> + Send> { ::tsox_core::fntrace::enter("get_global_value_symbol_resolver"); 
         let name = name.to_string();
         Box::new(move |c: &mut Checker| {
             c.get_global_symbol(name.as_str(), SymbolFlags::VALUE, if report_errors { Some(&CANNOT_FIND_GLOBAL_VALUE_0) } else { None })
@@ -533,7 +533,7 @@ impl Checker {
 
 }
 
-pub fn get_entity_name_from_type_node(node: &Node) -> Option<&Node> {
+pub fn get_entity_name_from_type_node(node: &Node) -> Option<&Node> { ::tsox_core::fntrace::enter("get_entity_name_from_type_node"); 
     match node.kind {
         SyntaxKind::TypeReference => Some(&node.as_type_reference_node().type_name),
         SyntaxKind::ExpressionWithTypeArguments => {
@@ -549,11 +549,11 @@ pub fn get_entity_name_from_type_node(node: &Node) -> Option<&Node> {
     }
 }
 
-pub fn get_first_declaration(symbol: &Arc<Symbol>) -> Option<&Arc<Node>> {
+pub fn get_first_declaration(symbol: &Arc<Symbol>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("get_first_declaration"); 
     symbol.declarations.first()
 }
 
-pub fn get_first_non_ambient_class_or_function_declaration(symbol: &Arc<Symbol>) -> Option<&Arc<Node>> {
+pub fn get_first_non_ambient_class_or_function_declaration(symbol: &Arc<Symbol>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("get_first_non_ambient_class_or_function_declaration"); 
     symbol
         .declarations
         .iter()
@@ -565,7 +565,7 @@ pub fn get_first_non_ambient_class_or_function_declaration(symbol: &Arc<Symbol>)
         .map(|d| d)
 }
 
-pub fn get_global_type_declaration(symbol: &Arc<Symbol>) -> Option<&Arc<Node>> {
+pub fn get_global_type_declaration(symbol: &Arc<Symbol>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("get_global_type_declaration"); 
     symbol.declarations.iter().find_map(|declaration| match declaration.kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::InterfaceDeclaration | SyntaxKind::EnumDeclaration | SyntaxKind::TypeAliasDeclaration => {
             Some(declaration)
@@ -574,7 +574,7 @@ pub fn get_global_type_declaration(symbol: &Arc<Symbol>) -> Option<&Arc<Node>> {
     })
 }
 
-pub fn global_symbol_type_parameter_count(symbol: &Arc<Symbol>) -> usize {
+pub fn global_symbol_type_parameter_count(symbol: &Arc<Symbol>) -> usize { ::tsox_core::fntrace::enter("global_symbol_type_parameter_count"); 
     let mut names: Vec<&str> = Vec::new();
     for declaration in &symbol.declarations {
         match declaration.kind {

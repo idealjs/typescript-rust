@@ -5,12 +5,12 @@ use tsox_frontend::ast::node::Node;
 use tsox_frontend::ast::node_data_generated::{for_each_child, is_jsx_opening_element, is_jsx_self_closing_element, NodeData};
 use tsox_frontend::ast::mig::m3f::{get_pragma_argument, get_pragma_from_source_file};
 
-pub fn set_parent_in_children(node: &Arc<Node>) {
+pub fn set_parent_in_children(node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_parent_in_children"); 
     let mut state: Option<Arc<Node>> = None;
     set_parent_in_children_visit(node, &mut state);
 }
 
-fn set_parent_in_children_visit(node: &Arc<Node>, parent: &mut Option<Arc<Node>>) {
+fn set_parent_in_children_visit(node: &Arc<Node>, parent: &mut Option<Arc<Node>>) { ::tsox_core::fntrace::enter("set_parent_in_children_visit"); 
     if let Some(p) = parent.as_ref() {
         node.set_parent(p);
     }
@@ -26,7 +26,7 @@ fn set_parent_in_children_visit(node: &Arc<Node>, parent: &mut Option<Arc<Node>>
 pub fn get_jsx_implicit_import_base(
     compiler_options: &CompilerOptions,
     file: &tsox_frontend::ast::node::SourceFile,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_jsx_implicit_import_base"); 
     let jsx_import_source_pragma = get_pragma_from_source_file(Some(file), "jsximportsource");
     let jsx_runtime_pragma = get_pragma_from_source_file(Some(file), "jsxruntime");
     if get_pragma_argument(jsx_runtime_pragma, "factory") == "classic" {
@@ -50,7 +50,7 @@ pub fn get_jsx_implicit_import_base(
     String::new()
 }
 
-pub fn get_jsx_runtime_import(base: &str, options: &CompilerOptions) -> String {
+pub fn get_jsx_runtime_import(base: &str, options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_jsx_runtime_import"); 
     if base.is_empty() {
         return base.to_string();
     }
@@ -62,11 +62,11 @@ pub fn get_jsx_runtime_import(base: &str, options: &CompilerOptions) -> String {
     format!("{}/{}", base, runtime)
 }
 
-pub fn is_jsx_opening_like_element(node: &Node) -> bool {
+pub fn is_jsx_opening_like_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_opening_like_element"); 
     is_jsx_opening_element(node) || is_jsx_self_closing_element(node)
 }
 
-pub fn get_semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn get_semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_semantic_jsx_children"); 
     children
         .iter()
         .filter(|child| match &child.data {
@@ -81,7 +81,7 @@ pub fn get_semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> {
 pub fn create_expression_from_entity_name(
     factory: &crate::printer::NodeFactory,
     node: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_expression_from_entity_name"); 
     if let NodeData::QualifiedName(d) = &node.data {
         let left = create_expression_from_entity_name(factory, &d.left);
         let right = factory.new_identifier(d.right.text());
@@ -97,7 +97,7 @@ pub fn create_expression_from_entity_name(
 
 use tsox_frontend::format::mig::m4o_2::EmitHelper;
 
-pub fn async_super_helper() -> Arc<EmitHelper> {
+pub fn async_super_helper() -> Arc<EmitHelper> { ::tsox_core::fntrace::enter("async_super_helper"); 
     Arc::new(EmitHelper {
         name: "typescript:async-super".to_string(),
         scoped: true,
@@ -111,7 +111,7 @@ pub fn async_super_helper() -> Arc<EmitHelper> {
     })
 }
 
-pub fn advanced_async_super_helper() -> Arc<EmitHelper> {
+pub fn advanced_async_super_helper() -> Arc<EmitHelper> { ::tsox_core::fntrace::enter("advanced_async_super_helper"); 
     Arc::new(EmitHelper {
         name: "typescript:advanced-async-super".to_string(),
         scoped: true,

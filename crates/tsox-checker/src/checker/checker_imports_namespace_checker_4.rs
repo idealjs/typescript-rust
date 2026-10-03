@@ -10,7 +10,7 @@ impl Checker {
     /// 号承接显示身份（class → typeof Foo，function 无驻留签名 → 成员展开
     /// { default: () => any; }），否则直接取目标类型（interface 等纯类型目
     /// 标 → any，值对象/模块 → 原成员表）
-    pub(crate) fn namespace_import_module_type(&mut self, module_sym: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn namespace_import_module_type(&mut self, module_sym: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("namespace_import_module_type"); 
         let export_equals = module_sym
             .exports
             .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
@@ -125,7 +125,7 @@ impl Checker {
         &mut self,
         namespace: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("namespace_member_recursive"); 
         if let Some(s) = namespace
             .exports
             .get(name)
@@ -231,7 +231,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn namespace_full_path(&self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn namespace_full_path(&self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("namespace_full_path"); 
         // Go getFullyQualifiedName：沿符号 parent 链拼点分限定名；模块文件
         // 符号输出带引号 specifier（"mod".Ns），脚本文件无文件符号父级
         if let Some(parent) = symbol.parent() {
@@ -249,7 +249,7 @@ impl Checker {
         }
     }
 
-    fn file_symbol_kind(&self, symbol: &Arc<Symbol>) -> FileSymbolKind {
+    fn file_symbol_kind(&self, symbol: &Arc<Symbol>) -> FileSymbolKind { ::tsox_core::fntrace::enter("file_symbol_kind"); 
         let Some(decl) = symbol
             .declarations
             .iter()

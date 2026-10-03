@@ -161,7 +161,7 @@ impl R19K11CheckerExt for Checker {
         this_parameter: Option<&Arc<tsox_frontend::ast::Symbol>>,
         parameters: &[Arc<tsox_frontend::ast::Symbol>],
         return_type: &Arc<Type>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("new_call_signature"); 
         self.new_signature(
             SignatureFlags::empty(),
             None,
@@ -180,7 +180,7 @@ impl R19K11CheckerExt for Checker {
         this_parameter: Option<&Arc<tsox_frontend::ast::Symbol>>,
         parameters: &[Arc<tsox_frontend::ast::Symbol>],
         return_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_function_type"); 
         let signature = <Self as R19K11CheckerExt>::new_call_signature(
             self,
             type_parameters,
@@ -191,33 +191,33 @@ impl R19K11CheckerExt for Checker {
         self.get_or_create_type_from_signature(&signature)
     }
 
-    fn unknown_union_type(&mut self) -> Arc<Type> {
+    fn unknown_union_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("unknown_union_type"); 
         let unknown = self.unknown_type.get().cloned().expect("unknown_type");
         let null = self.null_type.get().cloned().expect("null_type");
         self.get_union_type(vec![unknown, null])
     }
 
-    fn unknown_empty_object_type(&mut self) -> Arc<Type> {
+    fn unknown_empty_object_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("unknown_empty_object_type"); 
         self.empty_object_type.get().cloned().expect("empty_object_type")
     }
 
-    fn strict_subtyping_relation(&mut self) -> RelationKind {
+    fn strict_subtyping_relation(&mut self) -> RelationKind { ::tsox_core::fntrace::enter("strict_subtyping_relation"); 
         RelationKind::StrictSubtype
     }
 
-    fn marker_super_type(&mut self) -> Arc<Type> {
+    fn marker_super_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("marker_super_type"); 
         Arc::clone(self.marker_super_type.get_or_init(|| Checker::new_marker_type_parameter(None)))
     }
 
-    fn marker_sub_type(&mut self) -> Arc<Type> {
+    fn marker_sub_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("marker_sub_type"); 
         Arc::clone(self.marker_sub_type.get_or_init(|| Checker::new_marker_type_parameter(None)))
     }
 
-    fn marker_other_type(&mut self) -> Arc<Type> {
+    fn marker_other_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("marker_other_type"); 
         Arc::clone(self.marker_other_type.get_or_init(|| Checker::new_marker_type_parameter(None)))
     }
 
-    fn unknown_signature(&mut self) -> Arc<Signature> {
+    fn unknown_signature(&mut self) -> Arc<Signature> { ::tsox_core::fntrace::enter("unknown_signature"); 
         self.unknown_signature.get().cloned().expect("unknown_signature")
     }
 }

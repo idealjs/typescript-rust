@@ -4,7 +4,7 @@ use crate::checker::checker_classes::*;
 
 impl Checker {
     /// 成员键：标识符/字面量按文本，well-known 计算名按内部名
-    fn member_key_of(&self, node: &Arc<Node>) -> Option<String> {
+    fn member_key_of(&self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("member_key_of"); 
         let name = node.name()?;
         match name.kind {
             SyntaxKind::Identifier | SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
@@ -25,7 +25,7 @@ impl Checker {
         node: &Arc<Node>,
         body: &Option<Arc<Node>>,
         parameters: &Option<Arc<NodeList>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_accessor_pair_rules"); 
         if matches!(node.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor) {
             let ambient = self
                 .enclosing_class_stack

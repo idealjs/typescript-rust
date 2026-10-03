@@ -43,7 +43,7 @@ pub struct MetadataSerializerContext {
 }
 
 impl Default for MetadataSerializerContext {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         MetadataSerializerContext {
             current_lexical_scope: None,
             current_name_scope: None,
@@ -67,7 +67,7 @@ pub fn new_metadata_serializer(
     emit_context: EmitContext,
     language_version: ScriptTarget,
     strict_null_checks: bool,
-) -> MetadataSerializer {
+) -> MetadataSerializer { ::tsox_core::fntrace::enter("new_metadata_serializer"); 
     MetadataSerializer {
         resolver,
         language_version,
@@ -78,7 +78,7 @@ pub fn new_metadata_serializer(
     }
 }
 
-pub fn get_set_accessor_value_parameter(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_set_accessor_value_parameter(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_set_accessor_value_parameter"); 
     let parameters = node.parameters()?;
     let nodes = &parameters.nodes;
     if !nodes.is_empty() {
@@ -90,12 +90,12 @@ pub fn get_set_accessor_value_parameter(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub fn get_set_accessor_type_annotation_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_set_accessor_type_annotation_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_set_accessor_type_annotation_node"); 
     let p = get_set_accessor_value_parameter(node)?;
     p.type_().cloned()
 }
 
-pub fn get_accessor_type_node(node: &Arc<Node>, container: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_accessor_type_node(node: &Arc<Node>, container: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_accessor_type_node"); 
     let accessors = get_all_accessor_declarations(members(container), node);
     if let Some(set_accessor) = accessors.set_accessor {
         return get_set_accessor_type_annotation_node(&set_accessor);
@@ -107,15 +107,15 @@ pub fn get_accessor_type_node(node: &Arc<Node>, container: &Arc<Node>) -> Option
 }
 
 impl MetadataSerializer {
-    pub(crate) fn factory(&self) -> &NodeFactory {
+    pub(crate) fn factory(&self) -> &NodeFactory { ::tsox_core::fntrace::enter("factory"); 
         &self.f
     }
 
-    pub(crate) fn emit_context(&self) -> &EmitContext {
+    pub(crate) fn emit_context(&self) -> &EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         &self.emit_context
     }
 
-    pub fn set_context(&mut self, ctx: MetadataSerializerContext) {
+    pub fn set_context(&mut self, ctx: MetadataSerializerContext) { ::tsox_core::fntrace::enter("set_context"); 
         self.c = ctx;
     }
 
@@ -124,7 +124,7 @@ impl MetadataSerializer {
         ctx: MetadataSerializerContext,
         node: &Arc<Node>,
         container: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_type_of_node"); 
         let old_ctx = std::mem::replace(&mut self.c, ctx);
         let result = self.serialize_type_of_node_impl(node, container);
         self.c = old_ctx;
@@ -136,7 +136,7 @@ impl MetadataSerializer {
         ctx: MetadataSerializerContext,
         node: &Arc<Node>,
         container: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_parameter_types_of_node"); 
         let old_ctx = std::mem::replace(&mut self.c, ctx);
         let result = self.serialize_parameter_types_of_node_impl(node, container);
         self.c = old_ctx;
@@ -147,7 +147,7 @@ impl MetadataSerializer {
         &mut self,
         ctx: MetadataSerializerContext,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_return_type_of_node"); 
         let old_ctx = std::mem::replace(&mut self.c, ctx);
         let result = self.serialize_return_type_of_node_impl(node);
         self.c = old_ctx;
@@ -158,7 +158,7 @@ impl MetadataSerializer {
         &mut self,
         node: &Arc<Node>,
         container: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_type_of_node_impl"); 
         match node.kind {
             SyntaxKind::PropertyDeclaration | SyntaxKind::Parameter => {
                 self.serialize_type_node(node.type_())
@@ -181,7 +181,7 @@ impl MetadataSerializer {
         &mut self,
         node: &Arc<Node>,
         container: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_parameter_types_of_node_impl"); 
         let value_declaration: Option<Arc<Node>> = if is_class_like(node) {
             get_first_constructor_with_body(node)
         } else if is_function_like(node) && node_is_present(node.body()) {
@@ -232,7 +232,7 @@ impl MetadataSerializer {
         )
     }
 
-    fn serialize_return_type_of_node_impl(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn serialize_return_type_of_node_impl(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_return_type_of_node_impl"); 
         if is_function_like(node) && node.type_().is_some() {
             self.serialize_type_node(node.type_())
         } else if is_async_function(node) {
@@ -242,7 +242,7 @@ impl MetadataSerializer {
         }
     }
 
-    pub(crate) fn serialize_type_node(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub(crate) fn serialize_type_node(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_type_node"); 
         let node = match node {
             Some(n) => n,
             None => return Some(self.factory().new_identifier("Object")),
@@ -331,7 +331,7 @@ impl MetadataSerializer {
 pub fn get_parameters_of_decorated_declaration(
     node: &Arc<Node>,
     container: Option<&Arc<Node>>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_parameters_of_decorated_declaration"); 
     if let Some(container) = container {
         if node.kind == SyntaxKind::GetAccessor {
             let acc = get_all_accessor_declarations(members(container), node);

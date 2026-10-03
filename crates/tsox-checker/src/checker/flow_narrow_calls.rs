@@ -18,7 +18,7 @@ impl Checker {
         expr: &Arc<Node>,
         target: &FlowRef,
         kind: NarrowKind,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_call_expression"); 
         let NodeData::CallExpression(call) = &expr.data else {
             return Arc::clone(type_);
         };
@@ -100,7 +100,7 @@ impl Checker {
         Arc::clone(type_)
     }
 
-    fn callback_predicate_type(&mut self, arg: &Arc<Node>) -> Option<Arc<Type>> {
+    fn callback_predicate_type(&mut self, arg: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("callback_predicate_type"); 
         let arg_type = self.get_type_of_node(arg);
         let sigs = self.get_signatures_of_type(&arg_type, SignatureKind::Call);
         for sig in &sigs {
@@ -119,7 +119,7 @@ impl Checker {
         type_: &Arc<Type>,
         call_expr: &Arc<Node>,
         target: &FlowRef,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_assertion_call"); 
         let NodeData::CallExpression(call) = &call_expr.data else {
             return Arc::clone(type_);
         };
@@ -170,7 +170,7 @@ impl Checker {
         type_: &Arc<Type>,
         arg: &Arc<Node>,
         target: &FlowRef,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("narrow_by_asserted_comparison"); 
         let NodeData::BinaryExpression(bin) = &arg.data else {
             return None;
         };
@@ -207,7 +207,7 @@ impl Checker {
         type_: &Arc<Type>,
         pred_type: &Arc<Type>,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_type_predicate"); 
         if type_.flags.contains(TypeFlags::Any) {
             return Arc::clone(type_);
         }
@@ -223,7 +223,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn typeof_expr_matches_target(&self, expr: &Arc<Node>, target: &FlowRef) -> bool {
+    pub(crate) fn typeof_expr_matches_target(&self, expr: &Arc<Node>, target: &FlowRef) -> bool { ::tsox_core::fntrace::enter("typeof_expr_matches_target"); 
         let NodeData::TypeOfExpression(typeof_data) = &expr.data else {
             return false;
         };
@@ -236,7 +236,7 @@ impl Checker {
         type_name_node: &Arc<Node>,
         narrow_to_value: bool,
         is_loose: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_typeof"); 
         let type_name = match &type_name_node.data {
             NodeData::StringLiteral(data) => data.text.as_str(),
             _ => return Arc::clone(type_),
@@ -274,7 +274,7 @@ impl Checker {
         self.remove_flags_from_union(type_, matching_flags)
     }
 
-    pub(crate) fn narrow_by_truthiness(&self, type_: &Arc<Type>, kind: NarrowKind) -> Arc<Type> {
+    pub(crate) fn narrow_by_truthiness(&self, type_: &Arc<Type>, kind: NarrowKind) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_truthiness"); 
         let constituents = self.constituent_types(&self.split_intrinsic_boolean(type_));
         let kept: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -292,7 +292,7 @@ impl Checker {
         self.flow_union_of(&kept)
     }
 
-    fn split_intrinsic_boolean(&self, type_: &Arc<Type>) -> Arc<Type> {
+    fn split_intrinsic_boolean(&self, type_: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("split_intrinsic_boolean"); 
         if type_.flags.contains(TypeFlags::Boolean) && !type_.is_union() {
             return self.flow_union_of(&[self.false_type(), self.true_type()]);
         }
@@ -301,7 +301,7 @@ impl Checker {
 
     // Go getTypeFactsWorker 的 Truthy 位：字面量按值判定，非字面
     // number/string/bigint/boolean/enum 与 symbol/object/any 均持有
-    pub(crate) fn has_truthy_fact(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn has_truthy_fact(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_truthy_fact"); 
         let flags = t.flags;
         if flags.contains(TypeFlags::Never)
             || flags.intersects(TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Void)
@@ -330,7 +330,7 @@ impl Checker {
     // Go getTypeFactsWorker 的 Falsy 位：非字面 number/string/bigint/boolean/enum
     // 双持有（两分支都保留）；symbol/object/nonPrimitive 仅非 strict 持有；
     // any/unknown/类型参数等 instantiable 走 UnknownFacts（全持有）
-    pub(crate) fn has_falsy_fact(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn has_falsy_fact(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_falsy_fact"); 
         let flags = t.flags;
         if flags.contains(TypeFlags::Never) {
             return false;
@@ -385,7 +385,7 @@ impl Checker {
         target: &FlowRef,
         kind: NarrowKind,
         _depth: u32,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_optionality"); 
         if self.expr_matches_target(expr, target) {
             return match kind {
                 NarrowKind::TrueBranch => self.remove_nullable_from_union(type_),
@@ -413,7 +413,7 @@ pub(crate) fn substitute_this_type(
     checker: &mut Checker,
     t: &Arc<Type>,
     replacement: &Arc<Type>,
-) -> Arc<Type> {
+) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_this_type"); 
     if let Some(tp) = match &t.data {
         TypeData::TypeParameter(tp) if tp.is_this_type => Some(()),
         _ => None,

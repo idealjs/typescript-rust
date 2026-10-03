@@ -45,7 +45,7 @@ pub(crate) struct ContentMapperContributions {
     pub extensions: Vec<String>,
 }
 
-pub(crate) fn unsafe_clone_session(session: &Session) -> &'static Session {
+pub(crate) fn unsafe_clone_session(session: &Session) -> &'static Session { ::tsox_core::fntrace::enter("unsafe_clone_session"); 
     unsafe { &*(session as *const Session) }
 }
 
@@ -56,21 +56,21 @@ struct SessionTypingsInstallerHost {
 }
 
 impl crate::project::ata_ata::NpmExecutor for SessionTypingsInstallerHost {
-    fn npm_install(&self, cwd: &str, args: &[String]) -> Result<Vec<u8>, String> {
+    fn npm_install(&self, cwd: &str, args: &[String]) -> Result<Vec<u8>, String> { ::tsox_core::fntrace::enter("npm_install"); 
         self.npm_executor.npm_install(cwd, args)
     }
 }
 
 impl crate::project::ata_ata::TypingsInstallerHost for SessionTypingsInstallerHost {
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
 }
 
-pub fn new_content_mapper_host(init: &SessionInit) -> Option<Arc<contentmapper::Host>> {
+pub fn new_content_mapper_host(init: &SessionInit) -> Option<Arc<contentmapper::Host>> { ::tsox_core::fntrace::enter("new_content_mapper_host"); 
     if !init.options.run_external_code || init.spawner.is_none() {
         return None;
     }
@@ -88,7 +88,7 @@ pub fn new_content_mapper_host(init: &SessionInit) -> Option<Arc<contentmapper::
 }
 
 impl Session {
-    pub fn new_session(init: SessionInit) -> Self {
+    pub fn new_session(init: SessionInit) -> Self { ::tsox_core::fntrace::enter("new_session"); 
         let current_directory = init.options.current_directory.clone();
         let use_case_sensitive = init.fs.use_case_sensitive_file_names();
         let to_path: Box<dyn Fn(&str) -> Path + Send + Sync> =
@@ -217,22 +217,22 @@ impl Session {
         session
     }
 
-    pub fn background_context(&self) -> background::Context {
+    pub fn background_context(&self) -> background::Context { ::tsox_core::fntrace::enter("background_context"); 
         self.with_current_locale(self.background_ctx())
     }
 
-    pub fn background_ctx(&self) -> background::Context {
+    pub fn background_ctx(&self) -> background::Context { ::tsox_core::fntrace::enter("background_ctx"); 
         self.background_ctx.clone()
     }
 
-    pub fn with_current_locale(&self, ctx: background::Context) -> background::Context {
+    pub fn with_current_locale(&self, ctx: background::Context) -> background::Context { ::tsox_core::fntrace::enter("with_current_locale"); 
         match &self.client {
             None => ctx,
             Some(client) => locale::with_locale(ctx, client.get_locale()),
         }
     }
 
-    pub fn trace(&self, _msg: &str) {
+    pub fn trace(&self, _msg: &str) { ::tsox_core::fntrace::enter("trace"); 
         panic!("ATA module resolution should not use tracing");
     }
 
@@ -240,7 +240,7 @@ impl Session {
         &self,
         contributions: ContentMapperContributions,
         document_uris: Vec<lsproto::DocumentUri>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_content_mapper_contributions"); 
         if !self.options.run_external_code {
             return;
         }
@@ -266,7 +266,7 @@ impl Session {
         }
     }
 
-    pub fn is_content_mapper_file(&self, uri: &lsproto::DocumentUri) -> bool {
+    pub fn is_content_mapper_file(&self, uri: &lsproto::DocumentUri) -> bool { ::tsox_core::fntrace::enter("is_content_mapper_file"); 
         let snapshot = self.snapshot().expect("snapshot");
         let configured = snapshot.config_file_registry_content_mappers();
         let mut extensions = configured.extensions.clone();

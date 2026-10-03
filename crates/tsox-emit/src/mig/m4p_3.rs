@@ -52,145 +52,145 @@ pub struct PrinterState {
 }
 
 impl Default for PrinterState {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self { comment_state: None }
     }
 }
 
-fn intersection_type_types(node: &Arc<Node>) -> &Arc<NodeList> {
+fn intersection_type_types(node: &Arc<Node>) -> &Arc<NodeList> { ::tsox_core::fntrace::enter("intersection_type_types"); 
     match &node.data {
         NodeData::IntersectionTypeNode(d) => &d.types,
         _ => panic!("unexpected IntersectionType: {:?}", node.kind),
     }
 }
 
-fn type_parameter_constraint(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn type_parameter_constraint(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("type_parameter_constraint"); 
     match &node.data {
         NodeData::TypeParameterDeclaration(d) => d.constraint.as_ref(),
         _ => None,
     }
 }
 
-fn infer_type_type_parameter(node: &Arc<Node>) -> &Arc<Node> {
+fn infer_type_type_parameter(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("infer_type_type_parameter"); 
     match &node.data {
         NodeData::InferTypeNode(d) => &d.type_parameter,
         _ => panic!("unexpected InferType: {:?}", node.kind),
     }
 }
 
-fn indexed_access_object_type(node: &Arc<Node>) -> &Arc<Node> {
+fn indexed_access_object_type(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("indexed_access_object_type"); 
     match &node.data {
         NodeData::IndexedAccessTypeNode(d) => &d.object_type,
         _ => panic!("unexpected IndexedAccessType: {:?}", node.kind),
     }
 }
 
-fn indexed_access_index_type(node: &Arc<Node>) -> &Arc<Node> {
+fn indexed_access_index_type(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("indexed_access_index_type"); 
     match &node.data {
         NodeData::IndexedAccessTypeNode(d) => &d.index_type,
         _ => panic!("unexpected IndexedAccessType: {:?}", node.kind),
     }
 }
 
-fn mapped_type_readonly_token(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn mapped_type_readonly_token(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("mapped_type_readonly_token"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => d.readonly_token.as_ref(),
         _ => None,
     }
 }
 
-fn mapped_type_type_parameter(node: &Arc<Node>) -> &Arc<Node> {
+fn mapped_type_type_parameter(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("mapped_type_type_parameter"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => &d.type_parameter,
         _ => panic!("unexpected MappedType: {:?}", node.kind),
     }
 }
 
-fn mapped_type_name_type(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn mapped_type_name_type(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("mapped_type_name_type"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => d.name_type.as_ref(),
         _ => None,
     }
 }
 
-fn mapped_type_question_token(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn mapped_type_question_token(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("mapped_type_question_token"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => d.question_token.as_ref(),
         _ => None,
     }
 }
 
-fn mapped_type_members(node: &Arc<Node>) -> Option<&Arc<NodeList>> {
+fn mapped_type_members(node: &Arc<Node>) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("mapped_type_members"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => d.members.as_ref(),
         _ => None,
     }
 }
 
-fn literal_type_literal(node: &Arc<Node>) -> &Arc<Node> {
+fn literal_type_literal(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("literal_type_literal"); 
     match &node.data {
         NodeData::LiteralTypeNode(d) => &d.literal,
         _ => panic!("unexpected LiteralType: {:?}", node.kind),
     }
 }
 
-fn import_attributes_token(node: &Arc<Node>) -> SyntaxKind {
+fn import_attributes_token(node: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("import_attributes_token"); 
     match &node.data {
         NodeData::ImportAttributes(d) => d.token,
         _ => panic!("unexpected ImportAttributes: {:?}", node.kind),
     }
 }
 
-fn import_attributes_attributes(node: &Arc<Node>) -> &Arc<NodeList> {
+fn import_attributes_attributes(node: &Arc<Node>) -> &Arc<NodeList> { ::tsox_core::fntrace::enter("import_attributes_attributes"); 
     match &node.data {
         NodeData::ImportAttributes(d) => &d.attributes,
         _ => panic!("unexpected ImportAttributes: {:?}", node.kind),
     }
 }
 
-fn import_type_is_type_of(node: &Arc<Node>) -> bool {
+fn import_type_is_type_of(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("import_type_is_type_of"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => d.is_type_of,
         _ => false,
     }
 }
 
-fn import_type_argument(node: &Arc<Node>) -> &Arc<Node> {
+fn import_type_argument(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("import_type_argument"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => &d.argument,
         _ => panic!("unexpected ImportType: {:?}", node.kind),
     }
 }
 
-fn import_type_attributes(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn import_type_attributes(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("import_type_attributes"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => d.attributes.as_ref(),
         _ => None,
     }
 }
 
-fn import_type_qualifier(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn import_type_qualifier(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("import_type_qualifier"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => d.qualifier.as_ref(),
         _ => None,
     }
 }
 
-fn element_access_argument_expression(node: &Arc<Node>) -> &Arc<Node> {
+fn element_access_argument_expression(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("element_access_argument_expression"); 
     match &node.data {
         NodeData::ElementAccessExpression(d) => &d.argument_expression,
         _ => panic!("unexpected ElementAccessExpression: {:?}", node.kind),
     }
 }
 
-fn function_expression_asterisk_token(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn function_expression_asterisk_token(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("function_expression_asterisk_token"); 
     match &node.data {
         NodeData::FunctionExpression(d) => d.asterisk_token.as_ref(),
         _ => None,
     }
 }
 
-fn greatest_node_end(end: usize, nodes: &[Option<&Arc<Node>>]) -> usize {
+fn greatest_node_end(end: usize, nodes: &[Option<&Arc<Node>>]) -> usize { ::tsox_core::fntrace::enter("greatest_node_end"); 
     let mut end = end;
     for node in nodes.iter().rev() {
         if let Some(node_end) = node.map(|n| n.end()) {
@@ -203,7 +203,7 @@ fn greatest_node_end(end: usize, nodes: &[Option<&Arc<Node>>]) -> usize {
 }
 
 impl Printer {
-    pub fn emit_function_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_function_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_function_type"); 
         let state = self.enter_node(node);
         let indented = self.should_emit_indented(node);
         self.increase_indent_if(indented);
@@ -215,11 +215,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_intersection_type_constituent(&mut self, node: &Arc<Node>) {
+    pub fn emit_intersection_type_constituent(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_intersection_type_constituent"); 
         self.emit_type_node(node, TypePrecedence::TypeOperator);
     }
 
-    pub fn emit_intersection_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_intersection_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_intersection_type"); 
         let state = self.enter_node(node);
         self.emit_list(
             Self::emit_intersection_type_constituent,
@@ -230,7 +230,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_infer_type_parameter(&mut self, node: &Arc<Node>) {
+    pub fn emit_infer_type_parameter(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_infer_type_parameter"); 
         let state = self.enter_node(node);
         self.emit_binding_identifier(node.name().unwrap());
         if let Some(constraint) = type_parameter_constraint(node) {
@@ -242,7 +242,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_infer_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_infer_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_infer_type"); 
         let state = self.enter_node(node);
         self.write_keyword("infer");
         self.write_space();
@@ -250,7 +250,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_indexed_access_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_indexed_access_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_indexed_access_type"); 
         let state = self.enter_node(node);
         self.emit_postfix_type_operand(indexed_access_object_type(node), node);
         self.write_punctuation("[");
@@ -259,7 +259,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_mapped_type_parameter(&mut self, node: &Arc<Node>) {
+    pub fn emit_mapped_type_parameter(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_mapped_type_parameter"); 
         let state = self.enter_node(node);
         self.emit_binding_identifier(node.name().unwrap());
         self.write_space();
@@ -271,7 +271,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_mapped_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_mapped_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_mapped_type"); 
         let state = self.enter_node(node);
         let single_line = self.should_emit_on_single_line(node);
         self.write_punctuation("{");
@@ -329,13 +329,13 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_literal_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_literal_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_literal_type"); 
         let state = self.enter_node(node);
         self.emit_expression(literal_type_literal(node), OperatorPrecedence::Comma);
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_type_node_attributes(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_type_node_attributes(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_type_node_attributes"); 
         let state = self.enter_node(node);
         self.write_punctuation("{");
         self.write_space();
@@ -357,7 +357,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_type_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_type_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_type_node"); 
         let state = self.enter_node(node);
         if import_type_is_type_of(node) {
             self.write_keyword("typeof");
@@ -380,7 +380,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_element_access_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_element_access_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_element_access_expression"); 
         let state = self.enter_node(node);
         let expression = node.expression().unwrap();
         let argument_expression = element_access_argument_expression(node);
@@ -409,7 +409,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_function_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_function_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_function_expression"); 
         let state = self.enter_node(node);
         self.generate_name_if_needed(node.name());
         self.emit_modifier_list(node, node.modifiers(), false);
@@ -425,7 +425,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_expression_with_type_arguments(&mut self, node: &Arc<Node>) {
+    pub fn emit_expression_with_type_arguments(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_expression_with_type_arguments"); 
         let state = self.enter_node(node);
         self.emit_expression(node.expression().unwrap(), OperatorPrecedence::Member);
         self.emit_type_arguments(node, node.type_arguments());
@@ -437,7 +437,7 @@ impl Printer {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         start_pos: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_while_clause"); 
         let pos = self.emit_token(SyntaxKind::WhileKeyword, start_pos, WriteKind::Keyword, node);
         self.write_space();
         self.emit_token(SyntaxKind::OpenParenToken, pos, WriteKind::Punctuation, node);
@@ -445,7 +445,7 @@ impl Printer {
         self.emit_token(SyntaxKind::CloseParenToken, expression.end(), WriteKind::Punctuation, node);
     }
 
-    pub fn emit_type_element(printer: &mut Printer, node: &Arc<Node>) {
+    pub fn emit_type_element(printer: &mut Printer, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_type_element"); 
         match node.kind {
             SyntaxKind::IndexSignature => printer.emit_index_signature(node),
             SyntaxKind::GetAccessor => printer.emit_get_accessor_declaration(node),
@@ -455,7 +455,7 @@ impl Printer {
 }
 
 impl Printer {
-    pub fn write_as(&mut self, text: &str, write_kind: WriteKind) {
+    pub fn write_as(&mut self, text: &str, write_kind: WriteKind) { ::tsox_core::fntrace::enter("write_as"); 
         match write_kind {
             WriteKind::None => self.writer.write(text),
             WriteKind::Keyword => self.writer.write_keyword(text),
@@ -469,56 +469,56 @@ impl Printer {
         }
     }
 
-    pub fn write_space(&mut self) {
+    pub fn write_space(&mut self) { ::tsox_core::fntrace::enter("write_space"); 
         self.writer.write_space(" ");
     }
 
-    pub fn write_line(&mut self) {
+    pub fn write_line(&mut self) { ::tsox_core::fntrace::enter("write_line"); 
         self.writer.write_line();
     }
 
-    pub fn write_punctuation(&mut self, text: &str) {
+    pub fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         self.writer.write_punctuation(text);
     }
 
-    pub fn write_keyword(&mut self, text: &str) {
+    pub fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         self.writer.write_keyword(text);
     }
 
-    pub fn write_trailing_semicolon(&mut self) {
+    pub fn write_trailing_semicolon(&mut self) { ::tsox_core::fntrace::enter("write_trailing_semicolon"); 
         self.writer.write_trailing_semicolon(";");
     }
 
-    pub fn increase_indent(&mut self) {
+    pub fn increase_indent(&mut self) { ::tsox_core::fntrace::enter("increase_indent"); 
         self.writer.increase_indent();
     }
 
-    pub fn decrease_indent(&mut self) {
+    pub fn decrease_indent(&mut self) { ::tsox_core::fntrace::enter("decrease_indent"); 
         self.writer.decrease_indent();
     }
 
-    pub fn increase_indent_if(&mut self, indent_requested: bool) {
+    pub fn increase_indent_if(&mut self, indent_requested: bool) { ::tsox_core::fntrace::enter("increase_indent_if"); 
         if indent_requested {
             self.increase_indent();
         }
     }
 
-    pub fn decrease_indent_if(&mut self, indent_requested: bool) {
+    pub fn decrease_indent_if(&mut self, indent_requested: bool) { ::tsox_core::fntrace::enter("decrease_indent_if"); 
         if indent_requested {
             self.decrease_indent();
         }
     }
 
-    pub fn should_emit_indented(&self, node: &Arc<Node>) -> bool {
+    pub fn should_emit_indented(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_indented"); 
         let flags = self.emit_context.emit_flags(node);
         flags.intersects(EmitFlags::INDENTED) && !flags.intersects(EmitFlags::NO_INDENTATION)
     }
 
-    pub fn should_emit_on_single_line(&self, node: &Arc<Node>) -> bool {
+    pub fn should_emit_on_single_line(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_on_single_line"); 
         self.emit_context.emit_flags(node).intersects(EmitFlags::SINGLE_LINE)
     }
 
-    pub fn enter_node(&mut self, node: &Arc<Node>) -> PrinterState {
+    pub fn enter_node(&mut self, node: &Arc<Node>) -> PrinterState { ::tsox_core::fntrace::enter("enter_node"); 
         let mut state = PrinterState::default();
         if let Some(on_before_emit_node) = &self.on_before_emit_node {
             on_before_emit_node(node);
@@ -527,14 +527,14 @@ impl Printer {
         state
     }
 
-    pub fn exit_node(&mut self, node: &Arc<Node>, previous_state: PrinterState) {
+    pub fn exit_node(&mut self, node: &Arc<Node>, previous_state: PrinterState) { ::tsox_core::fntrace::enter("exit_node"); 
         self.emit_comments_after_node(node, previous_state.comment_state);
         if let Some(on_after_emit_node) = &self.on_after_emit_node {
             on_after_emit_node(node);
         }
     }
 
-    pub fn emit_comments_before_node(&mut self, node: &Arc<Node>) -> Option<CommentState> {
+    pub fn emit_comments_before_node(&mut self, node: &Arc<Node>) -> Option<CommentState> { ::tsox_core::fntrace::enter("emit_comments_before_node"); 
         if self.comments_disabled {
             return None;
         }
@@ -557,7 +557,7 @@ impl Printer {
         ))
     }
 
-    pub fn emit_comments_after_node(&mut self, node: &Arc<Node>, previous_state: Option<CommentState>) {
+    pub fn emit_comments_after_node(&mut self, node: &Arc<Node>, previous_state: Option<CommentState>) { ::tsox_core::fntrace::enter("emit_comments_after_node"); 
         let Some(state) = previous_state else {
             return;
         };
@@ -566,7 +566,7 @@ impl Printer {
         }
     }
 
-    pub fn enter_token_node(&mut self, node: &Arc<Node>, flags: TokenEmitFlags) -> PrinterState {
+    pub fn enter_token_node(&mut self, node: &Arc<Node>, flags: TokenEmitFlags) -> PrinterState { ::tsox_core::fntrace::enter("enter_token_node"); 
         let mut state = PrinterState::default();
         if flags.0 & TokenEmitFlags::NO_COMMENTS.0 == 0 {
             state.comment_state = self.emit_comments_before_node(node);
@@ -574,11 +574,11 @@ impl Printer {
         state
     }
 
-    pub fn exit_token_node(&mut self, node: &Arc<Node>, previous_state: PrinterState) {
+    pub fn exit_token_node(&mut self, node: &Arc<Node>, previous_state: PrinterState) { ::tsox_core::fntrace::enter("exit_token_node"); 
         self.emit_comments_after_node(node, previous_state.comment_state);
     }
 
-    pub fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize {
+    pub fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize { ::tsox_core::fntrace::enter("write_token_text"); 
         let text = tsox_frontend::scanner::token_to_string(token);
         self.write_as(text, write_kind);
         pos + text.len()
@@ -590,14 +590,14 @@ impl Printer {
         pos: usize,
         write_kind: WriteKind,
         context_node: &Arc<Node>,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("emit_token"); 
         let state = self.enter_token_node(context_node, TokenEmitFlags::NONE);
         let pos = self.write_token_text(token, write_kind, pos);
         self.exit_token_node(context_node, state);
         pos
     }
 
-    pub fn emit_token_node_ex(&mut self, node: &Arc<Node>, flags: TokenEmitFlags) {
+    pub fn emit_token_node_ex(&mut self, node: &Arc<Node>, flags: TokenEmitFlags) { ::tsox_core::fntrace::enter("emit_token_node_ex"); 
         let state = self.enter_token_node(node, flags);
         let write_kind = if is_keyword_kind(node.kind) {
             WriteKind::Keyword
@@ -610,18 +610,18 @@ impl Printer {
         self.exit_token_node(node, state);
     }
 
-    pub fn emit_token_node(&mut self, node: Option<&Arc<Node>>) {
+    pub fn emit_token_node(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("emit_token_node"); 
         let Some(node) = node else {
             return;
         };
         self.emit_token_node_ex(node, TokenEmitFlags::NONE);
     }
 
-    pub fn emit_punctuation_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_punctuation_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_punctuation_node"); 
         self.emit_token_node_ex(node, TokenEmitFlags::NONE);
     }
 
-    pub fn emit_type_node(&mut self, node: &Arc<Node>, precedence: TypePrecedence) {
+    pub fn emit_type_node(&mut self, node: &Arc<Node>, precedence: TypePrecedence) { ::tsox_core::fntrace::enter("emit_type_node"); 
         let parens = (get_type_node_precedence(node) as i32) < (precedence as i32);
         if parens {
             self.write_punctuation("(");
@@ -661,15 +661,15 @@ impl Printer {
         }
     }
 
-    pub fn emit_type_node_in_extends(&mut self, node: &Arc<Node>) {
+    pub fn emit_type_node_in_extends(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_type_node_in_extends"); 
         self.emit_type_node(node, TYPE_PRECEDENCE_LOWEST);
     }
 
-    pub fn emit_type_node_outside_extends(&mut self, node: &Arc<Node>) {
+    pub fn emit_type_node_outside_extends(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_type_node_outside_extends"); 
         self.emit_type_node(node, TYPE_PRECEDENCE_LOWEST);
     }
 
-    pub fn emit_postfix_type_operand(&mut self, operand: &Arc<Node>, parent_node: &Arc<Node>) {
+    pub fn emit_postfix_type_operand(&mut self, operand: &Arc<Node>, parent_node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_postfix_type_operand"); 
         if operand.kind == SyntaxKind::TypeQuery {
             self.emit_type_node(operand, TypePrecedence::TypeOperator);
             return;
@@ -677,13 +677,13 @@ impl Printer {
         self.emit_type_node(operand, TypePrecedence::Postfix);
     }
 
-    pub fn emit_return_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_return_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_return_type"); 
         self.write_punctuation("=>");
         self.write_space();
         self.emit_type_node(node, TYPE_PRECEDENCE_LOWEST);
     }
 
-    pub fn emit_binding_identifier(&mut self, node: &Arc<Node>) {
+    pub fn emit_binding_identifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_binding_identifier"); 
         let mut node = node.clone();
         if self.unique_helper_names.is_some()
             && self.emit_context.emit_flags(&node).intersects(EmitFlags::HELPER_NAME)
@@ -699,7 +699,7 @@ impl Printer {
         self.exit_node(&node, state);
     }
 
-    pub fn emit_type_annotation(&mut self, node: Option<&Arc<Node>>) {
+    pub fn emit_type_annotation(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("emit_type_annotation"); 
         let Some(node) = node else {
             return;
         };
@@ -708,7 +708,7 @@ impl Printer {
         self.emit_type_node_outside_extends(node);
     }
 
-    pub fn emit_type_parameter_declaration_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_type_parameter_declaration_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_type_parameter_declaration_node"); 
         if let Some(name) = node.name() {
             self.emit_identifier_name(name);
         }
@@ -720,7 +720,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_type_parameters(&mut self, parent_node: &Arc<Node>, nodes: Option<&Arc<NodeList>>) {
+    pub fn emit_type_parameters(&mut self, parent_node: &Arc<Node>, nodes: Option<&Arc<NodeList>>) { ::tsox_core::fntrace::enter("emit_type_parameters"); 
         let Some(nodes) = nodes else {
             return;
         };
@@ -732,7 +732,7 @@ impl Printer {
         );
     }
 
-    pub fn emit_parameter_declaration_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_parameter_declaration_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_parameter_declaration_node"); 
         self.emit_token_node(node.dot_dot_dot_token());
         if let Some(name) = node.name() {
             self.emit_binding_identifier(name);
@@ -742,7 +742,7 @@ impl Printer {
         self.emit_initializer(node.initializer(), name_end, node);
     }
 
-    pub fn emit_parameters(&mut self, parent_node: &Arc<Node>, parameters: &Arc<NodeList>) {
+    pub fn emit_parameters(&mut self, parent_node: &Arc<Node>, parameters: &Arc<NodeList>) { ::tsox_core::fntrace::enter("emit_parameters"); 
         self.write_punctuation("(");
         self.emit_list(
             Self::emit_parameter_declaration_node,
@@ -753,7 +753,7 @@ impl Printer {
         self.write_punctuation(")");
     }
 
-    pub fn emit_signature(&mut self, node: &Arc<Node>) {
+    pub fn emit_signature(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_signature"); 
         self.emit_type_parameters(node, node.type_parameters());
         if let Some(parameters) = node.parameters() {
             self.emit_parameters(node, parameters);
@@ -761,7 +761,7 @@ impl Printer {
         self.emit_type_annotation(node.type_());
     }
 
-    pub fn emit_type_arguments(&mut self, parent_node: &Arc<Node>, nodes: Option<&Arc<NodeList>>) {
+    pub fn emit_type_arguments(&mut self, parent_node: &Arc<Node>, nodes: Option<&Arc<NodeList>>) { ::tsox_core::fntrace::enter("emit_type_arguments"); 
         let Some(nodes) = nodes else {
             return;
         };
@@ -778,7 +778,7 @@ impl Printer {
         parent_node: &Arc<Node>,
         modifiers: Option<&Arc<ModifierList>>,
         allow_decorators: bool,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("emit_modifier_list"); 
         let Some(modifiers) = modifiers else {
             return parent_node.pos();
         };

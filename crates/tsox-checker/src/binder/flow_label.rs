@@ -7,13 +7,13 @@ pub(crate) struct FlowLabel {
 }
 
 impl FlowLabel {
-    pub(crate) fn new(flags: FlowFlags) -> Self {
+    pub(crate) fn new(flags: FlowFlags) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             node: FlowNode::new(flags),
         }
     }
 
-    pub(crate) fn add_antecedent(&mut self, antecedent: Arc<FlowNode>) {
+    pub(crate) fn add_antecedent(&mut self, antecedent: Arc<FlowNode>) { ::tsox_core::fntrace::enter("add_antecedent"); 
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return;
         }
@@ -26,7 +26,7 @@ impl FlowLabel {
         self.node.antecedents.push(antecedent);
     }
 
-    pub(crate) fn finish_multi(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> {
+    pub(crate) fn finish_multi(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("finish_multi"); 
         if self.node.antecedents.is_empty() {
             return Arc::clone(unreachable);
         }
@@ -41,7 +41,7 @@ impl FlowLabel {
         })
     }
 
-    pub(crate) fn push_antecedent(node: &Arc<FlowNode>, ant: Arc<FlowNode>) {
+    pub(crate) fn push_antecedent(node: &Arc<FlowNode>, ant: Arc<FlowNode>) { ::tsox_core::fntrace::enter("push_antecedent"); 
         if ant.flags.contains(FlowFlags::UNREACHABLE) {
             return;
         }
@@ -56,7 +56,7 @@ impl FlowLabel {
         }
     }
 
-    pub(crate) fn finish(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> {
+    pub(crate) fn finish(&self, unreachable: &Arc<FlowNode>) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("finish"); 
         if self.node.antecedents.is_empty() {
             return Arc::clone(unreachable);
         }

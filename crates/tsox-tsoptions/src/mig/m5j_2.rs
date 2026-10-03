@@ -43,7 +43,7 @@ pub fn parse_own_config_of_json_source_file(
     host: &ParseConfigHost,
     base_path: &str,
     config_file_name: &str,
-) -> (ParsedTsconfig, Vec<Diagnostic>) {
+) -> (ParsedTsconfig, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("parse_own_config_of_json_source_file"); 
     let mut compiler_options = get_default_compiler_options(config_file_name);
     let type_acquisition = get_default_type_acquisition(config_file_name);
     let mut extended_config_path: Option<ExtendedConfigPath> = None;
@@ -100,7 +100,7 @@ fn parse_compiler_options_from_value(
     value: &JsonValue,
     base_path: &str,
     options: &mut CompilerOptions,
-) -> Vec<Diagnostic> {
+) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("parse_compiler_options_from_value"); 
     let _ = (key, value, base_path, options);
     Vec::new()
 }
@@ -109,7 +109,7 @@ pub fn read_json_config_file(
     file_name: &str,
     path: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
-) -> (TsConfigSourceFile, Vec<Diagnostic>) {
+) -> (TsConfigSourceFile, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("read_json_config_file"); 
     let (text, diagnostic_list) = try_read_file(file_name, read_file);
     if !text.is_empty() {
         let source_file = parse_source_file_for_config(file_name, path, &text);
@@ -134,7 +134,7 @@ pub fn read_json_config_file(
     }
 }
 
-fn parse_source_file_for_config(file_name: &str, _path: &str, text: &str) -> SourceFile {
+fn parse_source_file_for_config(file_name: &str, _path: &str, text: &str) -> SourceFile { ::tsox_core::fntrace::enter("parse_source_file_for_config"); 
     tsox_frontend::parser::Parser::parse_source_file_text(file_name, text.to_string())
 }
 
@@ -143,7 +143,7 @@ pub fn parse_own_config_of_json(
     host: &ParseConfigHost,
     base_path: &str,
     config_file_name: &str,
-) -> (ParsedTsconfig, Vec<Diagnostic>) {
+) -> (ParsedTsconfig, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("parse_own_config_of_json"); 
     let mut errors: Vec<Diagnostic> = Vec::new();
     if json_object_has(json, "excludes") {
         errors.push(new_compiler_diagnostic(
@@ -194,7 +194,7 @@ pub fn parse_own_config_of_json(
     )
 }
 
-pub fn object_to_json_value(obj: &JsonObject) -> JsonValue {
+pub fn object_to_json_value(obj: &JsonObject) -> JsonValue { ::tsox_core::fntrace::enter("object_to_json_value"); 
     let map = obj.iter().cloned().collect::<serde_json::Map<String, JsonValue>>();
     JsonValue::Object(map)
 }
@@ -203,7 +203,7 @@ pub fn convert_compiler_options_from_json_worker(
     json_options: Option<&JsonValue>,
     base_path: &str,
     config_file_name: &str,
-) -> (Option<CompilerOptions>, Vec<Diagnostic>) {
+) -> (Option<CompilerOptions>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_compiler_options_from_json_worker"); 
     let (mut options, errors) = convert_options_from_json_worker(json_options, base_path, config_file_name);
     if !config_file_name.is_empty() {
         if let Some(options) = options.as_mut() {
@@ -217,7 +217,7 @@ fn convert_options_from_json_worker(
     json_options: Option<&JsonValue>,
     base_path: &str,
     config_file_name: &str,
-) -> (Option<CompilerOptions>, Vec<Diagnostic>) {
+) -> (Option<CompilerOptions>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_options_from_json_worker"); 
     let mut options = get_default_compiler_options(config_file_name);
     let mut errors: Vec<Diagnostic> = Vec::new();
     if let Some(JsonValue::Object(entries)) = json_options {
@@ -235,24 +235,24 @@ fn convert_options_from_json_worker(
     (options, errors)
 }
 
-fn set_option_value(_options: &mut CompilerOptions, _key: &str, _value: &JsonValue) {}
+fn set_option_value(_options: &mut CompilerOptions, _key: &str, _value: &JsonValue) { ::tsox_core::fntrace::enter("set_option_value"); }
 
 pub fn convert_type_acquisition_from_json_worker(
     json_options: Option<&JsonValue>,
     base_path: &str,
     config_file_name: &str,
-) -> (Option<TypeAcquisition>, Vec<Diagnostic>) {
+) -> (Option<TypeAcquisition>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_type_acquisition_from_json_worker"); 
     let options = get_default_type_acquisition(config_file_name);
     let mut errors: Vec<Diagnostic> = Vec::new();
     let _ = (json_options, base_path);
     (options, errors)
 }
 
-pub fn get_default_compiler_options(config_file_name: &str) -> Option<CompilerOptions> {
+pub fn get_default_compiler_options(config_file_name: &str) -> Option<CompilerOptions> { ::tsox_core::fntrace::enter("get_default_compiler_options"); 
     Some(CompilerOptions::default())
 }
 
-pub fn get_default_type_acquisition(config_file_name: &str) -> Option<TypeAcquisition> {
+pub fn get_default_type_acquisition(config_file_name: &str) -> Option<TypeAcquisition> { ::tsox_core::fntrace::enter("get_default_type_acquisition"); 
     Some(TypeAcquisition::default())
 }
 
@@ -263,7 +263,7 @@ pub fn convert_json_option(
     property_assignment: Option<&Node>,
     value_expression: Option<&Node>,
     source_file: Option<&SourceFile>,
-) -> (Option<JsonValue>, Vec<Diagnostic>) {
+) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_json_option"); 
     let _ = (property_assignment, source_file);
     let normalized = normalize_non_list_option_value(opt, base_path, value.clone());
     (Some(normalized), Vec::new())
@@ -302,28 +302,28 @@ pub fn get_extends_config_path_or_array(
     host: &ParseConfigHost,
     base_path: &str,
     config_file_name: &str,
-) -> (ExtendedConfigPath, Vec<Diagnostic>) {
+) -> (ExtendedConfigPath, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("get_extends_config_path_or_array"); 
     let _ = (value, host, base_path, config_file_name);
     (ExtendedConfigPath::Single(String::new()), Vec::new())
 }
 
-fn entries_to_object(entries: Vec<(String, JsonValue)>) -> JsonValue {
+fn entries_to_object(entries: Vec<(String, JsonValue)>) -> JsonValue { ::tsox_core::fntrace::enter("entries_to_object"); 
     let map = entries.into_iter().collect::<serde_json::Map<String, JsonValue>>();
     JsonValue::Object(map)
 }
 
-fn ts_config_source_file_statement_expression<'a>(_source_file: &'a SourceFile) -> Option<&'a Node> {
+fn ts_config_source_file_statement_expression<'a>(_source_file: &'a SourceFile) -> Option<&'a Node> { ::tsox_core::fntrace::enter("ts_config_source_file_statement_expression"); 
     None
 }
 
-fn ast_is_object_literal_expression(_node: &Node) -> bool {
+fn ast_is_object_literal_expression(_node: &Node) -> bool { ::tsox_core::fntrace::enter("ast_is_object_literal_expression"); 
     false
 }
 
 pub fn convert_config_file_to_object(
     source_file: &SourceFile,
     json_conversion_notifier: Option<&JsonConversionNotifier>,
-) -> (Option<JsonValue>, Vec<Diagnostic>) {
+) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_config_file_to_object"); 
     let _ = json_conversion_notifier;
     let root_expression = ts_config_source_file_statement_expression(source_file);
     match root_expression {
@@ -344,7 +344,7 @@ impl JsonConversionNotifier {
         _element: &Node,
         _object_option: Option<&OptionDecl>,
         _option: Option<&OptionDecl>,
-    ) -> (Option<JsonValue>, Vec<Diagnostic>) {
+    ) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("on_property_set"); 
         (None, Vec::new())
     }
 }
@@ -354,7 +354,7 @@ pub fn convert_to_json(
     root_expression: Option<&Node>,
     return_value: bool,
     json_conversion_notifier: Option<&JsonConversionNotifier>,
-) -> (Option<JsonValue>, Vec<Diagnostic>) {
+) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_to_json"); 
     let _ = (source_file, return_value, json_conversion_notifier);
     if root_expression.is_none() {
         return (Some(JsonValue::Object(serde_json::Map::new())), Vec::new());
@@ -370,7 +370,7 @@ pub fn parse_config(
     config_file_name: &str,
     resolution_stack: &[String],
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
-) -> (ParsedTsconfig, Vec<Diagnostic>) {
+) -> (ParsedTsconfig, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("parse_config"); 
     let base_path = tspath::normalize_slashes(base_path);
     let resolved_path = tspath::to_path(
         config_file_name,
@@ -412,7 +412,7 @@ fn parse_own_config_of_json_source_file_by_tsconfig(
     host: &ParseConfigHost,
     base_path: &str,
     config_file_name: &str,
-) -> (ParsedTsconfig, Vec<Diagnostic>) {
+) -> (ParsedTsconfig, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("parse_own_config_of_json_source_file_by_tsconfig"); 
     match source_file {
         Some(sf) => parse_own_config_of_json_source_file(&sf.source_file, host, base_path, config_file_name),
         None => (
@@ -439,7 +439,7 @@ pub fn parse_json_config_file_content_worker(
     config_file_name: &str,
     resolution_stack: &[String],
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
-) -> ParsedCommandLine {
+) -> ParsedCommandLine { ::tsox_core::fntrace::enter("parse_json_config_file_content_worker"); 
     let _ = (existing_options, existing_options_raw, extended_config_cache);
     let base_path_for_file_names = if !config_file_name.is_empty() {
         tspath::normalize_path(&directory_of_combined_path(config_file_name, base_path))
@@ -574,11 +574,11 @@ pub fn parse_json_config_file_content_worker(
     result
 }
 
-fn string_slice_to_json(list: &[String]) -> JsonValue {
+fn string_slice_to_json(list: &[String]) -> JsonValue { ::tsox_core::fntrace::enter("string_slice_to_json"); 
     JsonValue::Array(list.iter().map(|s| JsonValue::String(s.clone())).collect())
 }
 
-fn get_prop_from_raw(raw_config: &JsonObject, prop: &str) -> Option<Vec<String>> {
+fn get_prop_from_raw(raw_config: &JsonObject, prop: &str) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("get_prop_from_raw"); 
     match json_object_get(raw_config, prop) {
         Some(JsonValue::Array(items)) => Some(
             items
@@ -590,25 +590,25 @@ fn get_prop_from_raw(raw_config: &JsonObject, prop: &str) -> Option<Vec<String>>
     }
 }
 
-pub fn can_json_report_no_input_files(raw_config: &JsonObject) -> bool {
+pub fn can_json_report_no_input_files(raw_config: &JsonObject) -> bool { ::tsox_core::fntrace::enter("can_json_report_no_input_files"); 
     let files_exists = json_object_has(raw_config, "files");
     let references_exists = json_object_has(raw_config, "references");
     !files_exists && !references_exists
 }
 
-pub fn parse_json_to_string_key(raw: Option<&JsonValue>) -> JsonObject {
+pub fn parse_json_to_string_key(raw: Option<&JsonValue>) -> JsonObject { ::tsox_core::fntrace::enter("parse_json_to_string_key"); 
     match raw {
         Some(JsonValue::Object(map)) => map.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
         _ => Vec::new(),
     }
 }
 
-pub fn directory_of_combined_path(config_file_name: &str, base_path: &str) -> String {
+pub fn directory_of_combined_path(config_file_name: &str, base_path: &str) -> String { ::tsox_core::fntrace::enter("directory_of_combined_path"); 
     let combined = tspath::combine_paths(base_path, &[config_file_name]);
     tspath::get_directory_path(&combined)
 }
 
-pub fn try_read_file(file_name: &str, read_file: &dyn Fn(&str) -> Option<String>) -> (String, Vec<Diagnostic>) {
+pub fn try_read_file(file_name: &str, read_file: &dyn Fn(&str) -> Option<String>) -> (String, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("try_read_file"); 
     match read_file(file_name) {
         Some(text) => (text, Vec::new()),
         None => (

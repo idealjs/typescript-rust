@@ -13,7 +13,7 @@ use tsox_frontend::ast::*;
 use tsox_frontend::scanner::mig::m3i::get_source_text_of_node_from_source_file;
 
 impl ReferenceResolverImpl {
-    pub(crate) fn get_declaration_of_alias_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub(crate) fn get_declaration_of_alias_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaration_of_alias_symbol"); 
         symbol
             .declarations
             .iter()
@@ -22,7 +22,7 @@ impl ReferenceResolverImpl {
             .cloned()
     }
 
-    pub(crate) fn get_parent_of_symbol(&self, symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> {
+    pub(crate) fn get_parent_of_symbol(&self, symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_parent_of_symbol"); 
         if let Some(symbol) = symbol {
             if let Some(callback) = &self.hooks.get_parent_of_symbol_fn {
                 return callback(symbol);
@@ -36,7 +36,7 @@ impl ReferenceResolverImpl {
         &mut self,
         reference: &Arc<Node>,
         start_in_declaration_container: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_referenced_value_symbol"); 
         if let Some(resolved_symbol) = self.get_resolved_symbol(Some(reference)) {
             return Some(resolved_symbol);
         }
@@ -69,7 +69,7 @@ impl ReferenceResolverImpl {
         )
     }
 
-    pub(crate) fn is_type_only_alias_declaration(&self, symbol: Option<&Arc<Symbol>>) -> bool {
+    pub(crate) fn is_type_only_alias_declaration(&self, symbol: Option<&Arc<Symbol>>) -> bool { ::tsox_core::fntrace::enter("is_type_only_alias_declaration"); 
         if let Some(symbol) = symbol {
             if let Some(callback) = &self.hooks.get_type_only_alias_declaration_fn {
                 return callback(symbol, SymbolFlags::Value).is_some();
@@ -101,7 +101,7 @@ impl ReferenceResolverImpl {
     }
 }
 
-pub(crate) fn get_initializer_symbol(symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> {
+pub(crate) fn get_initializer_symbol(symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_initializer_symbol"); 
     let symbol = symbol?;
     let declaration = symbol.value_declaration.as_ref()?;
     if is_function_declaration(declaration)
@@ -133,14 +133,14 @@ pub(crate) fn get_initializer_symbol(symbol: Option<&Arc<Symbol>>) -> Option<Arc
     None
 }
 
-pub(crate) fn get_optional_symbol_flag_for_node(node: &Arc<Node>) -> SymbolFlags {
+pub(crate) fn get_optional_symbol_flag_for_node(node: &Arc<Node>) -> SymbolFlags { ::tsox_core::fntrace::enter("get_optional_symbol_flag_for_node"); 
     match node_postfix_token(node) {
         Some(token) if token.kind == SyntaxKind::QuestionToken => SymbolFlags::Optional,
         _ => SymbolFlags::empty(),
     }
 }
 
-pub(crate) fn get_parent_of_property_assignment(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_parent_of_property_assignment(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_parent_of_property_assignment"); 
     match node.kind {
         SyntaxKind::BinaryExpression => match &node.data {
             NodeData::BinaryExpression(expr) => expr.left.expression().cloned(),
@@ -151,22 +151,22 @@ pub(crate) fn get_parent_of_property_assignment(node: &Arc<Node>) -> Option<Arc<
     }
 }
 
-pub(crate) fn is_assignment_declaration(decl: &Arc<Node>) -> bool {
+pub(crate) fn is_assignment_declaration(decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_assignment_declaration"); 
     is_binary_expression(decl)
         || is_access_expression(decl)
         || is_identifier(decl)
         || is_call_expression(decl)
 }
 
-pub(crate) fn is_effective_module_declaration(node: &Arc<Node>) -> bool {
+pub(crate) fn is_effective_module_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_effective_module_declaration"); 
     is_module_declaration(node) || is_identifier(node)
 }
 
-pub(crate) fn is_eval_or_arguments_identifier(node: &Arc<Node>) -> bool {
+pub(crate) fn is_eval_or_arguments_identifier(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_eval_or_arguments_identifier"); 
     is_identifier(node) && (node.text() == "eval" || node.text() == "arguments")
 }
 
-pub(crate) fn is_function_symbol(symbol: &Arc<Symbol>) -> bool {
+pub(crate) fn is_function_symbol(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_function_symbol"); 
     if let Some(d) = &symbol.value_declaration {
         if is_function_declaration(d) {
             return true;
@@ -181,7 +181,7 @@ pub(crate) fn is_function_symbol(symbol: &Arc<Symbol>) -> bool {
     false
 }
 
-pub(crate) fn is_generator_function_expression(node: &Arc<Node>) -> bool {
+pub(crate) fn is_generator_function_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_generator_function_expression"); 
     is_function_expression(node)
         && matches!(
             &node.data,
@@ -189,11 +189,11 @@ pub(crate) fn is_generator_function_expression(node: &Arc<Node>) -> bool {
         )
 }
 
-pub(crate) fn is_logical_assignment_expression(node: &Arc<Node>) -> bool {
+pub(crate) fn is_logical_assignment_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_logical_assignment_expression"); 
     is_logical_or_coalescing_assignment_expression(&skip_parentheses(node))
 }
 
-pub(crate) fn is_signed_numeric_literal(node: &Arc<Node>) -> bool {
+pub(crate) fn is_signed_numeric_literal(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_signed_numeric_literal"); 
     if node.kind == SyntaxKind::PrefixUnaryExpression {
         if let NodeData::PrefixUnaryExpression(expr) = &node.data {
             return matches!(expr.operator, SyntaxKind::PlusToken | SyntaxKind::MinusToken)
@@ -203,7 +203,7 @@ pub(crate) fn is_signed_numeric_literal(node: &Arc<Node>) -> bool {
     false
 }
 
-pub(crate) fn is_statement_condition(node: &Arc<Node>) -> bool {
+pub(crate) fn is_statement_condition(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_statement_condition"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -223,7 +223,7 @@ pub(crate) fn is_statement_condition(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_top_level_logical_expression(node: &Arc<Node>) -> bool {
+pub(crate) fn is_top_level_logical_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_top_level_logical_expression"); 
     let mut node = Arc::clone(node);
     loop {
         let Some(parent) = node.parent() else {
@@ -251,7 +251,7 @@ pub(crate) fn is_top_level_logical_expression(node: &Arc<Node>) -> bool {
 pub(crate) fn is_use_strict_prologue_directive(
     source_file: &Arc<SourceFile>,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_use_strict_prologue_directive"); 
     let Some(expression) = node.expression() else {
         return false;
     };

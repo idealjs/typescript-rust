@@ -56,7 +56,7 @@ impl Session {
     pub fn handle_get_non_nullable_type(
         &self,
         params: &GetTypePropertyParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_non_nullable_type"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let result = setup.checker.get_non_nullable_type(&t);
@@ -66,7 +66,7 @@ impl Session {
     pub fn handle_get_object_type_of_type(
         &self,
         params: &GetTypePropertyParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_object_type_of_type"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let t = sd.resolve_type_handle(&params.project, params.r#type)?;
         match t
@@ -81,7 +81,7 @@ impl Session {
     pub fn handle_get_outer_type_parameters_of_type(
         &self,
         params: &GetTypePropertyParams,
-    ) -> Result<Option<Vec<TypeResponse>>, String> {
+    ) -> Result<Option<Vec<TypeResponse>>, String> { ::tsox_core::fntrace::enter("handle_get_outer_type_parameters_of_type"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let t = sd.resolve_type_handle(&params.project, params.r#type)?;
         let types = t
@@ -102,7 +102,7 @@ impl Session {
     pub fn handle_get_parameter_type(
         &self,
         params: &GetParameterTypeParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_parameter_type"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let sig = setup.resolve_signature_handle(params.signature)?;
         if params.index < 0 {
@@ -117,7 +117,7 @@ impl Session {
     pub fn handle_get_parameters_of_signature(
         &self,
         params: &GetSignaturePropertyParams,
-    ) -> Result<Option<Vec<SymbolResponse>>, String> {
+    ) -> Result<Option<Vec<SymbolResponse>>, String> { ::tsox_core::fntrace::enter("handle_get_parameters_of_signature"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let sig = sd.resolve_signature_handle(&params.project, params.signature)?;
         let symbols = sig.parameters();
@@ -135,14 +135,14 @@ impl Session {
     pub fn handle_get_parent_of_symbol(
         &self,
         params: &GetSymbolPropertyParams,
-    ) -> Result<Option<SymbolResponse>, String> {
+    ) -> Result<Option<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_parent_of_symbol"); 
         self.resolve_symbol_property_of_symbol(params, |sym| sym.parent())
     }
 
     pub fn handle_get_program_diagnostics(
         &self,
         params: &GetProjectDiagnosticsParams,
-    ) -> Result<Vec<DiagnosticResponse>, String> {
+    ) -> Result<Vec<DiagnosticResponse>, String> { ::tsox_core::fntrace::enter("handle_get_program_diagnostics"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let program = sd.get_program(&params.project)?;
         let diags = program.get_program_diagnostics();
@@ -152,7 +152,7 @@ impl Session {
     pub fn handle_get_properties_of_type(
         &self,
         params: &CheckerTypeParams,
-    ) -> Result<Option<Vec<SymbolResponse>>, String> {
+    ) -> Result<Option<Vec<SymbolResponse>>, String> { ::tsox_core::fntrace::enter("handle_get_properties_of_type"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let props = setup.checker.get_properties_of_type(&t);
@@ -170,7 +170,7 @@ impl Session {
     pub fn handle_get_property_of_type(
         &self,
         params: &GetPropertyOfTypeParams,
-    ) -> Result<Option<SymbolResponse>, String> {
+    ) -> Result<Option<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_property_of_type"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let prop = setup.checker.get_property_of_type(&t, &params.name);
@@ -183,7 +183,7 @@ impl Session {
     pub fn handle_get_reduced_type(
         &self,
         params: &GetTypePropertyParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_reduced_type"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let result = setup.checker.get_reduced_type(&t);
@@ -193,7 +193,7 @@ impl Session {
     pub fn handle_get_referenced_symbols_for_node(
         &self,
         params: &GetReferencedSymbolsForNodeParams,
-    ) -> Result<Option<Vec<ReferencedSymbolEntry>>, String> {
+    ) -> Result<Option<Vec<ReferencedSymbolEntry>>, String> { ::tsox_core::fntrace::enter("handle_get_referenced_symbols_for_node"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let program = sd.get_program(&params.project)?;
         let node = sd.resolve_node_handle(&program, &params.node)?;
@@ -236,7 +236,7 @@ impl Session {
     pub fn handle_get_references_to_symbol_in_file(
         &self,
         params: &GetReferencesToSymbolInFileParams,
-    ) -> Result<Vec<NodeHandle>, String> {
+    ) -> Result<Vec<NodeHandle>, String> { ::tsox_core::fntrace::enter("handle_get_references_to_symbol_in_file"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let symbol = setup.resolve_symbol_handle(params.symbol)?;
         let source_file = setup
@@ -252,7 +252,7 @@ impl Session {
     pub fn handle_get_regular_type_of_type(
         &self,
         params: &GetTypePropertyParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_regular_type_of_type"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let t = sd.resolve_type_handle(&params.project, params.r#type)?;
         match t
@@ -267,7 +267,7 @@ impl Session {
     pub fn handle_get_resolved_signature(
         &self,
         params: &GetResolvedSignatureParams,
-    ) -> Result<Option<SignatureResponse>, String> {
+    ) -> Result<Option<SignatureResponse>, String> { ::tsox_core::fntrace::enter("handle_get_resolved_signature"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let node = setup
             .sd
@@ -283,7 +283,7 @@ impl Session {
     pub fn handle_get_rest_type_of_signature(
         &self,
         params: &CheckerSignatureParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_rest_type_of_signature"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let sig = setup.resolve_signature_handle(params.signature)?;
         let result = setup.checker.get_rest_type_of_signature(&sig);
@@ -296,7 +296,7 @@ impl Session {
     pub fn handle_get_return_type_of_signature(
         &self,
         params: &GetSignaturePropertyParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_return_type_of_signature"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let sig = setup.resolve_signature_handle(params.signature)?;
         let result = setup.checker.get_return_type_of_signature(&sig);
@@ -309,7 +309,7 @@ impl Session {
     pub fn handle_get_semantic_diagnostics(
         &self,
         params: &GetDiagnosticsParams,
-    ) -> Result<Vec<DiagnosticResponse>, String> {
+    ) -> Result<Vec<DiagnosticResponse>, String> { ::tsox_core::fntrace::enter("handle_get_semantic_diagnostics"); 
         self.get_diagnostics(params, |p, sf| {
             p.get_semantic_diagnostics(&mut core_context(), sf)
                 .into_iter()
@@ -321,7 +321,7 @@ impl Session {
     pub fn handle_get_shorthand_assignment_value_symbol(
         &self,
         params: &GetSymbolAtLocationParams,
-    ) -> Result<Option<SymbolResponse>, String> {
+    ) -> Result<Option<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_shorthand_assignment_value_symbol"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let node = setup
             .sd
@@ -339,7 +339,7 @@ impl Session {
     pub fn handle_get_signature_from_declaration(
         &self,
         params: &CheckerNodeParams,
-    ) -> Result<Option<SignatureResponse>, String> {
+    ) -> Result<Option<SignatureResponse>, String> { ::tsox_core::fntrace::enter("handle_get_signature_from_declaration"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let node = setup
             .sd
@@ -355,7 +355,7 @@ impl Session {
     pub fn handle_get_signature_usages(
         &self,
         params: &GetSignatureUsagesParams,
-    ) -> Result<Option<Vec<SignatureUsageResponse>>, String> {
+    ) -> Result<Option<Vec<SignatureUsageResponse>>, String> { ::tsox_core::fntrace::enter("handle_get_signature_usages"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let program = sd.get_program(&params.project)?;
         let signature_decl = sd.resolve_node_handle(&program, &params.signature_decl)?;
@@ -382,7 +382,7 @@ impl Session {
     pub fn handle_get_signatures_of_type(
         &self,
         params: &GetSignaturesOfTypeParams,
-    ) -> Result<Vec<SignatureResponse>, String> {
+    ) -> Result<Vec<SignatureResponse>, String> { ::tsox_core::fntrace::enter("handle_get_signatures_of_type"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let sigs = setup
@@ -403,7 +403,7 @@ impl Session {
     pub fn handle_get_source_file(
         &self,
         params: &GetSourceFileParams,
-    ) -> Result<Option<SourceFileResponse>, String> {
+    ) -> Result<Option<SourceFileResponse>, String> { ::tsox_core::fntrace::enter("handle_get_source_file"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let program = sd.get_program(&params.project)?;
         let source_file = program.get_source_file(&params.file.to_file_name());
@@ -413,7 +413,7 @@ impl Session {
     pub fn handle_get_source_file_metadata(
         &self,
         params: &GetSourceFileParams,
-    ) -> Result<Option<SourceFileMetadata>, String> {
+    ) -> Result<Option<SourceFileMetadata>, String> { ::tsox_core::fntrace::enter("handle_get_source_file_metadata"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let program = sd.get_program(&params.project)?;
         let source_file = match program.get_source_file(&params.file.to_file_name()) {
@@ -433,7 +433,7 @@ impl Session {
     pub fn handle_get_source_file_names(
         &self,
         params: &GetSourceFileNamesParams,
-    ) -> Result<Vec<String>, String> {
+    ) -> Result<Vec<String>, String> { ::tsox_core::fntrace::enter("handle_get_source_file_names"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let program = sd.get_program(&params.project)?;
         Ok(program
@@ -446,7 +446,7 @@ impl Session {
     pub fn handle_get_suggestion_diagnostics(
         &self,
         params: &GetDiagnosticsParams,
-    ) -> Result<Vec<DiagnosticResponse>, String> {
+    ) -> Result<Vec<DiagnosticResponse>, String> { ::tsox_core::fntrace::enter("handle_get_suggestion_diagnostics"); 
         self.get_diagnostics(params, |p, sf| {
             p.get_suggestion_diagnostics(&mut core_context(), sf)
                 .into_iter()
@@ -458,7 +458,7 @@ impl Session {
     pub fn handle_get_symbol_at_location(
         &self,
         params: &GetSymbolAtLocationParams,
-    ) -> Result<Option<SymbolResponse>, String> {
+    ) -> Result<Option<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbol_at_location"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let node = setup
             .sd
@@ -474,7 +474,7 @@ impl Session {
     pub fn handle_get_symbol_at_position(
         &self,
         params: &GetSymbolAtPositionParams,
-    ) -> Result<Option<SymbolResponse>, String> {
+    ) -> Result<Option<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbol_at_position"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let source_file = setup
             .program
@@ -496,7 +496,7 @@ impl Session {
     pub fn handle_get_symbol_of_source_file(
         &self,
         params: &GetSymbolOfSourceFileParams,
-    ) -> Result<Option<SymbolResponse>, String> {
+    ) -> Result<Option<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbol_of_source_file"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let source_file = setup
             .program
@@ -512,14 +512,14 @@ impl Session {
     pub fn handle_get_symbol_of_type(
         &self,
         params: &GetTypePropertyParams,
-    ) -> Result<Option<SymbolResponse>, String> {
+    ) -> Result<Option<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbol_of_type"); 
         self.resolve_symbol_property_of_type(params, |t| t.symbol().cloned())
     }
 
     pub fn handle_get_symbols_at_locations(
         &self,
         params: &GetSymbolsAtLocationsParams,
-    ) -> Result<Vec<SymbolResponse>, String> {
+    ) -> Result<Vec<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbols_at_locations"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let mut results = Vec::with_capacity(params.locations.len());
         for loc in &params.locations {
@@ -538,7 +538,7 @@ impl Session {
     pub fn handle_get_symbols_at_positions(
         &self,
         params: &GetSymbolsAtPositionsParams,
-    ) -> Result<Vec<SymbolResponse>, String> {
+    ) -> Result<Vec<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbols_at_positions"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let source_file = setup
             .program
@@ -565,7 +565,7 @@ impl Session {
     pub fn handle_get_symbols_in_scope(
         &self,
         params: &GetSymbolsInScopeParams,
-    ) -> Result<Vec<SymbolResponse>, String> {
+    ) -> Result<Vec<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbols_in_scope"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let empty_handle = String::new();
         let location = setup.resolve_location(
@@ -589,7 +589,7 @@ impl Session {
     pub fn handle_get_symbols_of_source_files(
         &self,
         params: &GetSymbolsOfSourceFilesParams,
-    ) -> Result<Vec<SymbolResponse>, String> {
+    ) -> Result<Vec<SymbolResponse>, String> { ::tsox_core::fntrace::enter("handle_get_symbols_of_source_files"); 
         let setup = self.setup_checker(params.snapshot, &params.project)?;
         let mut results = Vec::with_capacity(params.files.len());
         for file in &params.files {
@@ -609,7 +609,7 @@ impl Session {
     pub fn handle_get_syntactic_diagnostics(
         &self,
         params: &GetDiagnosticsParams,
-    ) -> Result<Vec<DiagnosticResponse>, String> {
+    ) -> Result<Vec<DiagnosticResponse>, String> { ::tsox_core::fntrace::enter("handle_get_syntactic_diagnostics"); 
         self.get_diagnostics(params, |p, sf| {
             p.get_syntactic_diagnostics(&mut core_context(), sf)
                 .into_iter()
@@ -621,7 +621,7 @@ impl Session {
     pub fn handle_get_target_of_signature(
         &self,
         params: &GetSignaturePropertyParams,
-    ) -> Result<Option<SignatureResponse>, String> {
+    ) -> Result<Option<SignatureResponse>, String> { ::tsox_core::fntrace::enter("handle_get_target_of_signature"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let sig = sd.resolve_signature_handle(&params.project, params.signature)?;
         let result = sig.target.clone();
@@ -634,7 +634,7 @@ impl Session {
     pub fn handle_get_target_of_type(
         &self,
         params: &GetTypePropertyParams,
-    ) -> Result<Option<TypeResponse>, String> {
+    ) -> Result<Option<TypeResponse>, String> { ::tsox_core::fntrace::enter("handle_get_target_of_type"); 
         let sd = self.get_snapshot_data(params.snapshot)?;
         let t = sd.resolve_type_handle(&params.project, params.r#type)?;
         match t.target().cloned() {

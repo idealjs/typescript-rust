@@ -3,7 +3,7 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
-    pub fn get_base_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> {
+    pub fn get_base_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_base_signature"); 
         if sig.type_parameters.is_empty() {
             return Arc::clone(sig);
         }
@@ -14,7 +14,7 @@ impl Checker {
         result
     }
 
-    fn get_base_signature_inner(&mut self, sig: &Arc<Signature>) -> Arc<Signature> {
+    fn get_base_signature_inner(&mut self, sig: &Arc<Signature>) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_base_signature_inner"); 
         if sig.type_parameters.is_empty() {
             return Arc::clone(sig);
         }
@@ -47,7 +47,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         construct: bool,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("single_signature_of_kind"); 
         let kind = if construct {
             SignatureKind::Construct
         } else {
@@ -69,7 +69,7 @@ impl Checker {
         arg_type: &Arc<Type>,
         contextual_type: &Arc<Type>,
         outer: &mut crate::checker::inference::InferenceContext,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("instantiate_generic_call_arg_type"); 
         let construct;
         let sig = match self.single_signature_of_kind(arg_type, false) {
             Some(s) => {
@@ -159,7 +159,7 @@ impl Checker {
         sig: &Arc<Signature>,
         outer_tps: &[Arc<Type>],
         effective: &[Arc<Type>],
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("substitute_signature_outer"); 
         let count = self.get_parameter_count(sig);
         let mut inst = Signature::new();
         inst.flags = sig.flags;
@@ -190,7 +190,7 @@ impl Checker {
         inst: &Arc<Signature>,
         tps: &[Arc<Type>],
         args: &[Arc<Type>],
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("fixup_instantiated_predicate"); 
         let Some(pred) = self.compute_type_predicate_of_signature(original) else {
             return Arc::clone(inst);
         };

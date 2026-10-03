@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn walk_and_match(root_spec: &str, dir: &str, fs: &dyn FS, results: &mut Vec<String>) {
+pub(crate) fn walk_and_match(root_spec: &str, dir: &str, fs: &dyn FS, results: &mut Vec<String>) { ::tsox_core::fntrace::enter("walk_and_match"); 
     let entries = fs.get_accessible_entries(dir);
     for file in &entries.files {
         let full = tsox_core::tspath::combine_paths(dir, &[file]);
@@ -23,14 +23,14 @@ pub(crate) fn walk_and_match(root_spec: &str, dir: &str, fs: &dyn FS, results: &
     }
 }
 
-pub(crate) fn glob_matches(spec: &str, path: &str) -> bool {
+pub(crate) fn glob_matches(spec: &str, path: &str) -> bool { ::tsox_core::fntrace::enter("glob_matches"); 
     match Glob::parse(spec) {
         Ok(g) => g.is_match(path),
         Err(_) => false,
     }
 }
 
-pub(crate) fn strip_jsonc(input: &str) -> String {
+pub(crate) fn strip_jsonc(input: &str) -> String { ::tsox_core::fntrace::enter("strip_jsonc"); 
     let mut out = String::with_capacity(input.len());
     let chars: Vec<char> = input.chars().collect();
     let mut i = 0usize;

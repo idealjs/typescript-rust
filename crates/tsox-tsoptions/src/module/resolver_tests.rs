@@ -1,7 +1,7 @@
 use crate::module::resolver::*;
 
 #[test]
-fn extensions_bitfield() {
+fn extensions_bitfield() { ::tsox_core::fntrace::enter("extensions_bitfield"); 
     let ts = Extensions::TYPESCRIPT;
     assert!(ts.contains(Extensions::TYPESCRIPT));
     assert!(!ts.contains(Extensions::JAVASCRIPT));
@@ -17,7 +17,7 @@ fn extensions_bitfield() {
 }
 
 #[test]
-fn extensions_array() {
+fn extensions_array() { ::tsox_core::fntrace::enter("extensions_array"); 
     let ts = Extensions::TYPESCRIPT;
     let arr = ts.array();
     assert!(arr.contains(&".ts"));
@@ -29,13 +29,13 @@ fn extensions_array() {
 }
 
 #[test]
-fn extensions_string() {
+fn extensions_string() { ::tsox_core::fntrace::enter("extensions_string"); 
     let both = Extensions::TYPESCRIPT.union(Extensions::JAVASCRIPT);
     assert_eq!(both.extensions_string(), "TypeScript, JavaScript");
 }
 
 #[test]
-fn module_cache_first_writer_wins() {
+fn module_cache_first_writer_wins() { ::tsox_core::fntrace::enter("module_cache_first_writer_wins"); 
     let cache = ModuleResolutionCache::new();
     let key = ModuleResolutionCacheKey {
         containing_directory: "/foo".to_string(),
@@ -58,7 +58,7 @@ fn module_cache_first_writer_wins() {
 }
 
 #[test]
-fn type_ref_cache_last_writer_wins() {
+fn type_ref_cache_last_writer_wins() { ::tsox_core::fntrace::enter("type_ref_cache_last_writer_wins"); 
     let cache = TypeRefDirectiveResolutionCache::new();
     let key = TypeRefDirectiveCacheKey {
         containing_directory: "/foo".to_string(),
@@ -82,7 +82,7 @@ fn type_ref_cache_last_writer_wins() {
 }
 
 #[test]
-fn effective_type_roots_default() {
+fn effective_type_roots_default() { ::tsox_core::fntrace::enter("effective_type_roots_default"); 
     let opts = CompilerOptions::default();
     let (roots, from_config) = get_effective_type_roots(&opts, "/project/sub");
     assert!(!from_config);
@@ -95,7 +95,7 @@ fn effective_type_roots_default() {
 }
 
 #[test]
-fn effective_type_roots_explicit() {
+fn effective_type_roots_explicit() { ::tsox_core::fntrace::enter("effective_type_roots_explicit"); 
     let mut opts = CompilerOptions::default();
     opts.type_roots = vec!["./custom-types".to_string()];
     let (roots, from_config) = get_effective_type_roots(&opts, "/project");
@@ -104,7 +104,7 @@ fn effective_type_roots_explicit() {
 }
 
 #[test]
-fn effective_type_roots_base_on_config_file() {
+fn effective_type_roots_base_on_config_file() { ::tsox_core::fntrace::enter("effective_type_roots_base_on_config_file"); 
     let mut opts = CompilerOptions::default();
     opts.config_file_path = "/foo/bar/tsconfig.json".to_string();
     let (roots, from_config) = get_effective_type_roots(&opts, "/src");
@@ -120,7 +120,7 @@ fn make_state<'a>(
     containing_dir: &str,
     opts: &'a CompilerOptions,
     fs: &'a dyn FS,
-) -> ResolutionState<'a> {
+) -> ResolutionState<'a> { ::tsox_core::fntrace::enter("make_state"); 
     ResolutionState::new(name, containing_dir, false, ModuleKind::None, opts, fs, "/")
 }
 
@@ -129,7 +129,7 @@ const REL_EXTS: Extensions = Extensions::TYPESCRIPT
     .union(Extensions::DECLARATION);
 
 #[test]
-fn resolve_relative_ts_file() {
+fn resolve_relative_ts_file() { ::tsox_core::fntrace::enter("resolve_relative_ts_file"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -146,7 +146,7 @@ fn resolve_relative_ts_file() {
 }
 
 #[test]
-fn resolve_relative_tsx_file() {
+fn resolve_relative_tsx_file() { ::tsox_core::fntrace::enter("resolve_relative_tsx_file"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -162,7 +162,7 @@ fn resolve_relative_tsx_file() {
 }
 
 #[test]
-fn resolve_relative_js_specifier_swaps_to_ts() {
+fn resolve_relative_js_specifier_swaps_to_ts() { ::tsox_core::fntrace::enter("resolve_relative_js_specifier_swaps_to_ts"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -178,7 +178,7 @@ fn resolve_relative_js_specifier_swaps_to_ts() {
 }
 
 #[test]
-fn resolve_relative_mjs_specifier_swaps_to_mts() {
+fn resolve_relative_mjs_specifier_swaps_to_mts() { ::tsox_core::fntrace::enter("resolve_relative_mjs_specifier_swaps_to_mts"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -194,7 +194,7 @@ fn resolve_relative_mjs_specifier_swaps_to_mts() {
 }
 
 #[test]
-fn resolve_relative_nonexistent_returns_none() {
+fn resolve_relative_nonexistent_returns_none() { ::tsox_core::fntrace::enter("resolve_relative_nonexistent_returns_none"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -207,7 +207,7 @@ fn resolve_relative_nonexistent_returns_none() {
 }
 
 #[test]
-fn exports_target_nesting_bounded() {
+fn exports_target_nesting_bounded() { ::tsox_core::fntrace::enter("exports_target_nesting_bounded"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/node_modules/pkg");
@@ -247,7 +247,7 @@ fn exports_target_nesting_bounded() {
 }
 
 #[test]
-fn resolve_relative_parent_dir_not_exists() {
+fn resolve_relative_parent_dir_not_exists() { ::tsox_core::fntrace::enter("resolve_relative_parent_dir_not_exists"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
 
@@ -259,20 +259,20 @@ fn resolve_relative_parent_dir_not_exists() {
 }
 
 #[test]
-fn normalize_path_for_dot() {
+fn normalize_path_for_dot() { ::tsox_core::fntrace::enter("normalize_path_for_dot"); 
     let result = ResolutionState::normalize_path_for_cjs_resolution("/src", ".");
     assert!(result.ends_with('/'));
     assert!(tsox_core::tspath::has_trailing_directory_separator(&result));
 }
 
 #[test]
-fn normalize_path_for_dot_dot() {
+fn normalize_path_for_dot_dot() { ::tsox_core::fntrace::enter("normalize_path_for_dot_dot"); 
     let result = ResolutionState::normalize_path_for_cjs_resolution("/src", "..");
     assert!(tsox_core::tspath::has_trailing_directory_separator(&result));
 }
 
 #[test]
-fn resolve_bare_specifier_node_modules() {
+fn resolve_bare_specifier_node_modules() { ::tsox_core::fntrace::enter("resolve_bare_specifier_node_modules"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -290,7 +290,7 @@ fn resolve_bare_specifier_node_modules() {
 }
 
 #[test]
-fn resolve_bare_specifier_with_types() {
+fn resolve_bare_specifier_with_types() { ::tsox_core::fntrace::enter("resolve_bare_specifier_with_types"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -319,7 +319,7 @@ fn resolve_bare_specifier_with_types() {
 }
 
 #[test]
-fn resolve_bare_specifier_with_main() {
+fn resolve_bare_specifier_with_main() { ::tsox_core::fntrace::enter("resolve_bare_specifier_with_main"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -345,7 +345,7 @@ fn resolve_bare_specifier_with_main() {
 }
 
 #[test]
-fn resolve_bare_specifier_ancestor_node_modules() {
+fn resolve_bare_specifier_ancestor_node_modules() { ::tsox_core::fntrace::enter("resolve_bare_specifier_ancestor_node_modules"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -363,7 +363,7 @@ fn resolve_bare_specifier_ancestor_node_modules() {
 }
 
 #[test]
-fn resolve_bare_specifier_not_found() {
+fn resolve_bare_specifier_not_found() { ::tsox_core::fntrace::enter("resolve_bare_specifier_not_found"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -377,7 +377,7 @@ fn resolve_bare_specifier_not_found() {
 }
 
 #[test]
-fn node16_conditions_follow_resolution_mode() {
+fn node16_conditions_follow_resolution_mode() { ::tsox_core::fntrace::enter("node16_conditions_follow_resolution_mode"); 
     let mut opts = CompilerOptions::default();
     opts.module_resolution = ModuleResolutionKind::Node16;
     let require = get_conditions(&opts, ModuleKind::CommonJS);
@@ -394,7 +394,7 @@ fn node16_conditions_follow_resolution_mode() {
 }
 
 #[test]
-fn node16_exports_condition_by_file_format() {
+fn node16_exports_condition_by_file_format() { ::tsox_core::fntrace::enter("node16_exports_condition_by_file_format"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     for d in ["/proj", "/proj/sub", "/proj/node_modules/pkg"] {
@@ -462,7 +462,7 @@ fn node16_exports_condition_by_file_format() {
 }
 
 #[test]
-fn implied_format_from_package_json_chain() {
+fn implied_format_from_package_json_chain() { ::tsox_core::fntrace::enter("implied_format_from_package_json_chain"); 
     use crate::vfs::InMemoryFS;
     use tsox_core::core::compiler_options::ModuleKind;
     let fs = InMemoryFS::new();
@@ -491,7 +491,7 @@ fn implied_format_from_package_json_chain() {
 }
 
 #[test]
-fn resolve_types_fallback() {
+fn resolve_types_fallback() { ::tsox_core::fntrace::enter("resolve_types_fallback"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -515,7 +515,7 @@ fn resolve_types_fallback() {
 }
 
 #[test]
-fn resolve_paths_exact_match() {
+fn resolve_paths_exact_match() { ::tsox_core::fntrace::enter("resolve_paths_exact_match"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -538,7 +538,7 @@ fn resolve_paths_exact_match() {
 }
 
 #[test]
-fn resolve_paths_wildcard() {
+fn resolve_paths_wildcard() { ::tsox_core::fntrace::enter("resolve_paths_wildcard"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -569,7 +569,7 @@ fn resolve_paths_wildcard() {
 }
 
 #[test]
-fn resolve_paths_no_match_falls_through() {
+fn resolve_paths_no_match_falls_through() { ::tsox_core::fntrace::enter("resolve_paths_no_match_falls_through"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -588,7 +588,7 @@ fn resolve_paths_no_match_falls_through() {
 }
 
 #[test]
-fn resolve_root_dirs() {
+fn resolve_root_dirs() { ::tsox_core::fntrace::enter("resolve_root_dirs"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src/generated");
@@ -614,7 +614,7 @@ fn resolve_root_dirs() {
 }
 
 #[test]
-fn pattern_parsing() {
+fn pattern_parsing() { ::tsox_core::fntrace::enter("pattern_parsing"); 
     let p = Pattern::try_parse("foo");
     assert_eq!(p.star_index, -1);
     assert!(p.is_valid());
@@ -634,7 +634,7 @@ fn pattern_parsing() {
 }
 
 #[test]
-fn resolve_exports_string_main() {
+fn resolve_exports_string_main() { ::tsox_core::fntrace::enter("resolve_exports_string_main"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -667,7 +667,7 @@ fn resolve_exports_string_main() {
 }
 
 #[test]
-fn resolve_exports_conditional_types() {
+fn resolve_exports_conditional_types() { ::tsox_core::fntrace::enter("resolve_exports_conditional_types"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -706,7 +706,7 @@ fn resolve_exports_conditional_types() {
 }
 
 #[test]
-fn resolve_exports_subpath() {
+fn resolve_exports_subpath() { ::tsox_core::fntrace::enter("resolve_exports_subpath"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -747,7 +747,7 @@ fn resolve_exports_subpath() {
 }
 
 #[test]
-fn resolve_package_imports_exact() {
+fn resolve_package_imports_exact() { ::tsox_core::fntrace::enter("resolve_package_imports_exact"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -780,7 +780,7 @@ fn resolve_package_imports_exact() {
 }
 
 #[test]
-fn resolve_package_imports_pattern() {
+fn resolve_package_imports_pattern() { ::tsox_core::fntrace::enter("resolve_package_imports_pattern"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -813,7 +813,7 @@ fn resolve_package_imports_pattern() {
 }
 
 #[test]
-fn resolve_package_imports_lone_hash_unresolved() {
+fn resolve_package_imports_lone_hash_unresolved() { ::tsox_core::fntrace::enter("resolve_package_imports_lone_hash_unresolved"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -834,7 +834,7 @@ fn resolve_package_imports_lone_hash_unresolved() {
 }
 
 #[test]
-fn resolve_package_imports_walks_to_parent_scope() {
+fn resolve_package_imports_walks_to_parent_scope() { ::tsox_core::fntrace::enter("resolve_package_imports_walks_to_parent_scope"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -869,7 +869,7 @@ fn resolve_package_imports_walks_to_parent_scope() {
 }
 
 #[test]
-fn resolve_types_versions_redirect() {
+fn resolve_types_versions_redirect() { ::tsox_core::fntrace::enter("resolve_types_versions_redirect"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");
@@ -903,7 +903,7 @@ fn resolve_types_versions_redirect() {
 }
 
 #[test]
-fn resolve_types_versions_falls_back_when_no_match() {
+fn resolve_types_versions_falls_back_when_no_match() { ::tsox_core::fntrace::enter("resolve_types_versions_falls_back_when_no_match"); 
     use crate::vfs::InMemoryFS;
     let fs = InMemoryFS::new();
     fs.insert_dir("/src");

@@ -13,7 +13,7 @@ use tsox_frontend::ast::is_external_or_common_js_module;
 use tsox_frontend::ast::{is_declaration, is_function_like, NodeList, SourceFile, SyntaxKind};
 
 impl DeclarationTransformer {
-    pub fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         match node.kind {
             SyntaxKind::SourceFile => Some(node),
             SyntaxKind::FunctionDeclaration
@@ -53,7 +53,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn transform_source_file_entry(&mut self, file: Arc<SourceFile>) -> Option<Arc<Node>> {
+    pub fn transform_source_file_entry(&mut self, file: Arc<SourceFile>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_source_file_entry"); 
         self.cjs_export_assignment_name = None;
         if file.is_declaration_file {
             return Some(Arc::clone(&file.node));
@@ -86,7 +86,7 @@ impl DeclarationTransformer {
         updated
     }
 
-    fn transform_source_file_worker(&mut self, file: &Arc<SourceFile>) -> Option<Arc<Node>> {
+    fn transform_source_file_worker(&mut self, file: &Arc<SourceFile>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_source_file_worker"); 
         self.cjs_export_assignment = None;
         self.cjs_export_assignment_name = None;
         self.cjs_export_members = Vec::new();
@@ -114,7 +114,7 @@ impl DeclarationTransformer {
         Some(self.factory().update_source_file(&file.node, combined))
     }
 
-    pub fn visit_nodes_via_visit(&mut self, list: &Arc<NodeList>) -> Arc<NodeList> {
+    pub fn visit_nodes_via_visit(&mut self, list: &Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("visit_nodes_via_visit"); 
         let nodes: Vec<Arc<Node>> = list
             .nodes
             .iter()
@@ -123,7 +123,7 @@ impl DeclarationTransformer {
         self.factory().new_node_list(nodes)
     }
 
-    pub fn visit_slice_via_visit(&mut self, nodes: Vec<Arc<Node>>) -> (Vec<Arc<Node>>, bool) {
+    pub fn visit_slice_via_visit(&mut self, nodes: Vec<Arc<Node>>) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("visit_slice_via_visit"); 
         let before = nodes.len();
         let count = nodes.len();
         let visited: Vec<Arc<Node>> = nodes.into_iter().filter_map(|n| self.visit(n)).collect();
@@ -131,7 +131,7 @@ impl DeclarationTransformer {
         (visited, changed)
     }
 
-    pub fn visit_declaration_statements(&mut self, input: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_declaration_statements(&mut self, input: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_declaration_statements"); 
         if self.should_strip_internal(Some(&input)) {
             return None;
         }
@@ -160,7 +160,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn visit_declaration_subtree(&mut self, input: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_declaration_subtree(&mut self, input: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_declaration_subtree"); 
         if self.should_strip_internal(Some(&input)) {
             return None;
         }
@@ -192,7 +192,7 @@ impl DeclarationTransformer {
         result
     }
 
-    fn elide_or_diagnose_dynamic_name(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    fn elide_or_diagnose_dynamic_name(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("elide_or_diagnose_dynamic_name"); 
         if !self.state.isolated_declarations {
             let parse_node = self.emit_context().parse_node(input);
             let late_bound = self.resolver.is_late_bound(self.emit_context().parse_node(input).as_ref());
@@ -239,7 +239,7 @@ impl DeclarationTransformer {
     }
 }
 
-fn is_entity_name_expr(input: &Arc<Node>) -> bool {
+fn is_entity_name_expr(input: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expr"); 
     input
         .name()
         .and_then(|n| n.expression())

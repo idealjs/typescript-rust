@@ -11,7 +11,7 @@ use tsox_frontend::evaluator::EvalValue;
 use crate::checker::checker::*;
 
 impl Checker {
-    pub(crate) fn check_enum_member(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_enum_member(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_enum_member"); 
         if let Some(name) = node.name()
             && name.kind == SyntaxKind::PrivateIdentifier
         {
@@ -31,7 +31,7 @@ impl Checker {
         }
     }
 
-    fn enum_member_diagnostics_context(&self, member: &Arc<Node>) -> (bool, bool) {
+    fn enum_member_diagnostics_context(&self, member: &Arc<Node>) -> (bool, bool) { ::tsox_core::fntrace::enter("enum_member_diagnostics_context"); 
         let parent = member.parent();
         let is_const_enum = parent
             .as_ref()
@@ -51,11 +51,11 @@ impl Checker {
         &self,
         symbol: &Arc<Symbol>,
         kind: SyntaxKind,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaration_of_kind"); 
         symbol.declarations.iter().find(|d| d.kind == kind).cloned()
     }
 
-    pub fn get_enum_member_value(&mut self, node: &Arc<Node>) -> EvalResult {
+    pub fn get_enum_member_value(&mut self, node: &Arc<Node>) -> EvalResult { ::tsox_core::fntrace::enter("get_enum_member_value"); 
         if let Some(parent) = node.parent().as_ref() {
             self.compute_enum_member_values(parent);
         }
@@ -65,7 +65,7 @@ impl Checker {
             .unwrap_or_else(EvalResult::none)
     }
 
-    pub(crate) fn compute_enum_member_values(&mut self, node: &Arc<Node>) {
+    pub(crate) fn compute_enum_member_values(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("compute_enum_member_values"); 
         let already = self
             .node_links
             .get(node)
@@ -100,7 +100,7 @@ impl Checker {
         member: &Arc<Node>,
         auto_value: Option<f64>,
         previous: Option<&Arc<Node>>,
-    ) -> EvalResult {
+    ) -> EvalResult { ::tsox_core::fntrace::enter("compute_enum_member_value"); 
         // Go computeEnumMemberValue：非字面量计算名报 TS1164
         if let Some(name) = member.name()
             && name.kind == SyntaxKind::ComputedPropertyName
@@ -157,7 +157,7 @@ impl Checker {
         )
     }
 
-    fn compute_constant_enum_member_value(&mut self, member: &Arc<Node>) -> EvalResult {
+    fn compute_constant_enum_member_value(&mut self, member: &Arc<Node>) -> EvalResult { ::tsox_core::fntrace::enter("compute_constant_enum_member_value"); 
         let initializer = match &member.data {
             NodeData::EnumMember(d) => match &d.initializer {
                 Some(init) => Arc::clone(init),

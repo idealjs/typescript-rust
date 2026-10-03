@@ -37,7 +37,7 @@ pub struct NameResolver {
 }
 
 impl Default for NameResolver {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }

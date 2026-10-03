@@ -43,11 +43,11 @@ pub use crate::mig::m4g::r33k7_defs::{PrivateIdentifierKind, has_decorators};
 pub use crate::mig::m4h_2::is_class_named_evaluation_helper_block;
 pub use tsox_frontend::ast::utilities::skip_partially_emitted_expressions_arc as skip_partially_emitted_expressions;
 
-pub fn position_is_synthesized(pos: usize) -> bool {
+pub fn position_is_synthesized(pos: usize) -> bool { ::tsox_core::fntrace::enter("position_is_synthesized"); 
     (pos as i32) < 0
 }
 
-pub fn is_private_identifier_class_element_declaration(member: &Node) -> bool {
+pub fn is_private_identifier_class_element_declaration(member: &Node) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_class_element_declaration"); 
     use tsox_frontend::ast::node_data_generated as g;
     g::is_property_declaration(member)
         || g::is_method_declaration(member)
@@ -57,15 +57,15 @@ pub fn is_private_identifier_class_element_declaration(member: &Node) -> bool {
 pub use crate::mig::m4r_4::format_synthesized_comment;
 pub use tsox_frontend::scanner::mig::w1::compute_line_of_position;
 
-pub fn new_text_range(start: usize, end: usize) -> TextRange {
+pub fn new_text_range(start: usize, end: usize) -> TextRange { ::tsox_core::fntrace::enter("new_text_range"); 
     TextRange::new(start, end)
 }
 
-pub fn set_parent_in_children(node: &Arc<Node>) {
+pub fn set_parent_in_children(node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_parent_in_children"); 
     tsox_frontend::ast::mig::m3g_3::set_parent_in_children(node)
 }
 
-pub fn append_if_unique_vec<T: Clone + PartialEq>(v: &mut Vec<T>, value: T) {
+pub fn append_if_unique_vec<T: Clone + PartialEq>(v: &mut Vec<T>, value: T) { ::tsox_core::fntrace::enter("append_if_unique_vec"); 
     if !v.contains(&value) {
         v.push(value);
     }
@@ -218,7 +218,7 @@ pub struct RuntimeSyntaxTransformer {
 impl std::ops::Deref for RuntimeSyntaxTransformer {
     type Target = crate::mig::m4k_2::Transformer;
 
-    fn deref(&self) -> &Self::Target {
+    fn deref(&self) -> &Self::Target { ::tsox_core::fntrace::enter("deref"); 
         &self.transformer
     }
 }

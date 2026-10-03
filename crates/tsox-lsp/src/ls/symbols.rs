@@ -16,7 +16,7 @@ pub(crate) use super::types::{DocumentSymbol, SymbolKind};
 use crate::ls::symbols_names::*;
 
 impl LanguageService {
-    pub fn provide_document_symbols(&self, document_uri: &DocumentUri) -> Vec<DocumentSymbol> {
+    pub fn provide_document_symbols(&self, document_uri: &DocumentUri) -> Vec<DocumentSymbol> { ::tsox_core::fntrace::enter("provide_document_symbols"); 
         let (_program, source_file) = self.get_program_and_file(document_uri);
         get_document_symbols_for_children(&source_file.node, &source_file)
     }
@@ -25,7 +25,7 @@ impl LanguageService {
 pub fn get_document_symbols_for_children(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<DocumentSymbol> {
+) -> Vec<DocumentSymbol> { ::tsox_core::fntrace::enter("get_document_symbols_for_children"); 
     let text = &source_file.text;
     let line_map = &source_file.line_map;
     let mut symbols = Vec::new();
@@ -43,7 +43,7 @@ pub(crate) fn visit_for_symbols(
     text: &str,
     line_map: &LineMap,
     symbols: &mut Vec<DocumentSymbol>,
-) {
+) { ::tsox_core::fntrace::enter("visit_for_symbols"); 
     let kind = node.kind;
 
     match kind {
@@ -144,7 +144,7 @@ pub(crate) fn get_children_symbols(
     node: &Arc<Node>,
     text: &str,
     line_map: &LineMap,
-) -> Vec<DocumentSymbol> {
+) -> Vec<DocumentSymbol> { ::tsox_core::fntrace::enter("get_children_symbols"); 
     let mut children = Vec::new();
     for_each_child(node, |child| {
         visit_for_symbols(child, text, line_map, &mut children);
@@ -158,7 +158,7 @@ pub(crate) fn new_document_symbol(
     text: &str,
     line_map: &LineMap,
     children: Vec<DocumentSymbol>,
-) -> Option<DocumentSymbol> {
+) -> Option<DocumentSymbol> { ::tsox_core::fntrace::enter("new_document_symbol"); 
     let name = get_node_name(node, text)?;
     if name.is_empty() {
         return None;
@@ -186,7 +186,7 @@ pub(crate) fn new_document_symbol(
     })
 }
 
-pub(crate) fn symbol_kind_from_node(kind: SyntaxKind) -> SymbolKind {
+pub(crate) fn symbol_kind_from_node(kind: SyntaxKind) -> SymbolKind { ::tsox_core::fntrace::enter("symbol_kind_from_node"); 
     match kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => SymbolKind::Class,
         SyntaxKind::InterfaceDeclaration => SymbolKind::Interface,
@@ -212,7 +212,7 @@ pub(crate) fn symbol_kind_from_node(kind: SyntaxKind) -> SymbolKind {
     }
 }
 
-pub(crate) fn offset_range_to_lsp_range(line_map: &LineMap, start: usize, end: usize) -> Range {
+pub(crate) fn offset_range_to_lsp_range(line_map: &LineMap, start: usize, end: usize) -> Range { ::tsox_core::fntrace::enter("offset_range_to_lsp_range"); 
     Range {
         start: offset_to_position(line_map, start),
         end: offset_to_position(line_map, end),
@@ -222,7 +222,7 @@ pub(crate) fn offset_range_to_lsp_range(line_map: &LineMap, start: usize, end: u
 pub(crate) fn offset_to_position(
     line_map: &LineMap,
     offset: usize,
-) -> crate::lsp::lsproto_lsp::Position {
+) -> crate::lsp::lsproto_lsp::Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     crate::lsp::lsproto_lsp::Position {
@@ -231,7 +231,7 @@ pub(crate) fn offset_to_position(
     }
 }
 
-pub(crate) fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+pub(crate) fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

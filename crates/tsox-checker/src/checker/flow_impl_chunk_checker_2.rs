@@ -11,7 +11,7 @@ impl Checker {
         target: &FlowRef,
         depth: u32,
         query: &mut FlowQuery,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_at_flow_node"); 
         if flow.flags.contains(FlowFlags::UNREACHABLE) {
             return self.convert_auto_to_any(declared);
         }
@@ -218,7 +218,7 @@ impl Checker {
         target: &FlowRef,
         depth: u32,
         query: &mut FlowQuery,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("antecedent_type_at"); 
         let antecedent = flow
             .antecedent
             .as_ref()
@@ -231,7 +231,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn constituent_types(&self, type_: &Arc<Type>) -> Vec<Arc<Type>> {
+    pub(crate) fn constituent_types(&self, type_: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("constituent_types"); 
         if type_.is_union() {
             if let TypeData::Union(u) = &type_.data {
                 return u.union_or_intersection.types.clone();
@@ -242,7 +242,7 @@ impl Checker {
         }
         vec![Arc::clone(type_)]
     }
-    pub(crate) fn convert_auto_to_any(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn convert_auto_to_any(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("convert_auto_to_any"); 
         if Arc::ptr_eq(t, &self.auto_type()) {
             return self.get_any_type();
         }

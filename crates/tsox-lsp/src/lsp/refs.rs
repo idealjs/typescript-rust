@@ -7,7 +7,7 @@ use serde_json::{Value, json};
 use std::collections::HashMap;
 
 impl LspServer {
-    pub(super) fn handle_references(&self, params: &Value) -> Value {
+    pub(super) fn handle_references(&self, params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_references"); 
         let uri = params
             .get("textDocument")
             .and_then(|td| td.get("uri"))
@@ -72,7 +72,7 @@ impl LspServer {
         json!(locations)
     }
 
-    pub(super) fn handle_document_symbol(&self, params: &Value) -> Value {
+    pub(super) fn handle_document_symbol(&self, params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_document_symbol"); 
         let uri = params
             .get("textDocument")
             .and_then(|td| td.get("uri"))
@@ -97,7 +97,7 @@ impl LspServer {
         json!(symbols_for_statements(statements, &source_file))
     }
 
-    pub(super) fn handle_rename(&self, params: &Value) -> Value {
+    pub(super) fn handle_rename(&self, params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_rename"); 
         let uri = params
             .get("textDocument")
             .and_then(|td| td.get("uri"))

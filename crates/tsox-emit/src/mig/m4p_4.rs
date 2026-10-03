@@ -28,7 +28,7 @@ use super::m4p::Printer;
 pub mod r37k15_defs;
 
 impl Printer {
-    pub fn emit_function_body(&mut self, body: &Arc<Node>) {
+    pub fn emit_function_body(&mut self, body: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_function_body"); 
         Arc::make_mut(&mut self.emit_context)
             .add_emit_flags(body, PrinterEmitFlags::NO_SOURCE_MAP);
         if let Some(on_before) = &self.on_before_emit_node {
@@ -85,7 +85,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_function_body_node(&mut self, node: Option<&Arc<Node>>) {
+    pub fn emit_function_body_node(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("emit_function_body_node"); 
         let node = match node {
             Some(node) => node,
             None => {
@@ -97,11 +97,11 @@ impl Printer {
         self.emit_function_body(node);
     }
 
-    pub fn emit_get_accessor_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_get_accessor_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_get_accessor_declaration"); 
         self.emit_accessor_declaration(SyntaxKind::GetKeyword, node);
     }
 
-    pub fn emit_index_signature(&mut self, node: &Arc<Node>) {
+    pub fn emit_index_signature(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_index_signature"); 
         let state = self.enter_node(node);
         self.emit_modifier_list(node, node.modifiers(), false);
         let indented = self.should_emit_indented(node);
@@ -119,7 +119,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_function_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_function_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_function_declaration"); 
         let state = self.enter_node(node);
         self.generate_name_if_needed(node.name());
         self.emit_modifier_list(node, node.modifiers(), false);
@@ -143,7 +143,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_interface_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_interface_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_interface_declaration"); 
         let state = self.enter_node(node);
         self.emit_modifier_list(node, node.modifiers(), false);
         self.write_keyword("interface");
@@ -174,7 +174,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_enum_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_enum_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_enum_declaration"); 
         let state = self.enter_node(node);
         self.emit_modifier_list(node, node.modifiers(), false);
         self.write_keyword("enum");

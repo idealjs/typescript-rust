@@ -13,11 +13,11 @@ pub struct UnixDirent {
     pub typ: u8,
 }
 
-pub fn walk_dir(dir: &str, recursive: bool, callback: WalkFn) -> io::Result<()> {
+pub fn walk_dir(dir: &str, recursive: bool, callback: WalkFn) -> io::Result<()> { crate::fntrace::enter("walk_dir"); 
     walk_dir_generic(dir, recursive, callback)
 }
 
-pub fn walk_dir_generic(dir: &str, recursive: bool, callback: WalkFn) -> io::Result<()> {
+pub fn walk_dir_generic(dir: &str, recursive: bool, callback: WalkFn) -> io::Result<()> { crate::fntrace::enter("walk_dir_generic"); 
     let info = std::fs::symlink_metadata(dir)?;
     if !info.is_dir() {
         return Err(io::Error::from(ErrorKind::NotADirectory));
@@ -25,7 +25,7 @@ pub fn walk_dir_generic(dir: &str, recursive: bool, callback: WalkFn) -> io::Res
     walk_dir_generic_visit(dir, recursive, callback)
 }
 
-pub fn walk_dir_generic_visit(dir: &str, recursive: bool, callback: WalkFn) -> io::Result<()> {
+pub fn walk_dir_generic_visit(dir: &str, recursive: bool, callback: WalkFn) -> io::Result<()> { crate::fntrace::enter("walk_dir_generic_visit"); 
     let entries = match std::fs::read_dir(dir) {
         Ok(entries) => entries,
         Err(err)
@@ -66,11 +66,11 @@ pub fn walk_dir_generic_visit(dir: &str, recursive: bool, callback: WalkFn) -> i
     Ok(())
 }
 
-pub fn iterate_dir(dirname: &str, recursive: bool, callback: WalkFn) -> io::Result<()> {
+pub fn iterate_dir(dirname: &str, recursive: bool, callback: WalkFn) -> io::Result<()> { crate::fntrace::enter("iterate_dir"); 
     walk_dir_generic_visit(dirname, recursive, callback)
 }
 
-pub fn read_dir_entries(dir: &str) -> io::Result<Vec<UnixDirent>> {
+pub fn read_dir_entries(dir: &str) -> io::Result<Vec<UnixDirent>> { crate::fntrace::enter("read_dir_entries"); 
     let mut entries = Vec::new();
     for entry in std::fs::read_dir(dir)? {
         let entry = entry?;

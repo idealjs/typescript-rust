@@ -14,7 +14,7 @@ use super::language_service::LanguageService;
 use super::types::{Diagnostic as LspDiagnostic, DiagnosticRelatedInformation};
 
 impl LanguageService {
-    pub fn provide_diagnostics(&self, document_uri: &DocumentUri) -> Vec<LspDiagnostic> {
+    pub fn provide_diagnostics(&self, document_uri: &DocumentUri) -> Vec<LspDiagnostic> { ::tsox_core::fntrace::enter("provide_diagnostics"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let file_name = &source_file.file_name;
@@ -74,7 +74,7 @@ impl LanguageService {
     pub fn to_lsp_diagnostics(
         &self,
         diagnostics: &[Vec<Arc<AstDiagnostic>>],
-    ) -> Vec<LspDiagnostic> {
+    ) -> Vec<LspDiagnostic> { ::tsox_core::fntrace::enter("to_lsp_diagnostics"); 
         let mut result = Vec::new();
         for group in diagnostics {
             for diag in group {
@@ -92,7 +92,7 @@ impl LanguageService {
 pub fn get_all_diagnostics(
     program: &Arc<tsox_compile::compiler::Program>,
     file: &Arc<SourceFile>,
-) -> Vec<Arc<AstDiagnostic>> {
+) -> Vec<Arc<AstDiagnostic>> { ::tsox_core::fntrace::enter("get_all_diagnostics"); 
     let mut result = Vec::new();
     let file_name = &file.file_name;
 
@@ -122,7 +122,7 @@ pub fn get_all_diagnostics(
     result
 }
 
-fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> LspDiagnostic {
+fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> LspDiagnostic { ::tsox_core::fntrace::enter("ast_diagnostic_to_lsp"); 
     let message = diagnostic_message(diag);
 
     let related_information = convert_related_information(diag);
@@ -142,7 +142,7 @@ fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> LspDiagnos
     }
 }
 
-fn ast_diagnostic_to_lsp_no_file(diag: &AstDiagnostic) -> LspDiagnostic {
+fn ast_diagnostic_to_lsp_no_file(diag: &AstDiagnostic) -> LspDiagnostic { ::tsox_core::fntrace::enter("ast_diagnostic_to_lsp_no_file"); 
     let message = diagnostic_message(diag);
     let related_information = convert_related_information(diag);
 
@@ -167,7 +167,7 @@ fn ast_diagnostic_to_lsp_no_file(diag: &AstDiagnostic) -> LspDiagnostic {
     }
 }
 
-fn diagnostic_message(diag: &AstDiagnostic) -> String {
+fn diagnostic_message(diag: &AstDiagnostic) -> String { ::tsox_core::fntrace::enter("diagnostic_message"); 
     if let Some(ref msg) = diag.message {
         let args: Vec<&str> = diag.message_args.iter().map(|s| s.as_str()).collect();
         let text = tsox_core::diagnostics::format_message(msg.text, &args);
@@ -178,7 +178,7 @@ fn diagnostic_message(diag: &AstDiagnostic) -> String {
     format!("TS{}", diag.code)
 }
 
-fn convert_related_information(diag: &AstDiagnostic) -> Option<Vec<DiagnosticRelatedInformation>> {
+fn convert_related_information(diag: &AstDiagnostic) -> Option<Vec<DiagnosticRelatedInformation>> { ::tsox_core::fntrace::enter("convert_related_information"); 
     if diag.related_information.is_empty() {
         return None;
     }
@@ -230,7 +230,7 @@ fn convert_related_information(diag: &AstDiagnostic) -> Option<Vec<DiagnosticRel
     )
 }
 
-fn category_to_severity(category: Category) -> u32 {
+fn category_to_severity(category: Category) -> u32 { ::tsox_core::fntrace::enter("category_to_severity"); 
     match category {
         Category::Error => 1,
         Category::Warning => 2,
@@ -240,7 +240,7 @@ fn category_to_severity(category: Category) -> u32 {
     }
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -249,7 +249,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

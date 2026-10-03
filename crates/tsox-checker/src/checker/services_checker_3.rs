@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         contextual_type: &Arc<Type>,
         obj: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_invalid_due_to_union_discriminant"); 
         let properties: Vec<Arc<Node>> = match &obj.data {
             NodeData::ObjectLiteralExpression(data) => data.properties.nodes.clone(),
             _ => Vec::new(),
@@ -46,7 +46,7 @@ impl Checker {
     pub fn get_exports_and_properties_of_module(
         &mut self,
         module_symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_exports_and_properties_of_module"); 
         let mut exports = self.get_exports_of_module_as_array(module_symbol);
         let export_equals = self.resolve_external_module_symbol(module_symbol, false);
         if !Arc::ptr_eq(&export_equals, module_symbol) {
@@ -58,11 +58,11 @@ impl Checker {
         exports
     }
 
-    pub fn get_exports_of_module_as_array(&self, module_symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    pub fn get_exports_of_module_as_array(&self, module_symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_exports_of_module_as_array"); 
         symbols_to_array(&self.get_exports_of_module_table(module_symbol))
     }
 
-    pub fn get_jsx_intrinsic_tag_names_at(&mut self, location: &Arc<Node>) -> Vec<Arc<Symbol>> {
+    pub fn get_jsx_intrinsic_tag_names_at(&mut self, location: &Arc<Node>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_jsx_intrinsic_tag_names_at"); 
         let intrinsics = self.get_jsx_type_symbol("IntrinsicElements", location);
         if let Some(intrinsics) = intrinsics {
             return self.get_properties_of_type(&intrinsics);
@@ -70,7 +70,7 @@ impl Checker {
         Vec::new()
     }
 
-    pub fn get_constant_value_for_services(&mut self, node: &Arc<Node>) -> Option<EvalValue> {
+    pub fn get_constant_value_for_services(&mut self, node: &Arc<Node>) -> Option<EvalValue> { ::tsox_core::fntrace::enter("get_constant_value_for_services"); 
         if node.kind == SyntaxKind::EnumMember {
             return self.get_enum_member_value(node).value;
         }
@@ -102,7 +102,7 @@ impl Checker {
         _node: &Arc<Node>,
         _check_mode: CheckMode,
         _argument_count: i32,
-    ) -> (Option<Arc<Signature>>, Vec<Arc<Signature>>) {
+    ) -> (Option<Arc<Signature>>, Vec<Arc<Signature>>) { ::tsox_core::fntrace::enter("get_resolved_signature_worker"); 
         (None, Vec::new())
     }
 
@@ -110,7 +110,7 @@ impl Checker {
         &mut self,
         _call: &Arc<Node>,
         _editing_argument: &Arc<Node>,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_candidate_signatures_for_string_literal_completions"); 
         Vec::new()
     }
 
@@ -118,7 +118,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         pos: usize,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_at_position_for_services"); 
         self.get_type_at_position(sig, pos)
     }
 
@@ -126,7 +126,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         pos: usize,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_parameter_at_position"); 
         let t = self.get_type_at_position(sig, pos);
 
         if t.flags.contains(TypeFlags::Index) {
@@ -148,7 +148,7 @@ impl Checker {
         contextual_array_type: Option<&Arc<Type>>,
         array_literal: &Arc<Node>,
         position: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_array_literal_at_position"); 
         let contextual_array_type = contextual_array_type?;
         let mut first_spread_index = -1i32;
         let mut last_spread_index = -1i32;
@@ -180,7 +180,7 @@ impl Checker {
         )
     }
 
-    pub fn get_first_type_argument_from_known_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_first_type_argument_from_known_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_first_type_argument_from_known_type"); 
         if t.object_flags.contains(ObjectFlags::Reference) {
             if let Some(ref symbol) = t.symbol {
                 if is_known_generic_name(&symbol.name) {
@@ -204,7 +204,7 @@ impl Checker {
         node: &Arc<Node>,
         contextual_type: &Arc<Type>,
         union_symbol_ok: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_property_symbols_from_contextual_type"); 
         let name = node.name().map(|n| n.text()).unwrap_or("");
         if name.is_empty() {
             return Vec::new();
@@ -266,7 +266,7 @@ impl Checker {
     pub fn get_property_symbol_of_destructuring_assignment(
         &mut self,
         location: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_property_symbol_of_destructuring_assignment"); 
         let parent = location.parent().as_ref()?;
         let grandparent = parent.parent().as_ref()?;
 
@@ -278,11 +278,11 @@ impl Checker {
         None
     }
 
-    pub fn get_type_of_assignment_pattern(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> {
+    pub fn get_type_of_assignment_pattern(&mut self, expr: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_assignment_pattern"); 
         None
     }
 
-    pub fn get_signature_from_declaration(&mut self, _node: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub fn get_signature_from_declaration(&mut self, _node: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_signature_from_declaration"); 
         None
     }
 

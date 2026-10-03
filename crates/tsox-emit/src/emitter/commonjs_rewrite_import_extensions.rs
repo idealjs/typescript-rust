@@ -2,7 +2,7 @@
 
 use crate::emitter::commonjs::*;
 
-pub(crate) fn rewrite_import_extensions(text: &str) -> String {
+pub(crate) fn rewrite_import_extensions(text: &str) -> String { ::tsox_core::fntrace::enter("rewrite_import_extensions"); 
     let mut result = String::with_capacity(text.len());
     let bytes = text.as_bytes();
     let mut i = 0;
@@ -82,7 +82,7 @@ pub(crate) fn rewrite_import_extensions(text: &str) -> String {
     result
 }
 
-pub(crate) fn rewrite_one_specifier(spec: &str) -> String {
+pub(crate) fn rewrite_one_specifier(spec: &str) -> String { ::tsox_core::fntrace::enter("rewrite_one_specifier"); 
     for (old, new) in [
         (".ts", ".js"),
         (".tsx", ".js"),

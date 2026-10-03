@@ -30,7 +30,7 @@ pub mod r26k5_defs;
 use crate::checker::types::*;
 use tsox_frontend::ast::{Diagnostic, Node, NodeData, SyntaxKind};
 
-pub fn create_file_index_map(files: &[Arc<SourceFile>]) -> HashMap<u64, usize> {
+pub fn create_file_index_map(files: &[Arc<SourceFile>]) -> HashMap<u64, usize> { ::tsox_core::fntrace::enter("create_file_index_map"); 
     let mut result = HashMap::with_capacity(files.len());
     for (i, file) in files.iter().enumerate() {
         result.insert(file.id(), i);
@@ -40,7 +40,7 @@ pub fn create_file_index_map(files: &[Arc<SourceFile>]) -> HashMap<u64, usize> {
 
 
 impl Checker {
-    fn count_global_symbols(&self, files: &[Arc<SourceFile>]) -> usize {
+    fn count_global_symbols(&self, files: &[Arc<SourceFile>]) -> usize { ::tsox_core::fntrace::enter("count_global_symbols"); 
         let mut count = 0;
         for file in files {
             if !is_external_or_common_js_module(file) {
@@ -55,7 +55,7 @@ impl Checker {
         count
     }
 
-    pub fn check_type_parameter(&mut self, node: &Arc<Node>) {
+    pub fn check_type_parameter(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_parameter"); 
         self.check_grammar_modifiers(node);
         if let NodeData::TypeParameterDeclaration(tp) = &node.data {
             if let Some(expr) = &tp.expression {
@@ -107,14 +107,14 @@ impl Checker {
         self.check_node_deferred(node);
     }
 
-    fn marker_types_for_variance(&self) -> (Arc<Type>, Arc<Type>) {
+    fn marker_types_for_variance(&self) -> (Arc<Type>, Arc<Type>) { ::tsox_core::fntrace::enter("marker_types_for_variance"); 
         (
             self.marker_sub_type_for_check.clone().unwrap(),
             self.marker_super_type_for_check.clone().unwrap(),
         )
     }
 
-    pub fn check_type_parameter_deferred(&mut self, node: &Arc<Node>) {
+    pub fn check_type_parameter_deferred(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_parameter_deferred"); 
         let parent = match node.parent() {
             Some(p) => p,
             None => return,
@@ -167,7 +167,7 @@ impl Checker {
         }
     }
 
-    pub fn check_type_reference_node(&mut self, node: &Arc<Node>) {
+    pub fn check_type_reference_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_reference_node"); 
         if let NodeData::TypeReferenceNode(data) = &node.data {
             if let Some(type_arguments) = &data.type_arguments {
                 self.check_grammar_type_arguments(node, type_arguments);
@@ -208,7 +208,7 @@ impl Checker {
         }
     }
 
-    pub fn check_type_reference_or_import(&mut self, node: &Arc<Node>) {
+    pub fn check_type_reference_or_import(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_reference_or_import"); 
         let t = self.get_type_from_type_node(node);
         if !self.is_error_type(&t) {
             if !tsox_frontend::ast::mig::m3c::type_arguments(node).is_empty() {
@@ -232,11 +232,11 @@ impl Checker {
         }
     }
 
-    pub fn check_type_query(&mut self, node: &Arc<Node>) {
+    pub fn check_type_query(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_query"); 
         self.get_type_from_type_query_node(node);
     }
 
-    pub fn check_type_literal(&mut self, node: &Arc<Node>) {
+    pub fn check_type_literal(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_literal"); 
         if let NodeData::TypeLiteralNode(data) = &node.data {
             self.check_source_elements(&data.members.nodes);
         }
@@ -246,7 +246,7 @@ impl Checker {
         self.check_object_type_for_duplicate_declarations(node, false);
     }
 
-    pub fn check_tuple_type(&mut self, node: &Arc<Node>) {
+    pub fn check_tuple_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_tuple_type"); 
         let mut seen_optional_element = false;
         let mut seen_rest_element = false;
         let elements = tsox_frontend::ast::mig::m3b::elements(node);
@@ -295,7 +295,7 @@ impl Checker {
         self.get_type_from_type_node(node);
     }
 
-    pub fn check_union_or_intersection_type(&mut self, node: &Arc<Node>) {
+    pub fn check_union_or_intersection_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_union_or_intersection_type"); 
         for_each_child(node, |c| {
             self.check_source_element(c);
             true
@@ -303,14 +303,14 @@ impl Checker {
         self.get_type_from_type_node(node);
     }
 
-    pub fn check_type_operator(&mut self, node: &Arc<Node>) {
+    pub fn check_type_operator(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_operator"); 
         self.check_grammar_type_operator_node(node);
         if let Some(operand) = node_type(node) {
             self.check_source_element(operand);
         }
     }
 
-    pub fn check_while_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_while_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_while_statement"); 
         self.check_grammar_statement_in_ambient_context(node);
         let expression = node_expression(node).unwrap();
         self.check_truthiness_expression(expression, CheckMode::Normal);
@@ -321,7 +321,7 @@ impl Checker {
         self.check_source_element(&statement);
     }
 
-    pub fn check_with_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_with_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_with_statement"); 
         if !self.check_grammar_statement_in_ambient_context(node) {
             if node.flags.contains(NodeFlags::AwaitContext) {
                 self.grammar_error_on_first_token(

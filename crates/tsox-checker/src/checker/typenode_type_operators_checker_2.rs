@@ -3,7 +3,7 @@
 use crate::checker::typenode_type_operators::*;
 
 impl Checker {
-    pub(crate) fn build_conditional_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn build_conditional_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_conditional_type"); 
         let (check_type_node, extends_type_node) = match &node.data {
             NodeData::ConditionalTypeNode(data) => {
                 (Arc::clone(&data.check_type), Arc::clone(&data.extends_type))
@@ -74,7 +74,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn collect_infer_type_parameters(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> {
+    pub(crate) fn collect_infer_type_parameters(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("collect_infer_type_parameters"); 
         let symbols: Vec<Arc<Symbol>> = self
             .program
             .symbol_map()
@@ -93,7 +93,7 @@ impl Checker {
             .collect()
     }
 
-    pub(crate) fn cross_product_union_size(types: &[Arc<Type>]) -> u64 {
+    pub(crate) fn cross_product_union_size(types: &[Arc<Type>]) -> u64 { ::tsox_core::fntrace::enter("cross_product_union_size"); 
         let mut size: u64 = 1;
         for t in types {
             if let TypeData::Union(u) = &t.data {
@@ -110,7 +110,7 @@ impl Checker {
         object_type: &Arc<Type>,
         index_type: &Arc<Type>,
         index_type_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_missing_literal_index_property"); 
         let index_literal_kind = match &index_type_node.data {
             NodeData::LiteralTypeNode(d) => d.literal.kind,
             _ => index_type_node.kind,

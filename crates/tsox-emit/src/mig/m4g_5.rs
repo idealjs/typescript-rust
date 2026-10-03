@@ -16,14 +16,14 @@ use crate::mig::m4g::r33k7_defs::{
 
 impl ClassFieldsTransformer {
 
-    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_constructor_declaration"); 
         if let Some(container) = self.current_class_container.clone() {
             return self.transform_constructor(Some(node), &container);
         }
         Some(self.visitor().visit_each_child(node))
     }
 
-    pub fn try_get_class_this(&self) -> Option<Arc<Node>> {
+    pub fn try_get_class_this(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_class_this"); 
         if let Some(class_this) = self.try_get_class_this_no_container() {
             return Some(class_this);
         }
@@ -33,7 +33,7 @@ impl ClassFieldsTransformer {
         None
     }
 
-    pub fn try_get_class_this_no_container(&self) -> Option<Arc<Node>> {
+    pub fn try_get_class_this_no_container(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_class_this_no_container"); 
         let env = self
             .lexical_environment
             .as_ref()
@@ -48,7 +48,7 @@ impl ClassFieldsTransformer {
         None
     }
 
-    pub fn visit_for_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_for_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_for_statement"); 
         let initializer = self
             .discarded_value_visitor()
             .visit_node_opt(for_statement_initializer(node));
@@ -69,7 +69,7 @@ impl ClassFieldsTransformer {
         self.factory().update_for_statement(node, initializer, condition, incrementor, &body)
     }
 
-    pub fn visit_expression_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_expression_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_expression_statement"); 
         if is_private_identifier(expression_statement_expression(node).unwrap())
             && self.should_transform_private_elements_or_class_static_blocks
         {
@@ -82,7 +82,7 @@ impl ClassFieldsTransformer {
 
     }
 
-    pub fn visit_computed_property_name(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_computed_property_name(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_computed_property_name"); 
         let saved_lexical_environment = self.lexical_environment.take();
         let saved_inside_computed_property_name = self.inside_computed_property_name;
         self.inside_computed_property_name = true;
@@ -132,7 +132,7 @@ impl ClassFieldsTransformer {
         &mut self,
         constructor: Option<&Arc<Node>>,
         container: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_constructor"); 
         let will_hoist_initializers = self
             .lexical_environment
             .as_ref()
@@ -221,7 +221,7 @@ impl ClassFieldsTransformer {
         super_path_depth: usize,
         initializer_statements: &[Arc<Node>],
         constructor: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_constructor_body_worker"); 
         let super_statement_index = super_path[super_path_depth];
         for statement in &statements_in[statement_offset..super_statement_index] {
             statements_out.push(self.visitor().visit_node(statement));
@@ -300,7 +300,7 @@ impl ClassFieldsTransformer {
         container: &Arc<Node>,
         constructor: Option<&Arc<Node>>,
         is_derived_class: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_constructor_body"); 
         let instance_properties = get_properties_m4g5(container, false, false);
         let use_define_for_class_fields = self.compiler_options.get_use_define_for_class_fields();
         let properties: Vec<Arc<Node>> = if !use_define_for_class_fields {
@@ -489,7 +489,7 @@ impl ClassFieldsTransformer {
         mut statements: Vec<Arc<Node>>,
         properties: &[Arc<Node>],
         receiver: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("add_property_or_class_static_block_statements"); 
         for property in properties {
             if has_static_modifier(property)
                 && !self.should_transform_private_elements_or_class_static_blocks
@@ -504,7 +504,7 @@ impl ClassFieldsTransformer {
         statements
     }
 
-    pub fn transform_class_members(&mut self, node: &Arc<Node>) -> (Arc<NodeList>, Option<Arc<Node>>) {
+    pub fn transform_class_members(&mut self, node: &Arc<Node>) -> (Arc<NodeList>, Option<Arc<Node>>) { ::tsox_core::fntrace::enter("transform_class_members"); 
         let should_transform_private_static_elements_in_class = self
             .emit_context()
             .emit_flags(node)
@@ -683,7 +683,7 @@ impl ClassFieldsTransformer {
         (members_list, members_prologue)
     }
 
-    fn create_brand_check_weak_set_for_private_methods(&mut self) {
+    fn create_brand_check_weak_set_for_private_methods(&mut self) { ::tsox_core::fntrace::enter("create_brand_check_weak_set_for_private_methods"); 
         let weak_set_name = self
             .get_private_identifier_environment()
             .data
@@ -709,7 +709,7 @@ impl ClassFieldsTransformer {
         &mut self,
         properties_or_class_static_blocks: &[Arc<Node>],
         receiver: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("generate_initialized_property_expressions_or_class_static_block"); 
         let mut expressions: Vec<Arc<Node>> = Vec::new();
         for property in properties_or_class_static_blocks {
             let expression = if is_class_static_block_declaration(property) {
@@ -734,7 +734,7 @@ impl ClassFieldsTransformer {
     fn transform_class_static_block_declaration_m4g5(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_class_static_block_declaration_m4g5"); 
         if !self.should_transform_private_elements_or_class_static_blocks {
             return None;
         }
@@ -808,7 +808,7 @@ impl ClassFieldsTransformer {
     }
 }
 
-fn untransformed_private_identifier_info() -> PrivateIdentifierInfo {
+fn untransformed_private_identifier_info() -> PrivateIdentifierInfo { ::tsox_core::fntrace::enter("untransformed_private_identifier_info"); 
     PrivateIdentifierInfo {
         kind: PrivateIdentifierKind::Untransformed,
         brand_check_identifier: None,
@@ -821,7 +821,7 @@ fn untransformed_private_identifier_info() -> PrivateIdentifierInfo {
     }
 }
 
-fn get_private_instance_methods_and_accessors_m4g5(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn get_private_instance_methods_and_accessors_m4g5(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_private_instance_methods_and_accessors_m4g5"); 
     members(node)
         .iter()
         .filter(|m| is_non_static_method_or_accessor_with_private_name_m4g5(m))
@@ -829,7 +829,7 @@ fn get_private_instance_methods_and_accessors_m4g5(node: &Arc<Node>) -> Vec<Arc<
         .collect()
 }
 
-fn is_non_static_method_or_accessor_with_private_name_m4g5(member: &Arc<Node>) -> bool {
+fn is_non_static_method_or_accessor_with_private_name_m4g5(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_non_static_method_or_accessor_with_private_name_m4g5"); 
     !has_static_modifier(member)
         && (tsox_frontend::ast::node_data_generated::is_method_declaration(member)
             || tsox_frontend::ast::node_data_generated::is_get_accessor_declaration(member)
@@ -841,7 +841,7 @@ fn is_non_static_method_or_accessor_with_private_name_m4g5(member: &Arc<Node>) -
             .unwrap_or(false)
 }
 
-fn is_auto_accessor_property_declaration_m4g5(node: &Arc<Node>) -> bool {
+fn is_auto_accessor_property_declaration_m4g5(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_auto_accessor_property_declaration_m4g5"); 
     tsox_frontend::ast::mig::m3f_3::is_auto_accessor_property_declaration(node)
 }
 
@@ -849,7 +849,7 @@ fn get_private_identifier_in_m4g5<'a>(
     emit_context: &crate::printer::EmitContext,
     env: &'a crate::mig::m4g::PrivateEnvironment,
     name: &Arc<Node>,
-) -> Option<&'a crate::mig::m4g::PrivateIdentifierInfo> {
+) -> Option<&'a crate::mig::m4g::PrivateIdentifierInfo> { ::tsox_core::fntrace::enter("get_private_identifier_in_m4g5"); 
     if emit_context.has_auto_generate_info(name) {
         let key = Arc::as_ptr(name);
         return env.generated_identifiers.get(&key);
@@ -857,7 +857,7 @@ fn get_private_identifier_in_m4g5<'a>(
     env.members.get(name.text())
 }
 
-fn get_properties_m4g5(node: &Arc<Node>, require_initializer: bool, is_static: bool) -> Vec<Arc<Node>> {
+fn get_properties_m4g5(node: &Arc<Node>, require_initializer: bool, is_static: bool) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_properties_m4g5"); 
     let mut result = Vec::new();
     for member in members(node) {
         if is_property_declaration(member)
@@ -870,7 +870,7 @@ fn get_properties_m4g5(node: &Arc<Node>, require_initializer: bool, is_static: b
     result
 }
 
-fn get_class_extends_heritage_element_m4g5(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_class_extends_heritage_element_m4g5(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_class_extends_heritage_element_m4g5"); 
     let heritage_clauses = get_heritage_clauses(node)?;
     for clause in heritage_clauses.nodes.iter() {
         if let ndg::NodeData::HeritageClause(data) = &clause.data {
@@ -882,48 +882,48 @@ fn get_class_extends_heritage_element_m4g5(node: &Arc<Node>) -> Option<Arc<Node>
     None
 }
 
-fn block_statement_nodes_m4g5(block: &Arc<Node>) -> Vec<Arc<Node>> {
+fn block_statement_nodes_m4g5(block: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("block_statement_nodes_m4g5"); 
     match &block.data {
         ndg::NodeData::Block(d) => d.statements.nodes.clone(),
         _ => Vec::new(),
     }
 }
 
-fn block_is_multiline(block: &Arc<Node>) -> bool {
+fn block_is_multiline(block: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("block_is_multiline"); 
     match &block.data {
         ndg::NodeData::Block(d) => d.multi_line,
         _ => false,
     }
 }
 
-fn block_statements_loc(block: &Arc<Node>) -> tsox_core::core::text::TextRange {
+fn block_statements_loc(block: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("block_statements_loc"); 
     match &block.data {
         ndg::NodeData::Block(d) => d.statements.loc,
         _ => block.loc,
     }
 }
 
-fn static_block_statements_loc_m4g5(node: &Arc<Node>) -> tsox_core::core::text::TextRange {
+fn static_block_statements_loc_m4g5(node: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("static_block_statements_loc_m4g5"); 
     if let Some(body) = class_static_block_body_m4g5(node) {
         return block_statements_loc(&body);
     }
     node.loc
 }
 
-fn class_static_block_body_m4g5(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn class_static_block_body_m4g5(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_static_block_body_m4g5"); 
     match &node.data {
         ndg::NodeData::ClassStaticBlockDeclaration(d) => Some(d.body.clone()),
         _ => None,
     }
 }
 
-fn static_block_statements_m4g5(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn static_block_statements_m4g5(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("static_block_statements_m4g5"); 
     class_static_block_body_m4g5(node)
         .map(|body| block_statement_nodes_m4g5(&body))
         .unwrap_or_default()
 }
 
-fn static_block_first_expression_m4g5(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn static_block_first_expression_m4g5(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("static_block_first_expression_m4g5"); 
     let statement = static_block_statements_m4g5(node).into_iter().next()?;
     match &statement.data {
         ndg::NodeData::ExpressionStatement(d) => Some(d.expression.clone()),
@@ -936,7 +936,7 @@ fn factory_update_try_statement_m4g5(
     try_block: &Arc<Node>,
     catch_clause: Option<&Arc<Node>>,
     finally_block: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("factory_update_try_statement_m4g5"); 
     let mut updated = Node::new(
         SyntaxKind::TryStatement,
         ndg::NodeData::TryStatement(ndg::TryStatementData {

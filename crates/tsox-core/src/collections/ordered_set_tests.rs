@@ -1,7 +1,7 @@
 use crate::collections::ordered_set::*;
 
 #[test]
-fn insertion_order() {
+fn insertion_order() { crate::fntrace::enter("insertion_order"); 
     let mut s = OrderedSet::new();
     s.insert("b");
     s.insert("a");
@@ -12,7 +12,7 @@ fn insertion_order() {
 }
 
 #[test]
-fn remove() {
+fn remove() { crate::fntrace::enter("remove"); 
     let mut s = OrderedSet::new();
     s.insert("a");
     s.insert("b");
@@ -24,7 +24,7 @@ fn remove() {
 }
 
 #[test]
-fn test_ordered_set() {
+fn test_ordered_set() { crate::fntrace::enter("test_ordered_set"); 
     let mut s: OrderedSet<i32> = OrderedSet::new();
 
     s.add(1);
@@ -54,7 +54,7 @@ fn test_ordered_set() {
 }
 
 #[test]
-fn test_ordered_set_with_size_hint() {
+fn test_ordered_set_with_size_hint() { crate::fntrace::enter("test_ordered_set_with_size_hint"); 
     const N: usize = 1024;
 
     let mut s: OrderedSet<i32> = OrderedSet::with_capacity(N);

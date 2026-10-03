@@ -35,7 +35,7 @@ impl FileEmitKind {
     pub const AllDts: FileEmitKind = FileEmitKind((1 << 3) | (1 << 4) | (1 << 5));
     pub const All: FileEmitKind = FileEmitKind(0b111111);
 
-    pub fn from_repr(value: u16) -> Option<FileEmitKind> {
+    pub fn from_repr(value: u16) -> Option<FileEmitKind> { ::tsox_core::fntrace::enter("from_repr"); 
         if value <= 0b111111 {
             Some(FileEmitKind(value))
         } else {
@@ -43,38 +43,38 @@ impl FileEmitKind {
         }
     }
 
-    pub fn is_empty(self) -> bool {
+    pub fn is_empty(self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.0 == 0
     }
 }
 
 impl std::ops::BitAnd for FileEmitKind {
     type Output = FileEmitKind;
-    fn bitand(self, rhs: FileEmitKind) -> FileEmitKind {
+    fn bitand(self, rhs: FileEmitKind) -> FileEmitKind { ::tsox_core::fntrace::enter("bitand"); 
         FileEmitKind(self.0 & rhs.0)
     }
 }
 
 impl std::ops::BitAndAssign for FileEmitKind {
-    fn bitand_assign(&mut self, rhs: FileEmitKind) {
+    fn bitand_assign(&mut self, rhs: FileEmitKind) { ::tsox_core::fntrace::enter("bitand_assign"); 
         self.0 &= rhs.0;
     }
 }
 
 impl std::ops::BitOr for FileEmitKind {
     type Output = FileEmitKind;
-    fn bitor(self, rhs: FileEmitKind) -> FileEmitKind {
+    fn bitor(self, rhs: FileEmitKind) -> FileEmitKind { ::tsox_core::fntrace::enter("bitor"); 
         FileEmitKind(self.0 | rhs.0)
     }
 }
 
 impl std::ops::BitOrAssign for FileEmitKind {
-    fn bitor_assign(&mut self, rhs: FileEmitKind) {
+    fn bitor_assign(&mut self, rhs: FileEmitKind) { ::tsox_core::fntrace::enter("bitor_assign"); 
         self.0 |= rhs.0;
     }
 }
 
-pub fn get_file_emit_kind(options: &CompilerOptions) -> FileEmitKind {
+pub fn get_file_emit_kind(options: &CompilerOptions) -> FileEmitKind { ::tsox_core::fntrace::enter("get_file_emit_kind"); 
     let mut result = FileEmitKind::Js;
     if options.source_map.is_true() {
         result |= FileEmitKind::JsMap;
@@ -97,13 +97,13 @@ pub fn get_file_emit_kind(options: &CompilerOptions) -> FileEmitKind {
 pub fn get_pending_emit_kind_with_options(
     options: &CompilerOptions,
     old_options: &CompilerOptions,
-) -> FileEmitKind {
+) -> FileEmitKind { ::tsox_core::fntrace::enter("get_pending_emit_kind_with_options"); 
     let old_emit_kind = get_file_emit_kind(old_options);
     let new_emit_kind = get_file_emit_kind(options);
     get_pending_emit_kind(new_emit_kind, old_emit_kind)
 }
 
-pub fn get_pending_emit_kind(emit_kind: FileEmitKind, old_emit_kind: FileEmitKind) -> FileEmitKind {
+pub fn get_pending_emit_kind(emit_kind: FileEmitKind, old_emit_kind: FileEmitKind) -> FileEmitKind { ::tsox_core::fntrace::enter("get_pending_emit_kind"); 
     if old_emit_kind == emit_kind {
         return FileEmitKind::None;
     }
@@ -124,7 +124,7 @@ pub fn get_pending_emit_kind(emit_kind: FileEmitKind, old_emit_kind: FileEmitKin
     result
 }
 
-pub fn compute_hash(text: &str, hash_with_text: bool) -> String {
+pub fn compute_hash(text: &str, hash_with_text: bool) -> String { ::tsox_core::fntrace::enter("compute_hash"); 
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
@@ -147,19 +147,19 @@ pub struct FileInfo {
 }
 
 impl FileInfo {
-    pub fn version(&self) -> &str {
+    pub fn version(&self) -> &str { ::tsox_core::fntrace::enter("version"); 
         &self.version
     }
 
-    pub fn signature(&self) -> &str {
+    pub fn signature(&self) -> &str { ::tsox_core::fntrace::enter("signature"); 
         &self.signature
     }
 
-    pub fn affects_global_scope(&self) -> bool {
+    pub fn affects_global_scope(&self) -> bool { ::tsox_core::fntrace::enter("affects_global_scope"); 
         self.affects_global_scope
     }
 
-    pub fn implied_node_format(&self) -> tsox_core::core::compiler_options::ResolutionMode {
+    pub fn implied_node_format(&self) -> tsox_core::core::compiler_options::ResolutionMode { ::tsox_core::fntrace::enter("implied_node_format"); 
         self.implied_node_format
     }
 }
@@ -175,7 +175,7 @@ impl EmitSignature {
         &self,
         old_options: &CompilerOptions,
         new_options: &CompilerOptions,
-    ) -> EmitSignature {
+    ) -> EmitSignature { ::tsox_core::fntrace::enter("get_new_emit_signature"); 
         if old_options.declaration_map.is_true() == new_options.declaration_map.is_true() {
             return self.clone();
         }
@@ -218,7 +218,7 @@ impl BuildInfoDiagnosticWithFileName {
         &self,
         program: &tsox_compile::compiler::Program,
         file: Option<&Arc<SourceFile>>,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("to_diagnostic"); 
         let file_for_diagnostic: Option<Arc<SourceFile>> = if !self.file.as_str().is_empty() {
             program.get_source_file_by_path(self.file.as_str())
         } else if !self.no_file {
@@ -267,7 +267,7 @@ impl BuildInfoDiagnosticWithFileName {
         &self,
         program: &tsox_compile::compiler::Program,
         file: Option<&Arc<SourceFile>>,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("to_diagnostic_without_repopulate"); 
         let message_chain = self
             .message_chain
             .iter()
@@ -301,7 +301,7 @@ pub fn repopulate_diagnostic_chain(
     b: &BuildInfoDiagnosticWithFileName,
     program: &tsox_compile::compiler::Program,
     file: Option<&Arc<SourceFile>>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("repopulate_diagnostic_chain"); 
     let info = b.repopulate_info.as_ref().unwrap();
     match info.kind {
         tsox_frontend::ast::mig::m3e::RepopulateDiagnosticKind::ModeMismatch => {
@@ -317,7 +317,7 @@ fn repopulate_mode_mismatch_chain(
     b: &BuildInfoDiagnosticWithFileName,
     program: &tsox_compile::compiler::Program,
     file: Option<&Arc<SourceFile>>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("repopulate_mode_mismatch_chain"); 
     let Some(file) = file else {
         return b.to_diagnostic_without_repopulate(program, file);
     };
@@ -356,7 +356,7 @@ fn repopulate_module_not_found_chain(
     program: &tsox_compile::compiler::Program,
     file: Option<&Arc<SourceFile>>,
     info: &RepopulateDiagnosticInfo,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("repopulate_module_not_found_chain"); 
     let Some(file) = file else {
         return b.to_diagnostic_without_repopulate(program, file);
     };
@@ -411,7 +411,7 @@ impl DiagnosticsOrBuildInfoDiagnosticsWithFileName {
         &mut self,
         program: &tsox_compile::compiler::Program,
         file: &Arc<SourceFile>,
-    ) -> Vec<Diagnostic> {
+    ) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_diagnostics"); 
         if !self.diagnostics.is_empty() {
             return self.diagnostics.clone();
         }
@@ -425,7 +425,7 @@ impl DiagnosticsOrBuildInfoDiagnosticsWithFileName {
 }
 
 impl Default for Snapshot {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             file_infos: Default::default(),
             options: None,
@@ -489,13 +489,13 @@ pub struct Snapshot {
 }
 
 impl Snapshot {
-    pub fn add_file_to_change_set(&mut self, file_path: Path) {
+    pub fn add_file_to_change_set(&mut self, file_path: Path) { ::tsox_core::fntrace::enter("add_file_to_change_set"); 
         self.changed_files_set.lock().unwrap().insert(file_path);
         self.build_info_emit_pending
             .store(true, std::sync::atomic::Ordering::SeqCst);
     }
 
-    pub fn add_file_to_affected_files_pending_emit(&mut self, file_path: Path, emit_kind: FileEmitKind) {
+    pub fn add_file_to_affected_files_pending_emit(&mut self, file_path: Path, emit_kind: FileEmitKind) { ::tsox_core::fntrace::enter("add_file_to_affected_files_pending_emit"); 
         let existing_kind = self
             .affected_files_pending_emit
             .load(&file_path)
@@ -513,7 +513,7 @@ impl Snapshot {
         &mut self,
         program: &tsox_compile::compiler::Program,
         first_source_file: Option<&Arc<SourceFile>>,
-    ) -> Vec<Arc<SourceFile>> {
+    ) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_all_files_excluding_default_library_file"); 
         self.all_files_excluding_default_library_file_once.call_once(|| {
             let files = program.get_source_files();
             self.all_files_excluding_default_library_file = Vec::with_capacity(files.len());
@@ -543,7 +543,7 @@ impl Snapshot {
         file: &Arc<SourceFile>,
         text: &str,
         data: &crate::mig::m4y_3::WriteFileData,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("compute_signature_with_diagnostics"); 
         let mut builder = String::new();
         builder.push_str(&get_text_handling_source_map_for_signature(text, data));
         for diag in &data.diagnostics {
@@ -552,11 +552,11 @@ impl Snapshot {
         self.compute_hash(&builder)
     }
 
-    pub fn compute_hash(&self, text: &str) -> String {
+    pub fn compute_hash(&self, text: &str) -> String { ::tsox_core::fntrace::enter("compute_hash"); 
         compute_hash(text, self.hash_with_text)
     }
 
-    pub fn can_use_incremental_state(&self) -> bool {
+    pub fn can_use_incremental_state(&self) -> bool { ::tsox_core::fntrace::enter("can_use_incremental_state"); 
         let default_options = CompilerOptions::default();
         let options = self.options.as_ref().unwrap_or(&default_options);
         if !options.is_incremental() && options.build.is_true() {
@@ -569,7 +569,7 @@ impl Snapshot {
 pub fn get_text_handling_source_map_for_signature(
     text: &str,
     data: &crate::mig::m4y_3::WriteFileData,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_text_handling_source_map_for_signature"); 
     if data.source_map_url_pos != -1 {
         return text[..data.source_map_url_pos as usize].to_string();
     }
@@ -580,7 +580,7 @@ pub fn diagnostic_to_string_builder(
     diagnostic: &Diagnostic,
     file: &Arc<SourceFile>,
     builder: &mut String,
-) {
+) { ::tsox_core::fntrace::enter("diagnostic_to_string_builder"); 
     builder.push('\n');
     let same_file = diagnostic
         .file

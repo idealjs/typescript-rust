@@ -28,7 +28,7 @@ impl TypingsInstaller {
         &mut self,
         request: &TypingsInstallRequest,
         logger: Option<&dyn AtaLogger>,
-    ) -> Result<TypingsInstallResult, String> {
+    ) -> Result<TypingsInstallResult, String> { ::tsox_core::fntrace::enter("discover_and_install_typings"); 
         let fs = request.fs.as_deref().expect("request fs");
         self.init(&request.project_id.0, fs, logger);
 
@@ -82,7 +82,7 @@ impl TypingsInstaller {
         request_id: i32,
         package_names: &[String],
         logger: &dyn AtaLogger,
-    ) -> (Vec<String>, bool) {
+    ) -> (Vec<String>, bool) { ::tsox_core::fntrace::enter("install_worker"); 
         logger.log(&format!(
             "ATA:: #{} with cwd: {} arguments: {:?}",
             request_id, self.typings_location, package_names
@@ -109,7 +109,7 @@ impl TypingsInstaller {
         _project_id: &str,
         fs: &Arc<dyn FS>,
         logger: Option<&dyn AtaLogger>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("process_cache_location"); 
         let logger = logger;
         if let Some(logger) = logger {
             logger.log(&format!("ATA:: Processing cache location {}", self.typings_location));
@@ -200,7 +200,7 @@ impl TypingsInstaller {
         }
     }
 
-    pub fn ensure_typings_location_exists(&self, fs: &dyn FS, logger: Option<&dyn AtaLogger>) {
+    pub fn ensure_typings_location_exists(&self, fs: &dyn FS, logger: Option<&dyn AtaLogger>) { ::tsox_core::fntrace::enter("ensure_typings_location_exists"); 
         let npm_config_path = combine_paths(&self.typings_location, &["package.json"]);
         if let Some(logger) = logger {
             logger.log(&format!("ATA:: Npm config file: {}", npm_config_path));
@@ -224,7 +224,7 @@ impl TypingsInstaller {
         &self,
         fs: &dyn FS,
         logger: Option<&dyn AtaLogger>,
-    ) -> HashMap<String, HashMap<String, String>> {
+    ) -> HashMap<String, HashMap<String, String>> { ::tsox_core::fntrace::enter("load_types_registry_file"); 
         let types_registry_file = combine_paths(
             &self.typings_location,
             &["node_modules/types-registry/index.json"],
@@ -267,7 +267,7 @@ pub fn parse_npm_config_or_lock<T: serde::de::DeserializeOwned>(
     fs: &dyn FS,
     location: &str,
     config: &mut T,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("parse_npm_config_or_lock"); 
     let contents = fs.read_file(location).unwrap_or_default();
     if let Ok(parsed) = serde_json::from_str::<T>(&contents) {
         *config = parsed;
@@ -283,7 +283,7 @@ pub fn add_typing_names_and_get_files_to_watch(
     project_root_path: &str,
     manifest_name: &str,
     modules_dir_name: &str,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("add_typing_names_and_get_files_to_watch"); 
     let mut files_to_watch = files_to_watch;
     let manifest_path = combine_paths(project_root_path, &[manifest_name]);
     if let Some(contents) = fs.read_file(&manifest_path) {
@@ -316,7 +316,7 @@ pub fn add_typing_names_and_get_files_to_watch(
     files_to_watch
 }
 
-fn add_inferred_typing(inferred_typings: &mut HashMap<String, String>, typing_name: &str) {
+fn add_inferred_typing(inferred_typings: &mut HashMap<String, String>, typing_name: &str) { ::tsox_core::fntrace::enter("add_inferred_typing"); 
     inferred_typings
         .entry(typing_name.to_string())
         .or_default();
@@ -327,11 +327,11 @@ struct TypingsResolutionHost {
 }
 
 impl tsox_tsoptions::module::resolver::ResolutionHost for TypingsResolutionHost {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
 
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         ""
     }
 }
@@ -342,11 +342,11 @@ pub struct AutoImportBuilderFS {
 }
 
 impl AutoImportBuilderFS {
-    pub fn fs(&self) -> &dyn FS {
+    pub fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.snapshot_fs_builder.fs.as_ref()
     }
 
-    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         let path = (self.snapshot_fs_builder.to_path)(file_name);
         self.get_file_by_path(file_name, &path)
     }
@@ -355,7 +355,7 @@ impl AutoImportBuilderFS {
         &self,
         file_name: &str,
         path: &Path,
-    ) -> Option<Arc<dyn FileHandle>> {
+    ) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file_by_path"); 
         if let Some(overlay) = self.snapshot_fs_builder.overlays.get(path) {
             return Some(overlay.clone());
         }
@@ -375,21 +375,21 @@ impl AutoImportBuilderFS {
         fh
     }
 
-    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.snapshot_fs_builder.get_accessible_entries(path)
     }
 
-    pub fn file_exists(&self, file_name: &str, path: &Path) -> bool {
+    pub fn file_exists(&self, file_name: &str, path: &Path) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.snapshot_fs_builder.file_exists(file_name, path)
     }
 }
 
 impl FileSource for AutoImportBuilderFS {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         AutoImportBuilderFS::fs(self)
     }
 
-    fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> {
+    fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         AutoImportBuilderFS::get_file(self, file_name)
     }
 
@@ -397,15 +397,15 @@ impl FileSource for AutoImportBuilderFS {
         &self,
         file_name: &str,
         path: &Path,
-    ) -> Option<Arc<dyn FileHandle>> {
+    ) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file_by_path"); 
         AutoImportBuilderFS::get_file_by_path(self, file_name, path)
     }
 
-    fn file_exists(&self, file_name: &str, path: &Path) -> bool {
+    fn file_exists(&self, file_name: &str, path: &Path) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         AutoImportBuilderFS::file_exists(self, file_name, path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         AutoImportBuilderFS::get_accessible_entries(self, path)
     }
 }
@@ -424,7 +424,7 @@ pub fn new_auto_import_registry_clone_host(
     snapshot_fs_builder: Arc<SnapshotFSBuilder>,
     current_directory: String,
     to_path: Arc<dyn Fn(&str) -> Path + Send + Sync>,
-) -> AutoImportRegistryCloneHostReal {
+) -> AutoImportRegistryCloneHostReal { ::tsox_core::fntrace::enter("new_auto_import_registry_clone_host"); 
     let builder_fs = Arc::new(AutoImportBuilderFS {
         snapshot_fs_builder,
         untracked_files: SyncMap::new(),
@@ -439,28 +439,28 @@ pub fn new_auto_import_registry_clone_host(
 }
 
 impl AutoImportRegistryCloneHostReal {
-    pub fn fs(&self) -> &dyn FS {
+    pub fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.source.fs()
     }
 
-    pub fn get_current_directory(&self) -> &str {
+    pub fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }
 
 impl super::super::auto_import::RegistryCloneHost for AutoImportRegistryCloneHostReal {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         AutoImportRegistryCloneHostReal::fs(self)
     }
 
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         AutoImportRegistryCloneHostReal::get_current_directory(self)
     }
 
     fn get_default_project(
         &self,
         path: &Path,
-    ) -> (Path, Option<Arc<tsox_compile::compiler::Program>>) {
+    ) -> (Path, Option<Arc<tsox_compile::compiler::Program>>) { ::tsox_core::fntrace::enter("get_default_project"); 
         match self.project_collection.get_default_project(path) {
             Some(project) => (
                 project.config_file_path().clone(),
@@ -473,14 +473,14 @@ impl super::super::auto_import::RegistryCloneHost for AutoImportRegistryCloneHos
     fn get_package_json(
         &self,
         _file_name: &str,
-    ) -> Option<super::super::auto_import::PackageJsonInfoCacheEntry> {
+    ) -> Option<super::super::auto_import::PackageJsonInfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_json"); 
         None
     }
 
     fn get_program_for_project(
         &self,
         project_path: &Path,
-    ) -> Option<Arc<tsox_compile::compiler::Program>> {
+    ) -> Option<Arc<tsox_compile::compiler::Program>> { ::tsox_core::fntrace::enter("get_program_for_project"); 
         self.project_collection
             .get_project_by_path(project_path)
             .and_then(|project| project.get_program().cloned())
@@ -490,7 +490,7 @@ impl super::super::auto_import::RegistryCloneHost for AutoImportRegistryCloneHos
         &self,
         file_name: &str,
         path: &Path,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         let fh = self.fs.get_file(file_name)?;
         let options = SourceFileParseOptions {
             file_name: file_name.to_string(),
@@ -510,7 +510,7 @@ impl super::super::auto_import::RegistryCloneHost for AutoImportRegistryCloneHos
         Some(result)
     }
 
-    fn dispose(&self) {
+    fn dispose(&self) { ::tsox_core::fntrace::enter("dispose"); 
         let files = self.files_mu.lock().unwrap();
         for key in files.iter() {
             self.parse_cache.deref(key);

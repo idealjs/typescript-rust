@@ -3,7 +3,7 @@
 use crate::binder::nameresolver_impl_chunk::*;
 
 impl NameResolver {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             compiler_options: None,
             get_symbol_of_declaration_fn: None,
@@ -29,7 +29,7 @@ impl NameResolver {
         name_not_found_message: Option<&Message>,
         is_use: bool,
         exclude_globals: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve"); 
         let mut result: Option<Arc<Symbol>> = None;
         let mut last_location: Option<Arc<Node>> = None;
         let mut last_self_reference_location: Option<Arc<Node>> = None;

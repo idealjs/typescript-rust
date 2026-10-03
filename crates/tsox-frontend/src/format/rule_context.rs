@@ -30,16 +30,16 @@ pub enum Tristate {
 }
 
 impl Tristate {
-    pub fn is_true(self) -> bool {
+    pub fn is_true(self) -> bool { ::tsox_core::fntrace::enter("is_true"); 
         self == Tristate::True
     }
-    pub fn is_true_or_unknown(self) -> bool {
+    pub fn is_true_or_unknown(self) -> bool { ::tsox_core::fntrace::enter("is_true_or_unknown"); 
         self != Tristate::False
     }
-    pub fn is_false(self) -> bool {
+    pub fn is_false(self) -> bool { ::tsox_core::fntrace::enter("is_false"); 
         self == Tristate::False
     }
-    pub fn is_false_or_unknown(self) -> bool {
+    pub fn is_false_or_unknown(self) -> bool { ::tsox_core::fntrace::enter("is_false_or_unknown"); 
         self != Tristate::True
     }
 }
@@ -67,7 +67,7 @@ impl FormattingContext {
         file: Arc<crate::ast::SourceFile>,
         kind: FormatRequestKind,
         options: FormatCodeSettings,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             source_file: file,
             formatting_request_kind: kind,
@@ -92,7 +92,7 @@ impl FormattingContext {
         next: TextRangeWithKind,
         next_parent: Arc<Node>,
         context_node: Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("update_context"); 
         self.current_token_span = cur;
         self.current_token_parent = Some(cur_parent);
         self.next_token_span = next;
@@ -105,17 +105,17 @@ impl FormattingContext {
         self.next_node_block_is_on_one_line = Tristate::Unknown;
     }
 
-    fn range_is_on_one_line(&self, range: TextRange) -> bool {
+    fn range_is_on_one_line(&self, range: TextRange) -> bool { ::tsox_core::fntrace::enter("range_is_on_one_line"); 
         let start = range.pos().min(self.source_file.text.len());
         let end = range.end().min(self.source_file.text.len());
         util::line_of_position(&self.source_file, start) == util::line_of_position(&self.source_file, end)
     }
 
-    fn node_is_on_one_line(&self, node: &Arc<Node>) -> bool {
+    fn node_is_on_one_line(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_on_one_line"); 
         self.range_is_on_one_line(util::with_token_start(&self.source_file, node))
     }
 
-    fn block_is_on_one_line(&self, node: &Arc<Node>) -> bool {
+    fn block_is_on_one_line(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("block_is_on_one_line"); 
         let open = find_child_of_kind(node, SyntaxKind::OpenBraceToken, &self.source_file);
         let close = find_child_of_kind(node, SyntaxKind::CloseBraceToken, &self.source_file);
         if let (Some(open), Some(close)) = (open, close) {
@@ -125,7 +125,7 @@ impl FormattingContext {
         false
     }
 
-    pub(crate) fn context_node_all_on_same_line(&mut self) -> bool {
+    pub(crate) fn context_node_all_on_same_line(&mut self) -> bool { ::tsox_core::fntrace::enter("context_node_all_on_same_line"); 
         if self.context_node_all_on_same_line == Tristate::Unknown {
             let r = self
                 .context_node
@@ -136,7 +136,7 @@ impl FormattingContext {
         tristate_to_bool(self.context_node_all_on_same_line)
     }
 
-    pub(crate) fn next_node_all_on_same_line(&mut self) -> bool {
+    pub(crate) fn next_node_all_on_same_line(&mut self) -> bool { ::tsox_core::fntrace::enter("next_node_all_on_same_line"); 
         if self.next_node_all_on_same_line == Tristate::Unknown {
             let r = self
                 .next_token_parent
@@ -147,7 +147,7 @@ impl FormattingContext {
         tristate_to_bool(self.next_node_all_on_same_line)
     }
 
-    pub(crate) fn tokens_are_on_same_line(&mut self) -> bool {
+    pub(crate) fn tokens_are_on_same_line(&mut self) -> bool { ::tsox_core::fntrace::enter("tokens_are_on_same_line"); 
         if self.tokens_are_on_same_line == Tristate::Unknown {
             let start = self.current_token_span.loc.pos();
             let end = self.next_token_span.loc.end();
@@ -156,7 +156,7 @@ impl FormattingContext {
         tristate_to_bool(self.tokens_are_on_same_line)
     }
 
-    pub(crate) fn context_node_block_is_on_one_line(&mut self) -> bool {
+    pub(crate) fn context_node_block_is_on_one_line(&mut self) -> bool { ::tsox_core::fntrace::enter("context_node_block_is_on_one_line"); 
         if self.context_node_block_is_on_one_line == Tristate::Unknown {
             let r = self
                 .context_node
@@ -167,7 +167,7 @@ impl FormattingContext {
         tristate_to_bool(self.context_node_block_is_on_one_line)
     }
 
-    pub(crate) fn next_node_block_is_on_one_line(&mut self) -> bool {
+    pub(crate) fn next_node_block_is_on_one_line(&mut self) -> bool { ::tsox_core::fntrace::enter("next_node_block_is_on_one_line"); 
         if self.next_node_block_is_on_one_line == Tristate::Unknown {
             let r = self
                 .next_token_parent
@@ -179,11 +179,11 @@ impl FormattingContext {
     }
 }
 
-fn bool_to_tristate(b: bool) -> Tristate {
+fn bool_to_tristate(b: bool) -> Tristate { ::tsox_core::fntrace::enter("bool_to_tristate"); 
     if b { Tristate::True } else { Tristate::False }
 }
 
-fn tristate_to_bool(t: Tristate) -> bool {
+fn tristate_to_bool(t: Tristate) -> bool { ::tsox_core::fntrace::enter("tristate_to_bool"); 
     t == Tristate::True
 }
 
@@ -193,7 +193,7 @@ pub(crate) fn find_child_of_kind(
     node: &Arc<Node>,
     kind: SyntaxKind,
     file: &Arc<crate::ast::SourceFile>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_child_of_kind"); 
     let mut scanner = crate::scanner::Scanner::new(file.text.clone());
     scanner.set_language_variant(file.language_variant);
     let mut last_node_pos = node.pos();

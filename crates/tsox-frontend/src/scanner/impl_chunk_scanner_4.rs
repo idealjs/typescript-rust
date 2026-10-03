@@ -3,12 +3,12 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
-    pub(crate) fn scan_string(&mut self, quote: char) -> SyntaxKind {
+    pub(crate) fn scan_string(&mut self, quote: char) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_string"); 
         self.scan_string_ex(quote, false)
     }
 
     /// Go scanString(jsxAttributeString)：JSX 属性值字符串允许裸换行
-    pub(crate) fn scan_string_ex(&mut self, quote: char, jsx_attribute: bool) -> SyntaxKind {
+    pub(crate) fn scan_string_ex(&mut self, quote: char, jsx_attribute: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_string_ex"); 
         if quote == '\'' {
             self.token_flags |= TOKEN_FLAGS_SINGLE_QUOTE;
         }
@@ -43,7 +43,7 @@ impl Scanner {
         self.token
     }
 
-    pub(crate) fn scan_escape_sequence(&mut self, report_errors: bool) {
+    pub(crate) fn scan_escape_sequence(&mut self, report_errors: bool) { ::tsox_core::fntrace::enter("scan_escape_sequence"); 
         let escape_start = self.pos;
         self.pos += 1;
         if self.pos >= self.end {

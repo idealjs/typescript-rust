@@ -9,22 +9,22 @@ use crate::ast::node::Node;
 use crate::ast::SyntaxKind;
 use crate::ast::SourceFile;
 
-pub(crate) fn line_of_position(file: &SourceFile, pos: usize) -> usize {
+pub(crate) fn line_of_position(file: &SourceFile, pos: usize) -> usize { ::tsox_core::fntrace::enter("line_of_position"); 
     file.line_map.line_at(pos)
 }
 
-pub(crate) fn line_start_position_for_position(file: &SourceFile, position: usize) -> usize {
+pub(crate) fn line_start_position_for_position(file: &SourceFile, position: usize) -> usize { ::tsox_core::fntrace::enter("line_start_position_for_position"); 
     let line = line_of_position(file, position);
     line_start_of_line(file, line)
 }
 
-pub(crate) fn line_and_byte_offset_of_position(file: &SourceFile, pos: usize) -> (usize, usize) {
+pub(crate) fn line_and_byte_offset_of_position(file: &SourceFile, pos: usize) -> (usize, usize) { ::tsox_core::fntrace::enter("line_and_byte_offset_of_position"); 
     let line = line_of_position(file, pos);
     let start = line_start_of_line(file, line);
     (line, pos - start)
 }
 
-pub(crate) fn line_start_of_line(file: &SourceFile, line: usize) -> usize {
+pub(crate) fn line_start_of_line(file: &SourceFile, line: usize) -> usize { ::tsox_core::fntrace::enter("line_start_of_line"); 
     let starts = &file.line_map.line_starts;
     if line >= starts.len() {
         return starts.last().map(|s| *s as usize).unwrap_or(0);
@@ -32,7 +32,7 @@ pub(crate) fn line_start_of_line(file: &SourceFile, line: usize) -> usize {
     starts[line] as usize
 }
 
-pub(crate) fn end_line_position(file: &SourceFile, line: usize) -> usize {
+pub(crate) fn end_line_position(file: &SourceFile, line: usize) -> usize { ::tsox_core::fntrace::enter("end_line_position"); 
     let text = &file.text;
     let mut pos = line_start_of_line(file, line);
     while pos < text.len() {
@@ -46,13 +46,13 @@ pub(crate) fn end_line_position(file: &SourceFile, line: usize) -> usize {
     text.len().saturating_sub(1)
 }
 
-pub(crate) fn position_of_line_and_byte_offset(file: &SourceFile, line: usize, byte_offset: usize) -> usize {
+pub(crate) fn position_of_line_and_byte_offset(file: &SourceFile, line: usize, byte_offset: usize) -> usize { ::tsox_core::fntrace::enter("position_of_line_and_byte_offset"); 
     line_start_of_line(file, line) + byte_offset
 }
 
 /// Go GetTokenPosOfNode：missing 节点不跳 trivia，其余从节点起点跳过
 /// 前缀 trivia 得到首 token 位置。
-pub(crate) fn token_pos_of_node(file: &SourceFile, node: &Node) -> usize {
+pub(crate) fn token_pos_of_node(file: &SourceFile, node: &Node) -> usize { ::tsox_core::fntrace::enter("token_pos_of_node"); 
     if crate::astnav::is_missing_node(node) {
         return node.pos();
     }
@@ -67,7 +67,7 @@ pub(crate) fn token_pos_of_node(file: &SourceFile, node: &Node) -> usize {
     crate::scanner::skip_trivia(&file.text, node.pos())
 }
 
-pub(crate) fn with_token_start(file: &SourceFile, node: &Node) -> TextRange {
+pub(crate) fn with_token_start(file: &SourceFile, node: &Node) -> TextRange { ::tsox_core::fntrace::enter("with_token_start"); 
     TextRange::new(token_pos_of_node(file, node), node.end())
 }
 
@@ -77,7 +77,7 @@ pub(crate) fn find_first_non_whitespace_character_and_column(
     start_pos: usize,
     end_pos: usize,
     tab_size: u32,
-) -> (usize, u32) {
+) -> (usize, u32) { ::tsox_core::fntrace::enter("find_first_non_whitespace_character_and_column"); 
     let text = &file.text;
     let mut column: u32 = 0;
     let mut pos = start_pos;
@@ -103,11 +103,11 @@ pub(crate) fn find_first_non_whitespace_column(
     start_pos: usize,
     end_pos: usize,
     tab_size: u32,
-) -> u32 {
+) -> u32 { ::tsox_core::fntrace::enter("find_first_non_whitespace_column"); 
     find_first_non_whitespace_character_and_column(file, start_pos, end_pos, tab_size).1
 }
 
-pub(crate) fn get_indentation_string(indentation: usize, convert_tabs_to_spaces: bool, tab_size: u32) -> String {
+pub(crate) fn get_indentation_string(indentation: usize, convert_tabs_to_spaces: bool, tab_size: u32) -> String { ::tsox_core::fntrace::enter("get_indentation_string"); 
     if !convert_tabs_to_spaces {
         if tab_size == 0 {
             return String::new();
@@ -124,11 +124,11 @@ pub(crate) fn get_indentation_string(indentation: usize, convert_tabs_to_spaces:
     }
 }
 
-pub(crate) fn is_comment(kind: SyntaxKind) -> bool {
+pub(crate) fn is_comment(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_comment"); 
     kind == SyntaxKind::SingleLineCommentTrivia || kind == SyntaxKind::MultiLineCommentTrivia
 }
 
-pub(crate) fn is_string_or_regular_expression_or_template_literal(kind: SyntaxKind) -> bool {
+pub(crate) fn is_string_or_regular_expression_or_template_literal(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_string_or_regular_expression_or_template_literal"); 
     matches!(
         kind,
         SyntaxKind::StringLiteral
@@ -140,14 +140,14 @@ pub(crate) fn is_string_or_regular_expression_or_template_literal(kind: SyntaxKi
     )
 }
 
-pub(crate) fn is_line_break(ch: char) -> bool {
+pub(crate) fn is_line_break(ch: char) -> bool { ::tsox_core::fntrace::enter("is_line_break"); 
     matches!(ch, '\n' | '\r' | '\u{2028}' | '\u{2029}')
 }
 
-pub(crate) fn is_whitespace_single_line(ch: char) -> bool {
+pub(crate) fn is_whitespace_single_line(ch: char) -> bool { ::tsox_core::fntrace::enter("is_whitespace_single_line"); 
     matches!(ch, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}')
 }
 
-pub(crate) fn node_is_missing(node: &Arc<Node>) -> bool {
+pub(crate) fn node_is_missing(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_missing"); 
     crate::astnav::is_missing_node(node)
 }

@@ -1,7 +1,7 @@
 pub(crate) fn fold_expression_newlines_tracked(
     text: &str,
     src_offsets: &[u32],
-) -> (String, Vec<u32>) {
+) -> (String, Vec<u32>) { ::tsox_core::fntrace::enter("fold_expression_newlines_tracked"); 
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
     let mut out: Vec<char> = Vec::with_capacity(n);
@@ -275,7 +275,7 @@ pub(crate) fn fold_expression_newlines_tracked(
     (result_text, result_offsets)
 }
 
-pub(crate) fn drop_trailing_idx(out: &mut Vec<char>, out_idx: &mut Vec<usize>) {
+pub(crate) fn drop_trailing_idx(out: &mut Vec<char>, out_idx: &mut Vec<usize>) { ::tsox_core::fntrace::enter("drop_trailing_idx"); 
     while let Some(&ch) = out.last() {
         if ch == ' ' || ch == '\t' {
             out.pop();

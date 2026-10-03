@@ -34,15 +34,15 @@ pub struct TypeEraserTransformer {
 }
 
 impl TypeEraserTransformer {
-    pub fn emit_context(&self) -> &EmitContext {
+    pub fn emit_context(&self) -> &EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         &self.emit_context
     }
 
-    pub fn factory(&self) -> NodeFactory<'_> {
+    pub fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub fn visitor(&mut self) -> &mut NodeVisitor {
+    pub fn visitor(&mut self) -> &mut NodeVisitor { ::tsox_core::fntrace::enter("visitor"); 
         self.substitution_visitor.as_mut().unwrap()
     }
 
@@ -50,14 +50,14 @@ impl TypeEraserTransformer {
         &self,
         _visit: fn(&mut Self, Arc<Node>) -> Option<Arc<Node>>,
         emit_context: &EmitContext,
-    ) -> Arc<Transformer> {
+    ) -> Arc<Transformer> { ::tsox_core::fntrace::enter("new_transformer"); 
         Arc::new(Transformer::new(
             type_eraser_visit_entry,
             Some(emit_context.clone()),
         ))
     }
 
-    pub fn new_type_eraser_transformer(opts: &TransformOptions) -> Arc<Transformer> {
+    pub fn new_type_eraser_transformer(opts: &TransformOptions) -> Arc<Transformer> { ::tsox_core::fntrace::enter("new_type_eraser_transformer"); 
         let compiler_options = opts.compiler_options.clone();
         let emit_context = opts.context;
         let tx = Box::new(TypeEraserTransformer {
@@ -70,23 +70,23 @@ impl TypeEraserTransformer {
         tx.new_transformer(|tx, node| tx.visit(&node), emit_context)
     }
 
-    pub fn push_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn push_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("push_node"); 
         let grandparent_node = self.parent_node.take();
         self.parent_node = self.current_node.take();
         self.current_node = Some(Arc::clone(node));
         grandparent_node
     }
 
-    pub fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) {
+    pub fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) { ::tsox_core::fntrace::enter("pop_node"); 
         self.current_node = self.parent_node.take();
         self.parent_node = grandparent_node;
     }
 
-    pub fn elide(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn elide(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("elide"); 
         Some(self.emit_context.new_not_emitted_statement(node))
     }
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         if !node.subtree_facts().intersects(SubtreeContainsTypeScript) {
             return Some(Arc::clone(node));
         }
@@ -101,7 +101,7 @@ impl TypeEraserTransformer {
         result
     }
 
-    fn visit_inner(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_inner(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_inner"); 
         match node.kind {
             SyntaxKind::PublicKeyword
             | SyntaxKind::PrivateKeyword

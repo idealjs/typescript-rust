@@ -3,7 +3,7 @@
 use crate::checker::checker_unused_diagnostics::*;
 
 impl Checker {
-    pub(crate) fn check_unused_identifiers_in_file(&mut self, file_node: &Arc<Node>) {
+    pub(crate) fn check_unused_identifiers_in_file(&mut self, file_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unused_identifiers_in_file"); 
         let no_locals = !self.compiler_options.no_unused_locals.is_true();
         let no_params = !self.compiler_options.no_unused_parameters.is_true();
         if no_locals && no_params {
@@ -32,7 +32,7 @@ impl Checker {
     pub(crate) fn collect_unused_check_containers(
         node: &Arc<Node>,
         out: &mut Vec<(Arc<Node>, bool)>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_unused_check_containers"); 
         use SyntaxKind::*;
         match node.kind {
             SourceFile | ModuleDeclaration | Block | CaseBlock | ForStatement | ForInStatement
@@ -53,7 +53,7 @@ impl Checker {
         });
     }
 
-    pub(crate) fn check_unused_class_members(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_unused_class_members(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unused_class_members"); 
         use tsox_core::diagnostics::messages_generated::{
             PROPERTY_0_IS_DECLARED_BUT_ITS_VALUE_IS_NEVER_READ,
             X_0_IS_DECLARED_BUT_NEVER_USED, X_0_IS_DECLARED_BUT_ITS_VALUE_IS_NEVER_READ,
@@ -144,7 +144,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_unused_infer_type_parameter(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_unused_infer_type_parameter(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unused_infer_type_parameter"); 
         use tsox_core::diagnostics::messages_generated::X_0_IS_DECLARED_BUT_NEVER_USED;
         let tsox_frontend::ast::NodeData::InferTypeNode(data) = &node.data else {
             return;
@@ -163,7 +163,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_unused_type_parameters(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_unused_type_parameters(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unused_type_parameters"); 
         use tsox_core::diagnostics::messages_generated::{
             ALL_TYPE_PARAMETERS_ARE_UNUSED, X_0_IS_DECLARED_BUT_NEVER_USED,
         };
@@ -194,7 +194,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_unreferenced_type_parameter(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_unreferenced_type_parameter(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_unreferenced_type_parameter"); 
         let underscore = node.name().is_some_and(|n| n.text().starts_with('_'));
         if underscore {
             return false;
@@ -230,7 +230,7 @@ impl Checker {
         true
     }
 
-    fn type_parameter_referenced(&self, sym: &Arc<tsox_frontend::ast::Symbol>) -> bool {
+    fn type_parameter_referenced(&self, sym: &Arc<tsox_frontend::ast::Symbol>) -> bool { ::tsox_core::fntrace::enter("type_parameter_referenced"); 
         self.symbol_reference_kinds
             .get(&sym.id())
             .is_some_and(|k| k.intersects(SymbolFlags::TypeParameter))
@@ -238,7 +238,7 @@ impl Checker {
 
     pub(crate) fn type_parameter_list(
         node: &Arc<Node>,
-    ) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+    ) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("type_parameter_list"); 
         use tsox_frontend::ast::NodeData::*;
         match &node.data {
             FunctionDeclaration(d) => d.type_parameters.clone(),
@@ -261,7 +261,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn function_like_has_body(node: &Arc<Node>) -> bool {
+    pub(crate) fn function_like_has_body(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("function_like_has_body"); 
         use tsox_frontend::ast::NodeData;
         match &node.data {
             NodeData::ConstructorDeclaration(d) => d.body.is_some(),
@@ -275,7 +275,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_unused_locals_and_parameters(&mut self, container: &Arc<Node>) {
+    pub(crate) fn check_unused_locals_and_parameters(&mut self, container: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unused_locals_and_parameters"); 
         let mut locals: Vec<Arc<tsox_frontend::ast::Symbol>> = self
             .program
             .symbol_map()
@@ -392,7 +392,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn root_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn root_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("root_declaration"); 
         let mut cursor = Arc::clone(node);
         for _ in 0..100 {
             match cursor.kind {
@@ -408,14 +408,14 @@ impl Checker {
         None
     }
 
-    pub(crate) fn name_starts_with_underscore(node: &Arc<Node>) -> bool {
+    pub(crate) fn name_starts_with_underscore(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("name_starts_with_underscore"); 
         node.name().is_some_and(|n| {
             let text = n.text();
             !text.is_empty() && text.starts_with('_')
         })
     }
 
-    pub(crate) fn import_clause_from_imported(node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn import_clause_from_imported(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("import_clause_from_imported"); 
         match node.kind {
             SyntaxKind::ImportClause => Arc::clone(node),
             SyntaxKind::NamespaceImport => node.parent().unwrap_or_else(|| Arc::clone(node)),
@@ -427,7 +427,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn binding_root_declaration(node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn binding_root_declaration(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("binding_root_declaration"); 
         let mut current = Arc::clone(node);
         while matches!(
             current.kind,
@@ -443,7 +443,7 @@ impl Checker {
         current
     }
 
-    pub(crate) fn report_unused_local(&mut self, node: &Arc<Node>, name: &str, is_type_decl: bool) {
+    pub(crate) fn report_unused_local(&mut self, node: &Arc<Node>, name: &str, is_type_decl: bool) { ::tsox_core::fntrace::enter("report_unused_local"); 
         let message: &'static tsox_core::diagnostics::Message = if is_type_decl {
             &tsox_core::diagnostics::messages_generated::X_0_IS_DECLARED_BUT_NEVER_USED
         } else {
@@ -454,7 +454,7 @@ impl Checker {
         self.report_unused(node, is_param, loc, message, vec![name.to_string()]);
     }
 
-    pub(crate) fn report_unused_variables(&mut self, list: &Arc<Node>) {
+    pub(crate) fn report_unused_variables(&mut self, list: &Arc<Node>) { ::tsox_core::fntrace::enter("report_unused_variables"); 
         let declarations: Vec<Arc<Node>> = match &list.data {
             tsox_frontend::ast::NodeData::VariableDeclarationList(d) => {
                 d.declarations.iter().cloned().collect()
@@ -478,7 +478,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn report_unused_parameters(&mut self, function: &Arc<Node>) {
+    pub(crate) fn report_unused_parameters(&mut self, function: &Arc<Node>) { ::tsox_core::fntrace::enter("report_unused_parameters"); 
         let parameters: Vec<Arc<Node>> = match &function.data {
             tsox_frontend::ast::NodeData::ConstructorDeclaration(d) => {
                 d.parameters.iter().cloned().collect()
@@ -506,7 +506,7 @@ impl Checker {
         self.report_unused_variable_declarations(&parameters);
     }
 
-    pub(crate) fn report_unused_variable_declarations(&mut self, declarations: &[Arc<Node>]) {
+    pub(crate) fn report_unused_variable_declarations(&mut self, declarations: &[Arc<Node>]) { ::tsox_core::fntrace::enter("report_unused_variable_declarations"); 
         for declaration in declarations {
             let (name_node, is_pattern) = match &declaration.data {
                 tsox_frontend::ast::NodeData::VariableDeclaration(d) => {

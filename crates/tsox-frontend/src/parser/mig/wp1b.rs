@@ -41,7 +41,7 @@ thread_local! {
     static IDENTIFIER_COUNT: std::cell::Cell<u64> = const { std::cell::Cell::new(0) };
 }
 
-fn get_language_variant(script_kind: ScriptKind) -> LanguageVariant {
+fn get_language_variant(script_kind: ScriptKind) -> LanguageVariant { ::tsox_core::fntrace::enter("get_language_variant"); 
     match script_kind {
         ScriptKind::Tsx | ScriptKind::Jsx | ScriptKind::Js | ScriptKind::Json => {
             LanguageVariant::Jsx
@@ -56,7 +56,7 @@ impl Parser {
         opts: crate::ast::mig::m3e_2::SourceFileParseOptions,
         source_text: String,
         script_kind: ScriptKind,
-    ) {
+    ) { ::tsox_core::fntrace::enter("initialize_state"); 
         if script_kind == ScriptKind::Unknown {
             panic!("ScriptKind must be specified when parsing source file: {}", opts.file_name);
         }
@@ -76,7 +76,7 @@ impl Parser {
         &mut self,
         result: &mut crate::ast::SourceFile,
         is_declaration_file: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("finish_source_file"); 
         result.comment_directives = self.scanner.comment_directives().to_vec();
         FILE_PRAGMAS.with(|c| *c.borrow_mut() = super::wp1_2::get_comment_pragmas(self.source_text()));
         result.is_declaration_file = is_declaration_file;
@@ -97,11 +97,11 @@ impl Parser {
 
     pub(crate) fn create_jsdoc_cache(
         &self,
-    ) -> std::collections::HashMap<u64, Vec<Arc<Node>>> {
+    ) -> std::collections::HashMap<u64, Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("create_jsdoc_cache"); 
         std::collections::HashMap::new()
     }
 
-    pub(crate) fn new_identifier(&self, text: &str) -> Node {
+    pub(crate) fn new_identifier(&self, text: &str) -> Node { ::tsox_core::fntrace::enter("new_identifier"); 
         IDENTIFIER_COUNT.with(|c| c.set(c.get() + 1));
         Node::new(
             SyntaxKind::Identifier,
@@ -111,7 +111,7 @@ impl Parser {
         )
     }
 
-    pub(crate) fn parse_call_expression_rest(&mut self, pos: usize, expression: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn parse_call_expression_rest(&mut self, pos: usize, expression: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_call_expression_rest"); 
         let mut expression = expression;
         loop {
             expression = self.parse_member_expression_rest(pos, expression, true);
@@ -180,7 +180,7 @@ impl Parser {
         pos: usize,
         expression: Arc<Node>,
         allow_optional_chain: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_member_expression_rest"); 
         let mut expression = expression;
         loop {
             let mut question_dot_token: Option<Arc<Node>> = None;
@@ -251,12 +251,12 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_start_of_optional_property_or_element_access_chain(&mut self) -> bool {
+    pub(crate) fn is_start_of_optional_property_or_element_access_chain(&mut self) -> bool { ::tsox_core::fntrace::enter("is_start_of_optional_property_or_element_access_chain"); 
         self.token == SyntaxKind::QuestionDotToken
             && self.look_ahead(Parser::next_token_is_identifier_or_keyword_or_open_bracket_or_template)
     }
 
-    pub(crate) fn parse_expected_token(&mut self, kind: SyntaxKind) -> Arc<Node> {
+    pub(crate) fn parse_expected_token(&mut self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_expected_token"); 
         match self.parse_optional_token(kind) {
             Some(t) => t,
             None => {
@@ -272,7 +272,7 @@ impl Parser {
         pos: usize,
         expression: Arc<Node>,
         question_dot_token: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_property_access_expression_rest"); 
         let name = self.parse_right_side_of_dot();
         let is_optional_chain = question_dot_token.is_some() || self.try_reparse_optional_chain(&expression);
         let flags = if is_optional_chain { NodeFlags::OptionalChain } else { NodeFlags::empty() };
@@ -295,7 +295,7 @@ impl Parser {
         pos: usize,
         expression: Arc<Node>,
         question_dot_token: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_element_access_expression_rest"); 
         let mut argument_expression = self.missing_identifier_expression();
         if self.token == SyntaxKind::CloseBracketToken {
             let p = self.node_pos();
@@ -320,7 +320,7 @@ impl Parser {
         self.finish_node_arc(&mut n, pos)
     }
 
-    pub(crate) fn parse_expression_allow_in(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_expression_allow_in(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_expression_allow_in"); 
         let save = self.disallow_in_context;
         self.disallow_in_context = false;
         let result = self.parse_assignment_expression();
@@ -334,7 +334,7 @@ impl Parser {
         tag: Arc<Node>,
         question_dot_token: Option<Arc<Node>>,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_tagged_template_rest"); 
         let template = if self.token == SyntaxKind::NoSubstitutionTemplateLiteral {
             self.scanner.re_scan_template_token();
             self.parse_literal_expression()
@@ -360,11 +360,11 @@ impl Parser {
         result
     }
 
-    pub(crate) fn finish_node_arc(&mut self, node: &mut Node, pos: usize) -> Arc<Node> {
+    pub(crate) fn finish_node_arc(&mut self, node: &mut Node, pos: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("finish_node_arc"); 
         Arc::new(self.finish_node(node, pos))
     }
 
-    pub(crate) fn parse_literal_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_literal_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_literal_expression"); 
         let pos = self.node_pos();
         let text = self.scanner.token_value();
         let token_flags = self.scanner.token_flags();
@@ -407,7 +407,7 @@ impl Parser {
         &mut self,
         is_async: bool,
         allow_return_type_in_arrow_function: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_arrow_function_expression_body"); 
         if self.token == SyntaxKind::OpenBraceToken {
             return self.parse_function_block(false, is_async);
         }
@@ -432,11 +432,11 @@ impl Parser {
     pub(crate) fn parse_assignment_expression_or_higher_worker(
         &mut self,
         _allow_return_type_in_arrow_function: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_assignment_expression_or_higher_worker"); 
         self.parse_assignment_expression()
     }
 
-    pub(crate) fn next_token_can_follow_modifier(&mut self) -> bool {
+    pub(crate) fn next_token_can_follow_modifier(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_can_follow_modifier"); 
         match self.token {
             SyntaxKind::ConstKeyword => self.next_token() == SyntaxKind::EnumKeyword,
             SyntaxKind::ExportKeyword => {
@@ -462,7 +462,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn next_token_can_follow_default_keyword(&mut self) -> bool {
+    pub(crate) fn next_token_can_follow_default_keyword(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_can_follow_default_keyword"); 
         match self.next_token() {
             SyntaxKind::ClassKeyword
             | SyntaxKind::FunctionKeyword
@@ -478,12 +478,12 @@ impl Parser {
         }
     }
 
-    pub(crate) fn next_token_can_follow_export_modifier(&mut self) -> bool {
+    pub(crate) fn next_token_can_follow_export_modifier(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_can_follow_export_modifier"); 
         self.next_token();
         Parser::can_follow_export_modifier(self.token)
     }
 
-    pub(crate) fn parse_contextual_modifier(&mut self, t: SyntaxKind) -> bool {
+    pub(crate) fn parse_contextual_modifier(&mut self, t: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("parse_contextual_modifier"); 
         let state = self.mark();
         if self.token == t && self.next_token_can_follow_modifier() {
             return true;
@@ -492,7 +492,7 @@ impl Parser {
         false
     }
 
-    pub(crate) fn parse_any_contextual_modifier(&mut self) -> bool {
+    pub(crate) fn parse_any_contextual_modifier(&mut self) -> bool { ::tsox_core::fntrace::enter("parse_any_contextual_modifier"); 
         let state = self.mark();
         if is_modifier_kind(self.token) && self.next_token_can_follow_modifier() {
             return true;
@@ -501,7 +501,7 @@ impl Parser {
         false
     }
 
-    pub(crate) fn parse_decorated_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_decorated_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_decorated_expression"); 
         let pos = self.node_pos();
         let jsdoc = self.jsdoc_scanner_info();
         let modifiers = self.parse_modifiers_ex(true, false, false);
@@ -521,7 +521,7 @@ impl Parser {
         _allow_decorators: bool,
         _permit_const_as_modifier: bool,
         _stop_on_start_of_class_static_block: bool,
-    ) -> Option<Arc<crate::ast::node_node_list::ModifierList>> {
+    ) -> Option<Arc<crate::ast::node_node_list::ModifierList>> { ::tsox_core::fntrace::enter("parse_modifiers_ex"); 
         let mut nodes: Vec<Arc<Node>> = Vec::new();
         while crate::ast::is_modifier_kind(self.token) {
             let pos = self.node_pos();
@@ -543,7 +543,7 @@ impl Parser {
         _jsdoc: super::m4b::JSDocScannerInfo,
         modifiers: Option<Arc<crate::ast::node_node_list::ModifierList>>,
         _kind: SyntaxKind,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_declaration_or_expression"); 
         self.parse_class_declaration_with_modifiers(modifiers)
     }
 
@@ -553,7 +553,7 @@ impl Parser {
         close_kind: SyntaxKind,
         open_parsed: bool,
         open_position: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("parse_expected_matching_brackets"); 
         if self.token == close_kind {
             self.next_token();
             return;
@@ -564,7 +564,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_entity_name_of_type_reference(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_entity_name_of_type_reference(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_entity_name_of_type_reference"); 
         self.parse_entity_name_ex(true, false, Some(diagnostics::TYPE_EXPECTED))
     }
 
@@ -573,15 +573,15 @@ impl Parser {
         _in_type_context: bool,
         _allow_invalid_identifiers: bool,
         _diagnostic: Option<Message>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_entity_name_ex"); 
         self.parse_entity_name()
     }
 
-    pub(crate) fn in_disallow_conditional_types_context(&self) -> bool {
+    pub(crate) fn in_disallow_conditional_types_context(&self) -> bool { ::tsox_core::fntrace::enter("in_disallow_conditional_types_context"); 
         self.context_flags().intersects(NodeFlags::DisallowConditionalTypesContext)
     }
 
-    pub(crate) fn create_identifier(&mut self, is_identifier: bool) -> Arc<Node> {
+    pub(crate) fn create_identifier(&mut self, is_identifier: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("create_identifier"); 
         self.create_identifier_with_diagnostic(is_identifier, None, None)
     }
 
@@ -590,7 +590,7 @@ impl Parser {
         is_identifier: bool,
         diagnostic_message: Option<Message>,
         private_identifier_diagnostic_message: Option<Message>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_identifier_with_diagnostic"); 
         if is_identifier {
             let pos = if self.scanner.has_preceding_jsdoc_leading_asterisks() {
                 self.scanner.token_pos()
@@ -651,7 +651,7 @@ pub(crate) fn create_union_or_intersection_type_node(
     p: &mut Parser,
     operator: SyntaxKind,
     types: Arc<NodeList>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_union_or_intersection_type_node"); 
     match operator {
         SyntaxKind::BarToken => {
             Arc::new(Node::new(

@@ -16,7 +16,7 @@ pub(super) fn jsx_closing_tag_completion(
     text: &str,
     node_at_position: &Arc<Node>,
     position: usize,
-) -> Option<CompletionItem> {
+) -> Option<CompletionItem> { ::tsox_core::fntrace::enter("jsx_closing_tag_completion"); 
     let closing = match find_jsx_closing_element(text, node_at_position, position) {
         Some(c) => c,
         None => find_jsx_closing_element_at_eof(text, node_at_position, position)?,
@@ -50,7 +50,7 @@ fn find_jsx_closing_element(
     text: &str,
     node_at_position: &Arc<Node>,
     position: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_jsx_closing_element"); 
     let mut current = Some(Arc::clone(node_at_position));
     while let Some(n) = current {
         match n.kind {
@@ -79,7 +79,7 @@ fn find_jsx_closing_element(
 
 /// 沿 end==position 的孩子下降到底（deepest_node_ending_at 取最浅命中，
 /// 此处需要最深：闭合元素在语句内层）
-pub(super) fn deepest_node_ending_at_deep(root: &Arc<Node>, position: usize) -> Arc<Node> {
+pub(super) fn deepest_node_ending_at_deep(root: &Arc<Node>, position: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("deepest_node_ending_at_deep"); 
     use tsox_frontend::ast::node_data_generated::for_each_child;
     let mut cur = Arc::clone(root);
     'outer: loop {
@@ -105,7 +105,7 @@ fn find_jsx_closing_element_at_eof(
     text: &str,
     node_at_position: &Arc<Node>,
     position: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_jsx_closing_element_at_eof"); 
     let mut root = node_at_position.parent();
     while let Some(r) = root.as_ref().and_then(|r| r.parent()) {
         root = Some(r);
@@ -122,7 +122,7 @@ fn find_jsx_closing_element_at_eof(
 }
 
 /// 闭合标签区间内 `>` 的结尾位置（token 不在 AST 上，扫描判定）
-fn closing_angle_end(text: &str, closing: &Arc<Node>) -> Option<usize> {
+fn closing_angle_end(text: &str, closing: &Arc<Node>) -> Option<usize> { ::tsox_core::fntrace::enter("closing_angle_end"); 
     completions_context::scan_tokens(text, true, closing.pos(), closing.end())
         .iter()
         .filter(|t| t.kind == SyntaxKind::GreaterThanToken)
@@ -131,7 +131,7 @@ fn closing_angle_end(text: &str, closing: &Arc<Node>) -> Option<usize> {
 }
 
 /// 标签完整文本（node_text 对 PAE/命名空间名返回空串，按结构重建）
-pub(super) fn jsx_tag_name_text(tag: &Arc<Node>) -> Option<String> {
+pub(super) fn jsx_tag_name_text(tag: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("jsx_tag_name_text"); 
     match &tag.data {
         NodeData::Identifier(d) => Some(d.text.clone()),
         NodeData::JsxNamespacedName(d) => Some(format!("{}:{}", d.namespace.text(), d.name.text())),

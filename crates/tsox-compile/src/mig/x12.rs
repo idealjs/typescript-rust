@@ -20,14 +20,14 @@ pub struct MappedDiagnosticDirective {
     pub unused_expect_directive_index: Option<i32>,
 }
 
-fn json_unmarshal<T: DeserializeOwned>(value: &Value, out: &mut T) -> Result<(), Error> {
+fn json_unmarshal<T: DeserializeOwned>(value: &Value, out: &mut T) -> Result<(), Error> { ::tsox_core::fntrace::enter("json_unmarshal"); 
     <T as serde::Deserialize>::deserialize(value)
         .map(|_: T| ())
         .map_err(|e| Error::new(&e.to_string()))
 }
 
 impl MappedDiagnosticDirective {
-    pub fn unmarshal_json_from(&mut self, dec: &mut Decoder) -> Result<(), Error> {
+    pub fn unmarshal_json_from(&mut self, dec: &mut Decoder) -> Result<(), Error> { ::tsox_core::fntrace::enter("unmarshal_json_from"); 
         let tuple: Vec<Value> = unmarshal_decode(dec)?;
         if tuple.len() != 5 && tuple.len() != 6 {
             return Err(Error::new(&format!(

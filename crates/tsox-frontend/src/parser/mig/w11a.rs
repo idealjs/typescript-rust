@@ -9,7 +9,7 @@ pub(crate) fn should_consume_binary_operator(
     operator: SyntaxKind,
     operator_precedence: i32,
     current_precedence: i32,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_consume_binary_operator"); 
     if operator_precedence > current_precedence {
         return true;
     }
@@ -17,7 +17,7 @@ pub(crate) fn should_consume_binary_operator(
 }
 
 impl Parser {
-    pub(crate) fn should_parse_return_type(&mut self, return_token: SyntaxKind, is_type: bool) -> bool {
+    pub(crate) fn should_parse_return_type(&mut self, return_token: SyntaxKind, is_type: bool) -> bool { ::tsox_core::fntrace::enter("should_parse_return_type"); 
         if return_token == SyntaxKind::EqualsGreaterThanToken {
             self.expect(return_token);
             return true;
@@ -36,13 +36,13 @@ impl Parser {
     }
 
     /// Go parseModifiers 的跳过形态:连续消费 modifier token
-    pub(crate) fn parse_modifiers(&mut self) {
+    pub(crate) fn parse_modifiers(&mut self) { ::tsox_core::fntrace::enter("parse_modifiers"); 
         while is_modifier_kind(self.token) {
             self.next_token();
         }
     }
 
-    pub(crate) fn skip_parameter_start(&mut self) -> bool {
+    pub(crate) fn skip_parameter_start(&mut self) -> bool { ::tsox_core::fntrace::enter("skip_parameter_start"); 
         if is_modifier_kind(self.token) {
             // Skip modifiers(Go parseModifiers:本调用点仅消费 modifier token)
             self.parse_modifiers();
@@ -62,7 +62,7 @@ impl Parser {
     }
 }
 
-pub(crate) fn texts_equal(a: &Arc<Node>, b: &Arc<Node>) -> bool {
+pub(crate) fn texts_equal(a: &Arc<Node>, b: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("texts_equal"); 
     let mut a = Arc::clone(a);
     let mut b = Arc::clone(b);
     while !is_identifier(&a) || !is_identifier(&b) {

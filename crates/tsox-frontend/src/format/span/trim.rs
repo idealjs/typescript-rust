@@ -14,7 +14,7 @@ impl FormatSpanWorker {
     pub(super) fn trim_trailing_whitespaces_for_remaining_range(
         &mut self,
         trivias: &[TextRangeWithKind],
-    ) {
+    ) { ::tsox_core::fntrace::enter("trim_trailing_whitespaces_for_remaining_range"); 
         let mut start_pos = self.original_range.pos();
         if !self.previous_range_is_zero() {
             start_pos = self
@@ -40,7 +40,7 @@ impl FormatSpanWorker {
     }
 
     /// Go trimTrailingWitespacesForPositions
-    fn trim_trailing_whitespaces_for_positions(&mut self, start_pos: usize, end_pos: usize) {
+    fn trim_trailing_whitespaces_for_positions(&mut self, start_pos: usize, end_pos: usize) { ::tsox_core::fntrace::enter("trim_trailing_whitespaces_for_positions"); 
         let start_line = util::line_of_position(&self.source_file, start_pos);
         let end_line = util::line_of_position(&self.source_file, end_pos);
         self.trim_trailing_whitespaces_for_lines(start_line, end_line + 1, None);
@@ -52,7 +52,7 @@ impl FormatSpanWorker {
         line1: usize,
         line2: usize,
         r: Option<&TextRangeWithKind>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("trim_trailing_whitespaces_for_lines"); 
         let line_count = self.source_file.line_map.line_starts.len();
         for line in line1..line2 {
             if line >= line_count {
@@ -84,7 +84,7 @@ impl FormatSpanWorker {
     }
 
     /// Go getTrailingWhitespaceStartPosition
-    fn get_trailing_whitespace_start_position(&self, start: usize, end: usize) -> i64 {
+    fn get_trailing_whitespace_start_position(&self, start: usize, end: usize) -> i64 { ::tsox_core::fntrace::enter("get_trailing_whitespace_start_position"); 
         let text = &self.source_file.text;
         let mut pos = end as i64;
         while pos >= start as i64 {
@@ -104,7 +104,7 @@ impl FormatSpanWorker {
     }
 
     /// Go insertIndentation
-    pub(super) fn insert_indentation(&mut self, pos: usize, indentation: i64, line_added: bool) {
+    pub(super) fn insert_indentation(&mut self, pos: usize, indentation: i64, line_added: bool) { ::tsox_core::fntrace::enter("insert_indentation"); 
         let indentation_string = util::get_indentation_string(
             indentation.max(0) as usize,
             self.options.editor_settings.convert_tabs_to_spaces,
@@ -132,7 +132,7 @@ impl FormatSpanWorker {
         }
     }
 
-    fn character_to_column(&self, start_line_position: usize, character_in_line: usize) -> u32 {
+    fn character_to_column(&self, start_line_position: usize, character_in_line: usize) -> u32 { ::tsox_core::fntrace::enter("character_to_column"); 
         let mut column: u32 = 0;
         let text = &self.source_file.text;
         for i in 0..character_in_line {
@@ -152,7 +152,7 @@ impl FormatSpanWorker {
         &self,
         indentation_string: &str,
         start_line_position: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("indentation_is_different"); 
         let text = &self.source_file.text;
         let end = start_line_position + indentation_string.len();
         if end > text.len() {
@@ -168,7 +168,7 @@ impl FormatSpanWorker {
         comment_indentation: i64,
         mut indent_next_token_or_trivia: bool,
         mut indent_single_line: impl FnMut(&mut Self, &TextRangeWithKind),
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("indent_trivia_items"); 
         for trivia_item in &trivia {
             let trivia_in_range = trivia_item.loc.contained_by(&self.original_range);
             match trivia_item.kind {
@@ -205,7 +205,7 @@ impl FormatSpanWorker {
         indentation: i64,
         first_line_is_indented: bool,
         indent_final_line: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("indent_multiline_comment"); 
         let start_line = util::line_of_position(&self.source_file, comment_range.pos());
         let end_line = util::line_of_position(&self.source_file, comment_range.end());
 

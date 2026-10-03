@@ -2,7 +2,7 @@ pub(crate) use std::sync::Arc;
 
 pub(crate) use super::types::{Type, TypeMapper, TypeMapperKind};
 
-pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMapper {
+pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMapper { ::tsox_core::fntrace::enter("new_simple_type_mapper"); 
     let maps_this_only = is_this_type_parameter(&source);
     TypeMapper::new(
         Arc::new(move |t: &Arc<Type>| {
@@ -17,7 +17,7 @@ pub fn new_simple_type_mapper(source: Arc<Type>, target: Arc<Type>) -> TypeMappe
     )
 }
 
-pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -> TypeMapper {
+pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -> TypeMapper { ::tsox_core::fntrace::enter("new_array_type_mapper"); 
     let maps_this_only = sources.len() == 1 && is_this_type_parameter(&sources[0]);
     TypeMapper::new(
         Arc::new(move |t: &Arc<Type>| {
@@ -34,7 +34,7 @@ pub fn new_array_type_mapper(sources: Vec<Arc<Type>>, targets: Vec<Arc<Type>>) -
     )
 }
 
-pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type>) -> TypeMapper {
+pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type>) -> TypeMapper { ::tsox_core::fntrace::enter("new_array_to_single_type_mapper"); 
     let maps_this_only = sources.len() == 1 && is_this_type_parameter(&sources[0]);
     TypeMapper::new(
         Arc::new(move |t: &Arc<Type>| {
@@ -53,11 +53,11 @@ pub fn new_array_to_single_type_mapper(sources: Vec<Arc<Type>>, target: Arc<Type
 
 pub fn new_function_type_mapper(
     map_fn: impl Fn(&Arc<Type>) -> Arc<Type> + Send + Sync + 'static,
-) -> TypeMapper {
+) -> TypeMapper { ::tsox_core::fntrace::enter("new_function_type_mapper"); 
     TypeMapper::new(Arc::new(map_fn), TypeMapperKind::Unknown, false)
 }
 
-pub fn merge_type_mappers(m1: Option<&TypeMapper>, m2: Option<&TypeMapper>) -> Option<TypeMapper> {
+pub fn merge_type_mappers(m1: Option<&TypeMapper>, m2: Option<&TypeMapper>) -> Option<TypeMapper> { ::tsox_core::fntrace::enter("merge_type_mappers"); 
     match (m1, m2) {
         (Some(m1), Some(m2)) => {
             let m1 = m1.clone();
@@ -81,7 +81,7 @@ pub fn prepend_type_mapping(
     source: Arc<Type>,
     target: Arc<Type>,
     mapper: Option<&TypeMapper>,
-) -> TypeMapper {
+) -> TypeMapper { ::tsox_core::fntrace::enter("prepend_type_mapping"); 
     match mapper {
         None => new_simple_type_mapper(source, target),
         Some(m) => {
@@ -95,7 +95,7 @@ pub fn append_type_mapping(
     mapper: Option<&TypeMapper>,
     source: Arc<Type>,
     target: Arc<Type>,
-) -> TypeMapper {
+) -> TypeMapper { ::tsox_core::fntrace::enter("append_type_mapping"); 
     match mapper {
         None => new_simple_type_mapper(source, target),
         Some(m) => {
@@ -105,7 +105,7 @@ pub fn append_type_mapping(
     }
 }
 
-pub(crate) fn is_this_type_parameter(t: &Type) -> bool {
+pub(crate) fn is_this_type_parameter(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_this_type_parameter"); 
     if let super::types::TypeData::TypeParameter(tp) = &t.data {
         tp.is_this_type
     } else {

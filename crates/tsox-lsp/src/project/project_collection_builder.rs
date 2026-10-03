@@ -35,7 +35,7 @@ impl ProjectCollectionBuilder {
             &tsox_core::core::compiler_options::CompilerOptions,
         >,
         session_options: SessionOptions,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         let _ = compiler_options_for_inferred_projects;
         ProjectCollectionBuilder {
             session_options,
@@ -48,31 +48,31 @@ impl ProjectCollectionBuilder {
         }
     }
 
-    pub fn finalize(&self) -> (ProjectCollection, ConfigFileRegistry) {
+    pub fn finalize(&self) -> (ProjectCollection, ConfigFileRegistry) { ::tsox_core::fntrace::enter("finalize"); 
         todo!("ProjectCollectionBuilder::finalize requires full integration")
     }
 
-    pub fn handle_api_request(&mut self, _api_request: &APISnapshotRequest) -> Result<(), String> {
+    pub fn handle_api_request(&mut self, _api_request: &APISnapshotRequest) -> Result<(), String> { ::tsox_core::fntrace::enter("handle_api_request"); 
         todo!("ProjectCollectionBuilder::handle_api_request requires full integration")
     }
 
-    pub fn did_change_files(&mut self, _summary: &FileChangeSummary) {
+    pub fn did_change_files(&mut self, _summary: &FileChangeSummary) { ::tsox_core::fntrace::enter("did_change_files"); 
         todo!("ProjectCollectionBuilder::did_change_files requires full integration")
     }
 
-    pub fn did_update_ata_state(&mut self, _ata_changes: &HashMap<Path, ATAStateChange>) {}
+    pub fn did_update_ata_state(&mut self, _ata_changes: &HashMap<Path, ATAStateChange>) { ::tsox_core::fntrace::enter("did_update_ata_state"); }
 
-    pub fn did_change_custom_config_file_name(&mut self) {}
+    pub fn did_change_custom_config_file_name(&mut self) { ::tsox_core::fntrace::enter("did_change_custom_config_file_name"); }
 
     pub fn did_request_file(
         &mut self,
         _uri: &lsproto::DocumentUri,
         _configured_projects_only: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_request_file"); 
         todo!("ProjectCollectionBuilder::did_request_file requires full integration")
     }
 
-    pub fn did_request_project(&mut self, _project_id: &Path) {
+    pub fn did_request_project(&mut self, _project_id: &Path) { ::tsox_core::fntrace::enter("did_request_project"); 
         todo!("ProjectCollectionBuilder::did_request_project requires full integration")
     }
 }

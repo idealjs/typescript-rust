@@ -12,7 +12,7 @@ pub struct LspServer {
 }
 
 impl LspServer {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         LspServer {
             documents: HashMap::new(),
             workspace_root: None,
@@ -20,7 +20,7 @@ impl LspServer {
         }
     }
 
-    pub fn run(&mut self) -> i32 {
+    pub fn run(&mut self) -> i32 { ::tsox_core::fntrace::enter("run"); 
         let stdin = io::stdin();
         let stdout = io::stdout();
         let mut reader = BufReader::new(stdin.lock());
@@ -53,7 +53,7 @@ impl LspServer {
         }
     }
 
-    fn read_message<R: BufRead>(&self, reader: &mut R) -> io::Result<Option<Value>> {
+    fn read_message<R: BufRead>(&self, reader: &mut R) -> io::Result<Option<Value>> { ::tsox_core::fntrace::enter("read_message"); 
         let mut content_length: Option<usize> = None;
         loop {
             let mut line = String::new();
@@ -81,13 +81,13 @@ impl LspServer {
         Ok(Some(msg))
     }
 
-    fn write_message<W: Write>(&self, writer: &mut W, msg: &Value) -> io::Result<()> {
+    fn write_message<W: Write>(&self, writer: &mut W, msg: &Value) -> io::Result<()> { ::tsox_core::fntrace::enter("write_message"); 
         let body = serde_json::to_string(msg)?;
         write!(writer, "Content-Length: {}\r\n\r\n{}", body.len(), body)?;
         writer.flush()
     }
 
-    fn handle_message(&mut self, msg: &Value) -> (Option<Value>, Vec<Value>) {
+    fn handle_message(&mut self, msg: &Value) -> (Option<Value>, Vec<Value>) { ::tsox_core::fntrace::enter("handle_message"); 
         let id = msg.get("id").cloned();
         let method = msg.get("method").and_then(|m| m.as_str()).unwrap_or("");
         let params = msg.get("params").cloned().unwrap_or(Value::Null);
@@ -162,7 +162,7 @@ impl LspServer {
     }
 }
 
-pub fn run_lsp() -> i32 {
+pub fn run_lsp() -> i32 { ::tsox_core::fntrace::enter("run_lsp"); 
     let mut server = LspServer::new();
     server.run()
 }

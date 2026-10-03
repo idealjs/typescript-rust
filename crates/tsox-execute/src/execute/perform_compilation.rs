@@ -7,7 +7,7 @@ pub(crate) fn perform_compilation(
     config: ParsedCommandLine,
     pretty: bool,
     locale: Option<&Locale>,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("perform_compilation"); 
     let host: Arc<dyn CompilerHost> = Arc::new(CompilerHostImpl::new(
         sys.fs(),
         sys.current_directory().to_string(),
@@ -89,7 +89,7 @@ pub(crate) fn find_config_file(
     search_path: &str,
     file_exists: &dyn Fn(&str) -> bool,
     config_name: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("find_config_file"); 
     let mut current = search_path.to_string();
     loop {
         let candidate = tsox_core::tspath::combine_paths(&current, &[config_name]);
@@ -105,7 +105,7 @@ pub(crate) fn find_config_file(
     String::new()
 }
 
-pub(crate) fn should_be_pretty(sys: &dyn System, options: &CompilerOptions) -> bool {
+pub(crate) fn should_be_pretty(sys: &dyn System, options: &CompilerOptions) -> bool { ::tsox_core::fntrace::enter("should_be_pretty"); 
     match options.pretty {
         Tristate::True => true,
         Tristate::False => false,
@@ -113,7 +113,7 @@ pub(crate) fn should_be_pretty(sys: &dyn System, options: &CompilerOptions) -> b
     }
 }
 
-pub(crate) fn default_is_pretty(sys: &dyn System) -> bool {
+pub(crate) fn default_is_pretty(sys: &dyn System) -> bool { ::tsox_core::fntrace::enter("default_is_pretty"); 
     if sys.environment_variable("NO_COLOR").is_some() {
         return false;
     }
@@ -123,7 +123,7 @@ pub(crate) fn default_is_pretty(sys: &dyn System) -> bool {
     sys.write_output_is_tty()
 }
 
-pub(crate) fn print_help(sys: &dyn System, show_all: bool) {
+pub(crate) fn print_help(sys: &dyn System, show_all: bool) { ::tsox_core::fntrace::enter("print_help"); 
     let mut writer = sys.writer();
     let _ = writeln!(writer, "tsc: The TypeScript Compiler - Version {}", VERSION);
     let _ = writeln!(writer);
@@ -135,7 +135,7 @@ pub(crate) fn print_help(sys: &dyn System, show_all: bool) {
     }
 }
 
-pub(crate) fn print_simplified_help(writer: &mut dyn Write) {
+pub(crate) fn print_simplified_help(writer: &mut dyn Write) { ::tsox_core::fntrace::enter("print_simplified_help"); 
     let _ = writeln!(writer, "COMMON COMMANDS:");
     let _ = writeln!(writer);
     let commands = [
@@ -186,7 +186,7 @@ pub(crate) fn print_simplified_help(writer: &mut dyn Write) {
     );
 }
 
-pub(crate) fn print_all_options_section(writer: &mut dyn Write) {
+pub(crate) fn print_all_options_section(writer: &mut dyn Write) { ::tsox_core::fntrace::enter("print_all_options_section"); 
     let mut compiler_opts: Vec<&OptionDecl> = OPTIONS
         .iter()
         .filter(|o| !o.description.is_empty())
@@ -214,7 +214,7 @@ pub(crate) fn print_all_options_section(writer: &mut dyn Write) {
     print_option_section(writer, "BUILD OPTIONS:", &build_opts);
 }
 
-pub(crate) fn print_option_section(writer: &mut dyn Write, header: &str, opts: &[&OptionDecl]) {
+pub(crate) fn print_option_section(writer: &mut dyn Write, header: &str, opts: &[&OptionDecl]) { ::tsox_core::fntrace::enter("print_option_section"); 
     let _ = writeln!(writer, "{header}");
     let _ = writeln!(writer);
     if opts.is_empty() {
@@ -233,14 +233,14 @@ pub(crate) fn print_option_section(writer: &mut dyn Write, header: &str, opts: &
     }
 }
 
-pub(crate) fn display_name_of_option(opt: &OptionDecl) -> String {
+pub(crate) fn display_name_of_option(opt: &OptionDecl) -> String { ::tsox_core::fntrace::enter("display_name_of_option"); 
     match opt.short_name {
         Some(short) => format!("--{}, -{}", opt.name, short),
         None => format!("--{}", opt.name),
     }
 }
 
-pub(crate) fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> CommandLineResult {
+pub(crate) fn write_config_file(sys: &dyn System, options: &CompilerOptions) -> CommandLineResult { ::tsox_core::fntrace::enter("write_config_file"); 
     let config_file_name =
         tsox_core::tspath::combine_paths(sys.current_directory(), &["tsconfig.json"]);
     if sys.fs().file_exists(&config_file_name) {

@@ -8,7 +8,7 @@ impl Checker {
         node: &Arc<Node>,
         signatures: &[Arc<Signature>],
         arguments: &Arc<NodeList>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("report_no_overload_matches"); 
         let saved = self.diagnostics.take_inner();
         let mut entries: Vec<tsox_frontend::ast::Diagnostic> = Vec::new();
         
@@ -64,7 +64,7 @@ impl Checker {
         node: &Arc<Node>,
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("candidate_reaches_argument_check"); 
         let arg_count = arguments.len();
         let max_params = if sig.has_rest_parameter() {
             usize::MAX
@@ -88,7 +88,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         sig: &Arc<Signature>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("explicit_type_args_violate_constraints"); 
         let type_arg_nodes: Vec<Arc<Node>> = match &node.data {
             tsox_frontend::ast::NodeData::CallExpression(d) => d.type_arguments.as_ref(),
             tsox_frontend::ast::NodeData::NewExpression(d) => d.type_arguments.as_ref(),
@@ -138,7 +138,7 @@ impl Checker {
         node: &Arc<Node>,
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
-    ) -> Option<tsox_frontend::ast::Diagnostic> {
+    ) -> Option<tsox_frontend::ast::Diagnostic> { ::tsox_core::fntrace::enter("probe_first_argument_error"); 
         let arg_count = arguments.len();
         let max_params = if sig.has_rest_parameter() {
             usize::MAX
@@ -279,7 +279,7 @@ impl Checker {
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
         inferred_types: &[Arc<Type>],
-    ) -> Option<(Arc<Type>, Arc<Type>, Arc<Node>)> {
+    ) -> Option<(Arc<Type>, Arc<Type>, Arc<Node>)> { ::tsox_core::fntrace::enter("non_array_rest_spread_parts"); 
         if !sig.has_rest_parameter() {
             return None;
         }
@@ -336,7 +336,7 @@ impl Checker {
         }
         Some((spread, rest_type, err_node))
     }
-    fn call_receiver_type(&mut self, callee: &Arc<Node>) -> Option<Arc<Type>> {
+    fn call_receiver_type(&mut self, callee: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("call_receiver_type"); 
         let mut cur = Arc::clone(callee);
         while cur.kind == tsox_frontend::ast::SyntaxKind::ParenthesizedExpression {
             cur = match &cur.data {
@@ -357,7 +357,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_return_type_of_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_return_type_of_call_expression"); 
         // Go getResolvedSignature：调用位签名/返回型解析同步强制（inferSignature
         // 会查询实参函数的返回型），此窗口内不开函数体推断环抑制界
         self.call_return_query_depth += 1;
@@ -366,7 +366,7 @@ impl Checker {
         t
     }
 
-    fn get_return_type_of_call_expression_inner(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    fn get_return_type_of_call_expression_inner(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_return_type_of_call_expression_inner"); 
         let callee = match &node.data {
             tsox_frontend::ast::NodeData::CallExpression(data) => {
                 (&data.expression, data.arguments.clone())
@@ -454,7 +454,7 @@ impl Checker {
         explicit_type_args: Option<Arc<NodeList>>,
         arguments: &Arc<NodeList>,
         cached_inferred: Option<Vec<Arc<Type>>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("call_return_type_from_resolved"); 
         let Some(mut rt) = self.get_return_type_of_signature(sig) else {
             return self.get_any_type();
         };
@@ -526,14 +526,14 @@ impl Checker {
         rt
     }
 
-    pub(crate) fn get_return_type_of_new_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_return_type_of_new_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_return_type_of_new_expression"); 
         self.call_return_query_depth += 1;
         let t = self.get_return_type_of_new_expression_inner(node);
         self.call_return_query_depth -= 1;
         t
     }
 
-    fn get_return_type_of_new_expression_inner(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    fn get_return_type_of_new_expression_inner(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_return_type_of_new_expression_inner"); 
         let (callee, args) = match &node.data {
             tsox_frontend::ast::NodeData::NewExpression(data) => {
                 (&data.expression, data.arguments.clone().unwrap_or_default())

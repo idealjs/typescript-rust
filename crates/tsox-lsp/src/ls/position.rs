@@ -7,7 +7,7 @@ pub(crate) fn lsp_position_to_offset(
     line_map: &LineMap,
     line: usize,
     character: usize,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     let mut offset = line_start;
     let mut units = 0usize;

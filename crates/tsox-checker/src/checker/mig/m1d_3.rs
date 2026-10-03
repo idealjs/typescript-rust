@@ -23,7 +23,7 @@ use tsox_frontend::ast::mig::m3c::type_arguments as node_type_arguments;
 
 pub(crate) fn get_effective_set_accessor_type_annotation_node(
     node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_effective_set_accessor_type_annotation_node"); 
     let param = get_set_accessor_value_parameter(node);
     if let Some(param) = param {
         return param.type_node().cloned();
@@ -35,7 +35,7 @@ impl Checker {
     pub(crate) fn get_annotated_accessor_this_parameter(
         &mut self,
         accessor: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_annotated_accessor_this_parameter"); 
         let parameter = self.get_accessor_this_parameter(accessor);
         parameter.and_then(|p| self.symbol_of_node(&p))
     }
@@ -43,7 +43,7 @@ impl Checker {
     pub(crate) fn get_accessor_this_parameter(
         &mut self,
         accessor: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_accessor_this_parameter"); 
         let expected = if is_get_accessor_declaration(accessor) {
             1
         } else {
@@ -58,7 +58,7 @@ impl Checker {
     pub(crate) fn get_annotated_accessor_type(
         &mut self,
         accessor: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_annotated_accessor_type"); 
         let node = self.get_annotated_accessor_type_node(accessor);
         if let Some(node) = node {
             return Some(self.get_type_from_type_node(&node));
@@ -69,7 +69,7 @@ impl Checker {
     pub(crate) fn get_annotated_accessor_type_node(
         &mut self,
         accessor: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_annotated_accessor_type_node"); 
         match accessor.kind {
             SyntaxKind::GetAccessor | SyntaxKind::PropertyDeclaration => accessor.type_node().cloned(),
             SyntaxKind::SetAccessor => get_effective_set_accessor_type_annotation_node(accessor),
@@ -77,7 +77,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn find_mixins(&mut self, types: &[Arc<Type>]) -> (Vec<bool>, usize) {
+    pub(crate) fn find_mixins(&mut self, types: &[Arc<Type>]) -> (Vec<bool>, usize) { ::tsox_core::fntrace::enter("find_mixins"); 
         let mut mixin_flags: Vec<bool> = Vec::with_capacity(types.len());
         for t in types {
             mixin_flags.push(self.is_mixin_constructor_type(t));
@@ -106,7 +106,7 @@ impl Checker {
         (mixin_flags, mixin_count)
     }
 
-    pub(crate) fn get_apparent_type_of_mapped_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_apparent_type_of_mapped_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_apparent_type_of_mapped_type"); 
         if let Some(cached) = t.resolved_apparent_type_of_mapped_type() {
             return cached;
         }
@@ -119,7 +119,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         this_argument: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_apparent_type_of_intersection_type"); 
         if t.id == this_argument.id {
             if let Some(cached) = t.resolved_apparent_type_of_intersection() {
                 return cached;
@@ -135,7 +135,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         type_parameters: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_effective_type_arguments"); 
         let type_arguments: Vec<Arc<Type>> = node_type_arguments(node)
             .iter()
             .map(|n| self.get_type_from_type_node(n))
@@ -152,7 +152,7 @@ impl Checker {
     pub(crate) fn get_default_type_argument_type(
         &mut self,
         is_in_javascript_file: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_default_type_argument_type"); 
         if is_in_javascript_file {
             return self.get_any_type();
         }
@@ -162,7 +162,7 @@ impl Checker {
     pub(crate) fn get_default_or_unknown_from_type_parameter(
         &mut self,
         t: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_default_or_unknown_from_type_parameter"); 
         self.get_default_from_type_parameter(t)
             .unwrap_or_else(|| self.unknown_type())
     }
@@ -170,7 +170,7 @@ impl Checker {
     pub(crate) fn get_constraint_declaration_for_mapped_type(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_constraint_declaration_for_mapped_type"); 
         let m = t.mapped_data()?;
         let declaration = m.declaration.as_ref()?;
         if let NodeData::MappedTypeNode(d) = &declaration.data {
@@ -187,7 +187,7 @@ impl Checker {
         include: TypeFlags,
         strings_only: bool,
         cb: &mut dyn FnMut(&Arc<Type>),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_mapped_type_property_key_type_and_index_signature_key_type"); 
         for prop in self.get_properties_of_type(t) {
             let key = self.get_literal_type_from_property(&prop);
             cb(&key);
@@ -215,7 +215,7 @@ impl Checker {
     pub(crate) fn get_class_or_interface_like_declaration(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_class_or_interface_like_declaration"); 
         if symbol.flags.intersects(SymbolFlags::Class | SymbolFlags::Function) {
             return symbol.value_declaration.clone();
         }
@@ -236,7 +236,7 @@ impl Checker {
     pub(crate) fn get_declared_type_of_type_parameter(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_type_parameter"); 
         if let Some(t) = self
             .declared_type_links
             .get(symbol)
@@ -251,7 +251,7 @@ impl Checker {
         t
     }
 
-    pub(crate) fn get_declared_type_of_type_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn get_declared_type_of_type_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_type_alias"); 
         if let Some(t) = self
             .type_alias_links
             .get(symbol)
@@ -294,7 +294,7 @@ impl Checker {
     pub(crate) fn get_emit_syntax_for_module_specifier_expression(
         &mut self,
         _usage: &Arc<Node>,
-    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode {
+    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode { ::tsox_core::fntrace::enter("get_emit_syntax_for_module_specifier_expression"); 
         tsox_core::core::compiler_options_kinds::ResolutionMode::None
     }
 }

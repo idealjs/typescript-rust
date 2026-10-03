@@ -17,7 +17,7 @@ pub fn for_each_child_and_js_doc(
     node: &Arc<Node>,
     source_file: &SourceFile,
     v: &mut dyn FnMut(&Arc<Node>),
-) {
+) { ::tsox_core::fntrace::enter("for_each_child_and_js_doc"); 
     for jsdoc in node.jsdoc(source_file) {
         v(&jsdoc);
     }
@@ -30,7 +30,7 @@ pub fn for_each_child_and_js_doc(
 pub fn for_each_child_js_doc_parameter_or_property_tag(
     node: &Arc<Node>,
     v: &mut dyn FnMut(&Arc<Node>),
-) {
+) { ::tsox_core::fntrace::enter("for_each_child_js_doc_parameter_or_property_tag"); 
     let NodeData::JSDocParameterOrPropertyTag(data) = &node.data else {
         return;
     };
@@ -56,7 +56,7 @@ pub fn for_each_child_js_doc_parameter_or_property_tag(
 pub fn get_all_accessor_declarations_for_declaration(
     accessor: &Arc<Node>,
     declarations_of_symbol: &[Arc<Node>],
-) -> AllAccessorDeclarations {
+) -> AllAccessorDeclarations { ::tsox_core::fntrace::enter("get_all_accessor_declarations_for_declaration"); 
     let other_kind = match accessor.kind {
         SyntaxKind::SetAccessor => SyntaxKind::GetAccessor,
         SyntaxKind::GetAccessor => SyntaxKind::SetAccessor,
@@ -84,7 +84,7 @@ pub fn get_all_accessor_declarations_for_declaration(
 pub fn get_all_accessor_declarations(
     parent_declarations: &[Arc<Node>],
     accessor: &Arc<Node>,
-) -> AllAccessorDeclarations {
+) -> AllAccessorDeclarations { ::tsox_core::fntrace::enter("get_all_accessor_declarations"); 
     if has_dynamic_name(accessor) {
         return get_all_accessor_declarations_for_declaration(accessor, std::slice::from_ref(accessor));
     }

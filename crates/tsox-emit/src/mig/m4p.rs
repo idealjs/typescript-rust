@@ -54,7 +54,7 @@ impl CommentState {
         container_pos: usize,
         container_end: usize,
         declaration_list_container_end: usize,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             emit_flags,
             comment_range,
@@ -86,17 +86,17 @@ pub struct Printer {
 }
 
 impl Printer {
-    pub fn emit_keyword_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_keyword_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_keyword_node"); 
         self.emit_keyword_node_ex(node, TokenEmitFlags::NONE);
     }
 
-    pub fn emit_keyword_node_ex(&mut self, node: &Arc<Node>, flags: TokenEmitFlags) {
+    pub fn emit_keyword_node_ex(&mut self, node: &Arc<Node>, flags: TokenEmitFlags) { ::tsox_core::fntrace::enter("emit_keyword_node_ex"); 
         let state = self.enter_token_node(node, flags);
         self.write_token_text(node.kind, WriteKind::Keyword, node.pos());
         self.exit_token_node(node, state);
     }
 
-    pub fn emit_literal(&mut self, node: &Arc<Node>, mut flags: GetLiteralTextFlags) {
+    pub fn emit_literal(&mut self, node: &Arc<Node>, mut flags: GetLiteralTextFlags) { ::tsox_core::fntrace::enter("emit_literal"); 
         if self.options.never_ascii_escape {
             flags |= GET_LITERAL_TEXT_FLAGS_NEVER_ASCII_ESCAPE;
         }
@@ -107,7 +107,7 @@ impl Printer {
         self.writer.write_string_literal(&text);
     }
 
-    pub fn emit_identifier_text(&mut self, node: &Arc<Node>) {
+    pub fn emit_identifier_text(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_identifier_text"); 
         let text = self.get_text_of_node(node, false);
         let symbol = self
             .id_to_symbol
@@ -120,20 +120,20 @@ impl Printer {
         self.write(&text);
     }
 
-    pub fn emit_identifier_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_identifier_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_identifier_name"); 
         let state = self.enter_node(node);
         self.emit_identifier_text(node);
         self.exit_node(node, state);
     }
 
-    pub fn emit_identifier_name_node(&mut self, node: Option<&Arc<Node>>) {
+    pub fn emit_identifier_name_node(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("emit_identifier_name_node"); 
         let Some(node) = node else {
             return;
         };
         self.emit_identifier_name(node);
     }
 
-    pub fn get_unique_helper_name(&mut self, name: &str) -> Arc<Node> {
+    pub fn get_unique_helper_name(&mut self, name: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("get_unique_helper_name"); 
         let existing = self.unique_helper_names.as_ref().and_then(|m| m.get(name).cloned());
         if let Some(helper_name) = existing {
             return helper_name.clone();
@@ -163,7 +163,7 @@ impl Printer {
         helper_name
     }
 
-    pub fn emit_identifier_reference(&mut self, node: &Arc<Node>) {
+    pub fn emit_identifier_reference(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_identifier_reference"); 
         let mut node = node.clone();
         if (self.external_helpers_module_name.is_some() || self.unique_helper_names.is_some())
             && self
@@ -202,13 +202,13 @@ impl Printer {
         self.exit_node(&node, state);
     }
 
-    pub fn emit_label_identifier(&mut self, node: &Arc<Node>) {
+    pub fn emit_label_identifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_label_identifier"); 
         let state = self.enter_node(node);
         self.emit_identifier_text(node);
         self.exit_node(node, state);
     }
 
-    pub fn emit_entity_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_entity_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_entity_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_reference(node),
             SyntaxKind::QualifiedName => self.emit_qualified_name(node),
@@ -224,7 +224,7 @@ impl Printer {
         node: Option<&Arc<Node>>,
         equal_token_pos: usize,
         context_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_initializer"); 
         let Some(node) = node else {
             return;
         };
@@ -239,40 +239,40 @@ impl Printer {
         self.emit_expression(node, OPERATOR_PRECEDENCE_DISALLOW_COMMA);
     }
 
-    pub fn emit_keyword_type_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_keyword_type_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_keyword_type_node"); 
         self.emit_keyword_node(node);
     }
 
-    pub fn emit_keyword_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_keyword_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_keyword_expression"); 
         self.emit_keyword_node(node);
     }
 
-    pub fn emit_jsdoc_all_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsdoc_all_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsdoc_all_type"); 
         self.emit_keyword_node(node);
     }
 
-    pub fn emit_jsdoc_non_nullable_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsdoc_non_nullable_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsdoc_non_nullable_type"); 
         let state = self.enter_node(node);
         self.write_punctuation("!");
         self.emit_type_node(node.type_node().unwrap(), TypePrecedence::NonArray);
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsdoc_nullable_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsdoc_nullable_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsdoc_nullable_type"); 
         let state = self.enter_node(node);
         self.write_punctuation("?");
         self.emit_type_node(node.type_node().unwrap(), TypePrecedence::NonArray);
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsdoc_optional_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsdoc_optional_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsdoc_optional_type"); 
         let state = self.enter_node(node);
         self.emit_type_node(node.type_node().unwrap(), TypePrecedence::Jsdoc);
         self.write_punctuation("=");
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsdoc_variadic_type(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsdoc_variadic_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsdoc_variadic_type"); 
         let state = self.enter_node(node);
         self.write_punctuation("...");
         self.emit_type_node(node.type_node().unwrap(), TypePrecedence::Jsdoc);

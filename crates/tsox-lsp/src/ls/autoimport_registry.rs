@@ -3,7 +3,7 @@ pub(crate) use tsox_core::collections::set::Set;
 pub use crate::ls::autoimport_registry_bucket::*;
 pub use crate::ls::autoimport_registry_registry_impl::*;
 
-pub fn known_recursive_search_packages() -> Set<String> {
+pub fn known_recursive_search_packages() -> Set<String> { ::tsox_core::fntrace::enter("known_recursive_search_packages"); 
     let mut s = Set::new();
     for pkg in [
         "@material-ui/core",

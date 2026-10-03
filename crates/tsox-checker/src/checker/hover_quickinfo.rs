@@ -8,7 +8,7 @@ use tsox_frontend::ast::{Node, SyntaxKind};
 
 impl Checker {
     /// hover 类型显示统一走这里的 flags（Go typeFormatFlags + MultilineObjectLiterals）
-    pub fn hover_type_to_string(&mut self, t: &Arc<crate::checker::types::Type>) -> String {
+    pub fn hover_type_to_string(&mut self, t: &Arc<crate::checker::types::Type>) -> String { ::tsox_core::fntrace::enter("hover_type_to_string"); 
         use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
         self.type_to_string_ex(
             t,
@@ -23,7 +23,7 @@ impl Checker {
         &mut self,
         parts: &mut Vec<SymbolDisplayPart>,
         sig: &Arc<crate::checker::types::Signature>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("append_signature_return_parts"); 
         if let Some(pred) = self.compute_type_predicate_of_signature(sig) {
             match pred.kind {
                 crate::checker::types::TypePredicateKind::AssertsThis => {
@@ -59,14 +59,14 @@ impl Checker {
 
     /// `x as const` 中的 const：Go 侧解析为 Transient|TypeAlias 名为 const 的符号，
     /// 显示 `type const = <断言表达式类型>`（checker.go getTypeFromTypeReference 特判）
-    pub fn quick_info_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
+    pub fn quick_info_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("quick_info_parts"); 
         if let Some(parts) = self.const_assertion_parts(node) {
             return parts;
         }
         Vec::new()
     }
 
-    pub(crate) fn const_assertion_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
+    pub(crate) fn const_assertion_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("const_assertion_parts"); 
         if node.kind != SyntaxKind::ConstKeyword {
             return None;
         }

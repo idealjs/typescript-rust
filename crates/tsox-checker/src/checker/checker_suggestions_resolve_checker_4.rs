@@ -3,7 +3,7 @@
 use crate::checker::checker_suggestions_resolve::*;
 
 impl Checker {
-    pub(crate) fn check_duplicate_function_implementations(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_duplicate_function_implementations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_duplicate_function_implementations"); 
         let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data else {
             return;
         };
@@ -42,7 +42,7 @@ impl Checker {
             return;
         }
         // Go NodeIsPresent：零宽 body（parse 恢复产物）视为缺失
-        fn body_present(f: &Arc<Node>) -> bool {
+        fn body_present(f: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("body_present"); 
             matches!(&f.data, tsox_frontend::ast::NodeData::FunctionDeclaration(d) if d
                 .body
                 .as_ref()
@@ -92,7 +92,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_overload_implementation_follows(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_overload_implementation_follows(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_overload_implementation_follows"); 
         let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data else {
             return;
         };
@@ -196,7 +196,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_multiple_constructor_implementations(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_multiple_constructor_implementations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_multiple_constructor_implementations"); 
         let Some(class) = node.parent() else {
             return;
         };

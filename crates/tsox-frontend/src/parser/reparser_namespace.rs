@@ -2,7 +2,7 @@ use crate::ast::*;
 use std::sync::Arc;
 use tsox_core::core::text::TextRange;
 
-pub(super) fn get_innermost_name_of_jsdoc_namespace(full_name: &Arc<Node>) -> Arc<Node> {
+pub(super) fn get_innermost_name_of_jsdoc_namespace(full_name: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_innermost_name_of_jsdoc_namespace"); 
     let mut current = full_name.clone();
     while current.kind == SyntaxKind::ModuleDeclaration {
         let body = match &current.data {
@@ -31,7 +31,7 @@ pub(super) fn wrap_in_jsdoc_namespace(
     full_name: &Arc<Node>,
     statement: &Arc<Node>,
     nested: bool,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("wrap_in_jsdoc_namespace"); 
     if full_name.kind != SyntaxKind::ModuleDeclaration {
         return statement.clone();
     }
@@ -76,7 +76,7 @@ pub(super) fn wrap_in_jsdoc_namespace(
     ))
 }
 
-pub(super) fn create_export_modifier(location_node: &Arc<Node>) -> Arc<ModifierList> {
+pub(super) fn create_export_modifier(location_node: &Arc<Node>) -> Arc<ModifierList> { ::tsox_core::fntrace::enter("create_export_modifier"); 
     let export_modifier = Arc::new(Node::with_loc_flags(
         SyntaxKind::ExportKeyword,
         NodeData::Token,
@@ -93,7 +93,7 @@ pub(super) fn make_question_if_optional(
     is_bracketed: bool,
     type_expression: &Option<Arc<Node>>,
     location_node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("make_question_if_optional"); 
     let is_optional_type = type_expression.as_ref().is_some_and(|te| {
         te.kind == SyntaxKind::JSDocTypeExpression
             && matches!(&te.data, NodeData::JSDocTypeExpression(d) if d.type_node.kind == SyntaxKind::JSDocOptionalType)
@@ -110,15 +110,15 @@ pub(super) fn make_question_if_optional(
     }
 }
 
-pub(super) fn deep_clone(node: &Arc<Node>) -> Arc<Node> {
+pub(super) fn deep_clone(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("deep_clone"); 
     Arc::clone(node)
 }
 
-pub(super) fn name_is_qualified_name(name: &Arc<Node>) -> bool {
+pub(super) fn name_is_qualified_name(name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("name_is_qualified_name"); 
     name.kind == SyntaxKind::QualifiedName
 }
 
-pub(super) fn tag_name_loc(tag: &Arc<Node>) -> Option<TextRange> {
+pub(super) fn tag_name_loc(tag: &Arc<Node>) -> Option<TextRange> { ::tsox_core::fntrace::enter("tag_name_loc"); 
     match &tag.data {
         NodeData::JSDocOverloadTag(d) => Some(d.tag_name.loc),
         NodeData::JSDocTypedefTag(d) => Some(d.tag_name.loc),

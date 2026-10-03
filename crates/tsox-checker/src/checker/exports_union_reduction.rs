@@ -10,11 +10,11 @@ pub enum UnionReduction {
     Subtype,
 }
 
-pub fn get_declaration_modifier_flags_from_symbol(s: &Symbol) -> ModifierFlags {
+pub fn get_declaration_modifier_flags_from_symbol(s: &Symbol) -> ModifierFlags { ::tsox_core::fntrace::enter("get_declaration_modifier_flags_from_symbol"); 
     get_declaration_modifier_flags_from_symbol_ex(s, false)
 }
 
-pub fn get_declaration_modifier_flags_from_symbol_ex(s: &Symbol, is_write: bool) -> ModifierFlags {
+pub fn get_declaration_modifier_flags_from_symbol_ex(s: &Symbol, is_write: bool) -> ModifierFlags { ::tsox_core::fntrace::enter("get_declaration_modifier_flags_from_symbol_ex"); 
     if s.check_flags.contains(CheckFlags::SYNTHETIC) {
         let access_modifier = if !is_write && s.check_flags.contains(CheckFlags::ContainsPublic)
             || is_write && s.check_flags.contains(CheckFlags::ContainsWritePublic)

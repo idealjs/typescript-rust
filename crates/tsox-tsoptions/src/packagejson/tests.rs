@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn parse_basic_package_json() {
+fn parse_basic_package_json() { ::tsox_core::fntrace::enter("parse_basic_package_json"); 
     let json = r#"{
         "name": "my-package",
         "version": "1.0.0",
@@ -33,7 +33,7 @@ fn parse_basic_package_json() {
 }
 
 #[test]
-fn parse_dependencies() {
+fn parse_dependencies() { ::tsox_core::fntrace::enter("parse_dependencies"); 
     let json = r#"{
         "name": "test",
         "dependencies": {
@@ -52,7 +52,7 @@ fn parse_dependencies() {
 }
 
 #[test]
-fn parse_null_fields() {
+fn parse_null_fields() { ::tsox_core::fntrace::enter("parse_null_fields"); 
     let json = r#"{"name": null, "version": "1.0.0"}"#;
     let fields = parse(json).unwrap();
     assert!(fields.header_fields.name.present);
@@ -62,7 +62,7 @@ fn parse_null_fields() {
 }
 
 #[test]
-fn parse_exports_subpaths() {
+fn parse_exports_subpaths() { ::tsox_core::fntrace::enter("parse_exports_subpaths"); 
     let json = r#"{
         "name": "test",
         "exports": {
@@ -78,7 +78,7 @@ fn parse_exports_subpaths() {
 }
 
 #[test]
-fn parse_exports_conditions() {
+fn parse_exports_conditions() { ::tsox_core::fntrace::enter("parse_exports_conditions"); 
     let json = r#"{
         "name": "test",
         "exports": {
@@ -94,7 +94,7 @@ fn parse_exports_conditions() {
 }
 
 #[test]
-fn exports_classification_fixed() {
+fn exports_classification_fixed() { ::tsox_core::fntrace::enter("exports_classification_fixed"); 
     let e = ExportsOrImports {
         json_value: JsonValue {
             value_type: JsonValueType::Object,
@@ -125,7 +125,7 @@ fn exports_classification_fixed() {
 }
 
 #[test]
-fn parse_duplicate_names() {
+fn parse_duplicate_names() { ::tsox_core::fntrace::enter("parse_duplicate_names"); 
     let content = r#"{
         "name": "test-package",
         "name": "test-package",
@@ -145,7 +145,7 @@ fn parse_duplicate_names() {
 }
 
 #[test]
-fn expected_field_tracking() {
+fn expected_field_tracking() { ::tsox_core::fntrace::enter("expected_field_tracking"); 
     let json = r#"{
         "name": "test",
         "version": 2,
@@ -170,7 +170,7 @@ fn expected_field_tracking() {
 }
 
 #[test]
-fn exports_and_imports_navigation() {
+fn exports_and_imports_navigation() { ::tsox_core::fntrace::enter("exports_and_imports_navigation"); 
     let json = r##"{
         "imports": {
             "#foo": {
@@ -227,7 +227,7 @@ fn exports_and_imports_navigation() {
 }
 
 #[test]
-fn json_value_types() {
+fn json_value_types() { ::tsox_core::fntrace::enter("json_value_types"); 
     let json = r#"{
         "private": true,
         "false": false,

@@ -9,7 +9,7 @@ pub trait FS: Send + Sync {
     fn write_file(&self, path: &str, data: &str) -> std::io::Result<()>;
     fn append_file(&self, path: &str, data: &str) -> std::io::Result<()>;
     fn remove(&self, path: &str) -> std::io::Result<()>;
-    fn chtimes(&self, _path: &str, _atime: SystemTime, _mtime: SystemTime) -> std::io::Result<()> {
+    fn chtimes(&self, _path: &str, _atime: SystemTime, _mtime: SystemTime) -> std::io::Result<()> { ::tsox_core::fntrace::enter("chtimes"); 
         Ok(())
     }
     fn directory_exists(&self, path: &str) -> bool;
@@ -21,7 +21,7 @@ pub trait FS: Send + Sync {
         &self,
         root: &str,
         walk_fn: &mut dyn FnMut(&str, &FileInfo),
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("walk_dir"); 
         let _ = (root, walk_fn);
         Ok(())
     }

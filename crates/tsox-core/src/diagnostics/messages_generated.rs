@@ -21899,7 +21899,7 @@ pub static JSDOC_COMMENT: Message = Message {
     reports_deprecated: false,
 };
 
-pub fn key_to_message(key: Key) -> Option<&'static Message> {
+pub fn key_to_message(key: Key) -> Option<&'static Message> { crate::fntrace::enter("key_to_message"); 
     match key {
         "Unterminated_string_literal_1002" => Some(&UNTERMINATED_STRING_LITERAL),
         "Identifier_expected_1003" => Some(&IDENTIFIER_EXPECTED),

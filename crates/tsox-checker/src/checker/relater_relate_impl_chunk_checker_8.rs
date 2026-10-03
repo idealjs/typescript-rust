@@ -12,7 +12,7 @@ impl Checker {
         &self,
         symbol: Option<&Arc<tsox_frontend::ast::Symbol>>,
         fallback: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("missing_property_display_name"); 
         if let Some(symbol) = symbol
             && let Some((_, name)) = symbol
                 .declarations
@@ -38,7 +38,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         source_is_primitive: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_object_type_related_to"); 
         // 未解析的接口壳（自引用重建实例，members 空）：先解析成完整实例再比较
         // （tsc type reference 的成员延迟解析语义）
         if let Some(sym) = target.symbol.as_ref()
@@ -529,7 +529,7 @@ impl Checker {
     }
 }
 
-fn is_array_only_mutable_member(name: &str) -> bool {
+fn is_array_only_mutable_member(name: &str) -> bool { ::tsox_core::fntrace::enter("is_array_only_mutable_member"); 
     matches!(
         name,
         "pop"

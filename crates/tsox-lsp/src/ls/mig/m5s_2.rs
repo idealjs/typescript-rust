@@ -15,7 +15,7 @@ use tsox_frontend::astnav;
 
 pub fn combine_multi_document_highlights(
     results: Vec<MultiDocumentHighlightsOrNull>,
-) -> MultiDocumentHighlightsOrNull {
+) -> MultiDocumentHighlightsOrNull { ::tsox_core::fntrace::enter("combine_multi_document_highlights"); 
     let mut by_uri: HashMap<DocumentUri, usize> = HashMap::new();
     let mut seen: HashMap<DocumentUri, HashSet<Range>> = HashMap::new();
     let mut combined_documents: Vec<MultiDocumentHighlight> = Vec::new();
@@ -48,7 +48,7 @@ impl LanguageService {
     pub fn to_document_highlight(
         &self,
         entry: &mut ReferenceEntry,
-    ) -> (String, Option<DocumentHighlight>) {
+    ) -> (String, Option<DocumentHighlight>) { ::tsox_core::fntrace::enter("to_document_highlight"); 
         let file_name = entry.file_name.clone();
 
         let kind = DocumentHighlightKind::Read;
@@ -96,7 +96,7 @@ impl LanguageService {
         node_test: impl Fn(&Arc<Node>) -> bool,
         get_nodes: impl Fn(&Arc<Node>, &Arc<SourceFile>) -> Vec<Arc<Node>>,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<DocumentHighlight> {
+    ) -> Vec<DocumentHighlight> { ::tsox_core::fntrace::enter("use_parent"); 
         if let Some(node) = node {
             if node_test(node) {
                 return self.highlight_spans(&get_nodes(node, source_file), source_file);
@@ -109,7 +109,7 @@ impl LanguageService {
         &self,
         nodes: &[Arc<Node>],
         source_file: &Arc<SourceFile>,
-    ) -> Vec<DocumentHighlight> {
+    ) -> Vec<DocumentHighlight> { ::tsox_core::fntrace::enter("highlight_spans"); 
         if nodes.is_empty() {
             return Vec::new();
         }
@@ -137,7 +137,7 @@ impl LanguageService {
         keywords: &[SyntaxKind],
         node: &Arc<Node>,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<DocumentHighlight> {
+    ) -> Vec<DocumentHighlight> { ::tsox_core::fntrace::enter("get_from_all_declarations"); 
         self.use_parent(
             node.parent().as_ref(),
             &node_test,
@@ -173,7 +173,7 @@ impl LanguageService {
         &self,
         if_statement: &Arc<Node>,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<DocumentHighlight> {
+    ) -> Vec<DocumentHighlight> { ::tsox_core::fntrace::enter("get_if_else_occurrences"); 
         let keywords = get_if_else_keywords(if_statement.clone(), source_file);
         let kind = DocumentHighlightKind::Read;
         let mut highlights = Vec::new();
@@ -242,7 +242,7 @@ impl LanguageService {
 pub fn get_if_else_keywords(
     mut if_statement: Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_if_else_keywords"); 
     while let Some(parenting_if) = if_statement.parent() {
         if !ast::is_if_statement(&parenting_if) {
             break;
@@ -287,7 +287,7 @@ pub fn get_if_else_keywords(
     keywords
 }
 
-pub fn get_return_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> {
+pub fn get_return_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_return_occurrences"); 
     let func_node = match node.parent().and_then(|p| ast::find_ancestor(&p, ast::is_function_like))
     {
         Some(f) => f,
@@ -316,7 +316,7 @@ pub fn get_return_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) -
 pub fn aggregate_owned_throw_statements(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("aggregate_owned_throw_statements"); 
     if ast::is_throw_statement(node) {
         return vec![node.clone()];
     }
@@ -353,7 +353,7 @@ pub fn flat_map_children<T>(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     mut cb: impl FnMut(&Arc<Node>, &Arc<SourceFile>) -> Vec<T>,
-) -> Vec<T> {
+) -> Vec<T> { ::tsox_core::fntrace::enter("flat_map_children"); 
     let mut result = Vec::new();
     tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
         let value = cb(child, source_file);
@@ -363,7 +363,7 @@ pub fn flat_map_children<T>(
     result
 }
 
-pub fn get_throw_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> {
+pub fn get_throw_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_throw_occurrences"); 
     let owner = match get_throw_statement_owner(node) {
         Some(owner) => owner,
         None => return Vec::new(),
@@ -390,7 +390,7 @@ pub fn get_throw_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) ->
     keywords
 }
 
-pub fn get_throw_statement_owner(throw_statement: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_throw_statement_owner(throw_statement: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_throw_statement_owner"); 
     let mut child = throw_statement.clone();
     while let Some(parent) = child.parent() {
         if ast::is_function_block(&parent) || parent.kind == SyntaxKind::SourceFile {
@@ -422,7 +422,7 @@ pub fn get_throw_statement_owner(throw_statement: &Arc<Node>) -> Option<Arc<Node
 pub fn get_try_catch_finally_occurrences(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_try_catch_finally_occurrences"); 
     let mut keywords: Vec<Arc<Node>> = Vec::new();
     let token = crate::ls::lsutil_children::get_first_token(node, source_file);
     if let Some(token) = &token {
@@ -456,7 +456,7 @@ pub fn get_try_catch_finally_occurrences(
 pub fn get_switch_case_default_occurrences(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_switch_case_default_occurrences"); 
     let mut keywords: Vec<Arc<Node>> = Vec::new();
     if let Some(token) = crate::ls::lsutil_children::get_first_token(node, source_file) {
         if token.kind == SyntaxKind::SwitchKeyword {
@@ -506,7 +506,7 @@ pub fn get_switch_case_default_occurrences(
 pub fn aggregate_all_break_and_continue_statements(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("aggregate_all_break_and_continue_statements"); 
     if ast::is_break_or_continue_statement(node) {
         return vec![node.clone()];
     }
@@ -518,14 +518,14 @@ pub fn aggregate_all_break_and_continue_statements(
     })
 }
 
-pub fn owns_break_or_continue_statement(owner: &Arc<Node>, statement: &Arc<Node>) -> bool {
+pub fn owns_break_or_continue_statement(owner: &Arc<Node>, statement: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("owns_break_or_continue_statement"); 
     match get_break_or_continue_owner(statement) {
         Some(actual_owner) => Arc::ptr_eq(&actual_owner, owner),
         None => false,
     }
 }
 
-pub fn get_break_or_continue_owner(statement: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_break_or_continue_owner(statement: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_break_or_continue_owner"); 
     ast::mig::m3e_4::find_ancestor_or_quit(Some(statement), |node| {
         match node.kind {
             SyntaxKind::SwitchStatement => {
@@ -549,7 +549,7 @@ pub fn get_break_or_continue_owner(statement: &Arc<Node>) -> Option<Arc<Node>> {
     })
 }
 
-fn fallthrough_check(statement: &Arc<Node>, node: &Arc<Node>) -> ast::mig::m3e_4::FindAncestorResult {
+fn fallthrough_check(statement: &Arc<Node>, node: &Arc<Node>) -> ast::mig::m3e_4::FindAncestorResult { ::tsox_core::fntrace::enter("fallthrough_check"); 
     let label = tsox_frontend::ast::mig::m3b::label(statement);
     if label.is_none()
         || label.is_some_and(|l| is_labeled_by(node, l.text()))
@@ -559,7 +559,7 @@ fn fallthrough_check(statement: &Arc<Node>, node: &Arc<Node>) -> ast::mig::m3e_4
     ast::mig::m3e_4::FindAncestorResult::False
 }
 
-pub fn is_labeled_by(node: &Arc<Node>, label_name: &str) -> bool {
+pub fn is_labeled_by(node: &Arc<Node>, label_name: &str) -> bool { ::tsox_core::fntrace::enter("is_labeled_by"); 
     ast::mig::m3e_4::find_ancestor_or_quit(node.parent().as_ref(), |owner| {
         if !ast::is_labeled_statement(owner) {
             return ast::mig::m3e_4::FindAncestorResult::Quit;
@@ -577,7 +577,7 @@ pub fn is_labeled_by(node: &Arc<Node>, label_name: &str) -> bool {
 pub fn get_break_or_continue_statement_occurrences(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_break_or_continue_statement_occurrences"); 
     if let Some(owner) = get_break_or_continue_owner(node) {
         match owner.kind {
             SyntaxKind::ForStatement
@@ -595,7 +595,7 @@ pub fn get_break_or_continue_statement_occurrences(
 pub fn get_loop_break_continue_occurrences(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_loop_break_continue_occurrences"); 
     let mut keywords: Vec<Arc<Node>> = Vec::new();
 
     if let Some(token) = crate::ls::lsutil_children::get_first_token(node, source_file) {
@@ -634,7 +634,7 @@ pub fn get_loop_break_continue_occurrences(
 pub fn get_async_and_await_occurrences(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_async_and_await_occurrences"); 
     let fun = match ast::mig::x4ast::get_containing_function(node) {
         Some(fun) => fun,
         None => return Vec::new(),
@@ -664,7 +664,7 @@ pub fn get_async_and_await_occurrences(
     keywords
 }
 
-pub fn get_yield_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> {
+pub fn get_yield_occurrences(node: &Arc<Node>, source_file: &Arc<SourceFile>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_yield_occurrences"); 
     let parent_func = match node.parent().and_then(|p| ast::find_ancestor(&p, ast::is_function_like))
     {
         Some(f) => f,
@@ -693,7 +693,7 @@ pub fn traverse_without_crossing_function(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     cb: &mut impl FnMut(&Arc<Node>),
-) {
+) { ::tsox_core::fntrace::enter("traverse_without_crossing_function"); 
     cb(node);
     if !ast::is_function_like(node)
         && !ast::is_class_like(node)
@@ -713,7 +713,7 @@ pub fn get_modifier_occurrences(
     kind: SyntaxKind,
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_modifier_occurrences"); 
     let mut result = Vec::new();
 
     let nodes_to_search = get_nodes_to_search_for_modifier(node, ast::modifier_to_flag(kind));
@@ -728,7 +728,7 @@ pub fn get_modifier_occurrences(
 pub fn get_nodes_to_search_for_modifier(
     declaration: &Arc<Node>,
     modifier_flag: ast::ModifierFlags,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_nodes_to_search_for_modifier"); 
     let container = declaration.parent();
     let Some(container) = container else {
         return Vec::new();
@@ -789,7 +789,7 @@ pub fn get_nodes_to_search_for_modifier(
     }
 }
 
-pub fn find_modifier(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+pub fn find_modifier(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_modifier"); 
     for modifier in node.modifier_nodes() {
         if modifier.kind == kind {
             return Some(Arc::clone(modifier));

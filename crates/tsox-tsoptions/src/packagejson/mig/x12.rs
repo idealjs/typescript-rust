@@ -6,7 +6,7 @@ use tsox_core::collections::mig::x12::{unmarshal_decode, Decoder, Error, JsonKin
 pub fn unmarshal_json_value<T: DeserializeOwned>(
     v: &mut JsonValue,
     data: &[u8],
-) -> Result<(), Error> {
+) -> Result<(), Error> { ::tsox_core::fntrace::enter("unmarshal_json_value"); 
     if data == b"null" {
         *v = JsonValue {
             value_type: JsonValueType::Null,
@@ -50,7 +50,7 @@ pub fn unmarshal_json_value<T: DeserializeOwned>(
 pub fn unmarshal_json_value_v2<T: DeserializeOwned>(
     v: &mut JsonValue,
     dec: &mut Decoder,
-) -> Result<(), Error> {
+) -> Result<(), Error> { ::tsox_core::fntrace::enter("unmarshal_json_value_v2"); 
     match dec.peek_kind()? {
         JsonKind::Null => {
             dec.read_token()?;
@@ -105,19 +105,19 @@ pub struct InfoCacheEntry {
 }
 
 impl InfoCacheEntry {
-    pub fn exists(&self) -> bool {
+    pub fn exists(&self) -> bool { ::tsox_core::fntrace::enter("exists"); 
         self.contents.is_some()
     }
 
-    pub fn get_contents(&self) -> Option<&crate::packagejson::Fields> {
+    pub fn get_contents(&self) -> Option<&crate::packagejson::Fields> { ::tsox_core::fntrace::enter("get_contents"); 
         self.contents.as_ref()
     }
 
-    pub fn get_directory(&self) -> &str {
+    pub fn get_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_directory"); 
         &self.package_directory
     }
 
-    pub fn with_package_directory(&self, package_directory: impl Into<String>) -> Self {
+    pub fn with_package_directory(&self, package_directory: impl Into<String>) -> Self { ::tsox_core::fntrace::enter("with_package_directory"); 
         let package_directory = package_directory.into();
         if self.package_directory != package_directory {
             let mut copy = self.clone();

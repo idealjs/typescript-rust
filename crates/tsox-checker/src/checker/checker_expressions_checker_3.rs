@@ -3,7 +3,7 @@
 use crate::checker::checker_expressions::*;
 
 impl Checker {
-    pub(crate) fn check_function_like_body(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_function_like_body(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_function_like_body"); 
         self.get_type_of_node(node);
 
         self.in_ctor_body_stack.push(false);
@@ -64,7 +64,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn walk_children_for_expressions(&mut self, node: &Arc<Node>) {
+    pub(crate) fn walk_children_for_expressions(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("walk_children_for_expressions"); 
         let children: Vec<Arc<Node>> = {
             let mut collected = Vec::new();
             tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
@@ -82,7 +82,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_jsx_element(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_jsx_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_element"); 
         let opening_element: Option<Arc<Node>> = match &node.data {
             tsox_frontend::ast::NodeData::JsxElement(data) => {
                 Some(Arc::clone(&data.opening_element))
@@ -125,7 +125,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_jsx_attribute(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_jsx_attribute(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_attribute"); 
         match &node.data {
             tsox_frontend::ast::NodeData::JsxAttribute(data) => {
                 if let Some(init) = &data.initializer {
@@ -139,7 +139,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_jsx_child(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_jsx_child(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_child"); 
         match node.kind {
             SyntaxKind::JsxElement
             | SyntaxKind::JsxSelfClosingElement
@@ -157,7 +157,7 @@ impl Checker {
     pub(crate) fn cannot_find_name_message_for(
         name: &str,
         node: Option<&Arc<Node>>,
-    ) -> Option<&'static tsox_core::diagnostics::Message> {
+    ) -> Option<&'static tsox_core::diagnostics::Message> { ::tsox_core::fntrace::enter("cannot_find_name_message_for"); 
         use tsox_core::diagnostics::messages_generated as mg;
         if name == "await"
             && node.is_some_and(|n| {
@@ -197,7 +197,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_parameter_default_initializer(&mut self, param: &Arc<Node>) {
+    pub(crate) fn check_parameter_default_initializer(&mut self, param: &Arc<Node>) { ::tsox_core::fntrace::enter("check_parameter_default_initializer"); 
         if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data {
             // Go checkSignatureDeclaration：模式名参数逐元素急切解析，
             // 不以默认初始化式存在为前提

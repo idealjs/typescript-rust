@@ -21,7 +21,7 @@ pub struct ResolvedModule {
 }
 
 impl ResolvedModule {
-    pub fn is_resolved(&self) -> bool {
+    pub fn is_resolved(&self) -> bool { ::tsox_core::fntrace::enter("is_resolved"); 
         !self.resolved_file_name.is_empty()
     }
 }
@@ -37,7 +37,7 @@ pub struct ResolvedTypeReferenceDirective {
 }
 
 impl ResolvedTypeReferenceDirective {
-    pub fn is_resolved(&self) -> bool {
+    pub fn is_resolved(&self) -> bool { ::tsox_core::fntrace::enter("is_resolved"); 
         !self.resolved_file_name.is_empty()
     }
 }
@@ -51,7 +51,7 @@ pub struct PackageId {
 }
 
 impl PackageId {
-    pub fn package_name(&self) -> String {
+    pub fn package_name(&self) -> String { ::tsox_core::fntrace::enter("package_name"); 
         if self.sub_module_name.is_empty() {
             self.name.clone()
         } else {
@@ -61,7 +61,7 @@ impl PackageId {
 }
 
 impl std::fmt::Display for PackageId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(
             f,
             "{}@{}{}",
@@ -113,7 +113,7 @@ pub enum Extensions {
 }
 
 impl Extensions {
-    pub fn array(&self) -> Vec<&'static str> {
+    pub fn array(&self) -> Vec<&'static str> { ::tsox_core::fntrace::enter("array"); 
         match self {
             Extensions::TypeScript => {
                 tsox_core::tspath::SUPPORTED_TS_IMPLEMENTATION_EXTENSIONS.to_vec()
@@ -132,7 +132,7 @@ impl Extensions {
 
 pub const INFERRED_TYPES_CONTAINING_FILE: &str = "__inferred type names__.ts";
 
-pub fn parse_package_name(module_name: &str) -> (String, String) {
+pub fn parse_package_name(module_name: &str) -> (String, String) { ::tsox_core::fntrace::enter("parse_package_name"); 
     let mut idx = module_name.find('/');
     if !module_name.is_empty() && module_name.starts_with('@') {
         if let Some(slash_idx) = idx {
@@ -149,7 +149,7 @@ pub fn parse_package_name(module_name: &str) -> (String, String) {
     }
 }
 
-pub fn mangle_scoped_package_name(package_name: &str) -> String {
+pub fn mangle_scoped_package_name(package_name: &str) -> String { ::tsox_core::fntrace::enter("mangle_scoped_package_name"); 
     if package_name.starts_with('@') {
         if let Some(idx) = package_name.find('/') {
             return format!("{}__{}", &package_name[1..idx], &package_name[idx + 1..]);
@@ -158,18 +158,18 @@ pub fn mangle_scoped_package_name(package_name: &str) -> String {
     package_name.to_string()
 }
 
-pub fn unmangle_scoped_package_name(package_name: &str) -> String {
+pub fn unmangle_scoped_package_name(package_name: &str) -> String { ::tsox_core::fntrace::enter("unmangle_scoped_package_name"); 
     if let Some(idx) = package_name.find("__") {
         return format!("@{}/{}", &package_name[..idx], &package_name[idx + 2..]);
     }
     package_name.to_string()
 }
 
-pub fn get_types_package_name(package_name: &str) -> String {
+pub fn get_types_package_name(package_name: &str) -> String { ::tsox_core::fntrace::enter("get_types_package_name"); 
     format!("@types/{}", mangle_scoped_package_name(package_name))
 }
 
-pub fn get_package_name_from_types_package_name(mangled_name: &str) -> String {
+pub fn get_package_name_from_types_package_name(mangled_name: &str) -> String { ::tsox_core::fntrace::enter("get_package_name_from_types_package_name"); 
     if let Some(rest) = mangled_name.strip_prefix("@types/") {
         unmangle_scoped_package_name(rest)
     } else {
@@ -177,7 +177,7 @@ pub fn get_package_name_from_types_package_name(mangled_name: &str) -> String {
     }
 }
 
-pub fn parse_node_module_from_path(resolved: &str, is_folder: bool) -> String {
+pub fn parse_node_module_from_path(resolved: &str, is_folder: bool) -> String { ::tsox_core::fntrace::enter("parse_node_module_from_path"); 
     let path = tsox_core::tspath::normalize_path(resolved);
     let idx = match path.rfind("/node_modules/") {
         Some(i) => i,
@@ -203,7 +203,7 @@ pub(crate) fn move_to_next_directory_separator_if_available(
     path: &str,
     prev_separator_index: usize,
     is_folder: bool,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("move_to_next_directory_separator_if_available"); 
     let offset = prev_separator_index + 1;
     if offset > path.len() {
         return if is_folder {
@@ -224,7 +224,7 @@ pub(crate) fn move_to_next_directory_separator_if_available(
     }
 }
 
-pub fn compare_pattern_keys(a: &str, b: &str) -> std::cmp::Ordering {
+pub fn compare_pattern_keys(a: &str, b: &str) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_pattern_keys"); 
     use std::cmp::Ordering;
 
     let a_pattern_index = a.find('*');

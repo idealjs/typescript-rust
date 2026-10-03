@@ -6,20 +6,20 @@ use tsox_checker::checker::checker::*;
 use tsox_frontend::ast::Node;
 
 #[test]
-fn link_store_basic() {
+fn link_store_basic() { ::tsox_core::fntrace::enter("link_store_basic"); 
     let store: LinkStore<Node, NodeLinks> = LinkStore::new();
 
     assert!(store.data.is_empty());
 }
 
 #[test]
-fn ternary_and_or() {
+fn ternary_and_or() { ::tsox_core::fntrace::enter("ternary_and_or"); 
     assert_eq!(Ternary::True.and(Ternary::False), Ternary::False);
     assert_eq!(Ternary::True.or(Ternary::False), Ternary::True);
 }
 
 #[test]
-fn get_symbol_at_location() {
+fn get_symbol_at_location() { ::tsox_core::fntrace::enter("get_symbol_at_location"); 
     use tsox_checker::bundled::BundledFS;
     use tsox_checker::bundled::lib_path;
     use tsox_compile::compiler::CompilerHostImpl;
@@ -75,7 +75,7 @@ fn get_symbol_at_location() {
 }
 
 #[test]
-fn tracer_push_preserves_end_arg_mutations() {
+fn tracer_push_preserves_end_arg_mutations() { ::tsox_core::fntrace::enter("tracer_push_preserves_end_arg_mutations"); 
     use tsox_core::tracing::Phase;
     use tsox_core::tracing::TraceArg;
     use tsox_core::tracing::Tracer;

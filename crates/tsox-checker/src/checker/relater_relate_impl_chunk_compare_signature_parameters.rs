@@ -11,7 +11,7 @@ impl Checker {
         check_mode: SignatureCheckMode,
         strict_variance: bool,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_signature_parameters"); 
         let source_count = self.get_parameter_count(source);
         let source_rest = self.get_non_array_rest_type(source);
         let target_rest = self.get_non_array_rest_type(target);

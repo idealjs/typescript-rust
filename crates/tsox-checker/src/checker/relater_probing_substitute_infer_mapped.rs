@@ -11,7 +11,7 @@ impl Checker {
         idx: &crate::checker::types::IndexTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_index"); 
         let Some(old_target) = idx.target.clone() else {
             return Arc::clone(t);
         };
@@ -50,7 +50,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_mapped"); 
         self.substitute_infer_mapped_inner(t, m, params, substitutions)
     }
 
@@ -60,7 +60,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_mapped_inner"); 
         let chain = self.chained_subst(m, params, substitutions);
         let old_constraint = m.constraint_type.clone();
         let new_constraint = old_constraint
@@ -196,7 +196,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Option<Vec<(Vec<Arc<Type>>, Vec<Arc<Type>>)>> {
+    ) -> Option<Vec<(Vec<Arc<Type>>, Vec<Arc<Type>>)>> { ::tsox_core::fntrace::enter("chained_subst"); 
         let mut chain: Vec<(Vec<Arc<Type>>, Vec<Arc<Type>>)> = m
             .template_subst
             .as_ref()
@@ -217,7 +217,7 @@ impl Checker {
         }
     }
 
-    fn type_mentions_param(&self, t: &Arc<Type>, p: &Arc<Type>) -> bool {
+    fn type_mentions_param(&self, t: &Arc<Type>, p: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_mentions_param"); 
         if self.infer_param_matches(p, t) {
             return true;
         }
@@ -255,7 +255,7 @@ impl Checker {
         m: &crate::checker::types::MappedTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("apply_homomorphic_if_concrete"); 
         if m.name_type.is_some() {
             return None;
         }
@@ -316,7 +316,7 @@ impl Checker {
         Some(applied)
     }
 
-    pub(crate) fn type_is_generic(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn type_is_generic(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_generic"); 
         if t.flags.intersects(
             TypeFlags::TypeParameter | TypeFlags::Index | TypeFlags::IndexedAccess,
         ) {

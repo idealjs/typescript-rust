@@ -8,11 +8,11 @@ impl Checker {
         node: &Arc<Node>,
         body: &Option<Arc<Node>>,
         ambient: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_accessor_signature_rules"); 
         let name_loc = Self::class_member_name_node(node)
             .map(|n| n.loc)
             .unwrap_or(node.loc);
-        fn first_param_is_this(params: &Arc<NodeList>) -> bool {
+        fn first_param_is_this(params: &Arc<NodeList>) -> bool { ::tsox_core::fntrace::enter("first_param_is_this"); 
             params.iter().next().is_some_and(|p| {
                 matches!(
                         &p.data,

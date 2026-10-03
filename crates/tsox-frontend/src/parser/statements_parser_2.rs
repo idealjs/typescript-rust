@@ -3,7 +3,7 @@
 use crate::parser::statements::*;
 
 impl Parser {
-    pub(crate) fn parse_throw_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_throw_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_throw_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::ThrowKeyword);
         let expression = if !self.has_preceding_line_break() {
@@ -30,7 +30,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_try_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_try_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_try_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::TryKeyword);
         let try_block = self.parse_block();
@@ -60,7 +60,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_catch_clause(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_catch_clause(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_catch_clause"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::CatchKeyword);
         let variable_declaration = if self.parse_optional(SyntaxKind::OpenParenToken) {
@@ -84,7 +84,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_debugger_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_debugger_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_debugger_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::DebuggerKeyword);
         self.parse_semicolon();
@@ -96,7 +96,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_expression_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_expression_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_expression_statement"); 
         let pos = self.token_pos();
         let expression = self.parse_expression();
 
@@ -125,7 +125,7 @@ impl Parser {
         ))
     }
 
-    pub fn parse_statement(&mut self) -> Arc<Node> {
+    pub fn parse_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_statement"); 
         match self.token {
             SyntaxKind::SemicolonToken => self.parse_empty_statement(),
             SyntaxKind::OpenBraceToken => self.parse_block(),
@@ -193,7 +193,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_empty_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_empty_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_empty_statement"); 
         let pos = self.token_pos();
         self.next_token();
         Arc::new(Node::with_loc(
@@ -205,12 +205,12 @@ impl Parser {
 
     /// Go parseBlock：`{` 缺失时（shouldAdvance）报错推进并返回空块，
     /// 不解析语句列表（stray catch/finally 的递归防护依赖这一点）
-    pub(crate) fn parse_block(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_block(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_block"); 
         self.parse_block_ex(false)
     }
 
     /// Go parseBlock(ignoreMissingOpenBrace=true)：函数体等允许无 `{` 继续解析
-    pub(crate) fn parse_block_ex(&mut self, ignore_missing_open_brace: bool) -> Arc<Node> {
+    pub(crate) fn parse_block_ex(&mut self, ignore_missing_open_brace: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_block_ex"); 
         let pos = self.token_pos();
         let open_brace_parsed = self.expect(SyntaxKind::OpenBraceToken);
         if !open_brace_parsed && !ignore_missing_open_brace {
@@ -237,14 +237,14 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_variable_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_variable_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_variable_statement"); 
         self.parse_variable_statement_with_modifiers(None)
     }
 
     pub(crate) fn parse_variable_statement_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_variable_statement_with_modifiers"); 
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         let declaration_list = self.parse_variable_declaration_list(false);
         self.parse_semicolon();
@@ -259,7 +259,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_variable_declaration_list(&mut self, in_for: bool) -> Arc<Node> {
+    pub(crate) fn parse_variable_declaration_list(&mut self, in_for: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_variable_declaration_list"); 
         let pos = self.token_pos();
         let flags = match self.token {
             SyntaxKind::VarKeyword => NodeFlags::empty(),
@@ -312,11 +312,11 @@ impl Parser {
         Arc::new(node)
     }
 
-    pub(crate) fn parse_variable_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_variable_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_variable_declaration"); 
         self.parse_variable_declaration_worker(false)
     }
 
-    pub(crate) fn parse_variable_declaration_allow_exclamation(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_variable_declaration_allow_exclamation(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_variable_declaration_allow_exclamation"); 
         self.parse_variable_declaration_worker(true)
     }
 }

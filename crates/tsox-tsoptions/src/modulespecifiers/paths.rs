@@ -1,15 +1,15 @@
 use super::types::{ModulePath, ModuleSpecifierEnding, NodeModulePathParts};
 use tsox_core::tspath::ComparePathsOptions;
 
-pub fn contains_node_modules(s: &str) -> bool {
+pub fn contains_node_modules(s: &str) -> bool { ::tsox_core::fntrace::enter("contains_node_modules"); 
     s.contains("/node_modules/")
 }
 
-pub fn contains_ignored_path(s: &str) -> bool {
+pub fn contains_ignored_path(s: &str) -> bool { ::tsox_core::fntrace::enter("contains_ignored_path"); 
     tsox_core::tspath::contains_ignored_path(s)
 }
 
-pub fn try_get_real_file_name_for_non_js_declaration_file_name(file_name: &str) -> String {
+pub fn try_get_real_file_name_for_non_js_declaration_file_name(file_name: &str) -> String { ::tsox_core::fntrace::enter("try_get_real_file_name_for_non_js_declaration_file_name"); 
     let base_name = tsox_core::tspath::get_base_file_name(file_name);
     if !file_name.ends_with(".ts") || !base_name.contains(".d.") || base_name.ends_with(".d.ts") {
         return String::new();
@@ -21,11 +21,11 @@ pub fn try_get_real_file_name_for_non_js_declaration_file_name(file_name: &str) 
     format!("{before}{ext}")
 }
 
-pub fn path_is_bare_specifier(path: &str) -> bool {
+pub fn path_is_bare_specifier(path: &str) -> bool { ::tsox_core::fntrace::enter("path_is_bare_specifier"); 
     !tsox_core::tspath::path_is_absolute(path) && !tsox_core::tspath::path_is_relative(path)
 }
 
-pub fn ensure_path_is_non_module_name(path: &str) -> String {
+pub fn ensure_path_is_non_module_name(path: &str) -> String { ::tsox_core::fntrace::enter("ensure_path_is_non_module_name"); 
     if path_is_bare_specifier(path) {
         format!("./{path}")
     } else {
@@ -33,7 +33,7 @@ pub fn ensure_path_is_non_module_name(path: &str) -> String {
     }
 }
 
-pub fn get_js_extension_for_declaration_file_extension(ext: &str) -> String {
+pub fn get_js_extension_for_declaration_file_extension(ext: &str) -> String { ::tsox_core::fntrace::enter("get_js_extension_for_declaration_file_extension"); 
     match ext {
         tsox_core::tspath::EXTENSION_DTS => tsox_core::tspath::EXTENSION_JS.to_string(),
         tsox_core::tspath::EXTENSION_DMTS => tsox_core::tspath::EXTENSION_MJS.to_string(),
@@ -52,7 +52,7 @@ pub fn get_js_extension_for_declaration_file_extension(ext: &str) -> String {
     }
 }
 
-pub fn extension_from_path(path: &str) -> String {
+pub fn extension_from_path(path: &str) -> String { ::tsox_core::fntrace::enter("extension_from_path"); 
     let ext = tsox_core::tspath::try_get_extension_from_path(path);
     if ext.is_empty() {
         panic!("File {path} has unknown extension.");
@@ -60,7 +60,7 @@ pub fn extension_from_path(path: &str) -> String {
     ext.to_string()
 }
 
-pub fn is_path_relative_to_parent(path: &str) -> bool {
+pub fn is_path_relative_to_parent(path: &str) -> bool { ::tsox_core::fntrace::enter("is_path_relative_to_parent"); 
     path.starts_with("..")
 }
 
@@ -68,7 +68,7 @@ pub fn get_relative_path_if_in_same_volume(
     path: &str,
     directory_path: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_relative_path_if_in_same_volume"); 
     let relative_path = tsox_core::tspath::get_relative_path_to_directory_or_url(
         directory_path,
         path,
@@ -88,7 +88,7 @@ pub fn get_paths_relative_to_root_dirs(
     path: &str,
     root_dirs: &[String],
     use_case_sensitive_file_names: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_paths_relative_to_root_dirs"); 
     let mut results = Vec::new();
     for root_dir in root_dirs {
         let relative_path =
@@ -100,7 +100,7 @@ pub fn get_paths_relative_to_root_dirs(
     results
 }
 
-pub fn package_json_paths_are_equal(a: &str, b: &str, options: ComparePathsOptions) -> bool {
+pub fn package_json_paths_are_equal(a: &str, b: &str, options: ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("package_json_paths_are_equal"); 
     if a == b {
         return true;
     }
@@ -115,7 +115,7 @@ pub fn package_json_paths_are_equal(a: &str, b: &str, options: ComparePathsOptio
     }
 }
 
-pub fn prefers_ts_extension(allowed_endings: &[ModuleSpecifierEnding]) -> bool {
+pub fn prefers_ts_extension(allowed_endings: &[ModuleSpecifierEnding]) -> bool { ::tsox_core::fntrace::enter("prefers_ts_extension"); 
     let js_priority = allowed_endings
         .iter()
         .position(|e| *e == ModuleSpecifierEnding::JsExtension);
@@ -128,18 +128,18 @@ pub fn prefers_ts_extension(allowed_endings: &[ModuleSpecifierEnding]) -> bool {
     false
 }
 
-pub fn replace_first_star(s: &str, replacement: &str) -> String {
+pub fn replace_first_star(s: &str, replacement: &str) -> String { ::tsox_core::fntrace::enter("replace_first_star"); 
     s.replacen('*', replacement, 1)
 }
 
 pub fn all_keys_start_with_dot<'a, I>(keys: I) -> bool
 where
     I: IntoIterator<Item = &'a str>,
-{
+{ ::tsox_core::fntrace::enter("all_keys_start_with_dot"); 
     keys.into_iter().all(|k| k.starts_with('.'))
 }
 
-pub fn get_node_module_path_parts(full_path: &str) -> Option<NodeModulePathParts> {
+pub fn get_node_module_path_parts(full_path: &str) -> Option<NodeModulePathParts> { ::tsox_core::fntrace::enter("get_node_module_path_parts"); 
     let mut top_level_node_modules_index = 0usize;
     let mut top_level_package_name_index = 0usize;
     let mut package_root_index = 0usize;
@@ -204,7 +204,7 @@ pub fn get_node_module_path_parts(full_path: &str) -> Option<NodeModulePathParts
     None
 }
 
-pub fn get_package_name_from_directory(file_or_directory_path: &str) -> String {
+pub fn get_package_name_from_directory(file_or_directory_path: &str) -> String { ::tsox_core::fntrace::enter("get_package_name_from_directory"); 
     let idx = match file_or_directory_path.rfind("/node_modules/") {
         Some(i) => i,
         None => return String::new(),
@@ -231,7 +231,7 @@ pub fn compare_paths_by_redirect(
     a: &ModulePath,
     b: &ModulePath,
     use_case_sensitive_file_names: bool,
-) -> std::cmp::Ordering {
+) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_paths_by_redirect"); 
     use std::cmp::Ordering;
 
     match b.is_redirect.cmp(&a.is_redirect) {
@@ -256,11 +256,11 @@ pub fn compare_paths_by_redirect(
 }
 
 #[allow(non_snake_case)]
-fn full_path_bytes(s: &str) -> Vec<u8> {
+fn full_path_bytes(s: &str) -> Vec<u8> { ::tsox_core::fntrace::enter("full_path_bytes"); 
     s.as_bytes().to_vec()
 }
 
-fn index_after_bytes(bytes: &[u8], b: u8, start: usize) -> Option<usize> {
+fn index_after_bytes(bytes: &[u8], b: u8, start: usize) -> Option<usize> { ::tsox_core::fntrace::enter("index_after_bytes"); 
     if start > bytes.len() {
         return None;
     }

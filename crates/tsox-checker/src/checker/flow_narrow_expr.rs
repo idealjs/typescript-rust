@@ -19,7 +19,7 @@ impl Checker {
         target: &FlowRef,
         kind: NarrowKind,
         depth: u32,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_expression"); 
         if expr.kind == SyntaxKind::ParenthesizedExpression {
             if let NodeData::ParenthesizedExpression(p) = &expr.data {
                 return self.narrow_by_expression(type_, &p.expression, target, kind, depth);
@@ -174,7 +174,7 @@ impl Checker {
         &self,
         expr: &Arc<Node>,
         target: &FlowRef,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("discriminant_property_name_on_target"); 
         match &expr.data {
             NodeData::PropertyAccessExpression(pa) => {
                 if self.expr_matches_target(&pa.expression, target) {
@@ -203,7 +203,7 @@ impl Checker {
         type_: &Arc<Type>,
         name: &str,
         kind: NarrowKind,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_property_truthiness"); 
         let constituents = match type_.flags.contains(TypeFlags::Union) {
             true => match &type_.data {
                 TypeData::Union(u) => u.union_or_intersection.types.clone(),

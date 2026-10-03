@@ -13,14 +13,14 @@ use tsox_frontend::ast::{Diagnostic, Node, SourceFile, SyntaxKind};
 
 use crate::checker::types::{Type, TypeData, TypeFlags};
 
-pub fn is_union_with_undefined(t: &Type) -> bool {
+pub fn is_union_with_undefined(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_union_with_undefined"); 
     t.flags.intersects(TypeFlags::UNION)
         && t.types()
             .and_then(|ts| ts.first())
             .is_some_and(|first| first.flags.intersects(TypeFlags::UNDEFINED))
 }
 
-pub fn is_union_with_null(t: &Type) -> bool {
+pub fn is_union_with_null(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_union_with_null"); 
     t.flags.intersects(TypeFlags::UNION)
         && t.types().is_some_and(|ts| {
             ts.first().is_some_and(|t0| t0.flags.intersects(TypeFlags::Null))
@@ -28,7 +28,7 @@ pub fn is_union_with_null(t: &Type) -> bool {
         })
 }
 
-pub fn get_constituent_count(t: &Type) -> usize {
+pub fn get_constituent_count(t: &Type) -> usize { ::tsox_core::fntrace::enter("get_constituent_count"); 
     if !t.flags.intersects(TypeFlags::UNION | TypeFlags::INTERSECTION) || t.alias.is_some() {
         return 1;
     }
@@ -42,11 +42,11 @@ pub fn get_constituent_count(t: &Type) -> usize {
     t.types().map(get_constituent_count_of_types).unwrap_or(1)
 }
 
-pub fn get_constituent_count_of_types(types: &[Arc<Type>]) -> usize {
+pub fn get_constituent_count_of_types(types: &[Arc<Type>]) -> usize { ::tsox_core::fntrace::enter("get_constituent_count_of_types"); 
     types.iter().map(|t| get_constituent_count(t)).sum()
 }
 
-pub fn get_external_module_name(node: &Node) -> Option<Arc<Node>> {
+pub fn get_external_module_name(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_name"); 
     match node.kind {
         SyntaxKind::ImportDeclaration | SyntaxKind::ExportDeclaration => {
             module_specifier(node).cloned()
@@ -75,11 +75,11 @@ pub fn get_external_module_name(node: &Node) -> Option<Arc<Node>> {
     }
 }
 
-fn has_decorators(node: Option<&Node>) -> bool {
+fn has_decorators(node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("has_decorators"); 
     node.is_some_and(|n| !decorators(n).is_empty())
 }
 
-fn is_entity_name_expression_local(node: &Node) -> bool {
+fn is_entity_name_expression_local(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression_local"); 
     node.kind == SyntaxKind::Identifier
         || (node.kind == SyntaxKind::PropertyAccessExpression
             && node.expression().is_some_and(|e| is_entity_name_expression_local(&e)))
@@ -89,7 +89,7 @@ pub fn class_element_or_class_element_parameter_is_decorated(
     use_legacy_decorators: bool,
     node: &Arc<Node>,
     parent: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("class_element_or_class_element_parameter_is_decorated"); 
     let mut parameter_list: Option<&[Arc<Node>]> = None;
     let accessor_declarations;
     if is_accessor(node) {
@@ -130,7 +130,7 @@ pub fn class_element_or_class_element_parameter_is_decorated(
     false
 }
 
-pub fn new_text_range(start: usize, end: usize) -> TextRange {
+pub fn new_text_range(start: usize, end: usize) -> TextRange { ::tsox_core::fntrace::enter("new_text_range"); 
     TextRange::new(start, end)
 }
 
@@ -139,6 +139,6 @@ pub fn new_diagnostic(
     loc: TextRange,
     message: Message,
     args: &[String],
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("new_diagnostic"); 
     Diagnostic::new(Some(Arc::clone(file)), loc, message, args.to_vec())
 }

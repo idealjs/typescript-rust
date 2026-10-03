@@ -3,7 +3,7 @@
 use crate::parser::expressions::*;
 
 impl Parser {
-    pub(crate) fn parse_primary_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_primary_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_primary_expression"); 
         match self.token {
             SyntaxKind::Identifier => {
                 let text = self.scanner.token_text().to_string();
@@ -149,7 +149,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_fallback_identifier_or_error(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_fallback_identifier_or_error(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_fallback_identifier_or_error"); 
         // Go parseIdentifierWithDiagnostic：保留字不作表达式标识符（报错且不消费）
         if self.is_identifier()
             && self.token != SyntaxKind::InKeyword
@@ -187,7 +187,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_keyword_expression(&mut self, kind: SyntaxKind) -> Arc<Node> {
+    pub(crate) fn parse_keyword_expression(&mut self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_keyword_expression"); 
         let pos = self.token_pos();
         let end = self.token_end();
         self.next_token();
@@ -201,7 +201,7 @@ impl Parser {
     /// Go parseParenthesizedExpression：主表达式位置的 `(` 一律按括号表达式
     /// 解析，`(` 箭头函数只由 parseAssignmentExpressionOrHigher 入口尝试
     /// （Go parsePrimaryExpression case OpenParenToken → parseParenthesizedExpression）
-    pub(crate) fn parse_parenthesized_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_parenthesized_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parenthesized_expression"); 
         let pos = self.token_pos();
         self.next_token();
 
@@ -216,7 +216,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_array_literal(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_array_literal(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_array_literal"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBracketToken);
         let elements = self.parse_delimited_list(
@@ -235,7 +235,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_array_literal_element(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_array_literal_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_array_literal_element"); 
         if self.parse_optional(SyntaxKind::DotDotDotToken) {
             let pos = self.token_pos();
             let expression = self.allow_in(|p| p.parse_assignment_expression());
@@ -257,7 +257,7 @@ impl Parser {
         self.allow_in(|p| p.parse_assignment_expression())
     }
 
-    pub(crate) fn parse_object_literal(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_object_literal(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_object_literal"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let members = self.parse_delimited_list(

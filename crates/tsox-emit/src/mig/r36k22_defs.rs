@@ -26,11 +26,11 @@ pub const ENUM_MEMBERS: ListFormat = ListFormat(
 );
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_omitted_expression(&self) -> Arc<Node> {
+    pub fn new_omitted_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_omitted_expression"); 
         Arc::new(Node::new(SyntaxKind::OmittedExpression, NodeData::OmittedExpression))
     }
 
-    pub fn new_type_of_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_type_of_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_type_of_expression"); 
         Arc::new(Node::new(
             SyntaxKind::TypeOfExpression,
             NodeData::TypeOfExpression(TypeOfExpressionData {
@@ -43,7 +43,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         left: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_strict_inequality_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -53,7 +53,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_logical_and_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    pub fn new_logical_and_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_logical_and_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -71,7 +71,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<&Arc<Node>>,
         equals_token: Option<&Arc<Node>>,
         object_assignment_initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_shorthand_property_assignment"); 
         let end = name.loc.end();
         let type_node = type_node.cloned().unwrap_or_else(|| {
             Arc::new(Node::with_loc(

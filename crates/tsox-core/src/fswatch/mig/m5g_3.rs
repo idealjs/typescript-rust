@@ -29,7 +29,7 @@ pub fn new_dir_watch(
     physical_dir: &str,
     recursive: bool,
     db: &Arc<Debounce>,
-) -> Arc<DirWatch> {
+) -> Arc<DirWatch> { crate::fntrace::enter("new_dir_watch"); 
     let dw = Arc::new(DirWatch {
         dir: dir.to_string(),
         physical_dir: physical_dir.to_string(),
@@ -52,23 +52,23 @@ pub fn new_dir_watch(
 }
 
 impl DirWatch {
-    pub fn recursive_value(&self) -> bool {
+    pub fn recursive_value(&self) -> bool { crate::fntrace::enter("recursive_value"); 
         *self.recursive.lock().unwrap()
     }
 
-    pub fn set_sequence(&self, sequence: Option<SequenceFn>) {
+    pub fn set_sequence(&self, sequence: Option<SequenceFn>) { crate::fntrace::enter("set_sequence"); 
         *self.sequence.lock().unwrap() = sequence;
     }
 
-    pub fn display_path(&self, watch_path: &str) -> String {
+    pub fn display_path(&self, watch_path: &str) -> String { crate::fntrace::enter("display_path"); 
         rebase_path(watch_path, &self.physical_dir, &self.dir)
     }
 
-    pub fn physical_path(&self, display_path: &str) -> String {
+    pub fn physical_path(&self, display_path: &str) -> String { crate::fntrace::enter("physical_path"); 
         rebase_path(display_path, &self.dir, &self.physical_dir)
     }
 
-    pub fn destroy_debounce(&self) {
+    pub fn destroy_debounce(&self) { crate::fntrace::enter("destroy_debounce"); 
         let (db, key) = {
             let mut mu = self.mu.lock().unwrap();
             (mu.debounce.take(), mu.debounce_key.clone())
@@ -78,7 +78,7 @@ impl DirWatch {
         }
     }
 
-    pub fn notify(&self) {
+    pub fn notify(&self) { crate::fntrace::enter("notify"); 
         let (has_pending, has_terminal, db) = {
             let mu = self.mu.lock().unwrap();
             (
@@ -98,7 +98,7 @@ impl DirWatch {
         }
     }
 
-    pub fn notify_error(&self, err: &FswatchError) {
+    pub fn notify_error(&self, err: &FswatchError) { crate::fntrace::enter("notify_error"); 
         let cbs: Vec<Callback> = {
             let mut mu = self.mu.lock().unwrap();
             std::mem::take(&mut mu.callbacks)
@@ -108,7 +108,7 @@ impl DirWatch {
         }
     }
 
-    pub fn trigger_callbacks(&self) {
+    pub fn trigger_callbacks(&self) { crate::fntrace::enter("trigger_callbacks"); 
         let (cbs, events_by_callback, drain_err) = {
             let mut mu = self.mu.lock().unwrap();
             let has_error = self.events.has_error();
@@ -192,7 +192,7 @@ impl DirWatch {
         path: &str,
         seq: u64,
         err: &FswatchError,
-    ) -> bool {
+    ) -> bool { crate::fntrace::enter("terminate_callbacks_for_deleted_root"); 
         let mut mu = self.mu.lock().unwrap();
         let mut changed = false;
         for cb in &mut mu.callbacks {
@@ -218,7 +218,7 @@ impl DirWatch {
         recursive: bool,
         fn_: WatchCallback,
         ignore: Option<IgnoreFn>,
-    ) -> u64 {
+    ) -> u64 { crate::fntrace::enter("watch"); 
         let mut mu = self.mu.lock().unwrap();
         mu.next_cb_id += 1;
         let id = mu.next_cb_id;
@@ -242,7 +242,7 @@ impl DirWatch {
         id
     }
 
-    pub fn unwatch(&self, id: u64) -> bool {
+    pub fn unwatch(&self, id: u64) -> bool { crate::fntrace::enter("unwatch"); 
         let mut mu = self.mu.lock().unwrap();
         if let Some(i) = mu.callbacks.iter().position(|cb| cb.id == id) {
             mu.callbacks.remove(i);
@@ -251,7 +251,7 @@ impl DirWatch {
         false
     }
 
-    pub fn unref(self: &Arc<Self>, w: &super::m5g_5::WatcherImpl) {
+    pub fn unref(self: &Arc<Self>, w: &super::m5g_5::WatcherImpl) { crate::fntrace::enter("unref"); 
         let empty = self.mu.lock().unwrap().callbacks.is_empty();
         if empty {
             w.remove_dir_watch(self);

@@ -1,6 +1,6 @@
 use super::*;
 
-fn test_temp_dir(label: &str) -> std::path::PathBuf {
+fn test_temp_dir(label: &str) -> std::path::PathBuf { ::tsox_core::fntrace::enter("test_temp_dir"); 
     let dir = std::env::temp_dir().join(format!(
         "tsox_vfs_test_{}_{}_{}",
         label,
@@ -15,7 +15,7 @@ fn test_temp_dir(label: &str) -> std::path::PathBuf {
 }
 
 #[test]
-fn test_os_read_file() {
+fn test_os_read_file() { ::tsox_core::fntrace::enter("test_os_read_file"); 
     let fs = OsFS;
     let cargo_toml = format!("{}/Cargo.toml", env!("CARGO_MANIFEST_DIR"));
     let expected = std::fs::read_to_string(&cargo_toml).unwrap();
@@ -24,7 +24,7 @@ fn test_os_read_file() {
 }
 
 #[test]
-fn test_os_realpath() {
+fn test_os_realpath() { ::tsox_core::fntrace::enter("test_os_realpath"); 
     let fs = OsFS;
 
     if let Ok(home) = std::env::var("HOME") {
@@ -35,7 +35,7 @@ fn test_os_realpath() {
 }
 
 #[test]
-fn test_os_use_case_sensitive_file_names() {
+fn test_os_use_case_sensitive_file_names() { ::tsox_core::fntrace::enter("test_os_use_case_sensitive_file_names"); 
     let fs = OsFS;
     #[cfg(target_os = "windows")]
     assert!(!fs.use_case_sensitive_file_names());
@@ -45,7 +45,7 @@ fn test_os_use_case_sensitive_file_names() {
 
 #[cfg(unix)]
 #[test]
-fn test_symlink_realpath() {
+fn test_symlink_realpath() { ::tsox_core::fntrace::enter("test_symlink_realpath"); 
     use std::os::unix::fs::symlink;
 
     let tmp = test_temp_dir("symlink_rp");
@@ -74,7 +74,7 @@ fn test_symlink_realpath() {
 
 #[cfg(unix)]
 #[test]
-fn test_get_accessible_entries() {
+fn test_get_accessible_entries() { ::tsox_core::fntrace::enter("test_get_accessible_entries"); 
     use std::os::unix::fs::symlink;
 
     let tmp = test_temp_dir("gae");

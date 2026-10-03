@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk_5::*;
 
 impl Checker {
-    pub fn check_source_file(&mut self, file: &Arc<SourceFile>) {
+    pub fn check_source_file(&mut self, file: &Arc<SourceFile>) { ::tsox_core::fntrace::enter("check_source_file"); 
         self.type_instantiation_count = 0;
 
         if !self.globals_populated {
@@ -57,7 +57,7 @@ impl Checker {
         self.current_file_symbol = None;
     }
 
-    pub fn get_semantic_diagnostics(&self) -> Vec<tsox_frontend::ast::Diagnostic> {
+    pub fn get_semantic_diagnostics(&self) -> Vec<tsox_frontend::ast::Diagnostic> { ::tsox_core::fntrace::enter("get_semantic_diagnostics"); 
         self.diagnostics.get_all()
     }
 }

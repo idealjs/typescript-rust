@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
+pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) { ::tsox_core::fntrace::enter("set_bool"); 
     let t = Tristate::from(b);
 
     let name = name.to_ascii_lowercase();
@@ -105,14 +105,14 @@ pub(crate) fn set_bool(options: &mut CompilerOptions, name: &str, b: bool) {
     }
 }
 
-pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptions, Vec<String>) {
+pub fn apply_test_settings(settings: &HashMap<String, String>) -> (CompilerOptions, Vec<String>) { ::tsox_core::fntrace::enter("apply_test_settings"); 
     apply_test_settings_with_base(settings, CompilerOptions::default())
 }
 
 pub fn apply_test_settings_with_base(
     settings: &HashMap<String, String>,
     base: CompilerOptions,
-) -> (CompilerOptions, Vec<String>) {
+) -> (CompilerOptions, Vec<String>) { ::tsox_core::fntrace::enter("apply_test_settings_with_base"); 
     const KNOWN_BOOL_OPTIONS: &[&str] = &[
         "noemit",
         "nocheck",

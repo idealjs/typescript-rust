@@ -18,7 +18,7 @@ impl Checker {
         t: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
         alias: Option<&TypeAlias>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_mapped_type"); 
         let declaration = self.get_mapped_declaration(t);
         let type_variable = self.get_homomorphic_type_variable(t);
         fn instantiate_constituent(
@@ -28,7 +28,7 @@ impl Checker {
             type_variable: &Arc<Type>,
             m: Option<&Arc<TypeMapper>>,
             s: &Arc<Type>,
-        ) -> Arc<Type> {
+        ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_constituent"); 
             if !s.flags.intersects(
                 TYPE_FLAGS_ANY_OR_UNKNOWN
                     | TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE
@@ -123,7 +123,7 @@ impl Checker {
         array_type: &Arc<Type>,
         mapped_type: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_mapped_array_type"); 
         let number_type = self.number_type();
         let element_type =
             self.instantiate_mapped_type_template(mapped_type, &number_type, true, m);
@@ -143,7 +143,7 @@ impl Checker {
         mapped_type: &Arc<Type>,
         type_variable: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_mapped_tuple_type"); 
         let Some(target) = tuple_type.target_tuple_type() else {
             return Arc::clone(tuple_type);
         };
@@ -223,7 +223,7 @@ impl Checker {
         key: &Arc<Type>,
         is_optional: bool,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_mapped_type_template"); 
         let template_mapper = match self.get_type_parameter_from_mapped_type(t) {
             Some(tp) => Some(Arc::new(append_type_mapping(
                 m.map(|v| &**v),
@@ -261,7 +261,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_reverse_mapped_type"); 
         let Some(r) = t.as_reverse_mapped_type() else {
             return Arc::clone(t);
         };
@@ -294,7 +294,7 @@ impl Checker {
         contextual_type: &Arc<Type>,
         node: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_contextual_type"); 
         if self.maybe_type_of_kind(contextual_type, TYPE_FLAGS_INSTANTIABLE) {
             let context = match self.get_inference_context_arc(node).cloned() {
                 Some(ic) => self.clone_inference_context(Some(ic.as_ref()), InferenceFlags::None),
@@ -342,7 +342,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         mapper: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_instantiable_types"); 
         if t.flags.intersects(TYPE_FLAGS_INSTANTIABLE) {
             return self.instantiate_type(t, mapper);
         }
@@ -372,7 +372,7 @@ impl Checker {
         node: &Arc<Node>,
         t: &Arc<Type>,
         check_mode: CheckMode,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_type_with_single_generic_call_signature"); 
         if !check_mode
             .intersects(CheckMode::Inferential | CheckMode::SkipGenericFunctions)
         {

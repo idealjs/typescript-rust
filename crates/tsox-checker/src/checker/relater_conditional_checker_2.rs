@@ -4,7 +4,7 @@ use crate::checker::inference::InferencePriority;
 use crate::checker::relater_conditional::*;
 
 impl Checker {
-    pub fn get_false_type_from_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_false_type_from_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_false_type_from_conditional_type"); 
         if let TypeData::Conditional(ct) = &t.data {
             if let Some(rt) = ct.resolved_false_type.get() {
                 return Some(rt.clone());
@@ -13,7 +13,7 @@ impl Checker {
         None
     }
 
-    pub fn conditional_is_distribution_dependent(&self, _t: &Arc<Type>) -> bool {
+    pub fn conditional_is_distribution_dependent(&self, _t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("conditional_is_distribution_dependent"); 
         true
     }
 
@@ -21,7 +21,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         writing: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_simplified_type_for_relation"); 
         if t.flags.contains(TypeFlags::Conditional) {
             return self.get_simplified_conditional_type(t, writing);
         }
@@ -32,7 +32,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         writing: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_simplified_conditional_type"); 
         let (Some(check_type), Some(extends_type)) = (match &t.data {
             TypeData::Conditional(ct) => (ct.check_type.clone(), ct.extends_type.clone()),
             _ => (None, None),
@@ -80,7 +80,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> Option<bool> {
+    ) -> Option<bool> { ::tsox_core::fntrace::enter("mapped_source_related_to_type_param_target"); 
         let m = match &source.data {
             TypeData::Mapped(m) => m,
             _ => return None,
@@ -113,7 +113,7 @@ impl Checker {
         &mut self,
         a: &Arc<Type>,
         b: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("conditional_parts_intersection_empty"); 
         if a.flags.contains(TypeFlags::Never) || b.flags.contains(TypeFlags::Never) {
             return true;
         }
@@ -124,7 +124,7 @@ impl Checker {
     pub(crate) fn constraint_of_distributive_conditional(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("constraint_of_distributive_conditional"); 
         let (is_distributive, raw_check_type, raw_extends_type, mapper) = match &t.data {
             TypeData::Conditional(ct) => (
                 ct.root
@@ -180,11 +180,11 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("conditional_fallback_related"); 
         self.conditional_fallback_related_probing(source, target, relation)
     }
 
-    fn conditional_root_node_id(t: &Arc<Type>) -> Option<u64> {
+    fn conditional_root_node_id(t: &Arc<Type>) -> Option<u64> { ::tsox_core::fntrace::enter("conditional_root_node_id"); 
         match &t.data {
             TypeData::Conditional(tct) => tct
                 .root
@@ -200,7 +200,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("conditional_fallback_related_probing"); 
         if source.flags.contains(TypeFlags::Conditional)
             && self.deferred_constraint_depth < 100
         {
@@ -291,7 +291,7 @@ impl Checker {
     }
 }
 
-fn get_actual_type_variable(t: &Arc<Type>) -> Arc<Type> {
+fn get_actual_type_variable(t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_actual_type_variable"); 
     if t.flags.contains(TypeFlags::Substitution)
         && let TypeData::Substitution(sub) = &t.data
         && let Some(base) = &sub.base_type
@@ -307,7 +307,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> Option<bool> {
+    ) -> Option<bool> { ::tsox_core::fntrace::enter("conditional_four_way_related"); 
         let (sct, tct) = match (&source.data, &target.data) {
             (TypeData::Conditional(s), TypeData::Conditional(t)) => (s, t),
             _ => return None,

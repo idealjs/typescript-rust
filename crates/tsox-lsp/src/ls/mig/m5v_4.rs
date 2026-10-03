@@ -15,14 +15,14 @@ use crate::ls::lsutil_organize_imports_comparers::{StatementComparer, StringComp
 
 fn new_default_user_preferences_with_type_order(
     type_order: OrganizeImportsTypeOrder,
-) -> UserPreferences {
+) -> UserPreferences { ::tsox_core::fntrace::enter("new_default_user_preferences_with_type_order"); 
     UserPreferences {
         organize_imports_type_order: type_order,
         ..crate::ls::lsutil::new_default_user_preferences()
     }
 }
 
-pub fn get_top_level_export_groups(source_file: &Arc<SourceFile>) -> Vec<Vec<Arc<Node>>> {
+pub fn get_top_level_export_groups(source_file: &Arc<SourceFile>) -> Vec<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("get_top_level_export_groups"); 
     let mut top_level_export_groups: Vec<Vec<Arc<Node>>> = Vec::new();
     let statements = match &source_file.node.data {
         tsox_frontend::ast::NodeData::SourceFile(d) => d.statements.nodes.clone(),
@@ -71,7 +71,7 @@ pub fn organize_exports_worker(
     comparer: &OrganizeImportsComparerSettings,
     source_file: &Arc<SourceFile>,
     change_tracker: &mut ChangeTracker,
-) {
+) { ::tsox_core::fntrace::enter("organize_exports_worker"); 
     if old_export_decls.is_empty() {
         return;
     }
@@ -137,7 +137,7 @@ pub fn coalesce_exports_worker(
     module_specifier_comparer: &StringComparer,
     source_file: Option<&Arc<SourceFile>>,
     change_tracker: &mut ChangeTracker,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("coalesce_exports_worker"); 
     if export_group.is_empty() {
         return export_group.to_vec();
     }
@@ -251,7 +251,7 @@ pub struct CategorizedExports {
     pub type_only_exports: Vec<Arc<Node>>,
 }
 
-pub fn get_categorized_exports(export_group: &[Arc<Node>]) -> CategorizedExports {
+pub fn get_categorized_exports(export_group: &[Arc<Node>]) -> CategorizedExports { ::tsox_core::fntrace::enter("get_categorized_exports"); 
     let mut export_without_clause: Option<Arc<Node>> = None;
     let mut named_exports: Vec<Arc<Node>> = Vec::new();
     let mut type_only_exports: Vec<Arc<Node>> = Vec::new();

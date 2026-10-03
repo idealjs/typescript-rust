@@ -3,7 +3,7 @@
 use crate::checker::nodebuilder::*;
 
 impl Checker {
-    pub fn get_quick_info_text(&mut self, node: &Arc<Node>) -> String {
+    pub fn get_quick_info_text(&mut self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_quick_info_text"); 
         if node.kind == SyntaxKind::ThisKeyword {
             let t = self.get_type_of_node(node);
             return format!("this: {}", self.type_to_string(&t));
@@ -30,7 +30,7 @@ impl Checker {
         self.format_quick_info_for_symbol(&symbol, node)
     }
 
-    pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
+    pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("get_quick_info_display_parts"); 
         let symbol = self.resolve_identifier(node).or_else(|| {
             let symbol_map = self.program.symbol_map();
             let mut current: Option<&Arc<Node>> = Some(node);
@@ -53,7 +53,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
         type_arguments: &[String],
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("symbol_to_display_parts"); 
         let _ = meaning;
         let _ = type_arguments;
 
@@ -128,7 +128,7 @@ impl Checker {
         parts
     }
 
-    pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> {
+    pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("type_to_display_parts"); 
         let s = self.type_to_string(t);
 
         if let Some(name) = t.intrinsic_name() {
@@ -148,7 +148,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         is_method: bool,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("function_symbol_display_parts"); 
         let mut parts: Vec<SymbolDisplayPart> = Vec::new();
         if !is_method {
             push_keyword(&mut parts, "function");
@@ -184,7 +184,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         keyword: &'static str,
         name_kind: DisplayPartKind,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("named_type_symbol_display_parts"); 
         let mut parts = Vec::new();
         push_keyword(&mut parts, keyword);
         push_space(&mut parts, " ");
@@ -193,7 +193,7 @@ impl Checker {
         parts
     }
 
-    pub(crate) fn type_alias_symbol_display_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> {
+    pub(crate) fn type_alias_symbol_display_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("type_alias_symbol_display_parts"); 
         let mut parts = Vec::new();
         push_keyword(&mut parts, "type");
         push_space(&mut parts, " ");
@@ -209,7 +209,7 @@ impl Checker {
     pub(crate) fn type_parameter_symbol_display_parts(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("type_parameter_symbol_display_parts"); 
         let mut parts = Vec::new();
         push_part(&mut parts, &symbol.name, DisplayPartKind::TypeParameterName);
         if let Some(c) = self.get_constraint_of_type_parameter_symbol(symbol) {
@@ -219,7 +219,7 @@ impl Checker {
         parts
     }
 
-    pub(crate) fn variable_symbol_display_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> {
+    pub(crate) fn variable_symbol_display_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("variable_symbol_display_parts"); 
         let mut parts = Vec::new();
         if symbol.flags.intersects(SymbolFlags::Property) {
             push_punctuation(&mut parts, "(");
@@ -256,7 +256,7 @@ impl Checker {
         &mut self,
         parts: &mut Vec<SymbolDisplayPart>,
         sig: &Signature,
-    ) {
+    ) { ::tsox_core::fntrace::enter("append_signature_parameter_parts"); 
         for (i, param) in sig.parameters.iter().enumerate() {
             if i > 0 {
                 push_space(parts, ", ");
@@ -275,7 +275,7 @@ impl Checker {
         &self,
         parts: &mut Vec<SymbolDisplayPart>,
         symbol: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("append_type_parameter_parts"); 
         if let Some(tps) = self.collect_type_parameter_names(symbol) {
             if !tps.is_empty() {
                 push_punctuation(parts, "<");

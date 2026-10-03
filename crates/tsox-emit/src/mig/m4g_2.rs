@@ -29,7 +29,7 @@ use crate::mig::w7t::is_static_property_declaration_or_class_static_block;
 use tsox_checker::binder::mig::r19k5_ext::export_assignment_is_export_equals;
 
 impl ClassFieldsTransformer {
-    pub fn visit_discarded_value(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_discarded_value(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_discarded_value"); 
         match node.kind {
             SyntaxKind::PrefixUnaryExpression | SyntaxKind::PostfixUnaryExpression => {
                 self.visit_pre_or_postfix_unary_expression(node, true)
@@ -40,7 +40,7 @@ impl ClassFieldsTransformer {
         }
     }
 
-    pub fn visit_heritage_clause(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_heritage_clause(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_heritage_clause"); 
         match node.kind {
             SyntaxKind::HeritageClause => self.heritage_clause_visitor().visit_each_child(node),
             SyntaxKind::ExpressionWithTypeArguments => {
@@ -50,7 +50,7 @@ impl ClassFieldsTransformer {
         }
     }
 
-    pub fn visit_assignment_target(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_assignment_target(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_assignment_target"); 
         match node.kind {
             SyntaxKind::ObjectLiteralExpression | SyntaxKind::ArrayLiteralExpression => {
                 self.visit_assignment_pattern(node)
@@ -59,7 +59,7 @@ impl ClassFieldsTransformer {
         }
     }
 
-    pub fn visit_destructuring_assignment_target(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_destructuring_assignment_target(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_destructuring_assignment_target"); 
         if is_object_literal_expression(node) || is_array_literal_expression(node) {
             return self.visit_assignment_pattern(node);
         }
@@ -115,7 +115,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_class_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_class_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_element"); 
         match node.kind {
             SyntaxKind::Constructor => {
                 self.set_current_class_element_and(node, Self::visit_constructor_declaration, node)
@@ -146,14 +146,14 @@ impl ClassFieldsTransformer {
         }
     }
 
-    pub fn visit_property_name(&mut self, name: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_property_name(&mut self, name: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_name"); 
         if is_computed_property_name(name) {
             return self.visit_computed_property_name(name);
         }
         self.visitor().visit_node(name)
     }
 
-    pub fn visit_accessor_field_result(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_accessor_field_result(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_accessor_field_result"); 
         match node.kind {
             SyntaxKind::PropertyDeclaration => self.transform_field_initializer(node),
             SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => self.visit_class_element(node),
@@ -163,7 +163,7 @@ impl ClassFieldsTransformer {
         }
     }
 
-    pub fn visit_identifier(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_identifier(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_identifier"); 
         let declaration = self
             .resolver()
             .get_referenced_value_declaration(&self.emit_context().most_original(node));
@@ -181,7 +181,7 @@ impl ClassFieldsTransformer {
         node.clone()
     }
 
-    pub fn visit_private_identifier(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_private_identifier(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_private_identifier"); 
         if !self.should_transform_private_elements_or_class_static_blocks {
             return node.clone();
         }
@@ -195,7 +195,7 @@ impl ClassFieldsTransformer {
         result
     }
 
-    pub fn transform_private_identifier_in_in_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn transform_private_identifier_in_in_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_private_identifier_in_in_expression"); 
         let info = self.access_private_identifier(binary_left(node));
         if let Some(info) = info {
             let receiver = self.visitor().visit_node(binary_right(node));
@@ -211,7 +211,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_property_assignment(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_property_assignment(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_assignment"); 
         let mut node = node.clone();
         if is_named_evaluation_and(&self.emit_context(), &node, None) {
             node = transform_named_evaluation(&self.emit_context(), &node, false, "");
@@ -219,7 +219,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(&node)
     }
 
-    pub fn visit_variable_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_variable_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_variable_statement"); 
         let saved_pending_statements = std::mem::take(&mut self.pending_statements);
         let visited_node = self.visitor().visit_each_child(node);
         if !self.pending_statements.is_empty() {
@@ -233,7 +233,7 @@ impl ClassFieldsTransformer {
         visited_node
     }
 
-    pub fn visit_variable_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_variable_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_variable_declaration"); 
         let mut node = node.clone();
         if is_named_evaluation_and(&self.emit_context(), &node, None) {
             node = transform_named_evaluation(&self.emit_context(), &node, false, "");
@@ -241,7 +241,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(&node)
     }
 
-    pub fn visit_parameter_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_parameter_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_parameter_declaration"); 
         let mut node = node.clone();
         if is_named_evaluation_and(&self.emit_context(), &node, None) {
             node = transform_named_evaluation(&self.emit_context(), &node, false, "");
@@ -249,7 +249,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(&node)
     }
 
-    pub fn visit_binding_element(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_binding_element(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_binding_element"); 
         let mut node = node.clone();
         if is_named_evaluation_and(&self.emit_context(), &node, None) {
             node = transform_named_evaluation(&self.emit_context(), &node, false, "");
@@ -257,7 +257,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(&node)
     }
 
-    pub fn visit_export_assignment(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_export_assignment(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_export_assignment"); 
         let mut node = node.clone();
         if is_named_evaluation_and(&self.emit_context(), &node, None) {
             let mut assigned_name = "";
@@ -274,7 +274,7 @@ impl ClassFieldsTransformer {
         class_element: &Arc<Node>,
         visitor: fn(&mut Self, &Arc<Node>) -> Option<Arc<Node>>,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("set_current_class_element_and"); 
         if !self
             .current_class_element
             .as_ref()
@@ -288,7 +288,7 @@ impl ClassFieldsTransformer {
         visitor(self, node)
     }
 
-    pub fn visit_each_child_of_node(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_each_child_of_node(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child_of_node"); 
         self.visitor().visit_each_child(node)
     }
 }
@@ -296,7 +296,7 @@ impl ClassFieldsTransformer {
 fn visit_class_static_block_declaration_r37k13(
     tx: &mut ClassFieldsTransformer,
     node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_static_block_declaration_r37k13"); 
     if !tx.should_transform_private_elements_or_class_static_blocks {
         return Some(tx.visitor().visit_each_child(node));
     }

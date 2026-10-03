@@ -15,7 +15,7 @@ use tsox_frontend::ast::{
     ModifierFlags, Node, NodeFlags, Symbol, SymbolFlags, SyntaxKind,
 };
 
-pub fn is_tuple_type_target(t: &Arc<Type>) -> bool {
+pub fn is_tuple_type_target(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_tuple_type_target"); 
     is_tuple_type(t) && t.target().is_some_and(|target| Arc::ptr_eq(&target, t))
 }
 
@@ -23,7 +23,7 @@ impl Checker {
     pub fn get_local_type_parameters_of_class_or_interface_or_type_alias(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_local_type_parameters_of_class_or_interface_or_type_alias"); 
         let mut types: Vec<Arc<Type>> = Vec::new();
         for node in &symbol.declarations {
             if node_kind_is(
@@ -49,7 +49,7 @@ impl Checker {
         node: &Arc<Node>,
         member: &Arc<Node>,
         member_symbol: Option<&Arc<Symbol>>,
-    ) -> MemberOverrideStatus {
+    ) -> MemberOverrideStatus { ::tsox_core::fntrace::enter("get_member_override_modifier_status"); 
         let Some(member_symbol) = member_symbol else {
             return MemberOverrideStatus::None;
         };
@@ -96,7 +96,7 @@ impl Checker {
         )
     }
 
-    pub fn get_reduced_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_reduced_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_reduced_type"); 
         if t.flags.intersects(TypeFlags::Union) {
             if t.object_flags
                 .intersects(ObjectFlags::ContainsIntersections)
@@ -145,7 +145,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn is_readonly_symbol(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_readonly_symbol(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_readonly_symbol"); 
         symbol.check_flags.intersects(CheckFlags::Readonly)
             || symbol.flags.intersects(SymbolFlags::Property)
                 && get_declaration_modifier_flags_from_symbol(symbol)
@@ -169,7 +169,7 @@ impl EmitResolver {
         &self,
         n: &Arc<Node>,
         flags_to_check: ModifierFlags,
-    ) -> ModifierFlags {
+    ) -> ModifierFlags { ::tsox_core::fntrace::enter("get_effective_declaration_flags"); 
         let checker = unsafe { &mut *self.checker };
         checker.get_effective_declaration_flags(n, flags_to_check)
     }
@@ -180,7 +180,7 @@ impl Checker {
         &mut self,
         n: &Arc<Node>,
         flags_to_check: ModifierFlags,
-    ) -> ModifierFlags {
+    ) -> ModifierFlags { ::tsox_core::fntrace::enter("get_effective_declaration_flags"); 
         let mut flags = self.get_combined_modifier_flags_cached(n);
         let parent = n.parent();
         let in_class_like_container = parent.as_deref().is_some_and(|p| {

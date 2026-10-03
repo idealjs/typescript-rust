@@ -24,19 +24,19 @@ pub struct RequestError {
 }
 
 impl RequestError {
-    pub fn new(code: i32, message: String) -> Self {
+    pub fn new(code: i32, message: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         RequestError { code, message }
     }
 
-    pub fn method_not_found(method: &str) -> Self {
+    pub fn method_not_found(method: &str) -> Self { ::tsox_core::fntrace::enter("method_not_found"); 
         RequestError::new(-32601, format!("Method not found: {}", method))
     }
 
-    pub fn invalid_params(message: &str) -> Self {
+    pub fn invalid_params(message: &str) -> Self { ::tsox_core::fntrace::enter("invalid_params"); 
         RequestError::new(-32602, message.to_string())
     }
 
-    pub fn internal_error(message: &str) -> Self {
+    pub fn internal_error(message: &str) -> Self { ::tsox_core::fntrace::enter("internal_error"); 
         RequestError::new(-32603, message.to_string())
     }
 }
@@ -53,7 +53,7 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Server {
             session: RwLock::new(None),
             logger: Arc::new(Logger::new()),
@@ -66,16 +66,16 @@ impl Server {
         }
     }
 
-    pub fn mark_init_started(&self) {
+    pub fn mark_init_started(&self) { ::tsox_core::fntrace::enter("mark_init_started"); 
         self.init_started.store(true, Ordering::SeqCst);
         self.logger.mark_init_started();
     }
 
-    pub fn is_init_started(&self) -> bool {
+    pub fn is_init_started(&self) -> bool { ::tsox_core::fntrace::enter("is_init_started"); 
         self.init_started.load(Ordering::SeqCst)
     }
 
-    pub fn run_outgoing_loop(&self, writer: &mut dyn Write) -> io::Result<()> {
+    pub fn run_outgoing_loop(&self, writer: &mut dyn Write) -> io::Result<()> { ::tsox_core::fntrace::enter("run_outgoing_loop"); 
         while let Some(msg) = self.outgoing_queue.get() {
             let body = serde_json::to_string(&msg)?;
             write!(writer, "Content-Length: {}\r\n\r\n{}", body.len(), body)?;
@@ -84,7 +84,7 @@ impl Server {
         Ok(())
     }
 
-    pub fn handle_initialize(&self, _params: &Value) -> Value {
+    pub fn handle_initialize(&self, _params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_initialize"); 
         self.mark_init_started();
 
         let position_encoding = "utf-8";
@@ -183,14 +183,14 @@ impl Server {
         })
     }
 
-    pub fn handle_shutdown(&self) -> Value {
+    pub fn handle_shutdown(&self) -> Value { ::tsox_core::fntrace::enter("handle_shutdown"); 
         self.shutdown_requested.store(true, Ordering::SeqCst);
         Value::Null
     }
 
-    pub fn handle_initialized(&self) {}
+    pub fn handle_initialized(&self) { ::tsox_core::fntrace::enter("handle_initialized"); }
 
-    pub fn handle_exit(&self) -> i32 {
+    pub fn handle_exit(&self) -> i32 { ::tsox_core::fntrace::enter("handle_exit"); 
         if self.shutdown_requested.load(Ordering::SeqCst) {
             0
         } else {
@@ -198,7 +198,7 @@ impl Server {
         }
     }
 
-    pub fn send_notification(&self, method: &str, params: &Value) {
+    pub fn send_notification(&self, method: &str, params: &Value) { ::tsox_core::fntrace::enter("send_notification"); 
         let msg = json!({
             "jsonrpc": "2.0",
             "method": method,
@@ -207,7 +207,7 @@ impl Server {
         let _ = self.outgoing_queue.put(msg);
     }
 
-    pub fn send_client_request(&self, method: &str, params: &Value) {
+    pub fn send_client_request(&self, method: &str, params: &Value) { ::tsox_core::fntrace::enter("send_client_request"); 
         let id = self.request_id.fetch_add(1, Ordering::SeqCst);
         let msg = json!({
             "jsonrpc": "2.0",
@@ -221,7 +221,7 @@ impl Server {
     pub fn language_service_for_documents(
         &self,
         documents: &HashMap<String, String>,
-    ) -> Option<LanguageService> {
+    ) -> Option<LanguageService> { ::tsox_core::fntrace::enter("language_service_for_documents"); 
         if documents.is_empty() {
             return None;
         }
@@ -271,7 +271,7 @@ impl Server {
 }
 
 impl Default for Server {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }

@@ -3,7 +3,7 @@
 use crate::parser::impl_chunk::*;
 
 impl Parser {
-    pub(crate) fn parsing_context_errors(&mut self, context: ParsingContext) {
+    pub(crate) fn parsing_context_errors(&mut self, context: ParsingContext) { ::tsox_core::fntrace::enter("parsing_context_errors"); 
         match context {
             ParsingContext::SourceElements => {
                 if self.token == SyntaxKind::DefaultKeyword {
@@ -164,7 +164,7 @@ impl Parser {
     pub(crate) fn abort_parsing_list_or_move_to_next_token(
         &mut self,
         context: ParsingContext,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("abort_parsing_list_or_move_to_next_token"); 
         self.parsing_context_errors(context);
         if self.is_in_some_parsing_context() {
             true
@@ -178,7 +178,7 @@ impl Parser {
         &mut self,
         context: ParsingContext,
         parse_element: fn(&mut Self) -> Arc<Node>,
-    ) -> NodeList {
+    ) -> NodeList { ::tsox_core::fntrace::enter("parse_list"); 
         let pos = self.node_pos();
 
         let save_contexts = self.parsing_contexts;
@@ -204,7 +204,7 @@ impl Parser {
         &mut self,
         context: ParsingContext,
         parse_element: fn(&mut Self) -> Arc<Node>,
-    ) -> NodeList {
+    ) -> NodeList { ::tsox_core::fntrace::enter("parse_delimited_list"); 
         let pos = self.node_pos();
         let save_contexts = self.parsing_contexts;
         self.parsing_contexts |= 1 << (context as u32);
@@ -269,7 +269,7 @@ impl Parser {
         parse_element: fn(&mut Self) -> Arc<Node>,
         opening: SyntaxKind,
         closing: SyntaxKind,
-    ) -> NodeList {
+    ) -> NodeList { ::tsox_core::fntrace::enter("parse_bracketedList"); 
         if self.parse_optional(opening) {
             let list = self.parse_delimited_list(context, parse_element);
             self.expect(closing);
@@ -279,7 +279,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_list_terminator(&self, context: ParsingContext) -> bool {
+    pub(crate) fn is_list_terminator(&self, context: ParsingContext) -> bool { ::tsox_core::fntrace::enter("is_list_terminator"); 
         if self.token == SyntaxKind::EndOfFile {
             return true;
         }

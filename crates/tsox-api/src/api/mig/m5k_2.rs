@@ -10,7 +10,7 @@ pub struct StringTable {
     offsets: Vec<u32>,
 }
 
-pub fn new_string_table(file_text: String, string_count: usize) -> StringTable {
+pub fn new_string_table(file_text: String, string_count: usize) -> StringTable { ::tsox_core::fntrace::enter("new_string_table"); 
     StringTable {
         file_text,
         other_strings: String::new(),
@@ -19,7 +19,7 @@ pub fn new_string_table(file_text: String, string_count: usize) -> StringTable {
 }
 
 impl StringTable {
-    pub fn add(&mut self, text: &str, kind: SyntaxKind, pos: usize, end: usize) -> u32 {
+    pub fn add(&mut self, text: &str, kind: SyntaxKind, pos: usize, end: usize) -> u32 { ::tsox_core::fntrace::enter("add"); 
         let index = self.offsets.len() as u32;
         if kind == SyntaxKind::SourceFile {
             self.offsets.push(pos as u32);
@@ -52,7 +52,7 @@ impl StringTable {
         index
     }
 
-    pub fn encode(&self) -> Vec<u8> {
+    pub fn encode(&self) -> Vec<u8> { ::tsox_core::fntrace::enter("encode"); 
         let mut result = Vec::with_capacity(self.encoded_length());
         for &offset in &self.offsets {
             result.extend_from_slice(&offset.to_le_bytes());
@@ -62,27 +62,27 @@ impl StringTable {
         result
     }
 
-    pub fn string_length(&self) -> usize {
+    pub fn string_length(&self) -> usize { ::tsox_core::fntrace::enter("string_length"); 
         self.file_text.len() + self.other_strings.len()
     }
 
-    pub fn encoded_length(&self) -> usize {
+    pub fn encoded_length(&self) -> usize { ::tsox_core::fntrace::enter("encoded_length"); 
         self.offsets.len() * 4 + self.file_text.len() + self.other_strings.len()
     }
 }
 
-pub fn string_table_add(t: &mut StringTable, text: &str, kind: SyntaxKind, pos: usize, end: usize) -> u32 {
+pub fn string_table_add(t: &mut StringTable, text: &str, kind: SyntaxKind, pos: usize, end: usize) -> u32 { ::tsox_core::fntrace::enter("string_table_add"); 
     t.add(text, kind, pos, end)
 }
 
-pub fn string_table_encode(t: &StringTable) -> Vec<u8> {
+pub fn string_table_encode(t: &StringTable) -> Vec<u8> { ::tsox_core::fntrace::enter("string_table_encode"); 
     t.encode()
 }
 
-pub fn string_table_encoded_length(t: &StringTable) -> usize {
+pub fn string_table_encoded_length(t: &StringTable) -> usize { ::tsox_core::fntrace::enter("string_table_encoded_length"); 
     t.encoded_length()
 }
 
-pub fn string_table_string_length(t: &StringTable) -> usize {
+pub fn string_table_string_length(t: &StringTable) -> usize { ::tsox_core::fntrace::enter("string_table_string_length"); 
     t.string_length()
 }

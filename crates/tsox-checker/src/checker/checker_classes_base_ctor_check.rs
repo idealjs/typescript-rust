@@ -6,7 +6,7 @@ use crate::checker::checker_classes::*;
 // Go getBaseConstructorTypeOfClass 的合法性检查段：extends 表达式的
 // 值类型须为构造器类型（含构造签名），否则 TS2507
 impl Checker {
-    pub(crate) fn check_base_constructor_type(&mut self, expr: &Arc<Node>) {
+    pub(crate) fn check_base_constructor_type(&mut self, expr: &Arc<Node>) { ::tsox_core::fntrace::enter("check_base_constructor_type"); 
         if expr.kind == SyntaxKind::NullKeyword {
             return;
         }
@@ -98,7 +98,7 @@ impl Checker {
 impl Checker {
     // Go checkClassDeclaration 的 mixin 分支：基构造类型是类型变量时，
     // 自身构造器须为单 rest any 参数（TS2545）
-    pub(crate) fn check_mixin_constructor_type(&mut self, class_node: &Arc<Node>) {
+    pub(crate) fn check_mixin_constructor_type(&mut self, class_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_mixin_constructor_type"); 
         let Some(heritage_element) = class_extends_heritage_element(class_node) else {
             return;
         };
@@ -160,7 +160,7 @@ impl Checker {
         class_node: &Arc<Node>,
         instance_type: &Arc<Type>,
         out: &mut Vec<Arc<Signature>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("inherit_base_constructor_signatures"); 
         use crate::checker::checker_classes_ctor_super_calls::{
             class_extends_heritage_element, expression_with_type_arguments_expression,
         };

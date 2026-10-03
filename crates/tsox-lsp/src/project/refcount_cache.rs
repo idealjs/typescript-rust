@@ -20,13 +20,13 @@ pub struct RefCountCache<K: Eq + Hash + Clone, V: Clone> {
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.entries.lock().unwrap().len()
     }
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
-    pub fn new(options: RefCountCacheOptions) -> Self {
+    pub fn new(options: RefCountCacheOptions) -> Self { ::tsox_core::fntrace::enter("new"); 
         RefCountCache {
             options,
             entries: Mutex::new(HashMap::new()),
@@ -36,7 +36,7 @@ impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
     pub fn acquire<F>(&self, identity: K, parse: F) -> V
     where
         F: FnOnce(&K) -> V,
-    {
+    { ::tsox_core::fntrace::enter("acquire"); 
         let mut entries = self.entries.lock().unwrap();
         if let Some(entry) = entries.get_mut(&identity) {
             entry.ref_count += 1;
@@ -53,7 +53,7 @@ impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
         value
     }
 
-    pub fn has(&self, identity: &K) -> bool {
+    pub fn has(&self, identity: &K) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.entries.lock().unwrap().contains_key(identity)
     }
 
@@ -71,7 +71,7 @@ impl<K: Eq + Hash + Clone, V: Clone> RefCountCache<K, V> {
         }
     }
 
-    pub fn deref(&self, identity: &K) {
+    pub fn deref(&self, identity: &K) { ::tsox_core::fntrace::enter("deref"); 
         let mut entries = self.entries.lock().unwrap();
         if let Some(entry) = entries.get_mut(identity) {
             entry.ref_count -= 1;

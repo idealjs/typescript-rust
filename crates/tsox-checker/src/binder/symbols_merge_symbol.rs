@@ -10,7 +10,7 @@ impl Binder {
         node: &Arc<Node>,
         existing: &Arc<Symbol>,
         includes: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("append_declaration_to_existing_symbol"); 
         let existing_mut = Arc::as_ptr(existing) as *mut Symbol;
         unsafe {
             (*existing_mut).declarations.push(Arc::clone(node));
@@ -30,7 +30,7 @@ impl Binder {
         node: &Arc<Node>,
         existing: &Arc<Symbol>,
         includes: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("merge_into_existing_symbol"); 
         let var_var_merge = Self::declaration_is_var(node)
             && existing.flags == SymbolFlags::BlockScopedVariable
             && existing

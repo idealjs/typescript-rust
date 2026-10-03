@@ -11,12 +11,12 @@ use crate::checker::checker::*;
 use std::sync::Arc;
 use tsox_frontend::ast::{Node, Symbol};
 
-pub fn resolution_extension_is_ts_or_json(ext: &str) -> bool {
+pub fn resolution_extension_is_ts_or_json(ext: &str) -> bool { ::tsox_core::fntrace::enter("resolution_extension_is_ts_or_json"); 
     tsox_core::tspath::extension_is_ts(ext) || ext == tsox_core::tspath::EXTENSION_JSON
 }
 
 impl Checker {
-    pub fn remove_constrained_type_variables(&mut self, types: &[Arc<Type>]) -> Vec<Arc<Type>> {
+    pub fn remove_constrained_type_variables(&mut self, types: &[Arc<Type>]) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("remove_constrained_type_variables"); 
         let mut types = types.to_vec();
         let mut type_variables: Vec<Arc<Type>> = Vec::new();
         for t in &types {
@@ -114,7 +114,7 @@ impl Checker {
         types
     }
 
-    pub fn remove_definitely_falsy_types(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn remove_definitely_falsy_types(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_definitely_falsy_types"); 
         r22k6_defs::filter_type_ext(self, t, &mut |c, t| {
             c.has_type_facts(t, TypeFacts::TRUTHY)
         })
@@ -127,7 +127,7 @@ impl Checker {
         other_facts: TypeFacts,
         other_includes_facts: TypeFacts,
         other_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_nullable_by_intersection"); 
         let facts = self.get_type_facts(
             t,
             TypeFacts::EQ_UNDEFINED | TypeFacts::EQ_NULL | TypeFacts::IS_UNDEFINED | TypeFacts::IS_NULL,
@@ -163,7 +163,7 @@ impl Checker {
         &mut self,
         declared_type: &Arc<Type>,
         declaration: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_optionality_from_declared_type"); 
         let remove_undefined = self.strict_null_checks
             && tsox_frontend::ast::is_parameter_declaration(declaration)
             && declaration.initializer().is_some()
@@ -180,7 +180,7 @@ impl Checker {
         types: &[Arc<Type>],
         includes: TypeFlags,
         reduce_void_undefined: bool,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("remove_redundant_literal_types"); 
         let mut types = types.to_vec();
         let mut i = types.len();
         while i > 0 {
@@ -225,7 +225,7 @@ impl Checker {
         &mut self,
         types: &[Arc<Type>],
         includes: TypeFlags,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("remove_redundant_supertypes"); 
         let mut types = types.to_vec();
         let mut i = types.len();
         while i > 0 {
@@ -255,7 +255,7 @@ impl Checker {
     pub fn remove_string_literals_matched_by_template_literals(
         &mut self,
         types: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("remove_string_literals_matched_by_template_literals"); 
         let mut types = types.to_vec();
         let templates: Vec<Arc<Type>> = types
             .iter()
@@ -283,7 +283,7 @@ impl Checker {
         &mut self,
         types: &[Arc<Type>],
         has_object_types: bool,
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("remove_subtypes"); 
         if types.len() < 2 {
             return Some(types.to_vec());
         }
@@ -409,7 +409,7 @@ impl Checker {
         Some(types)
     }
 
-    pub fn remove_type(&mut self, t: &Arc<Type>, target_type: &Arc<Type>) -> Arc<Type> {
+    pub fn remove_type(&mut self, t: &Arc<Type>, target_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_type"); 
         if !t.flags.intersects(TypeFlags::Union) {
             if Arc::ptr_eq(t, target_type) {
                 return self.never_type();
@@ -444,7 +444,7 @@ impl Checker {
     }
 }
 
-fn option_arc_ptr_eq(a: &Option<Arc<Type>>, b: &Option<Arc<Type>>) -> bool {
+fn option_arc_ptr_eq(a: &Option<Arc<Type>>, b: &Option<Arc<Type>>) -> bool { ::tsox_core::fntrace::enter("option_arc_ptr_eq"); 
     match (a, b) {
         (Some(a), Some(b)) => Arc::ptr_eq(a, b),
         _ => false,

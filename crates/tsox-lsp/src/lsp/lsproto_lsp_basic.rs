@@ -43,7 +43,7 @@ pub enum MarkupKind {
 }
 
 impl Default for MarkupKind {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         MarkupKind::PlainText
     }
 }
@@ -57,7 +57,7 @@ pub struct StringOrMarkupContent {
 }
 
 impl StringOrMarkupContent {
-    pub fn as_string(&self) -> String {
+    pub fn as_string(&self) -> String { ::tsox_core::fntrace::enter("as_string"); 
         if let Some(s) = &self.string {
             return s.clone();
         }
@@ -74,7 +74,7 @@ pub struct MarkupContent {
     pub value: String,
 }
 
-pub fn preferred_markup_kind(formats: &[MarkupKind]) -> MarkupKind {
+pub fn preferred_markup_kind(formats: &[MarkupKind]) -> MarkupKind { ::tsox_core::fntrace::enter("preferred_markup_kind"); 
     if !formats.is_empty() {
         formats[0].clone()
     } else {

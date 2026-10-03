@@ -33,7 +33,7 @@ impl Checker {
         t: &Arc<Type>,
         type_argument_nodes: &[Arc<Node>],
         location: Option<&Arc<Node>>,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_instantiated_constructors_for_type_arguments"); 
         let signatures = match location {
             Some(location) => self.get_constructors_for_type_arguments(t, type_argument_nodes, location),
             None => {
@@ -63,7 +63,7 @@ impl Checker {
             .collect()
     }
 
-    pub fn get_instantiation_expression_type(&mut self, expr_type: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_instantiation_expression_type(&mut self, expr_type: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_instantiation_expression_type"); 
         let type_arguments = type_argument_list(node);
         if Arc::ptr_eq(expr_type, &self.silent_never_type())
             || self.is_error_type(expr_type)
@@ -103,7 +103,7 @@ impl Checker {
             get_instantiated_signatures: &mut dyn FnMut(&mut Checker, &[Arc<Signature>]) -> Vec<Arc<Signature>>,
             has_some_applicable_signature_cell: &std::cell::RefCell<bool>,
             non_applicable_type_cell: &std::cell::RefCell<Option<Arc<Type>>>,
-        ) -> Arc<Type> {
+        ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_instantiated_type"); 
             let mut has_signatures = false;
             let mut has_applicable_signature = false;
             fn get_instantiated_type_part(
@@ -113,7 +113,7 @@ impl Checker {
                 get_instantiated_signatures: &mut dyn FnMut(&mut Checker, &[Arc<Signature>]) -> Vec<Arc<Signature>>,
                 has_signatures: &mut bool,
                 has_applicable_signature: &mut bool,
-            ) -> Arc<Type> {
+            ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_instantiated_type_part"); 
                 if t.flags.intersects(TypeFlags::OBJECT) {
                     let resolved = c.resolve_structured_type_members(t);
                     let Some(structured) = resolved.as_structured_type() else {
@@ -227,7 +227,7 @@ impl Checker {
         result
     }
 
-    pub fn get_intersection_type_ex(&mut self, types: &[Arc<Type>], flags: IntersectionFlags, alias: Option<&TypeAlias>) -> Arc<Type> {
+    pub fn get_intersection_type_ex(&mut self, types: &[Arc<Type>], flags: IntersectionFlags, alias: Option<&TypeAlias>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_intersection_type_ex"); 
         let mut ordered_types: OrderedSet<Arc<Type>> = OrderedSet::with_capacity(types.len());
         let includes = self.add_types_to_intersection(&mut ordered_types, TypeFlags::empty(), types);
         let mut type_set: Vec<Arc<Type>> = ordered_types.iter().cloned().collect();
@@ -395,7 +395,7 @@ impl Checker {
         result
     }
 
-    pub fn get_intersection_type_facts(&mut self, t: &Arc<Type>, caller_only_needs: TypeFacts) -> TypeFacts {
+    pub fn get_intersection_type_facts(&mut self, t: &Arc<Type>, caller_only_needs: TypeFacts) -> TypeFacts { ::tsox_core::fntrace::enter("get_intersection_type_facts"); 
         let ignore_objects = self.maybe_type_of_kind(t, TypeFlags::PRIMITIVE);
         let mut ored_facts = TypeFacts::empty();
         let mut anded_facts = TypeFacts::ALL;
@@ -411,7 +411,7 @@ impl Checker {
         (ored_facts & TypeFacts::OR_FACTS_MASK) | (anded_facts & TypeFacts::AND_FACTS_MASK)
     }
 
-    pub fn get_isolated_modules_like_flag_name(&self) -> &'static str {
+    pub fn get_isolated_modules_like_flag_name(&self) -> &'static str { ::tsox_core::fntrace::enter("get_isolated_modules_like_flag_name"); 
         if self.compiler_options.verbatim_module_syntax.is_true() {
             "verbatimModuleSyntax"
         } else {
@@ -424,7 +424,7 @@ impl Checker {
         use_: IterationUse,
         input_type: &Arc<Type>,
         allows_strings: bool,
-    ) -> (Option<&'static str>, bool) {
+    ) -> (Option<&'static str>, bool) { ::tsox_core::fntrace::enter("get_iteration_diagnostic_details"); 
         let yield_type = self.get_iteration_type_of_iterable(use_, IterationTypeKind::YIELD, input_type, None);
         if yield_type.is_none() {
             return (
@@ -451,7 +451,7 @@ impl Checker {
         type_kind: IterationTypeKind,
         return_type: &Arc<Type>,
         is_async_generator: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_iteration_type_of_generator_function_return_type"); 
         if is_type_any(return_type) {
             return None;
         }
@@ -465,7 +465,7 @@ impl Checker {
         type_kind: IterationTypeKind,
         input_type: &Arc<Type>,
         error_node: Option<&Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_iteration_type_of_iterable"); 
         if is_type_any(input_type) {
             return None;
         }
@@ -477,7 +477,7 @@ impl Checker {
         &mut self,
         iteration_types: &[IterationTypes],
         f: impl Fn(&IterationTypes) -> Option<Arc<Type>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_iteration_type_union"); 
         let types: Vec<Arc<Type>> = iteration_types.iter().filter_map(f).collect();
         if types.is_empty() {
             return None;
@@ -486,11 +486,11 @@ impl Checker {
     }
 }
 
-fn same_signatures(a: &[Arc<Signature>], b: &[Arc<Signature>]) -> bool {
+fn same_signatures(a: &[Arc<Signature>], b: &[Arc<Signature>]) -> bool { ::tsox_core::fntrace::enter("same_signatures"); 
     a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| Arc::ptr_eq(x, y))
 }
 
-fn instantiation_expression_source_file(c: &crate::checker::checker::Checker, node: &Node) -> Option<Arc<tsox_frontend::ast::SourceFile>> {
+fn instantiation_expression_source_file(c: &crate::checker::checker::Checker, node: &Node) -> Option<Arc<tsox_frontend::ast::SourceFile>> { ::tsox_core::fntrace::enter("instantiation_expression_source_file"); 
     let mut current = node.parent()?;
     while let Some(parent) = current.parent() {
         current = parent;
@@ -502,7 +502,7 @@ fn instantiation_expression_source_file(c: &crate::checker::checker::Checker, no
     c.files.iter().find(|file| file.node.id() == node_id).cloned()
 }
 
-pub fn get_intersection_key(types: &[Arc<Type>], flags: IntersectionFlags, alias: Option<&TypeAlias>) -> CacheHashKey {
+pub fn get_intersection_key(types: &[Arc<Type>], flags: IntersectionFlags, alias: Option<&TypeAlias>) -> CacheHashKey { ::tsox_core::fntrace::enter("get_intersection_key"); 
     let mut b = KeyBuilder::new();
     b.write_types(types);
     if !flags.intersects(IntersectionFlags::NO_CONSTRAINT_REDUCTION) {

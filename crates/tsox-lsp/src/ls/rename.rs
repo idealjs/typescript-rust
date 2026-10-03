@@ -33,7 +33,7 @@ impl LanguageService {
         &self,
         params: &RenameParams,
         _orchestrator: Option<&dyn CrossProjectOrchestrator>,
-    ) -> Option<WorkspaceEdit> {
+    ) -> Option<WorkspaceEdit> { ::tsox_core::fntrace::enter("provide_rename"); 
         let (program, source_file) = self.get_program_and_file(&params.text_document.uri);
         let line_map = &source_file.line_map;
 
@@ -74,7 +74,7 @@ impl LanguageService {
         new_name: &str,
         document_uri: &DocumentUri,
         position: Position,
-    ) -> RenameInfo {
+    ) -> RenameInfo { ::tsox_core::fntrace::enter("get_rename_info"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let offset = lsp_position_to_offset(line_map, &position);
@@ -101,7 +101,7 @@ impl LanguageService {
         &self,
         data: &SymbolAndEntriesData,
         new_name: &str,
-    ) -> Option<WorkspaceEdit> {
+    ) -> Option<WorkspaceEdit> { ::tsox_core::fntrace::enter("symbol_and_entries_to_rename"); 
         let (program, _source_file) = self.get_program_and_file(&DocumentUri(String::new()));
         let _ = &program;
 
@@ -146,12 +146,12 @@ impl LanguageService {
         _entry: &ReferenceEntry,
         new_name: &str,
         _checker: &Checker,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_text_for_rename"); 
         new_name.to_string()
     }
 }
 
-pub fn node_is_eligible_for_rename(node: &Arc<Node>) -> bool {
+pub fn node_is_eligible_for_rename(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_eligible_for_rename"); 
     use tsox_frontend::ast::SyntaxKind;
     matches!(
         node.kind,
@@ -168,7 +168,7 @@ pub fn get_rename_info_for_node(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     program: &Arc<Program>,
-) -> Option<RenameInfo> {
+) -> Option<RenameInfo> { ::tsox_core::fntrace::enter("get_rename_info_for_node"); 
     let line_map = &source_file.line_map;
     let checker = program.build_checker();
 
@@ -190,11 +190,11 @@ pub fn get_adjusted_location(
     node: &Arc<Node>,
     _for_rename: bool,
     _file: &Arc<SourceFile>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_adjusted_location"); 
     node.clone()
 }
 
-fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -215,21 +215,21 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
 
-fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
+fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range { ::tsox_core::fntrace::enter("node_range_to_lsp_range"); 
     Range {
         start: offset_to_position(line_map, node.pos()),
         end: offset_to_position(line_map, node.end()),
     }
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -238,7 +238,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

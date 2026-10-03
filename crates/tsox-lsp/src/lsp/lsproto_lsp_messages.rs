@@ -16,7 +16,7 @@ pub const ERR_CODE_INVALID_PARAMS: i32 = crate::jsonrpc::jsonrpc::CODE_INVALID_P
 pub struct NoParams;
 
 impl NoParams {
-    pub fn is_zero(&self) -> bool {
+    pub fn is_zero(&self) -> bool { ::tsox_core::fntrace::enter("is_zero"); 
         true
     }
 }
@@ -30,7 +30,7 @@ pub struct RequestInfo {
 }
 
 impl RequestInfo {
-    pub fn new_request_message(&self, id: Option<JsonrpcId>, params: Value) -> RequestMessage {
+    pub fn new_request_message(&self, id: Option<JsonrpcId>, params: Value) -> RequestMessage { ::tsox_core::fntrace::enter("new_request_message"); 
         RequestMessage {
             jsonrpc: Default::default(),
             id,
@@ -46,7 +46,7 @@ pub struct NotificationInfo {
 }
 
 impl NotificationInfo {
-    pub fn new_notification_message(&self, params: Value) -> RequestMessage {
+    pub fn new_notification_message(&self, params: Value) -> RequestMessage { ::tsox_core::fntrace::enter("new_notification_message"); 
         RequestMessage {
             jsonrpc: Default::default(),
             id: None,
@@ -68,7 +68,7 @@ pub struct RequestMessage {
 }
 
 impl RequestMessage {
-    pub fn message(&self) -> Message {
+    pub fn message(&self) -> Message { ::tsox_core::fntrace::enter("message"); 
         let kind = if self.id.is_none() {
             crate::jsonrpc::jsonrpc::MessageKind::Notification
         } else {
@@ -93,7 +93,7 @@ pub struct ResponseMessage {
 }
 
 impl ResponseMessage {
-    pub fn message(&self) -> Message {
+    pub fn message(&self) -> Message { ::tsox_core::fntrace::enter("message"); 
         Message {
             kind: crate::jsonrpc::jsonrpc::MessageKind::Response,
             msg: MessageData::Response(self.clone()),
@@ -114,14 +114,14 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn as_request(&self) -> &RequestMessage {
+    pub fn as_request(&self) -> &RequestMessage { ::tsox_core::fntrace::enter("as_request"); 
         match &self.msg {
             MessageData::Request(r) => r,
             _ => panic!("Message is not a request"),
         }
     }
 
-    pub fn as_response(&self) -> &ResponseMessage {
+    pub fn as_response(&self) -> &ResponseMessage { ::tsox_core::fntrace::enter("as_response"); 
         match &self.msg {
             MessageData::Response(r) => r,
             _ => panic!("Message is not a response"),
@@ -133,7 +133,7 @@ impl Serialize for Message {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
-    {
+    { ::tsox_core::fntrace::enter("serialize"); 
         match &self.msg {
             MessageData::Request(r) => r.serialize(serializer),
             MessageData::Response(r) => r.serialize(serializer),
@@ -145,7 +145,7 @@ impl<'de> Deserialize<'de> for Message {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
-    {
+    { ::tsox_core::fntrace::enter("deserialize"); 
         #[derive(Deserialize)]
         struct RawMessage {
             #[serde(default)]

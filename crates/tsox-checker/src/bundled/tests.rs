@@ -2,14 +2,14 @@ use super::*;
 use tsox_tsoptions::vfs::InMemoryFS;
 
 #[test]
-fn lib_path_uses_scheme() {
+fn lib_path_uses_scheme() { ::tsox_core::fntrace::enter("lib_path_uses_scheme"); 
     assert_eq!(lib_path(), "bundled:///libs");
     assert!(is_bundled("bundled:///libs/lib.d.ts"));
     assert!(!is_bundled("/home/user/lib.d.ts"));
 }
 
 #[test]
-fn bundled_fs_serves_libs() {
+fn bundled_fs_serves_libs() { ::tsox_core::fntrace::enter("bundled_fs_serves_libs"); 
     let inner = Arc::new(InMemoryFS::new());
     let fs = BundledFS::new(inner);
 
@@ -21,7 +21,7 @@ fn bundled_fs_serves_libs() {
 }
 
 #[test]
-fn bundled_fs_case_sensitive_matching() {
+fn bundled_fs_case_sensitive_matching() { ::tsox_core::fntrace::enter("bundled_fs_case_sensitive_matching"); 
     let inner = Arc::new(InMemoryFS::new());
     let fs = BundledFS::new(inner);
 
@@ -36,7 +36,7 @@ fn bundled_fs_case_sensitive_matching() {
 }
 
 #[test]
-fn bundled_fs_delegates_case_sensitivity() {
+fn bundled_fs_delegates_case_sensitivity() { ::tsox_core::fntrace::enter("bundled_fs_delegates_case_sensitivity"); 
     let inner = Arc::new(InMemoryFS::new());
     let fs = BundledFS::new(inner);
 
@@ -44,7 +44,7 @@ fn bundled_fs_delegates_case_sensitivity() {
 }
 
 #[test]
-fn bundled_fs_lib_names_nonempty() {
+fn bundled_fs_lib_names_nonempty() { ::tsox_core::fntrace::enter("bundled_fs_lib_names_nonempty"); 
     let names = lib_names();
 
     if !names.is_empty() {
@@ -56,7 +56,7 @@ fn bundled_fs_lib_names_nonempty() {
 }
 
 #[test]
-fn testing_lib_path() {
+fn testing_lib_path() { ::tsox_core::fntrace::enter("testing_lib_path"); 
     let names = lib_names();
     if !names.is_empty() {
         assert!(
@@ -67,7 +67,7 @@ fn testing_lib_path() {
 }
 
 #[test]
-fn embedded_libs() {
+fn embedded_libs() { ::tsox_core::fntrace::enter("embedded_libs"); 
     let inner = Arc::new(InMemoryFS::new());
     let fs = BundledFS::new(inner);
     let entries = fs.get_accessible_entries(&lib_path());

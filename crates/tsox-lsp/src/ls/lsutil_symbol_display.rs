@@ -104,7 +104,7 @@ impl ScriptElementKindModifier {
     pub const CTS: Self = Self(1 << 19);
     pub const CJS: Self = Self(1 << 20);
 
-    pub fn strings(self) -> Set<String> {
+    pub fn strings(self) -> Set<String> { ::tsox_core::fntrace::enter("strings"); 
         let mut result = Set::new();
         for (flag, name) in SCRIPT_ELEMENT_KIND_MODIFIER_NAMES {
             if (self.0 & flag) != 0 {
@@ -117,20 +117,20 @@ impl ScriptElementKindModifier {
 
 impl std::ops::BitOr for ScriptElementKindModifier {
     type Output = Self;
-    fn bitor(self, rhs: Self) -> Self {
+    fn bitor(self, rhs: Self) -> Self { ::tsox_core::fntrace::enter("bitor"); 
         Self(self.0 | rhs.0)
     }
 }
 
 impl std::ops::BitOrAssign for ScriptElementKindModifier {
-    fn bitor_assign(&mut self, rhs: Self) {
+    fn bitor_assign(&mut self, rhs: Self) { ::tsox_core::fntrace::enter("bitor_assign"); 
         self.0 |= rhs.0;
     }
 }
 
 impl std::ops::BitAnd<u32> for ScriptElementKindModifier {
     type Output = u32;
-    fn bitand(self, rhs: u32) -> u32 {
+    fn bitand(self, rhs: u32) -> u32 { ::tsox_core::fntrace::enter("bitand"); 
         self.0 & rhs
     }
 }
@@ -178,13 +178,13 @@ pub fn get_symbol_kind(
     _type_checker: Option<&Checker>,
     _symbol: &Symbol,
     _location: &Arc<Node>,
-) -> ScriptElementKind {
+) -> ScriptElementKind { ::tsox_core::fntrace::enter("get_symbol_kind"); 
     ScriptElementKind::Unknown
 }
 
 pub fn get_symbol_modifiers(
     _type_checker: Option<&Checker>,
     _symbol: Option<&Symbol>,
-) -> ScriptElementKindModifier {
+) -> ScriptElementKindModifier { ::tsox_core::fntrace::enter("get_symbol_modifiers"); 
     ScriptElementKindModifier::NONE
 }

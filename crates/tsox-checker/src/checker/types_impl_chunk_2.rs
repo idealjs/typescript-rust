@@ -4,14 +4,14 @@ use crate::checker::types::*;
 use std::sync::atomic::AtomicBool;
 
 impl InterfaceTypeData {
-    pub fn outer_type_parameters(&self) -> &[Arc<Type>] {
+    pub fn outer_type_parameters(&self) -> &[Arc<Type>] { ::tsox_core::fntrace::enter("outer_type_parameters"); 
         if self.all_type_parameters.is_empty() {
             return &[];
         }
         &self.all_type_parameters[..self.outer_type_parameter_count]
     }
 
-    pub fn local_type_parameters(&self) -> &[Arc<Type>] {
+    pub fn local_type_parameters(&self) -> &[Arc<Type>] { ::tsox_core::fntrace::enter("local_type_parameters"); 
         if self.all_type_parameters.is_empty() {
             return &[];
         }
@@ -19,7 +19,7 @@ impl InterfaceTypeData {
         &self.all_type_parameters[self.outer_type_parameter_count..end]
     }
 
-    pub fn type_parameters(&self) -> &[Arc<Type>] {
+    pub fn type_parameters(&self) -> &[Arc<Type>] { ::tsox_core::fntrace::enter("type_parameters"); 
         if self.all_type_parameters.is_empty() {
             return &[];
         }

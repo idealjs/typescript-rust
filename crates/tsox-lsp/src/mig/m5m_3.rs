@@ -45,7 +45,7 @@ impl WatcherBackend for DefaultWatcherBackend {
         dir: &str,
         callback: WatchCallback,
         opts: &[WatchOption],
-    ) -> Result<Box<dyn FnOnce() + Send>, String> {
+    ) -> Result<Box<dyn FnOnce() + Send>, String> { ::tsox_core::fntrace::enter("watch_directory"); 
         let watch = self
             .watcher
             .watch_directory(dir, callback, opts)
@@ -95,7 +95,7 @@ pub fn new_with_fs_watcher(
     watcher: Arc<dyn FswatchWatcher>,
     on_changes: OnChanges,
     logger: Arc<dyn Logger>,
-) -> Arc<Watcher> {
+) -> Arc<Watcher> { ::tsox_core::fntrace::enter("new_with_fs_watcher"); 
     new_with_backend(
         fs,
         Box::new(DefaultWatcherBackend { watcher }),
@@ -109,7 +109,7 @@ pub fn new_with_backend(
     backend: Box<dyn WatcherBackend>,
     on_changes: OnChanges,
     logger: Arc<dyn Logger>,
-) -> Arc<Watcher> {
+) -> Arc<Watcher> { ::tsox_core::fntrace::enter("new_with_backend"); 
     Arc::new(Watcher {
         fs,
         backend,
@@ -125,7 +125,7 @@ pub fn new_with_backend(
 }
 
 impl Watch {
-    pub fn target_callback(self: &Arc<Self>, watched_directory: String) -> WatchCallback {
+    pub fn target_callback(self: &Arc<Self>, watched_directory: String) -> WatchCallback { ::tsox_core::fntrace::enter("target_callback"); 
         let watcher = self.watcher.clone();
         let watch = Arc::clone(self);
         let kind = self.kind;
@@ -151,14 +151,14 @@ impl Watch {
         })
     }
 
-    pub fn ancestor_callback(self: &Arc<Self>) -> WatchCallback {
+    pub fn ancestor_callback(self: &Arc<Self>) -> WatchCallback { ::tsox_core::fntrace::enter("ancestor_callback"); 
         let watch = Arc::clone(self);
         Arc::new(move |_events: &[FswatchEvent], _err: Option<&String>| {
             let _ = watch.reconcile(true);
         })
     }
 
-    pub fn handle_terminated(self: &Arc<Self>) {
+    pub fn handle_terminated(self: &Arc<Self>) { ::tsox_core::fntrace::enter("handle_terminated"); 
         let mut state = self.mu.lock().unwrap();
         if state.closed {
             return;
@@ -173,7 +173,7 @@ impl Watch {
         let _ = self.reconcile(true);
     }
 
-    pub fn reconcile(self: &Arc<Self>, emit_synthetic_creates: bool) -> Result<(), String> {
+    pub fn reconcile(self: &Arc<Self>, emit_synthetic_creates: bool) -> Result<(), String> { ::tsox_core::fntrace::enter("reconcile"); 
         let mut state = self.mu.lock().unwrap();
         loop {
             if state.closed {
@@ -240,7 +240,7 @@ impl Watch {
     }
 }
 
-pub fn nearest_existing_ancestor(fs: &dyn VfsFs, dir: &str) -> Option<String> {
+pub fn nearest_existing_ancestor(fs: &dyn VfsFs, dir: &str) -> Option<String> { ::tsox_core::fntrace::enter("nearest_existing_ancestor"); 
     let mut dir = dir.to_string();
     loop {
         if fs.directory_exists(&dir) {
@@ -255,7 +255,7 @@ pub fn nearest_existing_ancestor(fs: &dyn VfsFs, dir: &str) -> Option<String> {
 }
 
 impl Watcher {
-    pub fn forward_events(&self, kind: WatchKind, events: &[FswatchEvent]) {
+    pub fn forward_events(&self, kind: WatchKind, events: &[FswatchEvent]) { ::tsox_core::fntrace::enter("forward_events"); 
         let mut state = self.mu.lock().unwrap();
         if state.closed {
             return;
@@ -285,7 +285,7 @@ impl Watcher {
         schedule_flush_locked(&mut state, self);
     }
 
-    pub fn emit_synthetic_creates(&self, directory: &str, kind: WatchKind, recursive: bool) {
+    pub fn emit_synthetic_creates(&self, directory: &str, kind: WatchKind, recursive: bool) { ::tsox_core::fntrace::enter("emit_synthetic_creates"); 
         if kind & WATCH_KIND_CREATE == 0 {
             return;
         }
@@ -306,7 +306,7 @@ impl Watcher {
         self.enqueue_synthetic_creates(&paths);
     }
 
-    pub fn enqueue_synthetic_creates(&self, paths: &[String]) {
+    pub fn enqueue_synthetic_creates(&self, paths: &[String]) { ::tsox_core::fntrace::enter("enqueue_synthetic_creates"); 
         let mut state = self.mu.lock().unwrap();
         if state.closed {
             return;
@@ -328,7 +328,7 @@ impl Watcher {
         schedule_flush_locked(&mut state, self);
     }
 
-    pub fn flush(&self) {
+    pub fn flush(&self) { ::tsox_core::fntrace::enter("flush"); 
         let mut state = self.mu.lock().unwrap();
         if state.closed {
             return;
@@ -346,7 +346,7 @@ impl Watcher {
     }
 }
 
-fn schedule_flush_locked(state: &mut WatcherState, watcher: &Watcher) {
+fn schedule_flush_locked(state: &mut WatcherState, watcher: &Watcher) { ::tsox_core::fntrace::enter("schedule_flush_locked"); 
     if state.flush_timer.is_none() {
         let watcher = unsafe { &*(watcher as *const Watcher) };
         state.flush_timer = Some(std::thread::spawn(move || {
@@ -356,7 +356,7 @@ fn schedule_flush_locked(state: &mut WatcherState, watcher: &Watcher) {
     }
 }
 
-pub fn watch_root(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> Option<String> {
+pub fn watch_root(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> Option<String> { ::tsox_core::fntrace::enter("watch_root"); 
     if let Some(pattern) = &file_system_watcher.glob_pattern.pattern {
         return Some(root_from_glob(pattern));
     }
@@ -372,7 +372,7 @@ pub fn watch_root(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSy
     None
 }
 
-pub fn root_from_glob(pattern: &str) -> String {
+pub fn root_from_glob(pattern: &str) -> String { ::tsox_core::fntrace::enter("root_from_glob"); 
     let pattern = tsox_core::tspath::normalize_slashes(pattern);
     let mut meta_index: Option<usize> = None;
     for (i, ch) in pattern.char_indices() {
@@ -397,7 +397,7 @@ pub fn root_from_glob(pattern: &str) -> String {
     tsox_core::tspath::normalize_path(directory)
 }
 
-pub fn watch_pattern_string(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> String {
+pub fn watch_pattern_string(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> String { ::tsox_core::fntrace::enter("watch_pattern_string"); 
     if let Some(pattern) = &file_system_watcher.glob_pattern.pattern {
         return pattern.clone();
     }
@@ -412,17 +412,17 @@ pub fn watch_pattern_string(file_system_watcher: &crate::lsp::lsproto_lsp_protoc
     String::new()
 }
 
-pub fn is_recursive_glob(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> bool {
+pub fn is_recursive_glob(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> bool { ::tsox_core::fntrace::enter("is_recursive_glob"); 
     watch_pattern_string(file_system_watcher).contains("**")
 }
 
-pub fn effective_kind(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> WatchKind {
+pub fn effective_kind(file_system_watcher: &crate::lsp::lsproto_lsp_protocol::FileSystemWatcher) -> WatchKind { ::tsox_core::fntrace::enter("effective_kind"); 
     match &file_system_watcher.kind {
         Some(kind) => *kind,
         None => WATCH_KIND_CREATE | WATCH_KIND_CHANGE | WATCH_KIND_DELETE,
     }
 }
 
-pub fn server_progress_reporter_done(server: &crate::mig::m5n::Server) -> bool {
+pub fn server_progress_reporter_done(server: &crate::mig::m5n::Server) -> bool { ::tsox_core::fntrace::enter("server_progress_reporter_done"); 
     server.background_ctx.is_done()
 }

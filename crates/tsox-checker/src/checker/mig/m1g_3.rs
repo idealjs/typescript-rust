@@ -23,7 +23,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_class_or_interface_reference"); 
         let merged = self.get_merged_symbol(symbol);
         let t = self.get_declared_type_of_class_or_interface(&merged);
         let type_parameters: &[Arc<Type>] = t
@@ -98,7 +98,7 @@ impl Checker {
     pub(crate) fn get_type_from_import_attributes(
         &mut self,
         node: Option<&Arc<Node>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_from_import_attributes"); 
         let node = node?;
         if is_import_attributes(node) {
             return Some(self.check_import_attributes_expression(node));
@@ -111,7 +111,7 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
         name_type: Option<&Arc<Type>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_from_index_infos_of_contextual_type"); 
         if is_tuple_type(t) && is_numeric_literal_name(name) && jsnum_from_string(name).0 >= 0.0 {
             if let Some(target) = t.target_tuple_type() {
                 let rest_type = self.get_element_type_of_slice_of_tuple_type(
@@ -138,7 +138,7 @@ impl Checker {
     pub(crate) fn get_type_from_property_descriptor(
         &mut self,
         node: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_property_descriptor"); 
         let object_literal_type = self.check_expression_cached(node);
         if let Some(value_type) = self.get_type_of_property_of_type(&object_literal_type, "value") {
             return value_type;
@@ -164,7 +164,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_alias_reference"); 
         let empty_node_list: Vec<Arc<Node>> = Vec::new();
         let type_arguments = node.type_arguments().map(|l| &l.nodes).unwrap_or(&empty_node_list);
         if symbol
@@ -265,7 +265,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn has_type_json_import_attribute(node: &Arc<Node>) -> bool {
+pub(crate) fn has_type_json_import_attribute(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_type_json_import_attribute"); 
     let NodeData::ImportDeclaration(d) = &node.data else {
         return false;
     };
@@ -289,7 +289,7 @@ pub(crate) fn has_type_json_import_attribute(node: &Arc<Node>) -> bool {
         })
 }
 
-pub(crate) fn has_type_parameter_by_name(type_parameters: &[Arc<Type>], name: &str) -> bool {
+pub(crate) fn has_type_parameter_by_name(type_parameters: &[Arc<Type>], name: &str) -> bool { ::tsox_core::fntrace::enter("has_type_parameter_by_name"); 
     type_parameters.iter().any(|tp| {
         tp.symbol
             .as_ref()
@@ -297,7 +297,7 @@ pub(crate) fn has_type_parameter_by_name(type_parameters: &[Arc<Type>], name: &s
     })
 }
 
-pub(crate) fn get_unique_type_parameter_name(type_parameters: &[Arc<Type>], base_name: &str) -> String {
+pub(crate) fn get_unique_type_parameter_name(type_parameters: &[Arc<Type>], base_name: &str) -> String { ::tsox_core::fntrace::enter("get_unique_type_parameter_name"); 
     let mut base_name = base_name.to_string();
     while base_name.len() > 1
         && base_name
@@ -317,7 +317,7 @@ pub(crate) fn get_unique_type_parameter_name(type_parameters: &[Arc<Type>], base
     }
 }
 
-pub(crate) fn has_common_dom_type_name(t: &Arc<Type>) -> bool {
+pub(crate) fn has_common_dom_type_name(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_common_dom_type_name"); 
     let Some(symbol) = &t.symbol else {
         return false;
     };
@@ -328,7 +328,7 @@ pub(crate) fn has_common_dom_type_name(t: &Arc<Type>) -> bool {
         || (name.starts_with("HTML") && name.ends_with("Element"))
 }
 
-pub(crate) fn has_rest_parameter(signature: &Arc<Node>) -> bool {
+pub(crate) fn has_rest_parameter(signature: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_rest_parameter"); 
     signature
         .parameters()
         .and_then(|l| l.nodes.last())

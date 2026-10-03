@@ -1,15 +1,15 @@
 use crate::vfs::vfsmatch::*;
 
 impl GlobPattern {
-    pub fn matches(&self, path: &str) -> bool {
+    pub fn matches(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("matches"); 
         self.match_path_parts(path, "", 0, 0, false)
     }
 
-    pub fn matches_parts(&self, prefix: &str, suffix: &str) -> bool {
+    pub fn matches_parts(&self, prefix: &str, suffix: &str) -> bool { ::tsox_core::fntrace::enter("matches_parts"); 
         self.match_path_parts(prefix, suffix, 0, 0, false)
     }
 
-    pub fn matches_prefix_parts(&self, prefix: &str, suffix: &str) -> bool {
+    pub fn matches_prefix_parts(&self, prefix: &str, suffix: &str) -> bool { ::tsox_core::fntrace::enter("matches_prefix_parts"); 
         self.match_path_parts(prefix, suffix, 0, 0, true)
     }
 
@@ -20,7 +20,7 @@ impl GlobPattern {
         path_offset: usize,
         comp_idx: usize,
         prefix_only: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("match_path_parts"); 
         let mut path_offset = path_offset;
         let mut comp_idx = comp_idx;
 
@@ -72,7 +72,7 @@ impl GlobPattern {
         }
     }
 
-    pub(crate) fn pattern_satisfied(&self, comp_idx: usize) -> bool {
+    pub(crate) fn pattern_satisfied(&self, comp_idx: usize) -> bool { ::tsox_core::fntrace::enter("pattern_satisfied"); 
         for c in &self.components[comp_idx..] {
             if c.kind != ComponentKind::DoubleAsterisk {
                 return false;
@@ -81,7 +81,7 @@ impl GlobPattern {
         true
     }
 
-    pub(crate) fn match_wildcard(&self, segs: &[Segment], s: &str) -> bool {
+    pub(crate) fn match_wildcard(&self, segs: &[Segment], s: &str) -> bool { ::tsox_core::fntrace::enter("match_wildcard"); 
         if !self.is_exclude
             && !segs.is_empty()
             && is_hidden_path(s)
@@ -107,7 +107,7 @@ impl GlobPattern {
         self.match_segments(segs, s) && self.should_include_min_js(s, segs)
     }
 
-    pub(crate) fn match_segments(&self, segs: &[Segment], s: &str) -> bool {
+    pub(crate) fn match_segments(&self, segs: &[Segment], s: &str) -> bool { ::tsox_core::fntrace::enter("match_segments"); 
         let mut seg_idx: i32 = 0;
         let mut s_idx: usize = 0;
         let mut star_seg_idx: i32 = -1;
@@ -160,7 +160,7 @@ impl GlobPattern {
         (seg_idx as usize) >= segs.len()
     }
 
-    pub(crate) fn should_include_min_js(&self, filename: &str, segs: &[Segment]) -> bool {
+    pub(crate) fn should_include_min_js(&self, filename: &str, segs: &[Segment]) -> bool { ::tsox_core::fntrace::enter("should_include_min_js"); 
         if !self.exclude_min_js {
             return true;
         }
@@ -174,7 +174,7 @@ impl GlobPattern {
         false
     }
 
-    pub(crate) fn has_min_js_suffix(&self, filename: &str) -> bool {
+    pub(crate) fn has_min_js_suffix(&self, filename: &str) -> bool { ::tsox_core::fntrace::enter("has_min_js_suffix"); 
         const MIN_JS: &str = ".min.js";
         if self.case_sensitive {
             filename.ends_with(MIN_JS)
@@ -184,7 +184,7 @@ impl GlobPattern {
         }
     }
 
-    pub(crate) fn pattern_mentions_min_suffix(&self, segs: &[Segment]) -> bool {
+    pub(crate) fn pattern_mentions_min_suffix(&self, segs: &[Segment]) -> bool { ::tsox_core::fntrace::enter("pattern_mentions_min_suffix"); 
         for seg in segs {
             if seg.kind != SegmentKind::Literal {
                 continue;
@@ -206,7 +206,7 @@ impl GlobPattern {
         false
     }
 
-    pub(crate) fn strings_equal(&self, a: &str, b: &str) -> bool {
+    pub(crate) fn strings_equal(&self, a: &str, b: &str) -> bool { ::tsox_core::fntrace::enter("strings_equal"); 
         if self.case_sensitive {
             a == b
         } else {
@@ -214,7 +214,7 @@ impl GlobPattern {
         }
     }
 
-    pub(crate) fn bytes_equal(&self, a: &[u8], b: &[u8]) -> bool {
+    pub(crate) fn bytes_equal(&self, a: &[u8], b: &[u8]) -> bool { ::tsox_core::fntrace::enter("bytes_equal"); 
         if self.case_sensitive {
             a == b
         } else {
@@ -223,11 +223,11 @@ impl GlobPattern {
     }
 }
 
-pub(crate) fn next_rune_size(s: &str, idx: usize) -> usize {
+pub(crate) fn next_rune_size(s: &str, idx: usize) -> usize { ::tsox_core::fntrace::enter("next_rune_size"); 
     s[idx..].chars().next().map_or(0, |c| c.len_utf8())
 }
 
-pub(crate) fn next_path_part_single(s: &str, offset: usize) -> (String, usize, bool) {
+pub(crate) fn next_path_part_single(s: &str, offset: usize) -> (String, usize, bool) { ::tsox_core::fntrace::enter("next_path_part_single"); 
     if offset >= s.len() {
         return (String::new(), offset, false);
     }
@@ -250,7 +250,7 @@ pub(crate) fn next_path_part_single(s: &str, offset: usize) -> (String, usize, b
     }
 }
 
-pub fn next_path_part_parts(prefix: &str, suffix: &str, offset: usize) -> (String, usize, bool) {
+pub fn next_path_part_parts(prefix: &str, suffix: &str, offset: usize) -> (String, usize, bool) { ::tsox_core::fntrace::enter("next_path_part_parts"); 
     if suffix.is_empty() {
         return next_path_part_single(prefix, offset);
     }
@@ -286,6 +286,6 @@ pub fn next_path_part_parts(prefix: &str, suffix: &str, offset: usize) -> (Strin
     (suffix[s_off..].to_string(), total_len, true)
 }
 
-pub(crate) fn is_hidden_path(name: &str) -> bool {
+pub(crate) fn is_hidden_path(name: &str) -> bool { ::tsox_core::fntrace::enter("is_hidden_path"); 
     !name.is_empty() && name.as_bytes()[0] == b'.'
 }

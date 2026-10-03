@@ -52,7 +52,7 @@ pub struct TaskResult {
 }
 
 impl Default for TaskResult {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             builder: String::new(),
             report_status: None,
@@ -127,14 +127,14 @@ pub struct UpToDateStatus {
 }
 
 impl UpToDateStatus {
-    pub fn new(kind: UpToDateStatusType) -> Self {
+    pub fn new(kind: UpToDateStatusType) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             kind,
             data: UpToDateStatusData::None,
         }
     }
 
-    pub fn is_error(&self) -> bool {
+    pub fn is_error(&self) -> bool { ::tsox_core::fntrace::enter("is_error"); 
         matches!(
             self.kind,
             UpToDateStatusType::UpstreamErrors
@@ -150,35 +150,35 @@ impl UpToDateStatus {
         )
     }
 
-    pub fn is_pseudo_build(&self) -> bool {
+    pub fn is_pseudo_build(&self) -> bool { ::tsox_core::fntrace::enter("is_pseudo_build"); 
         matches!(
             self.kind,
             UpToDateStatusType::UpToDateWithInputFileText | UpToDateStatusType::OutOfDateRoots
         )
     }
 
-    pub fn upstream_errors(&self) -> Option<&UpstreamErrors> {
+    pub fn upstream_errors(&self) -> Option<&UpstreamErrors> { ::tsox_core::fntrace::enter("upstream_errors"); 
         match &self.data {
             UpToDateStatusData::UpstreamErrors(errors) => Some(errors),
             _ => None,
         }
     }
 
-    pub fn input_output_name(&self) -> Option<&InputOutputName> {
+    pub fn input_output_name(&self) -> Option<&InputOutputName> { ::tsox_core::fntrace::enter("input_output_name"); 
         match &self.data {
             UpToDateStatusData::InputOutputName(name) => Some(name),
             _ => None,
         }
     }
 
-    pub fn input_output_file_and_time(&self) -> Option<&InputOutputFileAndTime> {
+    pub fn input_output_file_and_time(&self) -> Option<&InputOutputFileAndTime> { ::tsox_core::fntrace::enter("input_output_file_and_time"); 
         match &self.data {
             UpToDateStatusData::InputOutputFileAndTime(value) => Some(value),
             _ => None,
         }
     }
 
-    pub fn oldest_output_file_name(&self) -> String {
+    pub fn oldest_output_file_name(&self) -> String { ::tsox_core::fntrace::enter("oldest_output_file_name"); 
         match self.data.clone() {
             UpToDateStatusData::InputOutputName(name) => name.output,
             UpToDateStatusData::InputOutputFileAndTime(value) => value.output.file,
@@ -217,7 +217,7 @@ impl BuildTask {
         &mut self,
         orchestrator: &mut Orchestrator,
     ) -> Result<Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>>, tsox_compile::mig::m4v_3::ContentMapperError>
-    {
+    { ::tsox_core::fntrace::enter("get_content_mapper_project"); 
         self.content_mapper_project_once.call_once(|| {
             if orchestrator.content_mapper_host.is_none()
                 || self.resolved.is_none()
@@ -246,7 +246,7 @@ impl BuildTask {
         }
     }
 
-    pub fn refresh_content_mapper_project(&mut self, _orchestrator: &mut Orchestrator) {
+    pub fn refresh_content_mapper_project(&mut self, _orchestrator: &mut Orchestrator) { ::tsox_core::fntrace::enter("refresh_content_mapper_project"); 
         if let Some(project) = self.content_mapper_project.as_ref() {
             self.content_mapper_project_err = project
                 .refresh()
@@ -255,19 +255,19 @@ impl BuildTask {
         }
     }
 
-    pub fn wait_on_upstream(&self) {
+    pub fn wait_on_upstream(&self) { ::tsox_core::fntrace::enter("wait_on_upstream"); 
         for upstream in &self.up_stream {
             drop(upstream.task.lock().unwrap());
         }
     }
 
-    pub fn unblock_downstream(&mut self) {
+    pub fn unblock_downstream(&mut self) { ::tsox_core::fntrace::enter("unblock_downstream"); 
         self.pending
             .store(false, std::sync::atomic::Ordering::SeqCst);
         self.is_initial_cycle = false;
     }
 
-    pub fn report_diagnostic(&mut self, err: Arc<Diagnostic>) {
+    pub fn report_diagnostic(&mut self, err: Arc<Diagnostic>) { ::tsox_core::fntrace::enter("report_diagnostic"); 
         self.errors.push(err.clone());
         if let Some(reporter) = self.result.as_mut().unwrap().diagnostic_reporter.as_mut() {
             reporter(&err);
@@ -279,7 +279,7 @@ impl BuildTask {
         orchestrator: &mut Orchestrator,
         config_path: Path,
         build_result: &mut OrchestratorResult,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report"); 
         if let Some(prev_reporter) = self.prev_reporter.take() {
             drop(prev_reporter.lock().unwrap());
         }
@@ -323,7 +323,7 @@ impl BuildTask {
         self.result = None;
     }
 
-    pub fn build_project(&mut self, orchestrator: &mut Orchestrator, path: Path) {
+    pub fn build_project(&mut self, orchestrator: &mut Orchestrator, path: Path) { ::tsox_core::fntrace::enter("build_project"); 
         self.wait_on_upstream();
         if self
             .pending
@@ -360,7 +360,7 @@ impl BuildTask {
         self.unblock_downstream();
     }
 
-    pub fn update_downstream(&mut self, orchestrator: &mut Orchestrator, path: Path) {
+    pub fn update_downstream(&mut self, orchestrator: &mut Orchestrator, path: Path) { ::tsox_core::fntrace::enter("update_downstream"); 
         if self.is_initial_cycle {
             return;
         }
@@ -464,7 +464,7 @@ impl BuildTask {
         }
     }
 
-    pub fn compile_and_emit(&mut self, orchestrator: &mut Orchestrator, path: Path) {
+    pub fn compile_and_emit(&mut self, orchestrator: &mut Orchestrator, path: Path) { ::tsox_core::fntrace::enter("compile_and_emit"); 
         self.errors.clear();
         if orchestrator.opts.command.build_options.verbose == Tristate::True {
             self.report_status(
@@ -560,7 +560,7 @@ impl BuildTask {
         self.result.as_mut().unwrap().build_kind = BuildKind::Program;
     }
 
-    pub fn report_status(&mut self, _orchestrator: &mut Orchestrator, diag: Arc<Diagnostic>) {
+    pub fn report_status(&mut self, _orchestrator: &mut Orchestrator, diag: Arc<Diagnostic>) { ::tsox_core::fntrace::enter("report_status"); 
         if let Some(report_status) = self.result.as_mut().unwrap().report_status.as_mut() {
             report_status(&diag);
         }
@@ -569,7 +569,7 @@ impl BuildTask {
     pub fn handle_status_that_doesnt_require_build(
         &mut self,
         orchestrator: &mut Orchestrator,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("handle_status_that_doesnt_require_build"); 
         let status = self.status.clone().unwrap();
         match status.kind {
             UpToDateStatusType::UpToDate => {
@@ -658,7 +658,7 @@ impl BuildTask {
         &mut self,
         orchestrator: &mut Orchestrator,
         config_path: Path,
-    ) -> UpToDateStatus {
+    ) -> UpToDateStatus { ::tsox_core::fntrace::enter("get_up_to_date_status"); 
         if let Some(status) = self.status.as_ref() {
             return status.clone();
         }
@@ -752,7 +752,7 @@ impl BuildTask {
         UpToDateStatus::new(UpToDateStatusType::UpToDate)
     }
 
-    pub fn report_up_to_date_status(&mut self, orchestrator: &mut Orchestrator) {
+    pub fn report_up_to_date_status(&mut self, orchestrator: &mut Orchestrator) { ::tsox_core::fntrace::enter("report_up_to_date_status"); 
         if orchestrator.opts.command.build_options.verbose != Tristate::True {
             return;
         }
@@ -909,7 +909,7 @@ impl BuildTask {
         }
     }
 
-    pub fn can_update_js_dts_output_timestamps(&self) -> bool {
+    pub fn can_update_js_dts_output_timestamps(&self) -> bool { ::tsox_core::fntrace::enter("can_update_js_dts_output_timestamps"); 
         let resolved = self.resolved.as_ref().unwrap();
         resolved.compiler_options().no_emit != Tristate::True
             && !resolved.compiler_options().is_incremental()
@@ -920,7 +920,7 @@ impl BuildTask {
         orchestrator: &mut Orchestrator,
         emitted_files: &[String],
         verbose_message: &'static Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("update_time_stamps"); 
         let mut emitted: Set<String> = Set::new();
         for file in emitted_files {
             emitted.add(file.clone());
@@ -972,7 +972,7 @@ impl BuildTask {
         update_time_stamp(self, &build_info_name);
     }
 
-    pub fn clean_project(&mut self, orchestrator: &mut Orchestrator, path: Path) {
+    pub fn clean_project(&mut self, orchestrator: &mut Orchestrator, path: Path) { ::tsox_core::fntrace::enter("clean_project"); 
         if self.resolved.is_none() {
             self.report_diagnostic(new_compiler_diagnostic(
                 &dg::FILE_0_NOT_FOUND,
@@ -999,7 +999,7 @@ impl BuildTask {
         orchestrator: &mut Orchestrator,
         output_file: &str,
         inputs: &Set<Path>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("clean_project_output"); 
         let output_path = orchestrator.to_path(output_file);
         if inputs.has(&output_path) {
             return;
@@ -1026,7 +1026,7 @@ impl BuildTask {
         &mut self,
         orchestrator: &mut Orchestrator,
         old_cache: &SyncMap<Path, SystemTime>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("update_watch"); 
         if self.resolved.is_some() && self.can_update_js_dts_output_timestamps() {
             for output_file in self
                 .resolved
@@ -1041,14 +1041,14 @@ impl BuildTask {
         }
     }
 
-    pub fn reset_status(&mut self) {
+    pub fn reset_status(&mut self) { ::tsox_core::fntrace::enter("reset_status"); 
         self.status = None;
         self.pending
             .store(true, std::sync::atomic::Ordering::SeqCst);
         self.errors.clear();
     }
 
-    pub fn reset_config(&mut self, orchestrator: &mut Orchestrator, path: Path) {
+    pub fn reset_config(&mut self, orchestrator: &mut Orchestrator, path: Path) { ::tsox_core::fntrace::enter("reset_config"); 
         self.dirty = true;
         orchestrator.host.resolved_references.delete(&path);
     }
@@ -1058,7 +1058,7 @@ impl BuildTask {
         orchestrator: &mut Orchestrator,
         config_path: Path,
         build_info_file_name: &str,
-    ) -> (Option<crate::mig::m4y_2::BuildInfo>, SystemTime) {
+    ) -> (Option<crate::mig::m4y_2::BuildInfo>, SystemTime) { ::tsox_core::fntrace::enter("load_or_store_build_info"); 
         let path = orchestrator.to_path(build_info_file_name);
         if let Some(entry) = self.build_info_entry.as_ref() {
             if entry.path == path {
@@ -1091,7 +1091,7 @@ impl BuildTask {
         build_info_file_name: &str,
         build_info: crate::mig::m4y_2::BuildInfo,
         has_changed_dts_file: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("on_build_info_emit"); 
         let m_time = SystemTime::now();
         let dts_time = if has_changed_dts_file {
             Some(m_time)
@@ -1112,14 +1112,14 @@ impl BuildTask {
         &self,
         _orchestrator: &Orchestrator,
         upstream: &BuildTask,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_conflicting_build_info"); 
         match (self.build_info_entry.as_ref(), upstream.build_info_entry.as_ref()) {
             (Some(mine), Some(theirs)) => mine.path == theirs.path,
             _ => false,
         }
     }
 
-    pub fn get_latest_changed_dts_m_time(&mut self, orchestrator: &Orchestrator) -> SystemTime {
+    pub fn get_latest_changed_dts_m_time(&mut self, orchestrator: &Orchestrator) -> SystemTime { ::tsox_core::fntrace::enter("get_latest_changed_dts_m_time"); 
         if let Some(dts_time) = self.build_info_entry.as_ref().and_then(|entry| entry.dts_time) {
             return dts_time;
         }
@@ -1144,7 +1144,7 @@ impl BuildTask {
         dts_time
     }
 
-    pub fn store_output_time_stamp(&self, orchestrator: &Orchestrator) -> bool {
+    pub fn store_output_time_stamp(&self, orchestrator: &Orchestrator) -> bool { ::tsox_core::fntrace::enter("store_output_time_stamp"); 
         orchestrator.opts.command.compiler_options.watch == Tristate::True
             && !self
                 .resolved
@@ -1160,7 +1160,7 @@ impl BuildTask {
         file_name: &str,
         text: &str,
         data: Option<&crate::mig::m4y_3::WriteFileData>,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("write_file"); 
         let err = orchestrator.host.fs().write_file(file_name, text);
         if err.is_ok() {
             if let Some(data) = data {
@@ -1194,7 +1194,7 @@ impl BuildTask {
 pub fn is_content_mapper_supplemental_build_info_path(
     input_path: &Path,
     roots: impl Iterator<Item = Path>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_content_mapper_supplemental_build_info_path"); 
     for root in roots {
         let suffix = match input_path.0.strip_prefix(&format!("{}.", root.0)) {
             Some(suffix) => suffix.to_string(),
@@ -1218,7 +1218,7 @@ pub fn is_content_mapper_supplemental_build_info_path(
 
 fn content_mapper_to_mapper(
     mapper: &tsox_tsoptions::mig::m5h_3::ContentMapper,
-) -> tsox_compile::mig::m3l_cm::Mapper {
+) -> tsox_compile::mig::m3l_cm::Mapper { ::tsox_core::fntrace::enter("content_mapper_to_mapper"); 
     tsox_compile::mig::m3l_cm::Mapper {
         definition: tsox_compile::mig::m3l_cm::Definition {
             package: mapper.definition.package.clone(),
@@ -1237,14 +1237,14 @@ fn content_mapper_to_mapper(
     }
 }
 
-fn status_text(status: &UpToDateStatus) -> String {
+fn status_text(status: &UpToDateStatus) -> String { ::tsox_core::fntrace::enter("status_text"); 
     match &status.data {
         UpToDateStatusData::Text(text) => text.clone(),
         _ => String::new(),
     }
 }
 
-pub fn new_compiler_diagnostic(message: &'static Message, args: &[String]) -> Arc<Diagnostic> {
+pub fn new_compiler_diagnostic(message: &'static Message, args: &[String]) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("new_compiler_diagnostic"); 
     Arc::new(tsox_frontend::ast::mig::m3d_2::new_compiler_diagnostic(
         *message,
         args.to_vec(),

@@ -6,18 +6,18 @@ use tsox_frontend::ast::SyntaxKind;
 use crate::ls::lsutil_user_preferences::QuotePreference;
 use crate::ls::lsutil_user_preferences::UserPreferences;
 
-pub fn probably_uses_semicolons(_file: &SourceFile) -> bool {
+pub fn probably_uses_semicolons(_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("probably_uses_semicolons"); 
     true
 }
 
 pub fn should_use_uri_style_node_core_modules(
     _file: &SourceFile,
     _program: &tsox_compile::compiler::Program,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("should_use_uri_style_node_core_modules"); 
     Tristate::Unknown
 }
 
-pub fn quote_preference_from_string(str_node: &Node) -> QuotePreference {
+pub fn quote_preference_from_string(str_node: &Node) -> QuotePreference { ::tsox_core::fntrace::enter("quote_preference_from_string"); 
     let _ = str_node;
     QuotePreference::Double
 }
@@ -25,7 +25,7 @@ pub fn quote_preference_from_string(str_node: &Node) -> QuotePreference {
 pub fn get_quote_preference(
     _source_file: &SourceFile,
     preferences: &UserPreferences,
-) -> QuotePreference {
+) -> QuotePreference { ::tsox_core::fntrace::enter("get_quote_preference"); 
     if preferences.quote_preference != QuotePreference::Unknown
         && preferences.quote_preference != QuotePreference::Auto
     {
@@ -42,14 +42,14 @@ pub fn get_quote_preference(
 pub fn module_symbol_to_valid_identifier(
     module_symbol: &tsox_frontend::ast::Symbol,
     force_capitalize: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("module_symbol_to_valid_identifier"); 
     module_specifier_to_valid_identifier(&strip_quotes(&module_symbol.name), force_capitalize)
 }
 
 pub fn module_specifier_to_valid_identifier(
     module_specifier: &str,
     force_capitalize: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("module_specifier_to_valid_identifier"); 
     let base_name = tsox_core::tspath::get_base_file_name(
         &module_specifier
             .strip_suffix("/index")
@@ -96,22 +96,22 @@ pub fn module_specifier_to_valid_identifier(
     }
 }
 
-pub fn is_non_contextual_keyword(token: Option<SyntaxKind>) -> bool {
+pub fn is_non_contextual_keyword(token: Option<SyntaxKind>) -> bool { ::tsox_core::fntrace::enter("is_non_contextual_keyword"); 
     token.is_some()
 }
 
-fn is_identifier_start(c: char) -> bool {
+fn is_identifier_start(c: char) -> bool { ::tsox_core::fntrace::enter("is_identifier_start"); 
     c.is_ascii_alphabetic()
         || c == '_'
         || c == '$'
         || (!c.is_ascii() && unicode_ident::is_xid_start(c))
 }
 
-fn is_identifier_part(c: char) -> bool {
+fn is_identifier_part(c: char) -> bool { ::tsox_core::fntrace::enter("is_identifier_part"); 
     tsox_frontend::scanner::is_identifier_part(c)
 }
 
-fn strip_quotes(s: &str) -> String {
+fn strip_quotes(s: &str) -> String { ::tsox_core::fntrace::enter("strip_quotes"); 
     let bytes = s.as_bytes();
     if bytes.len() >= 2
         && ((bytes[0] == b'"' && bytes[bytes.len() - 1] == b'"')

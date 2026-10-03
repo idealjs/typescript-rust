@@ -14,7 +14,7 @@ pub enum AutoImportFixKind {
 }
 
 impl Default for AutoImportFixKind {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         AutoImportFixKind::AddNew
     }
 }
@@ -28,7 +28,7 @@ pub enum ImportKind {
 }
 
 impl Default for ImportKind {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         ImportKind::Named
     }
 }
@@ -41,7 +41,7 @@ pub enum AddAsTypeOnly {
 }
 
 impl Default for AddAsTypeOnly {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         AddAsTypeOnly::Allowed
     }
 }
@@ -68,7 +68,7 @@ pub struct ResolvedEntrypoint {
 }
 
 impl ResolvedEntrypoint {
-    pub fn symlink_or_realpath(&self) -> &str {
+    pub fn symlink_or_realpath(&self) -> &str { ::tsox_core::fntrace::enter("symlink_or_realpath"); 
         &self.symlink_or_realpath
     }
 }
@@ -105,7 +105,7 @@ pub struct DirtyMapBuilder<K: std::hash::Hash + Eq + Clone, V: Clone, B: Clone> 
 }
 
 impl<K: std::hash::Hash + Eq + Clone, V: Clone, B: Clone> DirtyMapBuilder<K, V, B> {
-    pub fn new(entries: HashMap<K, V>) -> Self {
+    pub fn new(entries: HashMap<K, V>) -> Self { ::tsox_core::fntrace::enter("new"); 
         DirtyMapBuilder {
             entries,
             _builder: std::marker::PhantomData,
@@ -117,10 +117,10 @@ impl<K: std::hash::Hash + Eq + Clone, V: Clone, B: Clone> DirtyMapBuilder<K, V, 
 pub struct LogTree;
 
 impl LogTree {
-    pub fn fork(&self, _label: &str) -> LogTree {
+    pub fn fork(&self, _label: &str) -> LogTree { ::tsox_core::fntrace::enter("fork"); 
         LogTree
     }
-    pub fn logf(&self, _args: std::fmt::Arguments<'_>) {}
+    pub fn logf(&self, _args: std::fmt::Arguments<'_>) { ::tsox_core::fntrace::enter("logf"); }
 }
 
 pub trait Logger: Send + Sync {
@@ -131,7 +131,7 @@ pub trait Logger: Send + Sync {
 pub struct SpecMatcher;
 
 impl SpecMatcher {
-    pub fn match_string(&self, _path: &str) -> bool {
+    pub fn match_string(&self, _path: &str) -> bool { ::tsox_core::fntrace::enter("match_string"); 
         false
     }
 }

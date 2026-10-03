@@ -1,7 +1,7 @@
 use crate::core::watch_options::*;
 
 #[test]
-fn parse_watch_file_kind_roundtrip() {
+fn parse_watch_file_kind_roundtrip() { crate::fntrace::enter("parse_watch_file_kind_roundtrip"); 
     assert_eq!(
         parse_watch_file_kind("UseFsEvents"),
         Some(WatchFileKind::UseFsEvents)
@@ -14,7 +14,7 @@ fn parse_watch_file_kind_roundtrip() {
 }
 
 #[test]
-fn parse_watch_directory_kind_roundtrip() {
+fn parse_watch_directory_kind_roundtrip() { crate::fntrace::enter("parse_watch_directory_kind_roundtrip"); 
     assert_eq!(
         parse_watch_directory_kind("UseFsEvents"),
         Some(WatchDirectoryKind::UseFsEvents)
@@ -27,7 +27,7 @@ fn parse_watch_directory_kind_roundtrip() {
 }
 
 #[test]
-fn parse_polling_kind_roundtrip() {
+fn parse_polling_kind_roundtrip() { crate::fntrace::enter("parse_polling_kind_roundtrip"); 
     assert_eq!(
         parse_polling_kind("FixedInterval"),
         Some(PollingKind::FixedInterval)
@@ -40,14 +40,14 @@ fn parse_polling_kind_roundtrip() {
 }
 
 #[test]
-fn default_is_empty_and_interval() {
+fn default_is_empty_and_interval() { crate::fntrace::enter("default_is_empty_and_interval"); 
     let w = WatchOptions::default();
     assert!(w.is_empty());
     assert_eq!(w.watch_interval_ms(), 2000);
 }
 
 #[test]
-fn non_default_is_not_empty() {
+fn non_default_is_not_empty() { crate::fntrace::enter("non_default_is_not_empty"); 
     let w = WatchOptions {
         interval: Some(100),
         ..WatchOptions::default()

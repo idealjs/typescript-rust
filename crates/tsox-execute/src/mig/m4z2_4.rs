@@ -44,7 +44,7 @@ pub fn snapshot_to_build_info(
     snapshot: &Snapshot,
     program: &tsox_compile::compiler::Program,
     build_info_file_name: &str,
-) -> Result<BuildInfo, tsox_compile::mig::m4v_2::ContentMapperError> {
+) -> Result<BuildInfo, tsox_compile::mig::m4v_2::ContentMapperError> { ::tsox_core::fntrace::enter("snapshot_to_build_info"); 
     let content_mapper_identities: Vec<String> = match program.content_mapper_project() {
         None => Vec::new(),
         Some(project) => project.identities().map_err(|_| {
@@ -118,7 +118,7 @@ pub struct ToBuildInfo<'a> {
 }
 
 impl<'a> ToBuildInfo<'a> {
-    pub fn relative_to_build_info(&self, path: &str) -> String {
+    pub fn relative_to_build_info(&self, path: &str) -> String { ::tsox_core::fntrace::enter("relative_to_build_info"); 
         tspath::ensure_path_is_non_module_name(&tspath::mig::m3i::get_relative_path_from_directory(
             &self.build_info_directory,
             path,
@@ -126,7 +126,7 @@ impl<'a> ToBuildInfo<'a> {
         ))
     }
 
-    pub fn to_file_id(&mut self, path: &Path) -> BuildInfoFileId {
+    pub fn to_file_id(&mut self, path: &Path) -> BuildInfoFileId { ::tsox_core::fntrace::enter("to_file_id"); 
         let file_id = self
             .file_name_to_file_id
             .get(&path.to_string())
@@ -151,7 +151,7 @@ impl<'a> ToBuildInfo<'a> {
         file_id
     }
 
-    pub fn to_file_id_list_id(&mut self, set: &Set<Path>) -> BuildInfoFileIdListId {
+    pub fn to_file_id_list_id(&mut self, set: &Set<Path>) -> BuildInfoFileIdListId { ::tsox_core::fntrace::enter("to_file_id_list_id"); 
         let mut file_ids: Vec<BuildInfoFileId> = set
             .iter()
             .map(|path| self.to_file_id(path))
@@ -182,7 +182,7 @@ impl<'a> ToBuildInfo<'a> {
         &self,
         option: &tsox_tsoptions::tsoptions::OptionDecl,
         value: &tsox_tsoptions::tsoptions::OptValue,
-    ) -> tsox_tsoptions::tsoptions::OptValue {
+    ) -> tsox_tsoptions::tsoptions::OptValue { ::tsox_core::fntrace::enter("to_relative_to_build_info_compiler_option_value"); 
         if option.kind == tsox_tsoptions::tsoptions::OptionKind::List && option.is_file_path {
             if let tsox_tsoptions::tsoptions::OptValue::List(list) = value {
                 return tsox_tsoptions::tsoptions::OptValue::List(
@@ -206,7 +206,7 @@ impl<'a> ToBuildInfo<'a> {
     pub fn to_build_info_diagnostics_from_file_name_diagnostics(
         &mut self,
         diagnostics: &[Box<BuildInfoDiagnosticWithFileName>],
-    ) -> Vec<Box<BuildInfoDiagnostic>> {
+    ) -> Vec<Box<BuildInfoDiagnostic>> { ::tsox_core::fntrace::enter("to_build_info_diagnostics_from_file_name_diagnostics"); 
         diagnostics
             .iter()
             .map(|d| {
@@ -244,7 +244,7 @@ impl<'a> ToBuildInfo<'a> {
         &mut self,
         file_path: &Path,
         diagnostics: &[Diagnostic],
-    ) -> Vec<Box<BuildInfoDiagnostic>> {
+    ) -> Vec<Box<BuildInfoDiagnostic>> { ::tsox_core::fntrace::enter("to_build_info_diagnostics_from_diagnostics"); 
         diagnostics
             .iter()
             .map(|d| {
@@ -305,7 +305,7 @@ impl<'a> ToBuildInfo<'a> {
         &mut self,
         file_path: &Path,
         diags: &DiagnosticsOrBuildInfoDiagnosticsWithFileName,
-    ) -> Option<BuildInfoDiagnosticsOfFile> {
+    ) -> Option<BuildInfoDiagnosticsOfFile> { ::tsox_core::fntrace::enter("to_build_info_diagnostics_of_file"); 
         if !diags.diagnostics.is_empty() {
             return Some(BuildInfoDiagnosticsOfFile {
                 file_id: self.to_file_id(file_path),
@@ -327,7 +327,7 @@ impl<'a> ToBuildInfo<'a> {
         None
     }
 
-    pub fn collect_root_files(&mut self) {
+    pub fn collect_root_files(&mut self) { ::tsox_core::fntrace::enter("collect_root_files"); 
         for file_name in self.program.command_line().file_names() {
             let redirect = self.program.get_parse_file_redirect(&file_name);
             let file = if !redirect.is_empty() {
@@ -348,7 +348,7 @@ impl<'a> ToBuildInfo<'a> {
         }
     }
 
-    pub fn set_file_info_and_emit_signatures(&mut self) {
+    pub fn set_file_info_and_emit_signatures(&mut self) { ::tsox_core::fntrace::enter("set_file_info_and_emit_signatures"); 
         let mut file_infos = Vec::with_capacity(self.program.get_source_files().len());
         let is_composite = self
             .snapshot
@@ -421,7 +421,7 @@ impl<'a> ToBuildInfo<'a> {
         self.build_info.file_infos = file_infos;
     }
 
-    pub fn set_root_of_incremental_program(&mut self) {
+    pub fn set_root_of_incremental_program(&mut self) { ::tsox_core::fntrace::enter("set_root_of_incremental_program"); 
         let mut keys: Vec<Path> = self.roots.keys().cloned().collect();
         keys.sort_by_key(|path| self.to_file_id(path));
         for file_path in keys {
@@ -452,7 +452,7 @@ impl<'a> ToBuildInfo<'a> {
         }
     }
 
-    pub fn set_compiler_options(&mut self) {
+    pub fn set_compiler_options(&mut self) { ::tsox_core::fntrace::enter("set_compiler_options"); 
         let Some(options) = self.snapshot.options.clone() else {
             return;
         };
@@ -477,7 +477,7 @@ impl<'a> ToBuildInfo<'a> {
         );
     }
 
-    pub fn set_referenced_map(&mut self) {
+    pub fn set_referenced_map(&mut self) { ::tsox_core::fntrace::enter("set_referenced_map"); 
         let mut keys = self.snapshot.referenced_map.get_paths_with_references();
         keys.sort_by(|a, b| a.0.cmp(&b.0));
         let mut referenced_map = Vec::with_capacity(keys.len());
@@ -496,7 +496,7 @@ impl<'a> ToBuildInfo<'a> {
         self.build_info.referenced_map = referenced_map;
     }
 
-    pub fn set_change_file_set(&mut self) {
+    pub fn set_change_file_set(&mut self) { ::tsox_core::fntrace::enter("set_change_file_set"); 
         let mut files: Vec<Path> = self
             .snapshot
             .changed_files_set
@@ -513,7 +513,7 @@ impl<'a> ToBuildInfo<'a> {
         self.build_info.change_file_set = change_file_set;
     }
 
-    pub fn set_semantic_diagnostics(&mut self) {
+    pub fn set_semantic_diagnostics(&mut self) { ::tsox_core::fntrace::enter("set_semantic_diagnostics"); 
         for file in self.program.get_source_files() {
             let file_path = Path::from(file.path());
             match self
@@ -548,7 +548,7 @@ impl<'a> ToBuildInfo<'a> {
         }
     }
 
-    pub fn set_emit_diagnostics(&mut self) {
+    pub fn set_emit_diagnostics(&mut self) { ::tsox_core::fntrace::enter("set_emit_diagnostics"); 
         let mut files = self.snapshot.emit_diagnostics_per_file.keys();
         files.sort_by(|a, b| a.0.cmp(&b.0));
         let mut emit_diagnostics_per_file = Vec::with_capacity(files.len());
@@ -565,7 +565,7 @@ impl<'a> ToBuildInfo<'a> {
         self.build_info.emit_diagnostics_per_file = emit_diagnostics_per_file;
     }
 
-    pub fn set_affected_files_pending_emit(&mut self) {
+    pub fn set_affected_files_pending_emit(&mut self) { ::tsox_core::fntrace::enter("set_affected_files_pending_emit"); 
         let mut files = self.snapshot.affected_files_pending_emit.keys();
         files.sort_by(|a, b| a.0.cmp(&b.0));
         let full_emit_kind = self
@@ -600,7 +600,7 @@ impl<'a> ToBuildInfo<'a> {
         }
     }
 
-    pub fn set_root_of_non_incremental_program(&mut self) {
+    pub fn set_root_of_non_incremental_program(&mut self) { ::tsox_core::fntrace::enter("set_root_of_non_incremental_program"); 
         self.build_info.root = self
             .program
             .command_line()
@@ -621,7 +621,7 @@ impl<'a> ToBuildInfo<'a> {
             .collect();
     }
 
-    pub fn set_package_jsons(&mut self) {
+    pub fn set_package_jsons(&mut self) { ::tsox_core::fntrace::enter("set_package_jsons"); 
         if let Some(package_jsons) = &*self.snapshot.package_jsons.lock().unwrap() {
             if !package_jsons.is_empty() {
                 self.build_info.package_jsons = Some(
@@ -647,7 +647,7 @@ impl<'a> ToBuildInfo<'a> {
 
 pub fn to_build_info_repopulate_info(
     info: Option<&RepopulateDiagnosticInfo>,
-) -> Option<BuildInfoRepopulateInfo> {
+) -> Option<BuildInfoRepopulateInfo> { ::tsox_core::fntrace::enter("to_build_info_repopulate_info"); 
     info.map(|info| BuildInfoRepopulateInfo {
         kind: info.kind,
         module_reference: info.module_reference.clone(),
@@ -656,7 +656,7 @@ pub fn to_build_info_repopulate_info(
     })
 }
 
-fn value_is_zero(value: &tsox_tsoptions::tsoptions::OptValue) -> bool {
+fn value_is_zero(value: &tsox_tsoptions::tsoptions::OptValue) -> bool { ::tsox_core::fntrace::enter("value_is_zero"); 
     match value {
         tsox_tsoptions::tsoptions::OptValue::Null => true,
         tsox_tsoptions::tsoptions::OptValue::Bool(b) => !*b,
@@ -666,7 +666,7 @@ fn value_is_zero(value: &tsox_tsoptions::tsoptions::OptValue) -> bool {
     }
 }
 
-fn opt_value_to_json(value: &tsox_tsoptions::tsoptions::OptValue) -> serde_json::Value {
+fn opt_value_to_json(value: &tsox_tsoptions::tsoptions::OptValue) -> serde_json::Value { ::tsox_core::fntrace::enter("opt_value_to_json"); 
     match value {
         tsox_tsoptions::tsoptions::OptValue::Bool(b) => serde_json::Value::Bool(*b),
         tsox_tsoptions::tsoptions::OptValue::Str(s) => serde_json::Value::String(s.clone()),
@@ -682,7 +682,7 @@ fn opt_value_to_json(value: &tsox_tsoptions::tsoptions::OptValue) -> serde_json:
     }
 }
 
-fn option_affects_build_info(name: &str) -> bool {
+fn option_affects_build_info(name: &str) -> bool { ::tsox_core::fntrace::enter("option_affects_build_info"); 
     matches!(
         name,
         "allowImportingTsExtensions"
@@ -762,7 +762,7 @@ impl<'a> EmitFilesHandler<'a> {
         data: &crate::mig::m4y_3::WriteFileData,
         new_signature: &mut String,
         differs_only_in_map: &mut bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("skip_dts_output_of_composite"); 
         if !self
             .program
             .snapshot
@@ -819,7 +819,7 @@ impl<'a> EmitFilesHandler<'a> {
         false
     }
 
-    pub fn update_snapshot(&mut self) -> Vec<crate::mig::m4y_3::EmitResult> {
+    pub fn update_snapshot(&mut self) -> Vec<crate::mig::m4y_3::EmitResult> { ::tsox_core::fntrace::enter("update_snapshot"); 
         if self.program.snapshot.can_use_incremental_state() {
             self.signatures.for_each(|file, signature| {
                 if let Some(mut info) = self.program.snapshot.file_infos.load(file) {

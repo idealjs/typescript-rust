@@ -8,7 +8,7 @@ impl Checker {
         callee_expr: &Arc<Node>,
         callee_type: &Arc<Type>,
         is_new: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_invocation_error"); 
         let apparent = self.get_apparent_type(callee_type);
         let kind = if is_new {
             SignatureKind::Construct
@@ -18,7 +18,7 @@ impl Checker {
         self.invocation_error(callee_expr, &apparent, kind, None);
     }
 
-    pub(crate) fn is_never_intersection(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_never_intersection(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_never_intersection"); 
         let Some(ui) = t.as_union_or_intersection() else {
             return false;
         };

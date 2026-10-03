@@ -29,7 +29,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         r: &IterationTypesResolver,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_iterable_fast"); 
         if [
             (r.get_global_iterable_type)(),
             (r.get_global_iterator_object_type)(),
@@ -64,7 +64,7 @@ impl Checker {
         r: &IterationTypesResolver,
         error_node: Option<&Arc<Node>>,
         diagnostic_output: &mut Vec<Diagnostic>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_iterable_slow"); 
         let method_name = self.get_property_name_for_known_symbol_name(&r.iterator_symbol_name);
         let method = self.get_property_of_type(t, &method_name);
         if let Some(method) = method {
@@ -116,7 +116,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         r: &IterationTypesResolver,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_iterator_fast"); 
         if [
             (r.get_global_iterator_type)(),
             (r.get_global_iterator_object_type)(),
@@ -151,7 +151,7 @@ impl Checker {
         r: &IterationTypesResolver,
         error_node: Option<&Arc<Node>>,
         diagnostic_output: &mut Vec<Diagnostic>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_iterator_slow"); 
         let next_types = self.get_iteration_types_of_method(t, r, "next", error_node, diagnostic_output);
         let return_types = self.get_iteration_types_of_method(t, r, "return", error_node, diagnostic_output);
         let throw_types = self.get_iteration_types_of_method(t, r, "throw", error_node, diagnostic_output);
@@ -164,7 +164,7 @@ impl Checker {
         r: &IterationTypesResolver,
         error_node: Option<&Arc<Node>>,
         diagnostic_output: &mut Vec<Diagnostic>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_iterator_worker"); 
         if is_type_any(t) {
             return IterationTypes {
                 yield_type: Some(self.any_type()),
@@ -179,7 +179,7 @@ impl Checker {
         self.get_iteration_types_of_iterator_slow(t, r, error_node, diagnostic_output)
     }
 
-    pub fn get_late_bound_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn get_late_bound_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_late_bound_symbol"); 
         if !symbol.flags.intersects(SymbolFlags::CLASS_MEMBER)
             || symbol.name != internal_symbol_name_computed()
         {
@@ -214,7 +214,7 @@ impl Checker {
             .unwrap_or_else(|| Arc::clone(symbol))
     }
 
-    pub fn get_legacy_decorator_argument_count(&self, node: &Arc<Node>, signature: &Arc<Signature>) -> i32 {
+    pub fn get_legacy_decorator_argument_count(&self, node: &Arc<Node>, signature: &Arc<Signature>) -> i32 { ::tsox_core::fntrace::enter("get_legacy_decorator_argument_count"); 
         let Some(parent) = node.parent() else {
             panic!("Unhandled case in getLegacyDecoratorArgumentCount");
         };
@@ -239,7 +239,7 @@ impl Checker {
         }
     }
 
-    pub fn get_legacy_decorator_call_signature(&mut self, decorator: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub fn get_legacy_decorator_call_signature(&mut self, decorator: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_legacy_decorator_call_signature"); 
         let Some(node) = decorator.parent() else {
             return None;
         };
@@ -358,7 +358,7 @@ impl Checker {
         self.decorator_signature_result(&node)
     }
 
-    fn decorator_signature_result(&self, node: &Arc<Node>) -> Option<Arc<Signature>> {
+    fn decorator_signature_result(&self, node: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("decorator_signature_result"); 
         let links = self.signature_links.get(node)?;
         match &links.decorator_signature {
             Some(sig) => {
@@ -372,7 +372,7 @@ impl Checker {
         }
     }
 
-    pub fn get_longest_candidate_index(&mut self, candidates: &[Arc<Signature>], args_count: i32) -> i32 {
+    pub fn get_longest_candidate_index(&mut self, candidates: &[Arc<Signature>], args_count: i32) -> i32 { ::tsox_core::fntrace::enter("get_longest_candidate_index"); 
         let mut max_params_index = -1;
         let mut max_params = -1;
         for (i, candidate) in candidates.iter().enumerate() {
@@ -388,7 +388,7 @@ impl Checker {
         max_params_index
     }
 
-    pub fn get_lower_bound_of_key_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_lower_bound_of_key_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_lower_bound_of_key_type"); 
         if t.flags.intersects(TypeFlags::Index) {
             let target = index_type_target(t);
             let apparent = self.get_apparent_type(&target);
@@ -440,7 +440,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn get_mapped_type_name_type_kind(&mut self, t: &Arc<Type>) -> MappedTypeNameTypeKind {
+    pub fn get_mapped_type_name_type_kind(&mut self, t: &Arc<Type>) -> MappedTypeNameTypeKind { ::tsox_core::fntrace::enter("get_mapped_type_name_type_kind"); 
         let Some(name_type) = self.get_name_type_from_mapped_type(t) else {
             return MappedTypeNameTypeKind::None;
         };
@@ -458,7 +458,7 @@ impl Checker {
         &mut self,
         union_type: &Arc<Type>,
         node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_matching_union_constituent_for_object_literal"); 
         let key_property_name = self.get_key_property_name(union_type);
         if key_property_name.as_deref().is_some_and(|k| !k.is_empty()) {
             let prop_node = properties(node).iter().find(|p| {
@@ -481,8 +481,8 @@ impl Checker {
         None
     }
 
-    pub fn get_module_specifier_for_import_or_export(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
-        fn parent_node(n: &Arc<Node>) -> Arc<Node> {
+    pub fn get_module_specifier_for_import_or_export(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_module_specifier_for_import_or_export"); 
+        fn parent_node(n: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("parent_node"); 
             n.parent().unwrap_or_else(|| Arc::clone(n))
         }
         match node.kind {
@@ -505,7 +505,7 @@ impl Checker {
         }
     }
 
-    pub fn get_mutable_array_or_tuple_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_mutable_array_or_tuple_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_mutable_array_or_tuple_type"); 
         if t.flags.intersects(TypeFlags::Union) {
             return map_type_self(self, t, &mut |c, t| Some(c.get_mutable_array_or_tuple_type(t)))
                 .unwrap_or_else(|| Arc::clone(t));
@@ -535,7 +535,7 @@ impl Checker {
         )
     }
 
-    pub fn get_next_base_constraint(&mut self, t: &Arc<Type>, stack: &[RecursionId]) -> Option<Arc<Type>> {
+    pub fn get_next_base_constraint(&mut self, t: &Arc<Type>, stack: &[RecursionId]) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_next_base_constraint"); 
         let constraint = self.get_resolved_base_constraint(t, stack);
         if Arc::ptr_eq(&constraint, &self.no_constraint_type())
             || Arc::ptr_eq(&constraint, &self.circular_constraint_type())
@@ -545,21 +545,21 @@ impl Checker {
         Some(constraint)
     }
 
-    pub fn get_no_infer_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_no_infer_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_no_infer_type"); 
         if self.is_no_infer_target_type(t) {
             return self.get_or_create_substitution_type(t, &self.unknown_type());
         }
         Arc::clone(t)
     }
 
-    pub fn get_non_nullable_type_if_needed(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_non_nullable_type_if_needed(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_nullable_type_if_needed"); 
         if self.is_nullable_type(t) {
             return self.get_non_nullable_type(t);
         }
         Arc::clone(t)
     }
 
-    pub fn get_non_undefined_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_non_undefined_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_undefined_type"); 
         let mut type_or_constraint = Arc::clone(t);
         if some_type_self(self, t, |c, t| c.is_generic_type_with_undefined_constraint(t)) {
             type_or_constraint = map_type_self(self, t, &mut |c: &mut Checker, t: &Arc<Type>| {
@@ -574,7 +574,7 @@ impl Checker {
         self.get_type_with_facts(&type_or_constraint, TypeFacts::NE_UNDEFINED)
     }
 
-    pub fn get_normalized_tuple_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> {
+    pub fn get_normalized_tuple_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("get_normalized_tuple_type"); 
         let elements = self.get_element_types(t);
         let normalized_elements: Vec<Arc<Type>> = elements
             .iter()
@@ -593,7 +593,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn get_normalized_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> {
+    pub fn get_normalized_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("get_normalized_type"); 
         let mut current = Arc::clone(t);
         loop {
             let next = if is_fresh_literal_type(&current) {
@@ -626,7 +626,7 @@ impl Checker {
         }
     }
 
-    pub fn get_normalized_union_or_intersection_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> {
+    pub fn get_normalized_union_or_intersection_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("get_normalized_union_or_intersection_type"); 
         let reduced = self.get_reduced_type(t);
         if !Arc::ptr_eq(&reduced, t) {
             return reduced;
@@ -645,7 +645,7 @@ impl Checker {
     }
 }
 
-pub fn get_mapped_type_modifiers(t: &Arc<Type>) -> MappedTypeModifiers {
+pub fn get_mapped_type_modifiers(t: &Arc<Type>) -> MappedTypeModifiers { ::tsox_core::fntrace::enter("get_mapped_type_modifiers"); 
     let declaration = mapped_type_declaration(t);
     let mut modifiers = MappedTypeModifiers::empty();
     if let Some(readonly_token) = mapped_declaration_readonly_token(&declaration) {
@@ -665,7 +665,7 @@ pub fn get_mapped_type_modifiers(t: &Arc<Type>) -> MappedTypeModifiers {
     modifiers
 }
 
-pub fn get_mapped_type_optionality(t: &Arc<Type>) -> i32 {
+pub fn get_mapped_type_optionality(t: &Arc<Type>) -> i32 { ::tsox_core::fntrace::enter("get_mapped_type_optionality"); 
     let modifiers = get_mapped_type_modifiers(t);
     if modifiers.intersects(MappedTypeModifiers::ExcludeOptional) {
         return -1;
@@ -676,7 +676,7 @@ pub fn get_mapped_type_optionality(t: &Arc<Type>) -> i32 {
     0
 }
 
-pub fn get_modified_readonly_state(state: bool, modifiers: MappedTypeModifiers) -> bool {
+pub fn get_modified_readonly_state(state: bool, modifiers: MappedTypeModifiers) -> bool { ::tsox_core::fntrace::enter("get_modified_readonly_state"); 
     if modifiers.intersects(MappedTypeModifiers::IncludeReadonly) {
         return true;
     }
@@ -686,7 +686,7 @@ pub fn get_modified_readonly_state(state: bool, modifiers: MappedTypeModifiers) 
     state
 }
 
-pub fn get_module_specifier_from_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_module_specifier_from_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_module_specifier_from_node"); 
     match node.kind {
         SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration => node_module_specifier(node).cloned(),
         SyntaxKind::ExportDeclaration => node_module_specifier(node).cloned(),
@@ -694,7 +694,7 @@ pub fn get_module_specifier_from_node(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn get_name_from_index_info(info: &IndexInfo) -> String {
+pub fn get_name_from_index_info(info: &IndexInfo) -> String { ::tsox_core::fntrace::enter("get_name_from_index_info"); 
     if let Some(declaration) = &info.declaration {
         let parameters = node_parameters(declaration)
             .map(|l| l.nodes.as_slice())
@@ -707,11 +707,11 @@ pub fn get_name_from_index_info(info: &IndexInfo) -> String {
     "x".to_string()
 }
 
-pub fn get_number_literal_value(t: &Arc<Type>) -> f64 {
+pub fn get_number_literal_value(t: &Arc<Type>) -> f64 { ::tsox_core::fntrace::enter("get_number_literal_value"); 
     literal_type_number_value(t)
 }
 
-pub fn get_node_list_key(nodes: &[Arc<Node>]) -> CacheHashKey {
+pub fn get_node_list_key(nodes: &[Arc<Node>]) -> CacheHashKey { ::tsox_core::fntrace::enter("get_node_list_key"); 
     let mut b = R23KeyBuilder::new();
     b.write_int(nodes.len() as i32);
     for n in nodes {
@@ -724,7 +724,7 @@ pub fn get_type_instantiation_key(
     type_arguments: &[Arc<Type>],
     alias: Option<&TypeAlias>,
     single_signature: bool,
-) -> CacheHashKey {
+) -> CacheHashKey { ::tsox_core::fntrace::enter("get_type_instantiation_key"); 
     let mut b = R23KeyBuilder::new();
     b.write_types(type_arguments);
     b.write_alias(alias);

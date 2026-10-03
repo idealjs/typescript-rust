@@ -103,19 +103,19 @@ pub trait EmitContextExt37k4 {
 }
 
 impl EmitContextExt37k4 for EmitContext {
-    fn snippet_element(&self, _node: &Node) -> Option<SnippetElement> {
+    fn snippet_element(&self, _node: &Node) -> Option<SnippetElement> { ::tsox_core::fntrace::enter("snippet_element"); 
         None
     }
 
-    fn source_map_range(&self, node: &Node) -> TextRange {
+    fn source_map_range(&self, node: &Node) -> TextRange { ::tsox_core::fntrace::enter("source_map_range"); 
         node.loc
     }
 
-    fn token_source_map_range(&self, _node: &Node, _kind: SyntaxKind) -> (TextRange, bool) {
+    fn token_source_map_range(&self, _node: &Node, _kind: SyntaxKind) -> (TextRange, bool) { ::tsox_core::fntrace::enter("token_source_map_range"); 
         (TextRange::undefined(), false)
     }
 
-    fn emit_flags_of(&self, _node: &Node) -> u32 {
+    fn emit_flags_of(&self, _node: &Node) -> u32 { ::tsox_core::fntrace::enter("emit_flags_of"); 
         0
     }
 }
@@ -127,7 +127,7 @@ pub struct SourceMapStateSnapshot {
 }
 
 impl SourceMapStateSnapshot {
-    pub fn new(emit_flags: u32, source_map_range: TextRange, has_token_source_map_range: bool) -> Self {
+    pub fn new(emit_flags: u32, source_map_range: TextRange, has_token_source_map_range: bool) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             emit_flags,
             source_map_range,

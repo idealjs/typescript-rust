@@ -3,7 +3,7 @@ pub(crate) use std::cmp::Ordering;
 pub fn binary_search_unique_func<T, F>(slice: &[T], mut cmp: F) -> (usize, bool)
 where
     F: FnMut(usize, &T) -> Ordering,
-{
+{ crate::fntrace::enter("binary_search_unique_func"); 
     let n = slice.len();
     if n == 0 {
         return (0, false);

@@ -3,7 +3,7 @@
 use crate::checker::checker_contextual::*;
 
 impl Checker {
-    pub(crate) fn check_const_property_assignment(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_const_property_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_const_property_assignment"); 
         let (obj_expr, name, name_loc) = match &node.data {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(data) => {
                 (&data.expression, &data.name, data.name.loc)

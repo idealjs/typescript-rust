@@ -8,7 +8,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_object_types"); 
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
 
@@ -42,7 +42,7 @@ impl Checker {
         source_types: &[Arc<Type>],
         target_types: &[Arc<Type>],
         _variances: &[VarianceFlags],
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_type_arguments"); 
         let count = source_types.len().min(target_types.len());
         for i in 0..count {
             self.infer_from_types(state, &source_types[i], &target_types[i]);
@@ -54,7 +54,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_properties"); 
         let source_struct = source.as_structured();
         let target_struct = target.as_structured();
         if let (Some(source_s), Some(target_s)) = (source_struct, target_struct) {
@@ -76,7 +76,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_signatures"); 
         let source_sigs = self.get_signatures_of_type(source, SignatureKind::Call);
         let target_sigs = self.get_signatures_of_type(target, SignatureKind::Call);
         if source_sigs.len() == 1 && target_sigs.len() == 1 {
@@ -94,7 +94,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Signature>,
         target: &Arc<Signature>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_signature"); 
         // Go applyToParameterTypes：非 rest 参数成对（源无 rest 时按源参数数截断），
         // 目标带 rest 时用源在 rest 起点的展开类型对位（...t: T vs ...rest: infer R
         // 推出 R = T[number][]）
@@ -142,7 +142,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_index_types"); 
         let mut priority = InferencePriority::None;
         if source.object_flags.intersects(ObjectFlags::Mapped)
             && target.object_flags.intersects(ObjectFlags::Mapped)
@@ -202,7 +202,7 @@ impl Checker {
         sources: &[Arc<Type>],
         targets: &[Arc<Type>],
         use_identical: bool,
-    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
+    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("infer_from_matching_types"); 
         let mut remaining_sources: Vec<Arc<Type>> = sources.to_vec();
         let mut remaining_targets: Vec<Arc<Type>> = targets.to_vec();
         let mut i = 0;
@@ -236,7 +236,7 @@ impl Checker {
         state: &mut InferenceState,
         sources: &[Arc<Type>],
         targets: &[Arc<Type>],
-    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
+    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("infer_matching_types_identical"); 
         self.infer_from_matching_types(state, sources, targets, true)
     }
 
@@ -246,14 +246,14 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         new_priority: InferencePriority,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_with_priority"); 
         let save = state.priority;
         state.priority = new_priority;
         self.infer_from_types(state, source, target);
         state.priority = save;
     }
 
-    pub(crate) fn could_contain_type_variables(&self, t: &Type) -> bool {
+    pub(crate) fn could_contain_type_variables(&self, t: &Type) -> bool { ::tsox_core::fntrace::enter("could_contain_type_variables"); 
         t.flags.intersects(TypeFlags::Union)
             || t.flags.intersects(TypeFlags::Intersection)
             || t.flags.intersects(TypeFlags::Object)
@@ -262,11 +262,11 @@ impl Checker {
             || t.flags.intersects(TypeFlags::Conditional)
             || t.flags.intersects(TypeFlags::Substitution)
     }
-    pub(crate) fn is_no_infer_type(&self, _t: &Type) -> bool {
+    pub(crate) fn is_no_infer_type(&self, _t: &Type) -> bool { ::tsox_core::fntrace::enter("is_no_infer_type"); 
         false
     }
 
-    pub(crate) fn is_from_inference_blocked_source(&self, _source: &Type) -> bool {
+    pub(crate) fn is_from_inference_blocked_source(&self, _source: &Type) -> bool { ::tsox_core::fntrace::enter("is_from_inference_blocked_source"); 
         false
     }
 
@@ -276,7 +276,7 @@ impl Checker {
         signature: &Arc<Signature>,
         args: &[Arc<tsox_frontend::ast::Node>],
         context: &mut InferenceContext,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("infer_type_arguments"); 
         if matches!(
             node.kind,
             SyntaxKind::CallExpression | SyntaxKind::NewExpression

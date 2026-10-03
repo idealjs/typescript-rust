@@ -1,7 +1,7 @@
 use crate::collections::multimap::*;
 
 #[test]
-fn add_and_get() {
+fn add_and_get() { crate::fntrace::enter("add_and_get"); 
     let mut m = MultiMap::new();
     m.add("a", 1);
     m.add("a", 2);
@@ -12,7 +12,7 @@ fn add_and_get() {
 }
 
 #[test]
-fn remove() {
+fn remove() { crate::fntrace::enter("remove"); 
     let mut m = MultiMap::new();
     m.add("a", 1);
     m.add("a", 2);
@@ -23,7 +23,7 @@ fn remove() {
 }
 
 #[test]
-fn group_by_works() {
+fn group_by_works() { crate::fntrace::enter("group_by_works"); 
     let items = vec![1, 2, 3, 4, 5, 6];
     let m = group_by(&items, |x| x % 2);
     assert_eq!(m.get(&0), &[2, 4, 6]);

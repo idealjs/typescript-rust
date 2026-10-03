@@ -18,7 +18,7 @@ pub fn create_module_not_found_chain_details(
     module_reference: &str,
     _mode: tsox_core::core::compiler_options_kinds::ResolutionMode,
     package_name: &str,
-) -> DiagnosticDetails {
+) -> DiagnosticDetails { ::tsox_core::fntrace::enter("create_module_not_found_chain_details"); 
     let resolved = file.and_then(|f| program.get_resolved_module(&f.file_name, module_reference));
     if let Some(resolved) = resolved {
         let package_name = if resolved.contains("/node_modules/@types/") {
@@ -40,7 +40,7 @@ pub fn create_module_not_found_chain_details(
 pub fn create_mode_mismatch_details_worker(
     _program: &dyn crate::checker::checker_heritage_retry_limit::Program,
     file: &Arc<tsox_frontend::ast::SourceFile>,
-) -> DiagnosticDetails {
+) -> DiagnosticDetails { ::tsox_core::fntrace::enter("create_mode_mismatch_details_worker"); 
     let ext = try_get_extension_from_path(&file.file_name);
     let target_ext: &str = if ext == ".ts" {
         ".mts"

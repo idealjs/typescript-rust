@@ -2,7 +2,7 @@ use super::FS;
 use super::InMemoryFS;
 use super::vfsmatch::*;
 
-fn build_fs(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
+fn build_fs(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS { ::tsox_core::fntrace::enter("build_fs"); 
     let fs = InMemoryFS::with_case_sensitivity(case_sensitive);
     for &(path, content) in files {
         fs.insert_file(path, content);
@@ -17,15 +17,15 @@ fn build_fs(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
     fs
 }
 
-fn case_insensitive_host() -> InMemoryFS {
+fn case_insensitive_host() -> InMemoryFS { ::tsox_core::fntrace::enter("case_insensitive_host"); 
     build_fs(&case_insensitive_host_files(), false)
 }
 
-fn case_sensitive_host() -> InMemoryFS {
+fn case_sensitive_host() -> InMemoryFS { ::tsox_core::fntrace::enter("case_sensitive_host"); 
     build_fs(&case_sensitive_host_files(), true)
 }
 
-fn case_insensitive_host_files() -> Vec<(&'static str, &'static str)> {
+fn case_insensitive_host_files() -> Vec<(&'static str, &'static str)> { ::tsox_core::fntrace::enter("case_insensitive_host_files"); 
     vec![
         ("/dev/a.ts", ""),
         ("/dev/a.d.ts", ""),
@@ -53,7 +53,7 @@ fn case_insensitive_host_files() -> Vec<(&'static str, &'static str)> {
     ]
 }
 
-fn case_sensitive_host_files() -> Vec<(&'static str, &'static str)> {
+fn case_sensitive_host_files() -> Vec<(&'static str, &'static str)> { ::tsox_core::fntrace::enter("case_sensitive_host_files"); 
     vec![
         ("/dev/a.ts", ""),
         ("/dev/a.d.ts", ""),
@@ -80,7 +80,7 @@ fn case_sensitive_host_files() -> Vec<(&'static str, &'static str)> {
     ]
 }
 
-fn common_folders_host() -> InMemoryFS {
+fn common_folders_host() -> InMemoryFS { ::tsox_core::fntrace::enter("common_folders_host"); 
     build_fs(
         &[
             ("/dev/a.ts", ""),
@@ -96,7 +96,7 @@ fn common_folders_host() -> InMemoryFS {
     )
 }
 
-fn dotted_folders_host() -> InMemoryFS {
+fn dotted_folders_host() -> InMemoryFS { ::tsox_core::fntrace::enter("dotted_folders_host"); 
     build_fs(
         &[
             ("/dev/x/d.ts", ""),
@@ -112,7 +112,7 @@ fn dotted_folders_host() -> InMemoryFS {
     )
 }
 
-fn mixed_extension_host() -> InMemoryFS {
+fn mixed_extension_host() -> InMemoryFS { ::tsox_core::fntrace::enter("mixed_extension_host"); 
     build_fs(
         &[
             ("/dev/a.ts", ""),
@@ -131,7 +131,7 @@ fn mixed_extension_host() -> InMemoryFS {
     )
 }
 
-fn same_named_declarations_host() -> InMemoryFS {
+fn same_named_declarations_host() -> InMemoryFS { ::tsox_core::fntrace::enter("same_named_declarations_host"); 
     build_fs(
         &[
             ("/dev/a.tsx", ""),
@@ -151,11 +151,11 @@ fn same_named_declarations_host() -> InMemoryFS {
     )
 }
 
-fn contains_str(s: &str, substr: &str) -> bool {
+fn contains_str(s: &str, substr: &str) -> bool { ::tsox_core::fntrace::enter("contains_str"); 
     s.contains(substr)
 }
 
-fn has_suffix(s: &str, suffix: &str) -> bool {
+fn has_suffix(s: &str, suffix: &str) -> bool { ::tsox_core::fntrace::enter("has_suffix"); 
     s.ends_with(suffix)
 }
 
@@ -166,7 +166,7 @@ fn run_match(
     extensions: &[&str],
     excludes: &[&str],
     includes: &[&str],
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("run_match"); 
     match_files(
         "/dev",
         extensions,
@@ -187,7 +187,7 @@ fn run_match_full(
     excludes: &[&str],
     includes: &[&str],
     depth: i32,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("run_match_full"); 
     match_files(
         path,
         extensions,
@@ -201,7 +201,7 @@ fn run_match_full(
 }
 
 #[test]
-fn test_read_directory() {
+fn test_read_directory() { ::tsox_core::fntrace::enter("test_read_directory"); 
     {
         let host = common_folders_host();
         let got = run_match(&host, TS_EXTS, &[], &[]);
@@ -644,7 +644,7 @@ fn test_read_directory() {
 }
 
 #[test]
-fn test_read_directory_edge_cases() {
+fn test_read_directory_edge_cases() { ::tsox_core::fntrace::enter("test_read_directory_edge_cases"); 
     {
         let host = case_insensitive_host();
         let got = run_match(&host, &[".ts"], &[], &["/dev/a.ts"]);
@@ -707,7 +707,7 @@ fn test_read_directory_edge_cases() {
 }
 
 #[test]
-fn test_read_directory_empty_includes() {
+fn test_read_directory_empty_includes() { ::tsox_core::fntrace::enter("test_read_directory_empty_includes"); 
     let host = build_fs(&[("/root/a.ts", "")], true);
     let got = run_match_full(&host, "/root", "/", &[".ts"], &[], &[], UNLIMITED_DEPTH);
     if !got.is_empty() {
@@ -716,7 +716,7 @@ fn test_read_directory_empty_includes() {
 }
 
 #[test]
-fn test_read_directory_symlink_cycle() {
+fn test_read_directory_symlink_cycle() { ::tsox_core::fntrace::enter("test_read_directory_symlink_cycle"); 
     let fs = build_fs(&[], true);
     fs.create_symlink("/a", "/b");
     fs.create_symlink("/b", "/a");
@@ -742,7 +742,7 @@ fn test_read_directory_symlink_cycle() {
 }
 
 #[test]
-fn test_read_directory_matches_typescript_baselines() {
+fn test_read_directory_matches_typescript_baselines() { ::tsox_core::fntrace::enter("test_read_directory_matches_typescript_baselines"); 
     {
         let host = build_fs(
             &[
@@ -969,7 +969,7 @@ fn test_read_directory_matches_typescript_baselines() {
 }
 
 #[test]
-fn test_is_implicit_glob() {
+fn test_is_implicit_glob() { ::tsox_core::fntrace::enter("test_is_implicit_glob"); 
     let cases: &[(&str, &str, bool)] = &[
         ("simple", "foo", true),
         ("folder", "src", true),
@@ -990,7 +990,7 @@ fn test_is_implicit_glob() {
 }
 
 #[test]
-fn test_spec_matcher() {
+fn test_spec_matcher() { ::tsox_core::fntrace::enter("test_spec_matcher"); 
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true);
         assert!(m.is_some());
@@ -1041,7 +1041,7 @@ fn test_spec_matcher() {
 }
 
 #[test]
-fn test_spec_matcher_match_string() {
+fn test_spec_matcher_match_string() { ::tsox_core::fntrace::enter("test_spec_matcher_match_string"); 
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true).unwrap();
         let paths = ["/project/a.ts", "/project/sub/a.ts", "/project/a.js"];
@@ -1078,7 +1078,7 @@ fn test_spec_matcher_match_string() {
 }
 
 #[test]
-fn test_single_spec_matcher_match_string() {
+fn test_single_spec_matcher_match_string() { ::tsox_core::fntrace::enter("test_single_spec_matcher_match_string"); 
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true).unwrap();
         let paths = ["/project/a.ts", "/project/sub/a.ts", "/project/a.js"];
@@ -1101,7 +1101,7 @@ fn test_single_spec_matcher_match_string() {
 }
 
 #[test]
-fn test_spec_matchers_match_index() {
+fn test_spec_matchers_match_index() { ::tsox_core::fntrace::enter("test_spec_matchers_match_index"); 
     {
         let m = SpecMatcher::new(&["*.ts", "*.tsx"], "/project", Usage::Files, true).unwrap();
         let paths = ["/project/a.ts", "/project/a.tsx", "/project/a.js"];
@@ -1136,7 +1136,7 @@ fn test_spec_matchers_match_index() {
 }
 
 #[test]
-fn test_single_spec_matcher() {
+fn test_single_spec_matcher() { ::tsox_core::fntrace::enter("test_single_spec_matcher"); 
     {
         let m = SpecMatcher::new(&["*.ts"], "/project", Usage::Files, true);
         assert!(m.is_some());
@@ -1160,7 +1160,7 @@ fn test_single_spec_matcher() {
 }
 
 #[test]
-fn test_spec_matchers() {
+fn test_spec_matchers() { ::tsox_core::fntrace::enter("test_spec_matchers"); 
     {
         let m =
             SpecMatcher::new(&["*.ts", "*.tsx", "*.js"], "/project", Usage::Files, true).unwrap();
@@ -1177,7 +1177,7 @@ fn test_spec_matchers() {
 }
 
 #[test]
-fn test_glob_pattern_internals() {
+fn test_glob_pattern_internals() { ::tsox_core::fntrace::enter("test_glob_pattern_internals"); 
     {
         let path = "/dev//foo///bar";
 
@@ -1311,7 +1311,7 @@ fn test_glob_pattern_internals() {
 }
 
 #[test]
-fn test_match_segments_edge_cases() {
+fn test_match_segments_edge_cases() { ::tsox_core::fntrace::enter("test_match_segments_edge_cases"); 
     {
         let p = compile_glob_pattern("a?b", "/", Usage::Files, true).unwrap();
 
@@ -1420,7 +1420,7 @@ fn test_match_segments_edge_cases() {
 }
 
 #[test]
-fn test_read_directory_consecutive_slashes() {
+fn test_read_directory_consecutive_slashes() { ::tsox_core::fntrace::enter("test_read_directory_consecutive_slashes"); 
     let host = build_fs(&[("/dev/a.ts", ""), ("/dev/x/b.ts", "")], false);
     let got = match_files(
         "/dev",
@@ -1438,7 +1438,7 @@ fn test_read_directory_consecutive_slashes() {
 }
 
 #[test]
-fn test_glob_pattern_literal_with_package_folders() {
+fn test_glob_pattern_literal_with_package_folders() { ::tsox_core::fntrace::enter("test_glob_pattern_literal_with_package_folders"); 
     {
         let host = build_fs(&[("/dev/a.ts", ""), ("/dev/node_modules/b.ts", "")], false);
         let got = match_files(
@@ -1477,7 +1477,7 @@ fn test_glob_pattern_literal_with_package_folders() {
 }
 
 #[test]
-fn test_get_base_paths_case_sensitivity() {
+fn test_get_base_paths_case_sensitivity() { ::tsox_core::fntrace::enter("test_get_base_paths_case_sensitivity"); 
     {
         let base_paths = get_base_paths("/root", &["../Other/**/*.ts", "../other/**/*.ts"], true);
         assert!(

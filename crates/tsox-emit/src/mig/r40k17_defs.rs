@@ -30,7 +30,7 @@ use crate::mig::wt1b::r39k05_defs::new_run_initializers_helper_r39k05;
 use crate::mig::wt1b_4::class_has_class_this_assignment;
 use crate::printer::{AutoGenerateOptions, GeneratedIdentifierFlags, NodeFactory};
 
-fn new_file_level_generated_name(f: &NodeFactory, text: &str) -> Arc<Node> {
+fn new_file_level_generated_name(f: &NodeFactory, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_file_level_generated_name"); 
     f.generated_name_node(&f.new_unique_name_ex(
         text,
         AutoGenerateOptions {
@@ -41,7 +41,7 @@ fn new_file_level_generated_name(f: &NodeFactory, text: &str) -> Arc<Node> {
     ))
 }
 
-pub(crate) fn clone_class_info(ci: &ClassInfo) -> ClassInfo {
+pub(crate) fn clone_class_info(ci: &ClassInfo) -> ClassInfo { ::tsox_core::fntrace::enter("clone_class_info"); 
     let mut member_infos = MemberInfoMap::default();
     for (key, info) in ci.member_infos.iter() {
         member_infos.set(
@@ -79,7 +79,7 @@ pub(crate) fn clone_class_info(ci: &ClassInfo) -> ClassInfo {
     }
 }
 
-fn decorators_of(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn decorators_of(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("decorators_of"); 
     node.modifier_nodes()
         .iter()
         .filter(|m| is_decorator(m))
@@ -87,17 +87,17 @@ fn decorators_of(node: &Arc<Node>) -> Vec<Arc<Node>> {
         .collect()
 }
 
-fn is_private_identifier_class_element_declaration(member: &Arc<Node>) -> bool {
+fn is_private_identifier_class_element_declaration(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_class_element_declaration"); 
     (is_property_declaration(member) || is_method_or_accessor(member))
         && member.name().map(|n| is_private_identifier(&n)).unwrap_or(false)
 }
 
-fn is_method_or_accessor(member: &Arc<Node>) -> bool {
+fn is_method_or_accessor(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_method_or_accessor"); 
     is_method_declaration(member)
         || matches!(member.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
 }
 
-fn class_or_constructor_parameter_is_decorated(node: &Arc<Node>) -> bool {
+fn class_or_constructor_parameter_is_decorated(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_or_constructor_parameter_is_decorated"); 
     if node_is_decorated(false, node, None, None) {
         return true;
     }
@@ -107,7 +107,7 @@ fn class_or_constructor_parameter_is_decorated(node: &Arc<Node>) -> bool {
     }
 }
 
-fn new_constructor_declaration(f: &NodeFactory, body: &Arc<Node>) -> Arc<Node> {
+fn new_constructor_declaration(f: &NodeFactory, body: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_constructor_declaration"); 
     let parameters = f.new_node_list(Vec::new());
     Arc::new(Node::new(
         SyntaxKind::Constructor,
@@ -122,7 +122,7 @@ fn new_constructor_declaration(f: &NodeFactory, body: &Arc<Node>) -> Arc<Node> {
     ))
 }
 
-fn new_immediately_invoked_arrow_function(f: &NodeFactory, statements: Vec<Arc<Node>>) -> Arc<Node> {
+fn new_immediately_invoked_arrow_function(f: &NodeFactory, statements: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_immediately_invoked_arrow_function"); 
     let statements_list = f.new_node_list(statements);
     let body = f.new_block(&statements_list, true);
     let arrow = f.new_arrow_function(
@@ -149,7 +149,7 @@ fn inject_class_this_assignment_if_missing(
     f: &NodeFactory,
     node: &Arc<Node>,
     class_this: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("inject_class_this_assignment_if_missing"); 
     if class_has_class_this_assignment(ec, node) {
         return node.clone();
     }
@@ -198,7 +198,7 @@ fn inject_class_this_assignment_if_missing(
 }
 
 impl EsDecoratorTransformer {
-    pub fn transform_class_like(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn transform_class_like(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_class_like"); 
         let mut ec = self.transformer.emit_context();
         ec.start_variable_environment();
 
@@ -681,7 +681,7 @@ impl EsDecoratorTransformer {
         new_immediately_invoked_arrow_function(&f, merged_statements)
     }
 
-    pub(crate) fn store_class_info(&mut self, updated: ClassInfo) {
+    pub(crate) fn store_class_info(&mut self, updated: ClassInfo) { ::tsox_core::fntrace::enter("store_class_info"); 
         let arc = Arc::new(updated);
         let mut cursor = self.top.as_deref_mut();
         while let Some(entry) = cursor {

@@ -5,7 +5,7 @@ use super::m3h::has_comment;
 use crate::ast::*;
 use std::sync::Arc;
 
-fn comment_list(node: &Node) -> Option<&Arc<NodeList>> {
+fn comment_list(node: &Node) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("comment_list"); 
     match &node.data {
         NodeData::JSDoc(d) => Some(&d.comment),
         NodeData::JSDocUnknownTag(d) => d.comment.as_ref(),
@@ -34,7 +34,7 @@ fn comment_list(node: &Node) -> Option<&Arc<NodeList>> {
     }
 }
 
-pub fn is_expression_of_optional_chain_root(node: &Node) -> bool {
+pub fn is_expression_of_optional_chain_root(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_of_optional_chain_root"); 
     node.parent().is_some_and(|parent| {
         is_optional_chain_root(&parent)
             && parent
@@ -43,7 +43,7 @@ pub fn is_expression_of_optional_chain_root(node: &Node) -> bool {
     })
 }
 
-pub fn is_jsdoc_type_assertion(node: Option<&Node>) -> bool {
+pub fn is_jsdoc_type_assertion(node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_type_assertion"); 
     let Some(node) = node else {
         return false;
     };
@@ -56,17 +56,17 @@ pub fn is_jsdoc_type_assertion(node: Option<&Node>) -> bool {
     is_as_expression(&expr) && expr.type_node().is_some_and(|t| t.flags.intersects(NodeFlags::Reparsed))
 }
 
-pub fn is_function_or_module_block(node: &Node) -> bool {
+pub fn is_function_or_module_block(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_or_module_block"); 
     is_source_file(node)
         || is_module_block(node)
         || (is_block(node) && node.parent().is_some_and(|p| is_function_like(&p)))
 }
 
-pub fn is_expression_with_type_arguments_in_class_extends_clause(node: &Arc<Node>) -> bool {
+pub fn is_expression_with_type_arguments_in_class_extends_clause(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_expression_with_type_arguments_in_class_extends_clause"); 
     try_get_class_extending_expression_with_type_arguments(node).is_some()
 }
 
-pub fn is_external_module_import_equals_declaration(node: &Node) -> bool {
+pub fn is_external_module_import_equals_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_external_module_import_equals_declaration"); 
     node.kind == SyntaxKind::ImportEqualsDeclaration
         && matches!(
             &node.data,
@@ -74,13 +74,13 @@ pub fn is_external_module_import_equals_declaration(node: &Node) -> bool {
         )
 }
 
-pub fn is_external_module_indicator(node: &Node) -> bool {
+pub fn is_external_module_indicator(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_external_module_indicator"); 
     is_any_import_or_re_export(node)
         || is_export_assignment(node)
         || has_syntactic_modifier(node, ModifierFlags::Export)
 }
 
-pub fn is_export_namespace_as_default_declaration(node: &Node) -> bool {
+pub fn is_export_namespace_as_default_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_export_namespace_as_default_declaration"); 
     if is_export_declaration(node) {
         if let NodeData::ExportDeclaration(decl) = &node.data {
             if let Some(export_clause) = &decl.export_clause {
@@ -94,12 +94,12 @@ pub fn is_export_namespace_as_default_declaration(node: &Node) -> bool {
     false
 }
 
-pub fn is_jsdoc_name_reference_context(node: &Arc<Node>) -> bool {
+pub fn is_jsdoc_name_reference_context(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_name_reference_context"); 
     node.flags.intersects(NodeFlags::JSDoc)
         && find_ancestor(node, |n| is_jsdoc_name_reference(n) || is_jsdoc_link_like(n)).is_some()
 }
 
-pub fn is_jsdoc_single_comment_node_list(node_list: Option<&NodeList>) -> bool {
+pub fn is_jsdoc_single_comment_node_list(node_list: Option<&NodeList>) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_single_comment_node_list"); 
     let Some(node_list) = node_list else {
         return false;
     };
@@ -114,7 +114,7 @@ pub fn is_jsdoc_single_comment_node_list(node_list: Option<&NodeList>) -> bool {
             .is_some_and(|l| std::ptr::eq(Arc::as_ptr(l), node_list))
 }
 
-pub fn is_jsdoc_single_comment_node_comment(node: &Node) -> bool {
+pub fn is_jsdoc_single_comment_node_comment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_single_comment_node_comment"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -124,16 +124,16 @@ pub fn is_jsdoc_single_comment_node_comment(node: &Node) -> bool {
             .is_some_and(|first| std::ptr::eq(Arc::as_ptr(first), node))
 }
 
-pub fn is_jsdoc_single_comment_node(node: &Node) -> bool {
+pub fn is_jsdoc_single_comment_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_single_comment_node"); 
     has_comment(node.kind)
         && comment_list(node).is_some_and(|l| l.nodes.len() == 1)
 }
 
-pub fn is_import_or_import_equals_declaration(node: &Node) -> bool {
+pub fn is_import_or_import_equals_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_or_import_equals_declaration"); 
     is_import_declaration(node) || is_import_equals_declaration(node)
 }
 
-pub fn is_expando_initializer(declaration: &Node, initializer: Option<&Node>) -> bool {
+pub fn is_expando_initializer(declaration: &Node, initializer: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_expando_initializer"); 
     let Some(initializer) = initializer else {
         return false;
     };
@@ -153,11 +153,11 @@ pub fn is_expando_initializer(declaration: &Node, initializer: Option<&Node>) ->
     false
 }
 
-fn is_js_type_alias_declaration(node: &Node) -> bool {
+fn is_js_type_alias_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_js_type_alias_declaration"); 
     node.kind == SyntaxKind::JSTypeAliasDeclaration
 }
 
-pub fn is_implicitly_exported_jsdoc_declaration(node: &Node) -> bool {
+pub fn is_implicitly_exported_jsdoc_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_implicitly_exported_jsdoc_declaration"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -170,6 +170,6 @@ pub fn is_implicitly_exported_jsdoc_declaration(node: &Node) -> bool {
     is_module_declaration(node) && node.flags.intersects(NodeFlags::Reparsed)
 }
 
-pub fn is_expando_property_declaration(node: Option<&Node>) -> bool {
+pub fn is_expando_property_declaration(node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_expando_property_declaration"); 
     node.is_some_and(|n| is_binary_expression(n))
 }

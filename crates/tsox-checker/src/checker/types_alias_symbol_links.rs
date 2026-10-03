@@ -176,7 +176,7 @@ pub struct AccessibleChainCacheKey {
 }
 
 impl PartialEq for AccessibleChainCacheKey {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         self.use_only_external_aliasing == other.use_only_external_aliasing
             && self.meaning == other.meaning
             && match (&self.location, &other.location) {
@@ -190,7 +190,7 @@ impl PartialEq for AccessibleChainCacheKey {
 impl Eq for AccessibleChainCacheKey {}
 
 impl std::hash::Hash for AccessibleChainCacheKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { ::tsox_core::fntrace::enter("hash"); 
         self.use_only_external_aliasing.hash(state);
         self.meaning.bits().hash(state);
         match &self.location {

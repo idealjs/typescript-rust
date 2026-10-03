@@ -17,11 +17,11 @@ const SUPPORTED_TS_EXTENSIONS_WITH_JSON_FLAT: &[&str] = &[
     ".ts", ".tsx", ".d.ts", ".cts", ".d.cts", ".mts", ".d.mts", ".json",
 ];
 
-fn zip_all_eq<T, F: Fn(&T, &T) -> bool>(a: &[T], b: &[T], eq: F) -> bool {
+fn zip_all_eq<T, F: Fn(&T, &T) -> bool>(a: &[T], b: &[T], eq: F) -> bool { ::tsox_core::fntrace::enter("zip_all_eq"); 
     a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| eq(x, y))
 }
 
-pub fn source_file_content_mapper_identity(file: &Arc<SourceFile>) -> String {
+pub fn source_file_content_mapper_identity(file: &Arc<SourceFile>) -> String { ::tsox_core::fntrace::enter("source_file_content_mapper_identity"); 
     crate::mig::m3l_cm_2::content_mapper_source_file_info(&file.file_name)
         .map(|info| info.content_mapper)
         .unwrap_or_default()
@@ -32,7 +32,7 @@ impl Program {
         changed_file_path: &str,
         new_host: Arc<dyn crate::compiler::CompilerHost>,
         create_checker_pool: Option<crate::compiler::CreateCheckerPoolFn>,
-    ) -> (Arc<Program>, Option<Arc<SourceFile>>, bool) {
+    ) -> (Arc<Program>, Option<Arc<SourceFile>>, bool) { ::tsox_core::fntrace::enter("update_program"); 
         let (result, new_file, reused) = self.reuse_program(
             changed_file_path,
             new_host.clone(),
@@ -49,7 +49,7 @@ impl Program {
             (Program::new(new_opts), new_file, false)
         }
     }
-    pub fn get_checker_pool(&self) -> Arc<dyn CheckerPool> {
+    pub fn get_checker_pool(&self) -> Arc<dyn CheckerPool> { ::tsox_core::fntrace::enter("get_checker_pool"); 
         self.checker_pool
             .get()
             .cloned()
@@ -59,7 +59,7 @@ impl Program {
         &self,
         file1: &Arc<SourceFile>,
         file2: &Arc<SourceFile>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("can_replace_file_in_program"); 
         m3b_2::parse_options(&file2) == m3b_2::parse_options(&file1)
             && file1.script_kind == file2.script_kind
             && tsox_frontend::ast::is_external_or_common_js_module(file1)
@@ -91,7 +91,7 @@ impl Program {
     pub fn get_content_mapper(
         &self,
         file: &Arc<SourceFile>,
-    ) -> Option<&tsox_tsoptions::mig::m5h_3::ContentMapper> {
+    ) -> Option<&tsox_tsoptions::mig::m5h_3::ContentMapper> { ::tsox_core::fntrace::enter("get_content_mapper"); 
         let identity = source_file_content_mapper_identity(file);
         if identity.is_empty() {
             return None;
@@ -105,16 +105,16 @@ impl Program {
         }
         None
     }
-    pub fn content_mapper_extensions(&self) -> Vec<String> {
+    pub fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions"); 
         self.opts.config.content_mapper_extensions()
     }
-    pub fn command_line(&self) -> &ParsedCommandLine {
+    pub fn command_line(&self) -> &ParsedCommandLine { ::tsox_core::fntrace::enter("command_line"); 
         &self.opts.config
     }
-    pub fn tracing(&self) -> Option<&Arc<tsox_core::tracing::mig::x11a::Tracing<'static>>> {
+    pub fn tracing(&self) -> Option<&Arc<tsox_core::tracing::mig::x11a::Tracing<'static>>> { ::tsox_core::fntrace::enter("tracing"); 
         self.tracing.as_ref()
     }
-    pub fn get_config_file_parsing_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+    pub fn get_config_file_parsing_diagnostics(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_config_file_parsing_diagnostics"); 
         self.opts
             .config
             .get_config_file_parsing_diagnostics()
@@ -122,12 +122,12 @@ impl Program {
             .map(Arc::new)
             .collect()
     }
-    pub fn get_unresolved_imports(&self) -> std::collections::HashSet<String> {
+    pub fn get_unresolved_imports(&self) -> std::collections::HashSet<String> { ::tsox_core::fntrace::enter("get_unresolved_imports"); 
         self.unresolved_imports
             .get_value(|| self.extract_unresolved_imports())
             .clone()
     }
-    pub fn extract_unresolved_imports(&self) -> std::collections::HashSet<String> {
+    pub fn extract_unresolved_imports(&self) -> std::collections::HashSet<String> { ::tsox_core::fntrace::enter("extract_unresolved_imports"); 
         let mut unresolved_set = std::collections::HashSet::new();
         for source_file in &self.source_files {
             let unresolved_imports = self.extract_unresolved_imports_from_source_file(source_file);
@@ -140,7 +140,7 @@ impl Program {
     pub fn extract_unresolved_imports_from_source_file(
         &self,
         file: &Arc<SourceFile>,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("extract_unresolved_imports_from_source_file"); 
         let mut unresolved_imports = Vec::new();
         let file_path = m3b_2::path(file);
         if let Some(resolved_modules) = self.resolved_modules.get(file_path.as_str()) {
@@ -161,7 +161,7 @@ impl Program {
     }
     pub fn get_type_checker(
         &self,
-    ) -> std::sync::MutexGuard<'_, tsox_checker::checker::Checker> {
+    ) -> std::sync::MutexGuard<'_, tsox_checker::checker::Checker> { ::tsox_core::fntrace::enter("get_type_checker"); 
         if let Some(compiler_checker_pool) = self.compiler_checker_pool.get() {
             return compiler_checker_pool.get_checker(None);
         }
@@ -173,7 +173,7 @@ impl Program {
     pub fn for_each_checker_parallel(
         &self,
         cb: &mut (dyn FnMut(usize, &mut tsox_checker::checker::Checker) + Send),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_checker_parallel"); 
         if let Some(compiler_checker_pool) = self.compiler_checker_pool.get() {
             compiler_checker_pool.for_each_checker_parallel(cb);
         }
@@ -181,7 +181,7 @@ impl Program {
     pub fn get_type_checker_for_file(
         &self,
         file: &Arc<SourceFile>,
-    ) -> std::sync::MutexGuard<'_, tsox_checker::checker::Checker> {
+    ) -> std::sync::MutexGuard<'_, tsox_checker::checker::Checker> { ::tsox_core::fntrace::enter("get_type_checker_for_file"); 
         if let Some(compiler_checker_pool) = self.compiler_checker_pool.get() {
             return compiler_checker_pool.get_checker(Some(file));
         }
@@ -193,7 +193,7 @@ impl Program {
     pub fn get_type_checker_for_file_exclusive(
         &self,
         file: &Arc<SourceFile>,
-    ) -> std::sync::MutexGuard<'_, tsox_checker::checker::Checker> {
+    ) -> std::sync::MutexGuard<'_, tsox_checker::checker::Checker> { ::tsox_core::fntrace::enter("get_type_checker_for_file_exclusive"); 
         if let Some(compiler_checker_pool) = self.compiler_checker_pool.get() {
             return compiler_checker_pool.get_checker(Some(file));
         }

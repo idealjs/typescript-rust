@@ -6,7 +6,7 @@ use tsox_core::json::Value;
 pub(crate) fn insert_bool_options(
     map: &mut tsox_core::json::Map<String, tsox_core::json::Value>,
     options: &CompilerOptions,
-) {
+) { ::tsox_core::fntrace::enter("insert_bool_options"); 
     let bool_opts: &[(&str, Tristate)] = &[
         ("allowJs", options.allow_js),
         (

@@ -8,26 +8,26 @@ use super::m3g::is_module_augmentation_external;
 use super::m3g_2::is_signed_numeric_literal;
 use crate::parser::mig::wp1_2::Pragma;
 
-fn is_external_module_augmentation(node: &Arc<Node>) -> bool {
+fn is_external_module_augmentation(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_module_augmentation"); 
     is_ambient_module(node) && is_module_augmentation_external(node)
 }
 
-pub fn get_node_id(node: &Node) -> u64 {
+pub fn get_node_id(node: &Node) -> u64 { ::tsox_core::fntrace::enter("get_node_id"); 
     node.id()
 }
 
-pub fn get_symbol_id(symbol: &Arc<Symbol>) -> u64 {
+pub fn get_symbol_id(symbol: &Arc<Symbol>) -> u64 { ::tsox_core::fntrace::enter("get_symbol_id"); 
     symbol.id()
 }
 
-pub fn get_symbol_table(data: &mut SymbolTable) -> &SymbolTable {
+pub fn get_symbol_table(data: &mut SymbolTable) -> &SymbolTable { ::tsox_core::fntrace::enter("get_symbol_table"); 
     if data.entries.is_empty() {
         *data = SymbolTable::new();
     }
     data
 }
 
-pub fn get_right_most_assigned_expression(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_right_most_assigned_expression(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_right_most_assigned_expression"); 
     let mut current = Arc::clone(node);
     while is_assignment_expression(&current, false) {
         if let NodeData::BinaryExpression(d) = &current.data {
@@ -39,7 +39,7 @@ pub fn get_right_most_assigned_expression(node: &Arc<Node>) -> Arc<Node> {
     current
 }
 
-pub fn get_next_jsdoc_comment_location(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_next_jsdoc_comment_location(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_next_jsdoc_comment_location"); 
     let parent = node.parent()?;
     match parent.kind {
         SyntaxKind::PropertyAssignment
@@ -62,7 +62,7 @@ pub fn get_next_jsdoc_comment_location(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn get_non_augmentation_declaration(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+pub fn get_non_augmentation_declaration(symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_non_augmentation_declaration"); 
     symbol
         .declarations
         .iter()
@@ -70,7 +70,7 @@ pub fn get_non_augmentation_declaration(symbol: &Arc<Symbol>) -> Option<Arc<Node
         .map(Arc::clone)
 }
 
-pub fn get_pragma_argument(pragma: Option<&Pragma>, name: &str) -> String {
+pub fn get_pragma_argument(pragma: Option<&Pragma>, name: &str) -> String { ::tsox_core::fntrace::enter("get_pragma_argument"); 
     if let Some(pragma) = pragma {
         if let Some(arg) = pragma.args.iter().find(|a| a.name == name) {
             return arg.value.clone();
@@ -82,12 +82,12 @@ pub fn get_pragma_argument(pragma: Option<&Pragma>, name: &str) -> String {
 pub fn get_pragma_from_source_file<'a>(
     file: Option<&'a SourceFile>,
     name: &str,
-) -> Option<&'a Pragma> {
+) -> Option<&'a Pragma> { ::tsox_core::fntrace::enter("get_pragma_from_source_file"); 
     let _ = (file, name);
     None
 }
 
-pub fn get_property_name_for_property_name_node(name: &Arc<Node>) -> String {
+pub fn get_property_name_for_property_name_node(name: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_property_name_for_property_name_node"); 
     match name.kind {
         SyntaxKind::Identifier
         | SyntaxKind::PrivateIdentifier
@@ -118,7 +118,7 @@ pub fn get_property_name_for_property_name_node(name: &Arc<Node>) -> String {
     }
 }
 
-pub fn get_reparsed_node_for_node(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_reparsed_node_for_node(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_reparsed_node_for_node"); 
     if node.flags.contains(NodeFlags::HasJSDoc)
         && !node.flags.contains(NodeFlags::Reparsed)
         && get_source_file_of_node(node).is_some()
@@ -128,13 +128,13 @@ pub fn get_reparsed_node_for_node(node: &Arc<Node>) -> Arc<Node> {
     Arc::clone(node)
 }
 
-pub fn compare_node_positions(n1: &Node, n2: &Node) -> std::cmp::Ordering {
+pub fn compare_node_positions(n1: &Node, n2: &Node) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_node_positions"); 
     n1.loc.pos().cmp(&n2.loc.pos()).then(n1.loc.end().cmp(&n2.loc.end()))
 }
 
 pub fn get_rest_indicator_of_binding_or_assignment_element(
     binding_element: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_rest_indicator_of_binding_or_assignment_element"); 
     match &binding_element.data {
         NodeData::ParameterDeclaration(d) => d.dot_dot_dot_token.as_ref().map(Arc::clone),
         NodeData::BindingElement(d) => d.dot_dot_dot_token.as_ref().map(Arc::clone),
@@ -145,7 +145,7 @@ pub fn get_rest_indicator_of_binding_or_assignment_element(
     }
 }
 
-pub fn get_rest_parameter_element_type(node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+pub fn get_rest_parameter_element_type(node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_rest_parameter_element_type"); 
     let node = node?;
     match &node.data {
         NodeData::ArrayTypeNode(d) => Some(Arc::clone(&d.element_type)),
@@ -158,7 +158,7 @@ pub fn get_rest_parameter_element_type(node: Option<&Arc<Node>>) -> Option<Arc<N
     }
 }
 
-pub fn get_semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn get_semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_semantic_jsx_children"); 
     children
         .iter()
         .filter(|child| match child.kind {
@@ -173,14 +173,14 @@ pub fn get_semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> {
         .collect()
 }
 
-pub fn get_source_file_of_module(module: &Arc<Symbol>) -> Option<Arc<Node>> {
+pub fn get_source_file_of_module(module: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_source_file_of_module"); 
     let declaration = module.value_declaration.clone().or_else(|| {
         get_non_augmentation_declaration(module)
     })?;
     get_source_file_of_node(&declaration)
 }
 
-pub fn get_target_of_binding_or_assignment_element(binding_element: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_target_of_binding_or_assignment_element(binding_element: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_target_of_binding_or_assignment_element"); 
     if is_declaration_binding_element(binding_element) {
         return binding_element.name().map(Arc::clone);
     }

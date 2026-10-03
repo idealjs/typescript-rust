@@ -58,7 +58,7 @@ pub struct Printer {
 }
 
 impl Printer {
-    pub fn write_as(&mut self, text: &str, write_kind: WriteKind) {
+    pub fn write_as(&mut self, text: &str, write_kind: WriteKind) { ::tsox_core::fntrace::enter("write_as"); 
         match write_kind {
             WriteKind::None => self.writer.write(text),
             WriteKind::Parameter => self.write_parameter(text),
@@ -72,26 +72,26 @@ impl Printer {
         }
     }
 
-    pub fn write(&mut self, text: &str) {
+    pub fn write(&mut self, text: &str) { ::tsox_core::fntrace::enter("write"); 
         let kind = self.write_kind;
         self.write_as(text, kind);
     }
 
-    pub fn set_write_kind(&mut self, kind: WriteKind) -> WriteKind {
+    pub fn set_write_kind(&mut self, kind: WriteKind) -> WriteKind { ::tsox_core::fntrace::enter("set_write_kind"); 
         let previous = self.write_kind;
         self.write_kind = kind;
         previous
     }
 
-    pub fn write_comment(&mut self, text: &str) {
+    pub fn write_comment(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_comment"); 
         self.writer.write_comment(text);
     }
 
-    pub fn increase_indent(&mut self) {
+    pub fn increase_indent(&mut self) { ::tsox_core::fntrace::enter("increase_indent"); 
         self.writer.increase_indent();
     }
 
-    pub fn increase_indent_if(&mut self, indent_requested: bool) {
+    pub fn increase_indent_if(&mut self, indent_requested: bool) { ::tsox_core::fntrace::enter("increase_indent_if"); 
         if indent_requested {
             self.increase_indent();
         }
@@ -102,7 +102,7 @@ impl Printer {
         node: &Arc<Node>,
         source_file: Option<&Arc<Node>>,
         mut flags: GetLiteralTextFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_literal_text_of_node"); 
         if is_string_literal(node) {
             if let Some(text_source_node) = self.emit_context.text_source(node) {
                 let text = match text_source_node.kind {
@@ -139,7 +139,7 @@ impl Printer {
         get_literal_text(node, self.current_source_file.as_ref(), flags)
     }
 
-    pub fn get_text_of_node(&mut self, node: &Arc<Node>, include_trivia: bool) -> String {
+    pub fn get_text_of_node(&mut self, node: &Arc<Node>, include_trivia: bool) -> String { ::tsox_core::fntrace::enter("get_text_of_node"); 
         if is_member_name(node) && self.emit_context.has_auto_generate_info(node) {
             return self.get_text_of_node(node, false);
         }
@@ -175,7 +175,7 @@ impl Printer {
         get_source_text_of_node_from_source_file(source_file, node, include_trivia)
     }
 
-    pub fn get_lines_between_nodes(&mut self, parent: &Node, node1: &Node, node2: &Node) -> i32 {
+    pub fn get_lines_between_nodes(&mut self, parent: &Node, node1: &Node, node2: &Node) -> i32 { ::tsox_core::fntrace::enter("get_lines_between_nodes"); 
         if self.should_elide_indentation(parent) {
             return 0;
         }
@@ -214,7 +214,7 @@ impl Printer {
         0
     }
 
-    pub fn get_effective_lines(&self, get_line_difference: impl Fn(bool) -> i32) -> i32 {
+    pub fn get_effective_lines(&self, get_line_difference: impl Fn(bool) -> i32) -> i32 { ::tsox_core::fntrace::enter("get_effective_lines"); 
         let lines = get_line_difference(true);
         if lines == 0 {
             return get_line_difference(false);
@@ -227,7 +227,7 @@ impl Printer {
         parent_node: Option<&Arc<Node>>,
         first_child: Option<&Arc<Node>>,
         format: ListFormat,
-    ) -> i32 {
+    ) -> i32 { ::tsox_core::fntrace::enter("get_leading_line_terminator_count"); 
         if format & LF_PRESERVE_LINES != 0 || self.options.preserve_source_newlines {
             if format & LF_PREFER_NEW_LINE != 0 {
                 return 1;
@@ -288,7 +288,7 @@ impl Printer {
         previous_node: Option<&Arc<Node>>,
         next_node: Option<&Arc<Node>>,
         format: ListFormat,
-    ) -> i32 {
+    ) -> i32 { ::tsox_core::fntrace::enter("get_separating_line_terminator_count"); 
         if format & LF_PRESERVE_LINES != 0 || self.options.preserve_source_newlines {
             let (Some(previous_node), Some(next_node)) = (previous_node, next_node) else {
                 return 0;
@@ -356,7 +356,7 @@ impl Printer {
         last_child: Option<&Arc<Node>>,
         format: ListFormat,
         children_text_range: TextRange,
-    ) -> i32 {
+    ) -> i32 { ::tsox_core::fntrace::enter("get_closing_line_terminator_count"); 
         if format & LF_PRESERVE_LINES != 0 || self.options.preserve_source_newlines {
             if format & LF_PREFER_NEW_LINE != 0 {
                 return 1;
@@ -409,13 +409,13 @@ impl Printer {
         }
     }
 
-    pub fn should_emit_comments(&self, node: &Node) -> bool {
+    pub fn should_emit_comments(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_comments"); 
         !self.comments_disabled
             && self.current_source_file.is_some()
             && node.kind != SyntaxKind::SourceFile
     }
 
-    pub fn should_write_comment(&self, comment: CommentRange) -> bool {
+    pub fn should_write_comment(&self, comment: CommentRange) -> bool { ::tsox_core::fntrace::enter("should_write_comment"); 
         !self.options.only_print_jsdoc_style
             || (self.current_source_file.is_some()
                 && is_jsdoc_like_text(self.current_source_file.as_deref().unwrap().text(), &comment))
@@ -423,23 +423,23 @@ impl Printer {
                 && is_pinned_comment(self.current_source_file.as_deref().unwrap().text(), &comment))
     }
 
-    pub fn should_emit_indented(&self, node: &Node) -> bool {
+    pub fn should_emit_indented(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_indented"); 
         self.emit_context.k06_emit_flags(node) & (EF_INDENTED as u32) != 0
     }
 
-    pub fn should_elide_indentation(&self, node: &Node) -> bool {
+    pub fn should_elide_indentation(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_elide_indentation"); 
         self.emit_context.k06_emit_flags(node) & (EF_NO_INDENTATION as u32) != 0
     }
 
-    pub fn should_emit_on_single_line(&self, node: &Node) -> bool {
+    pub fn should_emit_on_single_line(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_on_single_line"); 
         self.emit_context.k06_emit_flags(node) & (EF_SINGLE_LINE as u32) != 0
     }
 
-    pub fn should_emit_on_multiple_lines(&self, node: &Node) -> bool {
+    pub fn should_emit_on_multiple_lines(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_on_multiple_lines"); 
         self.emit_context.k06_emit_flags(node) & (EF_MULTI_LINE as u32) != 0
     }
 
-    pub fn should_emit_block_function_body_on_single_line(&mut self, body: &Arc<Node>) -> bool {
+    pub fn should_emit_block_function_body_on_single_line(&mut self, body: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_block_function_body_on_single_line"); 
         if self.should_emit_on_single_line(body) {
             return true;
         }
@@ -473,14 +473,14 @@ impl Printer {
         true
     }
 
-    pub fn should_emit_on_new_line(&self, node: &Node, format: ListFormat) -> bool {
+    pub fn should_emit_on_new_line(&self, node: &Node, format: ListFormat) -> bool { ::tsox_core::fntrace::enter("should_emit_on_new_line"); 
         if self.emit_context.k06_emit_flags(node) & (EF_START_ON_NEW_LINE as u32) != 0 {
             return true;
         }
         format & LF_PREFER_NEW_LINE != 0
     }
 
-    pub fn should_emit_source_maps(&self, node: &Node) -> bool {
+    pub fn should_emit_source_maps(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_source_maps"); 
         !self.source_maps_disabled
             && self.source_map_source.is_some()
             && node.kind != SyntaxKind::SourceFile
@@ -493,26 +493,26 @@ impl Printer {
         pos: i32,
         context_node: &Node,
         flags: TokenEmitFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_emit_token_source_maps"); 
         flags & TEF_NO_SOURCE_MAPS == 0
             && self.should_emit_source_maps(context_node)
             && !self.options.omit_brace_source_map_positions
             && (token == SyntaxKind::OpenBraceToken || token == SyntaxKind::CloseBraceToken)
     }
 
-    pub fn should_emit_leading_comments(&self, node: &Node) -> bool {
+    pub fn should_emit_leading_comments(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_leading_comments"); 
         self.emit_context.k06_emit_flags(node) & (EF_NO_LEADING_COMMENTS as u32) == 0
     }
 
-    pub fn should_emit_trailing_comments(&self, node: &Node) -> bool {
+    pub fn should_emit_trailing_comments(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_trailing_comments"); 
         self.emit_context.k06_emit_flags(node) & (EF_NO_TRAILING_COMMENTS as u32) == 0
     }
 
-    pub fn should_emit_nested_comments(&self, node: &Node) -> bool {
+    pub fn should_emit_nested_comments(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_nested_comments"); 
         self.emit_context.k06_emit_flags(node) & (EF_NO_NESTED_COMMENTS as u32) == 0
     }
 
-    pub fn should_emit_detached_comments(&self, node: &Node) -> bool {
+    pub fn should_emit_detached_comments(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_detached_comments"); 
         if node.kind != SyntaxKind::SourceFile {
             return true;
         }
@@ -525,7 +525,7 @@ impl Printer {
         !is_prologue_directive(first) || node_is_synthesized(first)
     }
 
-    pub fn has_comments_at_position(&self, pos: i32) -> bool {
+    pub fn has_comments_at_position(&self, pos: i32) -> bool { ::tsox_core::fntrace::enter("has_comments_at_position"); 
         let Some(source_file) = self.current_source_file.as_deref() else {
             return false;
         };
@@ -542,7 +542,7 @@ impl Printer {
             .is_some()
     }
 
-    pub fn should_emit_indirect_call(&self, node: &Node) -> bool {
+    pub fn should_emit_indirect_call(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_indirect_call"); 
         self.emit_context.k06_emit_flags(node) & (EF_INDIRECT_CALL as u32) != 0
     }
 }

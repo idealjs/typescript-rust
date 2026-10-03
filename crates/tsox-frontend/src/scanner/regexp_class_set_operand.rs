@@ -1,7 +1,7 @@
 use crate::scanner::regexp::RegExpParser;
 
 impl<'a> RegExpParser<'a> {
-    pub(super) fn scan_class_set_operand(&mut self) -> String {
+    pub(super) fn scan_class_set_operand(&mut self) -> String { ::tsox_core::fntrace::enter("scan_class_set_operand"); 
         self.may_contain_strings = false;
         let ch = self.char();
         match ch {
@@ -39,7 +39,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn scan_class_string_disjunction_contents(&mut self) {
+    pub(super) fn scan_class_string_disjunction_contents(&mut self) { ::tsox_core::fntrace::enter("scan_class_string_disjunction_contents"); 
         let mut character_count = 0;
         while self.pos < self.body_end {
             let ch = self.char();
@@ -65,7 +65,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn scan_class_set_character(&mut self) -> String {
+    pub(super) fn scan_class_set_character(&mut self) -> String { ::tsox_core::fntrace::enter("scan_class_set_character"); 
         let ch = self.char();
         if ch == '\\' {
             self.inc_pos(1);

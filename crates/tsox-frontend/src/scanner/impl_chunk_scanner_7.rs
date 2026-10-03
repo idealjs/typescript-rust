@@ -3,7 +3,7 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
-    pub fn scan_jsdoc_token(&mut self) -> SyntaxKind {
+    pub fn scan_jsdoc_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_jsdoc_token"); 
         self.full_start_pos = self.pos;
         self.token_flags = TOKEN_FLAGS_NONE;
         if self.pos >= self.end {
@@ -87,7 +87,7 @@ impl Scanner {
         self.token
     }
 
-    pub fn scan_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind {
+    pub fn scan_jsdoc_comment_text_token(&mut self, in_backticks: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_jsdoc_comment_text_token"); 
         self.full_start_pos = self.pos;
         self.token_flags = TOKEN_FLAGS_NONE;
         if self.pos >= self.end {

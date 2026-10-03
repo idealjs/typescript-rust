@@ -3,7 +3,7 @@
 use crate::checker::jsx_impl_chunk_2::*;
 
 impl Checker {
-    pub fn check_jsx_opening_like_element(&mut self, opening: &Arc<Node>) {
+    pub fn check_jsx_opening_like_element(&mut self, opening: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_opening_like_element"); 
         let is_opening_like = is_jsx_opening_like_element(opening);
         if is_opening_like {
             self.check_grammar_jsx_element(opening);
@@ -82,13 +82,13 @@ impl Checker {
         }
     }
 
-    pub fn check_jsx_element_deferred(&mut self, _node: &Arc<Node>) {}
+    pub fn check_jsx_element_deferred(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_element_deferred"); }
 
     pub fn check_jsx_expression(
         &mut self,
         _node: &Arc<Node>,
         _check_mode: u32,
-    ) -> Arc<crate::checker::types::Type> {
+    ) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("check_jsx_expression"); 
         self.any_type()
     }
 
@@ -96,13 +96,13 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _check_mode: u32,
-    ) -> Arc<crate::checker::types::Type> {
+    ) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("check_jsx_self_closing_element"); 
         self.any_type()
     }
 
-    pub fn check_jsx_self_closing_element_deferred(&mut self, _node: &Arc<Node>) {}
+    pub fn check_jsx_self_closing_element_deferred(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_self_closing_element_deferred"); }
 
-    pub fn check_jsx_fragment(&mut self, _node: &Arc<Node>) -> Arc<crate::checker::types::Type> {
+    pub fn check_jsx_fragment(&mut self, _node: &Arc<Node>) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("check_jsx_fragment"); 
         self.any_type()
     }
 
@@ -110,7 +110,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _check_mode: u32,
-    ) -> Arc<crate::checker::types::Type> {
+    ) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("check_jsx_attributes"); 
         self.any_type()
     }
 
@@ -119,7 +119,7 @@ impl Checker {
         _ref_kind: JsxReferenceKind,
         _elem_instance_type: &Arc<crate::checker::types::Type>,
         _opening_like_element: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_jsx_return_assignable_to_appropriate_bound"); 
     }
 
     pub fn infer_jsx_type_arguments(
@@ -128,7 +128,7 @@ impl Checker {
         _signature: &Arc<crate::checker::types::Signature>,
         _check_mode: u32,
         _context: &crate::checker::inference::InferenceContext,
-    ) -> Vec<Arc<crate::checker::types::Type>> {
+    ) -> Vec<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("infer_jsx_type_arguments"); 
         Vec::new()
     }
 
@@ -136,7 +136,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         _context_flags: crate::checker::types::ContextFlags,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_jsx_expression"); 
         let jsx_expr = node.parent()?;
         if jsx_expr.kind != SyntaxKind::JsxExpression {
             return None;
@@ -164,7 +164,7 @@ impl Checker {
         &mut self,
         _attribute: &Arc<Node>,
         _context_flags: crate::checker::types::ContextFlags,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_jsx_attribute"); 
         None
     }
 
@@ -172,7 +172,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _context_flags: crate::checker::types::ContextFlags,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_jsx_element_attributes_type"); 
         None
     }
 
@@ -181,7 +181,7 @@ impl Checker {
         node: &Arc<Node>,
         child: &Arc<Node>,
         _context_flags: crate::checker::types::ContextFlags,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_child_jsx_expression"); 
         use crate::checker::types::TypeFlags;
         // Go getContextualTypeForChildJsxExpression：属性类型的 children 成员
         // （名字来自 JSX.ElementChildrenAttribute）即 children 位上下文
@@ -242,7 +242,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         contextual_type: &Arc<crate::checker::types::Type>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("discriminate_contextual_type_by_jsx_attributes"); 
         let _ = contextual_type;
         None
     }
@@ -254,7 +254,7 @@ impl Checker {
         _target: &Arc<crate::checker::types::Type>,
         _relation: crate::checker::relater::RelationKind,
         _diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_jsx_components"); 
         false
     }
 
@@ -262,11 +262,11 @@ impl Checker {
         &mut self,
         _name: &str,
         _containing_type: &Arc<crate::checker::types::Type>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_suggested_symbol_for_nonexistent_jsx_attribute"); 
         None
     }
 
-    pub fn get_jsx_fragment_type(&mut self, _node: &Arc<Node>) -> Arc<crate::checker::types::Type> {
+    pub fn get_jsx_fragment_type(&mut self, _node: &Arc<Node>) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("get_jsx_fragment_type"); 
         self.any_type()
     }
 
@@ -275,7 +275,7 @@ impl Checker {
         _node: &Arc<Node>,
         _candidates_out_array: Option<&mut Vec<Arc<crate::checker::types::Signature>>>,
         _check_mode: u32,
-    ) -> Option<Arc<crate::checker::types::Signature>> {
+    ) -> Option<Arc<crate::checker::types::Signature>> { ::tsox_core::fntrace::enter("resolve_jsx_opening_like_element"); 
         None
     }
 
@@ -287,7 +287,7 @@ impl Checker {
         _check_mode: u32,
         _report_errors: bool,
         _diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_applicable_signature_for_jsx_call_like_element"); 
         false
     }
 
@@ -295,7 +295,7 @@ impl Checker {
         &mut self,
         _opening_like_element: &Arc<Node>,
         _check_mode: u32,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("create_jsx_attributes_type_from_attributes_property"); 
         None
     }
 
@@ -303,7 +303,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _check_mode: u32,
-    ) -> Vec<Arc<crate::checker::types::Type>> {
+    ) -> Vec<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("check_jsx_children"); 
         Vec::new()
     }
 
@@ -311,7 +311,7 @@ impl Checker {
         &mut self,
         _signature: &Arc<crate::checker::types::Signature>,
         _node: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_effective_first_argument_for_jsx_signature"); 
         None
     }
 
@@ -319,7 +319,7 @@ impl Checker {
         &mut self,
         _sig: &Arc<crate::checker::types::Signature>,
         _context: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_props_type_from_call_signature"); 
         None
     }
 
@@ -327,7 +327,7 @@ impl Checker {
         &mut self,
         _sig: &Arc<crate::checker::types::Signature>,
         _context: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_props_type_from_class_type"); 
         None
     }
 
@@ -335,7 +335,7 @@ impl Checker {
         &mut self,
         _sig: &Arc<crate::checker::types::Signature>,
         _forced_lookup_location: &str,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_props_type_for_signature_from_member"); 
         None
     }
 
@@ -344,7 +344,7 @@ impl Checker {
         context: &Arc<Node>,
         ns: &Arc<tsox_frontend::ast::Symbol>,
         attributes_type: &Arc<crate::checker::types::Type>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_managed_attributes_from_located_attributes"); 
         let managed_sym = self
             .get_jsx_type(crate::checker::jsx_impl_chunk::JsxNames::LIBRARY_MANAGED_ATTRIBUTES)
             .filter(|s| s.flags.intersects(tsox_frontend::ast::SymbolFlags::TYPE))?;
@@ -361,7 +361,7 @@ impl Checker {
         managed_sym: &Arc<tsox_frontend::ast::Symbol>,
         type_arguments: &[Arc<crate::checker::types::Type>],
         _in_java_script: bool,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("instantiate_alias_or_interface_with_defaults"); 
         let declared = self.get_declared_type_of_symbol(managed_sym);
         if managed_sym
             .flags
@@ -407,14 +407,14 @@ impl Checker {
     pub fn get_jsx_library_managed_attributes(
         &self,
         _jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_library_managed_attributes"); 
         None
     }
 
     pub fn get_jsx_element_type_symbol(
         &self,
         _jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_element_type_symbol"); 
         None
     }
 }

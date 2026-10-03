@@ -3,7 +3,7 @@
 use crate::checker::checker_modules::*;
 
 impl Checker {
-    pub(crate) fn resolve_import_alias_module(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_import_alias_module(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_alias_module"); 
         let decl = symbol
             .declarations
             .iter()
@@ -66,7 +66,7 @@ impl Checker {
         }
         None
     }
-    pub(crate) fn check_module_format_mismatch(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_module_format_mismatch(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_module_format_mismatch"); 
         use tsox_core::core::compiler_options::ModuleKind;
         if !matches!(self.module_kind, ModuleKind::Node16 | ModuleKind::Node18) {
             return;
@@ -139,7 +139,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_declaration_nameability(&mut self, stmt: &Arc<Node>) {
+    pub(crate) fn check_declaration_nameability(&mut self, stmt: &Arc<Node>) { ::tsox_core::fntrace::enter("check_declaration_nameability"); 
         let Some(file) = self.nameability_file_guards() else {
             return;
         };
@@ -202,7 +202,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_declaration_nameability_export_default(&mut self, stmt: &Arc<Node>) {
+    pub(crate) fn check_declaration_nameability_export_default(&mut self, stmt: &Arc<Node>) { ::tsox_core::fntrace::enter("check_declaration_nameability_export_default"); 
         let Some(file) = self.nameability_file_guards() else {
             return;
         };
@@ -237,7 +237,7 @@ impl Checker {
         );
     }
 
-    fn nameability_file_guards(&self) -> Option<Arc<SourceFile>> {
+    fn nameability_file_guards(&self) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("nameability_file_guards"); 
         if !self.program.options().declaration.is_true() {
             return None;
         }
@@ -254,7 +254,7 @@ impl Checker {
     fn nameability_import_context(
         &self,
         file: &Arc<SourceFile>,
-    ) -> (Vec<String>, Vec<String>) {
+    ) -> (Vec<String>, Vec<String>) { ::tsox_core::fntrace::enter("nameability_import_context"); 
         let mut imported_files: Vec<String> = Vec::new();
         let mut spec_names: Vec<String> = Vec::new();
         let NodeData::SourceFile(sfd) = &file.node.data else {
@@ -285,7 +285,7 @@ impl Checker {
         (imported_files, spec_names)
     }
 
-    fn imported_binding_symbol_ids(&self, file: &Arc<SourceFile>) -> Vec<u64> {
+    fn imported_binding_symbol_ids(&self, file: &Arc<SourceFile>) -> Vec<u64> { ::tsox_core::fntrace::enter("imported_binding_symbol_ids"); 
         let NodeData::SourceFile(sfd) = &file.node.data else {
             return Vec::new();
         };
@@ -324,7 +324,7 @@ impl Checker {
         &self,
         symbol: &Arc<Symbol>,
         imported_specs: &[String],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("symbol_in_ambient_module_named"); 
         if imported_specs.is_empty() {
             return false;
         }

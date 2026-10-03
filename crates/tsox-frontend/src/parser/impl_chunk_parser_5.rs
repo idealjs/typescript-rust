@@ -3,7 +3,7 @@
 use crate::parser::impl_chunk::*;
 
 impl Parser {
-    pub(crate) fn scan_start_of_declaration(&mut self) -> bool {
+    pub(crate) fn scan_start_of_declaration(&mut self) -> bool { ::tsox_core::fntrace::enter("scan_start_of_declaration"); 
         loop {
             match self.token {
                 SyntaxKind::VarKeyword
@@ -83,7 +83,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn next_token_is_identifier_on_same_line(&self) -> bool {
+    pub(crate) fn next_token_is_identifier_on_same_line(&self) -> bool { ::tsox_core::fntrace::enter("next_token_is_identifier_on_same_line"); 
         let mut s = self.scanner.clone();
         s.scan();
         let token = s.token();
@@ -94,7 +94,7 @@ impl Parser {
             && (token == SyntaxKind::Identifier || is_keyword(token))
     }
 
-    pub(crate) fn next_token_is_identifier_or_string_literal_on_same_line(&self) -> bool {
+    pub(crate) fn next_token_is_identifier_or_string_literal_on_same_line(&self) -> bool { ::tsox_core::fntrace::enter("next_token_is_identifier_or_string_literal_on_same_line"); 
         let mut s = self.scanner.clone();
         s.scan();
         let token = s.token();
@@ -106,7 +106,7 @@ impl Parser {
         !s.has_preceding_line_break() && (identifier_like || token == SyntaxKind::StringLiteral)
     }
 
-    pub(crate) fn is_identifier(&self) -> bool {
+    pub(crate) fn is_identifier(&self) -> bool { ::tsox_core::fntrace::enter("is_identifier"); 
         // Go isIdentifier：yield 在 [Yield] 上下文、await 在 [Await] 上下文
         // 视为关键字不可作标识符；绑定位走 isBindingIdentifier（binder 再拒绝）
         if self.token == SyntaxKind::YieldKeyword && self.yield_context {
@@ -121,14 +121,14 @@ impl Parser {
         self.token == SyntaxKind::Identifier || is_keyword(self.token)
     }
 
-    pub(crate) fn is_binding_identifier(&self) -> bool {
+    pub(crate) fn is_binding_identifier(&self) -> bool { ::tsox_core::fntrace::enter("is_binding_identifier"); 
         if is_reserved_word_kind(self.token) {
             return false;
         }
         self.token == SyntaxKind::Identifier || is_keyword(self.token)
     }
 
-    pub(crate) fn next_is_identifier_and_close_paren(&self) -> bool {
+    pub(crate) fn next_is_identifier_and_close_paren(&self) -> bool { ::tsox_core::fntrace::enter("next_is_identifier_and_close_paren"); 
         let mut s = self.scanner.clone();
         s.scan();
         let token = s.token();
@@ -143,7 +143,7 @@ impl Parser {
         s.token() == SyntaxKind::CloseParenToken
     }
 
-    pub(crate) fn is_binding_identifier_or_pattern(&self) -> bool {
+    pub(crate) fn is_binding_identifier_or_pattern(&self) -> bool { ::tsox_core::fntrace::enter("is_binding_identifier_or_pattern"); 
         self.is_binding_identifier()
             || self.token == SyntaxKind::PrivateIdentifier
             || self.token == SyntaxKind::OpenBracketToken
@@ -151,7 +151,7 @@ impl Parser {
     }
 
     /// Go isStartOfParameter
-    pub(crate) fn is_start_of_parameter(&self, is_jsdoc_parameter: bool) -> bool {
+    pub(crate) fn is_start_of_parameter(&self, is_jsdoc_parameter: bool) -> bool { ::tsox_core::fntrace::enter("is_start_of_parameter"); 
         self.token == SyntaxKind::DotDotDotToken
             || self.is_binding_identifier_or_pattern()
             || crate::ast::node_data_generated::is_modifier_kind(self.token)
@@ -160,7 +160,7 @@ impl Parser {
     }
 
     /// Go isStartOfType(inStartOfParameter)
-    pub(crate) fn is_start_of_type_ex(&self, in_start_of_parameter: bool) -> bool {
+    pub(crate) fn is_start_of_type_ex(&self, in_start_of_parameter: bool) -> bool { ::tsox_core::fntrace::enter("is_start_of_type_ex"); 
         use SyntaxKind::*;
         match self.token {
             AnyKeyword | UnknownKeyword | StringKeyword | NumberKeyword | BigIntKeyword
@@ -180,13 +180,13 @@ impl Parser {
         }
     }
 
-    pub(crate) fn next_token_is_numeric_or_big_int_literal(&self) -> bool {
+    pub(crate) fn next_token_is_numeric_or_big_int_literal(&self) -> bool { ::tsox_core::fntrace::enter("next_token_is_numeric_or_big_int_literal"); 
         let mut s = self.scanner.clone();
         let t = s.scan();
         t == SyntaxKind::NumericLiteral || t == SyntaxKind::BigIntLiteral
     }
 
-    pub(crate) fn next_is_parenthesized_or_function_type(&self) -> bool {
+    pub(crate) fn next_is_parenthesized_or_function_type(&self) -> bool { ::tsox_core::fntrace::enter("next_is_parenthesized_or_function_type"); 
         let mut s = self.clone_state();
         s.next_token();
         s.token == SyntaxKind::CloseParenToken
@@ -194,7 +194,7 @@ impl Parser {
             || s.is_start_of_type_ex(false)
     }
 
-    pub(crate) fn is_start_of_type(&self) -> bool {
+    pub(crate) fn is_start_of_type(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_type"); 
         matches!(
             self.token,
             SyntaxKind::AnyKeyword
@@ -237,7 +237,7 @@ impl Parser {
         ) || is_keyword(self.token)
     }
 
-    pub(crate) fn is_literal_property_name(&self) -> bool {
+    pub(crate) fn is_literal_property_name(&self) -> bool { ::tsox_core::fntrace::enter("is_literal_property_name"); 
         is_identifier_or_keyword(self.token)
             || self.token == SyntaxKind::StringLiteral
             || self.token == SyntaxKind::NumericLiteral
@@ -247,7 +247,7 @@ impl Parser {
 
 
     /// Go parser contextFlags：节点创建时的 await/yield/ambient 上下文
-    pub(crate) fn context_flags_now(&self) -> crate::ast::node_flags::NodeFlags {
+    pub(crate) fn context_flags_now(&self) -> crate::ast::node_flags::NodeFlags { ::tsox_core::fntrace::enter("context_flags_now"); 
         let mut flags = crate::ast::node_flags::NodeFlags::empty();
         if self.await_context {
             flags |= crate::ast::node_flags::NodeFlags::AwaitContext;
@@ -261,7 +261,7 @@ impl Parser {
         flags
     }
 
-    pub(crate) fn parse_identifier(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_identifier(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_identifier"); 
         self.parse_identifier_with_private_diagnostic(None)
     }
 
@@ -269,7 +269,7 @@ impl Parser {
     pub(crate) fn parse_binding_identifier_with_private_diagnostic(
         &mut self,
         private_msg: Option<&'static tsox_core::diagnostics::Message>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_binding_identifier_with_private_diagnostic"); 
         if self.is_binding_identifier() {
             let text = self.scanner.token_value();
             let pos = self.token_pos();
@@ -288,7 +288,7 @@ impl Parser {
     pub(crate) fn parse_identifier_with_private_diagnostic(
         &mut self,
         private_msg: Option<&'static tsox_core::diagnostics::Message>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_identifier_with_private_diagnostic"); 
         if !self.is_identifier() {
             if self.token == SyntaxKind::PrivateIdentifier {
                 let msg = private_msg.unwrap_or(
@@ -323,7 +323,7 @@ impl Parser {
     /// Go parseRightSideOfDot：`. 后换行 + 标识符/关键字 + 同行再一个
     /// 标识符/关键字` 视为 ASI 断点，返回零宽 missing 且不消费
     /// （`this.\nclass Baz {}` 的 class 属此类）
-    pub(crate) fn parse_right_side_of_dot(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_right_side_of_dot(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_right_side_of_dot"); 
         if self.has_preceding_line_break()
             && (self.token == SyntaxKind::Identifier || is_keyword(self.token))
             && self.next_token_is_identifier_or_keyword_on_same_line()
@@ -346,7 +346,7 @@ impl Parser {
         self.identifier_expected_error_and_missing()
     }
 
-    pub(crate) fn identifier_expected_error_and_missing(&mut self) -> Arc<Node> {
+    pub(crate) fn identifier_expected_error_and_missing(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("identifier_expected_error_and_missing"); 
         if is_reserved_word_kind(self.token) {
             let word = self.scanner.token_text().to_string();
             self.parse_error_at_current_token(
@@ -359,7 +359,7 @@ impl Parser {
         self.missing_identifier_at_current()
     }
 
-    fn missing_identifier_at_current(&self) -> Arc<Node> {
+    fn missing_identifier_at_current(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("missing_identifier_at_current"); 
         let pos = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::Identifier,
@@ -370,13 +370,13 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn next_token_is_identifier_or_keyword_on_same_line(&self) -> bool {
+    pub(crate) fn next_token_is_identifier_or_keyword_on_same_line(&self) -> bool { ::tsox_core::fntrace::enter("next_token_is_identifier_or_keyword_on_same_line"); 
         let mut scanner = self.scanner.clone();
         let kind = scanner.scan();
         is_identifier_or_keyword(kind) && !scanner.has_preceding_line_break()
     }
 
-    pub(crate) fn parse_property_name(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_property_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_property_name"); 
         match self.token {
             SyntaxKind::PrivateIdentifier => {
                 let text = self.scanner.token_text().to_string();
@@ -449,7 +449,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn modifier_flag(kind: SyntaxKind) -> ModifierFlags {
+    pub(crate) fn modifier_flag(kind: SyntaxKind) -> ModifierFlags { ::tsox_core::fntrace::enter("modifier_flag"); 
         match kind {
             SyntaxKind::ExportKeyword => ModifierFlags::Export,
             SyntaxKind::DeclareKeyword => ModifierFlags::Ambient,

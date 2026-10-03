@@ -6,7 +6,7 @@ use std::sync::Arc;
 const ARG_SHELL_RESOLVE_CAP: u64 = 256;
 
 impl Checker {
-    pub(crate) fn push_interface_shell(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+    pub(crate) fn push_interface_shell(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("push_interface_shell"); 
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol as usize;
         if self.pending_interface_shells.contains_key(&key) {
             return None;
@@ -27,7 +27,7 @@ impl Checker {
         &mut self,
         shell: &Arc<Type>,
         result: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("fill_interface_shell"); 
         let shell_empty = shell
             .as_structured()
             .is_some_and(|s| s.members.entries.is_empty() && s.index_infos.is_empty());
@@ -51,7 +51,7 @@ impl Checker {
         key: &[usize],
         symbol: &Arc<Symbol>,
         args: Vec<Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("pending_arg_shell"); 
         if let Some((existing, _)) = self.pending_arg_shells.get(key) {
             return Arc::clone(existing);
         }
@@ -83,7 +83,7 @@ impl Checker {
         own_key: Option<&Vec<usize>>,
         own_result: &Arc<Type>,
         entry_seq: u64,
-    ) {
+    ) { ::tsox_core::fntrace::enter("backfill_pending_arg_shells"); 
         let sym_head = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol as usize;
         if let Some(own) = own_key
             && own.first() == Some(&sym_head)
@@ -119,7 +119,7 @@ impl Checker {
         }
     }
 
-    fn fill_arg_shell_in_place(shell: &Arc<Type>, full: &Arc<Type>) {
+    fn fill_arg_shell_in_place(shell: &Arc<Type>, full: &Arc<Type>) { ::tsox_core::fntrace::enter("fill_arg_shell_in_place"); 
         let sptr = Arc::as_ptr(shell) as *mut crate::checker::types::Type;
         let rptr = Arc::as_ptr(full) as *mut crate::checker::types::Type;
         unsafe {

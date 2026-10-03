@@ -61,7 +61,7 @@ pub enum SymbolKind {
 }
 
 impl SymbolKind {
-    pub fn as_i32(self) -> i32 {
+    pub fn as_i32(self) -> i32 { ::tsox_core::fntrace::enter("as_i32"); 
         self as i32
     }
 }

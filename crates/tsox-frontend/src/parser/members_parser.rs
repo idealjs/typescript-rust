@@ -3,11 +3,11 @@
 use crate::parser::members::*;
 
 impl Parser {
-    pub(crate) fn parse_template_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_template_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_template_expression"); 
         self.parse_template_expression_ex(false)
     }
 
-    pub(crate) fn parse_template_expression_ex(&mut self, is_tagged: bool) -> Arc<Node> {
+    pub(crate) fn parse_template_expression_ex(&mut self, is_tagged: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_template_expression_ex"); 
         let pos = self.token_pos();
         // Go parseTemplateHead：非 tagged 且 token 带非法转义时重扫报告
         if !is_tagged
@@ -74,7 +74,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_optional_type_parameters(&mut self) -> Option<Arc<NodeList>> {
+    pub(crate) fn parse_optional_type_parameters(&mut self) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("parse_optional_type_parameters"); 
         if self.token != SyntaxKind::LessThanToken {
             return None;
         }
@@ -100,7 +100,7 @@ impl Parser {
         }))
     }
 
-    pub(crate) fn parse_type_parameter_modifiers(&mut self) -> Option<Arc<ModifierList>> {
+    pub(crate) fn parse_type_parameter_modifiers(&mut self) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("parse_type_parameter_modifiers"); 
         let mut modifiers: Vec<(SyntaxKind, usize, usize)> = Vec::new();
         loop {
             if !matches!(
@@ -128,7 +128,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_type_parameter(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_parameter(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_parameter"); 
         let pos = self.token_pos();
 
         let modifiers = self.parse_type_parameter_modifiers();
@@ -160,7 +160,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_parameter_list(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_parameter_list(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_parameter_list"); 
         let pos = self.token_pos();
         // Go parseParameters：'(' 缺失时参数为缺失列表，不解析（防止
         // 后续语句被当参数吞掉）
@@ -179,7 +179,7 @@ impl Parser {
         })
     }
 
-    pub(crate) fn token_after_modifier_can_follow(&self, s: &mut crate::scanner::Scanner) -> bool {
+    pub(crate) fn token_after_modifier_can_follow(&self, s: &mut crate::scanner::Scanner) -> bool { ::tsox_core::fntrace::enter("token_after_modifier_can_follow"); 
         match self.token {
             SyntaxKind::ConstKeyword => s.token() == SyntaxKind::EnumKeyword,
             SyntaxKind::ExportKeyword => match s.token() {
@@ -200,7 +200,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_parameter_modifiers(&mut self) -> Option<Arc<ModifierList>> {
+    pub(crate) fn parse_parameter_modifiers(&mut self) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("parse_parameter_modifiers"); 
         enum Entry {
             Mod(SyntaxKind, usize, usize),
             Dec(Arc<Node>),
@@ -265,7 +265,7 @@ impl Parser {
         Some(Arc::new(ModifierList::new(nodes, flags)))
     }
 
-    pub(crate) fn parse_parameter(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_parameter(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parameter"); 
         let pos = self.token_pos();
 
         let modifiers = self.parse_parameter_modifiers();

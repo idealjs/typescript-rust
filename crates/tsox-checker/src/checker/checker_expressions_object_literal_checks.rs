@@ -4,7 +4,7 @@ use crate::checker::checker_expressions::*;
 
 
 // 自动编号枚举成员值：首个有显式初值之前的成员按序号，其后递增
-fn enum_member_auto_value(member: &Arc<Node>) -> Option<i64> {
+fn enum_member_auto_value(member: &Arc<Node>) -> Option<i64> { ::tsox_core::fntrace::enter("enum_member_auto_value"); 
     let enum_decl = member.parent()?;
     let members = match &enum_decl.data {
         tsox_frontend::ast::NodeData::EnumDeclaration(d) => &d.members,
@@ -36,7 +36,7 @@ fn enum_member_auto_value(member: &Arc<Node>) -> Option<i64> {
 }
 
 impl Checker {
-    pub fn check_object_literal_expression(&mut self, node: &Arc<Node>) {
+    pub fn check_object_literal_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_object_literal_expression"); 
         if let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &node.data {
             let is_destructuring_assignment_target = node.parent().as_ref().is_some_and(|p| match &p
                 .data
@@ -284,7 +284,7 @@ impl Checker {
 impl Checker {
     // Go getEffectivePropertyNameForPropertyNameNode：对象字面量成员的
     // 静态定名键（常量折叠计算键、字面量键），不可定名返回 None
-    fn object_literal_member_key(&mut self, name_node: &Arc<Node>) -> Option<String> {
+    fn object_literal_member_key(&mut self, name_node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("object_literal_member_key"); 
         if name_node.kind == SyntaxKind::ComputedPropertyName {
             let expr = match &name_node.data {
                 tsox_frontend::ast::NodeData::ComputedPropertyName(c) => Arc::clone(&c.expression),

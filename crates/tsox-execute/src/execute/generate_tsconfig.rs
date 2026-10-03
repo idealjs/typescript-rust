@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn generate_tsconfig(options: &CompilerOptions) -> String {
+pub(crate) fn generate_tsconfig(options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("generate_tsconfig"); 
     let target = tsox_tsoptions::tsoptions::script_target_name(options.target).unwrap_or("esnext");
     let module = tsox_tsoptions::tsoptions::module_kind_name(options.module).unwrap_or("nodenext");
     let jsx = tsox_tsoptions::tsoptions::jsx_emit_name(options.jsx).unwrap_or("react-jsx");

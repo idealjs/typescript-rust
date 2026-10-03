@@ -35,19 +35,19 @@ impl ForAwaitHierarchyFacts {
     pub const ITERATION_STATEMENT_INCLUDES: ForAwaitHierarchyFacts = ForAwaitHierarchyFacts::ITERATION_CONTAINER;
     pub const ITERATION_STATEMENT_EXCLUDES: ForAwaitHierarchyFacts = ForAwaitHierarchyFacts::NONE;
 
-    pub fn union(self, other: ForAwaitHierarchyFacts) -> ForAwaitHierarchyFacts {
+    pub fn union(self, other: ForAwaitHierarchyFacts) -> ForAwaitHierarchyFacts { ::tsox_core::fntrace::enter("union"); 
         ForAwaitHierarchyFacts(self.0 | other.0)
     }
 
-    pub fn minus(self, other: ForAwaitHierarchyFacts) -> ForAwaitHierarchyFacts {
+    pub fn minus(self, other: ForAwaitHierarchyFacts) -> ForAwaitHierarchyFacts { ::tsox_core::fntrace::enter("minus"); 
         ForAwaitHierarchyFacts(self.0 & !other.0)
     }
 
-    pub fn intersection(self, other: ForAwaitHierarchyFacts) -> ForAwaitHierarchyFacts {
+    pub fn intersection(self, other: ForAwaitHierarchyFacts) -> ForAwaitHierarchyFacts { ::tsox_core::fntrace::enter("intersection"); 
         ForAwaitHierarchyFacts(self.0 & other.0)
     }
 
-    pub fn intersects(self, other: ForAwaitHierarchyFacts) -> bool {
+    pub fn intersects(self, other: ForAwaitHierarchyFacts) -> bool { ::tsox_core::fntrace::enter("intersects"); 
         self.0 & other.0 != 0
     }
 }
@@ -66,7 +66,7 @@ pub struct ForAwaitTransformer {
     pub super_access_visitor: Option<NodeVisitor>,
 }
 
-pub fn new_for_await_transformer(opts: &TransformOptions) -> Transformer {
+pub fn new_for_await_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("new_for_await_transformer"); 
     let mut tx = ForAwaitTransformer {
         transformer: r39k13_defs::placeholder_transformer(),
         super_access_state: SuperAccessState::default(),
@@ -99,7 +99,7 @@ pub fn new_for_await_transformer(opts: &TransformOptions) -> Transformer {
     result
 }
 
-fn for_await_transformer_visit(tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+fn for_await_transformer_visit(tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("for_await_transformer_visit"); 
     let _ = tx;
     Some(node)
 }
@@ -109,7 +109,7 @@ impl ForAwaitTransformer {
         &self,
         exclude_facts: ForAwaitHierarchyFacts,
         include_facts: ForAwaitHierarchyFacts,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("affects_subtree"); 
         self.for_await_hierarchy_facts
             != self
                 .for_await_hierarchy_facts
@@ -121,7 +121,7 @@ impl ForAwaitTransformer {
         &mut self,
         exclude_facts: ForAwaitHierarchyFacts,
         include_facts: ForAwaitHierarchyFacts,
-    ) -> ForAwaitHierarchyFacts {
+    ) -> ForAwaitHierarchyFacts { ::tsox_core::fntrace::enter("enter_subtree"); 
         let ancestor_facts = self.for_await_hierarchy_facts;
         self.for_await_hierarchy_facts = self
             .for_await_hierarchy_facts
@@ -131,11 +131,11 @@ impl ForAwaitTransformer {
         ancestor_facts
     }
 
-    pub fn exit_subtree(&mut self, ancestor_facts: ForAwaitHierarchyFacts) {
+    pub fn exit_subtree(&mut self, ancestor_facts: ForAwaitHierarchyFacts) { ::tsox_core::fntrace::enter("exit_subtree"); 
         self.for_await_hierarchy_facts = ancestor_facts;
     }
 
-    pub fn visit_modifiers_no_async(&mut self, modifiers: &Option<Arc<ModifierList>>) -> Option<Arc<ModifierList>> {
+    pub fn visit_modifiers_no_async(&mut self, modifiers: &Option<Arc<ModifierList>>) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers_no_async"); 
         self.no_async_modifier_visitor.visit_modifiers(modifiers)
     }
 
@@ -145,7 +145,7 @@ impl ForAwaitTransformer {
         node: &Arc<Node>,
         exclude_facts: ForAwaitHierarchyFacts,
         include_facts: ForAwaitHierarchyFacts,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("do_with_hierarchy_facts"); 
         if self.affects_subtree(exclude_facts, include_facts) {
             let ancestor_facts = self.enter_subtree(exclude_facts, include_facts);
             let result = cb(self, node);
@@ -155,11 +155,11 @@ impl ForAwaitTransformer {
         cb(self, node)
     }
 
-    pub fn visit_default(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_default(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_default"); 
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn fallback_visitor(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn fallback_visitor(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("fallback_visitor"); 
         if self.super_access_state.captured_super_properties.is_none() {
             return node.clone();
         }
@@ -176,11 +176,11 @@ impl ForAwaitTransformer {
         self.fallback_node_visitor.visit_each_child(node)
     }
 
-    pub fn visit_fallback(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_fallback(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_fallback"); 
         self.fallback_visitor(node)
     }
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !node
             .subtree_facts()
             .intersects(SubtreeFacts::CONTAINS_FOR_AWAIT_OR_ASYNC_GENERATOR)
@@ -261,7 +261,7 @@ impl ForAwaitTransformer {
         }
     }
 
-    pub fn visit_await_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_await_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_await_expression"); 
         if self.enclosing_function_flags.0
             & (FunctionFlags::ASYNC.0 | FunctionFlags::GENERATOR.0)
             != 0
@@ -282,7 +282,7 @@ impl ForAwaitTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_yield_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_yield_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_yield_expression"); 
         if self.enclosing_function_flags.0
             & (FunctionFlags::ASYNC.0 | FunctionFlags::GENERATOR.0)
             != 0
@@ -332,7 +332,7 @@ impl ForAwaitTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_return_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_return_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_return_statement"); 
         if self.enclosing_function_flags.0
             & (FunctionFlags::ASYNC.0 | FunctionFlags::GENERATOR.0)
             != 0
@@ -355,7 +355,7 @@ impl ForAwaitTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_labeled_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_labeled_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_labeled_statement"); 
         if self.enclosing_function_flags.intersects(FunctionFlags::ASYNC) {
             let statement = unwrap_innermost_statement_of_label(node);
             if statement.kind == SyntaxKind::ForOfStatement {
@@ -376,7 +376,7 @@ impl ForAwaitTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         let ancestor_facts = self.enter_subtree(
             ForAwaitHierarchyFacts::SOURCE_FILE_EXCLUDES,
             ForAwaitHierarchyFacts::STRICT_MODE_SOURCE_FILE_INCLUDES,
@@ -394,7 +394,7 @@ impl ForAwaitTransformer {
         &mut self,
         node: &Arc<Node>,
         outermost_labeled_statement: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_for_of_statement"); 
         let ancestor_facts = self.enter_subtree(
             ForAwaitHierarchyFacts::ITERATION_STATEMENT_EXCLUDES,
             ForAwaitHierarchyFacts::ITERATION_STATEMENT_INCLUDES,
@@ -415,7 +415,7 @@ impl ForAwaitTransformer {
         result
     }
 
-    pub fn track_super_access(&mut self, node: &Arc<Node>) {
+    pub fn track_super_access(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("track_super_access"); 
         if self.super_access_state.captured_super_properties.is_none() {
             return;
         }
@@ -467,19 +467,19 @@ impl ForAwaitTransformer {
         }
     }
 
-    pub fn init_super_access_visitor(&mut self, emit_context: &EmitContext, _factory: &Factory) {
+    pub fn init_super_access_visitor(&mut self, emit_context: &EmitContext, _factory: &Factory) { ::tsox_core::fntrace::enter("init_super_access_visitor"); 
         self.super_access_visitor =
             Some(emit_context.new_node_visitor(Self::visit_super_access_node));
     }
 
-    pub fn substitute_super_accesses_in_body(&mut self, body: &Arc<Node>) -> Arc<Node> {
+    pub fn substitute_super_accesses_in_body(&mut self, body: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("substitute_super_accesses_in_body"); 
         match self.super_access_visitor.as_mut() {
             Some(v) => v.visit_node(body),
             None => body.clone(),
         }
     }
 
-    fn visit_super_access_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_super_access_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_super_access_node"); 
         match node.kind {
             SyntaxKind::CallExpression => {
                 let expression = node.as_call_expression().expression.clone();
@@ -538,7 +538,7 @@ impl ForAwaitTransformer {
         .into()
     }
 
-    fn substitute_call_expression_with_super_access(&mut self, call_node: &Arc<Node>) -> Arc<Node> {
+    fn substitute_call_expression_with_super_access(&mut self, call_node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("substitute_call_expression_with_super_access"); 
         let call = call_node.as_call_expression();
         let expression = call.expression.clone();
         let target: Arc<Node>;
@@ -593,7 +593,7 @@ impl ForAwaitTransformer {
     fn create_super_element_access_in_async_method(
         &mut self,
         argument_expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_super_element_access_in_async_method"); 
         let super_index_binding = self.super_access_state.super_index_binding.clone().unwrap();
         let super_index_call = self.transformer.factory().new_call_expression(
             &super_index_binding,
@@ -615,7 +615,7 @@ impl ForAwaitTransformer {
         super_index_call
     }
 
-    pub fn create_super_access_variable_statement(&mut self) -> Arc<Node> {
+    pub fn create_super_access_variable_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_super_access_variable_statement"); 
         let f = self.transformer.factory();
         let mut accessors: Vec<Arc<Node>> = Vec::new();
 
@@ -722,7 +722,7 @@ impl ForAwaitTransformer {
     }
 }
 
-pub fn unwrap_innermost_statement_of_label(node: &Arc<Node>) -> Arc<Node> {
+pub fn unwrap_innermost_statement_of_label(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("unwrap_innermost_statement_of_label"); 
     let mut node = node.clone();
     loop {
         let statement = match &node.data {

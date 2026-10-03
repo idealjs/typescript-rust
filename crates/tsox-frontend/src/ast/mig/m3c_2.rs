@@ -44,11 +44,11 @@ use crate::ast::syntax_kind_generated::SyntaxKind;
 use crate::ast::utilities_misc::is_this_identifier;
 use crate::scanner::error_callback::TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
 
-pub fn subtree_facts(node: &Node) -> SubtreeFacts {
+pub fn subtree_facts(node: &Node) -> SubtreeFacts { ::tsox_core::fntrace::enter("subtree_facts"); 
     compute_subtree_facts(node)
 }
 
-pub fn compute_subtree_facts(node: &Node) -> SubtreeFacts {
+pub fn compute_subtree_facts(node: &Node) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
     match &node.data {
         NodeData::GetAccessorDeclaration(d) => {
             compute_subtree_facts_accessor_declaration_base(
@@ -154,21 +154,21 @@ pub fn compute_subtree_facts(node: &Node) -> SubtreeFacts {
     }
 }
 
-fn compute_subtree_facts_node_default() -> SubtreeFacts {
+fn compute_subtree_facts_node_default() -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_node_default"); 
     SubtreeFactsNone
 }
 
-fn compute_subtree_facts_composite_base() -> SubtreeFacts {
+fn compute_subtree_facts_composite_base() -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_composite_base"); 
     unreachable!("computeSubtreeFacts must be implemented by the concrete node type")
 }
 
-pub(crate) fn modifier_flags_of(modifiers: &Option<Arc<crate::ast::node::ModifierList>>) -> ModifierFlags {
+pub(crate) fn modifier_flags_of(modifiers: &Option<Arc<crate::ast::node::ModifierList>>) -> ModifierFlags { ::tsox_core::fntrace::enter("modifier_flags_of"); 
     modifiers.as_ref().map(|m| m.modifier_flags).unwrap_or_default()
 }
 
 pub(crate) fn propagate_eraseable_syntax_list_subtree_facts(
     children: Option<&Arc<crate::ast::node::NodeList>>,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_eraseable_syntax_list_subtree_facts"); 
     if children.is_some() {
         SubtreeContainsTypeScript
     } else {
@@ -176,7 +176,7 @@ pub(crate) fn propagate_eraseable_syntax_list_subtree_facts(
     }
 }
 
-pub(crate) fn propagate_eraseable_syntax_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts {
+pub(crate) fn propagate_eraseable_syntax_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_eraseable_syntax_subtree_facts"); 
     if child.is_some() {
         SubtreeContainsTypeScript
     } else {
@@ -184,7 +184,7 @@ pub(crate) fn propagate_eraseable_syntax_subtree_facts(child: Option<&Arc<Node>>
     }
 }
 
-pub(crate) fn propagate_object_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts {
+pub(crate) fn propagate_object_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_object_binding_element_subtree_facts"); 
     let mut facts = propagate_subtree_facts(Some(child));
     if facts.contains(SubtreeContainsRestOrSpread) {
         facts = facts.without(SubtreeContainsRestOrSpread);
@@ -193,11 +193,11 @@ pub(crate) fn propagate_object_binding_element_subtree_facts(child: &Arc<Node>) 
     facts
 }
 
-pub(crate) fn propagate_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts {
+pub(crate) fn propagate_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_binding_element_subtree_facts"); 
     propagate_subtree_facts(Some(child)).without(SubtreeContainsRestOrSpread)
 }
 
-pub(crate) fn propagate_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts {
+pub(crate) fn propagate_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
     child
         .map(|child| child.propagate_subtree_facts())
         .unwrap_or(SubtreeFactsNone)
@@ -206,7 +206,7 @@ pub(crate) fn propagate_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts
 pub(crate) fn propagate_node_list_subtree_facts(
     children: Option<&Arc<crate::ast::node::NodeList>>,
     propagate: impl Fn(&Arc<Node>) -> SubtreeFacts,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_node_list_subtree_facts"); 
     let Some(children) = children else {
         return SubtreeFactsNone;
     };
@@ -219,7 +219,7 @@ pub(crate) fn propagate_node_list_subtree_facts(
 
 pub(crate) fn propagate_modifier_list_subtree_facts(
     children: Option<&Arc<crate::ast::node::ModifierList>>,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_modifier_list_subtree_facts"); 
     let Some(children) = children else {
         return SubtreeFactsNone;
     };
@@ -232,7 +232,7 @@ pub(crate) fn propagate_modifier_list_subtree_facts(
 
 fn compute_subtree_facts_binary_expression(
     d: &crate::ast::node_data_generated::BinaryExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_binary_expression"); 
     let mut facts = propagate_modifier_list_subtree_facts(d.modifiers.as_ref())
         | propagate_subtree_facts(Some(&d.left))
         | propagate_eraseable_syntax_subtree_facts(d.type_node.as_ref())
@@ -260,7 +260,7 @@ fn compute_subtree_facts_accessor_declaration_base(
     type_node: Option<&Arc<Node>>,
     full_signature: Option<&Arc<Node>>,
     body: Option<&Arc<Node>>,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_accessor_declaration_base"); 
     if body.is_none() {
         return SubtreeContainsTypeScript;
     }
@@ -273,7 +273,7 @@ fn compute_subtree_facts_accessor_declaration_base(
         | propagate_subtree_facts(body)
 }
 
-fn compute_subtree_facts_arrow_function(d: &crate::ast::node_data_generated::ArrowFunctionData) -> SubtreeFacts {
+fn compute_subtree_facts_arrow_function(d: &crate::ast::node_data_generated::ArrowFunctionData) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_arrow_function"); 
     propagate_modifier_list_subtree_facts(d.modifiers.as_ref())
         | propagate_eraseable_syntax_list_subtree_facts(d.type_parameters.as_ref())
         | propagate_node_list_subtree_facts(Some(&d.parameters), |n| propagate_subtree_facts(Some(n)))
@@ -289,13 +289,13 @@ fn compute_subtree_facts_arrow_function(d: &crate::ast::node_data_generated::Arr
 
 fn compute_subtree_facts_as_expression(
     d: &crate::ast::node_data_generated::AsExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_as_expression"); 
     propagate_subtree_facts(Some(&d.expression)) | SubtreeContainsTypeScript
 }
 
 fn compute_subtree_facts_await_expression(
     d: &crate::ast::node_data_generated::AwaitExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_await_expression"); 
     propagate_subtree_facts(Some(&d.expression))
         | SubtreeContainsAwait
         | SubtreeContainsAnyAwait
@@ -304,7 +304,7 @@ fn compute_subtree_facts_await_expression(
 
 fn compute_subtree_facts_binding_element(
     d: &crate::ast::node_data_generated::BindingElementData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_binding_element"); 
     propagate_subtree_facts(d.property_name.as_ref())
         | propagate_subtree_facts(d.name.as_ref())
         | propagate_subtree_facts(d.initializer.as_ref())
@@ -318,7 +318,7 @@ fn compute_subtree_facts_binding_element(
 fn compute_subtree_facts_binding_pattern(
     kind: SyntaxKind,
     d: &crate::ast::node_data_generated::BindingPatternData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_binding_pattern"); 
     match kind {
         SyntaxKind::ObjectBindingPattern => propagate_node_list_subtree_facts(
             Some(&d.elements),
@@ -334,7 +334,7 @@ fn compute_subtree_facts_binding_pattern(
 
 fn compute_subtree_facts_call_expression(
     d: &crate::ast::node_data_generated::CallExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_call_expression"); 
     propagate_subtree_facts(Some(&d.expression))
         | propagate_subtree_facts(d.question_dot_token.as_ref())
         | propagate_eraseable_syntax_list_subtree_facts(d.type_arguments.as_ref())
@@ -348,7 +348,7 @@ fn compute_subtree_facts_call_expression(
 
 fn compute_subtree_facts_catch_clause(
     d: &crate::ast::node_data_generated::CatchClauseData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_catch_clause"); 
     let mut res = propagate_subtree_facts(d.variable_declaration.as_ref())
         | propagate_subtree_facts(Some(&d.block));
     if d.variable_declaration.is_none() {
@@ -363,7 +363,7 @@ fn compute_subtree_facts_class_like_base(
     type_parameters: Option<&Arc<crate::ast::node::NodeList>>,
     heritage_clauses: Option<&Arc<crate::ast::node::NodeList>>,
     members: &Arc<crate::ast::node::NodeList>,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_class_like_base"); 
     if modifier_flags_of(modifiers).contains(ModifierFlags::Ambient) {
         return SubtreeContainsTypeScript;
     }
@@ -376,7 +376,7 @@ fn compute_subtree_facts_class_like_base(
 
 fn compute_subtree_facts_class_static_block_declaration(
     d: &crate::ast::node_data_generated::ClassStaticBlockDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_class_static_block_declaration"); 
     propagate_modifier_list_subtree_facts(d.modifiers.as_ref())
         | propagate_subtree_facts(Some(&d.body))
         | SubtreeContainsClassFields
@@ -384,7 +384,7 @@ fn compute_subtree_facts_class_static_block_declaration(
 
 fn compute_subtree_facts_constructor_declaration(
     d: &crate::ast::node_data_generated::ConstructorDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_constructor_declaration"); 
     if d.body.is_none() {
         return SubtreeContainsTypeScript;
     }
@@ -398,6 +398,6 @@ fn compute_subtree_facts_constructor_declaration(
 
 fn compute_subtree_facts_decorator(
     d: &crate::ast::node_data_generated::DecoratorData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_decorator"); 
     propagate_subtree_facts(Some(&d.expression)) | SubtreeContainsTypeScript | SubtreeContainsDecorators
 }

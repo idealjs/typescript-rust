@@ -18,7 +18,7 @@ pub fn validate_ending(
     relative_to_base_url: &str,
     compiler_options: &CompilerOptions,
     host: &dyn ModuleSpecifierGenerationHost,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("validate_ending"); 
     c.ending != ModuleSpecifierEnding::Minimal
         || c.value
             == process_ending(
@@ -34,7 +34,7 @@ pub fn process_ending(
     allowed_endings: &[ModuleSpecifierEnding],
     options: &CompilerOptions,
     host: &dyn ModuleSpecifierGenerationHost,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("process_ending"); 
     if tspath::file_extension_is_one_of(
         file_name,
         &[

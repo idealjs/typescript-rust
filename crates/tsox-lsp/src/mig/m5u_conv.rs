@@ -27,40 +27,40 @@ pub trait M5uFidelityExt {
 }
 
 impl M5uFidelityExt for SpanMapFidelity {
-    fn is_exact(&self) -> bool {
+    fn is_exact(&self) -> bool { ::tsox_core::fntrace::enter("is_exact"); 
         *self == SPANMAP_FIDELITY_EXACT
     }
-    fn is_none(&self) -> bool {
+    fn is_none(&self) -> bool { ::tsox_core::fntrace::enter("is_none"); 
         *self == SPANMAP_FIDELITY_NONE
     }
-    fn is_single_segment(&self) -> bool {
+    fn is_single_segment(&self) -> bool { ::tsox_core::fntrace::enter("is_single_segment"); 
         *self == SPANMAP_FIDELITY_SINGLE_SEGMENT
     }
 }
 
 impl crate::ls::lsconv_converters::Script for OriginalTextScriptOr<'_> {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         M5uScript::file_name(self)
     }
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         M5uScript::text(self)
     }
 }
 
 impl crate::ls::lsconv_converters::Script for SourceFileScriptView {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         M5uScript::file_name(self)
     }
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         M5uScript::text(self)
     }
 }
 
 impl crate::ls::lsconv_converters::Script for OriginalTextScript {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         M5uScript::file_name(self)
     }
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         M5uScript::text(self)
     }
 }
@@ -71,7 +71,7 @@ impl crate::ls::lsconv_converters::Converters {
         script: &dyn M5uScript,
         text_range: tsox_core::core::text::TextRange,
         feature: SpanMapFeature,
-    ) -> (M5uRange, SpanMapFidelity) {
+    ) -> (M5uRange, SpanMapFidelity) { ::tsox_core::fntrace::enter("to_lsp_range_for_feature"); 
         let (script, text_range, fidelity) =
             virtual_range_to_original(script, text_range, Some(feature));
         (
@@ -88,7 +88,7 @@ impl crate::ls::lsconv_converters::Converters {
         script: &dyn M5uScript,
         position: usize,
         feature: SpanMapFeature,
-    ) -> (M5uPosition, SpanMapFidelity) {
+    ) -> (M5uPosition, SpanMapFidelity) { ::tsox_core::fntrace::enter("to_lsp_position_for_feature"); 
         let (script, position, fidelity) =
             virtual_position_to_original(script, position, Some(feature));
         (self.position_to_line_and_character(&script, position), fidelity)
@@ -99,7 +99,7 @@ impl crate::ls::lsconv_converters::Converters {
         script: &dyn M5uScript,
         position: &Position,
         feature: SpanMapFeature,
-    ) -> Vec<M5uMappedPositionRaw> {
+    ) -> Vec<M5uMappedPositionRaw> { ::tsox_core::fntrace::enter("m5u_lsp_position_to_virtual"); 
         let view = PlainScriptView {
             file_name: script.file_name().to_string(),
             text: script.text().to_string(),
@@ -125,7 +125,7 @@ impl crate::ls::lsconv_converters::Converters {
         file: &Arc<SourceFile>,
         position: Position,
         feature: SpanMapFeature,
-    ) -> Vec<M5uFileMappedPosition> {
+    ) -> Vec<M5uFileMappedPosition> { ::tsox_core::fntrace::enter("from_lsp_position_for_source_file_m5u"); 
         let files = source_file_projections(file);
         let mut result = Vec::new();
         for script in &files {
@@ -216,14 +216,14 @@ pub struct M5uConverters {
 pub fn new_converters(
     position_encoding: PositionEncodingKind,
     get_line_map: Box<dyn Fn(&str) -> crate::ls::lsconv_linemap::LspLineMap + Send + Sync>,
-) -> M5uConverters {
+) -> M5uConverters { ::tsox_core::fntrace::enter("new_converters"); 
     M5uConverters {
         get_line_map,
         position_encoding,
     }
 }
 
-pub fn original_text_script(file_name: String, text: String) -> OriginalTextScript {
+pub fn original_text_script(file_name: String, text: String) -> OriginalTextScript { ::tsox_core::fntrace::enter("original_text_script"); 
     OriginalTextScript { file_name, text }
 }
 
@@ -233,45 +233,45 @@ pub struct OriginalTextScript {
 }
 
 impl M5uScript for OriginalTextScript {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    fn original_file_name(&self) -> &str {
+    fn original_file_name(&self) -> &str { ::tsox_core::fntrace::enter("original_file_name"); 
         &self.file_name
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 
-    fn span_map(&self) -> Option<&dyn M5uSpanMap> {
+    fn span_map(&self) -> Option<&dyn M5uSpanMap> { ::tsox_core::fntrace::enter("span_map"); 
         None
     }
 
-    fn original_text(&self) -> &str {
+    fn original_text(&self) -> &str { ::tsox_core::fntrace::enter("original_text"); 
         &self.text
     }
 }
 
 impl OriginalTextScript {
-    pub fn file_name(&self) -> &str {
+    pub fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    pub fn original_file_name(&self) -> &str {
+    pub fn original_file_name(&self) -> &str { ::tsox_core::fntrace::enter("original_file_name"); 
         &self.file_name
     }
 
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 
-    pub fn original_text(&self) -> &str {
+    pub fn original_text(&self) -> &str { ::tsox_core::fntrace::enter("original_text"); 
         &self.text
     }
 
-    pub fn span_map(&self) -> Option<&dyn M5uSpanMap> {
+    pub fn span_map(&self) -> Option<&dyn M5uSpanMap> { ::tsox_core::fntrace::enter("span_map"); 
         None
     }
 }
@@ -281,7 +281,7 @@ impl M5uConverters {
         &self,
         script: &dyn M5uScript,
         text_range: tsox_core::core::text::TextRange,
-    ) -> (M5uRange, SpanMapFidelity) {
+    ) -> (M5uRange, SpanMapFidelity) { ::tsox_core::fntrace::enter("to_lsp_range"); 
         let (script, text_range, fidelity) = virtual_range_to_original(script, text_range, None);
         (
             M5uRange {
@@ -297,7 +297,7 @@ impl M5uConverters {
         script: &dyn M5uScript,
         text_range: tsox_core::core::text::TextRange,
         feature: SpanMapFeature,
-    ) -> (M5uRange, SpanMapFidelity) {
+    ) -> (M5uRange, SpanMapFidelity) { ::tsox_core::fntrace::enter("to_lsp_range_for_feature"); 
         let (script, text_range, fidelity) =
             virtual_range_to_original(script, text_range, Some(feature));
         (
@@ -313,7 +313,7 @@ impl M5uConverters {
         &self,
         script: &dyn M5uScript,
         position: usize,
-    ) -> (M5uPosition, SpanMapFidelity) {
+    ) -> (M5uPosition, SpanMapFidelity) { ::tsox_core::fntrace::enter("to_lsp_position"); 
         let (script, position, fidelity) = virtual_position_to_original(script, position, None);
         (self.position_to_line_and_character(&script, position), fidelity)
     }
@@ -323,7 +323,7 @@ impl M5uConverters {
         script: &dyn M5uScript,
         position: usize,
         feature: SpanMapFeature,
-    ) -> (M5uPosition, SpanMapFidelity) {
+    ) -> (M5uPosition, SpanMapFidelity) { ::tsox_core::fntrace::enter("to_lsp_position_for_feature"); 
         let (script, position, fidelity) =
             virtual_position_to_original(script, position, Some(feature));
         (self.position_to_line_and_character(&script, position), fidelity)
@@ -334,7 +334,7 @@ impl M5uConverters {
         script: &dyn M5uScript,
         rng: tsox_core::core::text::TextRange,
         feature: SpanMapFeature,
-    ) -> (Location, SpanMapFidelity) {
+    ) -> (Location, SpanMapFidelity) { ::tsox_core::fntrace::enter("to_lsp_location_for_feature"); 
         let (lsp_range, fidelity) = self.to_lsp_range_for_feature(script, rng, feature);
         (
             Location {
@@ -349,7 +349,7 @@ impl M5uConverters {
         &self,
         script: &dyn M5uScript,
         line_and_character: &Position,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("line_and_character_to_position"); 
         convention_line_and_character_to_position(self, script, line_and_character)
     }
 
@@ -357,7 +357,7 @@ impl M5uConverters {
         &self,
         script: &dyn M5uScript,
         position: usize,
-    ) -> Position {
+    ) -> Position { ::tsox_core::fntrace::enter("position_to_line_and_character"); 
         convention_position_to_line_and_character(self, script, position)
     }
 
@@ -366,7 +366,7 @@ impl M5uConverters {
         script: &dyn M5uScript,
         text_range: &M5uRange,
         feature: SpanMapFeature,
-    ) -> Vec<M5uMappedSpanRaw> {
+    ) -> Vec<M5uMappedSpanRaw> { ::tsox_core::fntrace::enter("lsp_range_to_virtual"); 
         match script.span_map() {
             None => vec![M5uMappedSpanRaw {
                 span: tsox_core::core::text::TextRange::new(
@@ -394,7 +394,7 @@ impl M5uConverters {
         script: &dyn M5uScript,
         position: &Position,
         feature: SpanMapFeature,
-    ) -> Vec<M5uMappedPositionRaw> {
+    ) -> Vec<M5uMappedPositionRaw> { ::tsox_core::fntrace::enter("lsp_position_to_virtual"); 
         match script.span_map() {
             None => vec![M5uMappedPositionRaw {
                 position: self.line_and_character_to_position(script, position),
@@ -417,7 +417,7 @@ pub fn from_lsp_range<'a>(
     script: &'a dyn M5uScript,
     text_range: M5uRange,
     feature: SpanMapFeature,
-) -> Vec<M5uMappedSpan<'a, dyn M5uScript + 'a>> {
+) -> Vec<M5uMappedSpan<'a, dyn M5uScript + 'a>> { ::tsox_core::fntrace::enter("from_lsp_range"); 
     lsp_range_to_virtual(c, std::slice::from_ref(&script), text_range, feature)
 }
 
@@ -426,7 +426,7 @@ pub fn from_lsp_range_for_source_file(
     file: &Arc<SourceFile>,
     text_range: M5uRange,
     feature: SpanMapFeature,
-) -> Vec<M5uFileMappedSpan> {
+) -> Vec<M5uFileMappedSpan> { ::tsox_core::fntrace::enter("from_lsp_range_for_source_file"); 
     let files = source_file_projections(file);
     lsp_range_to_virtual_for_files(c, &files, text_range, feature)
 }
@@ -436,7 +436,7 @@ pub fn from_lsp_range_intersecting_for_source_file(
     file: &Arc<SourceFile>,
     text_range: M5uRange,
     feature: SpanMapFeature,
-) -> Vec<M5uFileMappedSpan> {
+) -> Vec<M5uFileMappedSpan> { ::tsox_core::fntrace::enter("from_lsp_range_intersecting_for_source_file"); 
     let files = source_file_projections(file);
     let mut result = Vec::with_capacity(files.len());
     for script in &files {
@@ -486,29 +486,29 @@ pub struct SourceFileScriptView {
 }
 
 impl SourceFileScriptView {
-    fn span_map_boxed(&self) -> Option<&'static dyn M5uSpanMap> {
+    fn span_map_boxed(&self) -> Option<&'static dyn M5uSpanMap> { ::tsox_core::fntrace::enter("span_map_boxed"); 
         source_file_span_map(&self.file)
     }
 }
 
 impl M5uScript for SourceFileScriptView {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file.file_name
     }
 
-    fn original_file_name(&self) -> &str {
+    fn original_file_name(&self) -> &str { ::tsox_core::fntrace::enter("original_file_name"); 
         source_file_original_file_name(&self.file)
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.file.text
     }
 
-    fn span_map(&self) -> Option<&dyn M5uSpanMap> {
+    fn span_map(&self) -> Option<&dyn M5uSpanMap> { ::tsox_core::fntrace::enter("span_map"); 
         source_file_span_map(&self.file)
     }
 
-    fn original_text(&self) -> &str {
+    fn original_text(&self) -> &str { ::tsox_core::fntrace::enter("original_text"); 
         source_file_original_text(&self.file)
     }
 }
@@ -518,7 +518,7 @@ pub fn lsp_range_to_virtual<'a>(
     scripts: &[&'a dyn M5uScript],
     text_range: M5uRange,
     feature: SpanMapFeature,
-) -> Vec<M5uMappedSpan<'a, dyn M5uScript + 'a>> {
+) -> Vec<M5uMappedSpan<'a, dyn M5uScript + 'a>> { ::tsox_core::fntrace::enter("lsp_range_to_virtual"); 
     let mut result = Vec::with_capacity(scripts.len());
     for script in scripts {
         for mapped in c.lsp_range_to_virtual(*script, &text_range, feature) {
@@ -537,7 +537,7 @@ pub fn lsp_range_to_virtual_for_files(
     files: &[Arc<SourceFile>],
     text_range: M5uRange,
     feature: SpanMapFeature,
-) -> Vec<M5uFileMappedSpan> {
+) -> Vec<M5uFileMappedSpan> { ::tsox_core::fntrace::enter("lsp_range_to_virtual_for_files"); 
     let mut result = Vec::with_capacity(files.len());
     for file in files {
         let script = SourceFileScriptView { file: Arc::clone(file) };
@@ -557,7 +557,7 @@ pub fn from_lsp_position<'a>(
     script: &'a dyn M5uScript,
     position: Position,
     feature: SpanMapFeature,
-) -> Vec<M5uMappedPosition<'a, dyn M5uScript + 'a>> {
+) -> Vec<M5uMappedPosition<'a, dyn M5uScript + 'a>> { ::tsox_core::fntrace::enter("from_lsp_position"); 
     lsp_position_to_virtual(c, std::slice::from_ref(&script), position, feature)
 }
 
@@ -566,7 +566,7 @@ pub fn from_lsp_position_for_source_file<'a>(
     file: &'a Arc<SourceFile>,
     position: Position,
     feature: SpanMapFeature,
-) -> Vec<M5uFileMappedPosition> {
+) -> Vec<M5uFileMappedPosition> { ::tsox_core::fntrace::enter("from_lsp_position_for_source_file"); 
     let files = source_file_projections(file);
     let mut result = Vec::new();
     for script in &files {
@@ -593,7 +593,7 @@ pub fn lsp_position_to_virtual<'a>(
     scripts: &[&'a dyn M5uScript],
     position: Position,
     feature: SpanMapFeature,
-) -> Vec<M5uMappedPosition<'a, dyn M5uScript + 'a>> {
+) -> Vec<M5uMappedPosition<'a, dyn M5uScript + 'a>> { ::tsox_core::fntrace::enter("lsp_position_to_virtual"); 
     let mut result = Vec::with_capacity(scripts.len());
     for script in scripts {
         for mapped in c.lsp_position_to_virtual(*script, &position, feature) {
@@ -611,7 +611,7 @@ pub fn from_lsp_range_to_original(
     c: &M5uConverters,
     script: &dyn M5uScript,
     text_range: M5uRange,
-) -> tsox_core::core::text::TextRange {
+) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("from_lsp_range_to_original"); 
     let original = original_text_script(
         script.original_file_name().to_string(),
         script.original_text().to_string(),
@@ -622,7 +622,7 @@ pub fn from_lsp_range_to_original(
     )
 }
 
-pub fn source_file_projections(file: &Arc<SourceFile>) -> Vec<Arc<SourceFile>> {
+pub fn source_file_projections(file: &Arc<SourceFile>) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_projections"); 
     let supplemental = source_file_supplemental_source_files(file);
     let mut files = Vec::with_capacity(1 + supplemental.len());
     files.push(Arc::clone(file));
@@ -634,7 +634,7 @@ pub fn virtual_range_to_original(
     script: &dyn M5uScript,
     text_range: tsox_core::core::text::TextRange,
     feature: Option<SpanMapFeature>,
-) -> (OriginalTextScriptOr<'_>, tsox_core::core::text::TextRange, SpanMapFidelity) {
+) -> (OriginalTextScriptOr<'_>, tsox_core::core::text::TextRange, SpanMapFidelity) { ::tsox_core::fntrace::enter("virtual_range_to_original"); 
     match script.span_map() {
         None => (
             OriginalTextScriptOr::Script(script),
@@ -664,35 +664,35 @@ pub enum OriginalTextScriptOr<'a> {
 }
 
 impl M5uScript for OriginalTextScriptOr<'_> {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         match self {
             OriginalTextScriptOr::Script(s) => s.file_name(),
             OriginalTextScriptOr::Original(s) => s.file_name(),
         }
     }
 
-    fn original_file_name(&self) -> &str {
+    fn original_file_name(&self) -> &str { ::tsox_core::fntrace::enter("original_file_name"); 
         match self {
             OriginalTextScriptOr::Script(s) => s.original_file_name(),
             OriginalTextScriptOr::Original(s) => s.original_file_name(),
         }
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         match self {
             OriginalTextScriptOr::Script(s) => s.text(),
             OriginalTextScriptOr::Original(s) => s.text(),
         }
     }
 
-    fn span_map(&self) -> Option<&dyn M5uSpanMap> {
+    fn span_map(&self) -> Option<&dyn M5uSpanMap> { ::tsox_core::fntrace::enter("span_map"); 
         match self {
             OriginalTextScriptOr::Script(s) => s.span_map(),
             OriginalTextScriptOr::Original(s) => s.span_map(),
         }
     }
 
-    fn original_text(&self) -> &str {
+    fn original_text(&self) -> &str { ::tsox_core::fntrace::enter("original_text"); 
         match self {
             OriginalTextScriptOr::Script(s) => s.original_text(),
             OriginalTextScriptOr::Original(s) => s.original_text(),
@@ -704,7 +704,7 @@ pub fn virtual_position_to_original(
     script: &dyn M5uScript,
     position: usize,
     feature: Option<SpanMapFeature>,
-) -> (OriginalTextScriptOr<'_>, usize, SpanMapFidelity) {
+) -> (OriginalTextScriptOr<'_>, usize, SpanMapFidelity) { ::tsox_core::fntrace::enter("virtual_position_to_original"); 
     match script.span_map() {
         None => (OriginalTextScriptOr::Script(script), position, SPANMAP_FIDELITY_EXACT),
         Some(spans) => {
@@ -737,7 +737,7 @@ pub fn diagnostic_to_lsp_pull(
     report_style_checks_as_warnings: bool,
     client_diagnostic_caps: &LsprotoDiagnosticClientCapabilities,
     visual_studio: bool,
-) -> LsprotoDiagnostic {
+) -> LsprotoDiagnostic { ::tsox_core::fntrace::enter("diagnostic_to_lsp_pull"); 
     diagnostic_to_lsp(
         converters,
         diagnostic,
@@ -755,7 +755,7 @@ pub fn diagnostic_to_lsp_push(
     diagnostic: &Diagnostic,
     client_diagnostic_caps: &LsprotoDiagnosticClientCapabilities,
     visual_studio: bool,
-) -> LsprotoDiagnostic {
+) -> LsprotoDiagnostic { ::tsox_core::fntrace::enter("diagnostic_to_lsp_push"); 
     diagnostic_to_lsp(
         converters,
         diagnostic,
@@ -800,7 +800,7 @@ pub fn diagnostic_to_lsp(
     converters: &M5uConverters,
     diagnostic: &Diagnostic,
     opts: DiagnosticOptions,
-) -> LsprotoDiagnostic {
+) -> LsprotoDiagnostic { ::tsox_core::fntrace::enter("diagnostic_to_lsp"); 
     let mut severity = diagnostic_severity(diagnostic.category());
 
     if opts.report_style_checks_as_warnings
@@ -889,7 +889,7 @@ pub fn diagnostic_script_and_range<'a>(
     file: Option<&'a Arc<SourceFile>>,
     loc: tsox_core::core::text::TextRange,
     source: &str,
-) -> (OriginalTextScriptOwn, tsox_core::core::text::TextRange) {
+) -> (OriginalTextScriptOwn, tsox_core::core::text::TextRange) { ::tsox_core::fntrace::enter("diagnostic_script_and_range"); 
     let Some(file) = file else {
         return (OriginalTextScriptOwn::SourceFile, loc);
     };
@@ -921,35 +921,35 @@ pub enum OriginalTextScriptOwn {
 }
 
 impl M5uScript for OriginalTextScriptOwn {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         match self {
             OriginalTextScriptOwn::SourceFile => "",
             OriginalTextScriptOwn::Original(s) => s.file_name(),
         }
     }
 
-    fn original_file_name(&self) -> &str {
+    fn original_file_name(&self) -> &str { ::tsox_core::fntrace::enter("original_file_name"); 
         match self {
             OriginalTextScriptOwn::SourceFile => "",
             OriginalTextScriptOwn::Original(s) => s.original_file_name(),
         }
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         match self {
             OriginalTextScriptOwn::SourceFile => "",
             OriginalTextScriptOwn::Original(s) => s.text(),
         }
     }
 
-    fn span_map(&self) -> Option<&dyn M5uSpanMap> {
+    fn span_map(&self) -> Option<&dyn M5uSpanMap> { ::tsox_core::fntrace::enter("span_map"); 
         match self {
             OriginalTextScriptOwn::SourceFile => None,
             OriginalTextScriptOwn::Original(s) => s.span_map(),
         }
     }
 
-    fn original_text(&self) -> &str {
+    fn original_text(&self) -> &str { ::tsox_core::fntrace::enter("original_text"); 
         match self {
             OriginalTextScriptOwn::SourceFile => "",
             OriginalTextScriptOwn::Original(s) => s.original_text(),
@@ -957,7 +957,7 @@ impl M5uScript for OriginalTextScriptOwn {
     }
 }
 
-pub fn diagnostic_severity(category: tsox_core::diagnostics::Category) -> i32 {
+pub fn diagnostic_severity(category: tsox_core::diagnostics::Category) -> i32 { ::tsox_core::fntrace::enter("diagnostic_severity"); 
     match category {
         tsox_core::diagnostics::Category::Warning => DIAGNOSTIC_SEVERITY_WARNING,
         tsox_core::diagnostics::Category::Error => DIAGNOSTIC_SEVERITY_ERROR,
@@ -966,14 +966,14 @@ pub fn diagnostic_severity(category: tsox_core::diagnostics::Category) -> i32 {
     }
 }
 
-pub fn message_chain_to_string(diagnostic: &Diagnostic) -> String {
+pub fn message_chain_to_string(diagnostic: &Diagnostic) -> String { ::tsox_core::fntrace::enter("message_chain_to_string"); 
     if diagnostic.message_chain().is_empty() {
         return diagnostic.display_string();
     }
     diagnostic_writer_write_flattened_ast_diagnostic_message(diagnostic)
 }
 
-pub fn ptr_to_slice_if_non_empty<T>(s: Vec<T>) -> Option<Vec<T>> {
+pub fn ptr_to_slice_if_non_empty<T>(s: Vec<T>) -> Option<Vec<T>> { ::tsox_core::fntrace::enter("ptr_to_slice_if_non_empty"); 
     if s.is_empty() {
         None
     } else {
@@ -981,15 +981,15 @@ pub fn ptr_to_slice_if_non_empty<T>(s: Vec<T>) -> Option<Vec<T>> {
     }
 }
 
-pub fn style_check_diagnostics_has(_code: i32) -> bool {
+pub fn style_check_diagnostics_has(_code: i32) -> bool { ::tsox_core::fntrace::enter("style_check_diagnostics_has"); 
     false
 }
 
-pub fn related_message(related: &Diagnostic) -> String {
+pub fn related_message(related: &Diagnostic) -> String { ::tsox_core::fntrace::enter("related_message"); 
     related.display_string()
 }
 
-pub fn diagnostic_writer_write_flattened_ast_diagnostic_message(diagnostic: &Diagnostic) -> String {
+pub fn diagnostic_writer_write_flattened_ast_diagnostic_message(diagnostic: &Diagnostic) -> String { ::tsox_core::fntrace::enter("diagnostic_writer_write_flattened_ast_diagnostic_message"); 
     use std::io::Write;
     let mut buf: Vec<u8> = Vec::new();
     tsox_frontend::diagnosticwriter::mig::x12::write_flattened_ast_diagnostic_message(
@@ -1001,19 +1001,19 @@ pub fn diagnostic_writer_write_flattened_ast_diagnostic_message(diagnostic: &Dia
     String::from_utf8(buf).unwrap_or_default()
 }
 
-pub fn source_file_span_map(_file: &Arc<SourceFile>) -> Option<&'static dyn M5uSpanMap> {
+pub fn source_file_span_map(_file: &Arc<SourceFile>) -> Option<&'static dyn M5uSpanMap> { ::tsox_core::fntrace::enter("source_file_span_map"); 
     None
 }
 
-pub fn source_file_original_file_name(file: &Arc<SourceFile>) -> &str {
+pub fn source_file_original_file_name(file: &Arc<SourceFile>) -> &str { ::tsox_core::fntrace::enter("source_file_original_file_name"); 
     &file.file_name
 }
 
-pub fn source_file_original_text(file: &Arc<SourceFile>) -> &str {
+pub fn source_file_original_text(file: &Arc<SourceFile>) -> &str { ::tsox_core::fntrace::enter("source_file_original_text"); 
     &file.text
 }
 
-pub fn source_file_supplemental_source_files(_file: &Arc<SourceFile>) -> Vec<Arc<SourceFile>> {
+pub fn source_file_supplemental_source_files(_file: &Arc<SourceFile>) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_supplemental_source_files"); 
     Vec::new()
 }
 
@@ -1021,7 +1021,7 @@ pub fn convention_line_and_character_to_position(
     c: &M5uConverters,
     script: &dyn M5uScript,
     line_and_character: &Position,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("convention_line_and_character_to_position"); 
     let existing = crate::ls::lsconv_converters::Converters::new(c.position_encoding);
     let view = PlainScriptView {
         file_name: script.file_name().to_string(),
@@ -1034,7 +1034,7 @@ pub fn convention_position_to_line_and_character(
     c: &M5uConverters,
     script: &dyn M5uScript,
     position: usize,
-) -> Position {
+) -> Position { ::tsox_core::fntrace::enter("convention_position_to_line_and_character"); 
     let existing = crate::ls::lsconv_converters::Converters::new(c.position_encoding);
     let view = PlainScriptView {
         file_name: script.file_name().to_string(),
@@ -1049,11 +1049,11 @@ pub struct PlainScriptView {
 }
 
 impl crate::ls::lsconv_converters::Script for PlainScriptView {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 }

@@ -19,7 +19,7 @@ use super::util;
 pub(crate) fn prepare_range_contains_error_function(
     errors: &[TextRange],
     original_range: TextRange,
-) -> Box<dyn Fn(TextRange) -> bool> {
+) -> Box<dyn Fn(TextRange) -> bool> { ::tsox_core::fntrace::enter("prepare_range_contains_error_function"); 
     if errors.is_empty() {
         return Box::new(|_r| false);
     }
@@ -52,7 +52,7 @@ pub(crate) fn format_span(
     kind: FormatRequestKind,
     options: super::FormatCodeSettings,
     new_line_character: &str,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_span"); 
     let enclosing_node = indentation::find_enclosing_node(span, file);
     let scan_start = indentation::get_scan_start_position(&enclosing_node, span, file);
     let initial_indentation =
@@ -73,12 +73,12 @@ pub(crate) fn format_span(
 }
 
 #[allow(dead_code)]
-fn default_options() -> super::FormatCodeSettings {
+fn default_options() -> super::FormatCodeSettings { ::tsox_core::fntrace::enter("default_options"); 
     super::get_default_format_code_settings()
 }
 
 /// 带 FormatContext 设置的入口（Go 从 ctx 取 options）
-pub(crate) fn format_document_with(ctx: &super::FormatContext, file: &Arc<SourceFile>) -> Vec<TextChange> {
+pub(crate) fn format_document_with(ctx: &super::FormatContext, file: &Arc<SourceFile>) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_document_with"); 
     let options = ctx.settings.clone();
     let out = format_span(
         TextRange::new(0, file.text.len()),
@@ -95,7 +95,7 @@ pub(crate) fn format_selection_with(
     file: &Arc<SourceFile>,
     start: usize,
     end: usize,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_selection_with"); 
     let line_start = util::line_start_position_for_position(file, start);
     format_span(
         TextRange::new(line_start, end),
@@ -108,7 +108,7 @@ pub(crate) fn format_selection_with(
 
 /// Go FormatDocument（引擎内部默认设置版本）
 #[allow(dead_code)]
-pub(crate) fn format_document(file: &Arc<SourceFile>, new_line_character: &str) -> Vec<TextChange> {
+pub(crate) fn format_document(file: &Arc<SourceFile>, new_line_character: &str) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_document"); 
     format_span(
         TextRange::new(0, file.text.len()),
         file,
@@ -125,7 +125,7 @@ pub(crate) fn format_selection(
     start: usize,
     end: usize,
     new_line_character: &str,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_selection"); 
     let line_start = util::line_start_position_for_position(file, start);
     format_span(
         TextRange::new(line_start, end),
@@ -142,7 +142,7 @@ fn format_node_lines(
     file: &Arc<SourceFile>,
     node: &Arc<Node>,
     request_kind: FormatRequestKind,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_node_lines"); 
     let token_start = util::token_pos_of_node(file, node);
     let line_start = util::line_start_position_for_position(file, token_start);
     format_span(
@@ -162,7 +162,7 @@ fn find_immediately_preceding_token_of_kind(
     end: usize,
     expected_token_kind: SyntaxKind,
     file: &Arc<SourceFile>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_immediately_preceding_token_of_kind"); 
     let preceding = preceding_token_with_synthesis(file, end)?;
     if preceding.kind != expected_token_kind || preceding.end() != end {
         return None;
@@ -170,7 +170,7 @@ fn find_immediately_preceding_token_of_kind(
     Some(preceding)
 }
 
-fn preceding_token_with_synthesis(file: &Arc<SourceFile>, position: usize) -> Option<Arc<Node>> {
+fn preceding_token_with_synthesis(file: &Arc<SourceFile>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("preceding_token_with_synthesis"); 
     let ast_token = crate::astnav::find_preceding_token(&file.node, position);
     let scan_from = ast_token.as_ref().map(|t| t.end()).unwrap_or(0);
     if scan_from >= position {
@@ -208,7 +208,7 @@ pub(crate) fn format_on_opening_curly_with(
     ctx: &super::FormatContext,
     file: &Arc<SourceFile>,
     position: usize,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_opening_curly_with"); 
     format_on_opening_curly_inner(file, position, &ctx.settings.clone(), &ctx.new_line_character)
 }
 
@@ -216,7 +216,7 @@ pub(crate) fn format_on_closing_curly_with(
     ctx: &super::FormatContext,
     file: &Arc<SourceFile>,
     position: usize,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_closing_curly_with"); 
     format_on_closing_curly_inner(file, position, &ctx.settings.clone(), &ctx.new_line_character)
 }
 
@@ -224,7 +224,7 @@ pub(crate) fn format_on_semicolon_with(
     ctx: &super::FormatContext,
     file: &Arc<SourceFile>,
     position: usize,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_semicolon_with"); 
     format_on_semicolon_inner(file, position, &ctx.settings.clone(), &ctx.new_line_character)
 }
 
@@ -232,7 +232,7 @@ pub(crate) fn format_on_enter_with(
     ctx: &super::FormatContext,
     file: &Arc<SourceFile>,
     position: usize,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_enter_with"); 
     format_on_enter_inner(file, position, &ctx.settings.clone(), &ctx.new_line_character)
 }
 
@@ -242,7 +242,7 @@ fn format_on_opening_curly_inner(
     position: usize,
     options: &super::FormatCodeSettings,
     new_line_character: &str,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_opening_curly_inner"); 
     let Some(opening_curly) =
         find_immediately_preceding_token_of_kind(position, SyntaxKind::OpenBraceToken, file)
     else {
@@ -268,7 +268,7 @@ fn format_on_closing_curly_inner(
     position: usize,
     options: &super::FormatCodeSettings,
     new_line_character: &str,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_closing_curly_inner"); 
     let preceding_token =
         find_immediately_preceding_token_of_kind(position, SyntaxKind::CloseBraceToken, file);
     match find_outermost_node_within_list_level_with_file(preceding_token, file) {
@@ -285,7 +285,7 @@ fn format_on_semicolon_inner(
     position: usize,
     options: &super::FormatCodeSettings,
     new_line_character: &str,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_semicolon_inner"); 
     let semicolon =
         find_immediately_preceding_token_of_kind(position, SyntaxKind::SemicolonToken, file);
     match find_outermost_node_within_list_level_with_file(semicolon, file) {
@@ -294,7 +294,7 @@ fn format_on_semicolon_inner(
     }
 }
 
-fn ctx_options_holder(options: &super::FormatCodeSettings, new_line: &str) -> super::FormatContext {
+fn ctx_options_holder(options: &super::FormatCodeSettings, new_line: &str) -> super::FormatContext { ::tsox_core::fntrace::enter("ctx_options_holder"); 
     super::FormatContext { settings: options.clone(), new_line_character: new_line.to_string() }
 }
 
@@ -304,7 +304,7 @@ fn format_on_enter_inner(
     position: usize,
     options: &super::FormatCodeSettings,
     new_line_character: &str,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_enter_inner"); 
     let line = util::line_of_position(file, position);
     if line == 0 {
         return Vec::new();
@@ -361,7 +361,7 @@ fn format_on_enter_inner(
 fn find_outermost_node_within_list_level_with_file(
     node: Option<Arc<Node>>,
     file: &Arc<SourceFile>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_outermost_node_within_list_level_with_file"); 
     let node = node?;
     let mut current = Some(node.clone());
     while let Some(cur) = current {

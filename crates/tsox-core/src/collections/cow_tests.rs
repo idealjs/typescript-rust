@@ -1,7 +1,7 @@
 use crate::collections::cow::*;
 
 #[test]
-fn scope_restores_state() {
+fn scope_restores_state() { crate::fntrace::enter("scope_restores_state"); 
     let mut m = CopyOnWriteMap::new();
     m.insert("a", 1);
     m.insert("b", 2);
@@ -18,7 +18,7 @@ fn scope_restores_state() {
 }
 
 #[test]
-fn cow_set_scope() {
+fn cow_set_scope() { crate::fntrace::enter("cow_set_scope"); 
     let mut s = CopyOnWriteSet::new();
     s.insert("a");
     s.insert("b");
@@ -32,7 +32,7 @@ fn cow_set_scope() {
 }
 
 #[test]
-fn explicit_enter_exit() {
+fn explicit_enter_exit() { crate::fntrace::enter("explicit_enter_exit"); 
     let mut m = CopyOnWriteMap::new();
     m.insert("a", 1);
     let state = m.enter_scope();

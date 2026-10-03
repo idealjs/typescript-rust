@@ -27,28 +27,28 @@ const EXTENSIONS_NOT_SUPPORTING_EXTENSIONLESS_RESOLUTION: &[&str] = &[
     tsox_core::tspath::EXTENSION_CJS,
 ];
 
-pub fn count_path_components(path: &str) -> usize {
+pub fn count_path_components(path: &str) -> usize { ::tsox_core::fntrace::enter("count_path_components"); 
     let initial = if path.starts_with("./") { 2 } else { 0 };
     path[initial..].matches('/').count()
 }
 
-pub fn contains_node_modules(s: &str) -> bool {
+pub fn contains_node_modules(s: &str) -> bool { ::tsox_core::fntrace::enter("contains_node_modules"); 
     s.contains("/node_modules/")
 }
 
-fn contains_ignored_path(s: &str) -> bool {
+fn contains_ignored_path(s: &str) -> bool { ::tsox_core::fntrace::enter("contains_ignored_path"); 
     s.contains("/node_modules/.") || s.contains("/.git") || s.contains(".#")
 }
 
 pub fn should_allow_importing_ts_extension(
     compiler_options: &CompilerOptions,
     from_file_name: &str,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_allow_importing_ts_extension"); 
     compiler_options.get_allow_importing_ts_extensions()
         || (!from_file_name.is_empty() && is_declaration_file_name(from_file_name))
 }
 
-pub fn uses_extensions_on_imports(file: &dyn SourceFileForSpecifierGeneration) -> bool {
+pub fn uses_extensions_on_imports(file: &dyn SourceFileForSpecifierGeneration) -> bool { ::tsox_core::fntrace::enter("uses_extensions_on_imports"); 
     for import_ref in file.imports() {
         let text = import_ref.text();
         if path_is_relative(text)
@@ -64,7 +64,7 @@ pub fn infer_preference(
     resolution_mode: ResolutionMode,
     source_file: Option<&dyn SourceFileForSpecifierGeneration>,
     module_resolution_is_node_next: bool,
-) -> ModuleSpecifierEnding {
+) -> ModuleSpecifierEnding { ::tsox_core::fntrace::enter("infer_preference"); 
     let mut uses_js_extensions = false;
     let mut specifiers: Vec<std::sync::Arc<tsox_frontend::ast::Node>> = Vec::new();
     if let Some(source_file) = source_file {
@@ -98,7 +98,7 @@ pub fn infer_preference(
     ModuleSpecifierEnding::Minimal
 }
 
-fn module_resolution_is_node_next(module_resolution: ModuleResolutionKind) -> bool {
+fn module_resolution_is_node_next(module_resolution: ModuleResolutionKind) -> bool { ::tsox_core::fntrace::enter("module_resolution_is_node_next"); 
     let value = module_resolution as u8;
     let node16 = ModuleResolutionKind::Node16 as u8;
     let node_next = ModuleResolutionKind::NodeNext as u8;
@@ -110,7 +110,7 @@ pub fn get_module_specifier_ending_preference(
     resolution_mode: ResolutionMode,
     compiler_options: &CompilerOptions,
     source_file: Option<&dyn SourceFileForSpecifierGeneration>,
-) -> ModuleSpecifierEnding {
+) -> ModuleSpecifierEnding { ::tsox_core::fntrace::enter("get_module_specifier_ending_preference"); 
     let module_resolution = compiler_options.get_module_resolution_kind();
     let module_resolution_is_node_next = module_resolution_is_node_next(module_resolution);
 
@@ -155,7 +155,7 @@ pub fn get_preferred_ending(
     importing_source_file: &dyn SourceFileForSpecifierGeneration,
     old_import_specifier: &str,
     mut resolution_mode: ResolutionMode,
-) -> ModuleSpecifierEnding {
+) -> ModuleSpecifierEnding { ::tsox_core::fntrace::enter("get_preferred_ending"); 
     if !old_import_specifier.is_empty() {
         if has_js_file_extension(old_import_specifier) {
             return ModuleSpecifierEnding::JsExtension;
@@ -189,7 +189,7 @@ pub fn get_allowed_endings_in_preferred_order(
     importing_source_file: &dyn SourceFileForSpecifierGeneration,
     old_import_specifier: &str,
     syntax_implied_node_format: ResolutionMode,
-) -> Vec<ModuleSpecifierEnding> {
+) -> Vec<ModuleSpecifierEnding> { ::tsox_core::fntrace::enter("get_allowed_endings_in_preferred_order"); 
     let mut preferred_ending = get_preferred_ending(
         prefs,
         host,
@@ -290,7 +290,7 @@ pub fn get_module_specifier_preferences<'a>(
     compiler_options: &'a CompilerOptions,
     importing_source_file: &'a dyn SourceFileForSpecifierGeneration,
     old_import_specifier: &'a str,
-) -> ModuleSpecifierPreferences<'a> {
+) -> ModuleSpecifierPreferences<'a> { ::tsox_core::fntrace::enter("get_module_specifier_preferences"); 
     let excludes = prefs.auto_import_specifier_exclude_regexes.clone();
     let mut relative_preference = RelativePreferenceKind::Shortest;
     if !old_import_specifier.is_empty() {
@@ -339,7 +339,7 @@ pub fn get_each_file_name_of_module(
     imported_file_name: &str,
     host: &dyn ModuleSpecifierGenerationHost,
     prefer_symlinks: bool,
-) -> Vec<ModulePath> {
+) -> Vec<ModulePath> { ::tsox_core::fntrace::enter("get_each_file_name_of_module"); 
     let cwd = host.get_current_directory();
     let imported_path = to_path(imported_file_name, &cwd, host.use_case_sensitive_file_names());
     let mut reference_redirect = String::new();

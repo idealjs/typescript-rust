@@ -146,29 +146,29 @@ pub const OPTIONS_FOR_WATCH: &[OptionDecl] = &[
     },
 ];
 
-pub(crate) fn decl_matches(o: &OptionDecl, name: &str) -> bool {
+pub(crate) fn decl_matches(o: &OptionDecl, name: &str) -> bool { ::tsox_core::fntrace::enter("decl_matches"); 
     o.name.eq_ignore_ascii_case(name)
         || o.short_name
             .map(|s| s.eq_ignore_ascii_case(name))
             .unwrap_or(false)
 }
 
-pub(crate) fn find_option(name: &str) -> Option<&'static OptionDecl> {
+pub(crate) fn find_option(name: &str) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("find_option"); 
     OPTIONS.iter().find(|o| decl_matches(o, name))
 }
 
-pub(crate) fn find_build_only_option(name: &str) -> Option<&'static OptionDecl> {
+pub(crate) fn find_build_only_option(name: &str) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("find_build_only_option"); 
     BUILD_OPTIONS.iter().find(|o| decl_matches(o, name))
 }
 
-pub(crate) fn find_build_option(name: &str) -> Option<&'static OptionDecl> {
+pub(crate) fn find_build_option(name: &str) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("find_build_option"); 
     BUILD_OPTIONS
         .iter()
         .chain(OPTIONS.iter())
         .find(|o| decl_matches(o, name))
 }
 
-pub(crate) fn did_you_mean_build_option(input: &str) -> Option<String> {
+pub(crate) fn did_you_mean_build_option(input: &str) -> Option<String> { ::tsox_core::fntrace::enter("did_you_mean_build_option"); 
     let input_lower = input.to_lowercase();
     let mut best: Option<(usize, &str)> = None;
     for opt in BUILD_OPTIONS.iter().chain(OPTIONS.iter()) {
@@ -182,7 +182,7 @@ pub(crate) fn did_you_mean_build_option(input: &str) -> Option<String> {
     best.map(|(_, name)| name.to_string())
 }
 
-pub(crate) fn levenshtein(a: &str, b: &str) -> usize {
+pub(crate) fn levenshtein(a: &str, b: &str) -> usize { ::tsox_core::fntrace::enter("levenshtein"); 
     let a: Vec<char> = a.chars().collect();
     let b: Vec<char> = b.chars().collect();
     let m = a.len();
@@ -206,7 +206,7 @@ pub(crate) fn levenshtein(a: &str, b: &str) -> usize {
     prev[n]
 }
 
-pub(crate) fn find_watch_option(name: &str) -> Option<&'static OptionDecl> {
+pub(crate) fn find_watch_option(name: &str) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("find_watch_option"); 
     OPTIONS_FOR_WATCH.iter().find(|o| decl_matches(o, name))
 }
 
@@ -220,19 +220,19 @@ pub enum OptValue {
 }
 
 impl OptValue {
-    pub(crate) fn as_bool(&self) -> Option<bool> {
+    pub(crate) fn as_bool(&self) -> Option<bool> { ::tsox_core::fntrace::enter("as_bool"); 
         match self {
             OptValue::Bool(b) => Some(*b),
             _ => None,
         }
     }
-    pub(crate) fn as_str(&self) -> Option<&str> {
+    pub(crate) fn as_str(&self) -> Option<&str> { ::tsox_core::fntrace::enter("as_str"); 
         match self {
             OptValue::Str(s) => Some(s),
             _ => None,
         }
     }
-    pub(crate) fn as_list(&self) -> Option<&[String]> {
+    pub(crate) fn as_list(&self) -> Option<&[String]> { ::tsox_core::fntrace::enter("as_list"); 
         match self {
             OptValue::List(v) => Some(v),
             _ => None,

@@ -28,7 +28,7 @@ use super::m3c_2::modifier_flags_of;
 
 pub fn compute_subtree_facts_enum_declaration(
     d: &crate::ast::node_data_generated::EnumDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_enum_declaration"); 
     if modifier_flags_of(&d.modifiers).contains(ModifierFlags::Ambient) {
         return SubtreeContainsTypeScript;
     }
@@ -40,7 +40,7 @@ pub fn compute_subtree_facts_enum_declaration(
 
 pub fn compute_subtree_facts_enum_member(
     d: &crate::ast::node_data_generated::EnumMemberData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_enum_member"); 
     propagate_subtree_facts(Some(&d.name))
         | propagate_subtree_facts(d.initializer.as_ref())
         | SubtreeContainsTypeScript
@@ -48,7 +48,7 @@ pub fn compute_subtree_facts_enum_member(
 
 pub fn compute_subtree_facts_export_assignment(
     d: &crate::ast::node_data_generated::ExportAssignmentData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_export_assignment"); 
     propagate_modifier_list_subtree_facts(d.modifiers.as_ref())
         | propagate_subtree_facts(Some(&d.type_node))
         | propagate_subtree_facts(Some(&d.expression))
@@ -61,7 +61,7 @@ pub fn compute_subtree_facts_export_assignment(
 
 pub fn compute_subtree_facts_export_declaration(
     d: &crate::ast::node_data_generated::ExportDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_export_declaration"); 
     propagate_modifier_list_subtree_facts(d.modifiers.as_ref())
         | propagate_subtree_facts(d.export_clause.as_ref())
         | propagate_subtree_facts(d.module_specifier.as_ref())
@@ -75,7 +75,7 @@ pub fn compute_subtree_facts_export_declaration(
 
 pub fn compute_subtree_facts_export_specifier(
     d: &crate::ast::node_data_generated::ExportSpecifierData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_export_specifier"); 
     if d.is_type_only {
         return SubtreeContainsTypeScript;
     }
@@ -84,14 +84,14 @@ pub fn compute_subtree_facts_export_specifier(
 
 pub fn compute_subtree_facts_expression_with_type_arguments(
     d: &crate::ast::node_data_generated::ExpressionWithTypeArgumentsData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_expression_with_type_arguments"); 
     propagate_subtree_facts(Some(&d.expression))
         | propagate_eraseable_syntax_list_subtree_facts(d.type_arguments.as_ref())
 }
 
 pub fn compute_subtree_facts_for_in_of_statement(
     d: &crate::ast::node_data_generated::ForInOrOfStatementData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_for_in_of_statement"); 
     propagate_subtree_facts(Some(&d.initializer))
         | propagate_subtree_facts(Some(&d.expression))
         | propagate_subtree_facts(Some(&d.statement))
@@ -104,7 +104,7 @@ pub fn compute_subtree_facts_for_in_of_statement(
 
 pub fn compute_subtree_facts_function_declaration(
     d: &crate::ast::node_data_generated::FunctionDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_function_declaration"); 
     if d.body.is_none() || modifier_flags_of(&d.modifiers).contains(ModifierFlags::Ambient) {
         return SubtreeContainsTypeScript;
     }
@@ -132,7 +132,7 @@ pub fn compute_subtree_facts_function_declaration(
 
 pub fn compute_subtree_facts_function_expression(
     d: &crate::ast::node_data_generated::FunctionExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_function_expression"); 
     let is_async = modifier_flags_of(&d.modifiers).contains(ModifierFlags::Async);
     let is_generator = d.asterisk_token.is_some();
     propagate_modifier_list_subtree_facts(d.modifiers.as_ref())
@@ -157,7 +157,7 @@ pub fn compute_subtree_facts_function_expression(
 
 pub fn compute_subtree_facts_heritage_clause(
     d: &crate::ast::node_data_generated::HeritageClauseData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_heritage_clause"); 
     match d.token {
         SyntaxKind::ExtendsKeyword => {
             propagate_node_list_subtree_facts(Some(&d.types), |n| propagate_subtree_facts(Some(n)))
@@ -169,7 +169,7 @@ pub fn compute_subtree_facts_heritage_clause(
 
 pub fn compute_subtree_facts_import_clause(
     d: &crate::ast::node_data_generated::ImportClauseData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_import_clause"); 
     if d.phase_modifier == Some(SyntaxKind::TypeKeyword) {
         return SubtreeContainsTypeScript;
     }
@@ -178,7 +178,7 @@ pub fn compute_subtree_facts_import_clause(
 
 pub fn compute_subtree_facts_import_equals_declaration(
     d: &crate::ast::node_data_generated::ImportEqualsDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_import_equals_declaration"); 
     if d.is_type_only || !is_external_module_reference(&d.module_reference) {
         return SubtreeContainsTypeScript;
     }
@@ -189,7 +189,7 @@ pub fn compute_subtree_facts_import_equals_declaration(
 
 pub fn compute_subtree_facts_import_specifier(
     d: &crate::ast::node_data_generated::ImportSpecifierData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_import_specifier"); 
     if d.is_type_only {
         return SubtreeContainsTypeScript;
     }
@@ -198,7 +198,7 @@ pub fn compute_subtree_facts_import_specifier(
 
 pub fn compute_subtree_facts_jsx_attribute(
     d: &crate::ast::node_data_generated::JsxAttributeData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_attribute"); 
     propagate_subtree_facts(Some(&d.name))
         | propagate_subtree_facts(d.initializer.as_ref())
         | SubtreeContainsJsx
@@ -206,20 +206,20 @@ pub fn compute_subtree_facts_jsx_attribute(
 
 pub fn compute_subtree_facts_jsx_attributes(
     d: &crate::ast::node_data_generated::JsxAttributesData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_attributes"); 
     propagate_node_list_subtree_facts(Some(&d.properties), |n| propagate_subtree_facts(Some(n)))
         | SubtreeContainsJsx
 }
 
 pub fn compute_subtree_facts_jsx_closing_element(
     d: &crate::ast::node_data_generated::JsxClosingElementData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_closing_element"); 
     propagate_subtree_facts(Some(&d.tag_name)) | SubtreeContainsJsx
 }
 
 pub fn compute_subtree_facts_jsx_element(
     d: &crate::ast::node_data_generated::JsxElementData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_element"); 
     propagate_subtree_facts(Some(&d.opening_element))
         | propagate_node_list_subtree_facts(Some(&d.children), |n| propagate_subtree_facts(Some(n)))
         | propagate_subtree_facts(Some(&d.closing_element))
@@ -228,20 +228,20 @@ pub fn compute_subtree_facts_jsx_element(
 
 pub fn compute_subtree_facts_jsx_expression(
     d: &crate::ast::node_data_generated::JsxExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_expression"); 
     propagate_subtree_facts(d.expression.as_ref()) | SubtreeContainsJsx
 }
 
 pub fn compute_subtree_facts_jsx_fragment(
     d: &crate::ast::node_data_generated::JsxFragmentData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_fragment"); 
     propagate_node_list_subtree_facts(Some(&d.children), |n| propagate_subtree_facts(Some(n)))
         | SubtreeContainsJsx
 }
 
 pub fn compute_subtree_facts_jsx_namespaced_name(
     d: &crate::ast::node_data_generated::JsxNamespacedNameData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_namespaced_name"); 
     propagate_subtree_facts(Some(&d.namespace))
         | propagate_subtree_facts(Some(&d.name))
         | SubtreeContainsJsx
@@ -249,7 +249,7 @@ pub fn compute_subtree_facts_jsx_namespaced_name(
 
 pub fn compute_subtree_facts_jsx_opening_element(
     d: &crate::ast::node_data_generated::JsxOpeningElementData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_opening_element"); 
     propagate_subtree_facts(Some(&d.tag_name))
         | propagate_eraseable_syntax_list_subtree_facts(d.type_arguments.as_ref())
         | propagate_subtree_facts(Some(&d.attributes))
@@ -258,7 +258,7 @@ pub fn compute_subtree_facts_jsx_opening_element(
 
 pub fn compute_subtree_facts_jsx_self_closing_element(
     d: &crate::ast::node_data_generated::JsxSelfClosingElementData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_self_closing_element"); 
     propagate_subtree_facts(Some(&d.tag_name))
         | propagate_eraseable_syntax_list_subtree_facts(d.type_arguments.as_ref())
         | propagate_subtree_facts(Some(&d.attributes))
@@ -267,7 +267,7 @@ pub fn compute_subtree_facts_jsx_self_closing_element(
 
 pub fn compute_subtree_facts_jsx_spread_attribute(
     d: &crate::ast::node_data_generated::JsxSpreadAttributeData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_jsx_spread_attribute"); 
     propagate_subtree_facts(Some(&d.expression)) | SubtreeContainsJsx
 }
 

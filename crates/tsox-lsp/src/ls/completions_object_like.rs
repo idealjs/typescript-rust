@@ -18,7 +18,7 @@ pub(super) fn try_get_object_like_container(
     text: &str,
     position: usize,
     root: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_object_like_container"); 
     let context = context_token?;
     let parent = token_parent(root, context)?;
     if std::env::var_os("TSOX_DEBUG_OBJ").is_some() {
@@ -103,7 +103,7 @@ pub(super) fn try_get_object_like_container(
 fn property_assignment_ancestor_container(
     parent: &Arc<Node>,
     context: &ScanToken,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("property_assignment_ancestor_container"); 
     let ancestor = find_ancestor_property_assignment(parent)?;
     if ancestor.loc.end() != context.end {
         return None;
@@ -113,7 +113,7 @@ fn property_assignment_ancestor_container(
         .filter(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
 }
 
-fn find_ancestor_property_assignment(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_ancestor_property_assignment(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_property_assignment"); 
     let mut current = Some(Arc::clone(node));
     while let Some(n) = current {
         if n.kind == SyntaxKind::PropertyAssignment {
@@ -132,7 +132,7 @@ pub(super) fn object_like_completion(
     container: &Arc<Node>,
     text: &str,
     position: usize,
-) -> Option<Vec<Arc<Symbol>>> {
+) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("object_like_completion"); 
     if std::env::var_os("TSOX_DEBUG_OBJ").is_some() {
         let ct = checker.get_contextual_type(container, ContextFlags::None);
         eprintln!("[obj-oc] ct={}", ct.as_ref().map(|t| checker.type_to_string(t)).unwrap_or_else(|| "<none>".into()));
@@ -151,7 +151,7 @@ pub(super) fn object_like_completion(
     ))
 }
 
-fn container_children(container: &Arc<Node>) -> Vec<Arc<Node>> {
+fn container_children(container: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("container_children"); 
     match &container.data {
         NodeData::ObjectLiteralExpression(d) => d.properties.nodes.clone(),
         NodeData::BindingPattern(d) => d.elements.nodes.clone(),
@@ -162,7 +162,7 @@ fn container_children(container: &Arc<Node>) -> Vec<Arc<Node>> {
 fn object_literal_type_members(
     checker: &mut Checker,
     container: &Arc<Node>,
-) -> Option<Vec<Arc<Symbol>>> {
+) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("object_literal_type_members"); 
     let instantiated = match checker.get_contextual_type(container, ContextFlags::None) {
         Some(t) => t,
         None => try_get_object_literal_contextual_type(checker, container)?,
@@ -189,7 +189,7 @@ fn object_literal_type_members(
 fn try_get_object_literal_contextual_type(
     checker: &mut Checker,
     container: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("try_get_object_literal_contextual_type"); 
     let parent = walk_up_parenthesized_expressions(container.parent().as_ref()?);
     if parent.kind == SyntaxKind::BinaryExpression
         && let NodeData::BinaryExpression(d) = &parent.data
@@ -201,7 +201,7 @@ fn try_get_object_literal_contextual_type(
     checker.get_contextual_type(&parent, ContextFlags::None)
 }
 
-fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
+fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("walk_up_parenthesized_expressions"); 
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::ParenthesizedExpression
         && let Some(parent) = &current.parent()
@@ -216,7 +216,7 @@ pub(super) fn properties_for_object_expression(
     instantiated: &Arc<Type>,
     completions_type: Option<&Arc<Type>>,
     obj: &Arc<Node>,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("properties_for_object_expression"); 
     // Go getPropertiesForObjectExpression：t = 实例化上下文 ∪ completionsType
     //（非 any）；completionsType 存在时剔除「唯一声明在字面量自身」的成员
     //（f({abc}) 的 abc 因自声明进入 T，防自证补全）
@@ -279,7 +279,7 @@ pub(super) fn properties_for_object_expression(
     properties
 }
 
-fn is_union_member_excluded(checker: &mut Checker, t: &Arc<Type>, obj: &Arc<Node>) -> bool {
+fn is_union_member_excluded(checker: &mut Checker, t: &Arc<Type>, obj: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_union_member_excluded"); 
     // Go getApparentProperties 的联合成员五条件：primitive、array-like、
     // 判别已失效（isTypeInvalidDueToUnionDiscriminant）、调用/构造签名、
     // 含非公开成员的 class
@@ -315,7 +315,7 @@ fn is_union_member_excluded(checker: &mut Checker, t: &Arc<Type>, obj: &Arc<Node
 // Go isArrayLikeType 的 isTypeAssignableTo(anyReadonlyArrayType) 近似：
 // 接口/引用目标的基类链走到全局 Array/ReadonlyArray（Many extends
 // ReadonlyArray 形态）
-fn extends_array_like(checker: &mut Checker, t: &Arc<Type>) -> bool {
+fn extends_array_like(checker: &mut Checker, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("extends_array_like"); 
     let Some(target) = t.target() else {
         return false;
     };
@@ -341,7 +341,7 @@ fn filter_object_members(
     existing: &[Arc<Node>],
     text: &str,
     position: usize,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("filter_object_members"); 
     if existing.is_empty() {
         return contextual;
     }
@@ -375,7 +375,7 @@ fn filter_object_members(
         .collect()
 }
 
-fn existing_member_name(member: &Arc<Node>) -> Option<String> {
+fn existing_member_name(member: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("existing_member_name"); 
     let name = match &member.data {
         NodeData::BindingElement(d) => d.property_name.clone().or_else(|| d.name.clone()),
         _ => member.name().cloned(),
@@ -389,12 +389,12 @@ fn existing_member_name(member: &Arc<Node>) -> Option<String> {
     None
 }
 
-pub(super) fn is_currently_editing_node(node: &Arc<Node>, text: &str, position: usize) -> bool {
+pub(super) fn is_currently_editing_node(node: &Arc<Node>, text: &str, position: usize) -> bool { ::tsox_core::fntrace::enter("is_currently_editing_node"); 
     let start = skip_trivia(text, node.pos());
     start <= position && position <= node.end()
 }
 
-pub(super) fn union_member_types(t: &Arc<Type>) -> Vec<Arc<Type>> {
+pub(super) fn union_member_types(t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("union_member_types"); 
     match &t.data {
         TypeData::Union(u) => u.union_or_intersection.types.clone(),
         _ => vec![Arc::clone(t)],
@@ -403,7 +403,7 @@ pub(super) fn union_member_types(t: &Arc<Type>) -> Vec<Arc<Type>> {
 
 
 /// Go NodeFlagsInWithStatement：对象字面量位于 with 语句内
-pub(super) fn in_with_statement(container: &Arc<Node>) -> bool {
+pub(super) fn in_with_statement(container: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("in_with_statement"); 
     let mut cur = Some(Arc::clone(container));
     while let Some(n) = cur {
         if n.kind == SyntaxKind::WithStatement {

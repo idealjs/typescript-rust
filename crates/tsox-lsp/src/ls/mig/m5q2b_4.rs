@@ -29,7 +29,7 @@ impl crate::ls::mig::m5q_3::SnippetPrinter {
         node: &Arc<Node>,
         _source_file: &Arc<SourceFile>,
         _format_options: &crate::ls::lsutil_format_code_options::FormatCodeSettings,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("print_and_format_node_with_settings"); 
         self.print_unescaped_node(node)
     }
 }
@@ -44,7 +44,7 @@ impl crate::ls::language_service::LanguageService {
         options: &core::compiler_options::CompilerOptions,
         program: &tsox_compile::compiler::Program,
         c: &mut Checker,
-    ) -> Option<Option<lsproto::CompletionItem>> {
+    ) -> Option<Option<lsproto::CompletionItem>> { ::tsox_core::fntrace::enter("get_exhaustive_case_snippets"); 
         let clauses: &[Arc<Node>] = match &case_block.data {
             ast::node_data_generated::NodeData::CaseBlock(d) => &d.clauses.nodes,
             _ => &[],
@@ -250,7 +250,7 @@ fn new_prefix_unary_expression_m5q2b4(
     _factory: &NodeFactory,
     operator: SyntaxKind,
     operand: Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_prefix_unary_expression_m5q2b4"); 
     Arc::new(Node::new(
         SyntaxKind::PrefixUnaryExpression,
         ast::node_data_generated::NodeData::PrefixUnaryExpression(
@@ -263,7 +263,7 @@ fn new_case_clause_m5q2b4(
     _factory: &NodeFactory,
     expression: Arc<Node>,
     statements: tsox_frontend::ast::node_node_list::NodeList,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_case_clause_m5q2b4"); 
     Arc::new(Node::new(
         SyntaxKind::CaseClause,
         ast::node_data_generated::NodeData::CaseOrDefaultClause(

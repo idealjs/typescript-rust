@@ -36,7 +36,7 @@ pub struct CombinedCodeActions {
 }
 
 impl LanguageService {
-    pub fn provide_code_actions(&self, params: &CodeActionParams) -> Vec<CodeAction> {
+    pub fn provide_code_actions(&self, params: &CodeActionParams) -> Vec<CodeAction> { ::tsox_core::fntrace::enter("provide_code_actions"); 
         let (program, source_file) = self.get_program_and_file(&params.text_document.uri);
         let line_map = &source_file.line_map;
 
@@ -77,7 +77,7 @@ impl LanguageService {
     }
 }
 
-fn diagnostic_title(diag: &AstDiagnostic) -> String {
+fn diagnostic_title(diag: &AstDiagnostic) -> String { ::tsox_core::fntrace::enter("diagnostic_title"); 
     if let Some(ref msg) = diag.message {
         let args: Vec<&str> = diag.message_args.iter().map(|s| s.as_str()).collect();
         let text = tsox_core::diagnostics::format_message(msg.text, &args);
@@ -88,7 +88,7 @@ fn diagnostic_title(diag: &AstDiagnostic) -> String {
     format!("Fix diagnostic (code {})", diag.code)
 }
 
-fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> Diagnostic {
+fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("ast_diagnostic_to_lsp"); 
     Diagnostic {
         range: Range {
             start: offset_to_position(line_map, diag.loc.pos()),
@@ -104,7 +104,7 @@ fn ast_diagnostic_to_lsp(line_map: &LineMap, diag: &AstDiagnostic) -> Diagnostic
     }
 }
 
-fn category_to_severity(category: Category) -> u32 {
+fn category_to_severity(category: Category) -> u32 { ::tsox_core::fntrace::enter("category_to_severity"); 
     match category {
         Category::Error => 1,
         Category::Warning => 2,
@@ -113,7 +113,7 @@ fn category_to_severity(category: Category) -> u32 {
     }
 }
 
-pub fn registered_code_fix_providers() -> Vec<&'static str> {
+pub fn registered_code_fix_providers() -> Vec<&'static str> { ::tsox_core::fntrace::enter("registered_code_fix_providers"); 
     vec![
         "ImportFixProvider",
         "IsolatedDeclarationsFixProvider",
@@ -121,14 +121,14 @@ pub fn registered_code_fix_providers() -> Vec<&'static str> {
     ]
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -137,7 +137,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

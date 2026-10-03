@@ -10,15 +10,15 @@ pub struct MapEntry<K: Clone + Eq + Hash, V: Clone> {
 }
 
 impl<K: Clone + Eq + Hash, V: Clone> MapEntry<K, V> {
-    pub fn key(&self) -> &K {
+    pub fn key(&self) -> &K { ::tsox_core::fntrace::enter("key"); 
         &self.key
     }
 
-    pub fn original(&self) -> &V {
+    pub fn original(&self) -> &V { ::tsox_core::fntrace::enter("original"); 
         &self.original
     }
 
-    pub fn value(&self) -> V {
+    pub fn value(&self) -> V { ::tsox_core::fntrace::enter("value"); 
         if self.delete {
             self.original.clone()
         } else {
@@ -26,7 +26,7 @@ impl<K: Clone + Eq + Hash, V: Clone> MapEntry<K, V> {
         }
     }
 
-    pub fn dirty(&self) -> bool {
+    pub fn dirty(&self) -> bool { ::tsox_core::fntrace::enter("dirty"); 
         self.dirty
     }
 }
@@ -37,14 +37,14 @@ pub struct DirtyMap<K: Clone + Eq + Hash, V: Clone> {
 }
 
 impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
-    pub fn new(base: HashMap<K, V>) -> Self {
+    pub fn new(base: HashMap<K, V>) -> Self { ::tsox_core::fntrace::enter("new"); 
         DirtyMap {
             base,
             dirty: HashMap::new(),
         }
     }
 
-    pub fn get(&self, key: &K) -> Option<MapEntry<K, V>> {
+    pub fn get(&self, key: &K) -> Option<MapEntry<K, V>> { ::tsox_core::fntrace::enter("get"); 
         if let Some(entry) = self.dirty.get(key) {
             if entry.delete {
                 return None;
@@ -61,7 +61,7 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         })
     }
 
-    pub fn add(&mut self, key: K, value: V) {
+    pub fn add(&mut self, key: K, value: V) { ::tsox_core::fntrace::enter("add"); 
         self.dirty.insert(
             key.clone(),
             MapEntry {
@@ -77,7 +77,7 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
     pub fn change<F>(&mut self, key: &K, apply: F)
     where
         F: FnOnce(&mut V),
-    {
+    { ::tsox_core::fntrace::enter("change"); 
         if let Some(entry) = self.get(key) {
             let dirty_key = key.clone();
             if !entry.dirty {
@@ -112,7 +112,7 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         }
     }
 
-    pub fn try_delete(&mut self, key: &K) -> bool {
+    pub fn try_delete(&mut self, key: &K) -> bool { ::tsox_core::fntrace::enter("try_delete"); 
         if self.get(key).is_none() {
             return false;
         }
@@ -134,7 +134,7 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
     pub fn range<F>(&self, mut f: F)
     where
         F: FnMut(&MapEntry<K, V>) -> bool,
-    {
+    { ::tsox_core::fntrace::enter("range"); 
         let mut seen = std::collections::HashSet::new();
         for (key, entry) in &self.dirty {
             seen.insert(key.clone());
@@ -159,12 +159,12 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
         }
     }
 
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self) { ::tsox_core::fntrace::enter("clear"); 
         self.dirty.clear();
         self.base.clear();
     }
 
-    pub fn finalize(&self) -> (HashMap<K, V>, bool) {
+    pub fn finalize(&self) -> (HashMap<K, V>, bool) { ::tsox_core::fntrace::enter("finalize"); 
         if self.dirty.is_empty() {
             return (self.base.clone(), false);
         }
@@ -181,7 +181,7 @@ impl<K: Clone + Eq + Hash, V: Clone> DirtyMap<K, V> {
 }
 
 impl<K: Clone + Eq + Hash, V: Clone> MapEntry<K, V> {
-    fn clone_shallow(&self) -> Self {
+    fn clone_shallow(&self) -> Self { ::tsox_core::fntrace::enter("clone_shallow"); 
         MapEntry {
             key: self.key.clone(),
             original: self.original.clone(),

@@ -168,7 +168,7 @@ pub trait EmitTextWriter {
     fn has_trailing_whitespace(&self) -> bool;
 }
 
-pub fn should_allow_trailing_comma_worker(node: &tsox_frontend::ast::Node, list: &NodeList) -> bool {
+pub fn should_allow_trailing_comma_worker(node: &tsox_frontend::ast::Node, list: &NodeList) -> bool { ::tsox_core::fntrace::enter("should_allow_trailing_comma_worker"); 
     use SyntaxKind as K;
     match node.kind {
         K::ObjectLiteralExpression => true,

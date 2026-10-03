@@ -4,11 +4,11 @@ use std::collections::HashMap;
 
 static SYSTEM_START: OnceLock<std::time::Instant> = OnceLock::new();
 
-pub fn system_start() -> std::time::Instant {
+pub fn system_start() -> std::time::Instant { ::tsox_core::fntrace::enter("system_start"); 
     *SYSTEM_START.get_or_init(std::time::Instant::now)
 }
 
-pub fn since_system_start() -> f64 {
+pub fn since_system_start() -> f64 { ::tsox_core::fntrace::enter("since_system_start"); 
     system_start().elapsed().as_secs_f64()
 }
 use std::io::Write;
@@ -43,7 +43,7 @@ impl ExtendedConfigCache {
         path: &str,
         resolution_stack: &[String],
         host: &ParseConfigHost,
-    ) -> Arc<ExtendedConfigCacheEntry> {
+    ) -> Arc<ExtendedConfigCacheEntry> { ::tsox_core::fntrace::enter("get_extended_config"); 
         let (entry, loaded) = self.load_or_store_new_locked_entry(path);
         let mut guard = entry.lock().unwrap();
         if !loaded {
@@ -56,7 +56,7 @@ impl ExtendedConfigCache {
     fn load_or_store_new_locked_entry(
         &self,
         path: &str,
-    ) -> (Mutex<ExtendedConfigCacheEntryLocked>, bool) {
+    ) -> (Mutex<ExtendedConfigCacheEntryLocked>, bool) { ::tsox_core::fntrace::enter("load_or_store_new_locked_entry"); 
         let mut entries = self.entries.lock().unwrap();
         if let Some(existing) = entries.get(path) {
             let existing = existing.clone();
@@ -88,7 +88,7 @@ fn parse_extended_config(
     resolution_stack: &[String],
     host: &ParseConfigHost,
     cache: &ExtendedConfigCache,
-) -> ExtendedConfigCacheEntry {
+) -> ExtendedConfigCacheEntry { ::tsox_core::fntrace::enter("parse_extended_config"); 
     let _ = (file_name, path, resolution_stack, host, cache);
     ExtendedConfigCacheEntry {
         extended_config: Default::default(),
@@ -114,18 +114,18 @@ pub struct EmitProgramLike<'a> {
 }
 
 impl EmitProgramLike<'_> {
-    pub fn options(&self) -> tsox_core::core::compiler_options::CompilerOptions {
+    pub fn options(&self) -> tsox_core::core::compiler_options::CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         self.program.options()
     }
-    pub fn get_bind_diagnostics(&self, file: &SourceFileRef) -> Vec<Arc<Diagnostic>> {
+    pub fn get_bind_diagnostics(&self, file: &SourceFileRef) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_bind_diagnostics"); 
         let _ = file;
         Vec::new()
     }
-    pub fn get_semantic_diagnostics(&self, file: &SourceFileRef) -> Vec<Arc<Diagnostic>> {
+    pub fn get_semantic_diagnostics(&self, file: &SourceFileRef) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_semantic_diagnostics"); 
         let _ = file;
         Vec::new()
     }
-    pub fn emit(&self, write_file: WriteFileFn) -> EmitResult {
+    pub fn emit(&self, write_file: WriteFileFn) -> EmitResult { ::tsox_core::fntrace::enter("emit"); 
         let _ = write_file;
         EmitResult {
             emit_skipped: true,
@@ -133,7 +133,7 @@ impl EmitProgramLike<'_> {
             emitted_files: Vec::new(),
         }
     }
-    pub fn take_nested_emit_time(&self) -> f64 {
+    pub fn take_nested_emit_time(&self) -> f64 { ::tsox_core::fntrace::enter("take_nested_emit_time"); 
         0.0
     }
 }
@@ -163,7 +163,7 @@ pub fn get_trace_with_writer_from_sys(
     mut w: Box<dyn Write + Send + Sync>,
     locale: &tsox_core::locale::Locale,
     testing: Option<&dyn CommandLineTesting>,
-) -> TraceFn {
+) -> TraceFn { ::tsox_core::fntrace::enter("get_trace_with_writer_from_sys"); 
     if let Some(testing) = testing {
         return testing.get_trace(&GetTraceSysStub);
     }
@@ -178,32 +178,32 @@ pub fn get_trace_with_writer_from_sys(
 struct GetTraceSysStub;
 
 impl System for GetTraceSysStub {
-    fn writer(&self) -> Box<dyn Write + Send> {
+    fn writer(&self) -> Box<dyn Write + Send> { ::tsox_core::fntrace::enter("writer"); 
         todo!("GetTraceSysStub requires the Go CommandLineTesting.GetTrace(writer, locale) channel")
     }
-    fn fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> {
+    fn fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> { ::tsox_core::fntrace::enter("fs"); 
         todo!("GetTraceSysStub::fs")
     }
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         todo!("GetTraceSysStub::default_library_path")
     }
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         todo!("GetTraceSysStub::current_directory")
     }
-    fn write_output_is_tty(&self) -> bool {
+    fn write_output_is_tty(&self) -> bool { ::tsox_core::fntrace::enter("write_output_is_tty"); 
         todo!("GetTraceSysStub::write_output_is_tty")
     }
-    fn width_of_terminal(&self) -> usize {
+    fn width_of_terminal(&self) -> usize { ::tsox_core::fntrace::enter("width_of_terminal"); 
         todo!("GetTraceSysStub::width_of_terminal")
     }
-    fn environment_variable(&self, _name: &str) -> Option<String> {
+    fn environment_variable(&self, _name: &str) -> Option<String> { ::tsox_core::fntrace::enter("environment_variable"); 
         todo!("GetTraceSysStub::environment_variable")
     }
 }
 
 pub fn emit_and_report_statistics(
     mut input: EmitInput,
-) -> (CompileAndEmitResult, Option<Statistics>) {
+) -> (CompileAndEmitResult, Option<Statistics>) { ::tsox_core::fntrace::enter("emit_and_report_statistics"); 
     let mut result = emit_files_and_report_errors(&mut input);
     if result.status != ExitStatus::Success {
         return (result, None);
@@ -226,7 +226,7 @@ pub fn emit_and_report_statistics(
     (result, None)
 }
 
-pub fn emit_files_and_report_errors(input: &mut EmitInput) -> CompileAndEmitResult {
+pub fn emit_files_and_report_errors(input: &mut EmitInput) -> CompileAndEmitResult { ::tsox_core::fntrace::enter("emit_files_and_report_errors"); 
     let mut result = CompileAndEmitResult {
         diagnostics: Vec::new(),
         emit_result: EmitResult {
@@ -289,12 +289,12 @@ pub fn emit_files_and_report_errors(input: &mut EmitInput) -> CompileAndEmitResu
     result
 }
 
-fn sort_and_deduplicate_diagnostics(diagnostics: &mut Vec<Arc<Diagnostic>>) {
+fn sort_and_deduplicate_diagnostics(diagnostics: &mut Vec<Arc<Diagnostic>>) { ::tsox_core::fntrace::enter("sort_and_deduplicate_diagnostics"); 
     diagnostics.sort_by(|a, b| tsox_frontend::ast::mig::m3d_2::compare_diagnostics(a, b));
     diagnostics.dedup_by(|a, b| tsox_frontend::ast::mig::m3d_2::equal_diagnostics_no_related_info(a, b));
 }
 
-pub fn list_files(input: &EmitInput, emit_result: &EmitResult) {
+pub fn list_files(input: &EmitInput, emit_result: &EmitResult) { ::tsox_core::fntrace::enter("list_files"); 
     let mut writer = input.sys.writer();
     let options = input.program.options();
     if options.list_emitted_files.is_true() {

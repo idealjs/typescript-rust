@@ -1,4 +1,4 @@
-pub(crate) fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
+pub(crate) fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> { ::tsox_core::fntrace::enter("collect_all_comment_ranges"); 
     let bytes = text.as_bytes();
     let len = bytes.len();
     let mut ranges: Vec<(usize, usize)> = Vec::new();
@@ -103,7 +103,7 @@ pub(crate) fn collect_all_comment_ranges(text: &str) -> Vec<(usize, usize)> {
     ranges
 }
 
-pub(crate) fn skip_template_literal(text: &str, pos: &mut usize) {
+pub(crate) fn skip_template_literal(text: &str, pos: &mut usize) { ::tsox_core::fntrace::enter("skip_template_literal"); 
     let bytes = text.as_bytes();
     let len = bytes.len();
     while *pos < len {
@@ -160,7 +160,7 @@ pub(crate) fn skip_template_literal(text: &str, pos: &mut usize) {
     }
 }
 
-pub(crate) fn is_regex_context(prev: char) -> bool {
+pub(crate) fn is_regex_context(prev: char) -> bool { ::tsox_core::fntrace::enter("is_regex_context"); 
     matches!(
         prev,
         '(' | ','
@@ -188,6 +188,6 @@ pub(crate) fn is_regex_context(prev: char) -> bool {
     )
 }
 
-pub(crate) fn is_regex_flag_char(b: u8) -> bool {
+pub(crate) fn is_regex_flag_char(b: u8) -> bool { ::tsox_core::fntrace::enter("is_regex_flag_char"); 
     matches!(b, b'g' | b'i' | b'm' | b's' | b'u' | b'y' | b'd' | b'v')
 }

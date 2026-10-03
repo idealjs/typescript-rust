@@ -13,7 +13,7 @@ use super::m1h::r22k7_defs::*;
 use crate::checker::checker::*;
 use std::sync::Arc;
 
-pub fn index_type_less_than(index_type: &Arc<Type>, limit: i32) -> bool {
+pub fn index_type_less_than(index_type: &Arc<Type>, limit: i32) -> bool { ::tsox_core::fntrace::enter("index_type_less_than"); 
     every_type(index_type, &|t: &Arc<Type>| {
         if t.flags.intersects(TYPE_FLAGS_STRING_OR_NUMBER_LITERAL) {
             let prop_name = get_property_name_from_type(t);
@@ -26,7 +26,7 @@ pub fn index_type_less_than(index_type: &Arc<Type>, limit: i32) -> bool {
     })
 }
 
-pub fn insert_type(types: &[Arc<Type>], t: &Arc<Type>) -> (Vec<Arc<Type>>, bool) {
+pub fn insert_type(types: &[Arc<Type>], t: &Arc<Type>) -> (Vec<Arc<Type>>, bool) { ::tsox_core::fntrace::enter("insert_type"); 
     match types.binary_search_by(|probe| compare_types(probe, t)) {
         Err(i) => {
             let mut result = types.to_vec();
@@ -42,7 +42,7 @@ impl Checker {
         &mut self,
         types: &[Arc<Type>],
         m: Option<&Arc<TypeMapper>>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("instantiate_types"); 
         self.instantiate_list(types, m, |c, t, m| c.instantiate_type(t, m), |a, b| {
             Arc::ptr_eq(a, b)
         })
@@ -52,7 +52,7 @@ impl Checker {
         &mut self,
         symbols: &[Arc<Symbol>],
         m: Option<&Arc<TypeMapper>>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("instantiate_symbols"); 
         let mut result: Vec<Arc<Symbol>> = Vec::with_capacity(symbols.len());
         for symbol in symbols {
             if let Some(instantiated) = self.instantiate_symbol(symbol, m) {
@@ -66,7 +66,7 @@ impl Checker {
         &mut self,
         signatures: &[Arc<Signature>],
         m: Option<&Arc<TypeMapper>>,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("instantiate_signatures"); 
         self.instantiate_list(
             signatures,
             m,
@@ -79,7 +79,7 @@ impl Checker {
         &mut self,
         index_infos: &[Arc<IndexInfo>],
         m: Option<&Arc<TypeMapper>>,
-    ) -> Vec<Arc<IndexInfo>> {
+    ) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("instantiate_index_infos"); 
         self.instantiate_list(
             index_infos,
             m,
@@ -94,7 +94,7 @@ impl Checker {
         m: Option<&Arc<TypeMapper>>,
         mut instantiator: impl FnMut(&mut Checker, &T, Option<&Arc<TypeMapper>>) -> T,
         same: impl Fn(&T, &T) -> bool,
-    ) -> Vec<T> {
+    ) -> Vec<T> { ::tsox_core::fntrace::enter("instantiate_list"); 
         for (i, value) in values.iter().enumerate() {
             let mapped = instantiator(self, value, m);
             if !same(&mapped, value) {
@@ -114,7 +114,7 @@ impl Checker {
         &mut self,
         alias: Option<&TypeAlias>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Option<TypeAlias> {
+    ) -> Option<TypeAlias> { ::tsox_core::fntrace::enter("instantiate_type_alias"); 
         let alias = alias?;
         Some(TypeAlias {
             symbol: alias.symbol.clone(),
@@ -127,7 +127,7 @@ impl Checker {
         t: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
         alias: Option<&TypeAlias>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_type_with_alias"); 
         let alias_has_type_variables = t.alias.as_ref().is_some_and(|a| {
             !a.type_arguments.is_empty()
                 && a.type_arguments
@@ -181,7 +181,7 @@ impl Checker {
         t: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
         alias: Option<&TypeAlias>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_type_worker"); 
         let flags = t.flags;
         if flags.intersects(TypeFlags::TypeParameter) {
             return m.unwrap().map(t);
@@ -333,7 +333,7 @@ impl Checker {
         t: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
         alias: Option<&TypeAlias>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_anonymous_type"); 
         let mut object_flags = t.object_flags
             & !(ObjectFlags::CouldContainTypeVariablesComputed
                 | ObjectFlags::CouldContainTypeVariables)

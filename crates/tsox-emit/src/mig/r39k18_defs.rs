@@ -13,14 +13,14 @@ impl crate::mig::m4e::DeclarationEmitHost for crate::mig::m3n_5::r33k8_defs::Dec
         &self,
         node: &Arc<tsox_frontend::ast::Node>,
         flags: tsox_frontend::ast::node_flags::ModifierFlags,
-    ) -> tsox_frontend::ast::node_flags::ModifierFlags {
+    ) -> tsox_frontend::ast::node_flags::ModifierFlags { ::tsox_core::fntrace::enter("get_effective_declaration_flags"); 
         crate::mig::m3n_5::r33k8_defs::DeclarationEmitHost::get_effective_declaration_flags(
             self, node, flags,
         )
     }
 }
 
-pub fn file_reference_from_ast(reference: &AstFileReference) -> FileReference {
+pub fn file_reference_from_ast(reference: &AstFileReference) -> FileReference { ::tsox_core::fntrace::enter("file_reference_from_ast"); 
     FileReference {
         file_name: reference.file_name.clone(),
         text_range: reference.range,
@@ -29,7 +29,7 @@ pub fn file_reference_from_ast(reference: &AstFileReference) -> FileReference {
     }
 }
 
-pub fn file_reference_to_ast(reference: &FileReference) -> AstFileReference {
+pub fn file_reference_to_ast(reference: &FileReference) -> AstFileReference { ::tsox_core::fntrace::enter("file_reference_to_ast"); 
     AstFileReference {
         range: reference.text_range,
         file_name: reference.file_name.clone(),
@@ -38,7 +38,7 @@ pub fn file_reference_to_ast(reference: &FileReference) -> AstFileReference {
     }
 }
 
-pub fn source_file_is_js(script_kind: tsox_frontend::ast::node_source_file::ScriptKind) -> bool {
+pub fn source_file_is_js(script_kind: tsox_frontend::ast::node_source_file::ScriptKind) -> bool { ::tsox_core::fntrace::enter("source_file_is_js"); 
     matches!(
         script_kind,
         tsox_frontend::ast::node_source_file::ScriptKind::Js
@@ -51,7 +51,7 @@ pub trait R39K18EmitResolverExt {
 }
 
 impl R39K18EmitResolverExt for EmitResolver {
-    fn is_optional_parameter(&self, node: &Arc<tsox_frontend::ast::Node>) -> bool {
+    fn is_optional_parameter(&self, node: &Arc<tsox_frontend::ast::Node>) -> bool { ::tsox_core::fntrace::enter("is_optional_parameter"); 
         matches!(
             &node.data,
             tsox_frontend::ast::NodeData::ParameterDeclaration(d)

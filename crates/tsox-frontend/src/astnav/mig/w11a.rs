@@ -5,11 +5,11 @@ pub(crate) fn should_rescan_less_than_less_than_token(
     _s: &Scanner,
     containing_node: &Node,
     token: SyntaxKind,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_rescan_less_than_less_than_token"); 
     token == SyntaxKind::LessThanLessThanToken && is_jsx_child(containing_node)
 }
 
-pub(crate) fn should_skip_child(node: &Node) -> bool {
+pub(crate) fn should_skip_child(node: &Node) -> bool { ::tsox_core::fntrace::enter("should_skip_child"); 
     node.kind == SyntaxKind::JSDoc
         || node.kind == SyntaxKind::JSDocText
         || node.kind == SyntaxKind::JSDocTypeLiteral

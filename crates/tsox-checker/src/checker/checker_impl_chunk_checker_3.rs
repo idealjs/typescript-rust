@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
-    pub fn any_type(&self) -> Arc<Type> {
+    pub fn any_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("any_type"); 
         self.any_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -16,7 +16,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn unknown_type(&self) -> Arc<Type> {
+    pub fn unknown_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("unknown_type"); 
         self.unknown_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -29,7 +29,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn empty_object_type(&self) -> Arc<Type> {
+    pub fn empty_object_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("empty_object_type"); 
         self.empty_object_type
             .get_or_init(|| {
                 Arc::new(Type {
@@ -49,7 +49,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn undefined_type(&self) -> Arc<Type> {
+    pub fn undefined_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("undefined_type"); 
         self.undefined_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -62,7 +62,7 @@ impl Checker {
             .clone()
     }
 
-    pub(crate) fn nullish_widening_type(&self, base: Arc<Type>) -> Arc<Type> {
+    pub(crate) fn nullish_widening_type(&self, base: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("nullish_widening_type"); 
         if self.strict_null_checks {
             return base;
         }
@@ -76,7 +76,7 @@ impl Checker {
         Arc::new(t)
     }
 
-    pub fn null_type(&self) -> Arc<Type> {
+    pub fn null_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("null_type"); 
         self.null_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -89,7 +89,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn string_type(&self) -> Arc<Type> {
+    pub fn string_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("string_type"); 
         self.string_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -102,7 +102,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn number_type(&self) -> Arc<Type> {
+    pub fn number_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("number_type"); 
         self.number_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -115,7 +115,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn bigint_type(&self) -> Arc<Type> {
+    pub fn bigint_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("bigint_type"); 
         self.bigint_type
             .get_or_init(|| {
                 Arc::new(Type::new(

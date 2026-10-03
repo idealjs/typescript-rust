@@ -10,7 +10,7 @@ use tsox_frontend::scanner::mig::m3i::declaration_name_to_string;
 use tsox_frontend::ast::*;
 
 impl Binder {
-    pub(crate) fn find_active_label(&self, name: &str) -> Option<&ActiveLabel> {
+    pub(crate) fn find_active_label(&self, name: &str) -> Option<&ActiveLabel> { ::tsox_core::fntrace::enter("find_active_label"); 
         let mut label = self.active_label_list.as_deref();
         while let Some(l) = label {
             if l.name == name {
@@ -21,7 +21,7 @@ impl Binder {
         None
     }
 
-    pub(crate) fn get_display_name(&self, node: &Arc<Node>) -> String {
+    pub(crate) fn get_display_name(&self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_display_name"); 
         if let Some(name_node) = node.name() {
             return declaration_name_to_string(Some(&name_node));
         }
@@ -35,7 +35,7 @@ impl Binder {
     pub(crate) fn get_strict_mode_block_scope_function_declaration_message(
         &self,
         node: &Arc<Node>,
-    ) -> &'static Message {
+    ) -> &'static Message { ::tsox_core::fntrace::enter("get_strict_mode_block_scope_function_declaration_message"); 
         if get_containing_class(node).is_some() {
             &msg::Function_declarations_are_not_allowed_inside_blocks_in_strict_mode_when_targeting_ES5_Class_definitions_are_automatically_in_strict_mode
         } else if self
@@ -49,7 +49,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn get_strict_mode_identifier_message(&self, node: &Arc<Node>) -> &'static Message {
+    pub(crate) fn get_strict_mode_identifier_message(&self, node: &Arc<Node>) -> &'static Message { ::tsox_core::fntrace::enter("get_strict_mode_identifier_message"); 
         if get_containing_class(node).is_some() {
             &msg::Identifier_expected_0_is_a_reserved_word_in_strict_mode_Class_definitions_are_automatically_in_strict_mode
         } else if self
@@ -65,7 +65,7 @@ impl Binder {
 
     pub(crate) fn get_this_class_and_symbol_table(
         &self,
-    ) -> (Option<Arc<Symbol>>, Option<SymbolTable>) {
+    ) -> (Option<Arc<Symbol>>, Option<SymbolTable>) { ::tsox_core::fntrace::enter("get_this_class_and_symbol_table"); 
         let this_container = match &self.this_container {
             Some(c) => c,
             None => return (None, None),
@@ -101,7 +101,7 @@ impl Binder {
         &self,
         node: &Arc<Node>,
         container: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup_entity"); 
         if is_identifier(node) {
             return self.lookup_name(node.text(), container);
         }
@@ -126,7 +126,7 @@ impl Binder {
         None
     }
 
-    pub(crate) fn lookup_name(&self, name: &str, container: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn lookup_name(&self, name: &str, container: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup_name"); 
         if let Some(locals) = self.symbol_map.locals_of(container) {
             if let Some(local) = locals.get(name) {
                 return Some(local.export_symbol.clone().unwrap_or_else(|| Arc::clone(local)));
@@ -138,7 +138,7 @@ impl Binder {
         None
     }
 
-    pub(crate) fn maybe_bind_expression_flow_if_call(&mut self, node: &Arc<Node>) {
+    pub(crate) fn maybe_bind_expression_flow_if_call(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("maybe_bind_expression_flow_if_call"); 
         if node.kind == SyntaxKind::CallExpression {
             let expression_kind = node.expression().map(|e| e.kind);
             if expression_kind != Some(SyntaxKind::SuperKeyword)
@@ -155,7 +155,7 @@ impl Binder {
         flags: FlowFlags,
         node: Option<Arc<Node>>,
         antecedent: Option<Arc<FlowNode>>,
-    ) -> FlowNode {
+    ) -> FlowNode { ::tsox_core::fntrace::enter("new_flow_node_ex"); 
         let mut result = self.new_flow_node(flags);
         result.node = node;
         result.antecedent = antecedent;

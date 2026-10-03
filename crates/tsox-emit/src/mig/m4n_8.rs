@@ -15,7 +15,7 @@ use std::sync::OnceLock;
 use tsox_frontend::format::mig::m4o_2::{EmitHelper, Priority};
 
 
-fn create_binding_helper_arc() -> &'static Arc<EmitHelper> {
+fn create_binding_helper_arc() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("create_binding_helper_arc"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| {
         Arc::new(EmitHelper {
@@ -41,11 +41,11 @@ fn create_binding_helper_arc() -> &'static Arc<EmitHelper> {
     })
 }
 
-pub fn create_binding_helper() -> &'static EmitHelper {
+pub fn create_binding_helper() -> &'static EmitHelper { ::tsox_core::fntrace::enter("create_binding_helper"); 
     create_binding_helper_arc()
 }
 
-pub fn es_decorate_helper() -> &'static Arc<EmitHelper> {
+pub fn es_decorate_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("es_decorate_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:esDecorate".to_string(),
@@ -85,7 +85,7 @@ pub fn es_decorate_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn export_star_helper() -> &'static Arc<EmitHelper> {
+pub fn export_star_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("export_star_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:export-star".to_string(),
@@ -110,7 +110,7 @@ impl<'a> NodeFactory<'a> {
         context_in: &Arc<Node>,
         initializers: &Arc<Node>,
         extra_initializers: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_es_decorate_helper"); 
         self.emit_context_mut()
             .request_emit_helper(es_decorate_helper());
         self.new_call_expression(
@@ -129,7 +129,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_export_default(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_export_default(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_export_default"); 
         self.new_export_assignment(None, false, None, expression)
     }
 
@@ -137,7 +137,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         module_expression: &Arc<Node>,
         exports_expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_export_star_helper"); 
         self.emit_context_mut()
             .request_emit_helper(export_star_helper());
         self.new_call_expression(
@@ -152,7 +152,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_external_module_export(&self, name: &Arc<Node>) -> Arc<Node> {
+    pub fn new_external_module_export(&self, name: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_external_module_export"); 
         let specifier = self.new_export_specifier(false, None, name);
         let named_exports = self.new_named_exports(&self.new_node_list(vec![specifier]));
         self.new_export_declaration(None, false, &named_exports, None, None)
@@ -163,7 +163,7 @@ impl<'a> NodeFactory<'a> {
         target: &Arc<Node>,
         this_arg: &Arc<Node>,
         arguments_list: &[Arc<Node>],
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_function_bind_call"); 
         let mut args = Vec::with_capacity(1 + arguments_list.len());
         args.push(Arc::clone(this_arg));
         args.extend(arguments_list.iter().cloned());
@@ -174,7 +174,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         param_name: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_assignment_target_wrapper"); 
         let set_accessor = self.new_set_accessor_declaration(
             None,
             &self.new_identifier("value"),

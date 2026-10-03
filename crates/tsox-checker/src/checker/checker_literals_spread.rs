@@ -13,7 +13,7 @@ impl Checker {
         symbol: Option<Arc<Symbol>>,
         object_flags: ObjectFlags,
         readonly: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_spread_type"); 
         if left.flags.contains(TypeFlags::Any) || right.flags.contains(TypeFlags::Any) {
             return self.get_any_type();
         }
@@ -172,7 +172,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn fresh_empty_object_type(&mut self) -> Arc<Type> {
+    pub(crate) fn fresh_empty_object_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("fresh_empty_object_type"); 
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::None,
@@ -193,7 +193,7 @@ impl Checker {
         expression: &Arc<Node>,
         prop: &Arc<Node>,
         literal_symbol: Option<Arc<Symbol>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("fold_object_literal_spread"); 
         if !prop_pairs.is_empty() {
             let segment =
                 self.object_literal_type_from_pairs(std::mem::take(prop_pairs), literal_symbol.clone());
@@ -236,13 +236,13 @@ impl Checker {
         true
     }
 
-    fn union_members(&self, t: &Arc<Type>) -> Option<Vec<Arc<Type>>> {
+    fn union_members(&self, t: &Arc<Type>) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("union_members"); 
         t.as_union_or_intersection()
             .filter(|_| t.flags.contains(TypeFlags::Union))
             .map(|ui| ui.types.clone())
     }
 
-    fn spread_cross_product_ok(&self, left: &Arc<Type>, right: &Arc<Type>) -> bool {
+    fn spread_cross_product_ok(&self, left: &Arc<Type>, right: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("spread_cross_product_ok"); 
         let mut size: usize = 1;
         for t in [left, right] {
             if t.flags.contains(TypeFlags::Union)
@@ -259,7 +259,7 @@ impl Checker {
         true
     }
 
-    pub fn try_merge_union_of_object_type_and_empty_object(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn try_merge_union_of_object_type_and_empty_object(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("try_merge_union_of_object_type_and_empty_object"); 
         if !t.flags.contains(TypeFlags::Union) {
             return Arc::clone(t);
         }
@@ -325,7 +325,7 @@ impl Checker {
         })
     }
 
-    fn is_empty_object_type_or_spreads_into_empty_object(&self, t: &Arc<Type>) -> bool {
+    fn is_empty_object_type_or_spreads_into_empty_object(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_empty_object_type_or_spreads_into_empty_object"); 
         self.type_is_empty_object(t)
             || t.flags.intersects(
                 TypeFlags::Null
@@ -344,7 +344,7 @@ impl Checker {
             )
     }
 
-    pub(crate) fn type_is_empty_object(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn type_is_empty_object(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_empty_object"); 
         if !t.flags.contains(TypeFlags::Object) {
             return false;
         }
@@ -357,7 +357,7 @@ impl Checker {
     }
 
 
-    fn get_spread_symbol(&mut self, prop: &Arc<Symbol>, readonly: bool) -> Arc<Symbol> {
+    fn get_spread_symbol(&mut self, prop: &Arc<Symbol>, readonly: bool) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_spread_symbol"); 
         let is_setonly_accessor = prop.flags.contains(SymbolFlags::SetAccessor)
             && !prop.flags.contains(SymbolFlags::GetAccessor);
         if !is_setonly_accessor && readonly == self.is_readonly_symbol_for_identity(prop) {
@@ -395,7 +395,7 @@ impl Checker {
         &mut self,
         info: &Arc<IndexInfo>,
         readonly: bool,
-    ) -> Arc<IndexInfo> {
+    ) -> Arc<IndexInfo> { ::tsox_core::fntrace::enter("get_index_info_with_readonly"); 
         if info.is_readonly != readonly {
             return Arc::new(IndexInfo {
                 key_type: info.key_type.clone(),
@@ -413,7 +413,7 @@ impl Checker {
         &mut self,
         left: &Arc<Type>,
         right: &Arc<Type>,
-    ) -> Vec<Arc<IndexInfo>> {
+    ) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_union_index_infos"); 
         let source_infos = self.get_index_infos_of_type(left);
         let mut result = Vec::new();
         for info in &source_infos {
@@ -454,7 +454,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn is_valid_spread_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_valid_spread_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_valid_spread_type"); 
         let base = self.get_base_constraint_or_type(t);
         if base.flags.contains(TypeFlags::Union) {
             let Some(ui) = base.as_union_or_intersection() else {
@@ -485,7 +485,7 @@ impl Checker {
                 && self.every_member_valid_spread(&base))
     }
 
-    fn every_member_valid_spread(&mut self, t: &Arc<Type>) -> bool {
+    fn every_member_valid_spread(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("every_member_valid_spread"); 
         t.as_union_or_intersection()
             .map(|ui| {
                 ui.types
@@ -495,7 +495,7 @@ impl Checker {
             .unwrap_or(false)
     }
 
-    fn spread_type_flags_ok(&self, t: &Arc<Type>) -> bool {
+    fn spread_type_flags_ok(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("spread_type_flags_ok"); 
         t.flags.intersects(
             TypeFlags::Any
                 | TypeFlags::NonPrimitive
@@ -508,7 +508,7 @@ impl Checker {
         &mut self,
         prop_pairs: Vec<(String, Arc<Type>, Vec<Arc<Node>>)>,
         literal_symbol: Option<Arc<Symbol>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("object_literal_type_from_pairs"); 
         let mut members = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
         for (name, t, decls) in prop_pairs {
@@ -560,7 +560,7 @@ impl Checker {
     }
 }
 
-fn type_is_definitely_falsy(t: &Arc<Type>) -> bool {
+fn type_is_definitely_falsy(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_definitely_falsy"); 
     t.flags.intersects(
         TypeFlags::BooleanLiteral
             | TypeFlags::StringLiteral

@@ -6,7 +6,7 @@ use tsox_frontend::ast::{Node, NodeData, SyntaxKind, is_class_like};
 
 impl Checker {
     // Go checkSuperExpression 的合法性检查（类型解析在 get_type_of_node）
-    pub(crate) fn check_super_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_super_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_super_expression"); 
         let is_call_expression = node
             .parent()
             .is_some_and(|p| matches!(&p.data, NodeData::CallExpression(c) if Arc::ptr_eq(&c.expression, node)));
@@ -105,7 +105,7 @@ impl Checker {
             immediate_container: &Option<Arc<Node>>,
             container: &Option<Arc<Node>>,
             is_call_expression: bool,
-        ) {
+        ) { ::tsox_core::fntrace::enter("check_legal_super_expression"); 
             if !is_call_expression
                 && let Some(immediate) = immediate_container
                 && immediate.kind == SyntaxKind::Constructor
@@ -160,7 +160,7 @@ impl Checker {
 
 // Go checkSuperExpression 的容器推导：super 的静态性与所属类取自语法祖先，
 // 与类型解析触发时机无关（方法体类型可在类成员检查之外被解析）
-pub(crate) fn super_container_class_and_staticity(node: &Arc<Node>) -> Option<(Arc<Node>, bool)> {
+pub(crate) fn super_container_class_and_staticity(node: &Arc<Node>) -> Option<(Arc<Node>, bool)> { ::tsox_core::fntrace::enter("super_container_class_and_staticity"); 
     let mut container = get_super_container(node, true)?;
     while container.kind == SyntaxKind::ArrowFunction {
         container = get_super_container(&container, true)?;
@@ -174,7 +174,7 @@ pub(crate) fn super_container_class_and_staticity(node: &Arc<Node>) -> Option<(A
     Some((class, is_static))
 }
 
-pub(crate) fn get_super_container(node: &Arc<Node>, stop_on_functions: bool) -> Option<Arc<Node>> {
+pub(crate) fn get_super_container(node: &Arc<Node>, stop_on_functions: bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_super_container"); 
     let mut current = node.parent()?;
     loop {
         match current.kind {
@@ -222,7 +222,7 @@ pub(crate) fn get_super_container(node: &Arc<Node>, stop_on_functions: bool) -> 
     }
 }
 
-fn is_class_element_kind(kind: SyntaxKind) -> bool {
+fn is_class_element_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_class_element_kind"); 
     matches!(
         kind,
         SyntaxKind::PropertyDeclaration
@@ -236,7 +236,7 @@ fn is_class_element_kind(kind: SyntaxKind) -> bool {
 
 // Go isInConstructorArgumentInitializer：super 位于构造器参数初始化器中
 //（遇函数声明即止）
-fn is_in_constructor_argument_initializer(node: &Arc<Node>, ctor: &Arc<Node>) -> bool {
+fn is_in_constructor_argument_initializer(node: &Arc<Node>, ctor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_constructor_argument_initializer"); 
     let mut current = node.parent();
     while let Some(n) = current {
         if tsox_frontend::ast::is_function_like_declaration(&n) {

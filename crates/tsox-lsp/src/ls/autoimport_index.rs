@@ -11,7 +11,7 @@ pub struct Index<T: Named + Clone> {
 }
 
 impl<T: Named + Clone> Default for Index<T> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             entries: Vec::new(),
             index: HashMap::new(),
@@ -20,11 +20,11 @@ impl<T: Named + Clone> Default for Index<T> {
 }
 
 impl<T: Named + Clone> Index<T> {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self::default()
     }
 
-    pub fn find(&self, name: &str, case_sensitive: bool) -> Vec<T> {
+    pub fn find(&self, name: &str, case_sensitive: bool) -> Vec<T> { ::tsox_core::fntrace::enter("find"); 
         if self.entries.is_empty() || name.is_empty() {
             return Vec::new();
         }
@@ -51,7 +51,7 @@ impl<T: Named + Clone> Index<T> {
         results
     }
 
-    pub fn search_word_prefix(&self, prefix: &str) -> Vec<T> {
+    pub fn search_word_prefix(&self, prefix: &str) -> Vec<T> { ::tsox_core::fntrace::enter("search_word_prefix"); 
         if self.entries.is_empty() {
             return Vec::new();
         }
@@ -97,7 +97,7 @@ impl<T: Named + Clone> Index<T> {
         results
     }
 
-    pub fn insert_as_words(&mut self, value: T) {
+    pub fn insert_as_words(&mut self, value: T) { ::tsox_core::fntrace::enter("insert_as_words"); 
         let name = value.name().to_string();
         if name.is_empty() {
             panic!("Cannot index entry with empty name");
@@ -128,7 +128,7 @@ impl<T: Named + Clone> Index<T> {
         }
     }
 
-    pub fn clone_filtered(&self, filter: &dyn Fn(&T) -> bool) -> Index<T> {
+    pub fn clone_filtered(&self, filter: &dyn Fn(&T) -> bool) -> Index<T> { ::tsox_core::fntrace::enter("clone_filtered"); 
         let mut new_idx = Index::<T>::new();
         new_idx.entries = Vec::with_capacity(self.entries.len());
         new_idx.index = HashMap::with_capacity(self.index.len());
@@ -158,7 +158,7 @@ impl<T: Named + Clone> Index<T> {
     }
 }
 
-pub(crate) fn contains_chars_in_order(s: &str, pattern: &str) -> bool {
+pub(crate) fn contains_chars_in_order(s: &str, pattern: &str) -> bool { ::tsox_core::fntrace::enter("contains_chars_in_order"); 
     let str_lower = s.to_ascii_lowercase();
     let pattern_lower = pattern.to_ascii_lowercase();
 
@@ -171,11 +171,11 @@ pub(crate) fn contains_chars_in_order(s: &str, pattern: &str) -> bool {
     pattern_chars.peek().is_none()
 }
 
-pub(crate) fn eq_ignore_ascii_case(a: &str, b: &str) -> bool {
+pub(crate) fn eq_ignore_ascii_case(a: &str, b: &str) -> bool { ::tsox_core::fntrace::enter("eq_ignore_ascii_case"); 
     a.eq_ignore_ascii_case(b)
 }
 
-pub fn word_indices(s: &str) -> Vec<usize> {
+pub fn word_indices(s: &str) -> Vec<usize> { ::tsox_core::fntrace::enter("word_indices"); 
     let mut indices = Vec::new();
     let bytes = s.as_bytes();
     for (byte_index, rune_value) in s.char_indices() {

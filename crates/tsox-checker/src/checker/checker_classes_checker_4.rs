@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         params: &NodeList,
         is_ctor_impl: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_parameter_property_modifiers"); 
         for param in params.iter() {
             let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data else {
                 continue;
@@ -52,11 +52,11 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_type_annotation(&mut self, tn: &Arc<Node>) {
+    pub(crate) fn check_type_annotation(&mut self, tn: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_annotation"); 
         self.with_declaring_file_context(tn, |c| c.check_type_annotation_inner(tn));
     }
 
-    pub(crate) fn check_property_signature_member_types(&mut self, members: &NodeList) {
+    pub(crate) fn check_property_signature_member_types(&mut self, members: &NodeList) { ::tsox_core::fntrace::enter("check_property_signature_member_types"); 
         for member in members.iter() {
             let tsox_frontend::ast::NodeData::PropertySignatureDeclaration(psd) = &member.data
             else {
@@ -82,7 +82,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_type_annotation_inner(&mut self, tn: &Arc<Node>) {
+    pub(crate) fn check_type_annotation_inner(&mut self, tn: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_annotation_inner"); 
         match tn.kind {
             SyntaxKind::FunctionType | SyntaxKind::ConstructorType => {
                 let (params, return_type): (&NodeList, Option<&Arc<Node>>) = match &tn.data {

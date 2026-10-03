@@ -19,7 +19,7 @@ pub struct IncomingEntry {
 }
 
 impl IncomingEntry {
-    pub fn new(ls: crate::ls::language_service::LanguageService, node: Arc<Node>) -> Self {
+    pub fn new(ls: crate::ls::language_service::LanguageService, node: Arc<Node>) -> Self { ::tsox_core::fntrace::enter("new"); 
         IncomingEntry {
             ls,
             node,
@@ -29,7 +29,7 @@ impl IncomingEntry {
         }
     }
 
-    pub fn get_source_file(&self) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         self.source_file
             .get_or_init(|| {
                 tsox_frontend::ast::get_source_file_of_node(&self.node)
@@ -38,7 +38,7 @@ impl IncomingEntry {
             .clone()
     }
 
-    pub fn text_document_uri(&self) -> String {
+    pub fn text_document_uri(&self) -> String { ::tsox_core::fntrace::enter("text_document_uri"); 
         self.document_uri
             .get_or_init(|| {
                 crate::ls::lsconv_converters::file_name_to_document_uri(
@@ -51,7 +51,7 @@ impl IncomingEntry {
             .clone()
     }
 
-    pub fn text_document_position(&self) -> crate::lsp::lsproto::Position {
+    pub fn text_document_position(&self) -> crate::lsp::lsproto::Position { ::tsox_core::fntrace::enter("text_document_position"); 
         self.position
             .get_or_init(|| {
                 let Some(f) = self.get_source_file() else {

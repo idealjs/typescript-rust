@@ -9,7 +9,7 @@ use crate::ast::node::Node;
 use crate::ast::node_flags::ModifierFlags;
 use crate::ast::syntax_kind_generated::SyntaxKind;
 
-pub fn contains_object_rest_or_spread(node: &Node) -> bool {
+pub fn contains_object_rest_or_spread(node: &Node) -> bool { ::tsox_core::fntrace::enter("contains_object_rest_or_spread"); 
     let facts = node.subtree_facts();
     if facts.intersects(SubtreeFacts::ObjectRestOrSpread) {
         return true;
@@ -42,7 +42,7 @@ pub fn contains_object_rest_or_spread(node: &Node) -> bool {
 pub fn create_modifiers_from_modifier_flags(
     flags: ModifierFlags,
     create_modifier: impl Fn(SyntaxKind) -> Arc<Node>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("create_modifiers_from_modifier_flags"); 
     let mut result = Vec::new();
     if flags.contains(ModifierFlags::Export) {
         result.push(create_modifier(SyntaxKind::ExportKeyword));

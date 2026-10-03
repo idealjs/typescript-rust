@@ -20,7 +20,7 @@ use super::m5j_2::*;
 use super::m5i_3::{add_implied_options, filter_same_as_default_include, serialize_compiler_options, TSConfig};
 use crate::tsoptions::build_options::ParsedCommandLine;
 
-fn skip_trivia(_text: &str, pos: usize) -> usize {
+fn skip_trivia(_text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_trivia"); 
     pos
 }
 
@@ -30,7 +30,7 @@ pub fn create_diagnostic_at_project_reference_property(
     property_name: &str,
     message: Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_at_project_reference_property"); 
     let node: Option<Arc<Node>> = source_file.and_then(|sf| {
         for_each_ts_config_prop_array(Some(sf.source_file.as_ref()), "references", &mut |property| {
             if is_array_literal_expression(property) {
@@ -67,7 +67,7 @@ pub fn get_content_mapper_syntax(
     source_file: Option<&SourceFile>,
     index: i64,
     sub_key: &str,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_content_mapper_syntax"); 
     let source_file = source_file?;
     for_each_ts_config_prop_array(Some(source_file), "contentMappers", &mut |property| {
         let initializer = property_initializer(property)?;
@@ -118,7 +118,7 @@ pub fn get_content_mapper_option_diagnostic_location<'a>(
     config: Option<&'a ParsedCommandLine>,
     mapper: &ContentMapper,
     path: &[OptionPathSegment],
-) -> Option<(&'a SourceFile, TextRange)> {
+) -> Option<(&'a SourceFile, TextRange)> { ::tsox_core::fntrace::enter("get_content_mapper_option_diagnostic_location"); 
     let config = config?;
     let config_file = config.config_file.as_ref()?;
     let index = config
@@ -167,7 +167,7 @@ pub fn get_content_mapper_option_diagnostic_location<'a>(
     Some((file, TextRange::new(skip_trivia(&file.text, node.pos()), node.end())))
 }
 
-pub fn get_content_mappers_key_syntax(source_file: Option<&SourceFile>) -> Option<Arc<Node>> {
+pub fn get_content_mappers_key_syntax(source_file: Option<&SourceFile>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_content_mappers_key_syntax"); 
     let source_file = source_file?;
     for_each_ts_config_prop_array(Some(source_file), "contentMappers", &mut |property| {
         property.name().cloned()
@@ -178,7 +178,7 @@ pub fn get_content_mapper_extension_syntax(
     source_file: Option<&SourceFile>,
     index: i64,
     ext: &str,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_content_mapper_extension_syntax"); 
     let node = get_content_mapper_syntax(source_file, index, "extensions")?;
     if is_array_literal_expression(&node) {
         let elements = match &node.data {

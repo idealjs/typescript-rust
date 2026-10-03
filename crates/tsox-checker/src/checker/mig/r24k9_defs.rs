@@ -10,7 +10,7 @@ use std::sync::{Arc, OnceLock};
 static RESOLVING_DEFAULT_TYPE: OnceLock<Arc<Type>> = OnceLock::new();
 
 impl Checker {
-    pub fn resolving_default_type(&mut self) -> Arc<Type> {
+    pub fn resolving_default_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("resolving_default_type"); 
         if let Some(t) = RESOLVING_DEFAULT_TYPE.get() {
             return t.clone();
         }
@@ -25,7 +25,7 @@ impl Checker {
         t
     }
 
-    pub fn create_promise_type(&mut self, promised_type: &Arc<Type>) -> Arc<Type> {
+    pub fn create_promise_type(&mut self, promised_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_promise_type"); 
         match self.get_promise_type() {
             Some(global_promise_type) if global_promise_type.id != self.empty_generic_type().id => {
                 let unwrapped = self.unwrap_awaited_type(promised_type);
@@ -38,11 +38,11 @@ impl Checker {
         }
     }
 
-    pub fn get_global_record_symbol(&mut self) -> Option<Arc<Symbol>> {
+    pub fn get_global_record_symbol(&mut self) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_global_record_symbol"); 
         self.get_global_type_alias_symbol("Record", 2, true)
     }
 
-    pub fn get_global_omit_symbol(&mut self) -> Option<Arc<Symbol>> {
+    pub fn get_global_omit_symbol(&mut self) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_global_omit_symbol"); 
         self.get_global_type_alias_symbol("Omit", 2, true)
     }
 
@@ -50,7 +50,7 @@ impl Checker {
         &mut self,
         return_type: &Arc<Type>,
         function_flags: tsox_frontend::ast::mig::m3e::FunctionFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("unwrap_return_type"); 
         use tsox_frontend::ast::mig::m3e::FunctionFlags;
         let is_generator = function_flags.contains(FunctionFlags::GENERATOR);
         let is_async = function_flags.contains(FunctionFlags::ASYNC);
@@ -80,7 +80,7 @@ impl Checker {
         &mut self,
         function_decl: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_return_type"); 
         let _ = context_flags;
         if let Some(return_type) = self.get_return_type_from_annotation_opt(function_decl) {
             return Some(return_type);
@@ -108,7 +108,7 @@ impl Checker {
         None
     }
 
-    fn get_return_type_from_annotation_opt(&mut self, declaration: &Arc<Node>) -> Option<Arc<Type>> {
+    fn get_return_type_from_annotation_opt(&mut self, declaration: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_from_annotation_opt"); 
         if is_constructor_declaration(declaration) {
             if let Some(parent_symbol) = declaration.parent().as_ref().and_then(|p| self.symbol_of_node(p)) {
                 let merged = self.get_merged_symbol(&parent_symbol);
@@ -137,7 +137,7 @@ impl Checker {
         t: &Arc<Type>,
         function_flags: tsox_frontend::ast::mig::m3e::FunctionFlags,
         is_async: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_passes_contextual_return_filter"); 
         use tsox_frontend::ast::mig::m3e::FunctionFlags;
         let predicate_flags =
             TypeFlags::ANY_OR_UNKNOWN | TypeFlags::Void | TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE;
@@ -155,7 +155,7 @@ impl Checker {
         t: &Arc<Type>,
         function_flags: tsox_frontend::ast::mig::m3e::FunctionFlags,
         is_async: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("filter_type_for_contextual_return"); 
         if t.flags.intersects(TypeFlags::Union) {
             let types = t.types().unwrap_or(&[]).to_vec();
             let mut kept: Vec<Arc<Type>> = Vec::new();
@@ -179,7 +179,7 @@ impl Checker {
         &mut self,
         return_type: &Arc<Type>,
         function_flags: tsox_frontend::ast::mig::m3e::FunctionFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_generator_instantiation_assignability_to_return_type_nil_error"); 
         use tsox_frontend::ast::mig::m3e::FunctionFlags;
         let is_async = function_flags.contains(FunctionFlags::ASYNC);
         let generator_yield_type = self
@@ -197,13 +197,13 @@ impl Checker {
     }
 }
 
-pub(crate) fn is_resolving_default_sentinel(target_default: &Arc<Type>, _t: &Arc<Type>) -> bool {
+pub(crate) fn is_resolving_default_sentinel(target_default: &Arc<Type>, _t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_resolving_default_sentinel"); 
     RESOLVING_DEFAULT_TYPE
         .get()
         .is_some_and(|m| m.id == target_default.id)
 }
 
-pub(crate) fn is_expression_node(node: &Node) -> bool {
+pub(crate) fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_node"); 
     match node.kind {
         SyntaxKind::SuperKeyword
         | SyntaxKind::NullKeyword
@@ -250,7 +250,7 @@ pub(crate) fn is_expression_node(node: &Node) -> bool {
     }
 }
 
-pub(crate) fn primitive_type_alias_suggestions() -> Vec<(&'static str, Arc<Symbol>)> {
+pub(crate) fn primitive_type_alias_suggestions() -> Vec<(&'static str, Arc<Symbol>)> { ::tsox_core::fntrace::enter("primitive_type_alias_suggestions"); 
     [
         ("string", "String"),
         ("number", "Number"),
@@ -272,7 +272,7 @@ pub(crate) fn primitive_type_alias_suggestions() -> Vec<(&'static str, Arc<Symbo
     .collect()
 }
 
-pub(crate) fn string_mapping_key_hash(symbol: &Arc<Symbol>, t: &Arc<Type>) -> u64 {
+pub(crate) fn string_mapping_key_hash(symbol: &Arc<Symbol>, t: &Arc<Type>) -> u64 { ::tsox_core::fntrace::enter("string_mapping_key_hash"); 
     use std::hash::Hasher;
     let mut hasher = std::collections::hash_map::DefaultHasher::new();
     hasher.write_usize(Arc::as_ptr(symbol) as *const () as usize);

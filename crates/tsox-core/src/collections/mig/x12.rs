@@ -7,13 +7,13 @@ use crate::collections::ordered_set::OrderedSet;
 pub struct Error(String);
 
 impl Error {
-    pub fn new(message: &str) -> Self {
+    pub fn new(message: &str) -> Self { crate::fntrace::enter("new"); 
         Error(message.to_string())
     }
 }
 
 impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         f.write_str(&self.0)
     }
 }
@@ -21,7 +21,7 @@ impl std::fmt::Display for Error {
 impl std::error::Error for Error {}
 
 impl From<serde_json::Error> for Error {
-    fn from(e: serde_json::Error) -> Self {
+    fn from(e: serde_json::Error) -> Self { crate::fntrace::enter("from"); 
         Error(e.to_string())
     }
 }
@@ -44,7 +44,7 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn kind(&self) -> JsonKind {
+    pub fn kind(&self) -> JsonKind { crate::fntrace::enter("kind"); 
         self.kind
     }
 }
@@ -54,11 +54,11 @@ pub struct Decoder<'a> {
 }
 
 impl<'a> Decoder<'a> {
-    pub fn new(data: &'a [u8]) -> Self {
+    pub fn new(data: &'a [u8]) -> Self { crate::fntrace::enter("new"); 
         Decoder { remaining: data }
     }
 
-    pub fn peek_kind(&self) -> Result<JsonKind, Error> {
+    pub fn peek_kind(&self) -> Result<JsonKind, Error> { crate::fntrace::enter("peek_kind"); 
         match skip_ws(self.remaining).first().copied() {
             Some(b'{') => Ok(JsonKind::ObjectStart),
             Some(b'}') => Ok(JsonKind::ObjectEnd),
@@ -74,7 +74,7 @@ impl<'a> Decoder<'a> {
         }
     }
 
-    pub fn read_token(&mut self) -> Result<Token, Error> {
+    pub fn read_token(&mut self) -> Result<Token, Error> { crate::fntrace::enter("read_token"); 
         let kind = self.peek_kind()?;
         match kind {
             JsonKind::Null => self.advance(4),
@@ -89,12 +89,12 @@ impl<'a> Decoder<'a> {
         Ok(Token { kind })
     }
 
-    fn advance(&mut self, n: usize) {
+    fn advance(&mut self, n: usize) { crate::fntrace::enter("advance"); 
         self.remaining = &self.remaining[n..];
     }
 }
 
-pub fn unmarshal_decode<T: DeserializeOwned>(dec: &mut Decoder) -> Result<T, Error> {
+pub fn unmarshal_decode<T: DeserializeOwned>(dec: &mut Decoder) -> Result<T, Error> { crate::fntrace::enter("unmarshal_decode"); 
     let trimmed = skip_ws(dec.remaining);
     let mut stream = serde_json::Deserializer::from_slice(trimmed).into_iter::<T>();
     let value = match stream.next() {
@@ -105,7 +105,7 @@ pub fn unmarshal_decode<T: DeserializeOwned>(dec: &mut Decoder) -> Result<T, Err
     Ok(value)
 }
 
-fn skip_ws(data: &[u8]) -> &[u8] {
+fn skip_ws(data: &[u8]) -> &[u8] { crate::fntrace::enter("skip_ws"); 
     let n = data
         .iter()
         .position(|b| !b.is_ascii_whitespace())
@@ -118,7 +118,7 @@ where
     K: DeserializeOwned + Eq + std::hash::Hash + Clone,
     V: DeserializeOwned + Clone,
 {
-    pub fn unmarshal_json_from(&mut self, dec: &mut Decoder) -> Result<(), Error> {
+    pub fn unmarshal_json_from(&mut self, dec: &mut Decoder) -> Result<(), Error> { crate::fntrace::enter("unmarshal_json_from"); 
         let token = dec.read_token()?;
         if token.kind() == JsonKind::Null {
             return Ok(());
@@ -137,7 +137,7 @@ where
 }
 
 impl<T: Clone + Eq + std::hash::Hash> OrderedSet<T> {
-    pub fn values(&self) -> impl Iterator<Item = &T> {
+    pub fn values(&self) -> impl Iterator<Item = &T> { crate::fntrace::enter("values"); 
         self.iter()
     }
 }

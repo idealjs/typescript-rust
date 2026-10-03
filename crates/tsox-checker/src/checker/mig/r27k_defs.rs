@@ -47,7 +47,7 @@ impl NameResolver {
         _name_not_found_message: Option<&'static str>,
         _use_outer_name: bool,
         _is_found_as_alias: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve"); 
         let symbol = self.globals.get(name)?.clone();
         if !symbol.flags.intersects(meaning) {
             return None;
@@ -86,7 +86,7 @@ pub struct PseudoType {
 }
 
 impl PseudoType {
-    pub fn as_pseudo_type_maybe_const_location(&self) -> &Self {
+    pub fn as_pseudo_type_maybe_const_location(&self) -> &Self { ::tsox_core::fntrace::enter("as_pseudo_type_maybe_const_location"); 
         self
     }
 }
@@ -97,13 +97,13 @@ pub struct MappedType {
 }
 
 impl MappedType {
-    pub fn as_type(&self) -> &Type {
+    pub fn as_type(&self) -> &Type { ::tsox_core::fntrace::enter("as_type"); 
         &self.ty
     }
 }
 
 impl<'a> NodeBuilderImpl<'a> {
-    pub fn mapped_type_target(&self, mapped: &MappedType) -> Option<Arc<Type>> {
+    pub fn mapped_type_target(&self, mapped: &MappedType) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("mapped_type_target"); 
         mapped.target.clone()
     }
 }
@@ -111,7 +111,7 @@ impl<'a> NodeBuilderImpl<'a> {
 pub struct NodeVisitorHooks;
 
 impl Default for NodeVisitorHooks {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         NodeVisitorHooks
     }
 }
@@ -127,15 +127,15 @@ pub fn new_node_visitor(
     visit: NodeVisitHook,
     _factory: &NodeFactoryStub,
     hooks: NodeVisitorHooks,
-) -> NodeVisitor {
+) -> NodeVisitor { ::tsox_core::fntrace::enter("new_node_visitor"); 
     NodeVisitor { visit, hooks }
 }
 
-pub fn clone_binding_name_visitor_hook(_b: &NodeBuilderImpl) -> NodeVisitHook {
+pub fn clone_binding_name_visitor_hook(_b: &NodeBuilderImpl) -> NodeVisitHook { ::tsox_core::fntrace::enter("clone_binding_name_visitor_hook"); 
     Box::new(|node| Some(Arc::clone(node)))
 }
 
-pub(crate) fn set_literal_fresh_type(regular_type: &Arc<Type>, fresh_type: &Arc<Type>) {
+pub(crate) fn set_literal_fresh_type(regular_type: &Arc<Type>, fresh_type: &Arc<Type>) { ::tsox_core::fntrace::enter("set_literal_fresh_type"); 
     if let Some(t) = Arc::get_mut(&mut Arc::clone(regular_type)) {
         if let TypeData::Literal(d) = &mut t.data {
             let _ = d.fresh_type.set(Arc::clone(fresh_type));

@@ -8,7 +8,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_simple_type_related_to"); 
         let s = source.flags;
         let t = target.flags;
 
@@ -150,7 +150,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn literal_values_equal(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+    pub(crate) fn literal_values_equal(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("literal_values_equal"); 
         match (&a.data, &b.data) {
             (TypeData::Literal(la), TypeData::Literal(lb)) => la.value == lb.value,
             _ => false,
@@ -161,7 +161,7 @@ impl Checker {
         &mut self,
         owner: &Arc<Type>,
         member_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("erase_bare_generic_params"); 
         let Some(sym) = owner.symbol.as_ref() else {
             return Arc::clone(member_type);
         };

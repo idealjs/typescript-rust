@@ -2,7 +2,7 @@
 
 use super::m5u_3::{is_only_spaces_or_tabs, scan_non_whitespace, starts_with_single_line_whitespace};
 
-pub fn strip_js_doc_template_indentation(template: &str, new_line: &str) -> String {
+pub fn strip_js_doc_template_indentation(template: &str, new_line: &str) -> String { ::tsox_core::fntrace::enter("strip_js_doc_template_indentation"); 
     let mut lines: Vec<String> = template.split(new_line).map(|l| l.to_string()).collect();
     for line in lines.iter_mut() {
         let trimmed = line.trim_start_matches([' ', '\t']).to_string();
@@ -15,12 +15,12 @@ pub fn strip_js_doc_template_indentation(template: &str, new_line: &str) -> Stri
     lines.join(new_line)
 }
 
-fn line_has_only_js_doc_asterisk(line: &str) -> bool {
+fn line_has_only_js_doc_asterisk(line: &str) -> bool { ::tsox_core::fntrace::enter("line_has_only_js_doc_asterisk"); 
     let trimmed = line.trim_matches([' ', '\t']);
     !trimmed.is_empty() && trimmed.chars().all(|c| c == '*')
 }
 
-pub fn transform_js_doc_template_lines(template: &str, new_line: &str, snippet_index: &mut i32) -> String {
+pub fn transform_js_doc_template_lines(template: &str, new_line: &str, snippet_index: &mut i32) -> String { ::tsox_core::fntrace::enter("transform_js_doc_template_lines"); 
     let mut lines: Vec<String> = template.split(new_line).map(|l| l.to_string()).collect();
     for i in 0..lines.len() {
         let line = lines[i].clone();
@@ -39,7 +39,7 @@ pub fn transform_js_doc_template_lines(template: &str, new_line: &str, snippet_i
     lines.join(new_line)
 }
 
-pub fn transform_js_doc_param_line(line: &str, snippet_index: &mut i32) -> Option<String> {
+pub fn transform_js_doc_param_line(line: &str, snippet_index: &mut i32) -> Option<String> { ::tsox_core::fntrace::enter("transform_js_doc_param_line"); 
     let mut prefix = "";
     let mut rest = line;
     if rest.starts_with(' ') {
@@ -86,7 +86,7 @@ pub fn transform_js_doc_param_line(line: &str, snippet_index: &mut i32) -> Optio
     Some(out)
 }
 
-pub fn transform_js_doc_returns_line(line: &str, snippet_index: &mut i32) -> Option<String> {
+pub fn transform_js_doc_returns_line(line: &str, snippet_index: &mut i32) -> Option<String> { ::tsox_core::fntrace::enter("transform_js_doc_returns_line"); 
     let mut prefix = "";
     let mut rest = line;
     if rest.starts_with(' ') {

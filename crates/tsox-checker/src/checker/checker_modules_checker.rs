@@ -3,7 +3,7 @@
 use crate::checker::checker_modules::*;
 
 impl Checker {
-    pub(crate) fn module_has_export_clause(&self, module_symbol: &Arc<Symbol>, name: &str) -> bool {
+    pub(crate) fn module_has_export_clause(&self, module_symbol: &Arc<Symbol>, name: &str) -> bool { ::tsox_core::fntrace::enter("module_has_export_clause"); 
         use tsox_frontend::ast::NodeData;
         let mut found = false;
         self.for_each_module_statement(module_symbol, |stmt| {
@@ -25,7 +25,7 @@ impl Checker {
         found
     }
 
-    pub(crate) fn module_has_syntactic_default(&self, module_symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn module_has_syntactic_default(&self, module_symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("module_has_syntactic_default"); 
         use tsox_frontend::ast::NodeData;
         let mut found = false;
         self.for_each_module_statement(module_symbol, |stmt| {
@@ -42,7 +42,7 @@ impl Checker {
         found
     }
 
-    pub(crate) fn module_is_ambient_export_context(&self, module_symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn module_is_ambient_export_context(&self, module_symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("module_is_ambient_export_context"); 
         use tsox_frontend::ast::NodeData;
         let mut is_ambient = false;
         let mut has_export_declaration = false;
@@ -82,7 +82,7 @@ impl Checker {
         &self,
         module_symbol: &Arc<Symbol>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("module_ambient_locals_contain"); 
         for decl in &module_symbol.declarations {
             if decl.kind == SyntaxKind::ModuleDeclaration
                 && let Some(locals) = self.program.symbol_map().locals.get(&decl.id())
@@ -98,7 +98,7 @@ impl Checker {
         &mut self,
         module_symbol: &Arc<Symbol>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("module_star_chain_exports"); 
         if name == "default" {
             return false;
         }
@@ -117,7 +117,7 @@ impl Checker {
     pub(crate) fn module_star_specs(
         &self,
         module_symbol: &Arc<Symbol>,
-    ) -> Vec<(Arc<Node>, Arc<tsox_frontend::ast::SourceFile>)> {
+    ) -> Vec<(Arc<Node>, Arc<tsox_frontend::ast::SourceFile>)> { ::tsox_core::fntrace::enter("module_star_specs"); 
         use tsox_frontend::ast::NodeData;
         let mut stars = Vec::new();
         self.for_each_module_statement(module_symbol, |stmt| {
@@ -139,7 +139,7 @@ impl Checker {
         name: &str,
         visited: &mut Vec<*const Symbol>,
         depth: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("star_target_exports"); 
         if depth >= 8 || visited.contains(&Arc::as_ptr(target)) {
             return false;
         }
@@ -175,7 +175,7 @@ impl Checker {
         &mut self,
         spec_node: &Arc<Node>,
         file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_module_symbol_from"); 
         let spec_text = spec_node.text().trim_matches(['"', '\'', '`']).to_string();
         let file_symbol = |checker: &Self| {
             checker
@@ -201,7 +201,7 @@ impl Checker {
     pub(crate) fn resolve_export_equals_target(
         &mut self,
         export_equals: &Arc<Symbol>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_export_equals_target"); 
         let mut target = self.resolve_alias_base(Arc::clone(export_equals));
         for decl in export_equals.declarations.clone() {
             if let tsox_frontend::ast::NodeData::ExportAssignment(d) = &decl.data
@@ -225,7 +225,7 @@ impl Checker {
         target
     }
 
-    pub(crate) fn module_target_has_member(&self, target: &Arc<Symbol>, name: &str) -> bool {
+    pub(crate) fn module_target_has_member(&self, target: &Arc<Symbol>, name: &str) -> bool { ::tsox_core::fntrace::enter("module_target_has_member"); 
         use tsox_frontend::ast::NodeData;
         if target.exports.get(name).is_some() || target.members.get(name).is_some() {
             return true;

@@ -6,7 +6,7 @@ use tsox_frontend::ast::is_function_like_kind;
 impl Checker {
     /// Go errorIfWritingToReadonlyIndex 的判定：成员不在属性表，但存在匹配
     /// 键型的 readonly 索引签名
-    pub(crate) fn is_readonly_index_write(&self, t: &Arc<Type>, name: &str) -> bool {
+    pub(crate) fn is_readonly_index_write(&self, t: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_readonly_index_write"); 
         self.is_readonly_index_write_kind(t, name, TypeFlags::String)
     }
 
@@ -15,7 +15,7 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
         key_flags: TypeFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_readonly_index_write_kind"); 
         let Some(structured) = t.as_structured() else {
             return false;
         };
@@ -31,12 +31,12 @@ impl Checker {
         })
     }
 
-    pub(crate) fn is_property_readonly(&self, t: &Arc<Type>, name: &str) -> bool {
+    pub(crate) fn is_property_readonly(&self, t: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_property_readonly"); 
         self.readonly_property_symbol(t, name)
             .is_some_and(|s| self.symbol_is_readonly(&s))
     }
 
-    pub(crate) fn readonly_property_symbol(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
+    pub(crate) fn readonly_property_symbol(&self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("readonly_property_symbol"); 
         if t.flags.intersects(TypeFlags::Union | TypeFlags::Intersection) {
             let parts: Vec<Arc<Type>> = t
                 .types()
@@ -78,7 +78,7 @@ impl Checker {
         constraint.and_then(|c| self.readonly_property_symbol(&c, name))
     }
 
-    pub(crate) fn symbol_is_readonly(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn symbol_is_readonly(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_readonly"); 
         for decl in &symbol.declarations {
             match &decl.data {
                 tsox_frontend::ast::NodeData::PropertyDeclaration(d) => {
@@ -122,7 +122,7 @@ impl Checker {
         target: &Arc<Node>,
         t: &Arc<Type>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_readonly_property_write"); 
         let Some(symbol) = self.readonly_property_symbol(t, name) else {
             return false;
         };
@@ -166,7 +166,7 @@ impl Checker {
     }
 }
 
-fn get_control_flow_container(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_control_flow_container(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_control_flow_container"); 
     let mut current = node.parent()?;
     loop {
         let is_container = (is_function_like_kind(current.kind) && !is_immediately_invoked(&current))
@@ -180,7 +180,7 @@ fn get_control_flow_container(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-fn is_immediately_invoked(func: &Arc<Node>) -> bool {
+fn is_immediately_invoked(func: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_immediately_invoked"); 
     let mut wrapper = Arc::clone(func);
     while let Some(p) = wrapper.parent()
         && p.kind == SyntaxKind::ParenthesizedExpression

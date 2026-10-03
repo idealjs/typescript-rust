@@ -21,15 +21,15 @@ pub trait R38K10NodeVisitorExt {
 }
 
 impl R38K10NodeVisitorExt for NodeVisitor {
-    fn visit_each_child(&mut self, node: &Arc<tsox_frontend::ast::node::Node>) -> Option<Arc<tsox_frontend::ast::node::Node>> {
+    fn visit_each_child(&mut self, node: &Arc<tsox_frontend::ast::node::Node>) -> Option<Arc<tsox_frontend::ast::node::Node>> { ::tsox_core::fntrace::enter("visit_each_child"); 
         Some(Arc::clone(node))
     }
 
-    fn visit_embedded_statement(&mut self, node: &Arc<tsox_frontend::ast::node::Node>) -> Option<Arc<tsox_frontend::ast::node::Node>> {
+    fn visit_embedded_statement(&mut self, node: &Arc<tsox_frontend::ast::node::Node>) -> Option<Arc<tsox_frontend::ast::node::Node>> { ::tsox_core::fntrace::enter("visit_embedded_statement"); 
         Some(Arc::clone(node))
     }
 
-    fn visit_nodes(&mut self, nodes: &NodeList) -> NodeList {
+    fn visit_nodes(&mut self, nodes: &NodeList) -> NodeList { ::tsox_core::fntrace::enter("visit_nodes"); 
         let mut new_list = NodeList::new(nodes.nodes.clone());
         new_list.loc = nodes.loc;
         new_list
@@ -58,7 +58,7 @@ macro_rules! r38k10_required_list_accessor {
 impl R38K10NodeExt for tsox_frontend::ast::node::Node {
     r38k10_required_list_accessor!(members, members);
 
-    fn heritage_clauses(&self) -> Arc<NodeList> {
+    fn heritage_clauses(&self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("heritage_clauses"); 
         match &self.data {
             NodeData::ClassDeclaration(d) => d
                 .heritage_clauses
@@ -72,14 +72,14 @@ impl R38K10NodeExt for tsox_frontend::ast::node::Node {
         }
     }
 
-    fn parameter_list(&self) -> Arc<NodeList> {
+    fn parameter_list(&self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parameter_list"); 
         match &self.data {
             NodeData::FunctionDeclaration(d) => d.parameters.clone(),
             _ => panic!("parameter_list() on {:?}", self.kind),
         }
     }
 
-    fn decorators(&self) -> Vec<Arc<tsox_frontend::ast::node::Node>> {
+    fn decorators(&self) -> Vec<Arc<tsox_frontend::ast::node::Node>> { ::tsox_core::fntrace::enter("decorators"); 
         tsox_frontend::ast::mig::m3b::decorators(self)
     }
 }

@@ -56,7 +56,7 @@ pub mod fs_baseline_util {
     }
 
     impl FsDiffer {
-        pub fn new(test_fs: &TestFs) -> Self {
+        pub fn new(test_fs: &TestFs) -> Self { ::tsox_core::fntrace::enter("new"); 
             FsDiffer {
                 fs: test_fs.fs.clone(),
                 map_fs: test_fs
@@ -69,15 +69,15 @@ pub mod fs_baseline_util {
             }
         }
 
-        pub fn map_fs(&self) -> Arc<vfstest::MapFS> {
+        pub fn map_fs(&self) -> Arc<vfstest::MapFS> { ::tsox_core::fntrace::enter("map_fs"); 
             Arc::clone(&self.map_fs)
         }
 
-        pub fn serialized_diff(&self) -> Option<Snapshot> {
+        pub fn serialized_diff(&self) -> Option<Snapshot> { ::tsox_core::fntrace::enter("serialized_diff"); 
             self.serialized_diff.lock().unwrap().clone()
         }
 
-        pub fn baseline_fs_with_diff(&self, baseline: &mut dyn std::io::Write) {
+        pub fn baseline_fs_with_diff(&self, baseline: &mut dyn std::io::Write) { ::tsox_core::fntrace::enter("baseline_fs_with_diff"); 
             let map_fs = self.map_fs();
             let mut snap: HashMap<String, DiffEntry> = HashMap::new();
             let mut diffs: HashMap<String, String> = HashMap::new();
@@ -162,7 +162,7 @@ pub mod fs_baseline_util {
         new_content: Option<&DiffEntry>,
         path: &str,
         diffs: &mut HashMap<String, String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_fs_entry_diff"); 
         let (old_content, snapshot_default_libs) = match serialized {
             Some(snapshot) => (snapshot.snap.get(path), snapshot.default_libs.as_ref()),
             None => (None, None),
@@ -198,7 +198,7 @@ pub mod fs_baseline_util {
         }
     }
 
-    pub fn sanitize_internal_symbol_name(s: &str) -> String {
+    pub fn sanitize_internal_symbol_name(s: &str) -> String { ::tsox_core::fntrace::enter("sanitize_internal_symbol_name"); 
         if !s.contains("\u{FFFD}@") {
             return s.to_string();
         }
@@ -255,15 +255,15 @@ pub mod harness_util {
             w: &mut dyn std::io::Write,
             msg: &str,
             use_package_json_cache: bool,
-        ) {
+        ) { ::tsox_core::fntrace::enter("trace_with_writer"); 
             let _ = writeln!(w, "{}", self.sanitize_trace(msg, use_package_json_cache));
         }
 
-        pub fn reset(&self) {
+        pub fn reset(&self) { ::tsox_core::fntrace::enter("reset"); 
             self.package_json_cache.lock().unwrap().clear();
         }
 
-        fn cache_path(&self, file: &str) -> tspath::Path {
+        fn cache_path(&self, file: &str) -> tspath::Path { ::tsox_core::fntrace::enter("cache_path"); 
             tspath::to_path(
                 file,
                 &self.opts.current_directory,
@@ -271,7 +271,7 @@ pub mod harness_util {
             )
         }
 
-        fn sanitize_trace(&self, msg: &str, use_package_json_cache: bool) -> String {
+        fn sanitize_trace(&self, msg: &str, use_package_json_cache: bool) -> String { ::tsox_core::fntrace::enter("sanitize_trace"); 
             let version_token = format!("'{}'", tsox_core::core::mig::m3k::version());
             if msg.contains(&version_token) {
                 return msg.replacen(&version_token, &format!("'{}'", FAKE_TS_VERSION), 1);
@@ -328,7 +328,7 @@ pub mod harness_util {
         }
     }
 
-    pub fn new_tracer_for_baselining(opts: ComparePathsOptions) -> TracerForBaselining {
+    pub fn new_tracer_for_baselining(opts: ComparePathsOptions) -> TracerForBaselining { ::tsox_core::fntrace::enter("new_tracer_for_baselining"); 
         TracerForBaselining {
             opts,
             package_json_cache: Mutex::new(HashMap::new()),
@@ -367,11 +367,11 @@ pub mod vfstest {
     }
 
     impl MapFS {
-        fn canonical(&self, path: &str) -> String {
+        fn canonical(&self, path: &str) -> String { ::tsox_core::fntrace::enter("canonical"); 
             tspath::get_canonical_file_name(path, self.use_case_sensitive_file_names)
         }
 
-        pub fn entries(&self) -> Vec<(String, MapFile)> {
+        pub fn entries(&self) -> Vec<(String, MapFile)> { ::tsox_core::fntrace::enter("entries"); 
             self.entries
                 .lock()
                 .unwrap()
@@ -380,7 +380,7 @@ pub mod vfstest {
                 .collect()
         }
 
-        pub fn get_mod_time(&self, path: &str) -> SystemTime {
+        pub fn get_mod_time(&self, path: &str) -> SystemTime { ::tsox_core::fntrace::enter("get_mod_time"); 
             let canonical = self.canonical(path);
             self.entries
                 .lock()
@@ -390,7 +390,7 @@ pub mod vfstest {
                 .unwrap_or(SystemTime::UNIX_EPOCH)
         }
 
-        pub fn get_target_of_symlink(&self, path: &str) -> Option<String> {
+        pub fn get_target_of_symlink(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("get_target_of_symlink"); 
             let canonical = self.canonical(path);
             self.entries
                 .lock()
@@ -400,12 +400,12 @@ pub mod vfstest {
                 .map(|file| format!("/{}", file.data))
         }
 
-        pub fn get_file_info(&self, path: &str) -> Option<MapFile> {
+        pub fn get_file_info(&self, path: &str) -> Option<MapFile> { ::tsox_core::fntrace::enter("get_file_info"); 
             let canonical = self.canonical(path);
             self.entries.lock().unwrap().get(&canonical).cloned()
         }
 
-        fn set_entry(&self, path: &str, data: String, is_dir: bool, is_symlink: bool) {
+        fn set_entry(&self, path: &str, data: String, is_dir: bool, is_symlink: bool) { ::tsox_core::fntrace::enter("set_entry"); 
             let canonical = self.canonical(path);
             self.entries.lock().unwrap().insert(
                 canonical,
@@ -421,32 +421,32 @@ pub mod vfstest {
     }
 
     impl FS for MapFS {
-        fn use_case_sensitive_file_names(&self) -> bool {
+        fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
             self.use_case_sensitive_file_names
         }
 
-        fn file_exists(&self, path: &str) -> bool {
+        fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
             self.get_file_info(path).is_some_and(|file| !file.is_dir)
         }
 
-        fn read_file(&self, path: &str) -> Option<String> {
+        fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
             self.get_file_info(path)
                 .filter(|file| !file.is_dir)
                 .map(|file| file.data)
         }
 
-        fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+        fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
             self.set_entry(path, data.to_string(), false, false);
             Ok(())
         }
 
-        fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+        fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
             let existing = self.read_file(path).unwrap_or_default();
             self.set_entry(path, format!("{existing}{data}"), false, false);
             Ok(())
         }
 
-        fn remove(&self, path: &str) -> std::io::Result<()> {
+        fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
             let canonical = self.canonical(path);
             let mut entries = self.entries.lock().unwrap();
             let prefix = format!("{canonical}/");
@@ -467,7 +467,7 @@ pub mod vfstest {
             path: &str,
             _atime: SystemTime,
             mtime: SystemTime,
-        ) -> std::io::Result<()> {
+        ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("chtimes"); 
             let canonical = self.canonical(path);
             let mut entries = self.entries.lock().unwrap();
             match entries.get_mut(&canonical) {
@@ -482,11 +482,11 @@ pub mod vfstest {
             }
         }
 
-        fn directory_exists(&self, path: &str) -> bool {
+        fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
             self.get_file_info(path).is_some_and(|file| file.is_dir)
         }
 
-        fn get_accessible_entries(&self, path: &str) -> Entries {
+        fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
             let prefix = format!("{}/", self.canonical(path));
             let mut result = Entries::default();
             let entries = self.entries.lock().unwrap();
@@ -505,7 +505,7 @@ pub mod vfstest {
             result
         }
 
-        fn stat(&self, path: &str) -> Option<FileInfo> {
+        fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
             let file = self.get_file_info(path)?;
             let name = file.path.rsplit('/').next().unwrap_or(&file.path).to_string();
             Some(FileInfo {
@@ -517,7 +517,7 @@ pub mod vfstest {
             })
         }
 
-        fn realpath(&self, path: &str) -> String {
+        fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
             self.get_file_info(path)
                 .map(|file| file.path)
                 .unwrap_or_else(|| path.to_string())
@@ -529,7 +529,7 @@ pub mod vfstest {
         path: &str,
         clock: &Arc<dyn Clock>,
         use_case_sensitive_file_names: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("ensure_parent_dirs"); 
         let mut dir = path;
         while let Some(index) = dir.rfind('/') {
             dir = &dir[..index];
@@ -557,7 +557,7 @@ pub mod vfstest {
         files: HashMap<String, String>,
         use_case_sensitive_file_names: bool,
         clock: Arc<dyn Clock>,
-    ) -> TestFs {
+    ) -> TestFs { ::tsox_core::fntrace::enter("from_map_with_clock"); 
         let mut map: BTreeMap<String, MapFile> = BTreeMap::new();
         let mut keys: Vec<&String> = files.keys().collect();
         keys.sort();
@@ -599,7 +599,7 @@ pub mod contentmapper_test {
     }
 
     impl std::io::Read for MemPipe {
-        fn read(&mut self, out: &mut [u8]) -> std::io::Result<usize> {
+        fn read(&mut self, out: &mut [u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("read"); 
             let available = self.buf.len() - self.read_pos;
             if available == 0 {
                 return Ok(0);
@@ -612,18 +612,18 @@ pub mod contentmapper_test {
     }
 
     impl std::io::Write for MemPipe {
-        fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+        fn write(&mut self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
             self.buf.extend_from_slice(data);
             Ok(data.len())
         }
 
-        fn flush(&mut self) -> std::io::Result<()> {
+        fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
             Ok(())
         }
     }
 
     impl ReadWriteCloser for MemPipe {
-        fn close(&mut self) -> std::io::Result<()> {
+        fn close(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("close"); 
             Ok(())
         }
     }
@@ -631,7 +631,7 @@ pub mod contentmapper_test {
     #[derive(Debug, Default)]
     pub struct TestSpawner;
 
-    pub fn new_spawner() -> TestSpawner {
+    pub fn new_spawner() -> TestSpawner { ::tsox_core::fntrace::enter("new_spawner"); 
         TestSpawner
     }
 
@@ -641,7 +641,7 @@ pub mod contentmapper_test {
             command: &[String],
             dir: &str,
             stderr: &mut dyn std::io::Write,
-        ) -> std::io::Result<Box<dyn ReadWriteCloser>> {
+        ) -> std::io::Result<Box<dyn ReadWriteCloser>> { ::tsox_core::fntrace::enter("spawn"); 
             if command.is_empty() {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
@@ -660,35 +660,35 @@ pub struct NameSet {
 }
 
 impl NameSet {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             inner: Mutex::new(HashSet::new()),
         }
     }
 
-    pub fn add_if_absent(&self, key: &str) -> bool {
+    pub fn add_if_absent(&self, key: &str) -> bool { ::tsox_core::fntrace::enter("add_if_absent"); 
         self.inner.lock().unwrap().insert(key.to_string())
     }
 
-    pub fn has(&self, key: &str) -> bool {
+    pub fn has(&self, key: &str) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.inner.lock().unwrap().contains(key)
     }
 
-    pub fn delete(&self, key: &str) {
+    pub fn delete(&self, key: &str) { ::tsox_core::fntrace::enter("delete"); 
         self.inner.lock().unwrap().remove(key);
     }
 
-    pub fn keys_vec(&self) -> Vec<String> {
+    pub fn keys_vec(&self) -> Vec<String> { ::tsox_core::fntrace::enter("keys_vec"); 
         self.inner.lock().unwrap().iter().cloned().collect()
     }
 
-    pub fn clear(&self) {
+    pub fn clear(&self) { ::tsox_core::fntrace::enter("clear"); 
         self.inner.lock().unwrap().clear();
     }
 }
 
 impl Clone for NameSet {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         let copy = Self::new();
         for key in self.keys_vec() {
             copy.add_if_absent(&key);
@@ -707,17 +707,17 @@ pub struct TestFs {
 
 
 impl TestFs {
-    pub fn written_files_keys(&self) -> Vec<String> {
+    pub fn written_files_keys(&self) -> Vec<String> { ::tsox_core::fntrace::enter("written_files_keys"); 
         self.written_files.keys_vec()
     }
 
-    pub fn default_libs_add(&self, path: &str) {
+    pub fn default_libs_add(&self, path: &str) { ::tsox_core::fntrace::enter("default_libs_add"); 
         if let Some(default_libs) = &self.default_libs {
             default_libs.add_if_absent(path);
         }
     }
 
-    pub fn remove_ignore_lib_path(&self, path: &str) {
+    pub fn remove_ignore_lib_path(&self, path: &str) { ::tsox_core::fntrace::enter("remove_ignore_lib_path"); 
         if let Some(default_libs) = &self.default_libs {
             if default_libs.has(path) {
                 default_libs.delete(path);
@@ -725,7 +725,7 @@ impl TestFs {
         }
     }
 
-    pub fn read_file_handling_build_info(&self, path: &str) -> Option<String> {
+    pub fn read_file_handling_build_info(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file_handling_build_info"); 
         let contents = self.fs.read_file(path)?;
         if tspath::file_extension_is(path, EXTENSION_TS_BUILD_INFO) {
             if let Ok(mut build_info) = serde_json::from_str::<BuildInfo>(&contents) {
@@ -741,7 +741,7 @@ impl TestFs {
         Some(contents)
     }
 
-    pub fn write_file_handling_build_info(&self, path: &str, data: &str) -> Result<(), String> {
+    pub fn write_file_handling_build_info(&self, path: &str, data: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("write_file_handling_build_info"); 
         if tspath::file_extension_is(path, EXTENSION_TS_BUILD_INFO) {
             match serde_json::from_str::<BuildInfo>(data) {
                 Ok(mut build_info) => {
@@ -772,7 +772,7 @@ impl TestFs {
             .map_err(|e| e.to_string())
     }
 
-    pub fn write_file(&self, path: &str, data: &str) -> Result<(), String> {
+    pub fn write_file(&self, path: &str, data: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("write_file"); 
         self.remove_ignore_lib_path(path);
         self.written_files.add_if_absent(path);
         self.write_file_handling_build_info(path, data)
@@ -780,28 +780,28 @@ impl TestFs {
 }
 
 impl FS for TestFs {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.fs.use_case_sensitive_file_names()
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.fs.file_exists(path)
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.remove_ignore_lib_path(path);
         self.read_file_handling_build_info(path)
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         Self::write_file(self, path, data).map_err(std::io::Error::other)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         self.fs.append_file(path, data)
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         self.fs.remove(path)
     }
 
@@ -810,23 +810,23 @@ impl FS for TestFs {
         path: &str,
         atime: std::time::SystemTime,
         mtime: std::time::SystemTime,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("chtimes"); 
         self.fs.chtimes(path, atime, mtime)
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.fs.directory_exists(path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.fs.get_accessible_entries(path)
     }
 
-    fn stat(&self, path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> {
+    fn stat(&self, path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         self.fs.stat(path)
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         self.fs.realpath(path)
     }
 
@@ -834,12 +834,12 @@ impl FS for TestFs {
         &self,
         root: &str,
         walk_fn: &mut dyn FnMut(&str, &tsox_tsoptions::vfs::FileInfo),
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("walk_dir"); 
         self.fs.walk_dir(root, walk_fn)
     }
 }
 
-pub fn is_zero(value: &usize) -> bool {
+pub fn is_zero(value: &usize) -> bool { ::tsox_core::fntrace::enter("is_zero"); 
     *value == 0
 }
 
@@ -949,24 +949,24 @@ pub struct ReadableBuildInfoDiagnostic {
     pub repopulate_info: Option<ReadableBuildInfoRepopulateInfo>,
 }
 
-pub fn is_zero_i32(value: &i32) -> bool {
+pub fn is_zero_i32(value: &i32) -> bool { ::tsox_core::fntrace::enter("is_zero_i32"); 
     *value == 0
 }
 
-fn category_is_zero(category: &Category) -> bool {
+fn category_is_zero(category: &Category) -> bool { ::tsox_core::fntrace::enter("category_is_zero"); 
     *category as i32 == 0
 }
 
 fn serialize_category<S: serde::Serializer>(
     category: &Category,
     serializer: S,
-) -> Result<S::Ok, S::Error> {
+) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize_category"); 
     serializer.serialize_i32(*category as i32)
 }
 
 fn deserialize_category<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
-) -> Result<Category, D::Error> {
+) -> Result<Category, D::Error> { ::tsox_core::fntrace::enter("deserialize_category"); 
     Ok(match i32::deserialize(deserializer)? {
         1 => Category::Error,
         2 => Category::Suggestion,
@@ -975,20 +975,20 @@ fn deserialize_category<'de, D: serde::Deserializer<'de>>(
     })
 }
 
-fn resolution_mode_is_none(mode: &ResolutionMode) -> bool {
+fn resolution_mode_is_none(mode: &ResolutionMode) -> bool { ::tsox_core::fntrace::enter("resolution_mode_is_none"); 
     *mode as i32 == 0
 }
 
 fn serialize_resolution_mode<S: serde::Serializer>(
     mode: &ResolutionMode,
     serializer: S,
-) -> Result<S::Ok, S::Error> {
+) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize_resolution_mode"); 
     serializer.serialize_i32(*mode as i32)
 }
 
 fn deserialize_resolution_mode<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
-) -> Result<ResolutionMode, D::Error> {
+) -> Result<ResolutionMode, D::Error> { ::tsox_core::fntrace::enter("deserialize_resolution_mode"); 
     Ok(match i32::deserialize(deserializer)? {
         1 => ResolutionMode::CommonJS,
         99 => ResolutionMode::ESNext,
@@ -999,13 +999,13 @@ fn deserialize_resolution_mode<'de, D: serde::Deserializer<'de>>(
 fn serialize_repopulate_diagnostic_kind<S: serde::Serializer>(
     kind: &RepopulateDiagnosticKind,
     serializer: S,
-) -> Result<S::Ok, S::Error> {
+) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize_repopulate_diagnostic_kind"); 
     serializer.serialize_i32(*kind as i32)
 }
 
 fn deserialize_repopulate_diagnostic_kind<'de, D: serde::Deserializer<'de>>(
     deserializer: D,
-) -> Result<RepopulateDiagnosticKind, D::Error> {
+) -> Result<RepopulateDiagnosticKind, D::Error> { ::tsox_core::fntrace::enter("deserialize_repopulate_diagnostic_kind"); 
     Ok(match i32::deserialize(deserializer)? {
         2 => RepopulateDiagnosticKind::ModuleNotFound,
         _ => RepopulateDiagnosticKind::ModeMismatch,
@@ -1038,13 +1038,13 @@ pub struct ReadableBuildInfoDiagnosticsOfFile {
 }
 
 impl Serialize for ReadableBuildInfoDiagnosticsOfFile {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         (self.file.clone(), self.diagnostics.clone()).serialize(serializer)
     }
 }
 
 impl<'de> Deserialize<'de> for ReadableBuildInfoDiagnosticsOfFile {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let file_id_and_diagnostics = Vec::<serde_json::Value>::deserialize(deserializer)
             .map_err(|_| serde::de::Error::custom("invalid readableBuildInfoDiagnosticsOfFile"))?;
         if file_id_and_diagnostics.len() != 2 {

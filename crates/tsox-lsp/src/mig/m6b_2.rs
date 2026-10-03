@@ -48,15 +48,15 @@ pub enum Fidelity {
 }
 
 impl Fidelity {
-    pub fn is_exact(self) -> bool {
+    pub fn is_exact(self) -> bool { ::tsox_core::fntrace::enter("is_exact"); 
         self == Fidelity::Exact
     }
 
-    pub fn is_single_segment(self) -> bool {
+    pub fn is_single_segment(self) -> bool { ::tsox_core::fntrace::enter("is_single_segment"); 
         self == Fidelity::Exact || self == Fidelity::Atom
     }
 
-    pub fn is_none(self) -> bool {
+    pub fn is_none(self) -> bool { ::tsox_core::fntrace::enter("is_none"); 
         self == Fidelity::None
     }
 }
@@ -100,7 +100,7 @@ pub struct MappingError {
 }
 
 impl MappingError {
-    pub fn error(&self) -> String {
+    pub fn error(&self) -> String { ::tsox_core::fntrace::enter("error"); 
         match self.kind {
             MappingErrorKind::Overlap => format!(
                 "content mapper position mappings overlap or are out of order near virtual offset {}",
@@ -132,7 +132,7 @@ pub struct SpanMap {
 }
 
 impl SpanMap {
-    pub fn validate(&self, virtual_text: &str, original: &str) -> Option<MappingError> {
+    pub fn validate(&self, virtual_text: &str, original: &str) -> Option<MappingError> { ::tsox_core::fntrace::enter("validate"); 
         let virtual_len = virtual_text.len();
         let original_len = original.len();
         let mut previous_virtual_end: TextPos = 0;
@@ -188,11 +188,11 @@ impl SpanMap {
         None
     }
 
-    pub fn segments(&self) -> Vec<Segment> {
+    pub fn segments(&self) -> Vec<Segment> { ::tsox_core::fntrace::enter("segments"); 
         self.segments.clone()
     }
 
-    pub fn virtual_to_original_span(&self, r: TextRange) -> (TextRange, Fidelity) {
+    pub fn virtual_to_original_span(&self, r: TextRange) -> (TextRange, Fidelity) { ::tsox_core::fntrace::enter("virtual_to_original_span"); 
         let virtual_start = r.pos() as TextPos;
         let virtual_end = std::cmp::max(r.end() as TextPos, virtual_start);
         if virtual_start == virtual_end {
@@ -244,7 +244,7 @@ impl SpanMap {
         &self,
         r: TextRange,
         feature: Feature,
-    ) -> (TextRange, Fidelity) {
+    ) -> (TextRange, Fidelity) { ::tsox_core::fntrace::enter("virtual_to_original_span_for_feature"); 
         let mapped = self.virtual_to_original_span(r);
         if self.virtual_span_supports_feature(r, feature) {
             return mapped;
@@ -252,7 +252,7 @@ impl SpanMap {
         (mapped.0, Fidelity::None)
     }
 
-    fn virtual_span_supports_feature(&self, r: TextRange, feature: Feature) -> bool {
+    fn virtual_span_supports_feature(&self, r: TextRange, feature: Feature) -> bool { ::tsox_core::fntrace::enter("virtual_span_supports_feature"); 
         let start = r.pos() as TextPos;
         let end = std::cmp::max(r.end() as TextPos, start);
         if start == end {
@@ -279,7 +279,7 @@ impl SpanMap {
         covered_through >= end
     }
 
-    pub fn virtual_to_original_position(&self, pos: TextPos) -> (TextPos, Fidelity) {
+    pub fn virtual_to_original_position(&self, pos: TextPos) -> (TextPos, Fidelity) { ::tsox_core::fntrace::enter("virtual_to_original_position"); 
         let (idx, in_seg) = self.segment_index_at(pos);
         if !in_seg {
             return (self.insertion_point(idx), Fidelity::None);
@@ -298,7 +298,7 @@ impl SpanMap {
         (seg.original_start, Fidelity::Atom)
     }
 
-    pub fn virtual_to_original_position_exact(&self, pos: TextPos) -> (TextPos, bool) {
+    pub fn virtual_to_original_position_exact(&self, pos: TextPos) -> (TextPos, bool) { ::tsox_core::fntrace::enter("virtual_to_original_position_exact"); 
         let (mapped, fidelity) = self.virtual_to_original_position(pos);
         if fidelity != Fidelity::Exact {
             return (mapped, false);
@@ -323,7 +323,7 @@ impl SpanMap {
         &self,
         pos: TextPos,
         feature: Feature,
-    ) -> (TextPos, Fidelity) {
+    ) -> (TextPos, Fidelity) { ::tsox_core::fntrace::enter("virtual_to_original_position_for_feature"); 
         let mapped = self.virtual_to_original_position(pos);
         let (index, inside) = self.segment_index_at(pos);
         if !inside || !supports_feature(self.segments[index as usize], feature) {
@@ -332,7 +332,7 @@ impl SpanMap {
         mapped
     }
 
-    pub fn alias_for_virtual_span(&self, r: TextRange) -> Option<Segment> {
+    pub fn alias_for_virtual_span(&self, r: TextRange) -> Option<Segment> { ::tsox_core::fntrace::enter("alias_for_virtual_span"); 
         let (index, inside) = self.segment_index_at(r.pos() as TextPos);
         if !inside {
             return None;
@@ -348,7 +348,7 @@ impl SpanMap {
         }
     }
 
-    fn segment_index_at(&self, pos: TextPos) -> (isize, bool) {
+    fn segment_index_at(&self, pos: TextPos) -> (isize, bool) { ::tsox_core::fntrace::enter("segment_index_at"); 
         let idx = self
             .segments
             .partition_point(|s| s.virtual_start < pos);
@@ -363,14 +363,14 @@ impl SpanMap {
         (prev, contained)
     }
 
-    fn insertion_point(&self, prev: isize) -> TextPos {
+    fn insertion_point(&self, prev: isize) -> TextPos { ::tsox_core::fntrace::enter("insertion_point"); 
         if prev < 0 {
             return 0;
         }
         self.segments[prev as usize].original_end
     }
 
-    fn map_low(&self, pos: TextPos, idx: isize, in_seg: bool) -> TextPos {
+    fn map_low(&self, pos: TextPos, idx: isize, in_seg: bool) -> TextPos { ::tsox_core::fntrace::enter("map_low"); 
         if !in_seg {
             return self.insertion_point(idx);
         }
@@ -386,7 +386,7 @@ impl SpanMap {
         }
     }
 
-    fn map_high(&self, pos: TextPos, idx: isize, in_seg: bool) -> TextPos {
+    fn map_high(&self, pos: TextPos, idx: isize, in_seg: bool) -> TextPos { ::tsox_core::fntrace::enter("map_high"); 
         if !in_seg {
             return self.insertion_point(idx);
         }
@@ -402,7 +402,7 @@ impl SpanMap {
         }
     }
 
-    fn original_index(&self) -> &OriginalIndex {
+    fn original_index(&self) -> &OriginalIndex { ::tsox_core::fntrace::enter("original_index"); 
         self.original_index.get_or_init(|| {
             let mut segments = self.segments.clone();
             segments.sort_by(|a, b| {
@@ -431,7 +431,7 @@ impl SpanMap {
     }
 }
 
-pub fn new_span_map(mut segments: Vec<Segment>) -> SpanMap {
+pub fn new_span_map(mut segments: Vec<Segment>) -> SpanMap { ::tsox_core::fntrace::enter("new_span_map"); 
     segments.sort_by(|a, b| a.virtual_start.cmp(&b.virtual_start));
     SpanMap {
         segments,
@@ -447,7 +447,7 @@ pub struct OriginalIndex {
 }
 
 impl OriginalIndex {
-    pub fn segments_at_original_position(&self, pos: TextPos) -> (Vec<Segment>, bool) {
+    pub fn segments_at_original_position(&self, pos: TextPos) -> (Vec<Segment>, bool) { ::tsox_core::fntrace::enter("segments_at_original_position"); 
         let start = self
             .segments
             .partition_point(|s| s.original_start < pos);
@@ -460,7 +460,7 @@ impl OriginalIndex {
         (results, has)
     }
 
-    pub fn segments_ending_after_position(&self, limit: usize, pos: TextPos) -> Vec<Segment> {
+    pub fn segments_ending_after_position(&self, limit: usize, pos: TextPos) -> Vec<Segment> { ::tsox_core::fntrace::enter("segments_ending_after_position"); 
         let mut results = Vec::new();
         self.collect_segments_ending_at_or_after(
             1,
@@ -483,7 +483,7 @@ impl OriginalIndex {
         pos: TextPos,
         include_end: bool,
         results: &mut Vec<Segment>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_segments_ending_at_or_after"); 
         if start >= limit
             || self.max_ends[node] < pos
             || (!include_end && self.max_ends[node] == pos)
@@ -518,7 +518,7 @@ impl OriginalIndex {
     pub fn segment_groups_at_original_position(
         &self,
         pos: TextPos,
-    ) -> Vec<SegmentGroupAtOriginalPosition> {
+    ) -> Vec<SegmentGroupAtOriginalPosition> { ::tsox_core::fntrace::enter("segment_groups_at_original_position"); 
         let limit = self
             .segments
             .partition_point(|s| s.original_start <= pos);
@@ -549,26 +549,26 @@ pub struct SegmentGroupAtOriginalPosition {
     pub at_end: bool,
 }
 
-pub fn same_original_range(left: &Segment, right: &Segment) -> bool {
+pub fn same_original_range(left: &Segment, right: &Segment) -> bool { ::tsox_core::fntrace::enter("same_original_range"); 
     left.original_start == right.original_start && left.original_end == right.original_end
 }
 
-pub fn supports_feature(segment: Segment, feature: Feature) -> bool {
+pub fn supports_feature(segment: Segment, feature: Feature) -> bool { ::tsox_core::fntrace::enter("supports_feature"); 
     segment.features & feature != 0
 }
 
-pub fn clamp(v: TextPos, lo: TextPos, hi: TextPos) -> TextPos {
+pub fn clamp(v: TextPos, lo: TextPos, hi: TextPos) -> TextPos { ::tsox_core::fntrace::enter("clamp"); 
     std::cmp::max(lo, std::cmp::min(v, hi))
 }
 
 impl Ord for Segment {
-    fn cmp(&self, other: &Self) -> Ordering {
+    fn cmp(&self, other: &Self) -> Ordering { ::tsox_core::fntrace::enter("cmp"); 
         self.virtual_start.cmp(&other.virtual_start)
     }
 }
 
 impl PartialOrd for Segment {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { ::tsox_core::fntrace::enter("partial_cmp"); 
         Some(self.cmp(other))
     }
 }

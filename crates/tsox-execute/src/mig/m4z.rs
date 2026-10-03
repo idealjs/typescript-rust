@@ -28,24 +28,24 @@ pub struct HostImpl {
 }
 
 impl Host for HostImpl {
-    fn fs(&self) -> Arc<dyn FS> {
+    fn fs(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs"); 
         self.host.fs_arc()
     }
 
-    fn get_m_time(&self, file_name: &str) -> SystemTime {
+    fn get_m_time(&self, file_name: &str) -> SystemTime { ::tsox_core::fntrace::enter("get_m_time"); 
         get_m_time(self.host.as_ref(), file_name)
     }
 
-    fn set_m_time(&self, file_name: &str, m_time: SystemTime) -> std::io::Result<()> {
+    fn set_m_time(&self, file_name: &str, m_time: SystemTime) -> std::io::Result<()> { ::tsox_core::fntrace::enter("set_m_time"); 
         self.host.fs().chtimes(file_name, m_time, m_time)
     }
 }
 
-pub fn create_host(compiler_host: Arc<dyn CompilerHost>) -> HostImpl {
+pub fn create_host(compiler_host: Arc<dyn CompilerHost>) -> HostImpl { ::tsox_core::fntrace::enter("create_host"); 
     HostImpl { host: compiler_host }
 }
 
-pub fn get_m_time(host: &dyn CompilerHost, file_name: &str) -> SystemTime {
+pub fn get_m_time(host: &dyn CompilerHost, file_name: &str) -> SystemTime { ::tsox_core::fntrace::enter("get_m_time"); 
     match host.fs().stat(file_name) {
         Some(stat) => stat.modified,
         None => SystemTime::UNIX_EPOCH,
@@ -61,7 +61,7 @@ pub struct BuildInfoReaderImpl {
 }
 
 impl BuildInfoReader for BuildInfoReaderImpl {
-    fn read_build_info(&self, config: &ParsedCommandLine) -> Option<crate::mig::m4y_2::BuildInfo> {
+    fn read_build_info(&self, config: &ParsedCommandLine) -> Option<crate::mig::m4y_2::BuildInfo> { ::tsox_core::fntrace::enter("read_build_info"); 
         let build_info_file_name = config.get_build_info_file_name();
         if build_info_file_name.is_empty() {
             return None;
@@ -73,7 +73,7 @@ impl BuildInfoReader for BuildInfoReaderImpl {
     }
 }
 
-pub fn new_build_info_reader(host: Arc<dyn CompilerHost>) -> BuildInfoReaderImpl {
+pub fn new_build_info_reader(host: Arc<dyn CompilerHost>) -> BuildInfoReaderImpl { ::tsox_core::fntrace::enter("new_build_info_reader"); 
     BuildInfoReaderImpl { host }
 }
 
@@ -81,7 +81,7 @@ pub fn read_build_info_program(
     config: &ParsedCommandLine,
     reader: &dyn BuildInfoReader,
     host: &dyn CompilerHost,
-) -> Option<crate::mig::m4z2::Program> {
+) -> Option<crate::mig::m4z2::Program> { ::tsox_core::fntrace::enter("read_build_info_program"); 
     let build_info = reader.read_build_info(config)?;
     if !build_info.is_valid_version() || !build_info.is_incremental() {
         return None;
@@ -113,19 +113,19 @@ pub struct ReferenceMap {
 }
 
 impl ReferenceMap {
-    pub fn store_references(&self, path: Path, refs: Arc<Set<Path>>) {
+    pub fn store_references(&self, path: Path, refs: Arc<Set<Path>>) { ::tsox_core::fntrace::enter("store_references"); 
         self.references.store(path, refs);
     }
 
-    pub fn get_references(&self, path: &Path) -> Option<Arc<Set<Path>>> {
+    pub fn get_references(&self, path: &Path) -> Option<Arc<Set<Path>>> { ::tsox_core::fntrace::enter("get_references"); 
         self.references.load(path)
     }
 
-    pub fn get_paths_with_references(&self) -> Vec<Path> {
+    pub fn get_paths_with_references(&self) -> Vec<Path> { ::tsox_core::fntrace::enter("get_paths_with_references"); 
         self.references.keys()
     }
 
-    pub fn get_referenced_by(&self, path: &Path) -> Vec<Path> {
+    pub fn get_referenced_by(&self, path: &Path) -> Vec<Path> { ::tsox_core::fntrace::enter("get_referenced_by"); 
         self.reference_by.call_once(|| {
             let mut referenced_by: HashMap<Path, Set<Path>> = HashMap::new();
             self.references.for_each(|key, value| {
@@ -149,7 +149,7 @@ pub fn command_line(
     sys: &dyn System,
     command_line_args: &[String],
     testing: Option<&dyn CommandLineTesting>,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("command_line"); 
     if !command_line_args.is_empty() {
         match command_line_args[0].to_lowercase().as_str() {
             "-b" | "--b" | "-build" | "--build" => {
@@ -176,7 +176,7 @@ pub fn command_line(
     )
 }
 
-pub fn fmt_main(sys: &dyn System, input: &str, output: &str) -> ExitStatus {
+pub fn fmt_main(sys: &dyn System, input: &str, output: &str) -> ExitStatus { ::tsox_core::fntrace::enter("fmt_main"); 
     let input = tspath::to_path(
         input,
         sys.current_directory(),
@@ -218,7 +218,7 @@ pub fn fmt_main(sys: &dyn System, input: &str, output: &str) -> ExitStatus {
     ExitStatus::Success
 }
 
-pub fn find_config_file(search_path: &str, file_exists: &dyn Fn(&str) -> bool, config_name: &str) -> String {
+pub fn find_config_file(search_path: &str, file_exists: &dyn Fn(&str) -> bool, config_name: &str) -> String { ::tsox_core::fntrace::enter("find_config_file"); 
     let mut result = String::new();
     tspath::for_each_ancestor_directory(search_path, |ancestor| {
         let full_config_name = tspath::combine_paths(ancestor, &[config_name]);

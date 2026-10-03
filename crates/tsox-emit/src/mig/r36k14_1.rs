@@ -13,11 +13,11 @@ pub struct TypedNode<'a> {
 }
 
 impl<'a> TypedNode<'a> {
-    pub fn as_node(&self) -> &'a Node {
+    pub fn as_node(&self) -> &'a Node { ::tsox_core::fntrace::enter("as_node"); 
         self.node
     }
 
-    pub fn name(&self) -> &'a Node {
+    pub fn name(&self) -> &'a Node { ::tsox_core::fntrace::enter("name"); 
         match &self.node.data {
             NodeData::NamedTupleMember(d) => &d.name,
             NodeData::NamespaceExport(d) => &d.name,
@@ -28,7 +28,7 @@ impl<'a> TypedNode<'a> {
         }
     }
 
-    pub fn elements(&self) -> &'a NodeList {
+    pub fn elements(&self) -> &'a NodeList { ::tsox_core::fntrace::enter("elements"); 
         match &self.node.data {
             NodeData::NamedImports(d) => &d.elements,
             NodeData::BindingPattern(d) => &d.elements,
@@ -36,25 +36,25 @@ impl<'a> TypedNode<'a> {
         }
     }
 
-    pub fn properties(&self) -> &'a NodeList {
+    pub fn properties(&self) -> &'a NodeList { ::tsox_core::fntrace::enter("properties"); 
         match &self.node.data {
             NodeData::ObjectLiteralExpression(d) => &d.properties,
             _ => panic!("properties() on {:?}", self.node.kind),
         }
     }
 
-    pub fn multi_line(&self) -> bool {
+    pub fn multi_line(&self) -> bool { ::tsox_core::fntrace::enter("multi_line"); 
         match &self.node.data {
             NodeData::ObjectLiteralExpression(d) => d.multi_line,
             _ => panic!("multi_line() on {:?}", self.node.kind),
         }
     }
 
-    pub fn modifiers(&self) -> Option<&'a ModifierList> {
+    pub fn modifiers(&self) -> Option<&'a ModifierList> { ::tsox_core::fntrace::enter("modifiers"); 
         self.node.modifiers().map(|m| &**m)
     }
 
-    pub fn dot_dot_dot_token(&self) -> Option<&'a Node> {
+    pub fn dot_dot_dot_token(&self) -> Option<&'a Node> { ::tsox_core::fntrace::enter("dot_dot_dot_token"); 
         match &self.node.data {
             NodeData::NamedTupleMember(d) => d.dot_dot_dot_token.as_deref(),
             NodeData::ParameterDeclaration(d) => d.dot_dot_dot_token.as_deref(),
@@ -62,7 +62,7 @@ impl<'a> TypedNode<'a> {
         }
     }
 
-    pub fn question_token(&self) -> Option<&'a Node> {
+    pub fn question_token(&self) -> Option<&'a Node> { ::tsox_core::fntrace::enter("question_token"); 
         match &self.node.data {
             NodeData::NamedTupleMember(d) => d.question_token.as_deref(),
             NodeData::ParameterDeclaration(d) => d.question_token.as_deref(),
@@ -70,7 +70,7 @@ impl<'a> TypedNode<'a> {
         }
     }
 
-    pub fn type_(&self) -> Option<&'a Node> {
+    pub fn type_(&self) -> Option<&'a Node> { ::tsox_core::fntrace::enter("type_"); 
         match &self.node.data {
             NodeData::NamedTupleMember(d) => Some(&d.type_node),
             NodeData::ParameterDeclaration(d) => d.type_node.as_deref(),
@@ -80,14 +80,14 @@ impl<'a> TypedNode<'a> {
         }
     }
 
-    pub fn initializer(&self) -> Option<&'a Node> {
+    pub fn initializer(&self) -> Option<&'a Node> { ::tsox_core::fntrace::enter("initializer"); 
         match &self.node.data {
             NodeData::ParameterDeclaration(d) => d.initializer.as_deref(),
             _ => panic!("initializer() on {:?}", self.node.kind),
         }
     }
 
-    pub fn expression(&self) -> Option<&'a Arc<Node>> {
+    pub fn expression(&self) -> Option<&'a Arc<Node>> { ::tsox_core::fntrace::enter("expression"); 
         match &self.node.data {
             NodeData::NewExpression(d) => Some(&d.expression),
             NodeData::NonNullExpression(d) => Some(&d.expression),
@@ -97,14 +97,14 @@ impl<'a> TypedNode<'a> {
         }
     }
 
-    pub fn type_arguments(&self) -> Option<&'a NodeList> {
+    pub fn type_arguments(&self) -> Option<&'a NodeList> { ::tsox_core::fntrace::enter("type_arguments"); 
         match &self.node.data {
             NodeData::NewExpression(d) => d.type_arguments.as_deref(),
             _ => panic!("typeArguments() on {:?}", self.node.kind),
         }
     }
 
-    pub fn arguments(&self) -> Option<&'a NodeList> {
+    pub fn arguments(&self) -> Option<&'a NodeList> { ::tsox_core::fntrace::enter("arguments"); 
         match &self.node.data {
             NodeData::NewExpression(d) => d.arguments.as_deref(),
             _ => panic!("arguments() on {:?}", self.node.kind),
@@ -115,106 +115,106 @@ impl<'a> TypedNode<'a> {
 pub trait NodeAsExt {
     fn as_typed(&self) -> TypedNode<'_>;
 
-    fn as_identifier(&self) -> TypedNode<'_> {
+    fn as_identifier(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_identifier"); 
         self.assert_kind(SyntaxKind::Identifier);
         self.as_typed()
     }
 
-    fn as_string_literal(&self) -> TypedNode<'_> {
+    fn as_string_literal(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_string_literal"); 
         self.assert_kind(SyntaxKind::StringLiteral);
         self.as_typed()
     }
 
-    fn as_namespace_import(&self) -> TypedNode<'_> {
+    fn as_namespace_import(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_namespace_import"); 
         self.assert_kind(SyntaxKind::NamespaceImport);
         self.as_typed()
     }
 
-    fn as_named_imports(&self) -> TypedNode<'_> {
+    fn as_named_imports(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_named_imports"); 
         self.assert_kind(SyntaxKind::NamedImports);
         self.as_typed()
     }
 
-    fn as_named_tuple_member(&self) -> TypedNode<'_> {
+    fn as_named_tuple_member(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_named_tuple_member"); 
         self.assert_kind(SyntaxKind::NamedTupleMember);
         self.as_typed()
     }
 
-    fn as_namespace_export(&self) -> TypedNode<'_> {
+    fn as_namespace_export(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_namespace_export"); 
         self.assert_kind(SyntaxKind::NamespaceExport);
         self.as_typed()
     }
 
-    fn as_namespace_export_declaration(&self) -> TypedNode<'_> {
+    fn as_namespace_export_declaration(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_namespace_export_declaration"); 
         self.assert_kind(SyntaxKind::NamespaceExportDeclaration);
         self.as_typed()
     }
 
-    fn as_parameter_declaration(&self) -> TypedNode<'_> {
+    fn as_parameter_declaration(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_parameter_declaration"); 
         self.assert_kind(SyntaxKind::Parameter);
         self.as_typed()
     }
 
-    fn as_new_expression(&self) -> TypedNode<'_> {
+    fn as_new_expression(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_new_expression"); 
         self.assert_kind(SyntaxKind::NewExpression);
         self.as_typed()
     }
 
-    fn as_non_null_expression(&self) -> TypedNode<'_> {
+    fn as_non_null_expression(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_non_null_expression"); 
         self.assert_kind(SyntaxKind::NonNullExpression);
         self.as_typed()
     }
 
-    fn as_binding_pattern(&self) -> TypedNode<'_> {
+    fn as_binding_pattern(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_binding_pattern"); 
         self.as_typed()
     }
 
-    fn as_object_literal_expression(&self) -> TypedNode<'_> {
+    fn as_object_literal_expression(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_object_literal_expression"); 
         self.assert_kind(SyntaxKind::ObjectLiteralExpression);
         self.as_typed()
     }
 
-    fn as_property_assignment(&self) -> TypedNode<'_> {
+    fn as_property_assignment(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_property_assignment"); 
         self.assert_kind(SyntaxKind::PropertyAssignment);
         self.as_typed()
     }
 
-    fn as_shorthand_property_assignment(&self) -> TypedNode<'_> {
+    fn as_shorthand_property_assignment(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_shorthand_property_assignment"); 
         self.assert_kind(SyntaxKind::ShorthandPropertyAssignment);
         self.as_typed()
     }
 
-    fn as_spread_assignment(&self) -> TypedNode<'_> {
+    fn as_spread_assignment(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_spread_assignment"); 
         self.assert_kind(SyntaxKind::SpreadAssignment);
         self.as_typed()
     }
 
-    fn as_method_declaration(&self) -> TypedNode<'_> {
+    fn as_method_declaration(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_method_declaration"); 
         self.assert_kind(SyntaxKind::MethodDeclaration);
         self.as_typed()
     }
 
-    fn as_get_accessor_declaration(&self) -> TypedNode<'_> {
+    fn as_get_accessor_declaration(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_get_accessor_declaration"); 
         self.assert_kind(SyntaxKind::GetAccessor);
         self.as_typed()
     }
 
-    fn as_set_accessor_declaration(&self) -> TypedNode<'_> {
+    fn as_set_accessor_declaration(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_set_accessor_declaration"); 
         self.assert_kind(SyntaxKind::SetAccessor);
         self.as_typed()
     }
 
-    fn as_optional_type_node(&self) -> TypedNode<'_> {
+    fn as_optional_type_node(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_optional_type_node"); 
         self.assert_kind(SyntaxKind::OptionalType);
         self.as_typed()
     }
 
-    fn as_parenthesized_expression(&self) -> TypedNode<'_> {
+    fn as_parenthesized_expression(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_parenthesized_expression"); 
         self.assert_kind(SyntaxKind::ParenthesizedExpression);
         self.as_typed()
     }
 
-    fn as_parenthesized_type_node(&self) -> TypedNode<'_> {
+    fn as_parenthesized_type_node(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_parenthesized_type_node"); 
         self.assert_kind(SyntaxKind::ParenthesizedType);
         self.as_typed()
     }
@@ -223,11 +223,11 @@ pub trait NodeAsExt {
 }
 
 impl NodeAsExt for Node {
-    fn as_typed(&self) -> TypedNode<'_> {
+    fn as_typed(&self) -> TypedNode<'_> { ::tsox_core::fntrace::enter("as_typed"); 
         TypedNode { node: self }
     }
 
-    fn assert_kind(&self, kind: SyntaxKind) {
+    fn assert_kind(&self, kind: SyntaxKind) { ::tsox_core::fntrace::enter("assert_kind"); 
         if self.kind != kind {
             panic!("expected {:?}, got {:?}", kind, self.kind);
         }

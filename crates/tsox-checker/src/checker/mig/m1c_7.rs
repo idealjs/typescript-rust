@@ -23,14 +23,14 @@ impl Checker {
         &mut self,
         generic_global_type: &Arc<Type>,
         type_arguments: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_type_from_generic_global_type"); 
         if self.empty_generic_type.get().map(|t| t.id) != Some(generic_global_type.id) {
             return self.create_type_reference(generic_global_type, type_arguments);
         }
         self.empty_object_type()
     }
 
-    pub fn create_iterable_type(&mut self, iterated_type: &Arc<Type>) -> Arc<Type> {
+    pub fn create_iterable_type(&mut self, iterated_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_iterable_type"); 
         let global_iterable = self.get_global_iterable_type_checked();
         self.create_type_from_generic_global_type(
             &global_iterable,
@@ -42,7 +42,7 @@ impl Checker {
         )
     }
 
-    pub fn create_widening_type(&mut self, non_widening_type: &Arc<Type>) -> Arc<Type> {
+    pub fn create_widening_type(&mut self, non_widening_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_widening_type"); 
         if self.strict_null_checks {
             return non_widening_type.clone();
         }
@@ -57,7 +57,7 @@ impl Checker {
         t
     }
 
-    pub fn create_unknown_union_type(&mut self) -> Arc<Type> {
+    pub fn create_unknown_union_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("create_unknown_union_type"); 
         if self.strict_null_checks {
             let types = vec![
                 self.undefined_type(),
@@ -73,7 +73,7 @@ impl Checker {
         &mut self,
         target: &Arc<Type>,
         type_arguments: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_type_reference"); 
         self.create_type_reference_ex(target, type_arguments, ObjectFlags::empty())
     }
 
@@ -82,7 +82,7 @@ impl Checker {
         target: &Arc<Type>,
         type_arguments: &[Arc<Type>],
         object_flags: ObjectFlags,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_type_reference_ex"); 
         let propagating =
             self.get_propagating_flags_of_types(type_arguments, TypeFlags::empty());
         let mut t = self.new_object_type(
@@ -104,7 +104,7 @@ impl Checker {
         node: Option<&Arc<Node>>,
         mapper: Option<&Arc<TypeMapper>>,
         alias: Option<TypeAlias>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_deferred_type_reference"); 
         let alias = match alias {
             Some(a) => Some(a),
             None => {
@@ -127,7 +127,7 @@ impl Checker {
         t
     }
 
-    pub fn clone_type_reference(&mut self, source: &Arc<Type>) -> Arc<Type> {
+    pub fn clone_type_reference(&mut self, source: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("clone_type_reference"); 
         let source_object = match &source.data {
             TypeData::Object(d) => Some(d),
             TypeData::Interface(i) => Some(&i.object),
@@ -148,7 +148,7 @@ impl Checker {
         t
     }
 
-    pub fn extract_unit_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn extract_unit_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("extract_unit_type"); 
         if t.flags.contains(TypeFlags::Intersection) {
             if let TypeData::Intersection(data) = &t.data {
                 if let Some(u) = data
@@ -168,7 +168,7 @@ impl Checker {
 pub fn find_index_info_free(
     index_infos: &[Arc<IndexInfo>],
     key_type: &Arc<Type>,
-) -> Option<Arc<IndexInfo>> {
+) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("find_index_info_free"); 
     index_infos
         .iter()
         .find(|info| info.key_type.as_ref().map(|k| k.id) == Some(key_type.id))

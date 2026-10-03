@@ -62,7 +62,7 @@ pub(crate) fn format_span(
     initial_indentation: i64,
     delta: i64,
     scan_start: usize,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_span"); 
     let mut worker = FormatSpanWorker {
         original_range: span,
         enclosing_node,
@@ -100,7 +100,7 @@ pub(super) type ScannerRef<'a> = &'a mut FormattingScanner;
 pub(crate) fn get_non_decorator_token_pos_of_node(
     file: &crate::ast::SourceFile,
     node: &Node,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_non_decorator_token_pos_of_node"); 
     let mut last_decorator_end: Option<usize> = None;
     if super::indenter::has_decorators(node) {
         if let Some(mods) = node.modifiers() {

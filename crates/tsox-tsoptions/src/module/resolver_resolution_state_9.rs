@@ -11,7 +11,7 @@ impl<'a> ResolutionState<'a> {
         entry: &str,
         package_directory: &str,
         is_imports: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_load_input_file_for_path"); 
         if self.is_config_lookup {
             return CONTINUE_SEARCHING;
         }
@@ -134,7 +134,7 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    fn extension_is_ok(ext: Extensions, extension: &str) -> bool {
+    fn extension_is_ok(ext: Extensions, extension: &str) -> bool { ::tsox_core::fntrace::enter("extension_is_ok"); 
         (ext.contains(Extensions::JAVASCRIPT)
             && matches!(extension, ".js" | ".jsx" | ".mjs" | ".cjs"))
             || (ext.contains(Extensions::TYPESCRIPT)
@@ -151,7 +151,7 @@ impl<'a> ResolutionState<'a> {
         package_directory: &str,
         _entry: &str,
         is_imports: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_file_name_from_package_json_field_checked"); 
         if let Some(input_link) =
             self.try_load_input_file_for_path(final_path, _entry, package_directory, is_imports)
         {
@@ -170,7 +170,7 @@ impl<'a> ResolutionState<'a> {
         lookup_table: &packagejson::JsonValue,
         package_directory: &str,
         is_imports: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_exports_or_imports"); 
         let entries = lookup_table.as_object();
 
         if !module_name.ends_with('/') && !module_name.contains('*') {
@@ -256,7 +256,7 @@ impl<'a> ResolutionState<'a> {
         target: &packagejson::JsonValue,
         subpath: &str,
         is_pattern: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_target_export_or_import"); 
         if self.export_target_depth >= 16 {
             return CONTINUE_SEARCHING;
         }
@@ -356,7 +356,7 @@ impl<'a> ResolutionState<'a> {
         &self,
         resolved: Option<Resolved>,
         is_external_library_import: bool,
-    ) -> ResolvedModule {
+    ) -> ResolvedModule { ::tsox_core::fntrace::enter("create_resolved_module"); 
         match resolved {
             Some(r) => {
                 let package_id =
@@ -382,7 +382,7 @@ impl<'a> ResolutionState<'a> {
     pub(crate) fn create_resolved_module_handling_symlink(
         &self,
         resolved: Option<Resolved>,
-    ) -> ResolvedModule {
+    ) -> ResolvedModule { ::tsox_core::fntrace::enter("create_resolved_module_handling_symlink"); 
         let mut resolved = resolved;
         let is_external_library_import = resolved
             .as_ref()
@@ -408,7 +408,7 @@ impl<'a> ResolutionState<'a> {
 
     // Go getOriginalAndResolvedFileName：realpath 与原路径仅大小写差异时
     // 保留原路径（forceConsistentCasingInFileNames 报错需要原拼写）
-    fn get_original_and_resolved_file_name(&self, file_name: &str) -> (String, String) {
+    fn get_original_and_resolved_file_name(&self, file_name: &str) -> (String, String) { ::tsox_core::fntrace::enter("get_original_and_resolved_file_name"); 
         let resolved_file_name =
             tsox_core::tspath::normalize_path(&self.fs.realpath(file_name));
         let compare_paths_options = tsox_core::tspath::ComparePathsOptions {
@@ -430,7 +430,7 @@ impl<'a> ResolutionState<'a> {
 pub(crate) fn get_conditions(
     options: &CompilerOptions,
     resolution_mode: ModuleKind,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_conditions"); 
     let mut conditions = Vec::new();
     if resolution_mode == ModuleKind::ESNext {
         conditions.push("import".to_string());

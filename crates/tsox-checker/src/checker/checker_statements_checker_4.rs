@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_variable_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_variable_declaration"); 
         self.check_grammar_variable_declaration(node);
         self.check_exports_on_merged_declarations(node);
         if let Some(name) = node.name() {
@@ -412,7 +412,7 @@ impl Checker {
                     } else {
                         primary_type_raw
                     };
-                    fn auto_to_any(c: &Checker, t: &Arc<Type>) -> Arc<Type> {
+                    fn auto_to_any(c: &Checker, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("auto_to_any"); 
                         if t.intrinsic_name() == Some("auto") {
                             c.get_any_type()
                         } else {
@@ -483,7 +483,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_binding_pattern_element_initializers(&mut self, pattern: &Arc<Node>) {
+    pub(crate) fn check_binding_pattern_element_initializers(&mut self, pattern: &Arc<Node>) { ::tsox_core::fntrace::enter("check_binding_pattern_element_initializers"); 
         let tsox_frontend::ast::NodeData::BindingPattern(bp) = &pattern.data else {
             return;
         };
@@ -509,7 +509,7 @@ impl Checker {
         &mut self,
         element: &Arc<Node>,
         default: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_binding_element_default_assignability"); 
         let tsox_frontend::ast::NodeData::BindingElement(be) = &element.data else {
             return;
         };
@@ -549,7 +549,7 @@ impl Checker {
         );
     }
 
-    pub(crate) fn check_binding_pattern_element_types(&mut self, pattern: &Arc<Node>) {
+    pub(crate) fn check_binding_pattern_element_types(&mut self, pattern: &Arc<Node>) { ::tsox_core::fntrace::enter("check_binding_pattern_element_types"); 
         let tsox_frontend::ast::NodeData::BindingPattern(bp) = &pattern.data else {
             return;
         };
@@ -576,7 +576,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         switch_expression_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_case_clause"); 
         if let tsox_frontend::ast::NodeData::CaseOrDefaultClause(data) = &node.data {
             if data.expression.kind != SyntaxKind::UnknownKeyword {
                 self.check_expression(&data.expression);
@@ -604,7 +604,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_type_equality_comparable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub(crate) fn is_type_equality_comparable_to(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_equality_comparable_to"); 
         target.flags.contains(TYPE_FLAGS_NULLABLE) || self.is_type_comparable_to(source, target)
     }
 
@@ -612,7 +612,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         t: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("attach_expando_if_fn_initialized"); 
         let is_fn_init = matches!(
             &node.data,
             tsox_frontend::ast::NodeData::VariableDeclaration(d)

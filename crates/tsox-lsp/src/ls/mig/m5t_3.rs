@@ -11,7 +11,7 @@ use super::m5s_3::{ImpExpKind, RefSearch, RefState};
 use super::m5t::{get_symbol_scope, is_for_rename_with_prefix_and_suffix_text, is_valid_reference_position, new_node_entry, new_node_entry_with_kind};
 use super::m5t_4::get_special_search_kind;
 
-pub fn state_special_search_kind(state: &RefState) -> &'static str {
+pub fn state_special_search_kind(state: &RefState) -> &'static str { ::tsox_core::fntrace::enter("state_special_search_kind"); 
     get_special_search_kind(Some(&state.node))
 }
 
@@ -23,7 +23,7 @@ pub fn new_state<'a>(
     checker: &'a mut tsox_checker::checker::Checker,
     search_meaning: SemanticMeaning,
     options: RefOptions,
-) -> RefState<'a> {
+) -> RefState<'a> { ::tsox_core::fntrace::enter("new_state"); 
     RefState {
         program: program.clone(),
         source_files: source_files.to_vec(),
@@ -42,11 +42,11 @@ pub fn new_state<'a>(
 }
 
 impl<'a> RefState<'a> {
-    pub fn includes_source_file(&self, source_file: &Arc<SourceFile>) -> bool {
+    pub fn includes_source_file(&self, source_file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("includes_source_file"); 
         self.source_files_set.contains(&source_file.file_name)
     }
 
-    pub fn mark_searched_symbols(&mut self, source_file: &Arc<SourceFile>, symbols: &[Arc<Symbol>]) -> bool {
+    pub fn mark_searched_symbols(&mut self, source_file: &Arc<SourceFile>, symbols: &[Arc<Symbol>]) -> bool { ::tsox_core::fntrace::enter("mark_searched_symbols"); 
         let file_key = Arc::as_ptr(source_file) as usize;
         let mut any_new_symbols = false;
         for sym in symbols {
@@ -57,15 +57,15 @@ impl<'a> RefState<'a> {
         any_new_symbols
     }
 
-    pub fn mark_seen_re_export_rhs(&mut self, node: &Arc<Node>) -> bool {
+    pub fn mark_seen_re_export_rhs(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("mark_seen_re_export_rhs"); 
         self.seenReExportRHS.insert(Arc::as_ptr(node) as usize)
     }
 
-    pub fn seen_containing_type_references_add_if_absent(&mut self, node: &Arc<Node>) -> bool {
+    pub fn seen_containing_type_references_add_if_absent(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("seen_containing_type_references_add_if_absent"); 
         self.seen_containing_type_references.insert(Arc::as_ptr(node) as usize)
     }
 
-    pub fn reference_adder(&mut self, search_symbol: &Arc<Symbol>) -> impl FnMut(&Arc<Node>, EntryKind) + '_ {
+    pub fn reference_adder(&mut self, search_symbol: &Arc<Symbol>) -> impl FnMut(&Arc<Node>, EntryKind) + '_ { ::tsox_core::fntrace::enter("reference_adder"); 
         self.pending_entries.push(ReferenceEntry {
             kind: EntryKind::None,
             node: None,
@@ -89,7 +89,7 @@ impl<'a> RefState<'a> {
         is_for_rename: bool,
         provide_prefix_and_suffix_text: bool,
         implementations: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("populate_search_symbol_set"); 
         let Some(_location) = location else {
             return vec![symbol.clone()];
         };
@@ -117,7 +117,7 @@ impl<'a> RefState<'a> {
         result
     }
 
-    pub fn get_related_symbol(&mut self, search: &RefSearch, reference_symbol: &Arc<Symbol>, reference_location: &Arc<Node>) -> Option<(Arc<Symbol>, EntryKind)> {
+    pub fn get_related_symbol(&mut self, search: &RefSearch, reference_symbol: &Arc<Symbol>, reference_location: &Arc<Node>) -> Option<(Arc<Symbol>, EntryKind)> { ::tsox_core::fntrace::enter("get_related_symbol"); 
         self.for_each_related_symbol(
             reference_symbol,
             reference_location,
@@ -153,7 +153,7 @@ impl<'a> RefState<'a> {
         only_include_binding_element_at_reference_location: bool,
         cb_symbol: &mut dyn FnMut(&Arc<Symbol>, Option<&Arc<Symbol>>, Option<&Arc<Symbol>>) -> Option<Arc<Symbol>>,
         allow_base_types: &dyn Fn(&Arc<Symbol>) -> bool,
-    ) -> Option<(Arc<Symbol>, EntryKind)> {
+    ) -> Option<(Arc<Symbol>, EntryKind)> { ::tsox_core::fntrace::enter("for_each_related_symbol"); 
         if let Some(res) = self.from_root(symbol, cb_symbol, allow_base_types) {
             return Some((res, EntryKind::Node));
         }
@@ -203,7 +203,7 @@ impl<'a> RefState<'a> {
         sym: &Arc<Symbol>,
         cb_symbol: &mut dyn FnMut(&Arc<Symbol>, Option<&Arc<Symbol>>, Option<&Arc<Symbol>>) -> Option<Arc<Symbol>>,
         allow_base_types: &dyn Fn(&Arc<Symbol>) -> bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("from_root"); 
         for root_symbol in self.checker.get_root_symbols(sym) {
             if let Some(result) = cb_symbol(sym, Some(&root_symbol), None) {
                 return Some(result);
@@ -220,11 +220,11 @@ impl<'a> RefState<'a> {
         None
     }
 
-    pub fn has_matching_meaning(&self, reference_location: &Arc<Node>) -> bool {
+    pub fn has_matching_meaning(&self, reference_location: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_matching_meaning"); 
         crate::ls::utilities::get_meaning_from_location(reference_location) & self.search_meaning.0 != 0
     }
 
-    pub fn search_for_imported_symbol(&mut self, symbol: &Arc<Symbol>) {
+    pub fn search_for_imported_symbol(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("search_for_imported_symbol"); 
         let declarations = symbol.declarations.clone();
         for declaration in declarations {
             let Some(exporting_file) = source_file_of_node(&self.program, &declaration) else {
@@ -236,7 +236,7 @@ impl<'a> RefState<'a> {
         }
     }
 
-    pub fn search_for_imports_of_export(&mut self, export_location: &Arc<Node>, export_symbol: &Arc<Symbol>, export_info: &crate::ls::import_tracker::ExportInfo) {
+    pub fn search_for_imports_of_export(&mut self, export_location: &Arc<Node>, export_symbol: &Arc<Symbol>, export_info: &crate::ls::import_tracker::ExportInfo) { ::tsox_core::fntrace::enter("search_for_imports_of_export"); 
         let Some(r) = self.get_import_searches(export_symbol, export_info) else {
             return;
         };
@@ -285,7 +285,7 @@ impl<'a> RefState<'a> {
         }
     }
 
-    pub fn should_add_single_reference(&self, single_ref: &Arc<Node>) -> bool {
+    pub fn should_add_single_reference(&self, single_ref: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_add_single_reference"); 
         if !self.has_matching_meaning(single_ref) {
             return false;
         }
@@ -300,13 +300,13 @@ impl<'a> RefState<'a> {
         !(is_specifier && tsox_frontend::ast::mig::m3g_3::module_export_name_is_default(single_ref))
     }
 
-    pub fn search_for_name(&mut self, source_file: &Arc<SourceFile>, search: &RefSearch) {
+    pub fn search_for_name(&mut self, source_file: &Arc<SourceFile>, search: &RefSearch) { ::tsox_core::fntrace::enter("search_for_name"); 
         if tsox_frontend::ast::mig::m3b::get_name_table(source_file).contains_key(search.text.as_str()) {
             self.get_references_in_source_file(source_file, search, true);
         }
     }
 
-    pub fn get_references_in_container_or_files(&mut self, symbol: &Arc<Symbol>, search: &RefSearch) {
+    pub fn get_references_in_container_or_files(&mut self, symbol: &Arc<Symbol>, search: &RefSearch) { ::tsox_core::fntrace::enter("get_references_in_container_or_files"); 
         let scope = get_symbol_scope(symbol, &self.checker);
         if let Some(scope) = scope {
             let add_references_here = scope.kind != SyntaxKind::SourceFile
@@ -322,12 +322,12 @@ impl<'a> RefState<'a> {
         }
     }
 
-    pub fn get_references_in_source_file(&mut self, source_file: &Arc<SourceFile>, search: &RefSearch, add_references_here: bool) {
+    pub fn get_references_in_source_file(&mut self, source_file: &Arc<SourceFile>, search: &RefSearch, add_references_here: bool) { ::tsox_core::fntrace::enter("get_references_in_source_file"); 
         let file_node = source_file.node.clone();
         self.get_references_in_container(&file_node, source_file, search, add_references_here);
     }
 
-    pub fn get_references_in_container(&mut self, container: &Arc<Node>, source_file: &Arc<SourceFile>, search: &RefSearch, add_references_here: bool) {
+    pub fn get_references_in_container(&mut self, container: &Arc<Node>, source_file: &Arc<SourceFile>, search: &RefSearch, add_references_here: bool) { ::tsox_core::fntrace::enter("get_references_in_container"); 
         if !self.mark_searched_symbols(source_file, &search.all_search_symbols) {
             return;
         }
@@ -338,7 +338,7 @@ impl<'a> RefState<'a> {
     }
 }
 
-pub fn source_file_of_node(program: &Arc<tsox_compile::compiler::Program>, node: &Arc<Node>) -> Option<Arc<SourceFile>> {
+pub fn source_file_of_node(program: &Arc<tsox_compile::compiler::Program>, node: &Arc<Node>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_of_node"); 
     let file_node = ast::get_source_file_of_node(node)?;
     program
         .source_files()

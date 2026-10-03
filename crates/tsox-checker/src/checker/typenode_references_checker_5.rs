@@ -6,7 +6,7 @@ impl Checker {
     pub(crate) fn build_interface_type_from_members(
         &mut self,
         members: &Arc<NodeList>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("build_interface_type_from_members"); 
         self.build_interface_type_from_members_with_symbol(members, None, None)
     }
 
@@ -15,7 +15,7 @@ impl Checker {
         members: &Arc<NodeList>,
         symbol: Option<Arc<Symbol>>,
         own_symbol: Option<&Arc<Symbol>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("build_interface_type_from_members_with_symbol"); 
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();

@@ -20,7 +20,7 @@ pub struct MemberInfoMap {
 }
 
 impl MemberInfoMap {
-    pub fn set(&mut self, key: Arc<Node>, value: MemberInfo) {
+    pub fn set(&mut self, key: Arc<Node>, value: MemberInfo) { ::tsox_core::fntrace::enter("set"); 
         if let Some(slot) = self.get_mut(&key) {
             *slot = value;
         } else {
@@ -28,14 +28,14 @@ impl MemberInfoMap {
         }
     }
 
-    pub fn get_mut(&mut self, key: &Arc<Node>) -> Option<&mut MemberInfo> {
+    pub fn get_mut(&mut self, key: &Arc<Node>) -> Option<&mut MemberInfo> { ::tsox_core::fntrace::enter("get_mut"); 
         self.entries
             .iter_mut()
             .find(|(k, _)| Arc::ptr_eq(k, key))
             .map(|(_, v)| v)
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&Arc<Node>, &MemberInfo)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&Arc<Node>, &MemberInfo)> { ::tsox_core::fntrace::enter("iter"); 
         self.entries.iter().map(|(k, v)| (k, v))
     }
 }
@@ -111,7 +111,7 @@ pub struct EsDecoratorTransformer {
     pub accessor_stripping_modifier_visitor: NodeVisitor,
 }
 
-pub fn new_es_decorator_transformer(opts: &TransformOptions) -> Option<Transformer> {
+pub fn new_es_decorator_transformer(opts: &TransformOptions) -> Option<Transformer> { ::tsox_core::fntrace::enter("new_es_decorator_transformer"); 
     if opts.compiler_options.experimental_decorators.is_true()
         || (opts.compiler_options.get_emit_script_target() >= ScriptTarget::ESNext
             && opts.compiler_options.get_use_define_for_class_fields())
@@ -141,7 +141,7 @@ pub fn new_es_decorator_transformer(opts: &TransformOptions) -> Option<Transform
         async_only_modifier_visitor: NodeVisitor::placeholder(),
         accessor_stripping_modifier_visitor: NodeVisitor::placeholder(),
     };
-    fn es_decorator_visit_fn(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn es_decorator_visit_fn(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("es_decorator_visit_fn"); 
         Some(node)
     }
     let result = Transformer::new(es_decorator_visit_fn, Some(opts.context.clone()));
@@ -210,7 +210,7 @@ pub fn new_es_decorator_transformer(opts: &TransformOptions) -> Option<Transform
 }
 
 impl EsDecoratorTransformer {
-    pub fn update_state(&mut self) {
+    pub fn update_state(&mut self) { ::tsox_core::fntrace::enter("update_state"); 
         self.class_info_stack = None;
         self.class_this = None;
         self.class_super = None;
@@ -245,7 +245,7 @@ impl EsDecoratorTransformer {
         }
     }
 
-    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         self.top = None;
         self.should_transform_private_static_elements_in_file = false;
         let visited = self.transformer.visitor().visit_each_child(node);
@@ -261,7 +261,7 @@ impl EsDecoratorTransformer {
         visited
     }
 
-    pub fn outer_this_visit(&mut self, n: &Arc<Node>) -> Arc<Node> {
+    pub fn outer_this_visit(&mut self, n: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("outer_this_visit"); 
         if !n.subtree_facts().intersects(SubtreeFacts::LexicalThis)
             && n.kind != SyntaxKind::ThisKeyword
         {
@@ -285,7 +285,7 @@ impl EsDecoratorTransformer {
         self.outer_this_visitor.visit_each_child(n)
     }
 
-    pub fn should_visit_node(&self, node: &Arc<Node>) -> bool {
+    pub fn should_visit_node(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_visit_node"); 
         node.subtree_facts().intersects(SubtreeFacts::Decorators)
             || (self.class_this.is_some()
                 && node
@@ -298,7 +298,7 @@ impl EsDecoratorTransformer {
                     .intersects(SubtreeFacts::LexicalSuper))
     }
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if node.kind == SyntaxKind::SourceFile {
             return self.visit_source_file(node);
         }
@@ -348,14 +348,14 @@ impl EsDecoratorTransformer {
         }
     }
 
-    pub fn modifier_visitor_visit(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn modifier_visitor_visit(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("modifier_visitor_visit"); 
         if node.kind == SyntaxKind::Decorator {
             return None;
         }
         Some(node.clone())
     }
 
-    pub fn non_constructor_class_element_visit(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn non_constructor_class_element_visit(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("non_constructor_class_element_visit"); 
         if is_constructor_declaration(node) {
             return node.clone();
         }

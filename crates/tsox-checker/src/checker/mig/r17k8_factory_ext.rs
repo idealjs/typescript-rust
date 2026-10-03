@@ -23,7 +23,7 @@ pub trait NodeFactoryExt {
 }
 
 impl NodeFactoryExt for NodeFactoryStub {
-    fn new_identifier(&self, text: &str) -> Arc<Node> {
+    fn new_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::Identifier,
             NodeData::Identifier(tsox_frontend::ast::node_data_generated::IdentifierData {
@@ -32,7 +32,7 @@ impl NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_string_literal(&self, text: &str, _token_flags: i32) -> Arc<Node> {
+    fn new_string_literal(&self, text: &str, _token_flags: i32) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal"); 
         Arc::new(Node::new(
             SyntaxKind::StringLiteral,
             NodeData::StringLiteral(StringLiteralData {
@@ -42,7 +42,7 @@ impl NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_numeric_literal(&self, text: &str, _token_flags: i32) -> Arc<Node> {
+    fn new_numeric_literal(&self, text: &str, _token_flags: i32) -> Arc<Node> { ::tsox_core::fntrace::enter("new_numeric_literal"); 
         Arc::new(Node::new(
             SyntaxKind::NumericLiteral,
             NodeData::NumericLiteral(NumericLiteralData {
@@ -52,20 +52,20 @@ impl NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_modifier(&self, kind: SyntaxKind) -> Arc<Node> {
+    fn new_modifier(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_modifier"); 
         Arc::new(Node::new(kind, NodeData::Token))
     }
 
-    fn new_modifier_list(&self, nodes: Vec<Arc<Node>>) -> Option<Arc<ModifierList>> {
+    fn new_modifier_list(&self, nodes: Vec<Arc<Node>>) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("new_modifier_list"); 
         let flags = modifiers_to_flags(&nodes);
         Some(Arc::new(ModifierList::new(nodes, flags)))
     }
 
-    fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> NodeList {
+    fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> NodeList { ::tsox_core::fntrace::enter("new_node_list"); 
         NodeList::new(nodes)
     }
 
-    fn new_enum_member(&self, name: Arc<Node>, initializer: Option<Arc<Node>>) -> Arc<Node> {
+    fn new_enum_member(&self, name: Arc<Node>, initializer: Option<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_enum_member"); 
         Arc::new(Node::new(
             SyntaxKind::EnumMember,
             NodeData::EnumMember(EnumMemberData { name, initializer }),
@@ -77,7 +77,7 @@ impl NodeFactoryExt for NodeFactoryStub {
         modifiers: Option<Arc<ModifierList>>,
         name: Arc<Node>,
         members: NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_enum_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::EnumDeclaration,
             NodeData::EnumDeclaration(EnumDeclarationData {
@@ -93,7 +93,7 @@ pub fn replace_modifiers(
     _factory: &NodeFactoryStub,
     node: &Arc<Node>,
     modifier_array: Option<Arc<ModifierList>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("replace_modifiers"); 
     let frontend_factory = tsox_frontend::ast::mig::m3b_2::NodeFactory::new();
     tsox_frontend::ast::mig::m3g_3::replace_modifiers(&frontend_factory, node, modifier_array)
 }

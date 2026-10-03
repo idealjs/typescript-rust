@@ -33,11 +33,11 @@ pub struct SymbolTrackerSharedState {
 }
 
 impl SymbolTrackerSharedState {
-    pub fn add_diagnostic(&mut self, diag: Diagnostic) {
+    pub fn add_diagnostic(&mut self, diag: Diagnostic) { ::tsox_core::fntrace::enter("add_diagnostic"); 
         self.diagnostics.push(diag);
     }
 
-    pub fn empty() -> Self {
+    pub fn empty() -> Self { ::tsox_core::fntrace::enter("empty"); 
         SymbolTrackerSharedState {
             late_marked_statements: Vec::new(),
             diagnostics: Vec::new(),
@@ -62,26 +62,26 @@ pub struct SymbolTrackerImpl {
 }
 
 impl SymbolTrackerImpl {
-    pub fn push_error_fallback_node(&mut self, node: Arc<Node>) {
+    pub fn push_error_fallback_node(&mut self, node: Arc<Node>) { ::tsox_core::fntrace::enter("push_error_fallback_node"); 
         self.fallback_stack.push(node);
     }
 
-    pub fn pop_error_fallback_node(&mut self) {
+    pub fn pop_error_fallback_node(&mut self) { ::tsox_core::fntrace::enter("pop_error_fallback_node"); 
         self.fallback_stack.pop();
     }
 
-    pub fn error_fallback_node(&self) -> Option<&Arc<Node>> {
+    pub fn error_fallback_node(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("error_fallback_node"); 
         self.fallback_stack.last()
     }
 
-    pub fn error_location(&self) -> Option<&Arc<Node>> {
+    pub fn error_location(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("error_location"); 
         self.state
             .error_name_node
             .as_ref()
             .or_else(|| self.error_fallback_node())
     }
 
-    pub fn error_declaration_name_with_fallback(&self) -> String {
+    pub fn error_declaration_name_with_fallback(&self) -> String { ::tsox_core::fntrace::enter("error_declaration_name_with_fallback"); 
         if let Some(error_name_node) = &self.state.error_name_node {
             return declaration_name_to_string(Some(error_name_node));
         }
@@ -100,7 +100,7 @@ impl SymbolTrackerImpl {
         "(Missing)".to_string()
     }
 
-    pub fn is_bound_expando(&self, node: &Arc<Node>) -> bool {
+    pub fn is_bound_expando(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_bound_expando"); 
         let left = match &node.data {
             NodeData::BinaryExpression(d) => &d.left,
             _ => return false,
@@ -116,7 +116,7 @@ impl SymbolTrackerImpl {
         self.resolver.is_expando_function_declaration_unsafe(&ref_decl)
     }
 
-    pub fn is_child_of_bound_expando(&self, node: &Arc<Node>) -> bool {
+    pub fn is_child_of_bound_expando(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_child_of_bound_expando"); 
         find_ancestor_or_quit(node, |n| {
             if is_source_file(n) || is_block(n) {
                 return FindAncestorResult::Quit;
@@ -126,7 +126,7 @@ impl SymbolTrackerImpl {
         .is_some()
     }
 
-    pub fn report_inference_fallback(&mut self, node: &Arc<Node>) {
+    pub fn report_inference_fallback(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("report_inference_fallback"); 
         if !self.state.isolated_declarations {
             return;
         }
@@ -161,7 +161,7 @@ impl SymbolTrackerImpl {
         symbol: &Arc<Symbol>,
         enclosing_declaration: &Arc<Node>,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("track_symbol"); 
         if symbol.flags.intersects(SymbolFlags::TypeParameter) {
             return false;
         }
@@ -180,7 +180,7 @@ impl SymbolTrackerImpl {
     pub fn handle_symbol_accessibility_error(
         &mut self,
         symbol_accessibility_result: SymbolAccessibilityResult,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("handle_symbol_accessibility_error"); 
         if symbol_accessibility_result.accessibility == SymbolAccessibility::Accessible {
             if !symbol_accessibility_result.aliases_to_make_visible.is_empty() {
                 for ref_node in &symbol_accessibility_result.aliases_to_make_visible {
@@ -236,7 +236,7 @@ pub fn create_diagnostic_for_node(
     node: &Arc<Node>,
     message: Option<&'static Message>,
     args: &[String],
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_for_node"); 
     new_diagnostic_for_node(
         Some(node),
         message.copied().expect("diagnostic message must be present"),
@@ -248,7 +248,7 @@ pub fn new_symbol_tracker(
     host: DeclarationEmitHost,
     resolver: EmitResolver,
     state: SymbolTrackerSharedState,
-) -> SymbolTrackerImpl {
+) -> SymbolTrackerImpl { ::tsox_core::fntrace::enter("new_symbol_tracker"); 
     let isolated_error_resolver = host.get_emit_resolver();
     SymbolTrackerImpl {
         host,

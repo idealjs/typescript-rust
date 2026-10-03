@@ -8,7 +8,7 @@ impl Checker {
     pub(crate) fn receiver_string_index_type(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("receiver_string_index_type"); 
         use tsox_frontend::ast::SyntaxKind;
         let expression = match node.kind {
             SyntaxKind::PropertyAccessExpression => {
@@ -64,19 +64,19 @@ impl Checker {
     pub(crate) fn index_signature_property_parts(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Vec<SymbolDisplayPart>> {
+    ) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("index_signature_property_parts"); 
         self.receiver_string_index_type(node)
             .map(|value| self.type_to_display_parts(&value))
     }
 
     /// Go shouldUsePlaceholderForProperty：反向映射属性的省略条件
     /// （1）已递归进入过的属性（2）嵌在非匿名源的反向映射内（3）深层同源 mapped
-    pub(crate) fn should_use_placeholder_for_property(&self, prop: &Arc<Symbol>) -> bool {
+    pub(crate) fn should_use_placeholder_for_property(&self, prop: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("should_use_placeholder_for_property"); 
         let result = self.should_use_placeholder_for_property_inner(prop);
                 result
     }
 
-    fn should_use_placeholder_for_property_inner(&self, prop: &Arc<Symbol>) -> bool {
+    fn should_use_placeholder_for_property_inner(&self, prop: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("should_use_placeholder_for_property_inner"); 
         if !prop
             .check_flags
             .contains(tsox_frontend::ast::CheckFlags::ReverseMapped)

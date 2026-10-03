@@ -16,7 +16,7 @@ use super::m4h_2::{
     get_assigned_name_of_property_name,
 };
 
-pub fn has_invalid_escape(template: &Arc<Node>) -> bool {
+pub fn has_invalid_escape(template: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_invalid_escape"); 
     if is_no_substitution_template_literal(template) {
         return template
             .template_literal_flags()
@@ -48,7 +48,7 @@ pub fn transform_named_evaluation_of_property_assignment(
     node: &Arc<PropertyAssignmentData>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_property_assignment"); 
     let factory = context.factory();
     let (assigned_name, name) =
         get_assigned_name_of_property_name(context, &node.name, assigned_name_text);
@@ -66,7 +66,7 @@ pub fn transform_named_evaluation_of_shorthand_assignment_property(
     node: &Arc<ShorthandPropertyAssignmentData>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_shorthand_assignment_property"); 
     let factory = context.factory();
     let assigned_name = if !assigned_name_text.is_empty() {
         factory.new_string_literal(assigned_name_text, 0)
@@ -99,7 +99,7 @@ pub fn transform_named_evaluation_of_variable_declaration(
     node: &Arc<VariableDeclarationData>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_variable_declaration"); 
     let factory = context.factory();
     let assigned_name = if !assigned_name_text.is_empty() {
         factory.new_string_literal(assigned_name_text, 0)
@@ -120,7 +120,7 @@ pub fn transform_named_evaluation_of_parameter_declaration(
     node: &Arc<Node>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_parameter_declaration"); 
     use crate::mig::m4m::r36k5_defs::NodeDataExt;
     let factory = context.factory();
     let data = node.as_parameter_declaration();
@@ -151,7 +151,7 @@ pub fn transform_named_evaluation_of_binding_element(
     node: &Arc<BindingElementData>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_binding_element"); 
     let factory = context.factory();
     let assigned_name = if !assigned_name_text.is_empty() {
         factory.new_string_literal(assigned_name_text, 0)
@@ -182,7 +182,7 @@ pub fn transform_named_evaluation_of_property_declaration(
     node: &Arc<PropertyDeclarationData>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_property_declaration"); 
     let factory = context.factory();
     let (assigned_name, name) =
         get_assigned_name_of_property_name(context, &node.name, assigned_name_text);
@@ -200,7 +200,7 @@ pub fn transform_named_evaluation_of_export_assignment(
     node: &Arc<ExportAssignmentData>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_export_assignment"); 
     let factory = context.factory();
     let assigned_name = if !assigned_name_text.is_empty() {
         factory.new_string_literal(assigned_name_text, 0)

@@ -4,7 +4,7 @@ use crate::parser::reparser_namespace::make_question_if_optional;
 use std::sync::Arc;
 use tsox_core::core::text::TextRange;
 
-pub(super) fn property_tags_to_signatures(tags: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub(super) fn property_tags_to_signatures(tags: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("property_tags_to_signatures"); 
     let mut properties: Vec<Arc<Node>> = Vec::new();
     for prop in tags {
         if prop.kind != SyntaxKind::JSDocPropertyTag
@@ -63,7 +63,7 @@ pub(super) fn property_tags_to_signatures(tags: &[Arc<Node>]) -> Vec<Arc<Node>> 
     properties
 }
 
-pub(super) fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> {
+pub(super) fn reparse_jsdoc_type_literal(t: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("reparse_jsdoc_type_literal"); 
     if t.kind != SyntaxKind::JSDocTypeLiteral {
         return t.clone();
     }

@@ -18,7 +18,7 @@ pub struct MappingsDecoder<'a> {
 }
 
 impl<'a> MappingsDecoder<'a> {
-    pub fn new(mappings: &'a str) -> Self {
+    pub fn new(mappings: &'a str) -> Self { ::tsox_core::fntrace::enter("new"); 
         MappingsDecoder {
             mappings,
             pos: 0,
@@ -33,38 +33,38 @@ impl<'a> MappingsDecoder<'a> {
         }
     }
 
-    pub fn mappings_string(&self) -> &str {
+    pub fn mappings_string(&self) -> &str { ::tsox_core::fntrace::enter("mappings_string"); 
         self.mappings
     }
 
-    pub fn pos(&self) -> usize {
+    pub fn pos(&self) -> usize { ::tsox_core::fntrace::enter("pos"); 
         self.pos
     }
 
-    pub(crate) fn set_error(&mut self, error: &str) {
+    pub(crate) fn set_error(&mut self, error: &str) { ::tsox_core::fntrace::enter("set_error"); 
         self.error = Some(error.to_string());
     }
 
-    pub(crate) fn stop_iterating(&mut self) -> (Option<Mapping>, bool) {
+    pub(crate) fn stop_iterating(&mut self) -> (Option<Mapping>, bool) { ::tsox_core::fntrace::enter("stop_iterating"); 
         self.done = true;
         (None, true)
     }
 
-    pub fn error(&self) -> Option<&str> {
+    pub fn error(&self) -> Option<&str> { ::tsox_core::fntrace::enter("error"); 
         self.error.as_deref()
     }
 
-    pub fn state(&self) -> Mapping {
+    pub fn state(&self) -> Mapping { ::tsox_core::fntrace::enter("state"); 
         self.capture_mapping(true, true)
     }
 
-    fn is_source_mapping_segment_end(&self) -> bool {
+    fn is_source_mapping_segment_end(&self) -> bool { ::tsox_core::fntrace::enter("is_source_mapping_segment_end"); 
         self.pos == self.mappings.len()
             || self.mappings.as_bytes()[self.pos] == b','
             || self.mappings.as_bytes()[self.pos] == b';'
     }
 
-    fn base64_vlq_format_decode(&mut self) -> i32 {
+    fn base64_vlq_format_decode(&mut self) -> i32 { ::tsox_core::fntrace::enter("base64_vlq_format_decode"); 
         let mut shift_count = 0;
         let mut value = 0;
         loop {
@@ -94,7 +94,7 @@ impl<'a> MappingsDecoder<'a> {
         }
     }
 
-    fn capture_mapping(&self, has_source: bool, has_name: bool) -> Mapping {
+    fn capture_mapping(&self, has_source: bool, has_name: bool) -> Mapping { ::tsox_core::fntrace::enter("capture_mapping"); 
         Mapping {
             generated_line: self.generated_line,
             generated_character: self.generated_character,
@@ -121,7 +121,7 @@ impl<'a> MappingsDecoder<'a> {
         }
     }
 
-    pub fn next(&mut self) -> Option<Mapping> {
+    pub fn next(&mut self) -> Option<Mapping> { ::tsox_core::fntrace::enter("next"); 
         while !self.done && self.pos < self.mappings.len() {
             let ch = self.mappings.as_bytes()[self.pos];
             if ch == b';' {
@@ -224,7 +224,7 @@ impl<'a> MappingsDecoder<'a> {
         None
     }
 
-    pub fn collect_all(mut self) -> (Vec<Mapping>, Option<String>) {
+    pub fn collect_all(mut self) -> (Vec<Mapping>, Option<String>) { ::tsox_core::fntrace::enter("collect_all"); 
         let mut result = Vec::new();
         while let Some(m) = self.next() {
             result.push(m);

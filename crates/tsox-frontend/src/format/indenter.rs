@@ -13,11 +13,11 @@ use crate::format::FormatCodeSettings;
 
 use super::util;
 
-pub(crate) fn range_is_on_one_line(range: TextRange, file: &SourceFile) -> bool {
+pub(crate) fn range_is_on_one_line(range: TextRange, file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("range_is_on_one_line"); 
     util::line_of_position(file, range.pos()) == util::line_of_position(file, range.end())
 }
 
-pub(crate) fn is_control_flow_ending_statement(kind: SyntaxKind, parent_kind: SyntaxKind) -> bool {
+pub(crate) fn is_control_flow_ending_statement(kind: SyntaxKind, parent_kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_control_flow_ending_statement"); 
     match kind {
         SyntaxKind::ReturnStatement
         | SyntaxKind::ThrowStatement
@@ -34,7 +34,7 @@ pub(crate) fn should_indent_child_node(
     child: Option<&Arc<Node>>,
     file: Option<&SourceFile>,
     is_next_child: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_indent_child_node"); 
     node_will_indent_child(settings, parent, child, file, false)
         && !(is_next_child
             && child.is_some_and(|c| is_control_flow_ending_statement(c.kind, parent.kind)))
@@ -47,7 +47,7 @@ pub(crate) fn node_will_indent_child(
     child: Option<&Arc<Node>>,
     file: Option<&SourceFile>,
     indent_by_default: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("node_will_indent_child"); 
     use SyntaxKind::*;
     let child_kind = child.map(|c| c.kind).unwrap_or(Unknown);
     match parent.kind {
@@ -168,7 +168,7 @@ pub(crate) fn child_is_unindented_branch_of_conditional_expression(
     child: &Arc<Node>,
     child_start_line: usize,
     file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("child_is_unindented_branch_of_conditional_expression"); 
     if parent.kind != SyntaxKind::ConditionalExpression {
         return false;
     }
@@ -194,7 +194,7 @@ pub(crate) fn argument_starts_on_same_line_as_previous_argument(
     child: &Arc<Node>,
     child_start_line: usize,
     file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("argument_starts_on_same_line_as_previous_argument"); 
     if parent.kind != SyntaxKind::CallExpression && parent.kind != SyntaxKind::NewExpression {
         return false;
     }
@@ -245,7 +245,7 @@ impl DynamicIndenter {
         delta: i64,
         options: FormatCodeSettings,
         file: Arc<SourceFile>,
-    ) -> IndenterRef {
+    ) -> IndenterRef { ::tsox_core::fntrace::enter("new_ref"); 
         Arc::new(RefCell::new(DynamicIndenter {
             node,
             node_start_line,
@@ -262,7 +262,7 @@ impl DynamicIndenter {
         kind: SyntaxKind,
         token_indentation: i64,
         container: &Arc<Node>,
-    ) -> i64 {
+    ) -> i64 { ::tsox_core::fntrace::enter("get_indentation_for_comment"); 
         match kind {
             SyntaxKind::CloseBraceToken | SyntaxKind::CloseBracketToken
             | SyntaxKind::CloseParenToken => {
@@ -283,19 +283,19 @@ impl DynamicIndenter {
         kind: SyntaxKind,
         container: &Arc<Node>,
         suppress_delta: bool,
-    ) -> i64 {
+    ) -> i64 { ::tsox_core::fntrace::enter("get_indentation_for_token"); 
         if !suppress_delta && self.should_add_delta(line, kind, container) {
             return self.indentation + self.get_delta(Some(container));
         }
         self.indentation
     }
 
-    pub(crate) fn get_indentation(&self) -> i64 {
+    pub(crate) fn get_indentation(&self) -> i64 { ::tsox_core::fntrace::enter("get_indentation"); 
         self.indentation
     }
 
     /// Go getDelta
-    pub(crate) fn get_delta(&self, child: Option<&Arc<Node>>) -> i64 {
+    pub(crate) fn get_delta(&self, child: Option<&Arc<Node>>) -> i64 { ::tsox_core::fntrace::enter("get_delta"); 
         if node_will_indent_child(&self.options, &self.node, child, Some(&self.file), true) {
             return self.delta;
         }
@@ -303,7 +303,7 @@ impl DynamicIndenter {
     }
 
     /// Go recomputeIndentation
-    pub(crate) fn recompute_indentation(&mut self, line_added: bool, parent: &Arc<Node>) {
+    pub(crate) fn recompute_indentation(&mut self, line_added: bool, parent: &Arc<Node>) { ::tsox_core::fntrace::enter("recompute_indentation"); 
         if should_indent_child_node(&self.options, parent, Some(&self.node), Some(&self.file), false) {
             if line_added {
                 self.indentation += self.options.editor_settings.indent_size as i64;
@@ -319,7 +319,7 @@ impl DynamicIndenter {
     }
 
     /// Go shouldAddDelta
-    fn should_add_delta(&self, line: usize, kind: SyntaxKind, container: &Arc<Node>) -> bool {
+    fn should_add_delta(&self, line: usize, kind: SyntaxKind, container: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_add_delta"); 
         use SyntaxKind::*;
         match kind {
             OpenBraceToken | CloseBraceToken | CloseParenToken | ElseKeyword | WhileKeyword
@@ -341,13 +341,13 @@ impl DynamicIndenter {
     }
 }
 
-pub(crate) fn has_decorators(node: &Node) -> bool {
+pub(crate) fn has_decorators(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_decorators"); 
     node.modifiers()
         .is_some_and(|m| m.flags().contains(crate::ast::ModifierFlags::Decorator))
 }
 
 /// Go getFirstNonDecoratorTokenOfNode
-pub(crate) fn first_non_decorator_token_of_node(node: &Arc<Node>) -> Option<SyntaxKind> {
+pub(crate) fn first_non_decorator_token_of_node(node: &Arc<Node>) -> Option<SyntaxKind> { ::tsox_core::fntrace::enter("first_non_decorator_token_of_node"); 
     use SyntaxKind::*;
     if let Some(mods) = node.modifiers() {
         let nodes = &mods.list.nodes;
@@ -383,7 +383,7 @@ pub(crate) fn first_non_decorator_token_of_node(node: &Arc<Node>) -> Option<Synt
     }
 }
 
-fn is_modifier_kind(kind: SyntaxKind) -> bool {
+fn is_modifier_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_modifier_kind"); 
     crate::ast::node_data_generated::is_modifier_kind(kind)
 }
 
@@ -393,7 +393,7 @@ pub(crate) fn child_starts_on_same_line_with_else_in_if_statement(
     child: &Arc<Node>,
     child_start_line: usize,
     file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("child_starts_on_same_line_with_else_in_if_statement"); 
     if parent.kind != SyntaxKind::IfStatement {
         return false;
     }

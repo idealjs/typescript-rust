@@ -11,7 +11,7 @@ pub enum QuotePreference {
 }
 
 impl QuotePreference {
-    pub fn as_str(self) -> &'static str {
+    pub fn as_str(self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
         match self {
             QuotePreference::Unknown => "",
             QuotePreference::Auto => "auto",
@@ -20,7 +20,7 @@ impl QuotePreference {
         }
     }
 
-    pub fn parse(value: &Value) -> QuotePreference {
+    pub fn parse(value: &Value) -> QuotePreference { ::tsox_core::fntrace::enter("parse"); 
         if let Value::String(s) = value {
             return match s.to_ascii_lowercase().as_str() {
                 "auto" => QuotePreference::Auto,
@@ -34,13 +34,13 @@ impl QuotePreference {
 }
 
 impl Serialize for QuotePreference {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_str(self.as_str())
     }
 }
 
 impl<'de> Deserialize<'de> for QuotePreference {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match String::deserialize(deserializer)?.to_ascii_lowercase().as_str() {
             "auto" => Self::Auto,
             "double" => Self::Double,
@@ -60,7 +60,7 @@ pub enum JsxAttributeCompletionStyle {
 }
 
 impl JsxAttributeCompletionStyle {
-    pub fn as_str(self) -> &'static str {
+    pub fn as_str(self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
         match self {
             JsxAttributeCompletionStyle::Unknown => "",
             JsxAttributeCompletionStyle::Auto => "auto",
@@ -69,7 +69,7 @@ impl JsxAttributeCompletionStyle {
         }
     }
 
-    pub fn parse(value: &Value) -> JsxAttributeCompletionStyle {
+    pub fn parse(value: &Value) -> JsxAttributeCompletionStyle { ::tsox_core::fntrace::enter("parse"); 
         if let Value::String(s) = value {
             return match s.to_ascii_lowercase().as_str() {
                 "braces" => JsxAttributeCompletionStyle::Braces,
@@ -82,13 +82,13 @@ impl JsxAttributeCompletionStyle {
 }
 
 impl Serialize for JsxAttributeCompletionStyle {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_str(self.as_str())
     }
 }
 
 impl<'de> Deserialize<'de> for JsxAttributeCompletionStyle {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match String::deserialize(deserializer)?.as_str() {
             "braces" => Self::Braces,
             "none" => Self::None,
@@ -107,7 +107,7 @@ pub enum IncludeInlayParameterNameHints {
 }
 
 impl IncludeInlayParameterNameHints {
-    pub fn as_str(self) -> &'static str {
+    pub fn as_str(self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
         match self {
             IncludeInlayParameterNameHints::None => "",
             IncludeInlayParameterNameHints::All => "all",
@@ -115,7 +115,7 @@ impl IncludeInlayParameterNameHints {
         }
     }
 
-    pub fn parse(value: &Value) -> IncludeInlayParameterNameHints {
+    pub fn parse(value: &Value) -> IncludeInlayParameterNameHints { ::tsox_core::fntrace::enter("parse"); 
         if let Value::String(s) = value {
             return match s.as_str() {
                 "all" => IncludeInlayParameterNameHints::All,
@@ -128,13 +128,13 @@ impl IncludeInlayParameterNameHints {
 }
 
 impl Serialize for IncludeInlayParameterNameHints {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_str(self.as_str())
     }
 }
 
 impl<'de> Deserialize<'de> for IncludeInlayParameterNameHints {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match String::deserialize(deserializer)?.as_str() {
             "all" => Self::All,
             "literals" => Self::Literals,
@@ -155,7 +155,7 @@ pub enum OrganizeImportsSort {
 }
 
 impl OrganizeImportsSort {
-    pub fn parse(value: &Value) -> OrganizeImportsSort {
+    pub fn parse(value: &Value) -> OrganizeImportsSort { ::tsox_core::fntrace::enter("parse"); 
         if let Value::String(s) = value {
             return match s.to_ascii_lowercase().as_str() {
                 "ordinal" => OrganizeImportsSort::Ordinal,
@@ -177,7 +177,7 @@ pub enum OrganizeImportsCollation {
 }
 
 impl OrganizeImportsCollation {
-    pub fn parse(value: &Value) -> OrganizeImportsCollation {
+    pub fn parse(value: &Value) -> OrganizeImportsCollation { ::tsox_core::fntrace::enter("parse"); 
         if let Value::String(s) = value {
             if s.to_ascii_lowercase() == "unicode" {
                 return OrganizeImportsCollation::Unicode;
@@ -197,7 +197,7 @@ pub enum OrganizeImportsCaseFirst {
 }
 
 impl OrganizeImportsCaseFirst {
-    pub fn parse(value: &Value) -> OrganizeImportsCaseFirst {
+    pub fn parse(value: &Value) -> OrganizeImportsCaseFirst { ::tsox_core::fntrace::enter("parse"); 
         if let Value::String(s) = value {
             return match s.as_str() {
                 "lower" => OrganizeImportsCaseFirst::Lower,
@@ -220,7 +220,7 @@ pub enum OrganizeImportsTypeOrder {
 }
 
 impl OrganizeImportsTypeOrder {
-    pub fn parse(value: &Value) -> OrganizeImportsTypeOrder {
+    pub fn parse(value: &Value) -> OrganizeImportsTypeOrder { ::tsox_core::fntrace::enter("parse"); 
         if let Value::String(s) = value {
             return match s.as_str() {
                 "last" => OrganizeImportsTypeOrder::Last,
@@ -234,13 +234,13 @@ impl OrganizeImportsTypeOrder {
 }
 
 impl Serialize for OrganizeImportsSort {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_i32(*self as i32)
     }
 }
 
 impl<'de> Deserialize<'de> for OrganizeImportsSort {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match i32::deserialize(deserializer)? {
             1 => Self::Ordinal,
             2 => Self::OrdinalIgnoreCase,
@@ -252,13 +252,13 @@ impl<'de> Deserialize<'de> for OrganizeImportsSort {
 }
 
 impl Serialize for OrganizeImportsCollation {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_bool(*self == Self::Unicode)
     }
 }
 
 impl<'de> Deserialize<'de> for OrganizeImportsCollation {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(if bool::deserialize(deserializer)? {
             Self::Unicode
         } else {
@@ -268,13 +268,13 @@ impl<'de> Deserialize<'de> for OrganizeImportsCollation {
 }
 
 impl Serialize for OrganizeImportsCaseFirst {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_i32(*self as i32)
     }
 }
 
 impl<'de> Deserialize<'de> for OrganizeImportsCaseFirst {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match i32::deserialize(deserializer)? {
             1 => Self::Lower,
             2 => Self::Upper,
@@ -284,13 +284,13 @@ impl<'de> Deserialize<'de> for OrganizeImportsCaseFirst {
 }
 
 impl Serialize for OrganizeImportsTypeOrder {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_i32(*self as i32)
     }
 }
 
 impl<'de> Deserialize<'de> for OrganizeImportsTypeOrder {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match i32::deserialize(deserializer)? {
             1 => Self::Last,
             2 => Self::Inline,

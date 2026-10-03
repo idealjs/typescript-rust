@@ -31,7 +31,7 @@ use tsox_core::diagnostics::messages_generated as msg;
 use tsox_frontend::ast::{self, Node, Symbol, SyntaxKind};
 
 impl Checker {
-    pub fn has_context_sensitive_yield_expression(&mut self, node: &Arc<Node>) -> bool {
+    pub fn has_context_sensitive_yield_expression(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_context_sensitive_yield_expression"); 
         tsox_frontend::ast::mig::m3e::get_function_flags(Some(node))
             .contains(tsox_frontend::ast::mig::m3e::FunctionFlags::GENERATOR)
             && node.body().is_some()
@@ -49,7 +49,7 @@ impl Checker {
         args: &[Arc<Node>],
         signature: &Arc<Signature>,
         signature_help_trailing_comma: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_correct_arity"); 
         if ast::is_jsx_opening_fragment(node) {
             return true;
         }
@@ -131,7 +131,7 @@ impl Checker {
         &mut self,
         signature: &Arc<Signature>,
         type_arguments: &[Arc<Node>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_correct_type_argument_arity"); 
         let num_type_parameters = signature.type_parameters.len();
         let min_type_argument_count =
             self.get_min_type_argument_count(&signature.type_parameters);
@@ -140,18 +140,18 @@ impl Checker {
                 && type_arguments.len() <= num_type_parameters)
     }
 
-    pub fn has_non_circular_base_constraint(&mut self, t: &Arc<Type>) -> bool {
+    pub fn has_non_circular_base_constraint(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_non_circular_base_constraint"); 
         let constraint = self.get_resolved_base_constraint(t, &[]);
         !Arc::ptr_eq(&constraint, self.circular_constraint_type.get().unwrap())
     }
 
-    pub fn has_numeric_property_names(&mut self, t: &Arc<Type>) -> bool {
+    pub fn has_numeric_property_names(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_numeric_property_names"); 
         let number_type = Arc::clone(self.number_type.get().unwrap());
         self.get_index_infos_of_type(t).len() == 1
             && self.get_index_info_of_type(t, &number_type).is_some()
     }
 
-    pub fn has_parent_with_type_annotation(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn has_parent_with_type_annotation(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("has_parent_with_type_annotation"); 
         if let Some(parent) = symbol.parent().as_ref() {
             if let Some(value_declaration) = parent.value_declaration.as_ref() {
                 if ast::is_function_expression_or_arrow_function(value_declaration) {
@@ -180,7 +180,7 @@ impl Checker {
         sig: &Arc<Signature>,
         context: &Arc<Signature>,
         inference_context: &Arc<InferenceContext>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_annotated_parameters_and_return"); 
         let length = sig.parameters.len() - if signature_has_rest_parameter(sig) { 1 } else { 0 };
         let inference_context =
             unsafe { &mut *(Arc::as_ptr(inference_context) as *mut InferenceContext) };
@@ -219,7 +219,7 @@ impl Checker {
         }
     }
 
-    fn initialize_global_symbols(&mut self) -> (Vec<Arc<Symbol>>, Vec<Vec<Arc<Node>>>) {
+    fn initialize_global_symbols(&mut self) -> (Vec<Arc<Symbol>>, Vec<Vec<Arc<Node>>>) { ::tsox_core::fntrace::enter("initialize_global_symbols"); 
         let mut ambient_module_symbols: Vec<Arc<Symbol>> = Vec::new();
         let mut augmentations: Vec<Vec<Arc<Node>>> = Vec::with_capacity(self.files.len());
         let files: Vec<Arc<ast::SourceFile>> = self.files.clone();
@@ -278,7 +278,7 @@ impl Checker {
         (ambient_module_symbols, augmentations)
     }
 
-    pub fn initialize_checker(&mut self) {
+    pub fn initialize_checker(&mut self) { ::tsox_core::fntrace::enter("initialize_checker"); 
         let (ambient_module_symbols, augmentations) = if self.globals_populated {
             (Vec::new(), Vec::new())
         } else {
@@ -382,7 +382,7 @@ impl Checker {
         error_target: &Arc<Node>,
         apparent_type: &Arc<Type>,
         kind: SignatureKind,
-    ) -> Option<ast::Diagnostic> {
+    ) -> Option<ast::Diagnostic> { ::tsox_core::fntrace::enter("invocation_error_details"); 
         let mut diagnostic: Option<ast::Diagnostic> = None;
         let is_call = kind == SignatureKind::Call;
         let awaited_type = self.get_awaited_type(apparent_type);
@@ -505,11 +505,11 @@ impl Checker {
         Some(diagnostic)
     }
 
-    pub fn is_array_or_tuple_like_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_array_or_tuple_like_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_array_or_tuple_like_type"); 
         self.is_array_like_type(t) || self.is_tuple_like_type(t)
     }
 
-    pub fn is_array_or_tuple_or_intersection(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_array_or_tuple_or_intersection(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_array_or_tuple_or_intersection"); 
         t.flags.intersects(TypeFlags::Intersection)
             && t.types()
                 .unwrap()
@@ -520,7 +520,7 @@ impl Checker {
     pub fn is_array_or_tuple_symbol(
         &mut self,
         symbol: Option<&Arc<Symbol>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_array_or_tuple_symbol"); 
         let Some(symbol) = symbol else {
             return false;
         };
@@ -546,7 +546,7 @@ impl Checker {
         expr: &Arc<Node>,
         symbol: &Arc<Symbol>,
         assignment_kind: AssignmentKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_assignment_to_readonly_entity"); 
         if assignment_kind == AssignmentKind::None {
             return false;
         }
@@ -619,7 +619,7 @@ impl Checker {
         false
     }
 
-    pub fn is_auto_typed_property(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_auto_typed_property(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_auto_typed_property"); 
         symbol
             .value_declaration
             .as_ref()
@@ -631,7 +631,7 @@ impl Checker {
             })
     }
 
-    pub fn is_awaited_type_instantiation(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_awaited_type_instantiation(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_awaited_type_instantiation"); 
         if t.flags.contains(TypeFlags::Conditional) {
             let awaited_symbol = self.get_global_awaited_symbol_or_nil();
             return awaited_symbol.is_some()
@@ -642,7 +642,7 @@ impl Checker {
         false
     }
 
-    pub fn is_awaited_type_needed(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_awaited_type_needed(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_awaited_type_needed"); 
         if is_type_any(t) || self.is_awaited_type_instantiation(t) {
             return false;
         }
@@ -658,7 +658,7 @@ impl Checker {
         false
     }
 
-    pub fn is_circular_mapped_property(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_circular_mapped_property(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_circular_mapped_property"); 
         if symbol.check_flags.intersects(CheckFlags::Mapped) {
             let links = self.value_symbol_links.get(symbol);
             return links.is_some_and(|l| l.resolved_type.is_none())
@@ -675,7 +675,7 @@ impl Checker {
         check_class: &Arc<Type>,
         prop: &Arc<Symbol>,
         writing: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_class_derived_from_declaring_classes"); 
         !self.for_each_property(prop, &mut |c: &mut Checker, p: &Arc<Symbol>| {
             if get_declaration_modifier_flags_from_symbol_ex(p, writing)
                 .intersects(ModifierFlags::Protected)
@@ -687,7 +687,7 @@ impl Checker {
         })
     }
 
-    pub fn is_commonjs_require(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_commonjs_require(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_commonjs_require"); 
         if !ast::is_require_call(node, true) {
             return false;
         }
@@ -731,7 +731,7 @@ impl Checker {
     }
 }
 
-pub fn is_conflicting_private_property(prop: &Arc<Symbol>) -> bool {
+pub fn is_conflicting_private_property(prop: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_conflicting_private_property"); 
     prop.value_declaration.is_none() && prop.check_flags.intersects(CheckFlags::ContainsPrivate)
 }
 
@@ -790,7 +790,7 @@ pub struct CallState {
 }
 
 impl Default for CallState {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             node: Arc::new(Node::new(SyntaxKind::Unknown, NodeData::Token)),
             args: Vec::new(),
@@ -806,11 +806,11 @@ impl Default for CallState {
     }
 }
 
-pub fn symbol_ptr_key(symbol: &Arc<Symbol>) -> u64 {
+pub fn symbol_ptr_key(symbol: &Arc<Symbol>) -> u64 { ::tsox_core::fntrace::enter("symbol_ptr_key"); 
     Arc::as_ptr(symbol) as *const () as u64
 }
 
-pub fn is_node_descendant_of(node: &Arc<Node>, other: &Arc<Node>) -> bool {
+pub fn is_node_descendant_of(node: &Arc<Node>, other: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_node_descendant_of"); 
     let mut current = Some(Arc::clone(node));
     while let Some(current_node) = current {
         if Arc::ptr_eq(&current_node, other) {
@@ -821,12 +821,12 @@ pub fn is_node_descendant_of(node: &Arc<Node>, other: &Arc<Node>) -> bool {
     false
 }
 
-pub fn is_invalid_computed_property_name(name: &Node) -> bool {
+pub fn is_invalid_computed_property_name(name: &Node) -> bool { ::tsox_core::fntrace::enter("is_invalid_computed_property_name"); 
     !tsox_frontend::ast::utilities::is_property_name_literal(name)
         && !tsox_frontend::ast::utilities::is_entity_name_expression(name)
 }
 
-pub fn is_internal_module_import_equals_declaration(node: &Node) -> bool {
+pub fn is_internal_module_import_equals_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_internal_module_import_equals_declaration"); 
     ast::is_import_equals_declaration(node)
         && tsox_frontend::ast::utilities::is_entity_name(
             &node.as_import_equals_declaration().module_reference,

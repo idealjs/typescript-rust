@@ -4,7 +4,7 @@ use crate::checker::nodebuilder::*;
 use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
 impl Checker {
-    pub fn type_to_string(&mut self, t: &Arc<Type>) -> String {
+    pub fn type_to_string(&mut self, t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("type_to_string"); 
         self.type_to_string_ex(
             t,
             TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE
@@ -12,7 +12,7 @@ impl Checker {
         )
     }
 
-    pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
+    pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("type_to_string_ex"); 
         let reduced = self.get_reduced_type(t);
         let t: &Arc<Type> = &reduced;
         let key = Arc::as_ptr(t) as usize;
@@ -48,7 +48,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("type_to_string_ex_worker"); 
         // Go typeToTypeNode（nodebuilderimpl.go:3298）：InTypeAlias 单层消费，
         // 仅别名右值顶层跳过按别名名呈现，嵌套类型恢复常规判定
         let in_type_alias = flags.contains(TypeFormatFlags::IN_TYPE_ALIAS);
@@ -427,7 +427,7 @@ impl Checker {
         "<unknown type>".to_string()
     }
 
-    pub(crate) fn literal_value_to_string(&mut self, val: &LiteralValue) -> String {
+    pub(crate) fn literal_value_to_string(&mut self, val: &LiteralValue) -> String { ::tsox_core::fntrace::enter("literal_value_to_string"); 
         match val {
             LiteralValue::String(s) => format!("\"{}\"", s),
             LiteralValue::Number(n) => n.to_string(),
@@ -438,7 +438,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_fn_symbol_anonymous_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_fn_symbol_anonymous_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_fn_symbol_anonymous_type"); 
         t.object_flags.contains(ObjectFlags::Anonymous)
             && t.symbol.as_ref().is_some_and(|s| {
                 s.flags.contains(SymbolFlags::Function)
@@ -448,7 +448,7 @@ impl Checker {
             })
     }
 
-    pub(crate) fn symbol_type_printed_by_name(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn symbol_type_printed_by_name(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("symbol_type_printed_by_name"); 
         t.symbol.as_ref().is_some_and(|sym| {
             !sym.flags.contains(SymbolFlags::TypeLiteral)
                 && (!sym.name.starts_with('\u{FE}') || sym.flags.contains(SymbolFlags::Class))
@@ -461,7 +461,7 @@ impl Checker {
         })
     }
 
-    fn self_referential_fn_symbol_to_string(&self, t: &Arc<Type>) -> Option<String> {
+    fn self_referential_fn_symbol_to_string(&self, t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("self_referential_fn_symbol_to_string"); 
         if !self.is_fn_symbol_anonymous_type(t) {
             return None;
         }

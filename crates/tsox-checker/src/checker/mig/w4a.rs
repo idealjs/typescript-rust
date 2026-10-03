@@ -32,7 +32,7 @@ impl Checker {
         f: &FlowState,
         expr: &Arc<Node>,
         computed_type: &Arc<Type>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_discriminant_property_access"); 
         let declared_type = f.declared_type.as_ref().unwrap();
         if declared_type.flags.intersects(TypeFlags::Union)
             || computed_type.flags.intersects(TypeFlags::Union)
@@ -59,7 +59,7 @@ impl Checker {
         &mut self,
         f: &FlowState,
         expr: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_candidate_discriminant_property_access"); 
         if f.reference.as_deref().is_some_and(is_binding_pattern)
             || f.reference
                 .as_deref()
@@ -125,7 +125,7 @@ impl Checker {
         None
     }
 
-    pub fn get_assigned_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_assigned_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assigned_type"); 
         let parent = node.parent().unwrap();
         match parent.kind {
             SyntaxKind::ForInStatement => self.string_type(),
@@ -149,7 +149,7 @@ impl Checker {
         }
     }
 
-    pub fn get_assigned_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_assigned_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assigned_type_of_binary_expression"); 
         let is_destructuring_default_assignment =
             (is_array_literal_expression(&node.parent().unwrap())
                 && self.is_destructuring_assignment_target(&node.parent().unwrap()))
@@ -169,7 +169,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         element: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assigned_type_of_array_literal_element"); 
         let assigned = self.get_assigned_type(node);
         let index = node
             .as_array_literal_expression_node()
@@ -181,7 +181,7 @@ impl Checker {
         self.get_type_of_destructured_array_element(&assigned, index)
     }
 
-    pub fn get_assigned_type_of_property_assignment(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_assigned_type_of_property_assignment(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assigned_type_of_property_assignment"); 
         let assigned = self.get_assigned_type(&node.parent().unwrap());
         self.get_type_of_destructured_property(&assigned, node.name().unwrap())
     }
@@ -189,7 +189,7 @@ impl Checker {
     pub fn get_assigned_type_of_shorthand_property_assignment(
         &mut self,
         node: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assigned_type_of_shorthand_property_assignment"); 
         let assigned = self.get_assigned_type_of_property_assignment(node);
         let initializer = node
             .as_shorthand_property_assignment_node()
@@ -202,7 +202,7 @@ impl Checker {
         &mut self,
         declared_type: &Arc<Type>,
         assigned_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assignment_reduced_type_worker"); 
         let checker_ptr: *mut Checker = self;
         let filtered_type = unsafe {
             (*checker_ptr).filter_type(declared_type, &mut |t: &Arc<Type>| {
@@ -227,7 +227,7 @@ impl Checker {
         }
     }
 
-    pub fn get_element_type_of_evolving_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_element_type_of_evolving_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_element_type_of_evolving_array_type"); 
         if t.object_flags.intersects(ObjectFlags::EvolvingArray) {
             if let Some(evolving) = t.as_evolving_array_type() {
                 if let Some(element_type) = &evolving.element_type {
@@ -238,7 +238,7 @@ impl Checker {
         self.never_type()
     }
 
-    pub fn get_final_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_final_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_final_array_type"); 
         let Some(evolving) = t.as_evolving_array_type() else {
             return self.never_type();
         };
@@ -252,7 +252,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         diagnostic: Option<&mut Diagnostic>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_explicit_type_of_symbol"); 
         let symbol = self.resolve_symbol(symbol);
         if !resolving_explicit_type_of_symbol_add_if_absent(&symbol) {
             return None;
@@ -266,7 +266,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         diagnostic: Option<&mut Diagnostic>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_explicit_type_of_symbol_worker"); 
         if symbol.flags.intersects(
             SymbolFlags::Function
                 | SymbolFlags::Method
@@ -333,7 +333,7 @@ impl Checker {
         None
     }
 
-    pub fn get_initial_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_initial_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_initial_type"); 
         match node.kind {
             SyntaxKind::VariableDeclaration => self.get_initial_type_of_variable_declaration(node),
             SyntaxKind::BindingElement => self.get_initial_type_of_binding_element(node),
@@ -341,7 +341,7 @@ impl Checker {
         }
     }
 
-    pub fn get_initial_type_of_variable_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_initial_type_of_variable_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_initial_type_of_variable_declaration"); 
         if let Some(initializer) = node.initializer() {
             return self.get_type_of_initializer(&initializer);
         }
@@ -357,7 +357,7 @@ impl Checker {
         self.error_type()
     }
 
-    pub fn get_initial_type_of_binding_element(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_initial_type_of_binding_element(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_initial_type_of_binding_element"); 
         let pattern = node.parent().unwrap();
         let parent_type = self.get_initial_type(&pattern.parent().unwrap());
         let t = if is_object_binding_pattern(&pattern) {
@@ -380,7 +380,7 @@ impl Checker {
         self.get_type_with_default_opt(&t, node.initializer())
     }
 
-    pub fn get_flow_reference_key(&mut self, f: &FlowState) -> CacheHashKey {
+    pub fn get_flow_reference_key(&mut self, f: &FlowState) -> CacheHashKey { ::tsox_core::fntrace::enter("get_flow_reference_key"); 
         let mut b = KeyBuilder::new();
         if self.write_flow_cache_key(
             &mut b,
@@ -398,7 +398,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         constructor: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_flow_type_in_constructor"); 
         let access_name = if symbol.name.starts_with(
             format!("{}#", INTERNAL_SYMBOL_NAME_PREFIX).as_str(),
         ) {
@@ -453,7 +453,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         static_blocks: &[Arc<Node>],
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_flow_type_in_static_blocks"); 
         let access_name = if symbol.name.starts_with(
             format!("{}#", INTERNAL_SYMBOL_NAME_PREFIX).as_str(),
         ) {
@@ -511,7 +511,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_apparent_type_of_contextual_type"); 
         let contextual_type = if is_object_literal_method(node) {
             self.get_contextual_type_for_object_literal_method(node, context_flags)
         } else {

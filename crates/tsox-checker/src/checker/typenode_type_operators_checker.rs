@@ -3,7 +3,7 @@
 use crate::checker::typenode_type_operators::*;
 
 impl Checker {
-    pub(crate) fn get_type_from_type_operator_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_type_operator_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_operator_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -69,7 +69,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_from_indexed_access_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_indexed_access_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_indexed_access_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -135,7 +135,7 @@ impl Checker {
         &self,
         object_type: &Arc<Type>,
         index_type: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_defer_indexed_access_type"); 
         if self.type_flags_is_generic_index_type(index_type) {
             return true;
         }
@@ -150,7 +150,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn index_type_is_kind_usable(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn index_type_is_kind_usable(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("index_type_is_kind_usable"); 
         let primitive_index_kinds = TypeFlags::from_bits_truncate(
             TypeFlags::Any.bits()
                 | TypeFlags::Unknown.bits()
@@ -188,7 +188,7 @@ impl Checker {
         true
     }
 
-    pub(crate) fn get_type_from_template_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_template_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_template_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -197,7 +197,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_from_mapped_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_mapped_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_mapped_type_node"); 
         // mapped 实例随类型实参语境变化（接口成员在声明期解析为裸类型参数
         // 版本，实例化期必须重解析），缓存按 (节点, 栈哈希) 区分；无栈语境
         // 的结果才写入免哈希节点缓存
@@ -217,7 +217,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_from_conditional_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_conditional_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_conditional_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -227,7 +227,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_from_infer_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_infer_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_infer_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }

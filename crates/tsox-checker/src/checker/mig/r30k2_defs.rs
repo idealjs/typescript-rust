@@ -8,7 +8,7 @@ unsafe impl Send for ActiveChecker {}
 unsafe impl Sync for ActiveChecker {}
 
 impl ActiveChecker {
-    fn checker(&self) -> &mut Checker {
+    fn checker(&self) -> &mut Checker { ::tsox_core::fntrace::enter("checker"); 
         unsafe { &mut *self.0 }
     }
 }
@@ -18,7 +18,7 @@ unsafe impl Send for ContextPtr {}
 unsafe impl Sync for ContextPtr {}
 
 impl ContextPtr {
-    fn context(&self) -> &mut InferenceContext {
+    fn context(&self) -> &mut InferenceContext { ::tsox_core::fntrace::enter("context"); 
         unsafe { &mut *self.0 }
     }
 }
@@ -27,7 +27,7 @@ pub(crate) fn new_inference_type_mapper(
     c: &Checker,
     n: &mut InferenceContext,
     fixing: bool,
-) -> Arc<TypeMapper> {
+) -> Arc<TypeMapper> { ::tsox_core::fntrace::enter("new_inference_type_mapper"); 
     let checker = ActiveChecker(c as *const Checker as *mut Checker);
     let context = ContextPtr(n as *mut InferenceContext);
     Arc::new(TypeMapper::new(

@@ -106,7 +106,7 @@ pub struct MappedDiagnosticDirectiveTuple {
 }
 
 impl Serialize for MappedDiagnosticDirectiveTuple {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         marshal_json_to_mapped_diagnostic_directive(self)
             .map_err(serde::ser::Error::custom)?
             .serialize(serializer)
@@ -114,7 +114,7 @@ impl Serialize for MappedDiagnosticDirectiveTuple {
 }
 
 impl<'de> Deserialize<'de> for MappedDiagnosticDirectiveTuple {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let tuple = Vec::<JsonValue>::deserialize(deserializer)?;
         unmarshal_json_from_mapped_diagnostic_directive(&tuple).map_err(serde::de::Error::custom)
     }
@@ -122,7 +122,7 @@ impl<'de> Deserialize<'de> for MappedDiagnosticDirectiveTuple {
 
 pub fn marshal_json_to_mapped_diagnostic_directive(
     d: &MappedDiagnosticDirectiveTuple,
-) -> Result<Vec<JsonValue>, serde_json::Error> {
+) -> Result<Vec<JsonValue>, serde_json::Error> { ::tsox_core::fntrace::enter("marshal_json_to_mapped_diagnostic_directive"); 
     let mut tuple = vec![
         JsonValue::from(d.original_start),
         JsonValue::from(d.original_length),
@@ -138,7 +138,7 @@ pub fn marshal_json_to_mapped_diagnostic_directive(
 
 pub fn unmarshal_json_from_mapped_diagnostic_directive(
     tuple: &[JsonValue],
-) -> Result<MappedDiagnosticDirectiveTuple, String> {
+) -> Result<MappedDiagnosticDirectiveTuple, String> { ::tsox_core::fntrace::enter("unmarshal_json_from_mapped_diagnostic_directive"); 
     if tuple.len() != 5 && tuple.len() != 6 {
         return Err(format!(
             "diagnostic directive tuple must contain 5 or 6 elements, got {}",
@@ -256,7 +256,7 @@ pub struct SourceFiles {
 }
 
 impl Default for SourceFiles {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         SourceFiles {
             canonical: None,
             supplemental: Vec::new(),
@@ -269,7 +269,7 @@ pub fn transform_and_parse(
     content: &str,
     mapper: &Mapper,
     project: &dyn Project,
-) -> Result<SourceFiles, TransformError> {
+) -> Result<SourceFiles, TransformError> { ::tsox_core::fntrace::enter("transform_and_parse"); 
     let transform_identity = project
         .identity(mapper)
         .map_err(|err| new_transform_error(TransformErrorKind::Project, err))?;
@@ -291,7 +291,7 @@ pub fn parse_result(
     mapper: &Mapper,
     transform_identity: &str,
     mut result: TransformOutcome,
-) -> Result<SourceFiles, TransformError> {
+) -> Result<SourceFiles, TransformError> { ::tsox_core::fntrace::enter("parse_result"); 
     let mappings = match &result.mappings {
         None => return Err(new_transform_error(TransformErrorKind::Mappings, Box::new(ProjectError::default()))),
         Some(mappings) => mappings.clone(),
@@ -390,7 +390,7 @@ pub fn parse_result(
     Ok(files)
 }
 
-pub fn is_module_virtual_extension(extension: &str) -> bool {
+pub fn is_module_virtual_extension(extension: &str) -> bool { ::tsox_core::fntrace::enter("is_module_virtual_extension"); 
     matches!(
         extension,
         tsox_core::tspath::EXTENSION_MTS
@@ -403,7 +403,7 @@ pub fn is_module_virtual_extension(extension: &str) -> bool {
 pub fn check_supplemental_file_name_collisions(
     files: &SourceFiles,
     file_exists: &dyn Fn(&str) -> bool,
-) -> Result<(), SupplementalFileCollisionError> {
+) -> Result<(), SupplementalFileCollisionError> { ::tsox_core::fntrace::enter("check_supplemental_file_name_collisions"); 
     for file in &files.supplemental {
         if file_exists(&file.file_name) {
             return Err(SupplementalFileCollisionError {
@@ -439,7 +439,7 @@ pub struct OperationTimingInner {
 }
 
 impl Default for OperationTimingInner {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         OperationTimingInner {
             count: AtomicU64::new(0),
             duration: AtomicI64::new(0),
@@ -448,13 +448,13 @@ impl Default for OperationTimingInner {
 }
 
 impl OperationTimingInner {
-    pub fn record(&self, start: Instant) {
+    pub fn record(&self, start: Instant) { ::tsox_core::fntrace::enter("record"); 
         self.count.fetch_add(1, Ordering::Relaxed);
         self.duration
             .fetch_add(start.elapsed().as_nanos() as i64, Ordering::Relaxed);
     }
 
-    pub fn snapshot(&self) -> OperationTiming {
+    pub fn snapshot(&self) -> OperationTiming { ::tsox_core::fntrace::enter("snapshot"); 
         OperationTiming {
             count: self.count.load(Ordering::Relaxed),
             duration: Duration::from_nanos(self.duration.load(Ordering::Relaxed).max(0) as u64),
@@ -474,7 +474,7 @@ pub struct TimingCollectorState {
 }
 
 impl TimingCollector {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         TimingCollector {
             mu: Mutex::new(TimingCollectorState {
                 mappers: std::collections::HashMap::new(),
@@ -485,7 +485,7 @@ impl TimingCollector {
         }
     }
 
-    pub fn mapper(self: &Arc<Self>, identity: &str) -> Arc<MapperTimingCollector> {
+    pub fn mapper(self: &Arc<Self>, identity: &str) -> Arc<MapperTimingCollector> { ::tsox_core::fntrace::enter("mapper"); 
         let mut state = self.mu.lock().unwrap();
         if let Some(timing) = state.mappers.get(identity) {
             return timing.clone();
@@ -502,7 +502,7 @@ impl TimingCollector {
         timing
     }
 
-    pub fn snapshot(&self) -> Timings {
+    pub fn snapshot(&self) -> Timings { ::tsox_core::fntrace::enter("snapshot"); 
         let request_wait;
         let mappers;
         {
@@ -547,7 +547,7 @@ pub struct MapperTimingCollector {
 }
 
 impl MapperTimingCollector {
-    pub fn start_request(&self) -> Instant {
+    pub fn start_request(&self) -> Instant { ::tsox_core::fntrace::enter("start_request"); 
         let owner = self
             .owner
             .upgrade()
@@ -560,7 +560,7 @@ impl MapperTimingCollector {
         Instant::now()
     }
 
-    pub fn finish_request(&self, operation: &OperationTimingInner, start: Instant) {
+    pub fn finish_request(&self, operation: &OperationTimingInner, start: Instant) { ::tsox_core::fntrace::enter("finish_request"); 
         operation.record(start);
         let owner = self
             .owner
@@ -582,7 +582,7 @@ impl MapperTimingCollector {
 pub struct Logger(pub std::sync::Arc<dyn Fn(&str) + Send + Sync>);
 
 impl Logger {
-    pub fn from_fn(f: std::sync::Arc<dyn Fn(&str) + Send + Sync>) -> Logger {
+    pub fn from_fn(f: std::sync::Arc<dyn Fn(&str) + Send + Sync>) -> Logger { ::tsox_core::fntrace::enter("from_fn"); 
         Logger(f)
     }
 }
@@ -612,14 +612,14 @@ impl Spawner for SpawnerFunc {
         command: &[String],
         dir: &str,
         stderr: &mut dyn std::io::Write,
-    ) -> std::io::Result<Box<dyn ReadWriteCloser>> {
+    ) -> std::io::Result<Box<dyn ReadWriteCloser>> { ::tsox_core::fntrace::enter("spawn"); 
         (self.0)(command, dir, stderr)
     }
 }
 
 pub trait ReadWriteCloser: std::io::Read + std::io::Write + Send {
     fn close(&mut self) -> std::io::Result<()>;
-    fn exit_code(&self) -> Option<i32> {
+    fn exit_code(&self) -> Option<i32> { ::tsox_core::fntrace::enter("exit_code"); 
         None
     }
 }
@@ -631,7 +631,7 @@ pub struct LoggingProtocol {
 }
 
 impl LoggingProtocol {
-    pub fn log<T: serde::Serialize>(&self, direction: &str, message: &T) {
+    pub fn log<T: serde::Serialize>(&self, direction: &str, message: &T) { ::tsox_core::fntrace::enter("log"); 
         match serde_json::to_string(message) {
             Ok(data) => (self.logger.0)(
                 &format!("[content mapper: {}] {}: {}", self.mapper_name, direction, data),
@@ -645,7 +645,7 @@ impl LoggingProtocol {
 }
 
 impl IpcProtocol for LoggingProtocol {
-    fn read_message(&self) -> std::io::Result<IpcMessage> {
+    fn read_message(&self) -> std::io::Result<IpcMessage> { ::tsox_core::fntrace::enter("read_message"); 
         let message = self.protocol.read_message()?;
         self.log("receive", &message);
         Ok(message)
@@ -656,7 +656,7 @@ impl IpcProtocol for LoggingProtocol {
         id: Option<&JsonRpcId>,
         method: &str,
         params: &JsonValue,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_request"); 
         self.log(
             "send",
             &JsonRpcRequestMessage {
@@ -668,7 +668,7 @@ impl IpcProtocol for LoggingProtocol {
         self.protocol.write_request(id, method, params)
     }
 
-    fn write_notification(&self, method: &str, params: &JsonValue) -> std::io::Result<()> {
+    fn write_notification(&self, method: &str, params: &JsonValue) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_notification"); 
         self.log(
             "send",
             &JsonRpcRequestMessage {
@@ -680,7 +680,7 @@ impl IpcProtocol for LoggingProtocol {
         self.protocol.write_notification(method, params)
     }
 
-    fn write_response(&self, id: &JsonRpcId, result: &JsonValue) -> std::io::Result<()> {
+    fn write_response(&self, id: &JsonRpcId, result: &JsonValue) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_response"); 
         self.log(
             "send",
             &JsonRpcResponseMessage {
@@ -692,7 +692,7 @@ impl IpcProtocol for LoggingProtocol {
         self.protocol.write_response(id, result)
     }
 
-    fn write_error(&self, id: &JsonRpcId, response_error: &JsonRpcResponseError) -> std::io::Result<()> {
+    fn write_error(&self, id: &JsonRpcId, response_error: &JsonRpcResponseError) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_error"); 
         self.log(
             "send",
             &JsonRpcResponseMessage {
@@ -779,7 +779,7 @@ pub struct StderrLogger {
 }
 
 impl StderrLogger {
-    pub fn new(mapper_name: String, logger: Logger) -> Self {
+    pub fn new(mapper_name: String, logger: Logger) -> Self { ::tsox_core::fntrace::enter("new"); 
         StderrLogger {
             mapper_name,
             logger,
@@ -787,7 +787,7 @@ impl StderrLogger {
         }
     }
 
-    pub fn write_line(&self, data: &[u8]) -> std::io::Result<usize> {
+    pub fn write_line(&self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write_line"); 
         let mut pending = self.mu.lock().unwrap();
         pending.push_str(&String::from_utf8_lossy(data));
         loop {
@@ -802,7 +802,7 @@ impl StderrLogger {
         Ok(data.len())
     }
 
-    pub fn flush(&self) {
+    pub fn flush(&self) { ::tsox_core::fntrace::enter("flush"); 
         let mut pending = self.mu.lock().unwrap();
         if !pending.is_empty() {
             self.log(pending.trim_end_matches('\r'));
@@ -810,7 +810,7 @@ impl StderrLogger {
         }
     }
 
-    fn log(&self, message: &str) {
+    fn log(&self, message: &str) { ::tsox_core::fntrace::enter("log"); 
         (self.logger.0)(&format!("[content mapper: {}] stderr: {}", self.mapper_name, message));
     }
 }
@@ -821,7 +821,7 @@ pub struct LoggedProcess {
 }
 
 impl LoggedProcess {
-    pub fn close(&mut self) -> std::io::Result<()> {
+    pub fn close(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("close"); 
         let err = self.process.close();
         self.stderr.flush();
         err
@@ -829,27 +829,27 @@ impl LoggedProcess {
 }
 
 impl std::io::Read for LoggedProcess {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("read"); 
         self.process.read(buf)
     }
 }
 
 impl std::io::Write for LoggedProcess {
-    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.process.write(data)
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         self.process.flush()
     }
 }
 
 impl ReadWriteCloser for LoggedProcess {
-    fn close(&mut self) -> std::io::Result<()> {
+    fn close(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("close"); 
         LoggedProcess::close(self)
     }
 
-    fn exit_code(&self) -> Option<i32> {
+    fn exit_code(&self) -> Option<i32> { ::tsox_core::fntrace::enter("exit_code"); 
         self.process.exit_code()
     }
 }
@@ -861,7 +861,7 @@ pub struct CloseOnceReadWriteCloser {
 }
 
 impl CloseOnceReadWriteCloser {
-    pub fn new(inner: Box<dyn ReadWriteCloser>) -> Self {
+    pub fn new(inner: Box<dyn ReadWriteCloser>) -> Self { ::tsox_core::fntrace::enter("new"); 
         CloseOnceReadWriteCloser {
             inner: Mutex::new(inner),
             once: Once::new(),
@@ -869,7 +869,7 @@ impl CloseOnceReadWriteCloser {
         }
     }
 
-    pub fn close(&self) -> std::io::Result<()> {
+    pub fn close(&self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("close"); 
         self.once.call_once(|| {
             let result = self.inner.lock().unwrap().close();
             *self.err.lock().unwrap() = Some(result);
@@ -881,32 +881,32 @@ impl CloseOnceReadWriteCloser {
         }
     }
 
-    pub fn exit_code(&self) -> Option<i32> {
+    pub fn exit_code(&self) -> Option<i32> { ::tsox_core::fntrace::enter("exit_code"); 
         self.inner.lock().unwrap().exit_code()
     }
 
-    pub(crate) fn lock_inner(&self) -> std::sync::MutexGuard<'_, Box<dyn ReadWriteCloser>> {
+    pub(crate) fn lock_inner(&self) -> std::sync::MutexGuard<'_, Box<dyn ReadWriteCloser>> { ::tsox_core::fntrace::enter("lock_inner"); 
         self.inner.lock().unwrap()
     }
 }
 
 impl std::io::Read for CloseOnceReadWriteCloser {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("read"); 
         self.inner.lock().unwrap().read(buf)
     }
 }
 
 impl std::io::Write for CloseOnceReadWriteCloser {
-    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.inner.lock().unwrap().write(data)
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         self.inner.lock().unwrap().flush()
     }
 }
 
-pub fn get_script_kind_from_file_name(file_name: &str) -> tsox_core::core::mig::m3j::ScriptKind {
+pub fn get_script_kind_from_file_name(file_name: &str) -> tsox_core::core::mig::m3j::ScriptKind { ::tsox_core::fntrace::enter("get_script_kind_from_file_name"); 
     tsox_core::core::mig::m3j::get_script_kind_from_file_name(file_name)
 }
 
@@ -914,7 +914,7 @@ pub fn parse_source_file(
     parse_options: &tsox_frontend::ast::mig::m3e_2::SourceFileParseOptions,
     text: String,
     _script_kind: tsox_core::core::mig::m3j::ScriptKind,
-) -> tsox_frontend::ast::SourceFile {
+) -> tsox_frontend::ast::SourceFile { ::tsox_core::fntrace::enter("parse_source_file"); 
     let (mut file, _) = tsox_frontend::parser::Parser::parse_source_file_text_with_diagnostics(
         &parse_options.file_name,
         text,
@@ -948,7 +948,7 @@ pub trait SetContentMapperInfo {
 }
 
 impl SetContentMapperInfo for tsox_frontend::ast::SourceFile {
-    fn set_content_mapper_info(&self, info: ContentMapperSourceFileInfo) {
+    fn set_content_mapper_info(&self, info: ContentMapperSourceFileInfo) { ::tsox_core::fntrace::enter("set_content_mapper_info"); 
         CONTENT_MAPPER_SOURCE_FILE_INFO_REGISTRY
             .lock()
             .unwrap()
@@ -958,7 +958,7 @@ impl SetContentMapperInfo for tsox_frontend::ast::SourceFile {
 
 pub fn content_mapper_source_file_info(
     file_name: &str,
-) -> Option<ContentMapperSourceFileInfo> {
+) -> Option<ContentMapperSourceFileInfo> { ::tsox_core::fntrace::enter("content_mapper_source_file_info"); 
     CONTENT_MAPPER_SOURCE_FILE_INFO_REGISTRY
         .lock()
         .unwrap()
@@ -969,11 +969,11 @@ pub fn content_mapper_source_file_info(
 pub struct StderrLineWriter(pub Arc<StderrLogger>);
 
 impl std::io::Write for StderrLineWriter {
-    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.0.write_line(data)
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         self.0.flush();
         Ok(())
     }
@@ -1004,7 +1004,7 @@ pub mod spanmap {
             &self,
             virtual_text: &str,
             original: &str,
-        ) -> Option<Box<dyn std::error::Error + Send + Sync>> {
+        ) -> Option<Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("validate"); 
             let virtual_len = virtual_text.len() as TextPos;
             let original_len = original.len() as TextPos;
             let mut previous_virtual_end: TextPos = 0;
@@ -1032,7 +1032,7 @@ pub mod spanmap {
         }
     }
 
-    pub fn span_map_new(segments: Vec<Segment>) -> SpanMap {
+    pub fn span_map_new(segments: Vec<Segment>) -> SpanMap { ::tsox_core::fntrace::enter("span_map_new"); 
         SpanMap { segments }
     }
 }

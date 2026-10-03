@@ -107,7 +107,7 @@ pub struct ClassFieldsTransformer {
     pub is_anonymous_class_needing_assigned_name: fn(&ClassFieldsTransformer, &Arc<Node>) -> bool,
 }
 
-fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> {
+fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> { ::tsox_core::fntrace::enter("with_loc"); 
     if let Some(n) = Arc::get_mut(&mut node) {
         n.loc = loc;
     }
@@ -115,25 +115,25 @@ fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> {
 }
 
 impl ClassFieldsTransformer {
-    fn push_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn push_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("push_node"); 
         let grandparent = self.parent_node.take();
         self.parent_node = self.current_node.take();
         self.current_node = Some(node.clone());
         grandparent
     }
 
-    fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) {
+    fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) { ::tsox_core::fntrace::enter("pop_node"); 
         self.current_node = self.parent_node.take();
         self.parent_node = grandparent_node;
     }
 
-    pub(crate) fn requires_block_scoped_var(&self) -> bool {
+    pub(crate) fn requires_block_scoped_var(&self) -> bool { ::tsox_core::fntrace::enter("requires_block_scoped_var"); 
         self.in_iteration_statement
             && self.current_class_container.is_some()
             && is_class_expression(self.current_class_container.as_ref().unwrap())
     }
 
-    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if node.is_declaration_file_node() {
             return node.clone();
         }
@@ -152,7 +152,7 @@ impl ClassFieldsTransformer {
         visited
     }
 
-    pub fn visit_modifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_modifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_modifier"); 
         if node.kind == SyntaxKind::AccessorKeyword {
             if self.should_transform_auto_accessors_in_current_class() {
                 return None;
@@ -165,7 +165,7 @@ impl ClassFieldsTransformer {
         None
     }
 
-    pub fn visit_for_substitution(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_for_substitution(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_for_substitution"); 
         if node.kind == SyntaxKind::Identifier {
             return self.visit_identifier(node);
         }
@@ -174,14 +174,14 @@ impl ClassFieldsTransformer {
         self.substitution_visitor().visit_each_child(node)
     }
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         let grandparent_node = self.push_node(node);
         let result = self.visit_worker(node);
         self.pop_node(grandparent_node);
         result
     }
 
-    fn visit_worker(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_worker(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_worker"); 
         if !node.subtree_facts().intersects(
             SubtreeContainsClassFields | SubtreeContainsLexicalThis | SubtreeContainsLexicalSuper,
         ) {

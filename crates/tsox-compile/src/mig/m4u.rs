@@ -14,7 +14,7 @@ pub fn get_checker_association_policy(
     total_weight: usize,
     declaration_weight: usize,
     checker_count: usize,
-) -> CheckerAssociationPolicy {
+) -> CheckerAssociationPolicy { ::tsox_core::fntrace::enter("get_checker_association_policy"); 
     if should_prioritize_source_files(total_weight, declaration_weight, checker_count) {
         return CheckerAssociationPolicy {
             prioritize_source_files: true,
@@ -42,7 +42,7 @@ pub fn get_checker_associations_in_order(
     file_order: Option<&[usize]>,
     checker_count: usize,
     penalty_multiplier: usize,
-) -> Vec<usize> {
+) -> Vec<usize> { ::tsox_core::fntrace::enter("get_checker_associations_in_order"); 
     if file_weights.is_empty() {
         return Vec::new();
     }
@@ -123,7 +123,7 @@ pub fn get_checker_association_order(
     file_weights: &[usize],
     is_declaration_file: &[bool],
     prioritize_source_files: bool,
-) -> Option<Vec<usize>> {
+) -> Option<Vec<usize>> { ::tsox_core::fntrace::enter("get_checker_association_order"); 
     if !prioritize_source_files {
         return None;
     }
@@ -137,7 +137,7 @@ pub fn get_checker_association_order(
     Some(file_order)
 }
 
-pub fn get_checker_association_base_weight(node_count: usize, text_length: usize) -> usize {
+pub fn get_checker_association_base_weight(node_count: usize, text_length: usize) -> usize { ::tsox_core::fntrace::enter("get_checker_association_base_weight"); 
     (node_count + text_length / CHECKER_ASSOCIATION_TEXT_WEIGHT_DIVISOR).max(1)
 }
 
@@ -145,14 +145,14 @@ pub fn should_prioritize_source_files(
     total_weight: usize,
     declaration_weight: usize,
     checker_count: usize,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_prioritize_source_files"); 
     declaration_weight * checker_count * 2 <= total_weight
 }
 
 pub fn get_checker_association_weights(
     base_weights: &[usize],
     import_counts: &[usize],
-) -> Vec<usize> {
+) -> Vec<usize> { ::tsox_core::fntrace::enter("get_checker_association_weights"); 
     let mut total_base_weight = 0usize;
     let mut total_imports = 0usize;
     for (i, base_weight) in base_weights.iter().enumerate() {

@@ -8,7 +8,7 @@ impl Checker {
         &self,
         node: &Arc<Node>,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_identifier_scope_symbol"); 
         let name = match &node.data {
             tsox_frontend::ast::NodeData::Identifier(data) => data.text.as_str(),
             _ => return None,
@@ -90,7 +90,7 @@ impl Checker {
         node: &Arc<Node>,
         name: &str,
         type_meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("base_expression_type_parameters_hit"); 
         let symbol_map = self.program.symbol_map();
         let mut child = Arc::clone(node);
         let mut ancestor = node.parent();

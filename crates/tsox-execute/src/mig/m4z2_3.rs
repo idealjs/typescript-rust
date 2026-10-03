@@ -26,7 +26,7 @@ pub fn program_to_snapshot(
     program: &tsox_compile::compiler::Program,
     old_program: Option<&Program>,
     hash_with_text: bool,
-) -> Snapshot {
+) -> Snapshot { ::tsox_core::fntrace::enter("program_to_snapshot"); 
     if let Some(old_program) = old_program {
         if let Some(old_inner) = old_program.program.as_deref() {
             if std::ptr::eq(old_inner, program) {
@@ -66,7 +66,7 @@ pub struct ToProgramSnapshot<'a> {
 }
 
 impl<'a> ToProgramSnapshot<'a> {
-    pub fn reuse_from_old_program(&mut self) {
+    pub fn reuse_from_old_program(&mut self) { ::tsox_core::fntrace::enter("reuse_from_old_program"); 
         if let Some(old_program) = self.old_program {
             if self
                 .snapshot
@@ -116,7 +116,7 @@ impl<'a> ToProgramSnapshot<'a> {
         }
     }
 
-    pub fn compute_program_file_changes(&mut self) {
+    pub fn compute_program_file_changes(&mut self) { ::tsox_core::fntrace::enter("compute_program_file_changes"); 
         let can_copy_semantic_diagnostics = self.old_program.is_some()
             && !tsox_tsoptions::mig::m5h_2::compiler_options_affect_semantic_diagnostics(
                 self.old_program.unwrap().snapshot.options.as_ref(),
@@ -281,7 +281,7 @@ impl<'a> ToProgramSnapshot<'a> {
         }
     }
 
-    pub fn handle_file_delete(&mut self) {
+    pub fn handle_file_delete(&mut self) { ::tsox_core::fntrace::enter("handle_file_delete"); 
         if let Some(old_program) = self.old_program {
             let file_infos: Vec<(Path, FileInfo)> = old_program
                 .snapshot
@@ -318,7 +318,7 @@ impl<'a> ToProgramSnapshot<'a> {
         }
     }
 
-    pub fn handle_global_scope_change(&mut self) {
+    pub fn handle_global_scope_change(&mut self) { ::tsox_core::fntrace::enter("handle_global_scope_change"); 
         if self.old_program.is_none() || self.global_file_removed {
             return;
         }
@@ -360,7 +360,7 @@ impl<'a> ToProgramSnapshot<'a> {
         }
     }
 
-    pub fn handle_pending_emit(&mut self) {
+    pub fn handle_pending_emit(&mut self) { ::tsox_core::fntrace::enter("handle_pending_emit"); 
         if let Some(old_program) = self.old_program {
             if !self.global_file_removed {
                 let old_options = old_program.snapshot.options.clone().unwrap_or_default();
@@ -392,7 +392,7 @@ impl<'a> ToProgramSnapshot<'a> {
         }
     }
 
-    pub fn handle_pending_check(&mut self) {
+    pub fn handle_pending_check(&mut self) { ::tsox_core::fntrace::enter("handle_pending_check"); 
         if let Some(old_program) = self.old_program {
             if self.snapshot.semantic_diagnostics_per_file.len()
                 != self.program.get_source_files().len()
@@ -407,7 +407,7 @@ impl<'a> ToProgramSnapshot<'a> {
     }
 }
 
-pub fn file_affects_global_scope(file: &Arc<SourceFile>) -> bool {
+pub fn file_affects_global_scope(file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("file_affects_global_scope"); 
     tsox_checker::binder::bind_source_file(file);
     if file.module_augmentations.iter().any(|augmentation| {
         augmentation
@@ -439,7 +439,7 @@ pub fn add_referenced_files_from_symbol(
     file: &Arc<SourceFile>,
     referenced_files: &mut Set<Path>,
     symbol: Option<&tsox_frontend::ast::Symbol>,
-) {
+) { ::tsox_core::fntrace::enter("add_referenced_files_from_symbol"); 
     let Some(symbol) = symbol else {
         return;
     };
@@ -458,7 +458,7 @@ pub fn add_referenced_files_from_import_literal(
     file: &Arc<SourceFile>,
     referenced_files: &mut Set<Path>,
     import_name: &Arc<tsox_frontend::ast::Node>,
-) {
+) { ::tsox_core::fntrace::enter("add_referenced_files_from_import_literal"); 
     let symbol = checker.get_symbol_at_location(import_name);
     add_referenced_files_from_symbol(checker, file, referenced_files, symbol.as_deref());
 }
@@ -468,7 +468,7 @@ pub fn add_referenced_file_from_file_name(
     file_name: &str,
     referenced_files: &mut Set<Path>,
     source_file_directory: &str,
-) {
+) { ::tsox_core::fntrace::enter("add_referenced_file_from_file_name"); 
     let redirect = program.get_parse_file_redirect(file_name);
     if !redirect.is_empty() {
         referenced_files.add(tspath::to_path(
@@ -488,7 +488,7 @@ pub fn add_referenced_file_from_file_name(
 pub fn get_referenced_files(
     program: &tsox_compile::compiler::Program,
     file: &Arc<SourceFile>,
-) -> Option<Set<Path>> {
+) -> Option<Set<Path>> { ::tsox_core::fntrace::enter("get_referenced_files"); 
     let mut referenced_files = Set::new();
 
     let mut checker = program.get_type_checker_for_file_exclusive(file);
@@ -548,7 +548,7 @@ pub fn repopulate_diagnostics_of_file(
     diags: DiagnosticsOrBuildInfoDiagnosticsWithFileName,
     program: &tsox_compile::compiler::Program,
     file: &Arc<SourceFile>,
-) -> DiagnosticsOrBuildInfoDiagnosticsWithFileName {
+) -> DiagnosticsOrBuildInfoDiagnosticsWithFileName { ::tsox_core::fntrace::enter("repopulate_diagnostics_of_file"); 
     if !diags.diagnostics.is_empty() {
         if let Some(repopulated) =
             repopulate_diagnostics_list(&diags.diagnostics, program, file)
@@ -567,7 +567,7 @@ pub fn repopulate_diagnostics_list(
     diags: &[Diagnostic],
     program: &tsox_compile::compiler::Program,
     file: &Arc<SourceFile>,
-) -> Option<Vec<Diagnostic>> {
+) -> Option<Vec<Diagnostic>> { ::tsox_core::fntrace::enter("repopulate_diagnostics_list"); 
     let mut changed = false;
     let mut result = Vec::with_capacity(diags.len());
     for d in diags {
@@ -592,7 +592,7 @@ pub fn repopulate_diagnostic_message_chain(
     chain: &[Diagnostic],
     program: &tsox_compile::compiler::Program,
     file: &Arc<SourceFile>,
-) -> Option<Vec<Diagnostic>> {
+) -> Option<Vec<Diagnostic>> { ::tsox_core::fntrace::enter("repopulate_diagnostic_message_chain"); 
     if chain.is_empty() {
         return None;
     }
@@ -636,7 +636,7 @@ pub fn repopulate_diagnostic_message_chain(
     Some(result)
 }
 
-pub fn ast_diag_to_build_info_diag(d: &Diagnostic) -> Box<BuildInfoDiagnosticWithFileName> {
+pub fn ast_diag_to_build_info_diag(d: &Diagnostic) -> Box<BuildInfoDiagnosticWithFileName> { ::tsox_core::fntrace::enter("ast_diag_to_build_info_diag"); 
     let mut b = Box::new(BuildInfoDiagnosticWithFileName {
         pos: d.loc.pos,
         end: d.loc.end,
@@ -659,7 +659,7 @@ pub fn ast_diag_to_build_info_diag(d: &Diagnostic) -> Box<BuildInfoDiagnosticWit
 
 fn repopulate_info_to_build_info(
     info: &tsox_frontend::ast::mig::m3d_2::RepopulateDiagnosticInfo,
-) -> tsox_frontend::ast::mig::m3e::RepopulateDiagnosticInfo {
+) -> tsox_frontend::ast::mig::m3e::RepopulateDiagnosticInfo { ::tsox_core::fntrace::enter("repopulate_info_to_build_info"); 
     tsox_frontend::ast::mig::m3e::RepopulateDiagnosticInfo {
         kind: match info.kind {
             tsox_frontend::ast::mig::m3d_2::RepopulateDiagnosticKind::ModeMismatch => {

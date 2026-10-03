@@ -10,7 +10,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_array_literal"); 
         if target.flags.intersects(
             TypeFlags::String
                 | TypeFlags::Number
@@ -139,7 +139,7 @@ impl Checker {
         _expr: Option<&Arc<tsox_frontend::ast::Node>>,
         _head_message: Option<&tsox_core::diagnostics::Message>,
         _diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_assignable_to_and_optionally_elaborate"); 
         self.check_type_related_to_and_optionally_elaborate(
             source,
             target,
@@ -162,7 +162,7 @@ impl Checker {
         head_message: Option<&tsox_core::diagnostics::Message>,
         diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
         display_target: Option<&Arc<Type>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_related_to_and_elaborate_display"); 
         let saved_display = self.display_target_override.take();
         self.display_target_override = display_target.cloned();
         let r = self.check_type_related_to_and_optionally_elaborate(

@@ -10,7 +10,7 @@ use super::m5y_pc::{
 };
 use super::m5y_pc_2::{is_undefined_pseudo_type, type_node_could_refer_to_undefined, PseudoChecker};
 
-pub fn new_pseudo_checker(strict_null_checks: bool, exact_optional_property_types: bool) -> PseudoChecker {
+pub fn new_pseudo_checker(strict_null_checks: bool, exact_optional_property_types: bool) -> PseudoChecker { ::tsox_core::fntrace::enter("new_pseudo_checker"); 
     PseudoChecker {
         strict_null_checks,
         exact_optional_property_types,
@@ -18,7 +18,7 @@ pub fn new_pseudo_checker(strict_null_checks: bool, exact_optional_property_type
 }
 
 impl PseudoChecker {
-    pub fn get_return_type_of_signature(&self, signature_node: &Arc<Node>) -> Option<PseudoType> {
+    pub fn get_return_type_of_signature(&self, signature_node: &Arc<Node>) -> Option<PseudoType> { ::tsox_core::fntrace::enter("get_return_type_of_signature"); 
         match signature_node.kind {
             SyntaxKind::GetAccessor => Some(self.type_from_accessor(signature_node)),
             SyntaxKind::MethodDeclaration
@@ -38,15 +38,15 @@ impl PseudoChecker {
         }
     }
 
-    pub fn get_type_of_accessor(&self, accessor: &Arc<Node>) -> PseudoType {
+    pub fn get_type_of_accessor(&self, accessor: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("get_type_of_accessor"); 
         self.type_from_accessor(accessor)
     }
 
-    pub fn get_type_of_expression(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn get_type_of_expression(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("get_type_of_expression"); 
         self.type_from_expression(node)
     }
 
-    pub fn get_type_of_declaration(&self, node: &Arc<Node>) -> Option<PseudoType> {
+    pub fn get_type_of_declaration(&self, node: &Arc<Node>) -> Option<PseudoType> { ::tsox_core::fntrace::enter("get_type_of_declaration"); 
         match node.kind {
             SyntaxKind::Parameter => Some(self.type_from_parameter(node)),
             SyntaxKind::VariableDeclaration => Some(self.type_from_variable(node)),
@@ -81,7 +81,7 @@ impl PseudoChecker {
     }
 }
 
-pub fn is_in_const_context(node: &Arc<Node>) -> bool {
+pub fn is_in_const_context(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_const_context"); 
     let mut current = node.parent();
     let mut maybe_assertion: Option<Arc<Node>> = None;
     while let Some(n) = current {
@@ -97,7 +97,7 @@ pub fn is_in_const_context(node: &Arc<Node>) -> bool {
         .unwrap_or(false)
 }
 
-pub fn is_const_context_propagating_kind(kind: SyntaxKind) -> bool {
+pub fn is_const_context_propagating_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_const_context_propagating_kind"); 
     matches!(
         kind,
         SyntaxKind::ArrayLiteralExpression
@@ -111,7 +111,7 @@ pub fn is_const_context_propagating_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn could_already_refer_to_undefined_type(t: &PseudoType) -> bool {
+pub fn could_already_refer_to_undefined_type(t: &PseudoType) -> bool { ::tsox_core::fntrace::enter("could_already_refer_to_undefined_type"); 
     if t.kind == PseudoTypeKind::NoResult
         || t.kind == PseudoTypeKind::Inferred
         || is_undefined_pseudo_type(t)
@@ -137,7 +137,7 @@ pub fn could_already_refer_to_undefined_type(t: &PseudoType) -> bool {
     false
 }
 
-pub fn add_undefined_if_definitely_required(expr: PseudoType) -> PseudoType {
+pub fn add_undefined_if_definitely_required(expr: PseudoType) -> PseudoType { ::tsox_core::fntrace::enter("add_undefined_if_definitely_required"); 
     if could_already_refer_to_undefined_type(&expr) {
         return expr;
     }

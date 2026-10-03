@@ -47,7 +47,7 @@ impl Checker {
         right: &Arc<Node>,
         check_mode: CheckMode,
         write_only: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("check_property_access_expression_or_qualified_name"); 
         let parent_symbol = self.get_resolved_symbol_or_nil(left);
         let assignment_kind = get_assignment_target_kind(node);
         let mut widened_type = Arc::clone(left_type);
@@ -291,7 +291,7 @@ impl Checker {
         self.flow_type_of_access_expression(node, prop.as_ref(), Arc::clone(&prop_type))
     }
 
-    pub fn check_kinds_of_property_member_overrides(&mut self, t: &Arc<Type>, base_type: &Arc<Type>) {
+    pub fn check_kinds_of_property_member_overrides(&mut self, t: &Arc<Type>, base_type: &Arc<Type>) { ::tsox_core::fntrace::enter("check_kinds_of_property_member_overrides"); 
         let mut not_implemented_info: HashMap<u64, MemberInfo> = HashMap::new();
         for base_property in self.get_properties_of_type(base_type) {
             let base = self.get_target_symbol(&base_property);
@@ -547,7 +547,7 @@ impl Checker {
         &mut self,
         base: &Arc<Symbol>,
         base_declaration_flags: ModifierFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("are_properties_abstract_or_interface"); 
         if base.check_flags.contains(CheckFlags::SYNTHETIC) {
             return base
                 .declarations
@@ -563,7 +563,7 @@ impl Checker {
         &self,
         declaration: &Arc<Node>,
         base_declaration_flags: ModifierFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_abstract_or_interface"); 
         declaration
             .parent()
             .map(|p| ast::is_interface_declaration(&p))

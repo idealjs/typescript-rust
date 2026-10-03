@@ -22,7 +22,7 @@ use self::r28k8_defs::EmitContextStubExt28;
 use crate::checker::mig::wc3::NodeAccessExt;
 use std::sync::Arc;
 
-pub(crate) fn new_type_mapper(sources: Vec<Arc<crate::checker::Type>>, targets: Vec<Arc<crate::checker::Type>>) -> crate::checker::TypeMapper {
+pub(crate) fn new_type_mapper(sources: Vec<Arc<crate::checker::Type>>, targets: Vec<Arc<crate::checker::Type>>) -> crate::checker::TypeMapper { ::tsox_core::fntrace::enter("new_type_mapper"); 
     if sources.len() == 1 {
         let s = sources.into_iter().next().unwrap();
         let t = targets.into_iter().next().unwrap();
@@ -33,11 +33,11 @@ pub(crate) fn new_type_mapper(sources: Vec<Arc<crate::checker::Type>>, targets: 
 }
 
 impl<'a> NodeBuilderImpl<'a> {
-    pub(crate) fn new_string_literal(&mut self, text: &str) -> Arc<Node> {
+    pub(crate) fn new_string_literal(&mut self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal"); 
         self.new_string_literal_ex(text, false)
     }
 
-    pub(crate) fn new_string_literal_ex(&mut self, text: &str, is_single_quote: bool) -> Arc<Node> {
+    pub(crate) fn new_string_literal_ex(&mut self, text: &str, is_single_quote: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal_ex"); 
         let mut flags: u32 = 0;
         if is_single_quote
             || self
@@ -51,7 +51,7 @@ impl<'a> NodeBuilderImpl<'a> {
         self.f.new_string_literal(text, flags as i32)
     }
 
-    pub(crate) fn clone_binding_name(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn clone_binding_name(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("clone_binding_name"); 
         if tsox_frontend::ast::is_computed_property_name(node) {
             if let Some(expr) = node.expression() {
                 let enclosing = self.ctx.borrow().enclosing_declaration.clone();
@@ -80,7 +80,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         parameter_symbol: &Arc<tsox_frontend::ast::Symbol>,
         parameter_declaration: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parameter_to_parameter_declaration_name"); 
         let parameter_declaration = parameter_declaration?;
         let name = parameter_declaration.name()?;
         match name.kind {

@@ -9,7 +9,7 @@ impl Checker {
         tup: &TupleTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_tuple"); 
         let new_elems: Vec<Arc<Type>> = tup
             .element_infos
             .iter()
@@ -59,7 +59,7 @@ impl Checker {
         ia: &IndexedAccessTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_indexed_access"); 
         let new_object = ia
             .object_type
             .as_ref()
@@ -127,7 +127,7 @@ impl Checker {
         ct: &ConditionalTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_conditional"); 
         let Some(old_check) = ct.check_type.clone() else {
             return Arc::clone(t);
         };
@@ -277,7 +277,7 @@ impl Checker {
         new_extends: Option<Arc<Type>>,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("rebuild_deferred_conditional"); 
         let mut creation_stack: Vec<HashMap<usize, Arc<Type>>> = ct
             .creation_type_argument_stack
             .iter()

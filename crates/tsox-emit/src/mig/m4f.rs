@@ -37,7 +37,7 @@ use crate::mig::m4g::r39k15_defs::NodeFactoryR39k15;
 use crate::mig::m4k::R39K02NodeExt;
 use tsox_frontend::ast::mig::m3g::is_label_name;
 
-fn is_identifier_name(node: &Arc<Node>) -> bool {
+fn is_identifier_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_identifier_name"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -88,7 +88,7 @@ pub struct LexicalArgumentsInfo {
 }
 
 impl Default for LexicalArgumentsInfo {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         LexicalArgumentsInfo {
             binding: None,
             used: false,
@@ -105,7 +105,7 @@ pub struct SuperAccessState {
 }
 
 impl Default for SuperAccessState {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         SuperAccessState {
             captured_super_properties: None,
             has_super_element_access: false,
@@ -116,7 +116,7 @@ impl Default for SuperAccessState {
     }
 }
 
-pub(crate) fn save_super_access_state(state: &mut SuperAccessState) -> SuperAccessState {
+pub(crate) fn save_super_access_state(state: &mut SuperAccessState) -> SuperAccessState { ::tsox_core::fntrace::enter("save_super_access_state"); 
     std::mem::replace(
         state,
         SuperAccessState {
@@ -129,7 +129,7 @@ pub(crate) fn save_super_access_state(state: &mut SuperAccessState) -> SuperAcce
     )
 }
 
-pub(crate) fn reset_super_access_state(tx: &mut AsyncTransformer, with_bindings: bool) {
+pub(crate) fn reset_super_access_state(tx: &mut AsyncTransformer, with_bindings: bool) { ::tsox_core::fntrace::enter("reset_super_access_state"); 
     tx.super_access.captured_super_properties = Some(OrderedSet::new());
     tx.super_access.has_super_element_access = false;
     tx.super_access.has_super_property_assignment = false;
@@ -156,7 +156,7 @@ pub(crate) fn reset_super_access_state(tx: &mut AsyncTransformer, with_bindings:
     }
 }
 
-pub(crate) fn restore_super_access_state(state: &mut SuperAccessState, saved: SuperAccessState) {
+pub(crate) fn restore_super_access_state(state: &mut SuperAccessState, saved: SuperAccessState) { ::tsox_core::fntrace::enter("restore_super_access_state"); 
     *state = saved;
 }
 
@@ -172,7 +172,7 @@ pub struct AsyncTransformer {
 }
 
 impl Default for AsyncTransformer {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         AsyncTransformer {
             super_access: SuperAccessState::default(),
             context_flags: 0,
@@ -187,17 +187,17 @@ impl Default for AsyncTransformer {
 }
 
 impl AsyncTransformer {
-    pub fn emit_context(&self) -> &EmitContext {
+    pub fn emit_context(&self) -> &EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         self.emit_context.as_ref().unwrap()
     }
 
-    pub fn factory(&self) -> NodeFactory<'_> {
+    pub fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(self.emit_context())
     }
 }
 
 impl AsyncTransformer {
-    pub fn new_async_transformer(opts: &TransformOptions) -> Arc<Transformer> {
+    pub fn new_async_transformer(opts: &TransformOptions) -> Arc<Transformer> { ::tsox_core::fntrace::enter("new_async_transformer"); 
         let mut tx = Box::<AsyncTransformer>::default();
         tx.emit_context = Some(opts.context.clone());
         let result =
@@ -214,7 +214,7 @@ impl AsyncTransformer {
         result
     }
 
-    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_source_file(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if node.is_declaration_file_node() {
             return Some(Arc::clone(node));
         }
@@ -229,7 +229,7 @@ impl AsyncTransformer {
         Some(visited)
     }
 
-    pub fn set_context_flag(&mut self, flag: AsyncContextFlags, val: bool) {
+    pub fn set_context_flag(&mut self, flag: AsyncContextFlags, val: bool) { ::tsox_core::fntrace::enter("set_context_flag"); 
         if val {
             self.context_flags |= flag;
         } else {
@@ -242,7 +242,7 @@ impl AsyncTransformer {
         flags: AsyncContextFlags,
         cb: fn(&mut AsyncTransformer, &Arc<Node>) -> Option<Arc<Node>>,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("do_with_context"); 
         let flags_to_set = flags & !self.context_flags;
         if flags_to_set != 0 {
             self.set_context_flag(flags_to_set, true);
@@ -253,15 +253,15 @@ impl AsyncTransformer {
         cb(self, node)
     }
 
-    pub fn visit_default(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_default(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_default"); 
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_fallback(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_fallback(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_fallback"); 
         self.fallback_visitor(node)
     }
 
-    pub fn fallback_visitor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn fallback_visitor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("fallback_visitor"); 
         if self.super_access.captured_super_properties.is_none()
             && self.lexical_arguments.binding.is_none()
         {
@@ -297,7 +297,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         let restore_lexical_this =
             self.emit_context().emit_flags(node).contains(EmitFlags::NO_LEXICAL_THIS)
                 && self.in_has_lexical_this_context();
@@ -311,7 +311,7 @@ impl AsyncTransformer {
         result
     }
 
-    fn visit_inner(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_inner(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_inner"); 
         if !node
             .subtree_facts()
             .intersects(SubtreeContainsAnyAwait | SubtreeContainsAwait)
@@ -365,7 +365,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn visit_async_body_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_async_body_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_async_body_node"); 
         if is_node_with_possible_hoisted_declaration(node) {
             match node.kind {
                 SyntaxKind::VariableStatement => {
@@ -405,7 +405,7 @@ impl AsyncTransformer {
         self.visit(node)
     }
 
-    pub fn visit_catch_clause_in_async_body(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_catch_clause_in_async_body(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_catch_clause_in_async_body"); 
         let mut catch_clause_names = Set::<String>::new();
         if let NodeData::CatchClause(d) = &node.data {
             if let Some(variable_declaration) = &d.variable_declaration {
@@ -442,7 +442,7 @@ impl AsyncTransformer {
     pub fn visit_variable_statement_in_async_body(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_variable_statement_in_async_body"); 
         let decl_list = match &node.data {
             NodeData::VariableStatement(d) => Arc::clone(&d.declaration_list),
             _ => return self.visitor().visit_each_child(node),
@@ -463,7 +463,7 @@ impl AsyncTransformer {
     pub fn visit_for_in_statement_in_async_body(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_for_in_statement_in_async_body"); 
         let (initializer, expression, statement) = match &node.data {
             NodeData::ForInOrOfStatement(d) => (
                 Arc::clone(&d.initializer),
@@ -495,7 +495,7 @@ impl AsyncTransformer {
     pub fn visit_for_of_statement_in_async_body(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_for_of_statement_in_async_body"); 
         let (await_modifier, initializer, expression, statement) = match &node.data {
             NodeData::ForInOrOfStatement(d) => (
                 d.await_modifier.clone(),
@@ -529,7 +529,7 @@ impl AsyncTransformer {
     pub fn visit_for_statement_in_async_body(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_for_statement_in_async_body"); 
         let (initializer, condition, incrementor, statement) = match &node.data {
             NodeData::ForStatement(d) => (
                 d.initializer.clone(),
@@ -566,7 +566,7 @@ impl AsyncTransformer {
         Some(updated)
     }
 
-    pub fn visit_await_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_await_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_await_expression"); 
         if self.in_top_level_context() {
             return self.visitor().visit_each_child(node);
         }
@@ -583,19 +583,19 @@ impl AsyncTransformer {
         Some(yield_expr)
     }
 
-    pub fn in_context(&self, flags: AsyncContextFlags) -> bool {
+    pub fn in_context(&self, flags: AsyncContextFlags) -> bool { ::tsox_core::fntrace::enter("in_context"); 
         self.context_flags & flags != 0
     }
 
-    pub fn in_top_level_context(&self) -> bool {
+    pub fn in_top_level_context(&self) -> bool { ::tsox_core::fntrace::enter("in_top_level_context"); 
         !self.in_context(ASYNC_CONTEXT_NON_TOP_LEVEL)
     }
 
-    pub fn in_has_lexical_this_context(&self) -> bool {
+    pub fn in_has_lexical_this_context(&self) -> bool { ::tsox_core::fntrace::enter("in_has_lexical_this_context"); 
         self.in_context(ASYNC_CONTEXT_HAS_LEXICAL_THIS)
     }
 
-    pub fn track_super_access(&mut self, node: &Arc<Node>) {
+    pub fn track_super_access(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("track_super_access"); 
         if self.super_access.captured_super_properties.is_none() {
             return;
         }
@@ -646,7 +646,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn is_variable_declaration_list_with_colliding_name(&self, node: &Arc<Node>) -> bool {
+    pub fn is_variable_declaration_list_with_colliding_name(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_list_with_colliding_name"); 
         is_variable_declaration_list(node)
             && node.flags & NodeFlags::BlockScoped == NodeFlags::empty()
             && match &node.data {
@@ -659,7 +659,7 @@ impl AsyncTransformer {
             }
     }
 
-    fn collides_with_parameter_name(&self, node: &Arc<Node>) -> bool {
+    fn collides_with_parameter_name(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("collides_with_parameter_name"); 
         let name = match node.name() {
             Some(name) => name,
             None => return false,
@@ -683,7 +683,7 @@ impl AsyncTransformer {
         false
     }
 
-    pub fn record_declaration_name(&mut self, node: &Arc<Node>, names: &mut Set<String>) {
+    pub fn record_declaration_name(&mut self, node: &Arc<Node>, names: &mut Set<String>) { ::tsox_core::fntrace::enter("record_declaration_name"); 
         let name = node.name();
         let name = match name {
             Some(name) => name,

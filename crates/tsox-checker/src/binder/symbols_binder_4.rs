@@ -3,7 +3,7 @@
 use crate::binder::symbols::*;
 
 impl Binder {
-    pub(crate) fn get_declaration_name(&self, node: &Arc<Node>) -> String {
+    pub(crate) fn get_declaration_name(&self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_declaration_name"); 
         match &node.data {
             NodeData::VariableDeclaration(data) => self.binding_declaration_name(Some(&data.name)),
             NodeData::VariableStatement(_) => String::new(),
@@ -140,7 +140,7 @@ impl Binder {
 
     // Go getDeclarationName：GetNameOfDeclaration 对绑定模式名返 nil，
     // 落到 InternalSymbolNameMissing（declareSymbolEx 建孤立符号，不入容器表）
-    fn binding_declaration_name(&self, name: Option<&Arc<Node>>) -> String {
+    fn binding_declaration_name(&self, name: Option<&Arc<Node>>) -> String { ::tsox_core::fntrace::enter("binding_declaration_name"); 
         match name {
             Some(n) if is_binding_pattern(n) => INTERNAL_SYMBOL_NAME_MISSING.to_string(),
             Some(n) => self.node_text(n),
@@ -148,7 +148,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn node_text(&self, node: &Arc<Node>) -> String {
+    pub(crate) fn node_text(&self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("node_text"); 
         match &node.data {
             NodeData::Identifier(data) => data.text.clone(),
 
@@ -164,7 +164,7 @@ impl Binder {
     /// 成员声明名：计算属性名为 `Symbol.<知名符号>` 形态时用内部名
     /// `__@<name>`（Go getDeclarationName 的 well-known symbol 分支等价，
     /// 去掉 Go 的 @symbolId 后缀，两端一致即可命中）
-    pub(crate) fn member_name_text(&self, name: &Arc<Node>) -> String {
+    pub(crate) fn member_name_text(&self, name: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("member_name_text"); 
         if name.kind == SyntaxKind::ComputedPropertyName
             && let NodeData::ComputedPropertyName(cd) = &name.data
             && let Some(internal) = well_known_symbol_member_name(&cd.expression)
@@ -193,7 +193,7 @@ impl Binder {
     }
 }
 
-pub(crate) fn well_known_symbol_member_name(expr: &Arc<Node>) -> Option<String> {
+pub(crate) fn well_known_symbol_member_name(expr: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("well_known_symbol_member_name"); 
     if let NodeData::PropertyAccessExpression(pa) = &expr.data
         && let NodeData::Identifier(base) = &pa.expression.data
         && base.text == "Symbol"
@@ -228,7 +228,7 @@ pub(crate) fn well_known_symbol_member_name(expr: &Arc<Node>) -> Option<String> 
     None
 }
 
-pub(crate) fn computed_member_literal_name(expression: &Arc<Node>) -> Option<String> {
+pub(crate) fn computed_member_literal_name(expression: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("computed_member_literal_name"); 
     if let NodeData::PrefixUnaryExpression(pu) = &expression.data
         && matches!(pu.operator, SyntaxKind::PlusToken | SyntaxKind::MinusToken)
         && pu.operand.kind == SyntaxKind::NumericLiteral
@@ -248,7 +248,7 @@ pub(crate) fn computed_member_literal_name(expression: &Arc<Node>) -> Option<Str
     }
 }
 
-fn literal_member_text(node: &Arc<Node>) -> String {
+fn literal_member_text(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("literal_member_text"); 
     match &node.data {
         NodeData::StringLiteral(d) => d.text.clone(),
         NodeData::NoSubstitutionTemplateLiteral(d) => d.text.clone(),
@@ -264,7 +264,7 @@ pub(crate) fn module_declaration_has_with_clause(
     node: &Arc<Node>,
     name: &Arc<Node>,
     body: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("module_declaration_has_with_clause"); 
     let start = name.loc.end().min(source_text.len());
     let end = body
         .map(|b| b.loc.pos())

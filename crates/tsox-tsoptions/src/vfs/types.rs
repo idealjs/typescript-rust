@@ -18,7 +18,7 @@ pub struct FileInfo {
 }
 
 impl Default for FileInfo {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         FileInfo {
             name: String::new(),
             size: 0,

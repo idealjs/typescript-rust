@@ -9,7 +9,7 @@ impl Checker {
         symbol_table: &mut SymbolTable,
         props: &mut Vec<Arc<Symbol>>,
         own_symbol: Option<&Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_property_signature_member"); 
         let NodeData::PropertySignatureDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -71,7 +71,7 @@ impl Checker {
         &self,
         type_node: &Arc<Node>,
         own_symbol: Option<&Arc<Symbol>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("property_signature_type_deferred"); 
         if self.variable_type_frame_depth > 0 {
             return true;
         }
@@ -94,7 +94,7 @@ impl Checker {
         member: &Arc<Node>,
         symbol_table: &mut SymbolTable,
         props: &mut Vec<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_method_signature_member"); 
         let NodeData::MethodSignatureDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -187,7 +187,7 @@ impl Checker {
         member: &Arc<Node>,
         symbol_table: &mut SymbolTable,
         props: &mut Vec<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_property_declaration_member"); 
         let NodeData::PropertyDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -288,7 +288,7 @@ impl Checker {
         member: &Arc<Node>,
         symbol_table: &mut SymbolTable,
         props: &mut Vec<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_method_declaration_member"); 
         let NodeData::MethodDeclaration(data) = &member.data else {
             unreachable!()
         };

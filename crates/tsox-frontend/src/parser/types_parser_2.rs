@@ -3,7 +3,7 @@
 use crate::parser::types::*;
 
 impl Parser {
-    pub(crate) fn parse_this_type_predicate(&mut self, lhs: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn parse_this_type_predicate(&mut self, lhs: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_this_type_predicate"); 
         let pos = lhs.pos();
         self.expect(SyntaxKind::IsKeyword);
         let type_node = self.parse_type();
@@ -19,7 +19,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_asserts_type_predicate(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_asserts_type_predicate(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_asserts_type_predicate"); 
         let pos = self.token_pos();
 
         let asserts_node = self.create_token_node();
@@ -42,7 +42,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_infer_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_infer_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_infer_type"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::InferKeyword);
         let type_parameter = self.parse_type_parameter();
@@ -54,7 +54,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_type_query(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_query(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_query"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::TypeOfKeyword);
         let expr_name = self.parse_entity_name();
@@ -75,7 +75,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_import_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_import_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_type"); 
         let pos = self.token_pos();
         let is_type_of = self.parse_optional(SyntaxKind::TypeOfKeyword);
         self.expect(SyntaxKind::ImportKeyword);
@@ -131,7 +131,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_template_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_template_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_template_type"); 
         let pos = self.token_pos();
         let head = self.create_template_token_node();
         self.next_token();
@@ -147,7 +147,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_template_type_spans(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_template_type_spans(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_template_type_spans"); 
         let pos = self.token_pos();
         let mut spans = Vec::new();
         loop {
@@ -166,7 +166,7 @@ impl Parser {
         })
     }
 
-    pub(crate) fn parse_template_type_span(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_template_type_span(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_template_type_span"); 
         let pos = self.token_pos();
         let type_node = self.parse_type();
 
@@ -188,7 +188,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_entity_name(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_entity_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_entity_name"); 
         let pos = self.token_pos();
 
         match self.token {
@@ -240,7 +240,7 @@ impl Parser {
         left
     }
 
-    pub(crate) fn next_is_start_of_mapped_type(&self) -> bool {
+    pub(crate) fn next_is_start_of_mapped_type(&self) -> bool { ::tsox_core::fntrace::enter("next_is_start_of_mapped_type"); 
         let mut scanner = self.scanner.clone();
 
         let t1 = scanner.scan();

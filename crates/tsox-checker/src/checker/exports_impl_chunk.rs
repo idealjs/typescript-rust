@@ -3,11 +3,11 @@
 use crate::checker::exports::*;
 
 impl Checker {
-    pub fn get_unknown_signature(&self) -> Option<Arc<Signature>> {
+    pub fn get_unknown_signature(&self) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_unknown_signature"); 
         self.unknown_signature.get().cloned()
     }
 
-    pub fn get_name_type_of_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+    pub fn get_name_type_of_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_name_type_of_symbol"); 
         self.value_symbol_links
             .get(symbol)
             .and_then(|links| links.name_type.clone())
@@ -18,7 +18,7 @@ impl Checker {
         name: &str,
         _meaning: SymbolFlags,
         _diagnostic: Option<&Message>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_global_symbol"); 
         self.globals.get(name).cloned()
     }
 
@@ -26,11 +26,11 @@ impl Checker {
         &self,
         name: &str,
         _meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_global_symbol_by_name"); 
         self.globals.get(name).cloned()
     }
 
-    pub fn get_global_type_by_name(&mut self, name: &str) -> Option<Arc<Type>> {
+    pub fn get_global_type_by_name(&mut self, name: &str) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_global_type_by_name"); 
         let symbol: Arc<Symbol> = self.globals.get(name).cloned()?;
         if !symbol
             .flags
@@ -41,19 +41,19 @@ impl Checker {
         Some(self.get_declared_type_of_symbol(&symbol))
     }
 
-    pub fn get_symbol_by_name(&self, name: &str, _meaning: SymbolFlags) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_by_name(&self, name: &str, _meaning: SymbolFlags) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_by_name"); 
         self.globals.get(name).cloned()
     }
 
-    pub fn get_merged_symbol_public(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn get_merged_symbol_public(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_merged_symbol_public"); 
         Some(Arc::clone(symbol))
     }
 
-    pub fn try_find_ambient_module(&self, _module_name: &str) -> Option<Arc<Symbol>> {
+    pub fn try_find_ambient_module(&self, _module_name: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_find_ambient_module"); 
         None
     }
 
-    pub fn get_immediate_aliased_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn get_immediate_aliased_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_immediate_aliased_symbol"); 
         if let Some(target) = self
             .alias_symbol_links
             .get(symbol)
@@ -67,18 +67,18 @@ impl Checker {
         target
     }
 
-    pub fn get_type_only_alias_declaration(&self, _symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn get_type_only_alias_declaration(&self, _symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_only_alias_declaration"); 
         None
     }
 
     pub fn resolve_external_module_name(
         &self,
         _module_specifier: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_external_module_name"); 
         None
     }
 
-    pub fn get_declared_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_declared_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_symbol"); 
         // Go tryGetDeclaredTypeOfSymbol 的 Class/Interface/TypeAlias 分支；
         // TypeParameter/Enum/Alias 等其余形态维持 any（尚未接入）
         if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::Interface) {
@@ -112,7 +112,7 @@ impl Checker {
         &mut self,
         attrs: &Arc<Node>,
         report_errors: bool,
-    ) -> Option<ResolutionMode> {
+    ) -> Option<ResolutionMode> { ::tsox_core::fntrace::enter("get_resolution_mode_override"); 
         use tsox_frontend::ast::SyntaxKind;
         let data = match &attrs.data {
             tsox_frontend::ast::NodeData::ImportAttributes(d) => d,
@@ -184,7 +184,7 @@ impl Checker {
         }
     }
 
-    pub fn type_predicate_to_string(&self, _t: &TypePredicate) -> String {
+    pub fn type_predicate_to_string(&self, _t: &TypePredicate) -> String { ::tsox_core::fntrace::enter("type_predicate_to_string"); 
         String::new()
     }
 
@@ -192,11 +192,11 @@ impl Checker {
         &self,
         _signature: &Arc<Signature>,
         _skip_union_expanding: bool,
-    ) -> Vec<Vec<Arc<Symbol>>> {
+    ) -> Vec<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("get_expanded_parameters"); 
         Vec::new()
     }
 
-    pub fn get_resolved_signature(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub fn get_resolved_signature(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_resolved_signature"); 
         if let Some(cached) = self
             .signature_links
             .get(node)
@@ -226,7 +226,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         check_mode: CheckMode,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolve_signature"); 
         match node.kind {
             SyntaxKind::CallExpression => self.resolve_call_expression(node, None, check_mode),
             SyntaxKind::NewExpression => self.resolve_new_expression(node, None, check_mode),
@@ -250,21 +250,21 @@ impl Checker {
         &self,
         _node: &Arc<Node>,
         _arg_index: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_argument_at_index"); 
         None
     }
 
-    pub fn get_index_signatures_at_location(&self, _node: &Arc<Node>) -> Vec<Arc<Node>> {
+    pub fn get_index_signatures_at_location(&self, _node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_index_signatures_at_location"); 
         Vec::new()
     }
 
-    pub fn get_resolved_symbol(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_resolved_symbol(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_resolved_symbol"); 
         self.symbol_node_links
             .get(node)
             .and_then(|l| l.resolved_symbol.clone())
     }
 
-    pub fn get_jsx_fragment_factory(&self, _location: &Arc<Node>) -> String {
+    pub fn get_jsx_fragment_factory(&self, _location: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_jsx_fragment_factory"); 
         String::new()
     }
 
@@ -274,7 +274,7 @@ impl Checker {
         location: &Arc<Node>,
         meaning: SymbolFlags,
         exclude_globals: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_name"); 
         // Go checker.resolveName = binder.NameResolver.Resolve：自 location 起
         // 逐层上溯查容器 locals/成员表（meaning 过滤，条件类型 infer 参数仅
         // trueType 可见），末端 globals 回退。起点节点自身 locals 按 Go 语义
@@ -331,16 +331,16 @@ impl Checker {
         None
     }
 
-    pub fn get_symbol_flags(&self, symbol: &Arc<Symbol>) -> SymbolFlags {
+    pub fn get_symbol_flags(&self, symbol: &Arc<Symbol>) -> SymbolFlags { ::tsox_core::fntrace::enter("get_symbol_flags"); 
         symbol.flags
     }
 
-    pub fn get_rest_type_of_signature(&self, _sig: &Arc<Signature>) -> Option<Arc<Type>> {
+    pub fn get_rest_type_of_signature(&self, _sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_rest_type_of_signature"); 
         None
     }
 
     // Go checker.isContextSensitive：递归判定（函数/嵌套箭头/||、??/条件/数组/对象字面量/括号）
-    pub fn is_context_sensitive(&self, node: &Arc<Node>) -> bool {
+    pub fn is_context_sensitive(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_context_sensitive"); 
         use tsox_frontend::ast::NodeData;
         match &node.data {
             NodeData::FunctionExpression(d) => self.is_context_sensitive_fn_like(
@@ -397,7 +397,7 @@ impl Checker {
         type_node: Option<&Arc<Node>>,
         body: Option<&Arc<Node>>,
         is_arrow: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_context_sensitive_fn_like"); 
         use tsox_frontend::ast::NodeData;
         if has_type_parameters {
             return false;
@@ -441,7 +441,7 @@ impl Checker {
         type_parameters: &[Arc<Type>],
         _min_type_argument_count: usize,
         is_java_script_implicit_any: bool,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("fill_missing_type_arguments"); 
         let num_type_parameters = type_parameters.len();
         if num_type_parameters == 0 {
             return Vec::new();
@@ -484,7 +484,7 @@ impl Checker {
         type_arguments.to_vec()
     }
 
-    pub fn get_min_type_argument_count(&self, type_parameters: &[Arc<Type>]) -> usize {
+    pub fn get_min_type_argument_count(&self, type_parameters: &[Arc<Type>]) -> usize { ::tsox_core::fntrace::enter("get_min_type_argument_count"); 
         for (i, tp) in type_parameters.iter().enumerate() {
             if self.get_default_from_type_parameter(tp).is_some() {
                 return i;
@@ -497,7 +497,7 @@ impl Checker {
         &mut self,
         types: Vec<Arc<Type>>,
         union_reduction: UnionReduction,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_union_type_ex"); 
         // Go getUnionTypeEx：归约路径直通 getUnionTypeWorker（addTypesToUnion
         // 排序去重 + 字面量/受约束类型参数/子类型归约 + named-union origin +
         // unionTypes 驻留）；None 维持排序去重轻路径
@@ -507,36 +507,36 @@ impl Checker {
         self.build_union_from_types(types)
     }
 
-    pub fn requires_adding_implicit_undefined(&self, _node: &Arc<Node>) -> bool {
+    pub fn requires_adding_implicit_undefined(&self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("requires_adding_implicit_undefined"); 
         false
     }
 
-    pub fn remove_missing_or_undefined_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn remove_missing_or_undefined_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_missing_or_undefined_type"); 
         Arc::clone(t)
     }
 
-    pub fn compare_symbols(&self, _s1: &Arc<Symbol>, _s2: &Arc<Symbol>) -> i32 {
+    pub fn compare_symbols(&self, _s1: &Arc<Symbol>, _s2: &Arc<Symbol>) -> i32 { ::tsox_core::fntrace::enter("compare_symbols"); 
         0
     }
 
-    pub fn get_default_keyword_type(&mut self) -> Option<Arc<Type>> {
+    pub fn get_default_keyword_type(&mut self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_default_keyword_type"); 
         self.get_global_type_by_name("default")
     }
 
-    pub fn get_promise_type(&self) -> Option<Arc<Type>> {
+    pub fn get_promise_type(&self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_promise_type"); 
         self.global_promise_type.get().cloned()
     }
 
-    pub fn get_promise_like_type(&mut self) -> Option<Arc<Type>> {
+    pub fn get_promise_like_type(&mut self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_promise_like_type"); 
         self.get_global_type_by_name("PromiseLike")
     }
 
-    pub fn create_type_checker_cache(&self) {}
+    pub fn create_type_checker_cache(&self) { ::tsox_core::fntrace::enter("create_type_checker_cache"); }
 
-    pub fn clear_possible_type_requests(&mut self) {}
+    pub fn clear_possible_type_requests(&mut self) { ::tsox_core::fntrace::enter("clear_possible_type_requests"); }
 }
 
-fn body_contains_this(node: &Arc<Node>) -> bool {
+fn body_contains_this(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("body_contains_this"); 
     if node.kind == SyntaxKind::ThisKeyword {
         return true;
     }
@@ -554,7 +554,7 @@ fn body_contains_this(node: &Arc<Node>) -> bool {
     hit
 }
 
-fn for_each_return_expression(body: &Arc<Node>) -> Option<Arc<Node>> {
+fn for_each_return_expression(body: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("for_each_return_expression"); 
     if body.kind == SyntaxKind::ReturnStatement {
         if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &body.data {
             return data.expression.clone();

@@ -23,7 +23,7 @@ pub(crate) enum ComparatorOperator {
 }
 
 impl VersionRange {
-    pub fn test(&self, version: &Version) -> bool {
+    pub fn test(&self, version: &Version) -> bool { crate::fntrace::enter("test"); 
         if self.alternatives.is_empty() {
             return true;
         }
@@ -43,7 +43,7 @@ impl VersionRange {
 }
 
 impl fmt::Display for VersionRange {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         let mut empty = true;
         for (i, alt) in self.alternatives.iter().enumerate() {
             if i > 0 {
@@ -71,11 +71,11 @@ impl fmt::Display for VersionRange {
     }
 }
 
-pub fn try_parse_version_range(text: &str) -> Option<VersionRange> {
+pub fn try_parse_version_range(text: &str) -> Option<VersionRange> { crate::fntrace::enter("try_parse_version_range"); 
     parse_alternatives(text).map(|alts| VersionRange { alternatives: alts })
 }
 
-pub(crate) fn parse_alternatives(text: &str) -> Option<Vec<Vec<VersionComparator>>> {
+pub(crate) fn parse_alternatives(text: &str) -> Option<Vec<Vec<VersionComparator>>> { crate::fntrace::enter("parse_alternatives"); 
     let text = text.trim();
     if text.is_empty() {
         return Some(Vec::new());
@@ -105,7 +105,7 @@ pub(crate) fn parse_alternatives(text: &str) -> Option<Vec<Vec<VersionComparator
     Some(alternatives)
 }
 
-pub(crate) fn parse_hyphen(text: &str) -> Option<(String, String)> {
+pub(crate) fn parse_hyphen(text: &str) -> Option<(String, String)> { crate::fntrace::enter("parse_hyphen"); 
     let parts: Vec<&str> = text.splitn(3, ' ').collect();
     if parts.len() == 3 && parts[1] == "-" {
         return Some((parts[0].to_string(), parts[2].to_string()));
@@ -116,7 +116,7 @@ pub(crate) fn parse_hyphen(text: &str) -> Option<(String, String)> {
 pub(crate) fn parse_hyphen_comparators(
     left: &PartialVersion,
     right: &PartialVersion,
-) -> Option<Vec<VersionComparator>> {
+) -> Option<Vec<VersionComparator>> { crate::fntrace::enter("parse_hyphen_comparators"); 
     let mut comparators = Vec::new();
 
     if !is_wildcard(&left.major_str) {
@@ -154,7 +154,7 @@ pub(crate) struct PartialVersion {
     pub(crate) patch_str: String,
 }
 
-pub(crate) fn parse_partial(text: &str) -> Option<PartialVersion> {
+pub(crate) fn parse_partial(text: &str) -> Option<PartialVersion> { crate::fntrace::enter("parse_partial"); 
     let (core, prerelease_part, build_part) = split_partial(text);
 
     let parts: Vec<&str> = core.split('.').collect();
@@ -226,7 +226,7 @@ pub(crate) fn parse_partial(text: &str) -> Option<PartialVersion> {
     })
 }
 
-pub(crate) fn split_partial(text: &str) -> (String, String, String) {
+pub(crate) fn split_partial(text: &str) -> (String, String, String) { crate::fntrace::enter("split_partial"); 
     let (before_build, build) = match text.find('+') {
         Some(pos) => (text[..pos].to_string(), text[pos + 1..].to_string()),
         None => (text.to_string(), String::new()),
@@ -241,7 +241,7 @@ pub(crate) fn split_partial(text: &str) -> (String, String, String) {
     (core, prerelease, build)
 }
 
-pub(crate) fn is_valid_partial_numeric(s: &str) -> bool {
+pub(crate) fn is_valid_partial_numeric(s: &str) -> bool { crate::fntrace::enter("is_valid_partial_numeric"); 
     if s.is_empty() {
         return false;
     }
@@ -254,7 +254,7 @@ pub(crate) fn is_valid_partial_numeric(s: &str) -> bool {
     s.chars().all(|c| c.is_ascii_digit())
 }
 
-pub(crate) fn parse_range_operator(text: &str) -> Option<(String, String)> {
+pub(crate) fn parse_range_operator(text: &str) -> Option<(String, String)> { crate::fntrace::enter("parse_range_operator"); 
     let text = text.trim();
     if text.starts_with(">=") {
         return Some((">=".to_string(), text[2..].trim().to_string()));

@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn is_conflict_marker_trivia(text: &str, pos: usize) -> bool {
+pub(crate) fn is_conflict_marker_trivia(text: &str, pos: usize) -> bool { ::tsox_core::fntrace::enter("is_conflict_marker_trivia"); 
     let bytes = text.as_bytes();
     let text_len = bytes.len();
     if pos + 1 >= text_len || bytes[pos + 1] != bytes[pos] {
@@ -30,7 +30,7 @@ pub(crate) fn scan_conflict_marker_trivia(
     text: &str,
     pos: usize,
     report_error: Option<&dyn Fn(usize, usize)>,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("scan_conflict_marker_trivia"); 
     if let Some(report) = report_error {
         report(pos, MERGE_CONFLICT_MARKER_LENGTH);
     }
@@ -57,7 +57,7 @@ pub(crate) fn scan_conflict_marker_trivia(
     pos
 }
 
-pub fn skip_trivia(text: &str, pos: usize) -> usize {
+pub fn skip_trivia(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_trivia"); 
     skip_trivia_ex(text, pos, &SkipTriviaOptions::default(), None)
 }
 
@@ -66,7 +66,7 @@ pub fn skip_trivia_ex(
     pos: usize,
     options: &SkipTriviaOptions,
     report_error: Option<&dyn Fn(usize, usize)>,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("skip_trivia_ex"); 
     let bytes = text.as_bytes();
     let text_len = bytes.len();
     let mut pos = pos;
@@ -169,10 +169,10 @@ pub fn skip_trivia_ex(
     }
 }
 
-pub fn get_leading_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> {
+pub fn get_leading_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> { ::tsox_core::fntrace::enter("get_leading_comment_ranges"); 
     iterate_comment_ranges(text, pos, false)
 }
 
-pub fn get_trailing_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> {
+pub fn get_trailing_comment_ranges(text: &str, pos: usize) -> Vec<CommentRange> { ::tsox_core::fntrace::enter("get_trailing_comment_ranges"); 
     iterate_comment_ranges(text, pos, true)
 }

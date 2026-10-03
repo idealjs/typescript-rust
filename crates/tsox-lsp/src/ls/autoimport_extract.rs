@@ -36,7 +36,7 @@ pub struct ExportExtractor {
 }
 
 impl ExportExtractor {
-    pub fn stats(&self) -> &ExtractorStats {
+    pub fn stats(&self) -> &ExtractorStats { ::tsox_core::fntrace::enter("stats"); 
         &self.symbol_extractor.stats
     }
 }
@@ -47,19 +47,19 @@ pub struct CheckerLease {
 }
 
 impl CheckerLease {
-    pub fn new(checker: Arc<Checker>) -> Self {
+    pub fn new(checker: Arc<Checker>) -> Self { ::tsox_core::fntrace::enter("new"); 
         CheckerLease {
             used: false,
             checker,
         }
     }
 
-    pub fn get_checker(&mut self) -> &Checker {
+    pub fn get_checker(&mut self) -> &Checker { ::tsox_core::fntrace::enter("get_checker"); 
         self.used = true;
         &self.checker
     }
 
-    pub fn try_checker(&self) -> Option<&Checker> {
+    pub fn try_checker(&self) -> Option<&Checker> { ::tsox_core::fntrace::enter("try_checker"); 
         if self.used { Some(&self.checker) } else { None }
     }
 }
@@ -69,7 +69,7 @@ pub fn new_symbol_extractor(
     checker: Arc<Checker>,
     to_path: Option<Box<dyn Fn(&str) -> tsox_core::tspath::Path + Send + Sync>>,
     realpath: Option<Box<dyn Fn(&str) -> String + Send + Sync>>,
-) -> SymbolExtractor {
+) -> SymbolExtractor { ::tsox_core::fntrace::enter("new_symbol_extractor"); 
     SymbolExtractor {
         package_name: package_name.to_string(),
         stats: Arc::new(ExtractorStats::default()),
@@ -80,7 +80,7 @@ pub fn new_symbol_extractor(
 }
 
 impl SymbolExtractor {
-    pub fn get_module_id(&self, file: &SourceFile) -> ModuleID {
+    pub fn get_module_id(&self, file: &SourceFile) -> ModuleID { ::tsox_core::fntrace::enter("get_module_id"); 
         if let (Some(realpath_fn), Some(to_path_fn)) = (&self.realpath, &self.to_path) {
             let rp = realpath_fn(&file.file_name);
             return to_path_fn(&rp).0;
@@ -89,17 +89,17 @@ impl SymbolExtractor {
         file.file_name.clone()
     }
 
-    pub fn get_module_id_for_symbol(&self, _symbol: &Symbol) -> Option<(ModuleID, bool)> {
+    pub fn get_module_id_for_symbol(&self, _symbol: &Symbol) -> Option<(ModuleID, bool)> { ::tsox_core::fntrace::enter("get_module_id_for_symbol"); 
         todo!("get_module_id_for_symbol requires tryGetModuleIDAndFileNameOfModuleSymbol")
     }
 }
 
 impl ExportExtractor {
-    pub fn extract_from_file(&self, _file: &SourceFile) -> Vec<Export> {
+    pub fn extract_from_file(&self, _file: &SourceFile) -> Vec<Export> { ::tsox_core::fntrace::enter("extract_from_file"); 
         todo!("extract_from_file requires ast.Symbol, file.Symbol.Exports iteration")
     }
 
-    pub fn extract_from_module(&self, _file: &SourceFile) -> Vec<Export> {
+    pub fn extract_from_module(&self, _file: &SourceFile) -> Vec<Export> { ::tsox_core::fntrace::enter("extract_from_module"); 
         todo!("extract_from_module requires module augmentation parsing")
     }
 
@@ -110,7 +110,7 @@ impl ExportExtractor {
         _module_id: ModuleID,
         _module_file_name: &str,
         _exports: &mut Vec<Export>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("extract_from_module_declaration"); 
         todo!("extract_from_module_declaration requires decl.Symbol.Exports")
     }
 }
@@ -124,7 +124,7 @@ impl SymbolExtractor {
         _module_file_name: &str,
         _file: &SourceFile,
         _exports: &mut Vec<Export>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("extract_from_symbol"); 
         todo!("extract_from_symbol requires checker.GetExportsOfModule and createExport")
     }
 
@@ -136,20 +136,20 @@ impl SymbolExtractor {
         _syntax: ExportSyntax,
         _file: &SourceFile,
         _checker_lease: &mut CheckerLease,
-    ) -> (Option<Export>, Option<Arc<Symbol>>) {
+    ) -> (Option<Export>, Option<Arc<Symbol>>) { ::tsox_core::fntrace::enter("create_export"); 
         todo!("create_export requires checker and lsutil helpers")
     }
 }
 
-pub fn should_ignore_symbol(symbol: &Symbol) -> bool {
+pub fn should_ignore_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("should_ignore_symbol"); 
     symbol.flags.contains(SymbolFlags::Prototype)
 }
 
-pub fn get_syntax(_symbol: &Symbol) -> ExportSyntax {
+pub fn get_syntax(_symbol: &Symbol) -> ExportSyntax { ::tsox_core::fntrace::enter("get_syntax"); 
     todo!("get_syntax requires ast declaration kind inspection")
 }
 
-pub fn is_unusable_name(name: &str) -> bool {
+pub fn is_unusable_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_unusable_name"); 
     name.is_empty()
         || name == "_default"
         || name == INTERNAL_SYMBOL_NAME_EXPORT_STAR
@@ -161,7 +161,7 @@ pub fn file_name_for_default_export_name(
     _target_symbol: Option<&Symbol>,
     module_file_name: &str,
     module_id: &ModuleID,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("file_name_for_default_export_name"); 
     if !module_file_name.is_empty() {
         module_file_name.to_string()
     } else {

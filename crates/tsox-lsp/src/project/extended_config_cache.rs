@@ -24,7 +24,7 @@ pub struct ExtendedConfigCache {
 }
 
 impl ExtendedConfigCache {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         ExtendedConfigCache {
             inner: OwnerCache::new(),
         }
@@ -33,29 +33,29 @@ impl ExtendedConfigCache {
     pub fn load_and_acquire<F>(&self, path: &Path, owner: u64, parse: F) -> ExtendedConfigCacheEntry
     where
         F: FnOnce(&Path) -> ExtendedConfigCacheEntry,
-    {
+    { ::tsox_core::fntrace::enter("load_and_acquire"); 
         self.inner.load_and_acquire(path.clone(), owner, parse)
     }
 
-    pub fn add_owner(&self, path: &Path, owner: u64) {
+    pub fn add_owner(&self, path: &Path, owner: u64) { ::tsox_core::fntrace::enter("add_owner"); 
         self.inner.add_owner(path, owner);
     }
 
-    pub fn has(&self, path: &Path) -> bool {
+    pub fn has(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.inner.has(path)
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.inner.len()
     }
 
-    pub fn release(&self, path: &Path, owner: u64) {
+    pub fn release(&self, path: &Path, owner: u64) { ::tsox_core::fntrace::enter("release"); 
         self.inner.release(path, owner);
     }
 }
 
 impl Default for ExtendedConfigCache {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }

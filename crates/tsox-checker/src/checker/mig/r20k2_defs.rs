@@ -40,19 +40,19 @@ pub trait R20k2NodeExt {
     fn is_import_or_export_specifier(&self) -> bool;
 }
 
-pub fn is_in_js_file(node: &Node) -> bool {
+pub fn is_in_js_file(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_js_file"); 
     node.flags.contains(NodeFlags::JavaScriptFile)
 }
 
-pub fn is_static(node: &Node) -> bool {
+pub fn is_static(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_static"); 
     node.has_syntactic_modifier(ModifierFlags::Static)
 }
 
-pub fn has_syntactic_modifier(node: &Node, flags: ModifierFlags) -> bool {
+pub fn has_syntactic_modifier(node: &Node, flags: ModifierFlags) -> bool { ::tsox_core::fntrace::enter("has_syntactic_modifier"); 
     node.has_syntactic_modifier(flags)
 }
 
-pub fn get_source_file_of_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_source_file_of_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_source_file_of_node"); 
     let mut current = Arc::clone(node);
     while let Some(parent) = current.parent() {
         current = parent;
@@ -60,7 +60,7 @@ pub fn get_source_file_of_node(node: &Arc<Node>) -> Option<Arc<Node>> {
     Some(current)
 }
 
-pub fn node_is_missing(node: Option<&Arc<Node>>) -> bool {
+pub fn node_is_missing(node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("node_is_missing"); 
     match node {
         None => true,
         Some(n) => n.pos() == n.end() && n.kind == SyntaxKind::EndOfFile,
@@ -92,30 +92,30 @@ impl R20k2NodeExt for Node {
     );
     r20k2_as_data!(as_named_tuple_member, NamedTupleMember, NamedTupleMemberData);
 
-    fn is_static(&self) -> bool {
+    fn is_static(&self) -> bool { ::tsox_core::fntrace::enter("is_static"); 
         self.has_syntactic_modifier(ModifierFlags::Static)
     }
 
-    fn is_in_js_file(&self) -> bool {
+    fn is_in_js_file(&self) -> bool { ::tsox_core::fntrace::enter("is_in_js_file"); 
         self.flags.contains(NodeFlags::JavaScriptFile)
     }
 
-    fn is_import_or_export_specifier(&self) -> bool {
+    fn is_import_or_export_specifier(&self) -> bool { ::tsox_core::fntrace::enter("is_import_or_export_specifier"); 
         matches!(self.kind, SyntaxKind::ImportSpecifier | SyntaxKind::ExportSpecifier)
     }
 
-    fn is_private_identifier_class_element_declaration(&self) -> bool {
+    fn is_private_identifier_class_element_declaration(&self) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_class_element_declaration"); 
         self.name().is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier)
     }
 
-    fn is_initialized_property(&self) -> bool {
+    fn is_initialized_property(&self) -> bool { ::tsox_core::fntrace::enter("is_initialized_property"); 
         match &self.data {
             NodeData::PropertyDeclaration(d) => d.initializer.is_some(),
             _ => false,
         }
     }
 
-    fn members(&self) -> Option<&tsox_frontend::ast::NodeList> {
+    fn members(&self) -> Option<&tsox_frontend::ast::NodeList> { ::tsox_core::fntrace::enter("members"); 
         match &self.data {
             NodeData::ClassDeclaration(d) => Some(&d.members),
             NodeData::ClassExpression(d) => Some(&d.members),
@@ -124,14 +124,14 @@ impl R20k2NodeExt for Node {
         }
     }
 
-    fn decorators(&self) -> Vec<&Arc<Node>> {
+    fn decorators(&self) -> Vec<&Arc<Node>> { ::tsox_core::fntrace::enter("decorators"); 
         self.modifier_nodes()
             .iter()
             .filter(|m| m.kind == SyntaxKind::Decorator)
             .collect()
     }
 
-    fn property_name_or_name(&self) -> &Node {
+    fn property_name_or_name(&self) -> &Node { ::tsox_core::fntrace::enter("property_name_or_name"); 
         match &self.data {
             NodeData::ImportSpecifier(d) => d.property_name.as_deref().unwrap_or(&d.name),
             NodeData::ExportSpecifier(d) => d.property_name.as_deref().unwrap_or(&d.name),

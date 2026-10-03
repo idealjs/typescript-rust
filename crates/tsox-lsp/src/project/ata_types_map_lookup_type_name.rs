@@ -2,7 +2,7 @@
 
 use crate::project::ata_types_map::*;
 
-pub fn lookup_type_name(file_name: &str) -> Option<&'static str> {
+pub fn lookup_type_name(file_name: &str) -> Option<&'static str> { ::tsox_core::fntrace::enter("lookup_type_name"); 
     safe_file_name_to_type_name()
         .iter()
         .find(|(k, _)| *k == file_name)

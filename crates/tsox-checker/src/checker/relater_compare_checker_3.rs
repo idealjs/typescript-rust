@@ -12,7 +12,7 @@ impl Checker {
         expr: Option<&Arc<tsox_frontend::ast::Node>>,
         head_message: Option<&tsox_core::diagnostics::Message>,
         mut diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_related_to_and_optionally_elaborate"); 
         {
             let sp = source.id;
             let tp = target.id;
@@ -233,7 +233,7 @@ impl Checker {
         mut diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
         was_active: bool,
         saved_chain: Vec<crate::checker::relater_relation::RelaterChainEntry>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("emit_chain_diagnostic_and_restore"); 
         let Some(error_node) = error_node else {
             self.relater_chain_active = was_active;
             self.relater_error_chain = saved_chain;
@@ -291,7 +291,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("weak_type_precheck_fires"); 
         if matches!(relation, RelationKind::Comparable | RelationKind::Identity) {
             return false;
         }
@@ -401,7 +401,7 @@ impl Checker {
         &self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("rebind_non_nullable_union_target"); 
         if !source.flags.intersects(TYPE_FLAGS_DEFINITELY_NON_NULLABLE)
             || !target.flags.contains(TypeFlags::Union)
         {
@@ -424,7 +424,7 @@ impl Checker {
         candidate
     }
 
-    pub(crate) fn get_base_type_of_literal_type_for_display(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_base_type_of_literal_type_for_display(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_base_type_of_literal_type_for_display"); 
         if t.flags.contains(TypeFlags::StringLiteral) || t.flags.contains(TypeFlags::StringMapping)
         {
             self.string_type()
@@ -450,7 +450,7 @@ impl Checker {
         }
     }
 
-    pub fn is_weak_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_weak_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_weak_type"); 
         if t.flags.contains(TypeFlags::Object) {
             if t.flags.contains(TypeFlags::Any) {
                 return false;
@@ -498,7 +498,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         _is_comparing_jsx_attributes: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_common_properties"); 
         for p in self.get_properties_of_type(source) {
             if self.is_known_property(target, &p.name, _is_comparing_jsx_attributes) {
                 return true;
@@ -538,7 +538,7 @@ impl Checker {
         target_type: &Arc<Type>,
         name: &str,
         is_comparing_jsx_attributes: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_known_property"); 
         if target_type.flags.contains(TypeFlags::Object) {
             if self.get_property_of_type(target_type, name).is_some()
                 || self.target_index_covers_name(target_type, name)
@@ -564,7 +564,7 @@ impl Checker {
         false
     }
 
-    fn target_index_covers_name(&self, target_type: &Arc<Type>, name: &str) -> bool {
+    fn target_index_covers_name(&self, target_type: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("target_index_covers_name"); 
         let Some(structured) = target_type.as_structured() else {
             return false;
         };
@@ -581,11 +581,11 @@ impl Checker {
         false
     }
 
-    pub fn get_mapped_target_with_symbol(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_mapped_target_with_symbol(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_mapped_target_with_symbol"); 
         Arc::clone(t)
     }
 
-    pub fn has_matching_recursion_identity(&self, t: &Arc<Type>, identity: &Arc<Type>) -> bool {
+    pub fn has_matching_recursion_identity(&self, t: &Arc<Type>, identity: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_matching_recursion_identity"); 
         Arc::ptr_eq(t, identity)
     }
 
@@ -594,7 +594,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         is_related_to: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_best_matching_type"); 
         if let Some(t) = self.find_matching_discriminant_type(source, target, is_related_to) {
             return Some(t);
         }
@@ -619,7 +619,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         union_target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("find_matching_type_reference_or_type_alias_reference"); 
         let source_object_flags = source.object_flags;
         if !source_object_flags
             .intersects(crate::checker::types::ObjectFlags::Reference | crate::checker::types::ObjectFlags::Anonymous)
@@ -659,7 +659,7 @@ impl Checker {
         source: &Arc<Type>,
         union_target: &Arc<Type>,
         kind: SignatureKind,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("find_best_type_for_invokable"); 
         if self.get_signatures_of_type(source, kind).is_empty() {
             return None;
         }

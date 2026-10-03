@@ -7,7 +7,7 @@ impl Checker {
         &self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_property_of_type_cached"); 
         if let TypeData::Mapped(m) = &t.data
             && m.type_parameter.is_some()
         {
@@ -86,7 +86,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn primitive_interface_name(&self, t: &Arc<Type>) -> Option<&'static str> {
+    pub(crate) fn primitive_interface_name(&self, t: &Arc<Type>) -> Option<&'static str> { ::tsox_core::fntrace::enter("primitive_interface_name"); 
         if t.flags
             .intersects(TypeFlags::String | TypeFlags::StringLiteral)
         {
@@ -120,12 +120,12 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_property_type_of_type"); 
         let sym = self.get_property_of_type(t, name)?;
         Some(self.get_type_of_symbol(&sym))
     }
 
-    pub(crate) fn type_has_property(&self, t: &Arc<Type>, name: &str) -> PropertyPresence {
+    pub(crate) fn type_has_property(&self, t: &Arc<Type>, name: &str) -> PropertyPresence { ::tsox_core::fntrace::enter("type_has_property"); 
         if let Some(structured) = t.as_structured() {
             if let Some(sym) = structured.members.get(name) {
                 if sym.flags.contains(SymbolFlags::Optional) {
@@ -149,7 +149,7 @@ impl Checker {
     pub(crate) fn get_instance_type_of_constructor(
         &mut self,
         ctor_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_instance_type_of_constructor"); 
         if let Some(prop_sym) = self.get_property_of_type(ctor_type, "prototype") {
             let prop_type = self.get_type_of_symbol(&prop_sym);
             if !prop_type.flags.contains(TypeFlags::Any) {
@@ -174,7 +174,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn get_accessed_property_name_from_node(node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn get_accessed_property_name_from_node(node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("get_accessed_property_name_from_node"); 
         match &node.data {
             NodeData::StringLiteral(s) => Some(s.text.clone()),
             NodeData::NumericLiteral(n) => Some(n.text.clone()),
@@ -206,7 +206,7 @@ impl Checker {
         &self,
         expr: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("discriminant_alias_access"); 
         if expr.kind != SyntaxKind::Identifier {
             return None;
         }
@@ -256,7 +256,7 @@ impl Checker {
 
     pub(crate) fn candidate_variable_declaration_initializer(
         decl: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("candidate_variable_declaration_initializer"); 
         let NodeData::VariableDeclaration(data) = &decl.data else {
             return None;
         };
@@ -270,7 +270,7 @@ impl Checker {
         &self,
         node: &Arc<Node>,
         reference: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_access_on_reference"); 
         let mut r = reference;
         loop {
             match &r.data {
@@ -290,7 +290,7 @@ impl Checker {
         &self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_access_on_symbol"); 
         match &node.data {
             NodeData::PropertyAccessExpression(pa) => {
                 pa.question_dot_token.is_none() && self.is_symbol_identifier(&pa.expression, symbol)

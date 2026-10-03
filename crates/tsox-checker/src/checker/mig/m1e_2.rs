@@ -39,7 +39,7 @@ pub mod r31k3_defs;
 pub use r31k3_defs::*;
 
 impl Checker {
-    pub fn get_helper_names(&self, helper: ExternalEmitHelpers) -> Vec<&'static str> {
+    pub fn get_helper_names(&self, helper: ExternalEmitHelpers) -> Vec<&'static str> { ::tsox_core::fntrace::enter("get_helper_names"); 
         match helper {
             ExternalEmitHelpers::Rest => vec!["__rest"],
             ExternalEmitHelpers::Decorate => {
@@ -71,7 +71,7 @@ impl Checker {
         }
     }
 
-    pub fn get_homomorphic_type_variable(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_homomorphic_type_variable(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_homomorphic_type_variable"); 
         let Some(constraint_type) = self.get_constraint_type_from_mapped_type(t) else {
             return None;
         };
@@ -88,7 +88,7 @@ impl Checker {
         None
     }
 
-    pub fn get_implied_constraint(&mut self, t: &Arc<Type>, check_node: &Arc<Node>, extends_node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub fn get_implied_constraint(&mut self, t: &Arc<Type>, check_node: &Arc<Node>, extends_node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_implied_constraint"); 
         if is_unary_tuple_type_node(check_node) && is_unary_tuple_type_node(extends_node) {
             let check_elements = elements(check_node);
             let extends_elements = elements(extends_node);
@@ -103,7 +103,7 @@ impl Checker {
         None
     }
 
-    pub fn get_import_attributes_type_for_module_specifier(&mut self, module_specifier: &Node) -> Option<Arc<Type>> {
+    pub fn get_import_attributes_type_for_module_specifier(&mut self, module_specifier: &Node) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_import_attributes_type_for_module_specifier"); 
         let parent = module_specifier.parent()?;
         if is_import_declaration_or_js_import_declaration(&parent) || is_export_declaration(&parent) {
             return self.get_type_from_import_attributes(get_import_attributes(&parent).as_ref());
@@ -122,7 +122,7 @@ impl Checker {
         None
     }
 
-    pub fn get_index_infos_of_index_symbol(&mut self, index_symbol: &Arc<Symbol>, sibling_symbols: &[Arc<Symbol>]) -> Vec<Arc<IndexInfo>> {
+    pub fn get_index_infos_of_index_symbol(&mut self, index_symbol: &Arc<Symbol>, sibling_symbols: &[Arc<Symbol>]) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_infos_of_index_symbol"); 
         let mut index_infos: Vec<Arc<IndexInfo>> = Vec::new();
         let mut has_computed_string_property = false;
         let mut has_computed_number_property = false;
@@ -219,7 +219,7 @@ impl Checker {
         index_infos
     }
 
-    pub fn get_index_infos_of_structured_type(&mut self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> {
+    pub fn get_index_infos_of_structured_type(&mut self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_infos_of_structured_type"); 
         if t.flags.intersects(TypeFlags::STRUCTURED_TYPE) {
             if let Some(s) = self.resolve_structured_type_members(t).as_structured_type() {
                 return s.index_infos.clone();
@@ -229,7 +229,7 @@ impl Checker {
         Vec::new()
     }
 
-    pub fn get_index_infos_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<IndexInfo>> {
+    pub fn get_index_infos_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_infos_of_symbol"); 
         if let Some(index_symbol) = self.get_index_symbol(symbol) {
             let members: Vec<Arc<Symbol>> = self
                 .get_resolved_members_or_exports_table(symbol)
@@ -241,7 +241,7 @@ impl Checker {
         Vec::new()
     }
 
-    pub fn get_index_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn get_index_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_index_symbol"); 
         self.get_resolved_members_or_exports_table(symbol)
             .get(internal_symbol_name_index)
             .cloned()
@@ -250,7 +250,7 @@ impl Checker {
     // Go getMembersOfSymbol：LateBindingContainer（Class|Interface|TypeLiteral|
     // ObjectLiteral|Function，symbolflags.go:82）走 resolved members（含
     // __index/__computed 晚绑定），其余取原始 members
-    fn get_resolved_members_or_exports_table(&mut self, symbol: &Arc<Symbol>) -> tsox_frontend::ast::SymbolTable {
+    fn get_resolved_members_or_exports_table(&mut self, symbol: &Arc<Symbol>) -> tsox_frontend::ast::SymbolTable { ::tsox_core::fntrace::enter("get_resolved_members_or_exports_table"); 
         if symbol
             .flags
             .intersects(SymbolFlags::Class
@@ -267,7 +267,7 @@ impl Checker {
         symbol.members.clone()
     }
 
-    pub fn get_index_type_ex(&mut self, t: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> {
+    pub fn get_index_type_ex(&mut self, t: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("get_index_type_ex"); 
         let t = self.get_reduced_type(t);
         if self.is_no_infer_type(&t) {
             if let TypeData::Substitution(s) = &t.data
@@ -322,7 +322,7 @@ impl Checker {
         self.get_literal_type_from_properties(&t, include, !index_flags.intersects(IndexFlags::NO_INDEX_SIGNATURES))
     }
 
-    pub fn get_index_type_for_generic_type(&mut self, t: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> {
+    pub fn get_index_type_for_generic_type(&mut self, t: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("get_index_type_for_generic_type"); 
         let key = CachedTypeKey {
             kind: if index_flags.intersects(IndexFlags::STRINGS_ONLY) {
                 CachedTypeKind::StringIndexType
@@ -339,7 +339,7 @@ impl Checker {
         index_type
     }
 
-    pub fn get_index_type_for_mapped_type(&mut self, t: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> {
+    pub fn get_index_type_for_mapped_type(&mut self, t: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("get_index_type_for_mapped_type"); 
         let type_parameter = self.get_type_parameter_from_mapped_type(t);
         let Some(constraint_type) = self.get_constraint_type_from_mapped_type(t) else {
             return self.never_type();
@@ -407,14 +407,14 @@ impl Checker {
         result
     }
 
-    pub fn get_index_type_of_type_ex(&mut self, t: &Arc<Type>, key_type: &Arc<Type>, default_type: &Arc<Type>) -> Arc<Type> {
+    pub fn get_index_type_of_type_ex(&mut self, t: &Arc<Type>, key_type: &Arc<Type>, default_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_index_type_of_type_ex"); 
         if let Some(result) = self.get_index_info_of_type(t, key_type).and_then(|i| i.value_type.clone()) {
             return result;
         }
         Arc::clone(default_type)
     }
 
-    pub fn get_index_type_or_string(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_index_type_or_string(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_index_type_or_string"); 
         let index_type = self.get_index_type(t);
         let index_type = self.get_extract_string_type(&index_type);
         if index_type.flags.intersects(TypeFlags::NEVER) {
@@ -430,7 +430,7 @@ impl Checker {
         mut access_flags: AccessFlags,
         access_node: Option<&Node>,
         alias: Option<&TypeAlias>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_indexed_access_type_or_undefined"); 
         if Arc::ptr_eq(object_type, &self.wildcard_type()) || Arc::ptr_eq(index_type, &self.wildcard_type()) {
             return Some(self.wildcard_type());
         }
@@ -506,7 +506,7 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
         name_type: Option<&Arc<Type>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_indexed_mapped_type_substituted_type_of_contextual_type"); 
         let property_name_type = match name_type {
             Some(nt) => Arc::clone(nt),
             None => self.get_string_literal_type(name),
@@ -530,7 +530,7 @@ impl Checker {
         Some(self.substitute_indexed_mapped_type(t, &property_name_type))
     }
 
-    pub fn get_inference_context(&self, node: &Node) -> Option<&InferenceContext> {
+    pub fn get_inference_context(&self, node: &Node) -> Option<&InferenceContext> { ::tsox_core::fntrace::enter("get_inference_context"); 
         for info in self.inference_context_infos.iter().rev() {
             if let Some(context) = info.context.as_deref()
                 && info.node.as_ref().is_some_and(|n| is_node_descendant_of(node, n))
@@ -541,7 +541,7 @@ impl Checker {
         None
     }
 
-    pub fn get_inferred_type_parameter_constraint(&mut self, t: &Arc<Type>, omit_type_references: bool) -> Option<Arc<Type>> {
+    pub fn get_inferred_type_parameter_constraint(&mut self, t: &Arc<Type>, omit_type_references: bool) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_inferred_type_parameter_constraint"); 
         let mut inferences: Vec<Arc<Type>> = Vec::new();
         if let Some(symbol) = &t.symbol
             && !symbol.declarations.is_empty()
@@ -657,7 +657,7 @@ impl Checker {
     }
 }
 
-pub fn get_index_node_for_access_expression(access_node: &Node) -> &Node {
+pub fn get_index_node_for_access_expression(access_node: &Node) -> &Node { ::tsox_core::fntrace::enter("get_index_node_for_access_expression"); 
     match access_node.kind {
         SyntaxKind::ElementAccessExpression => &access_node.as_element_access_expression().argument_expression,
         SyntaxKind::IndexedAccessType => match &access_node.data {
@@ -669,7 +669,7 @@ pub fn get_index_node_for_access_expression(access_node: &Node) -> &Node {
     }
 }
 
-pub fn get_indexed_access_key(object_type: &Arc<Type>, index_type: &Arc<Type>, access_flags: AccessFlags, alias: Option<&TypeAlias>) -> CacheHashKey {
+pub fn get_indexed_access_key(object_type: &Arc<Type>, index_type: &Arc<Type>, access_flags: AccessFlags, alias: Option<&TypeAlias>) -> CacheHashKey { ::tsox_core::fntrace::enter("get_indexed_access_key"); 
     let mut b = KeyBuilder::new();
     b.write_type(object_type);
     b.write_type(index_type);

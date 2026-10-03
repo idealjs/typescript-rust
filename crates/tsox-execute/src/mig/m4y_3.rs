@@ -47,7 +47,7 @@ pub struct EmitOptions {
 }
 
 impl Clone for EmitOptions {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         Self {
             target_source_files: self.target_source_files.clone(),
             emit_only: self.emit_only,
@@ -73,7 +73,7 @@ pub struct WriteFileData {
     pub source_file: Option<Arc<SourceFile>>,
 }
 
-pub fn combine_emit_results(results: &[EmitResult]) -> EmitResult {
+pub fn combine_emit_results(results: &[EmitResult]) -> EmitResult { ::tsox_core::fntrace::enter("combine_emit_results"); 
     let mut result = EmitResult::default();
     for emit_result in results {
         if emit_result.emit_skipped {
@@ -110,19 +110,19 @@ pub struct DtsMayChange(pub OrderedMap<Path, FileEmitKind>);
 impl std::ops::Deref for DtsMayChange {
     type Target = OrderedMap<Path, FileEmitKind>;
 
-    fn deref(&self) -> &Self::Target {
+    fn deref(&self) -> &Self::Target { ::tsox_core::fntrace::enter("deref"); 
         &self.0
     }
 }
 
 impl std::ops::DerefMut for DtsMayChange {
-    fn deref_mut(&mut self) -> &mut Self::Target {
+    fn deref_mut(&mut self) -> &mut Self::Target { ::tsox_core::fntrace::enter("deref_mut"); 
         &mut self.0
     }
 }
 
 impl DtsMayChange {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         DtsMayChange(OrderedMap::new())
     }
 
@@ -130,7 +130,7 @@ impl DtsMayChange {
         &mut self,
         file_path: Path,
         emit_kind: FileEmitKind,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_file_to_affected_files_pending_emit"); 
         self.insert(file_path, emit_kind);
     }
 }
@@ -154,7 +154,7 @@ pub struct EmitFilesHandler<'a> {
 }
 
 impl<'a> EmitFilesHandler<'a> {
-    pub fn new(program: &'a Program, is_for_dts_errors: bool) -> Self {
+    pub fn new(program: &'a Program, is_for_dts_errors: bool) -> Self { ::tsox_core::fntrace::enter("new"); 
         EmitFilesHandler {
             program,
             is_for_dts_errors,
@@ -168,7 +168,7 @@ impl<'a> EmitFilesHandler<'a> {
     }
 }
 
-fn source_file_path(program: &tsox_compile::compiler::Program, file: &SourceFile) -> Path {
+fn source_file_path(program: &tsox_compile::compiler::Program, file: &SourceFile) -> Path { ::tsox_core::fntrace::enter("source_file_path"); 
     tspath::to_path(
         &file.file_name,
         program.get_current_directory(),
@@ -179,7 +179,7 @@ fn source_file_path(program: &tsox_compile::compiler::Program, file: &SourceFile
 fn all_files_excluding_default_library_file(
     program: &tsox_compile::compiler::Program,
     first_source_file: Option<&Arc<SourceFile>>,
-) -> Vec<Arc<SourceFile>> {
+) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("all_files_excluding_default_library_file"); 
     let files = program.get_source_files();
     let mut result: Vec<Arc<SourceFile>> = Vec::with_capacity(files.len());
     let mut add_source_file =
@@ -208,7 +208,7 @@ pub fn build_info_to_snapshot(
     build_info: &BuildInfo,
     config: &ParsedCommandLine,
     host: &dyn tsox_compile::compiler::CompilerHost,
-) -> Snapshot {
+) -> Snapshot { ::tsox_core::fntrace::enter("build_info_to_snapshot"); 
     let mut to = ToSnapshot {
         build_info,
         build_info_directory: tspath::get_directory_path(&tspath::get_normalized_absolute_path(
@@ -279,22 +279,22 @@ pub struct ToSnapshot<'a> {
 }
 
 impl<'a> ToSnapshot<'a> {
-    pub fn to_absolute_path(&self, path: &str) -> String {
+    pub fn to_absolute_path(&self, path: &str) -> String { ::tsox_core::fntrace::enter("to_absolute_path"); 
         tspath::get_normalized_absolute_path(path, &self.build_info_directory)
     }
 
-    pub fn to_file_path(&self, file_id: BuildInfoFileId) -> Path {
+    pub fn to_file_path(&self, file_id: BuildInfoFileId) -> Path { ::tsox_core::fntrace::enter("to_file_path"); 
         self.file_paths[(file_id - 1) as usize].clone()
     }
 
-    pub fn to_file_path_set(&self, file_id_list_id: BuildInfoFileIdListId) -> &HashSet<Path> {
+    pub fn to_file_path_set(&self, file_id_list_id: BuildInfoFileIdListId) -> &HashSet<Path> { ::tsox_core::fntrace::enter("to_file_path_set"); 
         &self.file_path_set[(file_id_list_id - 1) as usize]
     }
 
     pub fn to_build_info_diagnostics_with_file_name(
         &self,
         diagnostics: &[Box<BuildInfoDiagnostic>],
-    ) -> Vec<Box<BuildInfoDiagnosticWithFileName>> {
+    ) -> Vec<Box<BuildInfoDiagnosticWithFileName>> { ::tsox_core::fntrace::enter("to_build_info_diagnostics_with_file_name"); 
         diagnostics
             .iter()
             .map(|d| {
@@ -332,7 +332,7 @@ impl<'a> ToSnapshot<'a> {
     pub fn to_diagnostics_or_build_info_diagnostics_with_file_name(
         &self,
         dig: &BuildInfoDiagnosticsOfFile,
-    ) -> DiagnosticsOrBuildInfoDiagnosticsWithFileName {
+    ) -> DiagnosticsOrBuildInfoDiagnosticsWithFileName { ::tsox_core::fntrace::enter("to_diagnostics_or_build_info_diagnostics_with_file_name"); 
         DiagnosticsOrBuildInfoDiagnosticsWithFileName {
             build_info_diagnostics: self
                 .to_build_info_diagnostics_with_file_name(&dig.diagnostics),
@@ -340,12 +340,12 @@ impl<'a> ToSnapshot<'a> {
         }
     }
 
-    pub fn set_compiler_options(&mut self) {
+    pub fn set_compiler_options(&mut self) { ::tsox_core::fntrace::enter("set_compiler_options"); 
         self.snapshot.options =
             Some(self.build_info.get_compiler_options(&self.build_info_directory));
     }
 
-    pub fn set_file_info_and_emit_signatures(&mut self) {
+    pub fn set_file_info_and_emit_signatures(&mut self) { ::tsox_core::fntrace::enter("set_file_info_and_emit_signatures"); 
         let is_composite = self
             .snapshot
             .options
@@ -381,7 +381,7 @@ impl<'a> ToSnapshot<'a> {
         }
     }
 
-    pub fn set_referenced_map(&mut self) {
+    pub fn set_referenced_map(&mut self) { ::tsox_core::fntrace::enter("set_referenced_map"); 
         for entry in &self.build_info.referenced_map {
             let mut refs = Set::new();
             for path in self.to_file_path_set(entry.file_id_list_id) {
@@ -393,7 +393,7 @@ impl<'a> ToSnapshot<'a> {
         }
     }
 
-    pub fn set_change_file_set(&mut self) {
+    pub fn set_change_file_set(&mut self) { ::tsox_core::fntrace::enter("set_change_file_set"); 
         for file_id in &self.build_info.change_file_set {
             let file_path = self.to_file_path(*file_id);
             self.snapshot
@@ -404,7 +404,7 @@ impl<'a> ToSnapshot<'a> {
         }
     }
 
-    pub fn set_semantic_diagnostics(&mut self) {
+    pub fn set_semantic_diagnostics(&mut self) { ::tsox_core::fntrace::enter("set_semantic_diagnostics"); 
         let paths: Vec<Path> = self
             .snapshot
             .file_infos
@@ -434,7 +434,7 @@ impl<'a> ToSnapshot<'a> {
         }
     }
 
-    pub fn set_emit_diagnostics(&mut self) {
+    pub fn set_emit_diagnostics(&mut self) { ::tsox_core::fntrace::enter("set_emit_diagnostics"); 
         for diagnostic in &self.build_info.emit_diagnostics_per_file {
             let file_path = self.to_file_path(diagnostic.file_id);
             self.snapshot.emit_diagnostics_per_file.store(
@@ -444,7 +444,7 @@ impl<'a> ToSnapshot<'a> {
         }
     }
 
-    pub fn set_affected_files_pending_emit(&mut self) {
+    pub fn set_affected_files_pending_emit(&mut self) { ::tsox_core::fntrace::enter("set_affected_files_pending_emit"); 
         if self.build_info.affected_files_pending_emit.is_empty() {
             return;
         }
@@ -466,7 +466,7 @@ impl<'a> ToSnapshot<'a> {
         }
     }
 
-    pub fn set_package_jsons(&mut self) {
+    pub fn set_package_jsons(&mut self) { ::tsox_core::fntrace::enter("set_package_jsons"); 
         *self.snapshot.package_jsons.lock().unwrap() = Some(match &self.build_info.package_jsons {
             Some(package_jsons) => package_jsons
                 .iter()
@@ -486,7 +486,7 @@ impl<'a> ToSnapshot<'a> {
     }
 }
 
-pub fn from_build_info_repopulate_info(info: &BuildInfoRepopulateInfo) -> RepopulateDiagnosticInfo {
+pub fn from_build_info_repopulate_info(info: &BuildInfoRepopulateInfo) -> RepopulateDiagnosticInfo { ::tsox_core::fntrace::enter("from_build_info_repopulate_info"); 
     RepopulateDiagnosticInfo {
         kind: info.kind,
         module_reference: info.module_reference.clone(),
@@ -510,14 +510,14 @@ impl<'a> AffectedFilesHandler<'a> {
         &mut self,
         affected_file_path: Path,
         affected_file_emit_kind: FileEmitKind,
-    ) -> DtsMayChange {
+    ) -> DtsMayChange { ::tsox_core::fntrace::enter("get_dts_may_change"); 
         let mut result = DtsMayChange::new();
         result.insert(affected_file_path, affected_file_emit_kind);
         self.dts_may_change.push(result.clone());
         result
     }
 
-    pub fn is_changed_signature(&self, path: &Path) -> bool {
+    pub fn is_changed_signature(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("is_changed_signature"); 
         let Some(new_signature) = self.updated_signatures.load(path) else {
             return false;
         };
@@ -527,11 +527,11 @@ impl<'a> AffectedFilesHandler<'a> {
         *new_signature.signature.lock().unwrap() != old_info.signature
     }
 
-    pub fn remove_semantic_diagnostics_of(&mut self, path: Path) {
+    pub fn remove_semantic_diagnostics_of(&mut self, path: Path) { ::tsox_core::fntrace::enter("remove_semantic_diagnostics_of"); 
         self.files_to_remove_diagnostics.insert(path);
     }
 
-    pub fn remove_diagnostics_of_library_files(&mut self) {
+    pub fn remove_diagnostics_of_library_files(&mut self) { ::tsox_core::fntrace::enter("remove_diagnostics_of_library_files"); 
         if self.cleaned_diagnostics_of_lib_files.is_completed() {
             return;
         }
@@ -549,7 +549,7 @@ impl<'a> AffectedFilesHandler<'a> {
         self.cleaned_diagnostics_of_lib_files.call_once(|| {});
     }
 
-    pub fn compute_dts_signature(&mut self, file: &Arc<SourceFile>) -> String {
+    pub fn compute_dts_signature(&mut self, file: &Arc<SourceFile>) -> String { ::tsox_core::fntrace::enter("compute_dts_signature"); 
         let mut signature = String::new();
         let _done = self.program.begin_nested_emit();
         let captured = &mut signature as *mut String;
@@ -585,7 +585,7 @@ impl<'a> AffectedFilesHandler<'a> {
         &mut self,
         file: &Arc<SourceFile>,
         use_file_version_as_signature: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("update_shape_signature"); 
         let update = Arc::new(UpdatedSignature::default());
         let _lock = update.mu.lock().unwrap();
         let path = source_file_path(self.program.program(), file);
@@ -615,7 +615,7 @@ impl<'a> AffectedFilesHandler<'a> {
         *signature != prev_signature
     }
 
-    pub fn get_files_affected_by(&mut self, path: &Path) -> Vec<Arc<SourceFile>> {
+    pub fn get_files_affected_by(&mut self, path: &Path) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_files_affected_by"); 
         let Some(file) = self.program.program().get_source_file_by_path(path.as_str()) else {
             return Vec::new();
         };
@@ -670,7 +670,7 @@ impl<'a> AffectedFilesHandler<'a> {
         program: &Program,
         file: &Arc<SourceFile>,
         mut f: impl FnMut(Option<Arc<SourceFile>>, &Path) -> (bool, bool),
-    ) -> HashMap<Path, Option<Arc<SourceFile>>> {
+    ) -> HashMap<Path, Option<Arc<SourceFile>>> { ::tsox_core::fntrace::enter("for_each_file_referenced_by"); 
         let mut seen_file_names_map: HashMap<Path, Option<Arc<SourceFile>>> = HashMap::new();
         seen_file_names_map.insert(source_file_path(program.program(), file), Some(file.clone()));
         let mut queue: Vec<Path> = program
@@ -710,7 +710,7 @@ impl<'a> AffectedFilesHandler<'a> {
         &mut self,
         dts_may_change: &mut DtsMayChange,
         affected_file: &Arc<SourceFile>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("handle_dts_may_change_of_affected_file"); 
         let affected_file_path = source_file_path(self.program.program(), affected_file);
         self.remove_semantic_diagnostics_of(affected_file_path.clone());
 
@@ -843,7 +843,7 @@ impl<'a> AffectedFilesHandler<'a> {
         dts_may_change: &mut DtsMayChange,
         file_path: Path,
         invalidate_js_files: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("handle_dts_may_change_of_file_and_references"); 
         let (existing, loaded) =
             self.seen_file_and_references
                 .load_or_store(file_path.clone(), invalidate_js_files);
@@ -880,7 +880,7 @@ impl<'a> AffectedFilesHandler<'a> {
         dts_may_change: &mut DtsMayChange,
         file_path: Path,
         invalidate_js_files: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("handle_dts_may_change_of_global_scope"); 
         let is_affects_global_scope = self
             .program
             .snapshot
@@ -907,7 +907,7 @@ impl<'a> AffectedFilesHandler<'a> {
         dts_may_change: &mut DtsMayChange,
         path: Path,
         invalidate_js_files: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("handle_dts_may_change_of"); 
         if self
             .program
             .snapshot
@@ -960,7 +960,7 @@ impl<'a> AffectedFilesHandler<'a> {
         }
     }
 
-    pub fn update_snapshot(&mut self) {
+    pub fn update_snapshot(&mut self) { ::tsox_core::fntrace::enter("update_snapshot"); 
         self.updated_signatures.for_each(|file_path, update| {
             if let Some(mut info) = self.program.snapshot.file_infos.load(file_path) {
                 info.signature = update.signature.lock().unwrap().clone();
@@ -1018,7 +1018,7 @@ impl<'a> AffectedFilesHandler<'a> {
     }
 }
 
-pub fn collect_all_affected_files(program: &Program) {
+pub fn collect_all_affected_files(program: &Program) { ::tsox_core::fntrace::enter("collect_all_affected_files"); 
     if program.snapshot.changed_files_set.lock().unwrap().is_empty() {
         return;
     }
@@ -1068,7 +1068,7 @@ impl<'a> EmitFilesHandler<'a> {
         &self,
         emit_kind: FileEmitKind,
         options: &EmitOptions,
-    ) -> FileEmitKind {
+    ) -> FileEmitKind { ::tsox_core::fntrace::enter("get_pending_emit_kind_for_emit_options"); 
         let mut pending_kind = get_pending_emit_kind(emit_kind, FileEmitKind::None);
         if options.emit_only == EmitOnly::Dts {
             pending_kind &= FileEmitKind::AllDts;
@@ -1082,7 +1082,7 @@ impl<'a> EmitFilesHandler<'a> {
     pub fn emit_all_affected_files(
         &mut self,
         options: &EmitOptions,
-    ) -> Option<EmitResult> {
+    ) -> Option<EmitResult> { ::tsox_core::fntrace::enter("emit_all_affected_files"); 
         if self.program.snapshot.can_use_incremental_state() {
             let results = self.emit_files_incremental(options);
             if self.is_for_dts_errors {
@@ -1148,7 +1148,7 @@ impl<'a> EmitFilesHandler<'a> {
         }
     }
 
-    pub fn update_has_emit_diagnostics(&self, result: Option<&EmitResult>) {
+    pub fn update_has_emit_diagnostics(&self, result: Option<&EmitResult>) { ::tsox_core::fntrace::enter("update_has_emit_diagnostics"); 
         if let Some(result) = result
             && !result.diagnostics.is_empty()
         {
@@ -1161,7 +1161,7 @@ impl<'a> EmitFilesHandler<'a> {
         &mut self,
         options: &EmitOptions,
         result: &mut EmitResult,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_build_info"); 
         let Some(build_info_result) = self.program.emit_build_info(options) else {
             return;
         };
@@ -1172,7 +1172,7 @@ impl<'a> EmitFilesHandler<'a> {
     pub fn emit_files_incremental(
         &mut self,
         options: &EmitOptions,
-    ) -> Vec<EmitResult> {
+    ) -> Vec<EmitResult> { ::tsox_core::fntrace::enter("emit_files_incremental"); 
         collect_all_affected_files(self.program);
 
         let mut pending: Vec<(Path, FileEmitKind)> = Vec::new();
@@ -1290,7 +1290,7 @@ impl<'a> EmitFilesHandler<'a> {
     pub fn get_emit_options(
         &self,
         options: &EmitOptions,
-    ) -> EmitOptions {
+    ) -> EmitOptions { ::tsox_core::fntrace::enter("get_emit_options"); 
         if !self
             .program
             .snapshot
@@ -1395,7 +1395,7 @@ pub fn emit_files(
     program: &Program,
     options: &EmitOptions,
     is_for_dts_errors: bool,
-) -> Option<EmitResult> {
+) -> Option<EmitResult> { ::tsox_core::fntrace::enter("emit_files"); 
     let mut emit_handler = EmitFilesHandler::new(program, is_for_dts_errors);
 
     if !is_for_dts_errors && options.target_source_files.is_some() {
@@ -1414,5 +1414,5 @@ fn unused_refs(
     _: &Snapshot,
     _: &FileInfo,
     _: &tsox_checker::checker::Checker,
-) {
+) { ::tsox_core::fntrace::enter("unused_refs"); 
 }

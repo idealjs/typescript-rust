@@ -11,7 +11,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         union_target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("find_most_overlappy_type"); 
         let ui = union_target.as_union_or_intersection()?;
         let excluded = TypeFlags::from_bits_truncate(
             TYPE_FLAGS_PRIMITIVE.bits()
@@ -50,7 +50,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         union_target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("find_best_type_for_object_literal"); 
         if !source
             .object_flags
             .contains(crate::checker::types::ObjectFlags::ObjectLiteral)
@@ -71,7 +71,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_report_unmatched_property_error"); 
         let Some(s) = source.as_structured() else {
             return true;
         };
@@ -103,7 +103,7 @@ impl Checker {
         target: &Arc<Type>,
         _require_optional_properties: bool,
         _match_discriminant_properties: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_unmatched_property"); 
         let _ = (source, target);
         None
     }
@@ -114,7 +114,7 @@ impl Checker {
         target: &Arc<Type>,
         require_optional_properties: bool,
         match_discriminant_properties: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_unmatched_properties"); 
         let _ = (
             source,
             target,
@@ -129,7 +129,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         _is_related_to: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("find_matching_discriminant_type"); 
         let _ = (source, target);
         None
     }
@@ -138,7 +138,7 @@ impl Checker {
         &mut self,
         _source_properties: &[Arc<Symbol>],
         _target: &Arc<Type>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("find_discriminant_properties"); 
         Vec::new()
     }
 
@@ -146,11 +146,11 @@ impl Checker {
         &mut self,
         _union_type: &Arc<Type>,
         _t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_matching_union_constituent_for_type"); 
         None
     }
 
-    pub fn get_key_property_name(&mut self, t: &Arc<Type>) -> Option<String> {
+    pub fn get_key_property_name(&mut self, t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("get_key_property_name"); 
         let _ = t;
         None
     }
@@ -159,14 +159,14 @@ impl Checker {
         &mut self,
         _t: &Arc<Type>,
         _key_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constituent_type_for_key_type"); 
         None
     }
 
     pub fn filter_primitives_if_contains_non_primitive(
         &mut self,
         union_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("filter_primitives_if_contains_non_primitive"); 
         let _ = union_type;
         None
     }
@@ -175,7 +175,7 @@ impl Checker {
         &mut self,
         left: &Arc<Type>,
         right: &Arc<Type>,
-    ) -> (String, String) {
+    ) -> (String, String) { ::tsox_core::fntrace::enter("get_type_names_for_error_display"); 
         let left_str = self.type_to_string_for_error_display(left);
         let right_str = self.type_to_string_for_error_display(right);
         if left_str == right_str {
@@ -187,7 +187,7 @@ impl Checker {
         (left_str, right_str)
     }
 
-    fn type_to_string_for_error_display(&mut self, t: &Arc<Type>) -> String {
+    fn type_to_string_for_error_display(&mut self, t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("type_to_string_for_error_display"); 
         let Some(enclosing) = self.error_display_enclosing_declaration(t) else {
             return self.type_to_string(t);
         };
@@ -206,7 +206,7 @@ impl Checker {
     fn error_display_enclosing_declaration(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<tsox_frontend::ast::Node>> {
+    ) -> Option<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("error_display_enclosing_declaration"); 
         if let Some(symbol) = t.symbol.as_ref() {
             if self.symbol_value_declaration_is_context_sensitive(symbol) {
                 return symbol.value_declaration.clone();
@@ -237,7 +237,7 @@ impl Checker {
     // Go typeToString(TypeFormatFlags.UseFullyQualifiedType)：沿符号 parent
     // 链拼点分全限定名；外部模块文件符号输出 import("name")，ambient 模块
     // 名去引号
-    pub fn fully_qualified_type_string(&mut self, t: &Arc<Type>) -> String {
+    pub fn fully_qualified_type_string(&mut self, t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("fully_qualified_type_string"); 
         if self.is_array_type(t)
             && !matches!(t.data, TypeData::Tuple(_))
             && let Some(elem) = self.get_element_type_of_array_type(t)
@@ -313,7 +313,7 @@ impl Checker {
         self.type_to_string(t)
     }
 
-    fn symbol_fqn(&self, sym: &Arc<Symbol>) -> String {
+    fn symbol_fqn(&self, sym: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("symbol_fqn"); 
         let mut parts: Vec<String> = Vec::new();
         let mut cur = Some(Arc::clone(sym));
         while let Some(s) = cur {
@@ -359,7 +359,7 @@ impl Checker {
         parts.join(".")
     }
 
-    fn reference_type_arguments(&self, t: &Arc<Type>) -> Option<Vec<Arc<Type>>> {
+    fn reference_type_arguments(&self, t: &Arc<Type>) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("reference_type_arguments"); 
         match &t.data {
             TypeData::Object(o) if !o.type_arguments.is_empty() => {
                 Some(o.type_arguments.iter().cloned().collect())
@@ -368,18 +368,18 @@ impl Checker {
         }
     }
 
-    pub fn get_type_name_for_error_display(&mut self, t: &Arc<Type>) -> String {
+    pub fn get_type_name_for_error_display(&mut self, t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("get_type_name_for_error_display"); 
         self.type_to_string(t)
     }
 
-    pub fn symbol_value_declaration_is_context_sensitive(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn symbol_value_declaration_is_context_sensitive(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_value_declaration_is_context_sensitive"); 
         let Some(decl) = symbol.value_declaration.as_ref() else {
             return false;
         };
         tsox_frontend::ast::is_expression(decl) && !self.is_context_sensitive(decl)
     }
 
-    pub fn type_could_have_top_level_singleton_types(&mut self, t: &Arc<Type>) -> bool {
+    pub fn type_could_have_top_level_singleton_types(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_could_have_top_level_singleton_types"); 
         if t.flags.contains(TypeFlags::Boolean) {
             return false;
         }
@@ -410,7 +410,7 @@ impl Checker {
         )
     }
 
-    pub(crate) fn new_marker_type_parameter(constraint: Option<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn new_marker_type_parameter(constraint: Option<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("new_marker_type_parameter"); 
         Arc::new(Type {
             flags: TypeFlags::TypeParameter,
             object_flags: ObjectFlags::None,
@@ -428,11 +428,11 @@ impl Checker {
         })
     }
 
-    pub(crate) fn marker_super(&self) -> Arc<Type> {
+    pub(crate) fn marker_super(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("marker_super"); 
         Arc::clone(self.marker_super_type.get_or_init(|| Self::new_marker_type_parameter(None)))
     }
 
-    pub(crate) fn marker_sub(&self) -> Arc<Type> {
+    pub(crate) fn marker_sub(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("marker_sub"); 
         Arc::clone(self.marker_sub_type.get_or_init(|| {
             let sup = Arc::clone(
                 self.marker_super_type
@@ -442,11 +442,11 @@ impl Checker {
         }))
     }
 
-    pub(crate) fn marker_other(&self) -> Arc<Type> {
+    pub(crate) fn marker_other(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("marker_other"); 
         Arc::clone(self.marker_other_type.get_or_init(|| Self::new_marker_type_parameter(None)))
     }
 
-    fn is_variance_marker(&self, t: &Arc<Type>) -> bool {
+    fn is_variance_marker(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_variance_marker"); 
         self.marker_super_type.get().is_some_and(|m| Arc::ptr_eq(t, m))
             || self.marker_sub_type.get().is_some_and(|m| Arc::ptr_eq(t, m))
             || self.marker_other_type
@@ -454,13 +454,13 @@ impl Checker {
                 .is_some_and(|m| Arc::ptr_eq(t, m))
     }
 
-    fn any_variance_marker_in_types(&mut self, types: &[Arc<Type>], depth: usize) -> bool {
+    fn any_variance_marker_in_types(&mut self, types: &[Arc<Type>], depth: usize) -> bool { ::tsox_core::fntrace::enter("any_variance_marker_in_types"); 
         types
             .iter()
             .any(|t| self.contains_variance_marker(t, depth + 1))
     }
 
-    fn contains_variance_marker(&mut self, t: &Arc<Type>, depth: usize) -> bool {
+    fn contains_variance_marker(&mut self, t: &Arc<Type>, depth: usize) -> bool { ::tsox_core::fntrace::enter("contains_variance_marker"); 
         if depth > 100 {
             return false;
         }
@@ -513,19 +513,19 @@ impl Checker {
         self.any_variance_marker_in_types(&children, depth)
     }
 
-    pub fn report_unreliable_markers(&mut self, t: &Arc<Type>) {
+    pub fn report_unreliable_markers(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("report_unreliable_markers"); 
         if self.contains_variance_marker(t, 0) {
             self.reliability_flags |= RELATION_REPORTS_UNRELIABLE;
         }
     }
 
-    pub fn report_unmeasurable_markers(&mut self, t: &Arc<Type>) {
+    pub fn report_unmeasurable_markers(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("report_unmeasurable_markers"); 
         if self.contains_variance_marker(t, 0) {
             self.reliability_flags |= RELATION_REPORTS_UNMEASURABLE;
         }
     }
 
-    pub fn get_alias_variances(&mut self, symbol: &Arc<Symbol>) -> Vec<VarianceFlags> {
+    pub fn get_alias_variances(&mut self, symbol: &Arc<Symbol>) -> Vec<VarianceFlags> { ::tsox_core::fntrace::enter("get_alias_variances"); 
         if let Some(links) = self.variance_links.get(symbol)
             && !links.variances.is_empty()
         {
@@ -589,7 +589,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("create_marker_type"); 
         let (tp_symbols, _) = self.collect_alias_type_params_and_body(symbol);
         if tp_symbols.is_empty() {
             return self.create_marker_type_reference(symbol, source, target);
@@ -616,7 +616,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("create_marker_type_reference"); 
         let is_interface = symbol
             .flags
             .intersects(tsox_frontend::ast::SymbolFlags::Interface)
@@ -684,7 +684,7 @@ impl Checker {
     pub fn get_type_parameter_modifiers(
         &mut self,
         tp: &Arc<Type>,
-    ) -> tsox_frontend::ast::ModifierFlags {
+    ) -> tsox_frontend::ast::ModifierFlags { ::tsox_core::fntrace::enter("get_type_parameter_modifiers"); 
         let mut flags = tsox_frontend::ast::ModifierFlags::empty();
         if let Some(symbol) = tp.symbol.as_ref() {
             for d in &symbol.declarations {
@@ -698,7 +698,7 @@ impl Checker {
         &mut self,
         type_arguments: &[Arc<Type>],
         variances: &[VarianceFlags],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_covariant_void_argument"); 
         use crate::checker::types_type_flags_instantiable_non_primitive::VARIANCE_FLAGS_VARIANCE_MASK;
         variances.iter().zip(type_arguments.iter()).any(|(v, t)| {
             (*v & VARIANCE_FLAGS_VARIANCE_MASK) == VarianceFlags::Covariant
@@ -711,7 +711,7 @@ impl Checker {
         _source: &Arc<Signature>,
         _target: &Arc<Signature>,
         _ignore_return_types: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_signature_assignable_to"); 
         false
     }
 
@@ -719,7 +719,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         _flags: MinArgumentCountFlags,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_min_argument_count_ex"); 
         sig.min_argument_count.max(0) as usize
     }
 
@@ -727,7 +727,7 @@ impl Checker {
         &mut self,
         _signature: &Arc<Signature>,
         _pos: usize,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_parameter_name_at_position"); 
         String::new()
     }
 
@@ -736,7 +736,7 @@ impl Checker {
         _element_info: &TupleElementInfo,
         _rest_symbol: Option<&Arc<Symbol>>,
         _index: usize,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_tuple_element_label"); 
         String::new()
     }
 
@@ -745,7 +745,7 @@ impl Checker {
         _node: &Arc<tsox_frontend::ast::Node>,
         _index: usize,
         _element_flags: ElementFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_tuple_element_label_from_binding_element"); 
         String::new()
     }
 
@@ -753,14 +753,14 @@ impl Checker {
         &mut self,
         _signature: &Arc<Signature>,
         _pos: usize,
-    ) -> Option<Arc<tsox_frontend::ast::Node>> {
+    ) -> Option<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("get_nameable_declaration_at_position"); 
         None
     }
 
     pub fn is_valid_declaration_for_tuple_label(
         &mut self,
         _d: &Arc<tsox_frontend::ast::Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_valid_declaration_for_tuple_label"); 
         false
     }
 
@@ -769,7 +769,7 @@ impl Checker {
         t: &Arc<Type>,
         index: usize,
         end_skip_count: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("slice_tuple_type"); 
         let tuple = t.as_tuple_type()?;
         let fixed_length = tuple.fixed_length;
         if index > fixed_length {
@@ -799,7 +799,7 @@ impl Checker {
         Some(self.create_tuple_type_ex(element_types, element_infos, false))
     }
 
-    pub fn get_known_keys_of_tuple_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_known_keys_of_tuple_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_known_keys_of_tuple_type"); 
         let tuple = match &t.data {
             TypeData::Tuple(tuple) => tuple,
             _ => return None,
@@ -814,7 +814,7 @@ impl Checker {
         Some(self.get_union_type(keys))
     }
 
-    pub fn get_rest_array_type_of_tuple_type(&mut self, _t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_rest_array_type_of_tuple_type(&mut self, _t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_rest_array_type_of_tuple_type"); 
         None
     }
 
@@ -822,11 +822,11 @@ impl Checker {
         &mut self,
         _signatures: &[Arc<Signature>],
         _is_union: bool,
-    ) -> Option<Box<TypePredicate>> {
+    ) -> Option<Box<TypePredicate>> { ::tsox_core::fntrace::enter("get_union_or_intersection_type_predicate"); 
         None
     }
 
-    pub fn type_predicate_kinds_match(&mut self, a: &TypePredicate, b: &TypePredicate) -> bool {
+    pub fn type_predicate_kinds_match(&mut self, a: &TypePredicate, b: &TypePredicate) -> bool { ::tsox_core::fntrace::enter("type_predicate_kinds_match"); 
         a.kind == b.kind
     }
 
@@ -834,12 +834,12 @@ impl Checker {
         &mut self,
         _node: &Arc<tsox_frontend::ast::Node>,
         _signature: &Arc<Signature>,
-    ) -> Option<Box<TypePredicate>> {
+    ) -> Option<Box<TypePredicate>> { ::tsox_core::fntrace::enter("create_type_predicate_from_type_predicate_node"); 
         None
     }
 }
 
-fn unit_member_ids(t: &Arc<Type>) -> std::collections::HashSet<crate::checker::types::TypeId> {
+fn unit_member_ids(t: &Arc<Type>) -> std::collections::HashSet<crate::checker::types::TypeId> { ::tsox_core::fntrace::enter("unit_member_ids"); 
     let mut set = std::collections::HashSet::new();
     if crate::checker::utilities::is_unit_type(t) {
         set.insert(t.id);

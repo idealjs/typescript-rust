@@ -3,7 +3,7 @@
 use crate::parser::types::*;
 
 impl Parser {
-    pub(crate) fn parse_function_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_function_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_type"); 
         let pos = self.token_pos();
         let type_parameters = self.parse_optional_type_parameters();
         let parameters = self.parse_parameter_list();
@@ -25,7 +25,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_constructor_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_constructor_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_constructor_type"); 
         let pos = self.token_pos();
         let modifiers = if self.token == SyntaxKind::AbstractKeyword {
             let modifier_pos = self.token_pos();
@@ -65,7 +65,7 @@ impl Parser {
         &mut self,
         is_union_type: bool,
         parse_constituent: fn(&mut Self) -> Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_or_constructor_type_to_error"); 
         if !self.is_start_of_function_type_or_constructor_type() {
             return parse_constituent(self);
         }

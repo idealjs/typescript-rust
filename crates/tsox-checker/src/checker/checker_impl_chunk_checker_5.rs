@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
-    pub fn get_fresh_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_fresh_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_fresh_type_of_literal_type"); 
         if !t.flags.intersects(TYPE_FLAGS_FRESHABLE) {
             return Arc::clone(t);
         }
@@ -49,7 +49,7 @@ impl Checker {
         &self,
         candidate: &Arc<Type>,
         contextual: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_literal_of_contextual_type"); 
         if contextual
             .flags
             .intersects(TypeFlags::Union | TypeFlags::Intersection)
@@ -97,7 +97,7 @@ impl Checker {
                 && candidate.flags.intersects(TypeFlags::UniqueESSymbol))
     }
 
-    pub fn get_widened_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_widened_literal_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_literal_type"); 
         if crate::checker::is_fresh_literal_type(t) {
             if t.flags.intersects(TYPE_FLAGS_ENUM_LIKE) {
                 if let Some(sym) = &t.symbol
@@ -145,7 +145,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn get_regular_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_regular_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_regular_type_of_literal_type"); 
         if t.flags.intersects(TYPE_FLAGS_FRESHABLE) {
             if let TypeData::Literal(lit) = &t.data {
                 if let Some(regular) = lit.regular_type.get() {
@@ -177,7 +177,7 @@ impl Checker {
         &mut self,
         declaration: &Arc<Node>,
         t: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_literal_type_for_initializer"); 
         if self
             .get_combined_node_flags(declaration)
             .intersects(NodeFlags::Constant)
@@ -187,15 +187,15 @@ impl Checker {
         self.get_widened_literal_type(t)
     }
 
-    pub fn get_diagnostics(&self) -> &DiagnosticsCollection {
+    pub fn get_diagnostics(&self) -> &DiagnosticsCollection { ::tsox_core::fntrace::enter("get_diagnostics"); 
         &self.diagnostics
     }
 
-    pub fn get_suggestion_diagnostics(&self) -> &DiagnosticsCollection {
+    pub fn get_suggestion_diagnostics(&self) -> &DiagnosticsCollection { ::tsox_core::fntrace::enter("get_suggestion_diagnostics"); 
         &self.suggestion_diagnostics
     }
 
-    pub fn get_combined_node_flags(&mut self, node: &Arc<Node>) -> NodeFlags {
+    pub fn get_combined_node_flags(&mut self, node: &Arc<Node>) -> NodeFlags { ::tsox_core::fntrace::enter("get_combined_node_flags"); 
         let mut flags = node.flags;
         let mut parent = node.parent();
         while let Some(p) = parent {
@@ -208,7 +208,7 @@ impl Checker {
         flags
     }
 
-    pub fn get_combined_modifier_flags(&mut self, node: &Arc<Node>) -> ModifierFlags {
+    pub fn get_combined_modifier_flags(&mut self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("get_combined_modifier_flags"); 
         if let Some(cached) = &self.last_combined_modifier_flags_node {
             if Arc::ptr_eq(cached, node) {
                 return self.last_combined_modifier_flags_result;
@@ -220,7 +220,7 @@ impl Checker {
         flags
     }
 
-    pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_root_declaration"); 
         let mut current = Arc::clone(node);
         while current.kind == SyntaxKind::BindingElement {
             let parent = match current.parent() {
@@ -236,7 +236,7 @@ impl Checker {
         current
     }
 
-    pub fn get_declaration_container(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_declaration_container(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaration_container"); 
         let root = Self::get_root_declaration(node);
 
         let skip = |kind: SyntaxKind| {
@@ -261,14 +261,14 @@ impl Checker {
         None
     }
 
-    pub fn is_global_source_file(node: &Arc<Node>) -> bool {
+    pub fn is_global_source_file(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_global_source_file"); 
         if node.kind != SyntaxKind::SourceFile {
             return false;
         }
         !Self::is_external_or_common_js_module(node)
     }
 
-    pub fn is_external_or_common_js_module(node: &Arc<Node>) -> bool {
+    pub fn is_external_or_common_js_module(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_or_common_js_module"); 
         if node.kind != SyntaxKind::SourceFile {
             return false;
         }
@@ -292,7 +292,7 @@ impl Checker {
         false
     }
 
-    pub fn is_external_module_augmentation(node: &Arc<Node>) -> bool {
+    pub fn is_external_module_augmentation(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_module_augmentation"); 
         if !Self::is_ambient_module(node) {
             return false;
         }

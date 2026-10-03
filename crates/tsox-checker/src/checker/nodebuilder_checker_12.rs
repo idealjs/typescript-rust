@@ -3,7 +3,7 @@
 use crate::checker::nodebuilder::*;
 use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
-fn clean_jsdoc_text(raw: &str) -> String {
+fn clean_jsdoc_text(raw: &str) -> String { ::tsox_core::fntrace::enter("clean_jsdoc_text"); 
     let body = raw
         .trim_start()
         .strip_prefix("/**")
@@ -30,7 +30,7 @@ fn node_line_char(
     sf: &tsox_frontend::ast::SourceFile,
     start: usize,
     end: usize,
-) -> (usize, usize, usize, usize) {
+) -> (usize, usize, usize, usize) { ::tsox_core::fntrace::enter("node_line_char"); 
     let text = &sf.text;
     let lc = |off: usize| {
         let prefix = &text[..off.min(text.len())];
@@ -46,7 +46,7 @@ fn node_line_char(
     (l1, c1 + 1, l2, c2 + 1)
 }
 
-pub(crate) fn is_declaration_name(parent: &Arc<Node>, name: &Arc<Node>) -> bool {
+pub(crate) fn is_declaration_name(parent: &Arc<Node>, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_name"); 
     let hit = |n: Option<&Arc<Node>>| n.is_some_and(|x| Arc::ptr_eq(x, name));
     if let tsox_frontend::ast::NodeData::BindingElement(d) = &parent.data {
         return hit(d.name.as_ref()) || hit(d.property_name.as_ref());
@@ -58,7 +58,7 @@ pub(crate) fn is_declaration_name(parent: &Arc<Node>, name: &Arc<Node>) -> bool 
 }
 
 impl Checker {
-    pub(crate) fn resolve_property_access_symbol(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_property_access_symbol(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_property_access_symbol"); 
         let parent = node.parent()?;
         if parent.kind == SyntaxKind::ElementAccessExpression {
             let tsox_frontend::ast::NodeData::ElementAccessExpression(d) = &parent.data else {
@@ -92,7 +92,7 @@ impl Checker {
             .or_else(|| self.property_from_union(&obj_type, &name))
     }
 
-    fn property_from_union(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> {
+    fn property_from_union(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("property_from_union"); 
         if !t.is_union() {
             return None;
         }
@@ -102,7 +102,7 @@ impl Checker {
     }
 
     // x: C<number> 的成员访问显示：qualified 名带实例实参 + 方法/属性形态
-    pub(crate) fn instantiated_member_access_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
+    pub(crate) fn instantiated_member_access_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("instantiated_member_access_parts"); 
         let p = node.parent()?;
                 if p.kind != SyntaxKind::PropertyAccessExpression {
             return None;
@@ -262,7 +262,7 @@ impl Checker {
     pub(crate) fn call_return_function_symbol(
         &mut self,
         call: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("call_return_function_symbol"); 
         let sig = self.resolved_call_signature(call);
                 let sig = sig?;
         let decl = sig.declaration.clone()?;
@@ -290,7 +290,7 @@ impl Checker {
         &self,
         node: &Arc<Node>,
         found: &mut Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("find_first_return_expression"); 
         if found.is_some() {
             return;
         }
@@ -315,7 +315,7 @@ impl Checker {
     }
 
     /// 调用位的被调签名推断实参（容器显示 getProps<{}>）
-    pub(crate) fn call_inferred_type_arguments(&mut self, call: &Arc<Node>) -> Vec<Arc<Type>> {
+    pub(crate) fn call_inferred_type_arguments(&mut self, call: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("call_inferred_type_arguments"); 
         let Some(sig) = self.resolved_call_signature(call) else {
             return Vec::new();
         };
@@ -333,7 +333,7 @@ impl Checker {
     }
 
     // JSX 属性 hover：<Opt propx={2}/> 的 propx → (property) propx: <元素类型属性>
-    pub(crate) fn jsx_attribute_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> {
+    pub(crate) fn jsx_attribute_parts(&mut self, node: &Arc<Node>) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("jsx_attribute_parts"); 
         let p = node.parent()?;
         if p.kind != SyntaxKind::JsxAttribute {
             return None;
@@ -451,7 +451,7 @@ impl Checker {
     pub fn jsx_element_attributes_contextual_type(
         &mut self,
         elem: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("jsx_element_attributes_contextual_type"); 
         let (tag_name, attrs, elem_type_arguments) = match &elem.data {
             tsox_frontend::ast::NodeData::JsxSelfClosingElement(d) => (
                 Arc::clone(&d.tag_name),
@@ -591,7 +591,7 @@ impl Checker {
         _class_sym: &Arc<Symbol>,
         attr_node: &Arc<Node>,
         _name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("jsx_attribute_symbol_from_construct_signature"); 
         let attrs = attr_node.parent()?;
         let elem = attrs.parent()?;
         let param_type = self.jsx_element_attributes_contextual_type(&elem)?;
@@ -602,7 +602,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn is_jsx_tag_name(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_jsx_tag_name(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_tag_name"); 
         let is_jsx_container = |k: SyntaxKind| {
             matches!(
                 k,
@@ -635,7 +635,7 @@ impl Checker {
     }
 
     /// IntrinsicElements 上的元素属性符号（供 tag hover 与属性上下文共用）
-    pub fn jsx_intrinsic_element_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> {
+    pub fn jsx_intrinsic_element_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("jsx_intrinsic_element_symbol"); 
         let find_jsx = |checker: &Checker| -> Option<Arc<Symbol>> {
             let symbol_map = checker.program.symbol_map();
             let file = checker.display_enclosing_file.clone()?;
@@ -675,7 +675,7 @@ impl Checker {
     }
 
     /// 符号名按声明原样（保留引号风格，Go getNameOfSymbolAsWritten）
-    pub(crate) fn symbol_name_as_written(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+    pub(crate) fn symbol_name_as_written(&mut self, symbol: &Arc<Symbol>) -> Option<String> { ::tsox_core::fntrace::enter("symbol_name_as_written"); 
         let decl = symbol
             .value_declaration
             .as_ref()
@@ -685,7 +685,7 @@ impl Checker {
     }
 
     // 查全局 JSX 命名空间的 IntrinsicElements 属性，产出 (property) JSX.IntrinsicElements.div: any
-    pub(crate) fn jsx_intrinsic_element_parts(&mut self, name: &str) -> Option<Vec<SymbolDisplayPart>> {
+    pub(crate) fn jsx_intrinsic_element_parts(&mut self, name: &str) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("jsx_intrinsic_element_parts"); 
         // JSX 命名空间可来自文件内 declare namespace 或全局 lib：
         // 沿 enclosing 文件容器 locals/members 找名字为 JSX 的命名空间符号
         let find_jsx = |checker: &Checker| -> Option<Arc<Symbol>> {
@@ -753,7 +753,7 @@ impl Checker {
         Some(parts)
     }
 
-    pub(crate) fn resolve_symbol_for_hover(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_symbol_for_hover(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_symbol_for_hover"); 
         // 1) 引用：沿祖先容器查 binder locals（hover 无作用域栈时的等价物）
         let by_locals = (|| {
             let name = match &node.data {
@@ -852,7 +852,7 @@ impl Checker {
     pub(crate) fn resolve_contextual_property_symbol(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_contextual_property_symbol"); 
         let parent = node.parent()?;
         match parent.kind {
             SyntaxKind::PropertyAssignment
@@ -878,7 +878,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) -> Option<Vec<SymbolDisplayPart>> {
+    ) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("constructor_display_parts"); 
         // 节点须处于 new 表达式中：new 关键字、表达式名或类型实参内
         let mut cur = node.parent()?;
         loop {
@@ -924,7 +924,7 @@ impl Checker {
         new_expr: &Arc<Node>,
         symbol: &Arc<Symbol>,
         ret: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_new_expression_return"); 
         let tsox_frontend::ast::NodeData::NewExpression(d) = &new_expr.data else {
             return ret;
         };
@@ -967,7 +967,7 @@ impl Checker {
         &mut self,
         new_expr: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("new_expression_type_args_text"); 
         let tsox_frontend::ast::NodeData::NewExpression(d) = &new_expr.data else {
             return None;
         };
@@ -985,7 +985,7 @@ impl Checker {
         Some(format!("<{}>", texts.join(", ")))
     }
 
-    pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
+    pub fn get_quick_info_display_parts(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("get_quick_info_display_parts"); 
                 self.display_enclosing_file = self.get_source_file_of_node(node);
         self.display_enclosing_node = Some(Arc::clone(node));
         // tsc getTypeOfNode：with 块内无法回答语义问题，类型查询返回 error（显示 any）
@@ -1298,7 +1298,7 @@ impl Checker {
         parts
     }
 
-    pub fn get_quick_info_text(&mut self, node: &Arc<Node>) -> String {
+    pub fn get_quick_info_text(&mut self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_quick_info_text"); 
         self.display_enclosing_file = self.get_source_file_of_node(node);
         self.display_enclosing_node = Some(Arc::clone(node));
         if node.kind == SyntaxKind::ThisKeyword {
@@ -1330,7 +1330,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
         type_arguments: &[String],
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("symbol_to_display_parts"); 
         let _ = meaning;
         let _ = type_arguments;
 
@@ -1427,7 +1427,7 @@ impl Checker {
         parts
     }
 
-    fn doc_lookup_symbols(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    fn doc_lookup_symbols(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("doc_lookup_symbols"); 
         let mut targets = vec![Arc::clone(symbol)];
         if let Some(container) = self
             .value_symbol_links
@@ -1453,7 +1453,7 @@ impl Checker {
         sf: &tsox_frontend::ast::SourceFile,
         decl: &Arc<Node>,
         text: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("render_jsdoc_links"); 
         let mut out = String::new();
         let mut rest = text;
         while let Some(i) = rest.find("{@link ") {
@@ -1499,7 +1499,7 @@ impl Checker {
         _sf: &tsox_frontend::ast::SourceFile,
         decl: &Arc<Node>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_name_from"); 
         let symbol_map = self.program.symbol_map();
         let mut cur = decl.parent();
         while let Some(n) = cur {
@@ -1520,7 +1520,7 @@ impl Checker {
 
     // Go getDocumentationForSymbol：先取调用位解析签名的声明文档（call/construct 签名），
     // 再回退符号声明文档
-    pub(crate) fn hover_documentation(&mut self, symbol: &Arc<Symbol>, node: &Arc<Node>) -> String {
+    pub(crate) fn hover_documentation(&mut self, symbol: &Arc<Symbol>, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("hover_documentation"); 
         if let Some(call) = Self::enclosing_call_or_new(node)
             && let Some(sig) = self.resolved_call_signature(&call)
             && let Some(decl) = sig.declaration.clone()
@@ -1534,7 +1534,7 @@ impl Checker {
         self.symbol_documentation(symbol)
     }
 
-    pub(crate) fn enclosing_call_or_new(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn enclosing_call_or_new(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("enclosing_call_or_new"); 
         let mut cur = Arc::clone(node);
         // 仅当节点是属性访问的「名字」段（被调函数）时穿透到访问表达式；
         // object 段（如 p1.then 里的 p1）不是被调函数
@@ -1562,7 +1562,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn resolved_call_signature(&mut self, call: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub(crate) fn resolved_call_signature(&mut self, call: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolved_call_signature"); 
         let (callee, args) = match &call.data {
             crate::checker::nodebuilder::NodeData::CallExpression(d) => {
                 (&d.expression, d.arguments.clone())
@@ -1590,7 +1590,7 @@ impl Checker {
         Some(Arc::clone(&sigs[idx]))
     }
 
-    pub(crate) fn declaration_jsdoc_text(&mut self, decl: &Arc<Node>) -> String {
+    pub(crate) fn declaration_jsdoc_text(&mut self, decl: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("declaration_jsdoc_text"); 
         let Some(sf) = self.get_source_file_of_node(decl) else {
             return String::new();
         };
@@ -1621,7 +1621,7 @@ impl Checker {
         String::new()
     }
 
-    pub(crate) fn symbol_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn symbol_documentation(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("symbol_documentation"); 
         let direct = self.symbol_documentation_direct(symbol);
         if !direct.is_empty() {
             return direct;
@@ -1631,7 +1631,7 @@ impl Checker {
         self.base_member_documentation(symbol)
     }
 
-    fn symbol_documentation_direct(&mut self, symbol: &Arc<Symbol>) -> String {
+    fn symbol_documentation_direct(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("symbol_documentation_direct"); 
         // JS 函数参数：文档来自所在函数 JSDoc 的同名 @param tag 注释
         if let Some(doc) = self.jsdoc_param_tag_documentation(symbol) {
             return doc;
@@ -1707,7 +1707,7 @@ impl Checker {
         String::new()
     }
 
-    pub(crate) fn constructor_jsdoc_documentation(&mut self, class_symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn constructor_jsdoc_documentation(&mut self, class_symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("constructor_jsdoc_documentation"); 
         let ctor_decl = class_symbol.declarations.iter().find_map(|decl| {
             let members = match &decl.data {
                 tsox_frontend::ast::NodeData::ClassDeclaration(d) => Some(&d.members),
@@ -1745,7 +1745,7 @@ impl Checker {
     fn container_symbol_from_declarations(
         &self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("container_symbol_from_declarations"); 
         let symbol_map = self.program.symbol_map();
         symbol.declarations.first().and_then(|decl| {
             let mut cur = decl.parent();
@@ -1770,7 +1770,7 @@ impl Checker {
     }
 
     /// 合并 namespace+class 容器段：Class&lt;T extends C = D&gt; 形态（约束/默认值经解析渲染）
-    fn merged_class_container_segment(&mut self, parent: &Arc<Symbol>) -> Option<String> {
+    fn merged_class_container_segment(&mut self, parent: &Arc<Symbol>) -> Option<String> { ::tsox_core::fntrace::enter("merged_class_container_segment"); 
         let tps = parent.declarations.iter().find_map(|d| match &d.data {
             crate::checker::nodebuilder::NodeData::ClassDeclaration(data) => {
                 data.type_parameters.as_ref()
@@ -1810,7 +1810,7 @@ impl Checker {
         Some(format!("{}<{}>", parent.name, parts.join(", ")))
     }
 
-    pub(crate) fn qualified_symbol_name(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn qualified_symbol_name(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("qualified_symbol_name"); 
         // Go getNameOfSymbolAsWritten：内部名符号按声明形态显示匿名占位
         if symbol.name.starts_with('\u{FE}') {
             if let Some(display) = anonymous_symbol_display_name(symbol) {
@@ -1922,7 +1922,7 @@ impl Checker {
         q
     }
 
-    pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> {
+    pub fn type_to_display_parts(&mut self, t: &Arc<Type>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("type_to_display_parts"); 
         use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
         self.type_to_display_parts_ex(
             t,
@@ -1935,7 +1935,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         flags: crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("type_to_display_parts_ex"); 
         let s = self.type_to_string_ex(t, flags);
 
         if let Some(name) = t.intrinsic_name() {
@@ -1955,7 +1955,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         is_method: bool,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("function_symbol_display_parts"); 
         let mut parts: Vec<SymbolDisplayPart> = Vec::new();
         if is_method {
             push_punctuation(&mut parts, "(");
@@ -1993,7 +1993,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         keyword: &'static str,
         name_kind: DisplayPartKind,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("named_type_symbol_display_parts"); 
         let mut parts = Vec::new();
         push_keyword(&mut parts, keyword);
         push_space(&mut parts, " ");
@@ -2005,7 +2005,7 @@ impl Checker {
     pub(crate) fn type_alias_symbol_display_parts(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("type_alias_symbol_display_parts"); 
         let mut parts = Vec::new();
         push_keyword(&mut parts, "type");
         push_space(&mut parts, " ");
@@ -2021,7 +2021,7 @@ impl Checker {
     pub(crate) fn type_parameter_symbol_display_parts(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("type_parameter_symbol_display_parts"); 
         let mut parts = Vec::new();
         push_part(&mut parts, &symbol.name, DisplayPartKind::TypeParameterName);
         if let Some(c) = self.get_constraint_of_type_parameter_symbol(symbol) {
@@ -2058,7 +2058,7 @@ impl Checker {
         parts
     }
 
-    pub(crate) fn variable_prefix_and_name_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> {
+    pub(crate) fn variable_prefix_and_name_parts(&mut self, symbol: &Arc<Symbol>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("variable_prefix_and_name_parts"); 
         let mut parts = Vec::new();
         let is_parameter = symbol.declarations.iter().any(|d| {
             let mut cur = Some(d.clone());
@@ -2146,7 +2146,7 @@ impl Checker {
     pub(crate) fn variable_symbol_display_parts(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Vec<SymbolDisplayPart> {
+    ) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("variable_symbol_display_parts"); 
         // 先触发类型解析（binding_element_type 在此挂 container 链接）
         let _ = self.get_type_of_symbol(symbol);
         let mut parts = self.variable_prefix_and_name_parts(symbol);
@@ -2159,7 +2159,7 @@ impl Checker {
         &mut self,
         parts: &mut Vec<SymbolDisplayPart>,
         sig: &Signature,
-    ) {
+    ) { ::tsox_core::fntrace::enter("append_signature_parameter_parts"); 
         // Go getExpandedParameters：rest 参数类型为元组时按元素展开为具名
         // 参数序列（标签取元素 label，回退 rest 符号名_i）
         if let Some(expanded) = self.tuple_expanded_params(sig) {
@@ -2217,7 +2217,7 @@ impl Checker {
         &mut self,
         param: &Arc<Symbol>,
         resolved: &Arc<Type>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("annotated_param_type_text"); 
         let decl = param
             .value_declaration
             .as_ref()
@@ -2252,7 +2252,7 @@ impl Checker {
         &mut self,
         param: &Arc<Symbol>,
         t: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("strip_param_optionality_undefined"); 
         if !crate::checker::nodebuilder::param_declared_optional(param)
             || !t.flags.contains(TypeFlags::Union)
         {
@@ -2284,7 +2284,7 @@ impl Checker {
         &mut self,
         tn: &Arc<Node>,
         resolved: &Arc<Type>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("equivalent_annotation_text"); 
         let annotated = self.get_type_from_type_node(tn);
         if annotated.id != resolved.id {
             return None;
@@ -2298,7 +2298,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         resolved: &Arc<Type>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("annotated_decl_type_text"); 
         let decl = symbol
             .value_declaration
             .as_ref()
@@ -2322,7 +2322,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("call_site_union_signature"); 
         let mut cur = Arc::clone(node);
         if cur.parent().as_ref().map(|p| p.kind) == Some(SyntaxKind::PropertyAccessExpression) {
             cur = cur.parent().expect("checked Some above");
@@ -2355,7 +2355,7 @@ impl Checker {
         Some(Arc::clone(&sigs[0]))
     }
 
-    pub(crate) fn arrow_signature_parts(&mut self, sig: &Arc<Signature>) -> Vec<SymbolDisplayPart> {
+    pub(crate) fn arrow_signature_parts(&mut self, sig: &Arc<Signature>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("arrow_signature_parts"); 
         let mut parts = Vec::new();
         if !sig.type_parameters.is_empty() {
             let names: Vec<String> = sig
@@ -2384,7 +2384,7 @@ impl Checker {
         &self,
         parts: &mut Vec<SymbolDisplayPart>,
         symbol: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("append_type_parameter_parts"); 
         if let Some(tps) = self.collect_type_parameter_displays(symbol) {
             if !tps.is_empty() {
                 push_punctuation(parts, "<");
@@ -2401,7 +2401,7 @@ impl Checker {
 }
 
 
-fn assignment_target_expr(obj: &Arc<Node>) -> Arc<Node> {
+fn assignment_target_expr(obj: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("assignment_target_expr"); 
     // 向上找最近的 BinaryExpression=，返回其左操作数；找不到返回 obj 自身
     let mut cur = obj.parent();
     while let Some(n) = cur {
@@ -2421,7 +2421,7 @@ fn assignment_target_expr(obj: &Arc<Node>) -> Arc<Node> {
     Arc::clone(obj)
 }
 
-pub(crate) fn node_in_with_block(node: &Arc<Node>) -> bool {
+pub(crate) fn node_in_with_block(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_in_with_block"); 
     // 遍历兄弟扫描祖先 WithStatement 的 span 包含（parser 可能不把 with body 挂进祖先链）
     let mut cur = node.parent();
     while let Some(n) = cur {
@@ -2455,7 +2455,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Option<Vec<SymbolDisplayPart>> {
+    ) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("binding_element_property_name_parts"); 
         if let Some(elem) = node.parent().as_ref()
             && elem.kind == SyntaxKind::BindingElement
             && let tsox_frontend::ast::NodeData::BindingElement(d) = &elem.data
@@ -2506,7 +2506,7 @@ impl Checker {
     }
 }
 
-fn anonymous_symbol_display_name(symbol: &Arc<Symbol>) -> Option<String> {
+fn anonymous_symbol_display_name(symbol: &Arc<Symbol>) -> Option<String> { ::tsox_core::fntrace::enter("anonymous_symbol_display_name"); 
     let decl = symbol
         .value_declaration
         .as_ref()
@@ -2530,7 +2530,7 @@ fn anonymous_symbol_display_name(symbol: &Arc<Symbol>) -> Option<String> {
 }
 
 impl Checker {
-    fn base_member_documentation(&mut self, symbol: &Arc<Symbol>) -> String {
+    fn base_member_documentation(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("base_member_documentation"); 
         let mut seen = std::collections::HashSet::from([Arc::as_ptr(symbol) as usize]);
         self.base_member_documentation_seen(symbol, &mut seen)
     }
@@ -2539,7 +2539,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         seen: &mut std::collections::HashSet<usize>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("base_member_documentation_seen"); 
         let decl = symbol
             .value_declaration
             .as_ref()
@@ -2592,7 +2592,7 @@ impl Checker {
         base_type: &Arc<Type>,
         symbol: &Arc<Symbol>,
         seen: &mut std::collections::HashSet<usize>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("jsdoc_from_base_member"); 
         let prop = self.get_property_of_type(base_type, &symbol.name)?;
         if !seen.insert(Arc::as_ptr(&prop) as usize) {
             return None;
@@ -2617,7 +2617,7 @@ impl Checker {
         &mut self,
         sf: &Arc<tsox_frontend::ast::SourceFile>,
         decl: &Arc<Node>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("jsdoc_tag_comment_at"); 
         use crate::checker::nodebuilder::NodeData;
         let comments = tsox_frontend::scanner::get_leading_comment_ranges(&sf.text, 0);
         for range in comments {
@@ -2649,7 +2649,7 @@ impl Checker {
 }
 
 /// @tag 注释段：标签行尾起的连续注释文本（去除前导 * 与空白）
-fn jsdoc_tag_trailing_comment(text: &str, tag: &crate::checker::nodebuilder::Node) -> String {
+fn jsdoc_tag_trailing_comment(text: &str, tag: &crate::checker::nodebuilder::Node) -> String { ::tsox_core::fntrace::enter("jsdoc_tag_trailing_comment"); 
     let mut lines: Vec<String> = Vec::new();
     let body = &text[tag.loc.pos as usize..tag.loc.end as usize];
     for (i, raw) in body.split('\n').enumerate() {
@@ -2670,7 +2670,7 @@ fn jsdoc_tag_trailing_comment(text: &str, tag: &crate::checker::nodebuilder::Nod
     lines.join("\n")
 }
 
-fn jsdoc_comment_text(comment: Option<&Arc<tsox_frontend::ast::NodeList>>) -> String {
+fn jsdoc_comment_text(comment: Option<&Arc<tsox_frontend::ast::NodeList>>) -> String { ::tsox_core::fntrace::enter("jsdoc_comment_text"); 
     let Some(list) = comment else {
         return String::new();
     };
@@ -2687,7 +2687,7 @@ fn jsdoc_comment_text(comment: Option<&Arc<tsox_frontend::ast::NodeList>>) -> St
 
 /// Go getDocumentationFromDeclaration 对 reparse @typedef 别名的整块文档：
 /// 块首注释 + 各标签 "*@name* — comments"（跳过 type/typedef/callback）
-fn jsdoc_block_doc(sf: &Arc<tsox_frontend::ast::SourceFile>, decl: &Arc<Node>) -> Option<String> {
+fn jsdoc_block_doc(sf: &Arc<tsox_frontend::ast::SourceFile>, decl: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("jsdoc_block_doc"); 
     let ranges = tsox_frontend::scanner::get_leading_comment_ranges(&sf.text, 0);
     for range in ranges {
         if !(range.pos <= decl.pos() && decl.end() <= range.end) {
@@ -2749,7 +2749,7 @@ fn jsdoc_block_doc(sf: &Arc<tsox_frontend::ast::SourceFile>, decl: &Arc<Node>) -
     None
 }
 
-fn jsdoc_tag_name(tag: &Arc<Node>) -> Option<String> {
+fn jsdoc_tag_name(tag: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("jsdoc_tag_name"); 
     let name = match &tag.data {
         crate::checker::nodebuilder::NodeData::JSDocUnknownTag(d) => &d.tag_name,
         crate::checker::nodebuilder::NodeData::JSDocParameterOrPropertyTag(d) => &d.tag_name,
@@ -2765,7 +2765,7 @@ fn jsdoc_tag_name(tag: &Arc<Node>) -> Option<String> {
     Some(name.text().to_string())
 }
 
-fn jsdoc_tag_comment(tag: &Arc<Node>) -> String {
+fn jsdoc_tag_comment(tag: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("jsdoc_tag_comment"); 
     let comment = match &tag.data {
         crate::checker::nodebuilder::NodeData::JSDocUnknownTag(d) => d.comment.as_ref(),
         crate::checker::nodebuilder::NodeData::JSDocParameterOrPropertyTag(d) => d.comment.as_ref(),

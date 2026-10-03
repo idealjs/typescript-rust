@@ -16,7 +16,7 @@ mod fswatch {
 
     use std::sync::Arc;
 
-    pub fn default() -> Arc<dyn Watcher> {
+    pub fn default() -> Arc<dyn Watcher> { ::tsox_core::fntrace::enter("default"); 
         use tsox_core::fswatch::mig::m5g_7;
         if cfg!(target_os = "linux") {
             let fanotify = m5g_7::fanotify();
@@ -39,7 +39,7 @@ mod fswatch {
         }
     }
 
-    pub fn normalize_ignore(ignore: IgnoreFn) -> IgnoreFn {
+    pub fn normalize_ignore(ignore: IgnoreFn) -> IgnoreFn { ::tsox_core::fntrace::enter("normalize_ignore"); 
         ignore
     }
 }
@@ -86,7 +86,7 @@ impl WatchBackend for FSWatchBackend {
         callback: fswatch::WatchCallback,
         recursive: bool,
         ignore: Option<fswatch::IgnoreFn>,
-    ) -> Result<Box<dyn WatchCloser>, String> {
+    ) -> Result<Box<dyn WatchCloser>, String> { ::tsox_core::fntrace::enter("watch_directory"); 
         let mut closers = self.watch_directories(&[WatchDirectoryRequest {
             dir: dir.to_string(),
             callback,
@@ -99,7 +99,7 @@ impl WatchBackend for FSWatchBackend {
     fn watch_directories(
         &self,
         requests: &[WatchDirectoryRequest],
-    ) -> Result<Vec<Box<dyn WatchCloser>>, String> {
+    ) -> Result<Vec<Box<dyn WatchCloser>>, String> { ::tsox_core::fntrace::enter("watch_directories"); 
         let mut fswatch_requests = Vec::with_capacity(requests.len());
         for request in requests {
             let mut opts: Vec<fswatch::WatchOption> = Vec::new();
@@ -128,12 +128,12 @@ impl WatchBackend for FSWatchBackend {
 struct WatchCloserImpl(Arc<dyn fswatch::Watch>);
 
 impl WatchCloser for WatchCloserImpl {
-    fn close(&mut self) {
+    fn close(&mut self) { ::tsox_core::fntrace::enter("close"); 
         let _ = self.0.close();
     }
 }
 
-pub fn should_ignore_watch_path(path: &str) -> bool {
+pub fn should_ignore_watch_path(path: &str) -> bool { ::tsox_core::fntrace::enter("should_ignore_watch_path"); 
     let p = tspath::normalize_slashes(path);
     p.ends_with("/.git")
         || p.contains("/.git/")
@@ -141,7 +141,7 @@ pub fn should_ignore_watch_path(path: &str) -> bool {
         || p.contains("/.#")
 }
 
-pub fn can_watch_directory(dir: &str) -> bool {
+pub fn can_watch_directory(dir: &str) -> bool { ::tsox_core::fntrace::enter("can_watch_directory"); 
     let components = tspath::get_path_components(dir, "");
     let length = components.len();
     if length <= 2 {
@@ -151,7 +151,7 @@ pub fn can_watch_directory(dir: &str) -> bool {
     length > root_length + 1
 }
 
-pub fn perceived_os_root_length_for_watching(components: &[String]) -> usize {
+pub fn perceived_os_root_length_for_watching(components: &[String]) -> usize { ::tsox_core::fntrace::enter("perceived_os_root_length_for_watching"); 
     let length = components.len();
     if length <= 1 {
         return 1;
@@ -217,7 +217,7 @@ struct ChangedState {
 }
 
 impl WatchManager {
-    pub fn new(warn_writer: Box<dyn Write + Send>, dir_exists: Arc<dyn Fn(&str) -> bool + Send + Sync>) -> Self {
+    pub fn new(warn_writer: Box<dyn Write + Send>, dir_exists: Arc<dyn Fn(&str) -> bool + Send + Sync>) -> Self { ::tsox_core::fntrace::enter("new"); 
         let (tx, _) = std::sync::mpsc::sync_channel(1);
         Self {
             mu: Mutex::new(()),
@@ -231,15 +231,15 @@ impl WatchManager {
         }
     }
 
-    pub fn set_backend(&mut self, backend: Arc<dyn WatchBackend>) {
+    pub fn set_backend(&mut self, backend: Arc<dyn WatchBackend>) { ::tsox_core::fntrace::enter("set_backend"); 
         self.backend = Some(backend);
     }
 
-    pub fn backend(&self) -> Option<Arc<dyn WatchBackend>> {
+    pub fn backend(&self) -> Option<Arc<dyn WatchBackend>> { ::tsox_core::fntrace::enter("backend"); 
         self.backend.clone()
     }
 
-    pub fn ensure_default_backend(&mut self) {
+    pub fn ensure_default_backend(&mut self) { ::tsox_core::fntrace::enter("ensure_default_backend"); 
         if self.backend.is_none() {
             let fsw = fswatch::default();
             self.backend = Some(Arc::new(FSWatchBackend { inner: fsw.clone() }));
@@ -249,17 +249,17 @@ impl WatchManager {
         }
     }
 
-    pub fn lock(&self) -> MutexGuard<'_, ()> {
+    pub fn lock(&self) -> MutexGuard<'_, ()> { ::tsox_core::fntrace::enter("lock"); 
         self.mu.lock().unwrap()
     }
 
-    pub fn unlock(&self) {}
+    pub fn unlock(&self) { ::tsox_core::fntrace::enter("unlock"); }
 
-    pub fn do_cycle_ch(&self) -> &std::sync::mpsc::SyncSender<()> {
+    pub fn do_cycle_ch(&self) -> &std::sync::mpsc::SyncSender<()> { ::tsox_core::fntrace::enter("do_cycle_ch"); 
         &self.do_cycle_ch
     }
 
-    pub fn drain_events(&self) -> (HashMap<String, fswatch::EventKind>, bool) {
+    pub fn drain_events(&self) -> (HashMap<String, fswatch::EventKind>, bool) { ::tsox_core::fntrace::enter("drain_events"); 
         let mut state = self.changed_state.lock().unwrap();
         let changed = state.changed_paths.take().unwrap_or_default();
         let overflow = state.changed_overflow;
@@ -267,15 +267,15 @@ impl WatchManager {
         (changed, overflow)
     }
 
-    pub fn force_overflow(&self) {
+    pub fn force_overflow(&self) { ::tsox_core::fntrace::enter("force_overflow"); 
         self.changed_state.lock().unwrap().changed_overflow = true;
     }
 
-    pub fn signal_do_cycle(&self) {
+    pub fn signal_do_cycle(&self) { ::tsox_core::fntrace::enter("signal_do_cycle"); 
         let _ = self.do_cycle_ch.try_send(());
     }
 
-    pub fn on_watch_events(&self, events: &[fswatch::Event], err: Option<&fswatch::Error>) {
+    pub fn on_watch_events(&self, events: &[fswatch::Event], err: Option<&fswatch::Error>) { ::tsox_core::fntrace::enter("on_watch_events"); 
         if let Some(err) = err {
             if fswatch::is_fswatch_err(err, fswatch::ERR_OVERFLOW) {
                 if let Some(mut debug_log) = self.debug_log.as_ref().map(|log| log.lock().unwrap()) {
@@ -315,7 +315,7 @@ impl WatchManager {
         }
     }
 
-    pub fn handle_watch_terminated(&self, dir: &str, identity: *const WatchedDir) {
+    pub fn handle_watch_terminated(&self, dir: &str, identity: *const WatchedDir) { ::tsox_core::fntrace::enter("handle_watch_terminated"); 
         if let Some(mut debug_log) = self.debug_log.as_ref().map(|log| log.lock().unwrap()) {
             let _ = writeln!(debug_log, "[watch] watch terminated: {}", dir);
         }
@@ -338,7 +338,7 @@ impl WatchManager {
         self.signal_do_cycle();
     }
 
-    pub fn close_all_watches(&self) {
+    pub fn close_all_watches(&self) { ::tsox_core::fntrace::enter("close_all_watches"); 
         let mut closers: Vec<Box<dyn WatchCloser>> = Vec::new();
         {
             let mut watched = self.watched_dirs.lock().unwrap();
@@ -351,7 +351,7 @@ impl WatchManager {
         }
     }
 
-    fn create_dir_watch_request(&self, dir: &str, entry: *const WatchedDir) -> WatchDirectoryRequest {
+    fn create_dir_watch_request(&self, dir: &str, entry: *const WatchedDir) -> WatchDirectoryRequest { ::tsox_core::fntrace::enter("create_dir_watch_request"); 
         let dir_owned = dir.to_string();
         WatchDirectoryRequest {
             dir: dir_owned.clone(),
@@ -367,7 +367,7 @@ impl WatchManager {
         }
     }
 
-    pub fn resolve_desired_dirs(&self, desired_dirs: &HashMap<String, bool>) -> HashMap<String, bool> {
+    pub fn resolve_desired_dirs(&self, desired_dirs: &HashMap<String, bool>) -> HashMap<String, bool> { ::tsox_core::fntrace::enter("resolve_desired_dirs"); 
         let mut resolved: HashMap<String, bool> = HashMap::with_capacity(desired_dirs.len());
         for (dir, recursive) in desired_dirs {
             let mut watch_dir = dir.clone();
@@ -399,7 +399,7 @@ impl WatchManager {
         resolved
     }
 
-    pub fn reconcile_watches(&self, desired_dirs: &HashMap<String, bool>) -> Result<(), String> {
+    pub fn reconcile_watches(&self, desired_dirs: &HashMap<String, bool>) -> Result<(), String> { ::tsox_core::fntrace::enter("reconcile_watches"); 
         let backend = match &self.backend {
             Some(b) => b,
             None => return Ok(()),
@@ -468,7 +468,7 @@ impl WatchManager {
         self.create_dir_watches(&additions)
     }
 
-    fn create_dir_watches(&self, updates: &[DirWatchUpdate]) -> Result<(), String> {
+    fn create_dir_watches(&self, updates: &[DirWatchUpdate]) -> Result<(), String> { ::tsox_core::fntrace::enter("create_dir_watches"); 
         if updates.is_empty() {
             return Ok(());
         }
@@ -511,7 +511,7 @@ impl WatchManager {
         }
     }
 
-    pub fn is_path_under_watch(&self, path: &str, opts: &ComparePathsOptions) -> bool {
+    pub fn is_path_under_watch(&self, path: &str, opts: &ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("is_path_under_watch"); 
         let watched = self.watched_dirs.lock().unwrap();
         for dir in watched.keys() {
             if contains_path(dir, path, opts) {
@@ -521,7 +521,7 @@ impl WatchManager {
         false
     }
 
-    pub fn run_loop(&self, ctx: &Context, do_cycle: &mut dyn FnMut()) {
+    pub fn run_loop(&self, ctx: &Context, do_cycle: &mut dyn FnMut()) { ::tsox_core::fntrace::enter("run_loop"); 
         loop {
             if (ctx.done)() {
                 self.close_all_watches();
@@ -539,23 +539,23 @@ pub struct DirWatchSet {
 }
 
 impl DirWatchSet {
-    pub fn new(opts: ComparePathsOptions) -> Self {
+    pub fn new(opts: ComparePathsOptions) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             opts,
             dirs: HashMap::new(),
         }
     }
 
-    pub fn canonical(&self, dir: &str) -> String {
+    pub fn canonical(&self, dir: &str) -> String { ::tsox_core::fntrace::enter("canonical"); 
         tspath::get_canonical_file_name(dir, self.opts.use_case_sensitive_file_names)
     }
 
-    pub fn set(&mut self, dir: &str, recursive: bool) {
+    pub fn set(&mut self, dir: &str, recursive: bool) { ::tsox_core::fntrace::enter("set"); 
         let dir = self.canonical(dir);
         self.dirs.entry(dir).and_modify(|existing| *existing |= recursive).or_insert(recursive);
     }
 
-    pub fn covered(&self, dir: &str) -> bool {
+    pub fn covered(&self, dir: &str) -> bool { ::tsox_core::fntrace::enter("covered"); 
         let mut dir = self.canonical(dir);
         if self.dirs.contains_key(&dir) {
             return true;
@@ -570,12 +570,12 @@ impl DirWatchSet {
         false
     }
 
-    pub fn dirs(&self) -> HashMap<String, bool> {
+    pub fn dirs(&self) -> HashMap<String, bool> { ::tsox_core::fntrace::enter("dirs"); 
         self.dirs.clone()
     }
 }
 
-fn contains_path(parent: &str, child: &str, options: &ComparePathsOptions) -> bool {
+fn contains_path(parent: &str, child: &str, options: &ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("contains_path"); 
     let parent = tspath::combine_paths(&options.current_directory, &[parent]);
     let child = tspath::combine_paths(&options.current_directory, &[child]);
     if parent.is_empty() || child.is_empty() {

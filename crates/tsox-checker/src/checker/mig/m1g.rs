@@ -19,14 +19,14 @@ impl Checker {
     pub(crate) fn get_type_arguments_for_alias_symbol(
         &mut self,
         symbol: Option<&Arc<Symbol>>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_arguments_for_alias_symbol"); 
         if let Some(symbol) = symbol {
             return self.get_local_type_parameters_of_class_or_interface_or_type_alias(symbol);
         }
         Vec::new()
     }
 
-    pub(crate) fn get_type_arguments_from_node(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> {
+    pub(crate) fn get_type_arguments_from_node(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_arguments_from_node"); 
         type_arguments(node)
             .iter()
             .map(|n| self.get_type_from_type_node(n))
@@ -37,7 +37,7 @@ impl Checker {
         &mut self,
         type_argument_nodes: &[Arc<Node>],
         type_parameters: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_arguments_from_nodes"); 
         let nodes: &[Arc<Node>] = if type_argument_nodes.len() > type_parameters.len() {
             &type_argument_nodes[..type_parameters.len()]
         } else {
@@ -62,7 +62,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         caller_only_needs: TypeFacts,
-    ) -> TypeFacts {
+    ) -> TypeFacts { ::tsox_core::fntrace::enter("get_type_facts_worker"); 
         let mut t = Arc::clone(t);
         if t.flags.intersects(TypeFlags::Intersection | TYPE_FLAGS_INSTANTIABLE) {
             t = self
@@ -222,7 +222,7 @@ impl Checker {
     pub(crate) fn get_type_for_binding_element(
         &mut self,
         declaration: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_for_binding_element"); 
         let check_mode = if has_dot_dot_dot_token(declaration) {
             CheckMode::RestBindingElement
         } else {
@@ -246,7 +246,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         check_mode: CheckMode,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_for_binding_element_parent"); 
         if check_mode == CheckMode::Normal {
             if let Some(symbol) = self.get_symbol_of_declaration(node) {
                 if let Some(resolved_type) = self

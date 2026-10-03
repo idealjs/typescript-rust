@@ -44,44 +44,44 @@ use tsox_core::diagnostics::{self, Message};
 // createJSDocCache → 架构差异：jsdoc 经 with_jsdoc 依附节点
 // isMissingNodeList/createMissingList → 架构差异：缺失列表以 Option/missing 标记表达
 
-pub(crate) fn attach_file_to_diagnostics(mut diagnostics: Vec<ParserDiagnostic>) -> Vec<ParserDiagnostic> {
+pub(crate) fn attach_file_to_diagnostics(mut diagnostics: Vec<ParserDiagnostic>) -> Vec<ParserDiagnostic> { ::tsox_core::fntrace::enter("attach_file_to_diagnostics"); 
     diagnostics
 }
 
 impl Parser {
-    pub(crate) fn can_follow_get_or_set_keyword(&self) -> bool {
+    pub(crate) fn can_follow_get_or_set_keyword(&self) -> bool { ::tsox_core::fntrace::enter("can_follow_get_or_set_keyword"); 
         self.token == SyntaxKind::OpenBracketToken || self.is_literal_property_name()
     }
 
-    pub(crate) fn in_await_context(&self) -> bool {
+    pub(crate) fn in_await_context(&self) -> bool { ::tsox_core::fntrace::enter("in_await_context"); 
         self.await_context
     }
 
-    pub(crate) fn in_decorator_context(&self) -> bool {
+    pub(crate) fn in_decorator_context(&self) -> bool { ::tsox_core::fntrace::enter("in_decorator_context"); 
         self.decorator_context
     }
 
-    pub(crate) fn in_disallow_in_context(&self) -> bool {
+    pub(crate) fn in_disallow_in_context(&self) -> bool { ::tsox_core::fntrace::enter("in_disallow_in_context"); 
         self.disallow_in_context
     }
 
-    pub(crate) fn in_yield_context(&self) -> bool {
+    pub(crate) fn in_yield_context(&self) -> bool { ::tsox_core::fntrace::enter("in_yield_context"); 
         self.yield_context
     }
 
-    pub(crate) fn is_binding_identifier_or_private_identifier_or_pattern(&self) -> bool {
+    pub(crate) fn is_binding_identifier_or_private_identifier_or_pattern(&self) -> bool { ::tsox_core::fntrace::enter("is_binding_identifier_or_private_identifier_or_pattern"); 
         self.token == SyntaxKind::OpenBraceToken
             || self.token == SyntaxKind::OpenBracketToken
             || self.token == SyntaxKind::PrivateIdentifier
             || self.is_binding_identifier()
     }
 
-    pub(crate) fn is_index_signature(&mut self) -> bool {
+    pub(crate) fn is_index_signature(&mut self) -> bool { ::tsox_core::fntrace::enter("is_index_signature"); 
         self.token == SyntaxKind::OpenBracketToken
             && self.look_ahead(Parser::next_is_unambiguously_index_signature)
     }
 
-    pub(crate) fn next_is_unambiguously_index_signature(&mut self) -> bool {
+    pub(crate) fn next_is_unambiguously_index_signature(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_unambiguously_index_signature"); 
         self.next_token();
         if self.token == SyntaxKind::DotDotDotToken || self.token == SyntaxKind::CloseBracketToken {
             return true;
@@ -109,7 +109,7 @@ impl Parser {
             || self.token == SyntaxKind::CloseBracketToken
     }
 
-    pub(crate) fn next_is_unambiguously_start_of_function_type(&mut self) -> bool {
+    pub(crate) fn next_is_unambiguously_start_of_function_type(&mut self) -> bool { ::tsox_core::fntrace::enter("next_is_unambiguously_start_of_function_type"); 
         self.next_token();
         if self.token == SyntaxKind::CloseParenToken || self.token == SyntaxKind::DotDotDotToken {
             return true;
@@ -131,12 +131,12 @@ impl Parser {
 
     pub(crate) fn next_is_using_keyword_then_binding_identifier_or_start_of_object_destructuring_on_same_line(
         &mut self,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("next_is_using_keyword_then_binding_identifier_or_start_of_object_destructuring_on_same_line"); 
         self.next_token() == SyntaxKind::UsingKeyword
             && self.next_token_is_binding_identifier_or_start_of_destructuring_on_same_line(false)
     }
 
-    pub(crate) fn next_token_is_binding_identifier_or_start_of_destructuring(&mut self) -> bool {
+    pub(crate) fn next_token_is_binding_identifier_or_start_of_destructuring(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_binding_identifier_or_start_of_destructuring"); 
         self.next_token();
         self.is_binding_identifier()
             || self.token == SyntaxKind::OpenBraceToken
@@ -146,7 +146,7 @@ impl Parser {
     pub(crate) fn next_token_is_binding_identifier_or_start_of_destructuring_on_same_line(
         &mut self,
         disallow_of: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("next_token_is_binding_identifier_or_start_of_destructuring_on_same_line"); 
         self.next_token();
         if disallow_of && self.token == SyntaxKind::OfKeyword {
             return false;
@@ -159,52 +159,52 @@ impl Parser {
 
     pub(crate) fn next_token_is_binding_identifier_or_start_of_destructuring_on_same_line_disallow_of(
         &mut self,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("next_token_is_binding_identifier_or_start_of_destructuring_on_same_line_disallow_of"); 
         self.next_token_is_binding_identifier_or_start_of_destructuring_on_same_line(true)
     }
 
-    pub(crate) fn next_token_is_class_keyword_on_same_line(&mut self) -> bool {
+    pub(crate) fn next_token_is_class_keyword_on_same_line(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_class_keyword_on_same_line"); 
         self.next_token() == SyntaxKind::ClassKeyword && !self.has_preceding_line_break()
     }
 
-    pub(crate) fn next_token_is_colon_or_question_colon(&mut self) -> bool {
+    pub(crate) fn next_token_is_colon_or_question_colon(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_colon_or_question_colon"); 
         self.next_token();
         self.token == SyntaxKind::ColonToken
     }
 
-    pub(crate) fn next_token_is_dot(&mut self) -> bool {
+    pub(crate) fn next_token_is_dot(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_dot"); 
         self.next_token() == SyntaxKind::DotToken
     }
 
-    pub(crate) fn next_token_is_equals_or_semicolon_or_colon_token(&mut self) -> bool {
+    pub(crate) fn next_token_is_equals_or_semicolon_or_colon_token(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_equals_or_semicolon_or_colon_token"); 
         self.next_token();
         self.token == SyntaxKind::EqualsToken
             || self.token == SyntaxKind::SemicolonToken
             || self.token == SyntaxKind::ColonToken
     }
 
-    pub(crate) fn next_token_is_from_keyword_or_equals_token(&mut self) -> bool {
+    pub(crate) fn next_token_is_from_keyword_or_equals_token(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_from_keyword_or_equals_token"); 
         self.next_token();
         self.token == SyntaxKind::FromKeyword || self.token == SyntaxKind::EqualsToken
     }
 
-    pub(crate) fn next_token_is_function_keyword_on_same_line(&mut self) -> bool {
+    pub(crate) fn next_token_is_function_keyword_on_same_line(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_function_keyword_on_same_line"); 
         self.next_token() == SyntaxKind::FunctionKeyword && !self.has_preceding_line_break()
     }
 
-    pub(crate) fn next_token_is_identifier_or_keyword(&mut self) -> bool {
+    pub(crate) fn next_token_is_identifier_or_keyword(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_identifier_or_keyword"); 
         self.next_token() == SyntaxKind::Identifier
             || (self.token as u32) > (SyntaxKind::WithKeyword as u32)
     }
 
-    pub(crate) fn next_token_is_identifier_or_keyword_or_greater_than(&mut self) -> bool {
+    pub(crate) fn next_token_is_identifier_or_keyword_or_greater_than(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_identifier_or_keyword_or_greater_than"); 
         self.next_token();
         self.token == SyntaxKind::Identifier
             || (self.token as u32) > (SyntaxKind::WithKeyword as u32)
             || self.token == SyntaxKind::GreaterThanToken
     }
 
-    pub(crate) fn next_token_is_identifier_or_keyword_or_literal_on_same_line(&mut self) -> bool {
+    pub(crate) fn next_token_is_identifier_or_keyword_or_literal_on_same_line(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_identifier_or_keyword_or_literal_on_same_line"); 
         self.next_token();
         (self.token == SyntaxKind::StringLiteral
             || self.token == SyntaxKind::NumericLiteral
@@ -212,18 +212,18 @@ impl Parser {
             && !self.has_preceding_line_break()
     }
 
-    pub(crate) fn next_token_is_identifier_or_keyword_or_open_bracket_or_template(&mut self) -> bool {
+    pub(crate) fn next_token_is_identifier_or_keyword_or_open_bracket_or_template(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_identifier_or_keyword_or_open_bracket_or_template"); 
         self.next_token();
         token_is_identifier_or_keyword(self.token)
             || self.token == SyntaxKind::OpenBracketToken
             || is_template_literal_kind(self.token)
     }
 
-    pub(crate) fn next_token_is_new_keyword(&mut self) -> bool {
+    pub(crate) fn next_token_is_new_keyword(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_new_keyword"); 
         self.next_token() == SyntaxKind::NewKeyword
     }
 
-    pub(crate) fn next_token_is_on_same_line_and_can_follow_modifier(&mut self) -> bool {
+    pub(crate) fn next_token_is_on_same_line_and_can_follow_modifier(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_on_same_line_and_can_follow_modifier"); 
         self.next_token();
         if self.has_preceding_line_break() {
             return false;
@@ -231,35 +231,35 @@ impl Parser {
         Parser::token_can_follow_modifier(self.token)
     }
 
-    pub(crate) fn next_token_is_open_brace(&mut self) -> bool {
+    pub(crate) fn next_token_is_open_brace(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_open_brace"); 
         self.next_token() == SyntaxKind::OpenBraceToken
     }
 
-    pub(crate) fn next_token_is_open_paren(&mut self) -> bool {
+    pub(crate) fn next_token_is_open_paren(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_open_paren"); 
         self.next_token() == SyntaxKind::OpenParenToken
     }
 
-    pub(crate) fn next_token_is_open_paren_or_less_than(&mut self) -> bool {
+    pub(crate) fn next_token_is_open_paren_or_less_than(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_open_paren_or_less_than"); 
         self.next_token();
         self.token == SyntaxKind::OpenParenToken || self.token == SyntaxKind::LessThanToken
     }
 
-    pub(crate) fn next_token_is_open_paren_or_less_than_or_dot(&mut self) -> bool {
+    pub(crate) fn next_token_is_open_paren_or_less_than_or_dot(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_open_paren_or_less_than_or_dot"); 
         self.next_token();
         self.token == SyntaxKind::OpenParenToken
             || self.token == SyntaxKind::LessThanToken
             || self.token == SyntaxKind::DotToken
     }
 
-    pub(crate) fn next_token_is_slash(&mut self) -> bool {
+    pub(crate) fn next_token_is_slash(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_slash"); 
         self.next_token() == SyntaxKind::SlashToken
     }
 
-    pub(crate) fn next_token_is_token_string_literal(&mut self) -> bool {
+    pub(crate) fn next_token_is_token_string_literal(&mut self) -> bool { ::tsox_core::fntrace::enter("next_token_is_token_string_literal"); 
         self.next_token() == SyntaxKind::StringLiteral
     }
 
-    pub(crate) fn get_template_literal_raw_text(&self, end_length: usize) -> String {
+    pub(crate) fn get_template_literal_raw_text(&self, end_length: usize) -> String { ::tsox_core::fntrace::enter("get_template_literal_raw_text"); 
         let token_text = self.scanner.token_text().to_string();
         let end_length = if token_flags_intersects(self.scanner.token_flags(), TOKEN_FLAGS_UNTERMINATED) {
             0
@@ -270,6 +270,6 @@ impl Parser {
     }
 }
 
-pub(crate) fn token_is_identifier_or_keyword(token: SyntaxKind) -> bool {
+pub(crate) fn token_is_identifier_or_keyword(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("token_is_identifier_or_keyword"); 
     token == SyntaxKind::Identifier || (token as u32) > (SyntaxKind::WithKeyword as u32)
 }

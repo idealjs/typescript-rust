@@ -248,7 +248,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         context_token: &Arc<Node>,
         source_file: &Arc<SourceFile>,
-    ) -> ImportStatementCompletionInfo {
+    ) -> ImportStatementCompletionInfo { ::tsox_core::fntrace::enter("get_import_statement_completion_info"); 
         let mut result = ImportStatementCompletionInfo::default();
         let mut candidate: Option<Arc<Node>> = None;
         let parent = context_token.parent();
@@ -349,7 +349,7 @@ impl crate::ls::language_service::LanguageService {
     pub fn get_single_line_replacement_span_for_import_completion_node(
         &self,
         node: &Arc<Node>,
-    ) -> Option<lsproto::Range> {
+    ) -> Option<lsproto::Range> { ::tsox_core::fntrace::enter("get_single_line_replacement_span_for_import_completion_node"); 
         let mut node = Arc::clone(node);
         if let Some(ancestor) = ast::find_ancestor(&node, |n| {
             ast::is_import_declaration(n) || ast::is_import_equals_declaration(n) || ast::is_jsdoc_import_tag(n)
@@ -417,7 +417,7 @@ impl crate::ls::language_service::LanguageService {
 
 fn get_completions_symbol_kind_m5q2b3(
     kind: crate::ls::lsutil_symbol_display::ScriptElementKind,
-) -> lsproto::CompletionItemKind {
+) -> lsproto::CompletionItemKind { ::tsox_core::fntrace::enter("get_completions_symbol_kind_m5q2b3"); 
     use crate::ls::lsutil_symbol_display::ScriptElementKind as K;
     match kind {
         K::PrimitiveType | K::Keyword => lsproto::CompletionItemKind::Keyword,
@@ -442,7 +442,7 @@ fn get_completions_symbol_kind_m5q2b3(
     }
 }
 
-fn node_is_type_only_m5q2b3(node: &Arc<Node>) -> bool {
+fn node_is_type_only_m5q2b3(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_type_only_m5q2b3"); 
     match &node.data {
         ast::node_data_generated::NodeData::ImportClause(d) => {
             d.phase_modifier == Some(SyntaxKind::TypeKeyword)
@@ -453,7 +453,7 @@ fn node_is_type_only_m5q2b3(node: &Arc<Node>) -> bool {
     }
 }
 
-fn import_clause_of_m5q2b3(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn import_clause_of_m5q2b3(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_clause_of_m5q2b3"); 
     match &node.data {
         ast::node_data_generated::NodeData::ImportDeclaration(d) => d.import_clause.clone(),
         _ => None,

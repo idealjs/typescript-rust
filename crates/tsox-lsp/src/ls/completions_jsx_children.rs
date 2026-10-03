@@ -18,7 +18,7 @@ use super::completions_jsx_attributes::jsx_namespace_container_member_name;
 pub(super) fn jsx_children_param_type(
     checker: &mut Checker,
     identifier: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("jsx_children_param_type"); 
     let sym = checker.resolve_identifier(identifier)?;
     let param = sym
         .declarations
@@ -53,7 +53,7 @@ pub(super) fn jsx_children_param_type(
 fn jsx_children_contextual_type(
     checker: &mut Checker,
     jsx_expression: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("jsx_children_contextual_type"); 
     let element = jsx_expression.parent()?;
     let opening = match &element.data {
         NodeData::JsxElement(d) => Arc::clone(&d.opening_element),
@@ -114,7 +114,7 @@ fn component_attributes_type(
     checker: &mut Checker,
     element: &Arc<Node>,
     opening: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("component_attributes_type"); 
     if let Some(t) = checker.jsx_element_attributes_contextual_type(element) {
         return Some(t);
     }
@@ -137,7 +137,7 @@ fn component_attributes_type(
     Some(checker.get_type_of_symbol(&sig.parameters[0]))
 }
 
-fn fn_parameters(fn_node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn fn_parameters(fn_node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("fn_parameters"); 
     match &fn_node.data {
         NodeData::ArrowFunction(d) => d.parameters.iter().cloned().collect(),
         NodeData::FunctionExpression(d) => d.parameters.iter().cloned().collect(),
@@ -146,7 +146,7 @@ fn fn_parameters(fn_node: &Arc<Node>) -> Vec<Arc<Node>> {
 }
 
 /// 函数体宿主向上（跳过括号）是否为 JsxElement children 里的 JsxExpression
-fn enclosing_jsx_child_expression(fn_node: &Arc<Node>) -> Option<Arc<Node>> {
+fn enclosing_jsx_child_expression(fn_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("enclosing_jsx_child_expression"); 
     let mut current = fn_node.parent()?;
     while current.kind == SyntaxKind::ParenthesizedExpression {
         current = current.parent()?;

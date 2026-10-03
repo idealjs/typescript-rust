@@ -25,7 +25,7 @@ thread_local! {
 fn map_get(
     cell: &RefCell<HashMap<*const Node, Arc<Node>>>,
     node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("map_get"); 
     cell.borrow().get(&(Arc::as_ptr(node) as *const Node)).cloned()
 }
 
@@ -33,12 +33,12 @@ fn map_set(
     cell: &RefCell<HashMap<*const Node, Arc<Node>>>,
     node: &Arc<Node>,
     value: &Arc<Node>,
-) {
+) { ::tsox_core::fntrace::enter("map_set"); 
     cell.borrow_mut()
         .insert(Arc::as_ptr(node) as *const Node, Arc::clone(value));
 }
 
-fn map_remove(cell: &RefCell<HashMap<*const Node, Arc<Node>>>, node: &Arc<Node>) {
+fn map_remove(cell: &RefCell<HashMap<*const Node, Arc<Node>>>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("map_remove"); 
     cell.borrow_mut().remove(&(Arc::as_ptr(node) as *const Node));
 }
 
@@ -55,45 +55,45 @@ pub trait R39K12EmitContextMapsExt {
 }
 
 impl R39K12EmitContextMapsExt for EmitContext {
-    fn r39k12_original_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn r39k12_original_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("r39k12_original_get"); 
         ORIGINAL_MAP.with(|m| map_get(m, node))
     }
 
-    fn r39k12_original_set(&self, node: &Arc<Node>, original: &Arc<Node>) {
+    fn r39k12_original_set(&self, node: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("r39k12_original_set"); 
         ORIGINAL_MAP.with(|m| map_set(m, node, original));
     }
 
-    fn r39k12_original_remove(&self, node: &Arc<Node>) {
+    fn r39k12_original_remove(&self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("r39k12_original_remove"); 
         ORIGINAL_MAP.with(|m| map_remove(m, node));
     }
 
-    fn r39k12_assigned_name_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn r39k12_assigned_name_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("r39k12_assigned_name_get"); 
         ASSIGNED_NAME_MAP.with(|m| map_get(m, node))
     }
 
-    fn r39k12_assigned_name_set(&mut self, node: &Arc<Node>, name: &Arc<Node>) {
+    fn r39k12_assigned_name_set(&mut self, node: &Arc<Node>, name: &Arc<Node>) { ::tsox_core::fntrace::enter("r39k12_assigned_name_set"); 
         ASSIGNED_NAME_MAP.with(|m| map_set(m, node, name));
     }
 
-    fn r39k12_class_this_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn r39k12_class_this_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("r39k12_class_this_get"); 
         CLASS_THIS_MAP.with(|m| map_get(m, node))
     }
 
-    fn r39k12_class_this_set(&mut self, node: &Arc<Node>, class_this: &Arc<Node>) {
+    fn r39k12_class_this_set(&mut self, node: &Arc<Node>, class_this: &Arc<Node>) { ::tsox_core::fntrace::enter("r39k12_class_this_set"); 
         CLASS_THIS_MAP.with(|m| map_set(m, node, class_this));
     }
 
-    fn r39k12_text_source_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn r39k12_text_source_get(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("r39k12_text_source_get"); 
         TEXT_SOURCE_MAP.with(|m| map_get(m, node))
     }
 
-    fn r39k12_text_source_set(&mut self, node: &Arc<Node>, source: &Arc<Node>) {
+    fn r39k12_text_source_set(&mut self, node: &Arc<Node>, source: &Arc<Node>) { ::tsox_core::fntrace::enter("r39k12_text_source_set"); 
         TEXT_SOURCE_MAP.with(|m| map_set(m, node, source));
     }
 }
 
 impl NodeFactory<'_> {
-    pub(crate) fn emit_context_mut(&self) -> &mut EmitContext {
+    pub(crate) fn emit_context_mut(&self) -> &mut EmitContext { ::tsox_core::fntrace::enter("emit_context_mut"); 
         unsafe { &mut *(self.emit_context as *const EmitContext as *mut EmitContext) }
     }
 
@@ -102,7 +102,7 @@ impl NodeFactory<'_> {
         node: &Arc<Node>,
         emit_flags: EmitFlags,
         opts: AssignedNameOptions,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_name"); 
         let node_name = tsox_frontend::ast::utilities::get_name_of_declaration(node);
         if let Some(node_name) = node_name {
             let mut emit_flags = emit_flags;

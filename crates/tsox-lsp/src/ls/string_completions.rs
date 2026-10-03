@@ -43,7 +43,7 @@ pub fn string_literal_completion_labels(
     checker: &mut Checker,
     node: &Arc<Node>,
     position: usize,
-) -> Option<Vec<String>> {
+) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("string_literal_completion_labels"); 
     let lit = match innermost_string_literal(node, position) {
         Some(l) => l,
         None => return None,
@@ -370,8 +370,8 @@ pub fn string_literal_completion_labels(
 }
 
 /// case block 内已用的字符串字面量（跳过正在编辑的 editing_lit_pos）
-fn case_block_literals(block: &Arc<Node>, editing_lit_pos: usize) -> Vec<String> {
-    fn collect(expr: &Arc<Node>, editing_lit_pos: usize, out: &mut Vec<String>) {
+fn case_block_literals(block: &Arc<Node>, editing_lit_pos: usize) -> Vec<String> { ::tsox_core::fntrace::enter("case_block_literals"); 
+    fn collect(expr: &Arc<Node>, editing_lit_pos: usize, out: &mut Vec<String>) { ::tsox_core::fntrace::enter("collect"); 
         if expr.kind == SyntaxKind::StringLiteral && expr.pos() != editing_lit_pos {
             out.push(expr.text().trim_matches(['"', '\'']).to_string());
             return;
@@ -394,7 +394,7 @@ fn case_block_literals(block: &Arc<Node>, editing_lit_pos: usize) -> Vec<String>
 }
 
 /// Go ast.SkipParentheses：下穿括号取内层表达式
-fn skip_parens(mut n: Arc<Node>) -> Arc<Node> {
+fn skip_parens(mut n: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_parens"); 
     while n.kind == SyntaxKind::ParenthesizedExpression {
         let NodeData::ParenthesizedExpression(d) = &n.data else {
             break;
@@ -404,7 +404,7 @@ fn skip_parens(mut n: Arc<Node>) -> Arc<Node> {
     n
 }
 
-fn innermost_string_literal(node: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+fn innermost_string_literal(node: &Arc<Node>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("innermost_string_literal"); 
     let mut cur = Some(Arc::clone(node));
     while let Some(c) = cur {
         if c.kind == tsox_frontend::ast::SyntaxKind::StringLiteral {
@@ -430,7 +430,7 @@ fn innermost_string_literal(node: &Arc<Node>, position: usize) -> Option<Arc<Nod
 fn literal_union_labels(
     checker: &mut Checker,
     t: &Arc<tsox_checker::checker::types::Type>,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("literal_union_labels"); 
     
     let mut out = Vec::new();
     collect_string_literals(checker, t, &mut out, 0);
@@ -445,7 +445,7 @@ fn from_unionable_literal_type(
     checker: &mut Checker,
     literal_type: &Arc<Node>,
     position: usize,
-) -> Option<Vec<String>> {
+) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("from_unionable_literal_type"); 
     let grandparent = literal_type.parent()?;
     match grandparent.kind {
         SyntaxKind::CallExpression
@@ -501,7 +501,7 @@ fn from_unionable_literal_type(
     }
 }
 
-fn already_used_literals_in_union(union: &Arc<Node>, current: &Arc<Node>) -> Vec<String> {
+fn already_used_literals_in_union(union: &Arc<Node>, current: &Arc<Node>) -> Vec<String> { ::tsox_core::fntrace::enter("already_used_literals_in_union"); 
     let NodeData::UnionTypeNode(d) = &union.data else {
         return Vec::new();
     };
@@ -521,7 +521,7 @@ fn collect_string_literals(
     t: &Arc<tsox_checker::checker::types::Type>,
     out: &mut Vec<String>,
     depth: usize,
-) {
+) { ::tsox_core::fntrace::enter("collect_string_literals"); 
     use tsox_checker::checker::types::TypeFlags;
     if depth > 8 {
         return;
@@ -555,7 +555,7 @@ pub fn relative_module_specifier_labels(
     node: &Arc<Node>,
     text: &str,
     position: usize,
-) -> Option<Vec<String>> {
+) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("relative_module_specifier_labels"); 
     let lit = innermost_string_literal(node, position)?;
     if !is_module_specifier_literal(&lit) {
         return None;
@@ -635,7 +635,7 @@ pub fn relative_module_specifier_labels(
     Some(labels)
 }
 
-fn is_module_specifier_literal(lit: &Arc<Node>) -> bool {
+fn is_module_specifier_literal(lit: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_specifier_literal"); 
     let Some(parent) = &lit.parent() else {
         return false;
     };
@@ -650,7 +650,7 @@ fn is_module_specifier_literal(lit: &Arc<Node>) -> bool {
     }
 }
 
-fn normalize_path(path: &str) -> String {
+fn normalize_path(path: &str) -> String { ::tsox_core::fntrace::enter("normalize_path"); 
     let mut parts: Vec<&str> = Vec::new();
     for part in path.split('/') {
         match part {
@@ -664,7 +664,7 @@ fn normalize_path(path: &str) -> String {
     format!("/{}", parts.join("/"))
 }
 
-fn strip_module_extension(name: &str) -> &str {
+fn strip_module_extension(name: &str) -> &str { ::tsox_core::fntrace::enter("strip_module_extension"); 
     for ext in [".d.ts", ".d.mts", ".d.cts", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs"] {
         if let Some(stripped) = name.strip_suffix(ext) {
             return stripped;
@@ -679,7 +679,7 @@ fn strip_module_extension(name: &str) -> &str {
 pub(super) fn import_attribute_value_labels(
     checker: &mut Checker,
     attr_name: &str,
-) -> Option<Vec<String>> {
+) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("import_attribute_value_labels"); 
     let global = checker
         .get_global_symbol_by_name("ImportAttributes", SymbolFlags::TYPE)
         .or_else(|| checker.get_global_symbol_by_name("ImportAssertions", SymbolFlags::TYPE))?;

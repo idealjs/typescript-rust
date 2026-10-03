@@ -8,7 +8,7 @@ impl NameResolver {
         result: &Arc<Symbol>,
         location: &Arc<Node>,
         last_location: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("use_outer_variable_scope_in_parameter"); 
         if let Some(last) = last_location {
             if is_parameter_declaration(last) {
                 let body: Option<&Arc<Node>> = None;
@@ -38,7 +38,7 @@ impl NameResolver {
         false
     }
 
-    pub fn requires_scope_change(&self, _node: &Arc<Node>) -> bool {
+    pub fn requires_scope_change(&self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("requires_scope_change"); 
         let name: Option<&Arc<Node>> = None;
         let initializer: Option<&Arc<Node>> = None;
         let name_change = name
@@ -50,7 +50,7 @@ impl NameResolver {
         name_change || init_change
     }
 
-    pub fn requires_scope_change_worker(&self, node: &Arc<Node>) -> bool {
+    pub fn requires_scope_change_worker(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("requires_scope_change_worker"); 
         match node.kind {
             SyntaxKind::ArrowFunction
             | SyntaxKind::FunctionExpression
@@ -109,7 +109,7 @@ impl NameResolver {
         location: &Arc<Node>,
         message: &Message,
         args: &[String],
-    ) -> Option<Diagnostic> {
+    ) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("error"); 
         if let Some(callback) = &self.error_fn {
             return callback(location, message, args);
         }
@@ -117,7 +117,7 @@ impl NameResolver {
         None
     }
 
-    pub fn get_symbol_of_declaration(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_of_declaration(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_declaration"); 
         if let Some(callback) = &self.get_symbol_of_declaration_fn {
             return callback(node);
         }
@@ -130,7 +130,7 @@ impl NameResolver {
         symbols: &SymbolTable,
         name: &str,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup"); 
         if let Some(callback) = &self.lookup_fn {
             return callback(symbols, name, meaning);
         }
@@ -145,7 +145,7 @@ impl NameResolver {
         None
     }
 
-    pub fn arguments_symbol(&mut self) -> Arc<Symbol> {
+    pub fn arguments_symbol(&mut self) -> Arc<Symbol> { ::tsox_core::fntrace::enter("arguments_symbol"); 
         if self.arguments_symbol.is_none() {
             self.arguments_symbol = Some(Arc::new(Symbol::new(
                 SymbolFlags::Property.union(SymbolFlags::Transient),
@@ -161,7 +161,7 @@ impl NameResolver {
         _name: &str,
         _meaning: SymbolFlags,
         _result: &mut Option<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("resolve_module_exports_case"); 
     }
 
     pub(crate) fn resolve_enum_case(
@@ -171,7 +171,7 @@ impl NameResolver {
         name: &str,
         name_not_found_message: Option<&Message>,
         _result: &mut Option<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("resolve_enum_case"); 
         if let Some(_message) = name_not_found_message {
             if let Some(opts) = &self.compiler_options {
                 if opts.get_isolated_modules() {
@@ -202,7 +202,7 @@ impl NameResolver {
         _name: &str,
         _meaning: SymbolFlags,
         _property_with_invalid_initializer: &mut Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("resolve_property_declaration_case"); 
     }
 
     pub(crate) fn resolve_class_or_interface_case(
@@ -214,7 +214,7 @@ impl NameResolver {
         name_not_found_message: Option<&Message>,
         _last_location: Option<&Arc<Node>>,
         _result: &mut Option<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("resolve_class_or_interface_case"); 
         if name_not_found_message.is_some() {
             self.error(
                 original_location,
@@ -233,7 +233,7 @@ impl NameResolver {
         name_not_found_message: Option<&Message>,
         _last_location: Option<&Arc<Node>>,
         _result: &mut Option<Arc<Symbol>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("resolve_expression_with_type_arguments_case"); 
         if name_not_found_message.is_some() {
             self.error(
                 original_location,
@@ -252,7 +252,7 @@ impl NameResolver {
         _meaning: SymbolFlags,
         name_not_found_message: Option<&Message>,
         _result: &mut Option<Arc<Symbol>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("resolve_computed_property_name_case"); 
         if name_not_found_message.is_some() {
             self.error(
                 original_location,
@@ -267,7 +267,7 @@ impl NameResolver {
         &self,
         _location: &Arc<Node>,
         _name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("resolve_function_expression_name_case"); 
         false
     }
 
@@ -276,7 +276,7 @@ impl NameResolver {
         _location: &Arc<Node>,
         _last_location: Option<&Arc<Node>>,
         _associated: &mut Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("track_parameter_initializer"); 
     }
 
     pub(crate) fn track_binding_element_initializer(
@@ -284,10 +284,10 @@ impl NameResolver {
         _location: &Arc<Node>,
         _last_location: Option<&Arc<Node>>,
         _associated: &mut Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("track_binding_element_initializer"); 
     }
 
-    pub(crate) fn resolve_infer_type_case(&self, _location: &Arc<Node>, _name: &str) -> bool {
+    pub(crate) fn resolve_infer_type_case(&self, _location: &Arc<Node>, _name: &str) -> bool { ::tsox_core::fntrace::enter("resolve_infer_type_case"); 
         false
     }
 }

@@ -3,7 +3,7 @@
 use crate::parser::jsdoc::*;
 
 impl crate::parser::Parser {
-    pub(crate) fn parse_jsdoc_type_expression(&mut self, may_omit_braces: bool) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_type_expression(&mut self, may_omit_braces: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_type_expression"); 
         let pos = self.token_pos();
         let has_brace = if may_omit_braces {
             self.parse_optional(SyntaxKind::OpenBraceToken)
@@ -33,7 +33,7 @@ impl crate::parser::Parser {
         ))
     }
 
-    pub(crate) fn parse_jsdoc_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_type"); 
         let pos = self.token_pos();
         // Go parseJSDocType：类型解析期间扫描器跳过 jsdoc 续行 `*` 边距，
         // 否则边距星号成为 AsteriskToken，类型成员表解析对不可成名 token
@@ -97,7 +97,7 @@ impl crate::parser::Parser {
         }
     }
 
-    pub(crate) fn try_parse_type_expression(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn try_parse_type_expression(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_type_expression"); 
         self.skip_whitespace_or_asterisk();
         if self.token == SyntaxKind::OpenBraceToken {
             Some(self.parse_jsdoc_type_expression(false))
@@ -106,7 +106,7 @@ impl crate::parser::Parser {
         }
     }
 
-    pub(crate) fn parse_type_arguments_of_type_node(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_type_arguments_of_type_node(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_type_arguments_of_type_node"); 
         let pos = self.token_pos();
         self.parse_expected_jsdoc(SyntaxKind::LessThanToken);
         let mut types: Vec<Arc<Node>> = Vec::new();
@@ -126,7 +126,7 @@ impl crate::parser::Parser {
         })
     }
 
-    pub(crate) fn parse_expression_with_type_arguments_for_augments(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_expression_with_type_arguments_for_augments(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_expression_with_type_arguments_for_augments"); 
         let pos = self.token_pos();
         let has_brace = self.parse_optional_jsdoc(SyntaxKind::OpenBraceToken);
         let expression = self.parse_property_access_entity_name_expression();
@@ -164,7 +164,7 @@ impl crate::parser::Parser {
         ))
     }
 
-    pub(crate) fn parse_property_access_entity_name_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_property_access_entity_name_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_property_access_entity_name_expression"); 
         let mut node = self.parse_jsdoc_identifier_name(None);
         while self.parse_optional_jsdoc(SyntaxKind::DotToken) {
             let name = self.parse_jsdoc_identifier_name(None);

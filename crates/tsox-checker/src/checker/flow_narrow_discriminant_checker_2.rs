@@ -9,7 +9,7 @@ impl Checker {
         switch_stmt: &Arc<Node>,
         (clause_start, clause_end): (usize, usize),
         target: &FlowRef,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_switch_on_true"); 
         let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
             return Arc::clone(type_);
         };
@@ -82,7 +82,7 @@ impl Checker {
         type_: &Arc<Type>,
         switch_stmt: &Arc<Node>,
         (clause_start, clause_end): (usize, usize),
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_switch_on_typeof"); 
         let witnesses = self.get_switch_clause_typeof_witnesses(switch_stmt);
         let Some(witnesses) = witnesses else {
             return Arc::clone(type_);
@@ -126,7 +126,7 @@ impl Checker {
     pub(crate) fn get_switch_clause_typeof_witnesses(
         &mut self,
         switch_stmt: &Arc<Node>,
-    ) -> Option<Vec<String>> {
+    ) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("get_switch_clause_typeof_witnesses"); 
         let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
             return None;
         };
@@ -152,7 +152,7 @@ impl Checker {
         Some(witnesses)
     }
 
-    pub(crate) fn typeof_string_to_type(&mut self, text: &str) -> Arc<Type> {
+    pub(crate) fn typeof_string_to_type(&mut self, text: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("typeof_string_to_type"); 
         match text {
             "string" => self.string_type(),
             "number" => self.number_type(),
@@ -176,7 +176,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn literal_text_of(&self, node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn literal_text_of(&self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("literal_text_of"); 
         match node.kind {
             SyntaxKind::StringLiteral => {
                 if let NodeData::StringLiteral(data) = &node.data {
@@ -201,7 +201,7 @@ impl Checker {
         type_: &Arc<Type>,
         switch_stmt: &Arc<Node>,
         (clause_start, clause_end): (usize, usize),
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_switch_on_discriminant"); 
         let case_types = self.get_switch_clause_types(switch_stmt);
         let group_clauses = clauses_of_range(switch_stmt, clause_start, clause_end);
 

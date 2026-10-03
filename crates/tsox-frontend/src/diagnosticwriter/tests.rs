@@ -3,7 +3,7 @@ use crate::ast::SourceFile;
 use tsox_core::core::text::TextRange;
 use tsox_core::diagnostics::new_ad_hoc_message;
 
-fn make_file(text: &str) -> Arc<SourceFile> {
+fn make_file(text: &str) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("make_file"); 
     use crate::ast::{Node, NodeData, NodeList, SyntaxKind};
     let line_map = LineMap::from_text(text);
     Arc::new(SourceFile {
@@ -45,7 +45,7 @@ fn make_file(text: &str) -> Arc<SourceFile> {
 }
 
 #[test]
-fn line_and_character_basic() {
+fn line_and_character_basic() { ::tsox_core::fntrace::enter("line_and_character_basic"); 
     let file = make_file("abc\ndef\nghi");
     let (line, col) = line_and_character(&file.line_map, &file.text, 5);
     assert_eq!(line, 1);
@@ -53,7 +53,7 @@ fn line_and_character_basic() {
 }
 
 #[test]
-fn compact_format() {
+fn compact_format() { ::tsox_core::fntrace::enter("compact_format"); 
     let file = make_file("abc\ndef");
     let diag = Diagnostic::new(
         Some(file),
@@ -66,7 +66,7 @@ fn compact_format() {
 }
 
 #[test]
-fn pretty_format_has_squiggle() {
+fn pretty_format_has_squiggle() { ::tsox_core::fntrace::enter("pretty_format_has_squiggle"); 
     let file = make_file("let x = 1");
     let diag = Diagnostic::new(
         Some(file),

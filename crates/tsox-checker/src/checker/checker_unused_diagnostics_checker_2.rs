@@ -3,7 +3,7 @@
 use crate::checker::checker_unused_diagnostics::*;
 
 impl Checker {
-    pub(crate) fn report_unused_binding_elements(&mut self, pattern: &Arc<Node>) {
+    pub(crate) fn report_unused_binding_elements(&mut self, pattern: &Arc<Node>) { ::tsox_core::fntrace::enter("report_unused_binding_elements"); 
         let elements: Vec<Arc<Node>> = match &pattern.data {
             tsox_frontend::ast::NodeData::BindingPattern(d) => d.elements.iter().cloned().collect(),
             _ => return,
@@ -26,7 +26,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_unreferenced_variable_declaration(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_unreferenced_variable_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_unreferenced_variable_declaration"); 
         let name_node = match &node.data {
             tsox_frontend::ast::NodeData::VariableDeclaration(d) => Some(Arc::clone(&d.name)),
             tsox_frontend::ast::NodeData::ParameterDeclaration(d) => Some(Arc::clone(&d.name)),
@@ -114,25 +114,25 @@ impl Checker {
         true
     }
 
-    pub(crate) fn name_node_starts_with_underscore(node: &Arc<Node>) -> bool {
+    pub(crate) fn name_node_starts_with_underscore(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("name_node_starts_with_underscore"); 
         let text = node.text();
         !text.is_empty() && text.starts_with('_')
     }
 
-    pub(crate) fn is_binding_pattern(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_binding_pattern(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_binding_pattern"); 
         matches!(
             node.kind,
             SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
         )
     }
 
-    pub(crate) fn name_or_node_loc(node: &Arc<Node>) -> tsox_core::core::text::TextRange {
+    pub(crate) fn name_or_node_loc(node: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("name_or_node_loc"); 
         tsox_frontend::ast::utilities::get_name_of_declaration(node)
             .map(|n| n.loc)
             .unwrap_or(node.loc)
     }
 
-    pub(crate) fn report_unused_imports(&mut self, clause: &Arc<Node>, unused: &[Arc<Node>]) {
+    pub(crate) fn report_unused_imports(&mut self, clause: &Arc<Node>, unused: &[Arc<Node>]) { ::tsox_core::fntrace::enter("report_unused_imports"); 
         let mut declaration_count = 0usize;
         let named_bindings: Option<Arc<Node>> = match &clause.data {
             tsox_frontend::ast::NodeData::ImportClause(d) => {
@@ -184,7 +184,7 @@ impl Checker {
         &self,
         receiver: &Arc<Node>,
         object_type: &Arc<crate::checker::types::Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_self_type_access"); 
         if receiver.kind == SyntaxKind::ThisKeyword {
             return true;
         }
@@ -205,7 +205,7 @@ impl Checker {
             .is_some_and(|sym| sym.id() == parent.id())
     }
 
-    pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: Option<&Arc<Node>>) {
+    pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("mark_property_as_referenced"); 
         self.mark_property_as_referenced_ex(prop, node, None);
     }
 
@@ -214,7 +214,7 @@ impl Checker {
         prop: &Arc<Symbol>,
         node: Option<&Arc<Node>>,
         self_type_access: Option<bool>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("mark_property_as_referenced_ex"); 
         let has_private_modifier = prop.declarations.iter().any(|d| {
             d.has_syntactic_modifier(ModifierFlags::Private)
         });
@@ -275,7 +275,7 @@ impl Checker {
         loc: tsox_core::core::text::TextRange,
         message: &'static tsox_core::diagnostics::Message,
         args: Vec<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_unused"); 
         let ambient = location
             .flags
             .contains(tsox_frontend::ast::NodeFlags::Ambient)
@@ -300,7 +300,7 @@ impl Checker {
         ));
     }
 
-    pub(crate) fn set_parent_pointers(&mut self, node: &Arc<Node>) {
+    pub(crate) fn set_parent_pointers(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_parent_pointers"); 
         use tsox_frontend::ast::node_data_generated::for_each_child;
 
         let mut children: Vec<Arc<Node>> = Vec::new();

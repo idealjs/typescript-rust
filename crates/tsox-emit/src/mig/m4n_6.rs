@@ -20,7 +20,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         name_expr: &Arc<Node>,
         metadata: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_es_decorate_class_context_object"); 
         let props = vec![
             self.new_property_assignment(
                 None,
@@ -51,7 +51,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         name_computed: bool,
         name_expr: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_es_decorate_class_element_access_get_method"); 
         let accessor = if name_computed {
             self.new_element_access_expression(
                 &self.new_identifier("obj"),
@@ -94,7 +94,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         name_computed: bool,
         name_expr: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_es_decorate_class_element_access_has_method"); 
         let property_name = if !name_computed && is_identifier(name_expr) {
             self.new_string_literal_from_node(name_expr)
         } else {
@@ -136,7 +136,7 @@ impl<'a> NodeFactory<'a> {
         name_expr: &Arc<Node>,
         has_get: bool,
         has_set: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_es_decorate_class_element_access_object"); 
         let mut access_props = vec![self.new_es_decorate_class_element_access_has_method(
             name_computed,
             name_expr,
@@ -163,7 +163,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         name_computed: bool,
         name_expr: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_es_decorate_class_element_access_set_method"); 
         let accessor = if name_computed {
             self.new_element_access_expression(
                 &self.new_identifier("obj"),
@@ -219,7 +219,7 @@ impl<'a> NodeFactory<'a> {
         has_get: bool,
         has_set: bool,
         metadata: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_es_decorate_class_element_context_object"); 
         let name_value = if !name_computed && (is_private_identifier(name_expr) || is_identifier(name_expr)) {
             self.new_string_literal_from_node(name_expr)
         } else {

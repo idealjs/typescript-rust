@@ -1,7 +1,7 @@
 use crate::ast::*;
 use std::sync::Arc;
 
-fn strip_quotes(s: &str) -> &str {
+fn strip_quotes(s: &str) -> &str { ::tsox_core::fntrace::enter("strip_quotes"); 
     let b = s.as_bytes();
     if b.len() >= 2
         && ((b[0] == b'"' && b[b.len() - 1] == b'"') || (b[0] == b'\'' && b[b.len() - 1] == b'\''))
@@ -12,7 +12,7 @@ fn strip_quotes(s: &str) -> &str {
     }
 }
 
-fn literal_attributes(node: Option<&Arc<Node>>) -> Option<Vec<(String, String)>> {
+fn literal_attributes(node: Option<&Arc<Node>>) -> Option<Vec<(String, String)>> { ::tsox_core::fntrace::enter("literal_attributes"); 
     let NodeData::ImportAttributes(ImportAttributesData { attributes, .. }) = &node?.data else {
         return None;
     };
@@ -30,7 +30,7 @@ fn literal_attributes(node: Option<&Arc<Node>>) -> Option<Vec<(String, String)>>
     Some(pairs)
 }
 
-fn attributes_subset_of(module: &[(String, String)], import: &[(String, String)]) -> bool {
+fn attributes_subset_of(module: &[(String, String)], import: &[(String, String)]) -> bool { ::tsox_core::fntrace::enter("attributes_subset_of"); 
     module
         .iter()
         .all(|(k, v)| import.iter().any(|(ik, iv)| ik == k && iv == v))
@@ -40,7 +40,7 @@ pub fn pattern_ambient_module_with_attributes_exists(
     source_files: &[Arc<SourceFile>],
     name: &str,
     import_attributes: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("pattern_ambient_module_with_attributes_exists"); 
     let import_pairs = literal_attributes(import_attributes).unwrap_or_default();
     for file in source_files {
         if file.external_module_indicator.is_some() {
@@ -83,7 +83,7 @@ pub fn pattern_ambient_module_with_attributes_exists(
     false
 }
 
-pub fn import_attributes_of_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn import_attributes_of_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_attributes_of_declaration"); 
     match &node.data {
         NodeData::ImportDeclaration(d) => d.attributes.clone(),
         NodeData::ExportDeclaration(d) => d.attributes.clone(),

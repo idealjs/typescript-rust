@@ -5,7 +5,7 @@ use crate::ast::node_data_generated::{CallExpressionData, NodeData, NewExpressio
 use crate::ast::node_node::Node;
 use crate::ast::node_node_list::NodeList;
 
-pub fn argument_list(node: &Node) -> Option<&NodeList> {
+pub fn argument_list(node: &Node) -> Option<&NodeList> { ::tsox_core::fntrace::enter("argument_list"); 
     match &node.data {
         NodeData::CallExpression(CallExpressionData { arguments, .. }) => Some(arguments),
         NodeData::NewExpression(NewExpressionData { arguments, .. }) => arguments.as_deref(),
@@ -13,21 +13,21 @@ pub fn argument_list(node: &Node) -> Option<&NodeList> {
     }
 }
 
-pub fn arguments(node: &Node) -> &[Arc<Node>] {
+pub fn arguments(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("arguments"); 
     match argument_list(node) {
         Some(list) => &list.nodes,
         None => &[],
     }
 }
 
-pub fn as_flow_reduce_label_data(node: &Node) -> &FlowReduceLabelData {
+pub fn as_flow_reduce_label_data(node: &Node) -> &FlowReduceLabelData { ::tsox_core::fntrace::enter("as_flow_reduce_label_data"); 
     match &node.data {
         NodeData::FlowReduceLabelData(d) => d,
         _ => panic!("unexpected node data: {:?}", node.kind),
     }
 }
 
-pub fn as_flow_switch_clause_data(node: &Node) -> &FlowSwitchClauseData {
+pub fn as_flow_switch_clause_data(node: &Node) -> &FlowSwitchClauseData { ::tsox_core::fntrace::enter("as_flow_switch_clause_data"); 
     match &node.data {
         NodeData::FlowSwitchClauseData(d) => d,
         _ => panic!("unexpected node data: {:?}", node.kind),

@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use super::super::version::Version;
 use super::super::version_range::{ComparatorOperator, VersionComparator};
 
-pub fn test_comparator(comparator: &VersionComparator, version: &Version) -> bool {
+pub fn test_comparator(comparator: &VersionComparator, version: &Version) -> bool { crate::fntrace::enter("test_comparator"); 
     let cmp = version.compare(&comparator.operand);
     match comparator.operator {
         ComparatorOperator::LessThan => cmp == Ordering::Less,
@@ -16,11 +16,11 @@ pub fn test_comparator(comparator: &VersionComparator, version: &Version) -> boo
     }
 }
 
-pub fn test_alternative(alternative: &[VersionComparator], version: &Version) -> bool {
+pub fn test_alternative(alternative: &[VersionComparator], version: &Version) -> bool { crate::fntrace::enter("test_alternative"); 
     alternative.iter().all(|comparator| test_comparator(comparator, version))
 }
 
-pub fn test_disjunction(alternatives: &[Vec<VersionComparator>], version: &Version) -> bool {
+pub fn test_disjunction(alternatives: &[Vec<VersionComparator>], version: &Version) -> bool { crate::fntrace::enter("test_disjunction"); 
     if alternatives.is_empty() {
         return true;
     }

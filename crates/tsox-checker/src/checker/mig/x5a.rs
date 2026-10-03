@@ -21,7 +21,7 @@ impl Checker {
         candidate: &Arc<Type>,
         assume_true: bool,
         check_derived: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowed_type"); 
         if !t.flags.intersects(TypeFlags::Union) {
             return self.get_narrowed_type_worker(t, candidate, assume_true, check_derived);
         }
@@ -34,7 +34,7 @@ impl Checker {
         candidate: &Arc<Type>,
         assume_true: bool,
         check_derived: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowed_type_worker"); 
         let checker_ptr: *mut Checker = self;
         if !assume_true {
             if Arc::ptr_eq(t, candidate) {
@@ -150,7 +150,7 @@ impl Checker {
         start: usize,
         end: usize,
         witnesses: &[String],
-    ) -> TypeFacts {
+    ) -> TypeFacts { ::tsox_core::fntrace::enter("get_not_equal_facts_from_typeof_switch"); 
         let mut facts = TypeFacts::empty();
         for (i, witness) in witnesses.iter().enumerate() {
             if (i < start || i >= end) && !witness.is_empty() {
@@ -160,7 +160,7 @@ impl Checker {
         facts
     }
 
-    pub(crate) fn get_reference_candidate(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn get_reference_candidate(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_reference_candidate"); 
         match node.kind {
             SyntaxKind::ParenthesizedExpression => {
                 return self.get_reference_candidate(node.expression().expect("parenthesized expression has inner expression"));
@@ -187,7 +187,7 @@ impl Checker {
     pub(crate) fn get_symbol_has_instance_method_of_object_type(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_symbol_has_instance_method_of_object_type"); 
         let has_instance_property_name = self.get_property_name_for_known_symbol_name("hasInstance");
         if self.all_types_assignable_to_kind(t, TypeFlags::NonPrimitive) {
             if let Some(has_instance_property) = self.get_property_of_type(t, &has_instance_property_name) {

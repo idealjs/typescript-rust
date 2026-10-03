@@ -66,7 +66,7 @@ pub struct InferenceInfo {
 }
 
 impl InferenceInfo {
-    pub fn new(type_parameter: Arc<Type>) -> Self {
+    pub fn new(type_parameter: Arc<Type>) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             type_parameter,
             candidates: Vec::new(),
@@ -93,7 +93,7 @@ pub struct InferenceContext {
 }
 
 impl InferenceContext {
-    pub fn new(inferences: Vec<InferenceInfo>) -> Self {
+    pub fn new(inferences: Vec<InferenceInfo>) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             inferences,
             signature: None,

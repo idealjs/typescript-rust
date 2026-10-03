@@ -49,85 +49,85 @@ tristate_option_predicates!(insert_space_before_function_parenthesis,
     enabled: is_insert_space_before_function_paren_enabled,
     disabled_or_undef: is_insert_space_before_function_paren_disabled_or_undef);
 
-pub(crate) fn is_insert_space_nonempty_braces_enabled_or_undef(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_nonempty_braces_enabled_or_undef(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_nonempty_braces_enabled_or_undef"); 
     context.options.insert_space_after_opening_and_before_closing_nonempty_braces == Tristate::True
         || context.options.insert_space_after_opening_and_before_closing_nonempty_braces == Tristate::Unknown
 }
 
-pub(crate) fn is_insert_space_nonempty_braces_disabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_nonempty_braces_disabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_nonempty_braces_disabled"); 
     context.options.insert_space_after_opening_and_before_closing_nonempty_braces == Tristate::False
 }
 
-pub(crate) fn is_insert_space_empty_braces_enabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_empty_braces_enabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_empty_braces_enabled"); 
     context.options.insert_space_after_opening_and_before_closing_empty_braces == Tristate::True
 }
 
-pub(crate) fn is_insert_space_empty_braces_disabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_empty_braces_disabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_empty_braces_disabled"); 
     context.options.insert_space_after_opening_and_before_closing_empty_braces == Tristate::False
 }
 
-pub(crate) fn is_insert_space_template_braces_enabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_template_braces_enabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_template_braces_enabled"); 
     context.options.insert_space_after_opening_and_before_closing_template_string_braces == Tristate::True
 }
 
-pub(crate) fn is_insert_space_template_braces_disabled_or_undef(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_template_braces_disabled_or_undef(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_template_braces_disabled_or_undef"); 
     context.options.insert_space_after_opening_and_before_closing_template_string_braces != Tristate::True
 }
 
-pub(crate) fn is_insert_space_jsx_braces_enabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_jsx_braces_enabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_jsx_braces_enabled"); 
     context.options.insert_space_after_opening_and_before_closing_jsx_expression_braces == Tristate::True
 }
 
-pub(crate) fn is_insert_space_jsx_braces_disabled_or_undef(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_jsx_braces_disabled_or_undef(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_jsx_braces_disabled_or_undef"); 
     context.options.insert_space_after_opening_and_before_closing_jsx_expression_braces != Tristate::True
 }
 
-pub(crate) fn is_insert_space_binary_operators_enabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_binary_operators_enabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_binary_operators_enabled"); 
     context.options.insert_space_before_and_after_binary_operators
 }
 
-pub(crate) fn is_insert_space_binary_operators_disabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_insert_space_binary_operators_disabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_binary_operators_disabled"); 
     !context.options.insert_space_before_and_after_binary_operators
 }
 
-pub(crate) fn is_place_open_brace_newline_functions_enabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_place_open_brace_newline_functions_enabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_place_open_brace_newline_functions_enabled"); 
     context.options.place_open_brace_on_new_line_for_functions == Tristate::True
 }
 
-pub(crate) fn is_place_open_brace_newline_functions_disabled_or_same_line(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_place_open_brace_newline_functions_disabled_or_same_line(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_place_open_brace_newline_functions_disabled_or_same_line"); 
     context.options.place_open_brace_on_new_line_for_functions != Tristate::True
         || context.tokens_are_on_same_line()
 }
 
-pub(crate) fn is_place_open_brace_newline_control_enabled(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_place_open_brace_newline_control_enabled(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_place_open_brace_newline_control_enabled"); 
     context.options.place_open_brace_on_new_line_for_control_blocks == Tristate::True
 }
 
-pub(crate) fn is_place_open_brace_newline_control_disabled_or_same_line(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_place_open_brace_newline_control_disabled_or_same_line(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_place_open_brace_newline_control_disabled_or_same_line"); 
     context.options.place_open_brace_on_new_line_for_control_blocks != Tristate::True
         || context.tokens_are_on_same_line()
 }
 
-pub(crate) fn is_semicolon_preference_remove(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_semicolon_preference_remove(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_semicolon_preference_remove"); 
     context.options.semicolons == SemicolonPreference::Remove
 }
 
-pub(crate) fn is_semicolon_preference_insert(context: &mut FormattingContext) -> bool {
+pub(crate) fn is_semicolon_preference_insert(context: &mut FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_semicolon_preference_insert"); 
     context.options.semicolons == SemicolonPreference::Insert
 }
 
 // ---- 上下文谓词 ----
 
 impl FormattingContext {
-    pub(crate) fn is_for_context(&mut self) -> bool {
+    pub(crate) fn is_for_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_for_context"); 
         self.context_node_kind() == SyntaxKind::ForStatement
     }
 
-    pub(crate) fn is_not_for_context(&mut self) -> bool {
+    pub(crate) fn is_not_for_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_for_context"); 
         !self.is_for_context()
     }
 
-    pub(crate) fn is_binary_op_context(&mut self) -> bool {
+    pub(crate) fn is_binary_op_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_binary_op_context"); 
         let Some(node) = &self.context_node else { return false };
         match node.kind {
             SyntaxKind::BinaryExpression => {
@@ -172,11 +172,11 @@ impl FormattingContext {
         }
     }
 
-    pub(crate) fn is_not_binary_op_context(&mut self) -> bool {
+    pub(crate) fn is_not_binary_op_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_binary_op_context"); 
         !self.is_binary_op_context()
     }
 
-    pub(crate) fn is_type_annotation_context(&mut self) -> bool {
+    pub(crate) fn is_type_annotation_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_type_annotation_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::PropertyDeclaration
@@ -186,54 +186,54 @@ impl FormattingContext {
         ) || crate::ast::utilities_functions::is_function_like_kind(self.context_node_kind())
     }
 
-    pub(crate) fn is_not_type_annotation_context(&mut self) -> bool {
+    pub(crate) fn is_not_type_annotation_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_type_annotation_context"); 
         !self.is_type_annotation_context()
     }
 
-    pub(crate) fn is_conditional_operator_context(&mut self) -> bool {
+    pub(crate) fn is_conditional_operator_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_conditional_operator_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::ConditionalExpression | SyntaxKind::ConditionalType
         )
     }
 
-    pub(crate) fn is_same_line_token_or_before_block_context(&mut self) -> bool {
+    pub(crate) fn is_same_line_token_or_before_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_same_line_token_or_before_block_context"); 
         self.tokens_are_on_same_line() || self.is_before_block_context()
     }
 
-    pub(crate) fn is_brace_wrapped_context(&mut self) -> bool {
+    pub(crate) fn is_brace_wrapped_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_brace_wrapped_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::ObjectBindingPattern | SyntaxKind::MappedType
         ) || self.is_single_line_block_context()
     }
 
-    pub(crate) fn is_before_multiline_block_context(&mut self) -> bool {
+    pub(crate) fn is_before_multiline_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_before_multiline_block_context"); 
         self.is_before_block_context()
             && !(self.next_node_all_on_same_line() || self.next_node_block_is_on_one_line())
     }
 
-    pub(crate) fn is_multiline_block_context(&mut self) -> bool {
+    pub(crate) fn is_multiline_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_multiline_block_context"); 
         self.is_block_context()
             && !(self.context_node_all_on_same_line() || self.context_node_block_is_on_one_line())
     }
 
-    pub(crate) fn is_single_line_block_context(&mut self) -> bool {
+    pub(crate) fn is_single_line_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_single_line_block_context"); 
         self.is_block_context()
             && (self.context_node_all_on_same_line() || self.context_node_block_is_on_one_line())
     }
 
-    pub(crate) fn is_block_context(&mut self) -> bool {
+    pub(crate) fn is_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_block_context"); 
         self.context_node.as_ref().is_some_and(node_is_block_context)
     }
 
-    pub(crate) fn is_before_block_context(&mut self) -> bool {
+    pub(crate) fn is_before_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_before_block_context"); 
         self.next_token_parent
             .as_ref()
             .is_some_and(node_is_block_context)
     }
 
-    pub(crate) fn is_function_decl_context(&mut self) -> bool {
+    pub(crate) fn is_function_decl_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_function_decl_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::FunctionDeclaration
@@ -249,22 +249,22 @@ impl FormattingContext {
         )
     }
 
-    pub(crate) fn is_not_function_decl_context(&mut self) -> bool {
+    pub(crate) fn is_not_function_decl_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_function_decl_context"); 
         !self.is_function_decl_context()
     }
 
-    pub(crate) fn is_function_declaration_or_function_expression_context(&mut self) -> bool {
+    pub(crate) fn is_function_declaration_or_function_expression_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_function_declaration_or_function_expression_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::FunctionDeclaration | SyntaxKind::FunctionExpression
         )
     }
 
-    pub(crate) fn is_type_script_decl_with_block_context(&mut self) -> bool {
+    pub(crate) fn is_type_script_decl_with_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_type_script_decl_with_block_context"); 
         self.context_node.as_ref().is_some_and(node_is_type_script_decl_with_block)
     }
 
-    pub(crate) fn is_after_code_block_context(&mut self) -> bool {
+    pub(crate) fn is_after_code_block_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_after_code_block_context"); 
         let Some(parent) = &self.current_token_parent else { return false };
         match parent.kind {
             SyntaxKind::ClassDeclaration
@@ -281,7 +281,7 @@ impl FormattingContext {
         }
     }
 
-    pub(crate) fn is_control_decl_context(&mut self) -> bool {
+    pub(crate) fn is_control_decl_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_control_decl_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::IfStatement
@@ -297,87 +297,87 @@ impl FormattingContext {
         )
     }
 
-    pub(crate) fn is_object_context(&mut self) -> bool {
+    pub(crate) fn is_object_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_object_context"); 
         self.context_node_kind() == SyntaxKind::ObjectLiteralExpression
     }
 
-    pub(crate) fn is_function_call_or_new_context(&mut self) -> bool {
+    pub(crate) fn is_function_call_or_new_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_function_call_or_new_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::CallExpression | SyntaxKind::NewExpression
         )
     }
 
-    pub(crate) fn is_previous_token_not_comma(&mut self) -> bool {
+    pub(crate) fn is_previous_token_not_comma(&mut self) -> bool { ::tsox_core::fntrace::enter("is_previous_token_not_comma"); 
         self.current_token_span.kind != SyntaxKind::CommaToken
     }
 
-    pub(crate) fn is_next_token_not_close_bracket(&mut self) -> bool {
+    pub(crate) fn is_next_token_not_close_bracket(&mut self) -> bool { ::tsox_core::fntrace::enter("is_next_token_not_close_bracket"); 
         self.next_token_span.kind != SyntaxKind::CloseBracketToken
     }
 
-    pub(crate) fn is_next_token_not_close_paren(&mut self) -> bool {
+    pub(crate) fn is_next_token_not_close_paren(&mut self) -> bool { ::tsox_core::fntrace::enter("is_next_token_not_close_paren"); 
         self.next_token_span.kind != SyntaxKind::CloseParenToken
     }
 
-    pub(crate) fn is_arrow_function_context(&mut self) -> bool {
+    pub(crate) fn is_arrow_function_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_arrow_function_context"); 
         self.context_node_kind() == SyntaxKind::ArrowFunction
     }
 
-    pub(crate) fn is_import_type_context(&mut self) -> bool {
+    pub(crate) fn is_import_type_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_import_type_context"); 
         self.context_node_kind() == SyntaxKind::ImportType
     }
 
-    pub(crate) fn is_non_jsx_same_line_token_context(&mut self) -> bool {
+    pub(crate) fn is_non_jsx_same_line_token_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_non_jsx_same_line_token_context"); 
         self.tokens_are_on_same_line() && self.context_node_kind() != SyntaxKind::JsxText
     }
 
-    pub(crate) fn is_non_jsx_text_context(&mut self) -> bool {
+    pub(crate) fn is_non_jsx_text_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_non_jsx_text_context"); 
         self.context_node_kind() != SyntaxKind::JsxText
     }
 
-    pub(crate) fn is_non_jsx_element_or_fragment_context(&mut self) -> bool {
+    pub(crate) fn is_non_jsx_element_or_fragment_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_non_jsx_element_or_fragment_context"); 
         !matches!(
             self.context_node_kind(),
             SyntaxKind::JsxElement | SyntaxKind::JsxFragment
         )
     }
 
-    pub(crate) fn is_jsx_expression_context(&mut self) -> bool {
+    pub(crate) fn is_jsx_expression_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_jsx_expression_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::JsxExpression | SyntaxKind::JsxSpreadAttribute
         )
     }
 
-    pub(crate) fn is_next_token_parent_jsx_attribute(&mut self) -> bool {
+    pub(crate) fn is_next_token_parent_jsx_attribute(&mut self) -> bool { ::tsox_core::fntrace::enter("is_next_token_parent_jsx_attribute"); 
         let Some(parent) = &self.next_token_parent else { return false };
         parent.kind == SyntaxKind::JsxAttribute
             || (parent.kind == SyntaxKind::JsxNamespacedName
                 && parent.parent().as_ref().is_some_and(|p| p.kind == SyntaxKind::JsxAttribute))
     }
 
-    pub(crate) fn is_jsx_attribute_context(&mut self) -> bool {
+    pub(crate) fn is_jsx_attribute_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_jsx_attribute_context"); 
         self.context_node_kind() == SyntaxKind::JsxAttribute
     }
 
-    pub(crate) fn is_next_token_parent_not_jsx_namespaced_name(&mut self) -> bool {
+    pub(crate) fn is_next_token_parent_not_jsx_namespaced_name(&mut self) -> bool { ::tsox_core::fntrace::enter("is_next_token_parent_not_jsx_namespaced_name"); 
         self.next_token_parent.as_ref().map(|p| p.kind) != Some(SyntaxKind::JsxNamespacedName)
     }
 
-    pub(crate) fn is_next_token_parent_jsx_namespaced_name(&mut self) -> bool {
+    pub(crate) fn is_next_token_parent_jsx_namespaced_name(&mut self) -> bool { ::tsox_core::fntrace::enter("is_next_token_parent_jsx_namespaced_name"); 
         self.next_token_parent.as_ref().map(|p| p.kind) == Some(SyntaxKind::JsxNamespacedName)
     }
 
-    pub(crate) fn is_jsx_self_closing_element_context(&mut self) -> bool {
+    pub(crate) fn is_jsx_self_closing_element_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_jsx_self_closing_element_context"); 
         self.context_node_kind() == SyntaxKind::JsxSelfClosingElement
     }
 
-    pub(crate) fn is_not_before_block_in_function_declaration_context(&mut self) -> bool {
+    pub(crate) fn is_not_before_block_in_function_declaration_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_before_block_in_function_declaration_context"); 
         !self.is_function_decl_context() && !self.is_before_block_context()
     }
 
-    pub(crate) fn is_end_of_decorator_context_on_same_line(&mut self) -> bool {
+    pub(crate) fn is_end_of_decorator_context_on_same_line(&mut self) -> bool { ::tsox_core::fntrace::enter("is_end_of_decorator_context_on_same_line"); 
         self.tokens_are_on_same_line()
             && self
                 .context_node
@@ -393,42 +393,42 @@ impl FormattingContext {
                 .is_some_and(|n| node_is_in_decorator_context(n))
     }
 
-    pub(crate) fn is_start_of_variable_declaration_list(&mut self) -> bool {
+    pub(crate) fn is_start_of_variable_declaration_list(&mut self) -> bool { ::tsox_core::fntrace::enter("is_start_of_variable_declaration_list"); 
         let Some(parent) = &self.current_token_parent else { return false };
         parent.kind == SyntaxKind::VariableDeclarationList
             && token_pos_of_node(parent) == self.current_token_span.loc.pos()
     }
 
-    pub(crate) fn is_not_format_on_enter(&mut self) -> bool {
+    pub(crate) fn is_not_format_on_enter(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_format_on_enter"); 
         self.formatting_request_kind != FormatRequestKind::FormatOnEnter
     }
 
-    pub(crate) fn is_module_decl_context(&mut self) -> bool {
+    pub(crate) fn is_module_decl_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_module_decl_context"); 
         self.context_node_kind() == SyntaxKind::ModuleDeclaration
     }
 
-    pub(crate) fn is_object_type_context(&mut self) -> bool {
+    pub(crate) fn is_object_type_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_object_type_context"); 
         self.context_node_kind() == SyntaxKind::TypeLiteral
     }
 
-    pub(crate) fn is_constructor_signature_context(&mut self) -> bool {
+    pub(crate) fn is_constructor_signature_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_constructor_signature_context"); 
         self.context_node_kind() == SyntaxKind::ConstructSignature
     }
 
-    pub(crate) fn is_type_argument_or_parameter_or_assertion_context(&mut self) -> bool {
+    pub(crate) fn is_type_argument_or_parameter_or_assertion_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_type_argument_or_parameter_or_assertion_context"); 
         is_type_argument_or_parameter_or_assertion(&self.current_token_span, self.current_token_parent.as_ref())
             || is_type_argument_or_parameter_or_assertion(&self.next_token_span, self.next_token_parent.as_ref())
     }
 
-    pub(crate) fn is_type_assertion_context(&mut self) -> bool {
+    pub(crate) fn is_type_assertion_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_type_assertion_context"); 
         self.context_node_kind() == SyntaxKind::TypeAssertionExpression
     }
 
-    pub(crate) fn is_non_type_assertion_context(&mut self) -> bool {
+    pub(crate) fn is_non_type_assertion_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_non_type_assertion_context"); 
         !self.is_type_assertion_context()
     }
 
-    pub(crate) fn is_void_op_context(&mut self) -> bool {
+    pub(crate) fn is_void_op_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_void_op_context"); 
         self.current_token_span.kind == SyntaxKind::VoidKeyword
             && self
                 .current_token_parent
@@ -436,7 +436,7 @@ impl FormattingContext {
                 .is_some_and(|p| p.kind == SyntaxKind::VoidExpression)
     }
 
-    pub(crate) fn is_yield_or_yield_star_with_operand(&mut self) -> bool {
+    pub(crate) fn is_yield_or_yield_star_with_operand(&mut self) -> bool { ::tsox_core::fntrace::enter("is_yield_or_yield_star_with_operand"); 
         let Some(node) = &self.context_node else { return false };
         if node.kind != SyntaxKind::YieldExpression {
             return false;
@@ -448,11 +448,11 @@ impl FormattingContext {
         }
     }
 
-    pub(crate) fn is_non_null_assertion_context(&mut self) -> bool {
+    pub(crate) fn is_non_null_assertion_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_non_null_assertion_context"); 
         self.context_node_kind() == SyntaxKind::NonNullExpression
     }
 
-    pub(crate) fn is_statement_condition_context(&mut self) -> bool {
+    pub(crate) fn is_statement_condition_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_statement_condition_context"); 
         matches!(
             self.context_node_kind(),
             SyntaxKind::IfStatement
@@ -464,11 +464,11 @@ impl FormattingContext {
         )
     }
 
-    pub(crate) fn is_not_statement_condition_context(&mut self) -> bool {
+    pub(crate) fn is_not_statement_condition_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_statement_condition_context"); 
         !self.is_statement_condition_context()
     }
 
-    pub(crate) fn is_optional_property_context(&self) -> bool {
+    pub(crate) fn is_optional_property_context(&self) -> bool { ::tsox_core::fntrace::enter("is_optional_property_context"); 
         let Some(node) = &self.context_node else { return false };
         if node.kind != SyntaxKind::PropertyDeclaration {
             return false;
@@ -482,11 +482,11 @@ impl FormattingContext {
         false
     }
 
-    pub(crate) fn is_non_optional_property_context(&mut self) -> bool {
+    pub(crate) fn is_non_optional_property_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_non_optional_property_context"); 
         !self.is_optional_property_context()
     }
 
-    pub(crate) fn is_not_property_access_on_integer_literal(&mut self) -> bool {
+    pub(crate) fn is_not_property_access_on_integer_literal(&mut self) -> bool { ::tsox_core::fntrace::enter("is_not_property_access_on_integer_literal"); 
         let Some(node) = &self.context_node else { return true };
         if node.kind != SyntaxKind::PropertyAccessExpression {
             return true;
@@ -500,7 +500,7 @@ impl FormattingContext {
         true
     }
 
-    pub(crate) fn is_semicolon_deletion_context(&mut self) -> bool {
+    pub(crate) fn is_semicolon_deletion_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_semicolon_deletion_context"); 
         // 忠实移植 isSemicolonDeletionContext；FindNextToken 简化为取
         // next parent 的第一个 token（格式化场景 parent 链完整）
         let mut next_token_kind = self.next_token_span.kind;
@@ -588,18 +588,18 @@ impl FormattingContext {
 
 use crate::ast::NodeData;
 
-fn context_kind_of(context: &FormattingContext) -> SyntaxKind {
+fn context_kind_of(context: &FormattingContext) -> SyntaxKind { ::tsox_core::fntrace::enter("context_kind_of"); 
     context.context_node.as_ref().map(|n| n.kind).unwrap_or(SyntaxKind::Unknown)
 }
 
 /// 为了方法化便利挂到 impl 外的工具（避免命名冲突）
 impl FormattingContext {
-    pub(crate) fn context_node_kind(&mut self) -> SyntaxKind {
+    pub(crate) fn context_node_kind(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("context_node_kind"); 
         context_kind_of(self)
     }
 }
 
-fn node_is_block_context(node: &Arc<Node>) -> bool {
+fn node_is_block_context(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_block_context"); 
     if node_is_type_script_decl_with_block(node) {
         return true;
     }
@@ -612,7 +612,7 @@ fn node_is_block_context(node: &Arc<Node>) -> bool {
     )
 }
 
-fn node_is_type_script_decl_with_block(node: &Arc<Node>) -> bool {
+fn node_is_type_script_decl_with_block(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_type_script_decl_with_block"); 
     matches!(
         node.kind,
         SyntaxKind::ClassDeclaration
@@ -628,7 +628,7 @@ fn node_is_type_script_decl_with_block(node: &Arc<Node>) -> bool {
     )
 }
 
-fn node_is_in_decorator_context(node: &Arc<Node>) -> bool {
+fn node_is_in_decorator_context(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_in_decorator_context"); 
     let mut cur = Some(node.clone());
     while let Some(n) = cur {
         if !crate::ast::utilities_expressions::is_expression(&n) {
@@ -639,21 +639,21 @@ fn node_is_in_decorator_context(node: &Arc<Node>) -> bool {
     false
 }
 
-fn has_decorators(node: &Arc<Node>) -> bool {
+fn has_decorators(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_decorators"); 
     if let Some(mods) = node.modifiers() {
         return mods.flags().contains(crate::ast::ModifierFlags::Decorator);
     }
     false
 }
 
-pub(crate) fn token_pos_of_node(node: &Arc<Node>) -> usize {
+pub(crate) fn token_pos_of_node(node: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("token_pos_of_node"); 
     node.name().map(|n| n.pos()).unwrap_or_else(|| node.pos())
 }
 
 fn is_type_argument_or_parameter_or_assertion(
     token: &TextRangeWithKind,
     parent: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_type_argument_or_parameter_or_assertion"); 
     if token.kind != SyntaxKind::LessThanToken && token.kind != SyntaxKind::GreaterThanToken {
         return false;
     }
@@ -679,7 +679,7 @@ fn is_type_argument_or_parameter_or_assertion(
     )
 }
 
-fn find_next_token(node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+fn find_next_token(node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_next_token"); 
     let node = node?;
     let mut hit = None;
     crate::ast::node_data_generated::for_each_child(node, |c| {

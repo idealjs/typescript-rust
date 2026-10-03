@@ -23,7 +23,7 @@ impl MetadataSerializer {
         &mut self,
         types: &[Arc<Node>],
         is_intersection: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_union_or_intersection_constituents"); 
         let mut serialized_type: Option<Arc<Node>> = None;
         for type_node in types {
             let type_node = skip_type_parentheses(type_node);
@@ -78,7 +78,7 @@ impl MetadataSerializer {
     pub fn serialize_literal_of_literal_type_node(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_literal_of_literal_type_node"); 
         match node.kind {
             SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral => {
                 Some(self.factory().new_identifier("String"))
@@ -111,7 +111,7 @@ impl MetadataSerializer {
     pub fn serialize_type_reference_node(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_type_reference_node"); 
         let mut serial_scope = self.c.current_name_scope.clone();
         if serial_scope.is_none() {
             serial_scope = self.c.current_lexical_scope.clone();
@@ -189,7 +189,7 @@ impl MetadataSerializer {
         }
     }
 
-    pub fn serialize_big_int_constructor(&mut self) -> Option<Arc<Node>> {
+    pub fn serialize_big_int_constructor(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_big_int_constructor"); 
         if (self.language_version as u32) >= (ScriptTarget::ES2020 as u32) {
             return Some(self.factory().new_identifier("BigInt"));
         }
@@ -207,7 +207,7 @@ impl MetadataSerializer {
     pub fn serialize_entity_name_as_expression(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_entity_name_as_expression"); 
         match node.kind {
             SyntaxKind::Identifier => {
                 let name = deep_clone_node(node);
@@ -230,7 +230,7 @@ impl MetadataSerializer {
     pub fn serialize_qualified_name_as_expression(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_qualified_name_as_expression"); 
         let qualified = node.as_qualified_name();
         let serialized_left = self.serialize_entity_name_as_expression(&qualified.left).unwrap();
         Some(self.factory().new_property_access_expression(
@@ -244,7 +244,7 @@ impl MetadataSerializer {
     pub fn serialize_entity_name_as_expression_fallback(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_entity_name_as_expression_fallback"); 
         if node.kind == SyntaxKind::Identifier {
             let copied = self.serialize_entity_name_as_expression(node).unwrap();
             return self.create_checked_value(&copied, &copied);

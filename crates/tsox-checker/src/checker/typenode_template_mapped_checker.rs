@@ -4,7 +4,7 @@ use std::cell::Cell;
 use crate::checker::typenode_template_mapped::*;
 
 impl Checker {
-    pub(crate) fn build_template_literal_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn build_template_literal_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_template_literal_type"); 
         let (head, spans) = match &node.data {
             NodeData::TemplateLiteralTypeNode(data) => {
                 (Arc::clone(&data.head), Arc::clone(&data.template_spans))
@@ -64,7 +64,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn template_string_for_type(&self, t: &Arc<Type>) -> String {
+    pub(crate) fn template_string_for_type(&self, t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("template_string_for_type"); 
         if t.flags.contains(TypeFlags::StringLiteral) {
             if let TypeData::Literal(lit) = &t.data {
                 if let LiteralValue::String(s) = &lit.value {
@@ -98,14 +98,14 @@ impl Checker {
         String::new()
     }
 
-    pub(crate) fn build_mapped_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn build_mapped_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_mapped_type"); 
         self.push_scope(node);
         let result = self.build_mapped_type_inner(node);
         self.pop_scope();
         result
     }
 
-    pub(crate) fn build_mapped_type_inner(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn build_mapped_type_inner(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_mapped_type_inner"); 
         let data = match &node.data {
             NodeData::MappedTypeNode(data) => data,
             _ => return self.error_type(),
@@ -309,7 +309,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn string_literal_values(&self, t: &Arc<Type>) -> Vec<String> {
+    pub(crate) fn string_literal_values(&self, t: &Arc<Type>) -> Vec<String> { ::tsox_core::fntrace::enter("string_literal_values"); 
         if t.flags.contains(TypeFlags::Never) {
             return Vec::new();
         }
@@ -334,7 +334,7 @@ impl Checker {
         Vec::new()
     }
 
-    pub(crate) fn union_is_all_string_literals(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn union_is_all_string_literals(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("union_is_all_string_literals"); 
         if t.flags.contains(TypeFlags::StringLiteral) {
             return true;
         }
@@ -350,7 +350,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn add_optionality(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn add_optionality(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("add_optionality"); 
         if self.strict_null_checks {
             self.make_union_two(Arc::clone(t), self.undefined_type())
         } else {

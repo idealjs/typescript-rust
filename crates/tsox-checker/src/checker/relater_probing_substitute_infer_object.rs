@@ -9,7 +9,7 @@ impl Checker {
         tps: &[Arc<Type>],
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("substitute_type_parameter_constraints"); 
         tps.iter()
             .map(|tp| {
                 let crate::checker::types::TypeData::TypeParameter(tpd) = &tp.data else {
@@ -52,7 +52,7 @@ impl Checker {
         this_param: &Option<Arc<Symbol>>,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("instantiate_this_parameter_symbol"); 
         let original = this_param.as_ref()?;
         let old = match self
             .value_symbol_links
@@ -91,7 +91,7 @@ impl Checker {
         o: &ObjectTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_object"); 
         if t.object_flags.contains(ObjectFlags::Reference)
             && o.type_arguments.len() == 1
             && t.symbol.as_ref().is_some_and(|s| {

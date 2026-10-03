@@ -14,7 +14,7 @@ pub(crate) enum JsxAttrsBuildMode {
     GuardedPartial,
 }
 
-fn jsx_param_has_raw_type_variable(t: &Arc<Type>) -> bool {
+fn jsx_param_has_raw_type_variable(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("jsx_param_has_raw_type_variable"); 
     if t.flags.intersects(TypeFlags::TypeParameter) {
         return true;
     }
@@ -33,7 +33,7 @@ fn jsx_param_has_raw_type_variable(t: &Arc<Type>) -> bool {
 }
 
 impl Checker {
-    pub(crate) fn create_jsx_attributes_type(&mut self, opening: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn create_jsx_attributes_type(&mut self, opening: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_jsx_attributes_type"); 
         self.create_jsx_attributes_type_with_context(opening, None)
     }
 
@@ -41,7 +41,7 @@ impl Checker {
         &mut self,
         opening: &Arc<Node>,
         context_props: Option<&Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_jsx_attributes_type_with_context"); 
         self.create_jsx_attributes_type_phased(opening, context_props, JsxAttrsBuildMode::Full)
     }
 
@@ -50,7 +50,7 @@ impl Checker {
         opening: &Arc<Node>,
         context_props: Option<&Arc<Type>>,
         mode: JsxAttrsBuildMode,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_jsx_attributes_type_phased"); 
         let mut pairs: Vec<(String, Arc<Type>, Vec<Arc<Node>>)> = Vec::new();
         let mut spread: Option<Arc<Type>> = None;
         let children_name = self
@@ -186,7 +186,7 @@ impl Checker {
         name: &str,
         context_props: Option<&Arc<Type>>,
         mode: JsxAttrsBuildMode,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("jsx_attr_value_type"); 
         if mode != JsxAttrsBuildMode::Full && self.is_context_sensitive(expr) {
             if mode == JsxAttrsBuildMode::SkipContextSensitive {
                 return self.any_function_type();
@@ -243,7 +243,7 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
         context_props: Option<&Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("widen_jsx_attribute_type"); 
         let contextual = context_props
             .and_then(|p| self.get_type_of_property_of_type(p, name));
         let literal_of_ctx = contextual
@@ -257,7 +257,7 @@ impl Checker {
         self.get_regular_type_of_literal_type(&t)
     }
 
-    fn jsx_child_types(&mut self, children: &[Arc<Node>]) -> Vec<Arc<Type>> {
+    fn jsx_child_types(&mut self, children: &[Arc<Node>]) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("jsx_child_types"); 
         children
             .iter()
             .map(|child| match &child.data {
@@ -282,7 +282,7 @@ impl Checker {
         &mut self,
         prop_pairs: Vec<(String, Arc<Type>, Vec<Arc<Node>>)>,
         literal_symbol: Option<Arc<Symbol>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("jsx_attributes_type_from_pairs"); 
         let mut members = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::with_capacity(prop_pairs.len());
         for (name, t, decls) in prop_pairs {

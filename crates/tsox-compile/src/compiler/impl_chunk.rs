@@ -4,50 +4,50 @@ use super::*;
 
 #[allow(dead_code)]
 impl Program {
-    pub fn get_source_files(&self) -> Vec<Arc<SourceFile>> {
+    pub fn get_source_files(&self) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_files"); 
         self.source_files.clone()
     }
 
-    pub fn get_file_include_reasons(&self) -> HashMap<String, Vec<FileIncludeReason>> {
+    pub fn get_file_include_reasons(&self) -> HashMap<String, Vec<FileIncludeReason>> { ::tsox_core::fntrace::enter("get_file_include_reasons"); 
         HashMap::new()
     }
 
-    pub fn is_missing_path(&self, path: &str) -> bool {
+    pub fn is_missing_path(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("is_missing_path"); 
         !self.source_files_by_name.contains_key(path)
     }
 
-    pub fn get_source_file_by_path(&self, path: &str) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file_by_path(&self, path: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_by_path"); 
         self.source_files_by_name.get(path).cloned()
     }
 
-    pub fn duplicate_source_files(&self) -> &[DuplicateSourceFile] {
+    pub fn duplicate_source_files(&self) -> &[DuplicateSourceFile] { ::tsox_core::fntrace::enter("duplicate_source_files"); 
         &[]
     }
 
-    pub fn line_count(&self) -> usize {
+    pub fn line_count(&self) -> usize { ::tsox_core::fntrace::enter("line_count"); 
         self.source_files
             .iter()
             .map(|f| f.text.lines().count())
             .sum()
     }
 
-    pub fn identifier_count(&self) -> usize {
+    pub fn identifier_count(&self) -> usize { ::tsox_core::fntrace::enter("identifier_count"); 
         0
     }
 
-    pub fn symbol_count(&self) -> usize {
+    pub fn symbol_count(&self) -> usize { ::tsox_core::fntrace::enter("symbol_count"); 
         self.symbol_map.symbols.len()
     }
 
-    pub fn type_count(&self) -> usize {
+    pub fn type_count(&self) -> usize { ::tsox_core::fntrace::enter("type_count"); 
         0
     }
 
-    pub fn instantiation_count(&self) -> usize {
+    pub fn instantiation_count(&self) -> usize { ::tsox_core::fntrace::enter("instantiation_count"); 
         0
     }
 
-    pub fn get_program_build_info(&self) -> ProgramBuildInfo {
+    pub fn get_program_build_info(&self) -> ProgramBuildInfo { ::tsox_core::fntrace::enter("get_program_build_info"); 
         ProgramBuildInfo {
             file_count: self.source_files.len(),
             line_count: self.line_count(),
@@ -58,17 +58,17 @@ impl Program {
         }
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.host.use_case_sensitive_file_names()
     }
 
-    pub fn get_current_directory(&self) -> &str {
+    pub fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.host.current_directory()
     }
 
     pub fn get_resolved_modules(
         &self,
-    ) -> HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>> {
+    ) -> HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>> { ::tsox_core::fntrace::enter("get_resolved_modules"); 
         self.resolved_modules
             .iter()
             .map(|(file_name, cache)| {
@@ -81,11 +81,11 @@ impl Program {
             .collect()
     }
 
-    pub fn get_packages_map(&self) -> HashMap<String, bool> {
+    pub fn get_packages_map(&self) -> HashMap<String, bool> { ::tsox_core::fntrace::enter("get_packages_map"); 
         HashMap::new()
     }
 
-    pub fn single_threaded(&self) -> bool {
+    pub fn single_threaded(&self) -> bool { ::tsox_core::fntrace::enter("single_threaded"); 
         true
     }
 }
@@ -98,7 +98,7 @@ pub fn process_root_file(
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     diagnostics: &mut Vec<Arc<Diagnostic>>,
     allow_js: bool,
-) {
+) { ::tsox_core::fntrace::enter("process_root_file"); 
     load_source_file_with_references(
         file_name,
         host,
@@ -117,7 +117,7 @@ pub fn process_source_file(
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     diagnostics: &mut Vec<Arc<Diagnostic>>,
     allow_js: bool,
-) -> Option<Arc<SourceFile>> {
+) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("process_source_file"); 
     load_source_file(
         file_name,
         host,
@@ -137,7 +137,7 @@ pub fn process_all_program_files(
     Vec<Arc<SourceFile>>,
     HashMap<String, Arc<SourceFile>>,
     Vec<Arc<Diagnostic>>,
-) {
+) { ::tsox_core::fntrace::enter("process_all_program_files"); 
     let mut source_files: Vec<Arc<SourceFile>> = Vec::new();
     let mut by_name: HashMap<String, Arc<SourceFile>> = HashMap::new();
     let mut diagnostics: Vec<Arc<Diagnostic>> = Vec::new();
@@ -160,7 +160,7 @@ pub fn process_all_program_files(
 pub(crate) fn ambient_module_exists(
     source_files: &[Arc<tsox_frontend::ast::SourceFile>],
     name: &str,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("ambient_module_exists"); 
     for file in source_files {
         if let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.node.data {
             for stmt in sf.statements.iter() {
@@ -178,7 +178,7 @@ pub(crate) fn ambient_module_exists(
     false
 }
 
-pub(crate) fn is_side_effect_import(import_node: &Arc<tsox_frontend::ast::Node>) -> bool {
+pub(crate) fn is_side_effect_import(import_node: &Arc<tsox_frontend::ast::Node>) -> bool { ::tsox_core::fntrace::enter("is_side_effect_import"); 
     import_node
         .parent()
         .map(|p| {
@@ -197,7 +197,7 @@ pub(crate) fn is_side_effect_import(import_node: &Arc<tsox_frontend::ast::Node>)
 pub(crate) fn is_side_effect_import_in_file(
     file: &SourceFile,
     import_node: &Arc<tsox_frontend::ast::Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_side_effect_import_in_file"); 
     let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.node.data else {
         return false;
     };
@@ -217,7 +217,7 @@ pub(crate) fn node_next_needs_extension(
     file_name: &str,
     spec: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("node_next_needs_extension"); 
     use tsox_core::core::compiler_options::ModuleKind;
     if !matches!(
         options.module,
@@ -236,7 +236,7 @@ pub(crate) fn node_next_needs_extension(
 pub(crate) fn pattern_ambient_module_exists(
     source_files: &[Arc<tsox_frontend::ast::SourceFile>],
     name: &str,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("pattern_ambient_module_exists"); 
     for file in source_files {
         if file.external_module_indicator.is_some() {
             continue;
@@ -269,7 +269,7 @@ pub(crate) fn pattern_ambient_module_exists(
     false
 }
 
-pub(crate) fn strip_quotes(s: &str) -> &str {
+pub(crate) fn strip_quotes(s: &str) -> &str { ::tsox_core::fntrace::enter("strip_quotes"); 
     let b = s.as_bytes();
     if b.len() >= 2
         && ((b[0] == b'"' && b[b.len() - 1] == b'"') || (b[0] == b'\'' && b[b.len() - 1] == b'\''))

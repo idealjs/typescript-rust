@@ -21,7 +21,7 @@ impl Checker {
         source: &Arc<Type>,
         kind: TypeFlags,
         strict: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_assignable_to_kind_ex"); 
         if source.flags.intersects(kind) {
             return true;
         }
@@ -71,7 +71,7 @@ impl Checker {
         early_symbols: &SymbolTable,
         late_symbols: &mut SymbolTable,
         decl: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("late_bind_index_signature"); 
         let mut index_symbol = late_symbols
             .get(INTERNAL_SYMBOL_NAME_INDEX)
             .cloned();
@@ -110,7 +110,7 @@ impl Checker {
         &mut self,
         alias_declaration: Option<&Arc<Node>>,
         export_star_declaration: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("mark_symbol_of_alias_declaration_if_type_only"); 
         let Some(alias_declaration) = alias_declaration else {
             return false;
         };
@@ -138,7 +138,7 @@ impl Checker {
         &mut self,
         typeName: &Arc<Node>,
         for_decorator_metadata: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("mark_entity_name_or_entity_expression_as_reference"); 
         let root_name = get_first_identifier(typeName);
         let meaning = if typeName.kind == SyntaxKind::Identifier {
             SymbolFlags::TYPE
@@ -192,7 +192,7 @@ impl Checker {
         }
     }
 
-    pub fn mark_export_specifier_alias_referenced(&mut self, location: &Arc<Node>) {
+    pub fn mark_export_specifier_alias_referenced(&mut self, location: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_export_specifier_alias_referenced"); 
         let parent = location.parent().unwrap();
         let grandparent = parent.parent().unwrap();
         if module_specifier(&grandparent).is_none()

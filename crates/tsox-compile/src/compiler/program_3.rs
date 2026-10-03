@@ -3,19 +3,19 @@
 use super::*;
 
 impl Program {
-    pub fn source_files(&self) -> &[Arc<SourceFile>] {
+    pub fn source_files(&self) -> &[Arc<SourceFile>] { ::tsox_core::fntrace::enter("source_files"); 
         &self.source_files
     }
 
-    pub fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         self.source_files_by_name.get(file_name).cloned()
     }
 
-    pub fn diagnostics(&self) -> &[Arc<Diagnostic>] {
+    pub fn diagnostics(&self) -> &[Arc<Diagnostic>] { ::tsox_core::fntrace::enter("diagnostics"); 
         &self.diagnostics
     }
 
-    pub fn get_diagnostics_to_report(&self) -> Vec<Arc<Diagnostic>> {
+    pub fn get_diagnostics_to_report(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_diagnostics_to_report"); 
         let skip_lib = self.options.skip_lib_check.is_true();
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
 
@@ -39,7 +39,7 @@ impl Program {
             .collect()
     }
 
-    pub fn get_semantic_diagnostics(self: &Arc<Self>) -> Vec<Diagnostic> {
+    pub fn get_semantic_diagnostics(self: &Arc<Self>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_semantic_diagnostics"); 
         let skip_lib = self.options.skip_lib_check.is_true();
         let skip_default_lib = self.options.skip_default_lib_check.is_true();
 
@@ -163,7 +163,7 @@ impl Program {
         diagnostics
     }
 
-    pub(crate) fn can_include_bind_and_check_diagnostics(&self, file: &SourceFile) -> bool {
+    pub(crate) fn can_include_bind_and_check_diagnostics(&self, file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("can_include_bind_and_check_diagnostics"); 
         match file.script_kind {
             ScriptKind::Ts | ScriptKind::Tsx | ScriptKind::External | ScriptKind::Deferred => true,
             ScriptKind::Js | ScriptKind::Jsx => !self.options.check_js.is_false(),
@@ -171,7 +171,7 @@ impl Program {
         }
     }
 
-    pub fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool {
+    pub fn includes_semantic_diagnostic(&self, d: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("includes_semantic_diagnostic"); 
         let Some(file) = &d.file else {
             return true;
         };
@@ -185,7 +185,7 @@ impl Program {
         true
     }
 
-    pub fn build_checker(self: &Arc<Self>) -> tsox_checker::checker::Checker {
+    pub fn build_checker(self: &Arc<Self>) -> tsox_checker::checker::Checker { ::tsox_core::fntrace::enter("build_checker"); 
         self.build_checker_internal(false, false)
     }
 
@@ -193,7 +193,7 @@ impl Program {
         self: &Arc<Self>,
         skip_lib: bool,
         skip_default_lib: bool,
-    ) -> tsox_checker::checker::Checker {
+    ) -> tsox_checker::checker::Checker { ::tsox_core::fntrace::enter("build_checker_internal"); 
         let tracer = Arc::new(tsox_checker::checker::Tracer::new());
         let program: Arc<dyn tsox_checker::checker::Program> = Arc::clone(self) as _;
         let mut checker = tsox_checker::checker::Checker::new(program, tracer);
@@ -210,30 +210,30 @@ impl Program {
         checker
     }
 
-    pub fn config_file_name(&self) -> &str {
+    pub fn config_file_name(&self) -> &str { ::tsox_core::fntrace::enter("config_file_name"); 
         &self.config_file_name
     }
 
-    pub fn symbol_map(&self) -> &NodeSymbolMap {
+    pub fn symbol_map(&self) -> &NodeSymbolMap { ::tsox_core::fntrace::enter("symbol_map"); 
         &self.symbol_map
     }
 
-    pub fn host(&self) -> &dyn CompilerHost {
+    pub fn host(&self) -> &dyn CompilerHost { ::tsox_core::fntrace::enter("host"); 
         self.host.as_ref()
     }
 
-    pub fn is_source_file_default_library(&self, file_name: &str) -> bool {
+    pub fn is_source_file_default_library(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_source_file_default_library"); 
         self.default_library_file_names.contains(file_name)
     }
 
-    pub fn file_exists(&self, file_name: &str) -> bool {
+    pub fn file_exists(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.host.fs().file_exists(file_name)
     }
 
     pub fn emit(
         &self,
         write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
-    ) -> tsox_emit::emitter::EmitResult {
+    ) -> tsox_emit::emitter::EmitResult { ::tsox_core::fntrace::enter("emit"); 
         let fs = self.host.fs();
 
         let source_files: Vec<_> = self
@@ -250,29 +250,29 @@ impl Program {
 }
 
 impl tsox_checker::checker::Program for Program {
-    fn options(&self) -> &CompilerOptions {
+    fn options(&self) -> &CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         &self.options
     }
-    fn source_files(&self) -> &[Arc<SourceFile>] {
+    fn source_files(&self) -> &[Arc<SourceFile>] { ::tsox_core::fntrace::enter("source_files"); 
         &self.source_files
     }
-    fn bind_source_files(&self) {}
-    fn file_exists(&self, file_name: &str) -> bool {
+    fn bind_source_files(&self) { ::tsox_core::fntrace::enter("bind_source_files"); }
+    fn file_exists(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         Program::file_exists(self, file_name)
     }
-    fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> {
+    fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         Program::get_source_file(self, file_name)
     }
-    fn is_source_file_default_library(&self, path: &str) -> bool {
+    fn is_source_file_default_library(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("is_source_file_default_library"); 
         Program::is_source_file_default_library(self, path)
     }
-    fn diagnostics(&self) -> &[Arc<tsox_frontend::ast::Diagnostic>] {
+    fn diagnostics(&self) -> &[Arc<tsox_frontend::ast::Diagnostic>] { ::tsox_core::fntrace::enter("diagnostics"); 
         Program::diagnostics(self)
     }
     fn get_resolved_modules(
         &self,
     ) -> std::collections::HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>>
-    {
+    { ::tsox_core::fntrace::enter("get_resolved_modules"); 
         Program::get_resolved_modules(self)
     }
     fn resolve_external_module_path(
@@ -280,7 +280,7 @@ impl tsox_checker::checker::Program for Program {
         specifier: &str,
         containing_file: &str,
         resolution_mode: tsox_core::core::compiler_options::ModuleKind,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("resolve_external_module_path"); 
         let resolution_host: Arc<dyn tsox_tsoptions::module::ResolutionHost + Send + Sync> =
             Arc::new(ResolutionHostAdapter::new(self.host.as_ref()));
         let resolver = tsox_tsoptions::module::Resolver::new(
@@ -295,16 +295,16 @@ impl tsox_checker::checker::Program for Program {
             .filter(|m| m.is_resolved())
             .map(|m| self.host.fs().realpath(m.resolved_file_name.as_str()))
     }
-    fn symbol_map(&self) -> &NodeSymbolMap {
+    fn symbol_map(&self) -> &NodeSymbolMap { ::tsox_core::fntrace::enter("symbol_map"); 
         Program::symbol_map(self)
     }
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         self.host.current_directory()
     }
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.host.use_case_sensitive_file_names()
     }
-    fn common_source_directory(&self) -> String {
+    fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         let source_files: Vec<_> = self
             .source_files
             .iter()
@@ -313,17 +313,17 @@ impl tsox_checker::checker::Program for Program {
             .collect();
         tsox_emit::emitter::compute_program_common_source_directory(&source_files, &self.options)
     }
-    fn canonicalize_path(&self, path: &str) -> String {
+    fn canonicalize_path(&self, path: &str) -> String { ::tsox_core::fntrace::enter("canonicalize_path"); 
         self.host.fs().realpath(path)
     }
 
-    fn read_file(&self, file_name: &str) -> Option<String> {
+    fn read_file(&self, file_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.host.fs().read_file(file_name)
     }
     fn get_emit_module_format_of_file(
         &self,
         file_name: &str,
-    ) -> tsox_core::core::compiler_options::ModuleKind {
+    ) -> tsox_core::core::compiler_options::ModuleKind { ::tsox_core::fntrace::enter("get_emit_module_format_of_file"); 
         use tsox_core::core::compiler_options::ModuleKind;
         match self.options.module {
             ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext => {
@@ -350,7 +350,7 @@ impl tsox_checker::checker::Program for Program {
     }
 }
 
-fn is_program_phase_module_not_found(d: &Diagnostic) -> bool {
+fn is_program_phase_module_not_found(d: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("is_program_phase_module_not_found"); 
     use tsox_core::diagnostics::messages_generated as msg;
     const KEYS: &[&str] = &[
         msg::CANNOT_FIND_MODULE_0_OR_ITS_CORRESPONDING_TYPE_DECLARATIONS.key,

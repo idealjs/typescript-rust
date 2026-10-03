@@ -11,7 +11,7 @@ use super::types::CodeAction;
 
 pub const FIX_MISSING_TYPE_ANNOTATION_ON_EXPORTS_FIX_ID: &str = "fixMissingTypeAnnotationOnExports";
 
-pub fn isolated_declarations_fix_provider() -> CodeFixProvider {
+pub fn isolated_declarations_fix_provider() -> CodeFixProvider { ::tsox_core::fntrace::enter("isolated_declarations_fix_provider"); 
     CodeFixProvider {
         error_codes: Vec::new(),
         fix_ids: vec![FIX_MISSING_TYPE_ANNOTATION_ON_EXPORTS_FIX_ID.to_string()],
@@ -22,14 +22,14 @@ impl LanguageService {
     pub fn get_isolated_declarations_code_actions(
         &self,
         _context: &CodeFixContext,
-    ) -> Vec<CodeAction> {
+    ) -> Vec<CodeAction> { ::tsox_core::fntrace::enter("get_isolated_declarations_code_actions"); 
         Vec::new()
     }
 
     pub fn get_all_isolated_declarations_code_actions(
         &self,
         _context: &CodeFixContext,
-    ) -> super::code_actions::CombinedCodeActions {
+    ) -> super::code_actions::CombinedCodeActions { ::tsox_core::fntrace::enter("get_all_isolated_declarations_code_actions"); 
         super::code_actions::CombinedCodeActions {
             description: String::new(),
             changes: Vec::new(),
@@ -37,7 +37,7 @@ impl LanguageService {
     }
 }
 
-pub fn can_have_type_annotation(_node: &Arc<Node>) -> bool {
+pub fn can_have_type_annotation(_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("can_have_type_annotation"); 
     use tsox_frontend::ast::SyntaxKind;
     matches!(
         _node.kind,
@@ -56,6 +56,6 @@ pub fn can_have_type_annotation(_node: &Arc<Node>) -> bool {
 pub fn get_class(
     _file: &Arc<tsox_frontend::ast::SourceFile>,
     _span: TextRange,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_class"); 
     None
 }

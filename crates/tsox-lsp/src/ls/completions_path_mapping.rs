@@ -24,7 +24,7 @@ pub(super) fn version_redirect(
     program: &Arc<Program>,
     base_directory: &str,
     result: &mut ModuleCompletionSet,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("version_redirect"); 
     let Some(package_dir) = nearest_package_json_dir(service, base_directory) else {
         return false;
     };
@@ -91,7 +91,7 @@ pub(super) fn completions_for_path_mapping(
     patterns: &[String],
     fragment: &str,
     package_directory: &str,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("completions_for_path_mapping"); 
     let parsed = tsox_core::core::core::try_parse_pattern(path);
     let fragment_directory = get_fragment_directory(fragment);
     let just_name = |name: &str| -> Option<String> {
@@ -164,7 +164,7 @@ fn modules_for_paths_pattern(
     fragment: &str,
     pattern: &str,
     package_directory: &str,
-) -> Vec<(String, bool)> {
+) -> Vec<(String, bool)> { ::tsox_core::fntrace::enter("modules_for_paths_pattern"); 
     let parsed = tsox_core::core::core::try_parse_pattern(pattern);
     if parsed.star_index == -1 {
         return Vec::new();
@@ -235,7 +235,7 @@ fn modules_for_paths_pattern(
 
 /// typesVersions 版本键匹配（Go semver.TryParseVersionRange 的常用子集）：
 /// 取第一个匹配编译器版本的范围键下的路径映射
-fn version_paths(fields: &packagejson::Fields) -> Option<Vec<(String, Vec<String>)>> {
+fn version_paths(fields: &packagejson::Fields) -> Option<Vec<(String, Vec<String>)>> { ::tsox_core::fntrace::enter("version_paths"); 
     let tv = &fields.path_fields.types_versions;
     if !tv.is_present() || tv.value_type != JsonValueType::Object {
         return None;
@@ -263,7 +263,7 @@ fn version_paths(fields: &packagejson::Fields) -> Option<Vec<(String, Vec<String
     None
 }
 
-fn version_range_matches(range: &str) -> bool {
+fn version_range_matches(range: &str) -> bool { ::tsox_core::fntrace::enter("version_range_matches"); 
     if range == "*" {
         return true;
     }
@@ -275,7 +275,7 @@ fn version_range_matches(range: &str) -> bool {
     compare_version(range.trim(), "=")
 }
 
-fn compare_version(text: &str, op: &str) -> bool {
+fn compare_version(text: &str, op: &str) -> bool { ::tsox_core::fntrace::enter("compare_version"); 
     let parse = |s: &str| -> (u64, u64, u64) {
         let mut it = s.split('.');
         (

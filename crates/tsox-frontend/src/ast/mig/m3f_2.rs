@@ -7,7 +7,7 @@ use super::m3f_4::is_dynamic_name;
 use super::m3g_2::is_this_parameter;
 use super::m3g_3::try_get_import_from_module_specifier;
 
-pub fn node_initializer(node: &Node) -> Option<&Arc<Node>> {
+pub fn node_initializer(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node_initializer"); 
     match &node.data {
         NodeData::VariableDeclaration(d) => d.initializer.as_ref(),
         NodeData::ParameterDeclaration(d) => d.initializer.as_ref(),
@@ -22,7 +22,7 @@ pub fn node_initializer(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn node_parameters(node: &Node) -> Option<&Arc<NodeList>> {
+pub fn node_parameters(node: &Node) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("node_parameters"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => Some(&d.parameters),
         NodeData::FunctionExpression(d) => Some(&d.parameters),
@@ -40,7 +40,7 @@ pub fn node_parameters(node: &Node) -> Option<&Arc<NodeList>> {
     }
 }
 
-pub fn node_type_parameters(node: &Node) -> Option<&Arc<NodeList>> {
+pub fn node_type_parameters(node: &Node) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("node_type_parameters"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.type_parameters.as_ref(),
         NodeData::FunctionExpression(d) => d.type_parameters.as_ref(),
@@ -62,7 +62,7 @@ pub fn node_type_parameters(node: &Node) -> Option<&Arc<NodeList>> {
     }
 }
 
-pub fn question_token(node: &Node) -> Option<&Arc<Node>> {
+pub fn question_token(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("question_token"); 
     match &node.data {
         NodeData::ParameterDeclaration(d) => d.question_token.as_ref(),
         NodeData::ConditionalExpression(d) => Some(&d.question_token),
@@ -75,15 +75,15 @@ pub fn question_token(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn has_abstract_modifier(node: &Node) -> bool {
+pub fn has_abstract_modifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_abstract_modifier"); 
     has_syntactic_modifier(node, ModifierFlags::Abstract)
 }
 
-pub fn has_ambient_modifier(node: &Node) -> bool {
+pub fn has_ambient_modifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_ambient_modifier"); 
     has_syntactic_modifier(node, ModifierFlags::Ambient)
 }
 
-pub fn has_context_sensitive_parameters(node: &Node) -> bool {
+pub fn has_context_sensitive_parameters(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_context_sensitive_parameters"); 
     if node_type_parameters(node).is_none() {
         if let Some(parameters) = node_parameters(node) {
             if parameters.nodes.iter().any(|p| p.type_node().is_none()) {
@@ -102,11 +102,11 @@ pub fn has_context_sensitive_parameters(node: &Node) -> bool {
     false
 }
 
-pub fn has_dynamic_name(declaration: &Arc<Node>) -> bool {
+pub fn has_dynamic_name(declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_dynamic_name"); 
     get_name_of_declaration(declaration).is_some_and(|name| is_dynamic_name(&name))
 }
 
-pub fn has_import_attributes(node: &Node) -> bool {
+pub fn has_import_attributes(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_import_attributes"); 
     matches!(
         node.kind,
         SyntaxKind::ImportDeclaration
@@ -116,7 +116,7 @@ pub fn has_import_attributes(node: &Node) -> bool {
     )
 }
 
-pub fn has_inferred_type(node: &Node) -> bool {
+pub fn has_inferred_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_inferred_type"); 
     matches!(
         node.kind,
         SyntaxKind::Parameter
@@ -136,7 +136,7 @@ pub fn has_inferred_type(node: &Node) -> bool {
     )
 }
 
-pub fn has_initializer(node: &Node) -> bool {
+pub fn has_initializer(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_initializer"); 
     match node.kind {
         SyntaxKind::VariableDeclaration
         | SyntaxKind::Parameter
@@ -152,15 +152,15 @@ pub fn has_initializer(node: &Node) -> bool {
     }
 }
 
-pub fn has_modifier(node: &Node, flags: ModifierFlags) -> bool {
+pub fn has_modifier(node: &Node, flags: ModifierFlags) -> bool { ::tsox_core::fntrace::enter("has_modifier"); 
     node.syntactic_modifier_flags().intersects(flags)
 }
 
-pub fn has_question_token(node: &Node) -> bool {
+pub fn has_question_token(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_question_token"); 
     is_question_token(question_token(node).map(Arc::as_ref))
 }
 
-pub fn has_resolution_mode_override(node: Option<&Arc<Node>>) -> bool {
+pub fn has_resolution_mode_override(node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("has_resolution_mode_override"); 
     let node = match node {
         Some(n) => n,
         None => return false,
@@ -177,7 +177,7 @@ pub fn has_resolution_mode_override(node: Option<&Arc<Node>>) -> bool {
     false
 }
 
-pub fn has_same_property_access_name(node1: &Arc<Node>, node2: &Arc<Node>) -> bool {
+pub fn has_same_property_access_name(node1: &Arc<Node>, node2: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_same_property_access_name"); 
     if node1.kind == SyntaxKind::Identifier && node2.kind == SyntaxKind::Identifier {
         node1.text() == node2.text()
     } else if node1.kind == SyntaxKind::PropertyAccessExpression
@@ -200,7 +200,7 @@ pub fn has_same_property_access_name(node1: &Arc<Node>, node2: &Arc<Node>) -> bo
     }
 }
 
-pub fn has_type_arguments(node: &Node) -> bool {
+pub fn has_type_arguments(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_type_arguments"); 
     matches!(
         node.kind,
         SyntaxKind::CallExpression
@@ -215,14 +215,14 @@ pub fn has_type_arguments(node: &Node) -> bool {
     )
 }
 
-pub fn import_from_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn import_from_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_from_module_specifier"); 
     if let Some(result) = try_get_import_from_module_specifier(node) {
         return Some(result);
     }
     None
 }
 
-pub fn index_of_node(nodes: &[Arc<Node>], node: &Arc<Node>) -> Option<usize> {
+pub fn index_of_node(nodes: &[Arc<Node>], node: &Arc<Node>) -> Option<usize> { ::tsox_core::fntrace::enter("index_of_node"); 
     let mut lo = 0usize;
     let mut hi = nodes.len();
     while lo < hi {

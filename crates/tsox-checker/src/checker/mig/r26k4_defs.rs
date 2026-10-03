@@ -31,7 +31,7 @@ thread_local! {
     static JSX_LINKS: RefCell<HashMap<u64, JsxLinks>> = RefCell::new(HashMap::new());
 }
 
-pub fn jsx_links(node: &Arc<Node>) -> JsxLinks {
+pub fn jsx_links(node: &Arc<Node>) -> JsxLinks { ::tsox_core::fntrace::enter("jsx_links"); 
     JSX_LINKS.with(|l| {
         l.borrow()
             .get(&node.id())
@@ -40,7 +40,7 @@ pub fn jsx_links(node: &Arc<Node>) -> JsxLinks {
     })
 }
 
-pub fn set_jsx_links_import_ref(node: &Arc<Node>, import_ref: Option<Arc<Node>>) {
+pub fn set_jsx_links_import_ref(node: &Arc<Node>, import_ref: Option<Arc<Node>>) { ::tsox_core::fntrace::enter("set_jsx_links_import_ref"); 
     JSX_LINKS.with(|l| {
         l.borrow_mut()
             .entry(node.id())
@@ -53,10 +53,10 @@ thread_local! {
     static BUILDER_CHECKER: Cell<*mut Checker> = const { Cell::new(std::ptr::null_mut()) };
 }
 
-pub fn set_builder_checker(ch: &Checker) {
+pub fn set_builder_checker(ch: &Checker) { ::tsox_core::fntrace::enter("set_builder_checker"); 
     BUILDER_CHECKER.with(|c| c.set(ch as *const Checker as *mut Checker));
 }
 
-pub fn builder_checker_ptr() -> *mut Checker {
+pub fn builder_checker_ptr() -> *mut Checker { ::tsox_core::fntrace::enter("builder_checker_ptr"); 
     BUILDER_CHECKER.with(|c| c.get())
 }

@@ -17,7 +17,7 @@ pub struct Mapping {
 }
 
 impl Mapping {
-    pub fn is_source_mapping(&self) -> bool {
+    pub fn is_source_mapping(&self) -> bool { ::tsox_core::fntrace::enter("is_source_mapping"); 
         self.source_index != MISSING_SOURCE
             && self.source_line != MISSING_LINE_OR_COLUMN
             && self.source_character != MISSING_UTF16_COLUMN
@@ -41,7 +41,7 @@ pub struct RawSourceMap {
     pub sources_content: Vec<Option<String>>,
 }
 
-pub fn try_get_source_mapping_url(text: &str, line_starts: &[usize]) -> String {
+pub fn try_get_source_mapping_url(text: &str, line_starts: &[usize]) -> String { ::tsox_core::fntrace::enter("try_get_source_mapping_url"); 
     if line_starts.is_empty() {
         return String::new();
     }

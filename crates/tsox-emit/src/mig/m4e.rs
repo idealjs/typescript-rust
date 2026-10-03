@@ -113,7 +113,7 @@ pub struct DeclarationTransformerState {
 }
 
 impl Default for DeclarationTransformerState {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             current_source_file: None,
             file: None,
@@ -131,7 +131,7 @@ impl Default for DeclarationTransformerState {
 }
 
 impl DeclarationTransformerState {
-    pub fn add_diagnostic(&mut self, diagnostic: tsox_frontend::ast::diagnostic::Diagnostic) {
+    pub fn add_diagnostic(&mut self, diagnostic: tsox_frontend::ast::diagnostic::Diagnostic) { ::tsox_core::fntrace::enter("add_diagnostic"); 
         self.diagnostics.push(diagnostic);
     }
 }
@@ -186,35 +186,35 @@ pub struct DeclarationTransformer {
 }
 
 impl DeclarationTransformer {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    fn visitor(&self) -> Visitor {
+    fn visitor(&self) -> Visitor { ::tsox_core::fntrace::enter("visitor"); 
         Visitor::default()
     }
 
-    fn emit_context(&self) -> &EmitContext {
+    fn emit_context(&self) -> &EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         &self.emit_context
     }
 
-    fn resolver(&self) -> &EmitResolver {
+    fn resolver(&self) -> &EmitResolver { ::tsox_core::fntrace::enter("resolver"); 
         &self.resolver
     }
 
-    fn host(&self) -> &dyn DeclarationEmitHost {
+    fn host(&self) -> &dyn DeclarationEmitHost { ::tsox_core::fntrace::enter("host"); 
         self.host.as_ref()
     }
 
-    fn state(&mut self) -> &mut DeclarationTransformerState {
+    fn state(&mut self) -> &mut DeclarationTransformerState { ::tsox_core::fntrace::enter("state"); 
         &mut self.state_data
     }
 
-    fn tracker(&self) -> &dyn EmitTracker {
+    fn tracker(&self) -> &dyn EmitTracker { ::tsox_core::fntrace::enter("tracker"); 
         self.tracker.as_ref()
     }
 
-    pub fn visit(&mut self, node: Option<Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         let node = node?;
         match node.kind {
             SyntaxKind::SourceFile => self.visit_source_file(node),
@@ -255,7 +255,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_source_file"); 
         self.cjs_export_assignment_name = None;
         if self
             .state_data
@@ -290,7 +290,7 @@ impl DeclarationTransformer {
         updated
     }
 
-    fn collect_file_references(&mut self) {
+    fn collect_file_references(&mut self) { ::tsox_core::fntrace::enter("collect_file_references"); 
         let Some(file) = self.state_data.file.clone() else {
             return;
         };
@@ -314,7 +314,7 @@ impl DeclarationTransformer {
             file.lib_reference_directives.iter().map(convert).collect();
     }
 
-    fn append_cjs_exports(&mut self, combined_statements: Arc<NodeList>) -> Arc<NodeList> {
+    fn append_cjs_exports(&mut self, combined_statements: Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("append_cjs_exports"); 
         let mut result: Vec<Arc<Node>> = Vec::new();
         if let Some(cjs) = &self.cjs_export_assignment {
             result.push(cjs.clone());
@@ -328,7 +328,7 @@ impl DeclarationTransformer {
         combined_statements
     }
 
-    pub fn transform_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_source_file"); 
         self.cjs_export_assignment = None;
         self.cjs_export_assignment_name = None;
         self.cjs_export_members = Vec::new();
@@ -341,7 +341,7 @@ impl DeclarationTransformer {
         result
     }
 
-    fn transform_source_file_worker(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn transform_source_file_worker(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_source_file_worker"); 
         self.cjs_export_assignment_visitor().visit_node(&node);
         self.expression_visitor().visit_node(&node);
         let statements = self.visitor().visit_nodes(node.as_source_file().statements.clone());
@@ -376,7 +376,7 @@ impl DeclarationTransformer {
         Some(result)
     }
 
-    pub fn visit_declaration_subtree(&mut self, input: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_declaration_subtree(&mut self, input: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_declaration_subtree"); 
         if self.should_strip_internal(Some(&input)) {
             return None;
         }
@@ -519,7 +519,7 @@ impl DeclarationTransformer {
         result
     }
 
-    pub fn transform_mapped_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_mapped_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_mapped_type_node"); 
         let mt = input.as_mapped_type_node();
         let type_node = match &mt.type_node {
             None => Some(self.factory().new_keyword_type_node(SyntaxKind::AnyKeyword)),
@@ -536,7 +536,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_heritage_clause(&mut self, clause: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_heritage_clause(&mut self, clause: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_heritage_clause"); 
         let hc = clause.as_heritage_clause();
         let retained_clauses: Vec<Arc<Node>> = hc
             .types
@@ -567,7 +567,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_import_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_import_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_import_type_node"); 
         if !is_literal_import_type_node(input) {
             return Some(input.clone());
         }
@@ -585,14 +585,14 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_type_reference(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_type_reference(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_type_reference"); 
         let type_name = input.as_type_reference_node().type_name.clone();
         let enclosing = self.enclosing_declaration.clone();
         self.check_entity_name_visibility(&type_name, enclosing.as_ref());
         self.visitor().visit_each_child(input)
     }
 
-    pub fn transform_expression_with_type_arguments(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_expression_with_type_arguments(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_expression_with_type_arguments"); 
         let expression = input.as_expression_with_type_arguments().expression.clone();
         if is_entity_name(&expression) || is_entity_name_expression(&expression) {
             let enclosing = self.enclosing_declaration.clone();
@@ -601,7 +601,7 @@ impl DeclarationTransformer {
         self.visitor().visit_each_child(input)
     }
 
-    pub fn transform_type_parameter_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_type_parameter_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_type_parameter_declaration"); 
         if is_private_method_type_parameter(self.host(), input)
             && (input.as_type_parameter_declaration().default_type.is_some()
                 || input.as_type_parameter_declaration().constraint.is_some())
@@ -619,7 +619,7 @@ impl DeclarationTransformer {
         self.visitor().visit_each_child(input)
     }
 
-    pub fn transform_variable_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_variable_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_variable_declaration"); 
         if self.state_data.file.as_ref().map(|f| f.common_js_module_indicator.is_some()).unwrap_or(false)
             && is_variable_declaration_initialized_to_require(input)
         {
@@ -644,7 +644,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    fn transform_cjs_require_variable_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    fn transform_cjs_require_variable_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_cjs_require_variable_declaration"); 
         let initializer_args = &input.initializer().unwrap().as_call_expression().arguments.nodes;
         let specifier = self.rewrite_module_specifier(input, Some(&initializer_args[0]));
         let Some(specifier) = specifier else {
@@ -689,7 +689,7 @@ impl DeclarationTransformer {
         }
     }
 
-    fn recreate_binding_pattern(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    fn recreate_binding_pattern(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("recreate_binding_pattern"); 
         let mut results: Vec<Arc<Node>> = Vec::new();
         for elem in &input.as_binding_pattern().elements.nodes {
             let result = self.recreate_binding_element(elem)?;
@@ -708,7 +708,7 @@ impl DeclarationTransformer {
         Some(self.factory().new_syntax_list(results))
     }
 
-    fn recreate_binding_element(&mut self, e: &Arc<Node>) -> Option<Arc<Node>> {
+    fn recreate_binding_element(&mut self, e: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("recreate_binding_element"); 
         let name = e.name()?;
         if !get_binding_name_visible(&self.resolver(), e) {
             return None;
@@ -725,7 +725,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_index_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_index_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_index_signature_declaration"); 
         let mut t = self.visitor().visit(input.as_index_signature_declaration().type_node.clone());
         if t.is_none() {
             t = Some(self.factory().new_keyword_type_node(SyntaxKind::AnyKeyword));
@@ -741,7 +741,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_property_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_property_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_signature_declaration"); 
         if input.name().map(|n| is_private_identifier(n)).unwrap_or(false) {
             return None;
         }
@@ -761,7 +761,7 @@ impl DeclarationTransformer {
         Some(result)
     }
 
-    pub fn transform_property_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_property_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_declaration"); 
         if input.name().map(|n| is_private_identifier(n)).unwrap_or(false) {
             return None;
         }
@@ -783,7 +783,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_set_accessor_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_set_accessor_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_set_accessor_declaration"); 
         if input.name().map(|n| is_private_identifier(n)).unwrap_or(false) {
             return None;
         }
@@ -806,7 +806,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_get_accessor_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_get_accessor_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_get_accessor_declaration"); 
         if input.name().map(|n| is_private_identifier(n)).unwrap_or(false) {
             return None;
         }
@@ -830,7 +830,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn update_accessor_param_list(&mut self, input: &Arc<Node>, is_private: bool) -> Arc<NodeList> {
+    pub fn update_accessor_param_list(&mut self, input: &Arc<Node>, is_private: bool) -> Arc<NodeList> { ::tsox_core::fntrace::enter("update_accessor_param_list"); 
         let mut new_params: Vec<Arc<Node>> = Vec::new();
         if !is_private {
             if let Some(this_param) = get_this_parameter(input) {
@@ -870,7 +870,7 @@ impl DeclarationTransformer {
         self.factory().new_node_list(new_params)
     }
 
-    fn transform_method_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    fn transform_method_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_method_signature_declaration"); 
         let parse_node = self.emit_context().parse_node(input).expect("parse node");
         if self
             .host()
@@ -901,7 +901,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn transform_method_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_method_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_method_declaration"); 
         let parse_node = self.emit_context().parse_node(input).expect("parse node");
         if self
             .host()
@@ -935,7 +935,7 @@ impl DeclarationTransformer {
         }
     }
 
-    fn omit_private_method_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    fn omit_private_method_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("omit_private_method_type"); 
         let declarations = input.symbol_declarations_k3();
         if !declarations.is_empty() && !Arc::ptr_eq(&declarations[0], input) {
             return None;
@@ -951,7 +951,7 @@ impl DeclarationTransformer {
         Some(result)
     }
 
-    pub fn visit_declaration_statements(&mut self, input: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_declaration_statements(&mut self, input: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_declaration_statements"); 
         if self.should_strip_internal(Some(&input)) {
             return None;
         }
@@ -989,7 +989,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn try_get_name_of_assigned_expression(&mut self, unwrapped: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn try_get_name_of_assigned_expression(&mut self, unwrapped: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_name_of_assigned_expression"); 
         let mut name_text = String::new();
         if !is_property_access_expression(unwrapped) && unwrapped.name().is_some() {
             name_text = unwrapped.name().unwrap().text().to_string();
@@ -1022,7 +1022,7 @@ impl DeclarationTransformer {
         &mut self,
         unwrapped: &Arc<Node>,
         is_export_equals: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_name_of_exported_assigned_expression"); 
         let name_node = self.try_get_name_of_assigned_expression(unwrapped);
         let name_node = match name_node {
             Some(n) => n,
@@ -1058,7 +1058,7 @@ impl DeclarationTransformer {
         name_node
     }
 
-    pub fn wrap_in_cjs_export_namespace(&mut self, content: Arc<Node>) -> Arc<Node> {
+    pub fn wrap_in_cjs_export_namespace(&mut self, content: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("wrap_in_cjs_export_namespace"); 
         let ns_name = match &self.cjs_export_assignment_name {
             None => return content,
             Some(name) => name.clone(),
@@ -1084,7 +1084,7 @@ impl DeclarationTransformer {
         )
     }
 
-    pub fn transform_top_level_declaration(&mut self, input: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_top_level_declaration(&mut self, input: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_top_level_declaration"); 
         if !self.state().late_marked_statements.is_empty() {
             self.state()
                 .late_marked_statements
@@ -1163,7 +1163,7 @@ impl DeclarationTransformer {
         result
     }
 
-    pub fn transform_type_alias_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_type_alias_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_type_alias_declaration"); 
         self.needs_declare = false;
         let ta = input.as_type_alias_declaration();
         Some(self.factory().update_type_alias_declaration(
@@ -1175,7 +1175,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_interface_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_interface_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_interface_declaration"); 
         let id = input.as_interface_declaration();
         Some(self.factory().update_interface_declaration(
             input,
@@ -1187,7 +1187,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_module_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_module_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_module_declaration"); 
         let mods = self.ensure_modifiers(input);
         let save_needs_declare = self.needs_declare;
         self.needs_declare = false;
@@ -1266,7 +1266,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn visit_this_property_assignments(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_this_property_assignments(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_this_property_assignments"); 
         let this_container = get_this_container(&node, false, false);
         let this_target = match this_container.parent() {
             None => return None,
@@ -1348,7 +1348,7 @@ impl DeclarationTransformer {
         self.this_property_visitor().visit_each_child(&node)
     }
 
-    pub fn walk_binding_pattern(&mut self, pattern: &Arc<Node>, param: &Arc<Node>) -> Vec<Arc<Node>> {
+    pub fn walk_binding_pattern(&mut self, pattern: &Arc<Node>, param: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("walk_binding_pattern"); 
         let mut elems: Vec<Arc<Node>> = Vec::new();
         for elem in &pattern.as_binding_pattern().elements.nodes {
             if is_omitted_expression(elem) {
@@ -1374,7 +1374,7 @@ impl DeclarationTransformer {
         elems
     }
 
-    pub fn transform_variable_statement(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_variable_statement(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_variable_statement"); 
         let declaration_list = input.as_variable_statement().declaration_list.clone();
         let declarations = &declaration_list.as_variable_declaration_list().declarations.nodes;
         let mut visible = false;
@@ -1446,7 +1446,7 @@ impl DeclarationTransformer {
         Some(res)
     }
 
-    pub fn update_param_list(&mut self, node: &Arc<Node>, params: &Arc<NodeList>) -> Arc<NodeList> {
+    pub fn update_param_list(&mut self, node: &Arc<Node>, params: &Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("update_param_list"); 
         let parse_node = self.emit_context().parse_node(node).expect("parse node");
         if self
             .host()
@@ -1464,7 +1464,7 @@ impl DeclarationTransformer {
         self.factory().new_node_list(results)
     }
 
-    fn ensure_parameter(&mut self, p: &Arc<Node>) -> Arc<Node> {
+    fn ensure_parameter(&mut self, p: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("ensure_parameter"); 
         let old_diag = self.state().get_symbol_accessibility_diagnostic.take();
         if !self.suppress_new_diagnostic_contexts {
             self.state().get_symbol_accessibility_diagnostic =
@@ -1496,7 +1496,7 @@ impl DeclarationTransformer {
         result
     }
 
-    fn ensure_no_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn ensure_no_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("ensure_no_initializer"); 
         if self.should_print_with_initializer(node) {
             let initializer = node.initializer();
             let unwrapped_initializer = unwrap_parenthesized_expression(&initializer.unwrap());
@@ -1509,7 +1509,7 @@ impl DeclarationTransformer {
         None
     }
 
-    pub fn visit_binding_name(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_binding_name(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_binding_name"); 
         match node.kind {
             SyntaxKind::Identifier | SyntaxKind::OmittedExpression => Some(node),
             SyntaxKind::ArrayBindingPattern | SyntaxKind::ObjectBindingPattern => {
@@ -1544,7 +1544,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn transform_import_equals_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_import_equals_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_import_equals_declaration"); 
         if !self.resolver().is_declaration_visible(decl) {
             return None;
         }
@@ -1573,7 +1573,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn transform_import_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_import_declaration(&mut self, decl: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_import_declaration"); 
         let d = decl.as_import_declaration();
         if d.import_clause.is_none() {
             let module_specifier = self
@@ -1705,12 +1705,12 @@ impl DeclarationTransformer {
         None
     }
 
-    pub fn transform_jsdoc_type_expression(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_type_expression(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_type_expression"); 
         self.visitor()
             .visit(input.as_jsdoc_type_expression().type_node.clone())
     }
 
-    pub fn transform_jsdoc_type_literal(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_type_literal(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_type_literal"); 
         let (members, _) = self
             .visitor()
             .visit_slice(
@@ -1727,7 +1727,7 @@ impl DeclarationTransformer {
         Some(replacement)
     }
 
-    pub fn transform_jsdoc_property_tag(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_property_tag(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_property_tag"); 
         let tag = input.as_jsdoc_parameter_or_property_tag();
         let replacement = self.factory().new_property_signature_declaration(
             None,
@@ -1740,13 +1740,13 @@ impl DeclarationTransformer {
         Some(replacement)
     }
 
-    pub fn transform_jsdoc_all_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_all_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_all_type"); 
         let replacement = self.factory().new_keyword_type_node(SyntaxKind::AnyKeyword);
         self.emit_context().set_original(&replacement, input);
         Some(replacement)
     }
 
-    pub fn transform_jsdoc_nullable_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_nullable_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_nullable_type"); 
         let inner = self.visitor().visit(input.as_jsdoc_nullable_type().type_node.clone());
         let replacement = self.factory().new_union_type_node(self.factory().new_node_list(vec![
             inner.unwrap(),
@@ -1757,12 +1757,12 @@ impl DeclarationTransformer {
         Some(replacement)
     }
 
-    pub fn transform_jsdoc_non_nullable_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_non_nullable_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_non_nullable_type"); 
         self.visitor()
             .visit(input.as_jsdoc_non_nullable_type().type_node.clone())
     }
 
-    pub fn transform_jsdoc_variadic_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_variadic_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_variadic_type"); 
         let inner = self.visitor()
             .visit(input.as_jsdoc_variadic_type().type_node.clone());
         let replacement = self.factory().new_array_type_node(inner);
@@ -1770,7 +1770,7 @@ impl DeclarationTransformer {
         Some(replacement)
     }
 
-    pub fn transform_jsdoc_optional_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsdoc_optional_type(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsdoc_optional_type"); 
         let inner = self.visitor()
             .visit(input.as_jsdoc_optional_type().type_node.clone());
         let replacement = self.factory().new_union_type_node(self.factory().new_node_list(vec![
@@ -1781,7 +1781,7 @@ impl DeclarationTransformer {
         Some(replacement)
     }
 
-    pub fn visit_cjs_export_assignments(&mut self, expression: Option<Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn visit_cjs_export_assignments(&mut self, expression: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_cjs_export_assignments"); 
         let expression = expression?;
         let (_, cleanup_diagnostic_context) = self.setup_diagnostic_context(&expression);
         if get_assignment_declaration_kind(&expression) == JsDeclarationKind::ModuleExports {
@@ -1810,7 +1810,7 @@ impl DeclarationTransformer {
         self.cjs_export_assignment_visitor().visit_each_child(&expression)
     }
 
-    pub fn visit_nested_expression(&mut self, expression: Option<Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn visit_nested_expression(&mut self, expression: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_nested_expression"); 
         let expression = expression?;
         let (_, cleanup_diagnostic_context) = self.setup_diagnostic_context(&expression);
         match get_assignment_declaration_kind(&expression) {
@@ -1856,7 +1856,7 @@ impl DeclarationTransformer {
         self.expression_visitor().visit_each_child(&expression)
     }
 
-    pub fn transform_expando_assignment(&mut self, node: &Arc<Node>) {
+    pub fn transform_expando_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("transform_expando_assignment"); 
         let left = node.as_binary_expression().left.clone();
         // Go 2719-2723: node.Symbol 含 SymbolFlagsAssignment 才继续。Node→Symbol 接线
         // (m3c::symbol 需 NodeSymbolMap)属 checker 裁决项,接线前无法判定;
@@ -2003,7 +2003,7 @@ impl DeclarationTransformer {
         &mut self,
         input: &Arc<Node>,
         name: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_common_js_export"); 
         let res = self.transform_common_js_export_worker(input, name)?;
         Some(self.wrap_in_cjs_export_namespace(res))
     }
@@ -2012,7 +2012,7 @@ impl DeclarationTransformer {
         &mut self,
         input: &Arc<Node>,
         name: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_common_js_export_worker"); 
         let mut name_text = String::new();
         if let Some(name) = &name {
             if is_identifier(name) || is_string_literal(name) {
@@ -2167,7 +2167,7 @@ impl DeclarationTransformer {
         &mut self,
         input: &Arc<Node>,
         name: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_binary_expression_to_export_declaration"); 
         let property_name = input.as_binary_expression().right.clone();
         // Go 1317: tx.tracker.handleSymbolAccessibilityError(
         //   resolver.IsEntityNameVisible(propertyName, enclosingDeclaration));
@@ -2192,7 +2192,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn try_get_property_name(&mut self, node: &Arc<Node>) -> String {
+    pub fn try_get_property_name(&mut self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("try_get_property_name"); 
         if is_element_access_expression(node) {
             return self.resolver().get_element_access_expression_name(node);
         }
@@ -2202,7 +2202,7 @@ impl DeclarationTransformer {
         String::new()
     }
 
-    pub fn get_referenced_files(&self, _output_file_path: &str) -> Vec<FileReference> {
+    pub fn get_referenced_files(&self, _output_file_path: &str) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_referenced_files"); 
         self.state_data
             .raw_referenced_files
             .iter()
@@ -2216,7 +2216,7 @@ impl DeclarationTransformer {
             .collect()
     }
 
-    pub fn create_full_expando_block(&mut self, id: u64) -> Option<Arc<Node>> {
+    pub fn create_full_expando_block(&mut self, id: u64) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_full_expando_block"); 
         let n = self.expando_hosts.get(&id).cloned();
         if let Some(add_ons) = self.expando_members.remove(&id) {
             let mut modifiers: Option<Arc<ModifierList>> = None;
@@ -2264,7 +2264,7 @@ impl DeclarationTransformer {
         n
     }
 
-    pub fn transform_function_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_function_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_function_declaration"); 
         let fd = input.as_function_declaration_r42k01();
         let type_parameters = fd
             .type_parameters
@@ -2286,7 +2286,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_class_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_class_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_class_declaration"); 
         let previous_enclosing_declaration = self.enclosing_declaration.clone();
         self.enclosing_declaration = Some(input.clone());
         let old_name = self.state().error_name_node.clone();
@@ -2316,7 +2316,7 @@ impl DeclarationTransformer {
         Some(result)
     }
 
-    pub fn transform_enum_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_enum_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_enum_declaration"); 
         let ed = input.as_enum_declaration_r42k01();
         let kept: Vec<Arc<Node>> = ed
             .members
@@ -2334,7 +2334,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_call_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_call_signature_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_call_signature_declaration"); 
         let csd = input.as_call_signature_declaration_r42k01();
         let type_parameters = csd
             .type_parameters
@@ -2354,7 +2354,7 @@ impl DeclarationTransformer {
     pub fn transform_construct_signature_declaration(
         &mut self,
         input: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_construct_signature_declaration"); 
         let csd = input.as_construct_signature_declaration_r42k01();
         let type_parameters = csd
             .type_parameters
@@ -2371,7 +2371,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_constructor_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_constructor_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_constructor_declaration"); 
         let ctor = input.as_constructor_declaration_r42k01();
         let params = ctor.parameters.clone();
         let new_params = self.update_param_list(input, &params);
@@ -2386,7 +2386,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_conditional_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_conditional_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_conditional_type_node"); 
         let ctd = input.as_conditional_type_node_r42k01();
         let check_type = self
             .visitor()
@@ -2416,7 +2416,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_function_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_function_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_function_type_node"); 
         let ftd = input.as_function_type_node_r42k01();
         let type_parameters = ftd
             .type_parameters
@@ -2436,7 +2436,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_constructor_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_constructor_type_node(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_constructor_type_node"); 
         let ctd = input.as_constructor_type_node_r42k01();
         let type_parameters = ctd
             .type_parameters
@@ -2463,7 +2463,7 @@ impl DeclarationTransformer {
         assignment: &Arc<Node>,
         expression: &Arc<Node>,
         is_export_equals: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_export_assignment"); 
         let parent_is_source_file = input
             .parent()
             .as_deref()
@@ -2581,7 +2581,7 @@ pub trait R42K01EmitResolverExt {
 }
 
 impl R42K01EmitResolverExt for EmitResolver {
-    fn precalculate_declaration_emit_visibility(&self, _file: &tsox_frontend::ast::SourceFile) {
+    fn precalculate_declaration_emit_visibility(&self, _file: &tsox_frontend::ast::SourceFile) { ::tsox_core::fntrace::enter("precalculate_declaration_emit_visibility"); 
         // m2d EmitResolver 的可见性判定均为无状态查询,无预计算缓存可落
     }
 }
@@ -2593,7 +2593,7 @@ impl<'a> NodeFactory<'a> {
         type_parameters: Option<Arc<NodeList>>,
         parameters: Arc<NodeList>,
         type_node: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_call_signature_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::CallSignature,
             NodeData::CallSignatureDeclaration(ndg::CallSignatureDeclarationData {
@@ -2613,7 +2613,7 @@ impl<'a> NodeFactory<'a> {
         type_parameters: Option<Arc<NodeList>>,
         parameters: Arc<NodeList>,
         type_node: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_construct_signature_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::ConstructSignature,
             NodeData::ConstructSignatureDeclaration(ndg::ConstructSignatureDeclarationData {
@@ -2634,7 +2634,7 @@ impl<'a> NodeFactory<'a> {
         extends_type: Arc<Node>,
         true_type: Arc<Node>,
         false_type: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_conditional_type_node"); 
         let mut updated = Node::new(
             SyntaxKind::ConditionalType,
             NodeData::ConditionalTypeNode(ndg::ConditionalTypeNodeData {
@@ -2655,7 +2655,7 @@ impl<'a> NodeFactory<'a> {
         type_parameters: Option<Arc<NodeList>>,
         parameters: Arc<NodeList>,
         type_node: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_function_type_node"); 
         let mut updated = Node::new(
             SyntaxKind::FunctionType,
             NodeData::FunctionTypeNode(ndg::FunctionTypeNodeData {
@@ -2676,7 +2676,7 @@ impl<'a> NodeFactory<'a> {
         type_parameters: Option<Arc<NodeList>>,
         parameters: Arc<NodeList>,
         type_node: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_constructor_type_node"); 
         let mut updated = Node::new(
             SyntaxKind::ConstructorType,
             NodeData::ConstructorTypeNode(ndg::ConstructorTypeNodeData {
@@ -2697,7 +2697,7 @@ impl<'a> NodeFactory<'a> {
         modifiers: Option<Arc<ModifierList>>,
         name: &Arc<Node>,
         members: Arc<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_enum_declaration_r42k01"); 
         let mut updated = Node::new(
             SyntaxKind::EnumDeclaration,
             NodeData::EnumDeclaration(ndg::EnumDeclarationData {
@@ -2715,7 +2715,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         modifiers: Option<Arc<ModifierList>>,
         declaration_list: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_variable_statement_r42k01"); 
         Arc::new(Node::new(
             SyntaxKind::VariableStatement,
             NodeData::VariableStatement(ndg::VariableStatementData {
@@ -2726,7 +2726,7 @@ impl<'a> NodeFactory<'a> {
     }
 }
 
-fn deep_clone_modifier_list_r42k01(modifiers: &Arc<ModifierList>) -> ModifierList {
+fn deep_clone_modifier_list_r42k01(modifiers: &Arc<ModifierList>) -> ModifierList { ::tsox_core::fntrace::enter("deep_clone_modifier_list_r42k01"); 
     ModifierList::new(
         modifiers
             .list
@@ -2743,21 +2743,21 @@ pub struct ReferencedFilePair {
     pub r#ref: FileReference,
 }
 
-pub fn node_or_syntax_list_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_or_syntax_list_children(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_or_syntax_list_children"); 
     if is_syntax_list(node) {
         return node.as_syntax_list().children.clone();
     }
     vec![node.clone()]
 }
 
-pub fn flatten_syntax_lists(nodes: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn flatten_syntax_lists(nodes: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_syntax_lists"); 
     nodes
         .iter()
         .flat_map(node_or_syntax_list_children)
         .collect()
 }
 
-pub fn get_this_parameter(signature: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_this_parameter(signature: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_this_parameter"); 
     let parameters = tsox_frontend::ast::mig::m3b::parameters(signature);
     if !parameters.is_empty() {
         let this_parameter = &parameters[0];
@@ -2768,7 +2768,7 @@ pub fn get_this_parameter(signature: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub fn create_empty_exports(factory: &NodeFactory) -> Arc<Node> {
+pub fn create_empty_exports(factory: &NodeFactory) -> Arc<Node> { ::tsox_core::fntrace::enter("create_empty_exports"); 
     factory.new_export_declaration(
         None,
         false,
@@ -2778,7 +2778,7 @@ pub fn create_empty_exports(factory: &NodeFactory) -> Arc<Node> {
     )
 }
 
-pub fn has_any_binding_initializers(binding_pattern: &Arc<Node>) -> bool {
+pub fn has_any_binding_initializers(binding_pattern: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_any_binding_initializers"); 
     for elem in &binding_pattern.as_binding_pattern().elements.nodes {
         if !is_binding_element(elem) {
             continue;
@@ -2799,7 +2799,7 @@ pub fn has_any_binding_initializers(binding_pattern: &Arc<Node>) -> bool {
     false
 }
 
-pub fn is_class_extending_null(node: Option<&Arc<Node>>) -> bool {
+pub fn is_class_extending_null(node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_class_extending_null"); 
     let node = match node {
         None => return false,
         Some(n) => n,
@@ -2817,7 +2817,7 @@ pub fn is_class_extending_null(node: Option<&Arc<Node>>) -> bool {
     expr.kind == SyntaxKind::NullKeyword
 }
 
-fn opt_arc_eq(a: &Option<Arc<Node>>, b: &Option<Arc<Node>>) -> bool {
+fn opt_arc_eq(a: &Option<Arc<Node>>, b: &Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("opt_arc_eq"); 
     match (a, b) {
         (Some(x), Some(y)) => Arc::ptr_eq(x, y),
         _ => false,

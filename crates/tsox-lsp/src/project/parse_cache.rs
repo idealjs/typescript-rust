@@ -24,7 +24,7 @@ impl ParseCacheKey {
         hash_lo: u64,
         hash_hi: u64,
         script_kind: i32,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         ParseCacheKey {
             file_name,
             path,
@@ -40,7 +40,7 @@ pub struct ParseCache {
 }
 
 impl ParseCache {
-    pub fn new(options: RefCountCacheOptions) -> Self {
+    pub fn new(options: RefCountCacheOptions) -> Self { ::tsox_core::fntrace::enter("new"); 
         ParseCache {
             inner: RefCountCache::new(options),
         }
@@ -49,15 +49,15 @@ impl ParseCache {
     pub fn acquire<F>(&self, key: &ParseCacheKey, _fh: &dyn FileHandle, parse: F) -> Arc<SourceFile>
     where
         F: FnOnce(&ParseCacheKey) -> Arc<SourceFile>,
-    {
+    { ::tsox_core::fntrace::enter("acquire"); 
         self.inner.acquire(key.clone(), parse)
     }
 
-    pub fn has(&self, key: &ParseCacheKey) -> bool {
+    pub fn has(&self, key: &ParseCacheKey) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.inner.has(key)
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.inner.len()
     }
 
@@ -65,7 +65,7 @@ impl ParseCache {
         self.inner.r#ref(key);
     }
 
-    pub fn deref(&self, key: &ParseCacheKey) {
+    pub fn deref(&self, key: &ParseCacheKey) { ::tsox_core::fntrace::enter("deref"); 
         self.inner.deref(key);
     }
 }

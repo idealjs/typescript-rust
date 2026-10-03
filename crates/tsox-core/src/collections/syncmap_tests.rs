@@ -1,7 +1,7 @@
 use crate::collections::syncmap::*;
 
 #[test]
-fn basic() {
+fn basic() { crate::fntrace::enter("basic"); 
     let m = SyncMap::new();
     m.store("a", 1);
     m.store("b", 2);
@@ -11,7 +11,7 @@ fn basic() {
 }
 
 #[test]
-fn load_or_store() {
+fn load_or_store() { crate::fntrace::enter("load_or_store"); 
     let m = SyncMap::new();
     let (v, loaded) = m.load_or_store("a", 1);
     assert_eq!(v, 1);
@@ -22,7 +22,7 @@ fn load_or_store() {
 }
 
 #[test]
-fn test_sync_map_with_nil() {
+fn test_sync_map_with_nil() { crate::fntrace::enter("test_sync_map_with_nil"); 
     let m: SyncMap<String, Option<()>> = SyncMap::new();
 
     let got1 = m.load(&"foo".to_string());

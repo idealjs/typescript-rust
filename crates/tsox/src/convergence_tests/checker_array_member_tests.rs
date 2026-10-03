@@ -9,7 +9,7 @@ use tsox_compile::compiler::ProgramOptions;
 use tsox_tsoptions::tsoptions::ParsedCommandLine;
 use tsox_tsoptions::vfs::InMemoryFS;
 
-fn build_checker_with_lib(source: &str) -> Checker {
+fn build_checker_with_lib(source: &str) -> Checker { ::tsox_core::fntrace::enter("build_checker_with_lib"); 
     use tsox_checker::bundled::BundledFS;
     let inner = Arc::new(InMemoryFS::new());
     inner.insert_file("/proj/entry.ts", source);
@@ -37,7 +37,7 @@ fn build_checker_with_lib(source: &str) -> Checker {
     program.build_checker()
 }
 
-fn error_codes(checker: &Checker) -> Vec<i32> {
+fn error_codes(checker: &Checker) -> Vec<i32> { ::tsox_core::fntrace::enter("error_codes"); 
     let codes: Vec<i32> = checker
         .diagnostics
         .get_all()
@@ -53,7 +53,7 @@ fn error_codes(checker: &Checker) -> Vec<i32> {
 }
 
 #[test]
-fn array_every_callback_param_typed_by_element() {
+fn array_every_callback_param_typed_by_element() { ::tsox_core::fntrace::enter("array_every_callback_param_typed_by_element"); 
     let ok = build_checker_with_lib("declare const ss: string[]; ss.every((x: string) => true);");
     assert_eq!(
         error_codes(&ok),
@@ -71,7 +71,7 @@ fn array_every_callback_param_typed_by_element() {
 }
 
 #[test]
-fn array_flat_own_type_params_stay_free() {
+fn array_flat_own_type_params_stay_free() { ::tsox_core::fntrace::enter("array_flat_own_type_params_stay_free"); 
     let ok = build_checker_with_lib(
         "function foo<T>(arr: T[], depth: number) { return arr.flat(depth); }",
     );
@@ -79,7 +79,7 @@ fn array_flat_own_type_params_stay_free() {
 }
 
 #[test]
-fn array_method_signature_display_substituted() {
+fn array_method_signature_display_substituted() { ::tsox_core::fntrace::enter("array_method_signature_display_substituted"); 
     let checker = build_checker_with_lib("declare const ss: string[]; ss.every(42);");
     let codes = crate::convergence_tests::checker_convergence_tests::error_codes(&checker);
     assert_eq!(codes, vec![2769]);
@@ -96,7 +96,7 @@ fn array_method_signature_display_substituted() {
         msg = msg.replace(&format!("{{{i}}}"), a);
     }
 
-    fn collect_chain_text(d: &tsox_frontend::ast::Diagnostic, out: &mut String) {
+    fn collect_chain_text(d: &tsox_frontend::ast::Diagnostic, out: &mut String) { ::tsox_core::fntrace::enter("collect_chain_text"); 
         out.push_str(&d.message.as_ref().map(|m| m.text).unwrap_or(""));
         for (i, a) in d.message_args.iter().enumerate() {
             out.push(' ');
@@ -116,7 +116,7 @@ fn array_method_signature_display_substituted() {
 }
 
 #[test]
-fn explicit_type_arguments_select_generic_overload() {
+fn explicit_type_arguments_select_generic_overload() { ::tsox_core::fntrace::enter("explicit_type_arguments_select_generic_overload"); 
     // Go oracle（gotsc --noEmit，2026-09-30 主 agent 实测）：单候选经
     // elaborateArrowFunction 短路默认头，恰报一条 TS2322（body 级）
     let ok = build_checker_with_lib(
@@ -126,7 +126,7 @@ fn explicit_type_arguments_select_generic_overload() {
 }
 
 #[test]
-fn bare_array_assignable_to_concat_array() {
+fn bare_array_assignable_to_concat_array() { ::tsox_core::fntrace::enter("bare_array_assignable_to_concat_array"); 
     let ok = build_checker_with_lib(
         "declare const a: string[]; const c: ConcatArray<string> = a; const r = a.concat(\"x\");",
     );
@@ -134,7 +134,7 @@ fn bare_array_assignable_to_concat_array() {
 }
 
 #[test]
-fn concat_on_number_array_with_array_arg() {
+fn concat_on_number_array_with_array_arg() { ::tsox_core::fntrace::enter("concat_on_number_array_with_array_arg"); 
     let ok = build_checker_with_lib("declare const fa: number[]; var x = fa.concat(fa);");
     assert_eq!(error_codes(&ok), Vec::<i32>::new());
 }

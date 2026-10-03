@@ -26,13 +26,13 @@ pub trait K13VisitorR40k14 {
 }
 
 impl K13VisitorR40k14 for K13Visitor {
-    fn visit_nodes(&mut self, nodes: &Arc<NodeList>) -> Arc<NodeList> {
+    fn visit_nodes(&mut self, nodes: &Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("visit_nodes"); 
         let visited: Vec<Arc<Node>> = nodes.nodes.iter().map(|n| self.visit_each_child(n)).collect();
         Arc::new(NodeList::new(visited))
     }
 }
 
-fn set_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> {
+fn set_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> { ::tsox_core::fntrace::enter("set_loc"); 
     if let Some(n) = Arc::get_mut(&mut node) {
         n.loc = loc;
     }
@@ -56,7 +56,7 @@ impl ClassFieldsTransformerR40k14 for ClassFieldsTransformer {
         discarded: bool,
         data: &ClassLexicalEnvironment,
         left: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_binary_super_assignment"); 
         if data.facts.contains(ClassFacts::ClassWasDecorated) {
             return Some(self.factory().update_binary_expression(
                 node,

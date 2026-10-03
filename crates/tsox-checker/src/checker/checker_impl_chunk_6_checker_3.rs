@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk_6::*;
 
 impl Checker {
-    pub(crate) fn check_external_emit_helpers(&mut self, location: &Arc<Node>, helpers: u32) {
+    pub(crate) fn check_external_emit_helpers(&mut self, location: &Arc<Node>, helpers: u32) { ::tsox_core::fntrace::enter("check_external_emit_helpers"); 
         if !self.compiler_options.import_helpers.is_true() {
             return;
         }

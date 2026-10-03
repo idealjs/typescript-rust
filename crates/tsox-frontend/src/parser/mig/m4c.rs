@@ -4,7 +4,7 @@ use crate::parser::*;
 use tsox_core::core::compiler_options_kinds::ModuleKind;
 
 impl Parser {
-    pub(crate) fn parse_optional_token_jsdoc(&mut self, kind: SyntaxKind) -> Option<Arc<Node>> {
+    pub(crate) fn parse_optional_token_jsdoc(&mut self, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_optional_token_jsdoc"); 
         if self.token == kind {
             Some(self.create_token_node())
         } else {
@@ -12,7 +12,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_initializer(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn parse_initializer(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_initializer"); 
         if self.parse_optional(SyntaxKind::EqualsToken) {
             Some(self.parse_assignment_expression())
         } else {
@@ -20,7 +20,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn re_scan_less_than_token(&mut self) -> SyntaxKind {
+    pub(crate) fn re_scan_less_than_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_less_than_token"); 
         self.token = self.scanner.re_scan_less_than();
         self.drain_scanner_errors();
         self.token
@@ -31,7 +31,7 @@ impl Parser {
         is_type_member: bool,
         is_generator: bool,
         is_async: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_function_block_or_semicolon"); 
         if self.token != SyntaxKind::OpenBraceToken {
             if is_type_member {
                 self.parse_type_member_semicolon();
@@ -50,7 +50,7 @@ impl Parser {
         mode: &str,
         pos: usize,
         end: usize,
-    ) -> ModuleKind {
+    ) -> ModuleKind { ::tsox_core::fntrace::enter("parse_resolution_mode"); 
         if mode == "import" {
             return ModuleKind::ESNext;
         }
@@ -67,7 +67,7 @@ impl Parser {
     }
 }
 
-pub(crate) fn skip_blanks(text: &str, pos: usize) -> usize {
+pub(crate) fn skip_blanks(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_blanks"); 
     let bytes = text.as_bytes();
     let mut pos = pos;
     while pos < bytes.len() && (bytes[pos] == b' ' || bytes[pos] == b'\t') {
@@ -76,7 +76,7 @@ pub(crate) fn skip_blanks(text: &str, pos: usize) -> usize {
     pos
 }
 
-pub(crate) fn skip_non_blanks(text: &str, pos: usize) -> usize {
+pub(crate) fn skip_non_blanks(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_non_blanks"); 
     let bytes = text.as_bytes();
     let mut pos = pos;
     while pos < bytes.len()

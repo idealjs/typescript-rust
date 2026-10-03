@@ -41,7 +41,7 @@ impl crate::ls::language_service::LanguageService {
         program: &tsox_compile::compiler::Program,
         file: &Arc<SourceFile>,
         mut list: Option<&mut lsproto::CompletionList>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("filter_content_mapped_auto_imports"); 
         let Some(list) = list.as_deref_mut() else {
             return;
         };
@@ -79,7 +79,7 @@ impl crate::ls::language_service::LanguageService {
         position: usize,
         context_token: Option<&Arc<Node>>,
         file: &Arc<SourceFile>,
-    ) -> Option<Option<MemberCompletionEntry>> {
+    ) -> Option<Option<MemberCompletionEntry>> { ::tsox_core::fntrace::enter("get_entry_for_member_completion"); 
         let class_like_declaration = ast::find_ancestor_kind(location, SyntaxKind::ClassDeclaration)
             .or_else(|| ast::find_ancestor_kind(location, SyntaxKind::ClassExpression));
         let Some(class_like_declaration) = class_like_declaration else {
@@ -258,7 +258,7 @@ impl crate::ls::language_service::LanguageService {
         context_token: Option<&Arc<Node>>,
         file: &Arc<SourceFile>,
         position: usize,
-    ) -> PresentMemberModifiers {
+    ) -> PresentMemberModifiers { ::tsox_core::fntrace::enter("get_present_member_modifiers"); 
         let Some(context_token) = context_token else {
             return PresentMemberModifiers::default();
         };
@@ -326,7 +326,7 @@ fn new_block_m5q2b(
     _factory: &NodeFactory,
     statements: tsox_frontend::ast::node_node_list::NodeList,
     multi_line: bool,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_block_m5q2b"); 
     Arc::new(Node::new(
         SyntaxKind::Block,
         tsox_frontend::ast::node_data_generated::NodeData::Block(
@@ -345,7 +345,7 @@ pub struct PresentMemberModifiers {
     pub erase_range: Option<lsproto::Range>,
 }
 
-fn auto_import_fix_from_lsproto(fix: &lsproto::AutoImportFix) -> crate::ls::autoimport::AutoImportFix {
+fn auto_import_fix_from_lsproto(fix: &lsproto::AutoImportFix) -> crate::ls::autoimport::AutoImportFix { ::tsox_core::fntrace::enter("auto_import_fix_from_lsproto"); 
     crate::ls::autoimport::AutoImportFix {
         kind: match fix.kind {
             0 => crate::ls::autoimport::AutoImportFixKind::UseNamespace,

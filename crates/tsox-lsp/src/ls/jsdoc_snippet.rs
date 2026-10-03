@@ -22,7 +22,7 @@ impl LanguageService {
         &self,
         _file: &Arc<SourceFile>,
         _position: usize,
-    ) -> Option<CompletionItem> {
+    ) -> Option<CompletionItem> { ::tsox_core::fntrace::enter("get_jsdoc_snippet_completion"); 
         None
     }
 }
@@ -30,7 +30,7 @@ impl LanguageService {
 pub fn is_potentially_valid_jsdoc_snippet_completion_position(
     _file: &Arc<SourceFile>,
     _position: usize,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_potentially_valid_jsdoc_snippet_completion_position"); 
     false
 }
 
@@ -39,10 +39,10 @@ pub fn get_doc_comment_template_at_position(
     _position: usize,
     _generate_return: bool,
     _new_line: &str,
-) -> Option<DocCommentTemplate> {
+) -> Option<DocCommentTemplate> { ::tsox_core::fntrace::enter("get_doc_comment_template_at_position"); 
     None
 }
 
-pub fn template_to_snippet(template: &str, _new_line: &str) -> String {
+pub fn template_to_snippet(template: &str, _new_line: &str) -> String { ::tsox_core::fntrace::enter("template_to_snippet"); 
     template.to_string()
 }

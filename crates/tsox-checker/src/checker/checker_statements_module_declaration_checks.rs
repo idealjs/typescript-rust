@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub fn check_module_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_module_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_module_declaration"); 
         if node.name().is_some_and(|n| n.kind == SyntaxKind::Identifier) {
             self.check_cjs_reserved_top_level_name(node, &node.name().unwrap());
         }
@@ -258,7 +258,7 @@ impl Checker {
         }
     }
 
-    fn augmentation_container_is_ambient(&self, node: &Arc<Node>) -> bool {
+    fn augmentation_container_is_ambient(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("augmentation_container_is_ambient"); 
         let file_is_declaration = self
             .current_file
             .as_ref()
@@ -277,7 +277,7 @@ impl Checker {
 }
 
 impl Checker {
-    fn check_module_augmentation_element(&mut self, node: &Arc<Node>) {
+    fn check_module_augmentation_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_module_augmentation_element"); 
         match node.kind {
             SyntaxKind::VariableStatement => {
                 if let tsox_frontend::ast::NodeData::VariableStatement(vs) = &node.data
@@ -336,7 +336,7 @@ impl Checker {
     }
 }
 
-fn binding_pattern_elements(name: &Arc<Node>) -> Vec<Arc<Node>> {
+fn binding_pattern_elements(name: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("binding_pattern_elements"); 
     match &name.data {
         tsox_frontend::ast::NodeData::BindingPattern(bp) => bp.elements.nodes.clone(),
         _ => Vec::new(),

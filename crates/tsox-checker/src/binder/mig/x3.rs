@@ -1,12 +1,12 @@
 use crate::binder::{Binder, FlowLabel, FlowNode};
 use std::sync::Arc;
 
-pub(crate) fn get_binder() -> Binder {
+pub(crate) fn get_binder() -> Binder { ::tsox_core::fntrace::enter("get_binder"); 
     Binder::new()
 }
 
 impl Binder {
-    pub(crate) fn finish_flow_label(&mut self, label: &FlowLabel) -> Arc<FlowNode> {
+    pub(crate) fn finish_flow_label(&mut self, label: &FlowLabel) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("finish_flow_label"); 
         let Some(unreachable_flow) = self.unreachable_flow.clone() else {
             let mut label_node = FlowNode::new(label.node.flags);
             label_node.node = label.node.node.clone();

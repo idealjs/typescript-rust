@@ -28,14 +28,14 @@ use tsox_compile::compiler::Program;
 
 pub use crate::mig::m5o3_4::*;
 
-pub fn bucket_build_preferences_from_user_preferences(prefs: &UserPreferences) -> BucketBuildPreferences {
+pub fn bucket_build_preferences_from_user_preferences(prefs: &UserPreferences) -> BucketBuildPreferences { ::tsox_core::fntrace::enter("bucket_build_preferences_from_user_preferences"); 
     BucketBuildPreferences {
         file_exclude_patterns: prefs.auto_import_file_exclude_patterns.clone(),
         auto_import_entrypoint_directory_search: prefs.auto_import_entrypoint_directory_search,
     }
 }
 
-pub fn new_registry_bucket() -> RegistryBucket {
+pub fn new_registry_bucket() -> RegistryBucket { ::tsox_core::fntrace::enter("new_registry_bucket"); 
     RegistryBucket {
         state: BucketState {
             multiple_files_dirty: true,
@@ -46,7 +46,7 @@ pub fn new_registry_bucket() -> RegistryBucket {
     }
 }
 
-pub fn recursive_search_subset(target: Option<&Set<String>>, current: Option<&Set<String>>) -> bool {
+pub fn recursive_search_subset(target: Option<&Set<String>>, current: Option<&Set<String>>) -> bool { ::tsox_core::fntrace::enter("recursive_search_subset"); 
     match (target, current) {
         (None, None) => true,
         (None, Some(_)) => false,
@@ -55,12 +55,12 @@ pub fn recursive_search_subset(target: Option<&Set<String>>, current: Option<&Se
     }
 }
 
-pub fn is_ignored_file(program: &Program, file: &SourceFile) -> bool {
+pub fn is_ignored_file(program: &Program, file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_ignored_file"); 
     program.is_source_file_default_library(&file.file_name)
         || program.is_global_typings_file(&file.file_name)
 }
 
-pub fn has_new_non_node_modules_files(program: &Program, bucket: &RegistryBucket) -> bool {
+pub fn has_new_non_node_modules_files(program: &Program, bucket: &RegistryBucket) -> bool { ::tsox_core::fntrace::enter("has_new_non_node_modules_files"); 
     if bucket.state.new_program_structure != NewProgramStructure::DifferentFileNames {
         return false;
     }
@@ -82,7 +82,7 @@ pub fn has_symlink_to_node_modules(
     file_path: &Path,
     project_root_path: &Path,
     symlink_cache: Option<&tsox_core::symlinks::KnownSymlinks>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_symlink_to_node_modules"); 
     let Some(symlink_cache) = symlink_cache else {
         return false;
     };
@@ -126,7 +126,7 @@ pub fn has_symlink_to_node_modules(
 pub fn install_extractions(
     discovered: &[DiscoveredPackage],
     extraction_cache: &HashMap<String, PerPackageExtractionResult>,
-) -> PackageExtractionResult {
+) -> PackageExtractionResult { ::tsox_core::fntrace::enter("install_extractions"); 
     let mut result = PackageExtractionResult {
         exports: HashMap::new(),
         package_files: HashMap::new(),
@@ -188,7 +188,7 @@ pub fn install_extractions(
 
 fn package_json_info_stub_from_host_entry(
     entry: crate::project::auto_import::PackageJsonInfoCacheEntry,
-) -> crate::ls::autoimport_registry_registry_impl::PackageJsonInfoStub {
+) -> crate::ls::autoimport_registry_registry_impl::PackageJsonInfoStub { ::tsox_core::fntrace::enter("package_json_info_stub_from_host_entry"); 
     crate::ls::autoimport_registry_registry_impl::PackageJsonInfoStub {
         exists: entry.directory_exists && !entry.package_directory.is_empty(),
         parseable: false,
@@ -208,7 +208,7 @@ pub struct RegistryBuilder {
     pub entrypoints: DirtyMapBuilder<Path, Vec<Arc<ResolvedEntrypoint>>, Vec<Arc<ResolvedEntrypoint>>>,
 }
 
-pub fn new_registry_builder(registry: &Arc<Registry>, host: Arc<dyn RegistryCloneHost>) -> RegistryBuilder {
+pub fn new_registry_builder(registry: &Arc<Registry>, host: Arc<dyn RegistryCloneHost>) -> RegistryBuilder { ::tsox_core::fntrace::enter("new_registry_builder"); 
     RegistryBuilder {
         host,
         base: std::sync::Arc::clone(registry),
@@ -230,7 +230,7 @@ pub fn new_registry_builder(registry: &Arc<Registry>, host: Arc<dyn RegistryClon
 }
 
 impl RegistryBuilder {
-    fn update_directory(&mut self, dir_path: &Path, dir_name: &str, package_json_changed: bool) {
+    fn update_directory(&mut self, dir_path: &Path, dir_name: &str, package_json_changed: bool) { ::tsox_core::fntrace::enter("update_directory"); 
         let package_json_file_name = tsox_core::tspath::combine_paths(dir_name, &["package.json"]);
         let has_node_modules = self
             .host
@@ -270,7 +270,7 @@ impl RegistryBuilder {
         }
     }
 
-    pub fn update_bucket_and_directory_existence(&mut self, change: &RegistryChange, _logger: Option<&LogTree>) {
+    pub fn update_bucket_and_directory_existence(&mut self, change: &RegistryChange, _logger: Option<&LogTree>) { ::tsox_core::fntrace::enter("update_bucket_and_directory_existence"); 
         let mut needed_projects: Set<Path> = Set::new();
         let mut needed_directories: HashMap<Path, String> = HashMap::new();
         for (path, file_name) in &change.open_files {
@@ -360,7 +360,7 @@ impl RegistryBuilder {
         }
     }
 
-    pub fn mark_buckets_dirty(&mut self, change: &RegistryChange, _logger: Option<&LogTree>) {
+    pub fn mark_buckets_dirty(&mut self, change: &RegistryChange, _logger: Option<&LogTree>) { ::tsox_core::fntrace::enter("mark_buckets_dirty"); 
         for (project_path, new_file_names) in &change.rebuilt_programs {
             if let Some(bucket) = self.projects.entries.get_mut(project_path) {
                 bucket.state.new_program_structure = if *new_file_names {
@@ -442,7 +442,7 @@ impl RegistryBuilder {
         mark_files_dirty(self, &change.changed);
     }
 
-    pub fn update_indexes(&mut self, change: &RegistryChange, _logger: Option<&LogTree>) {
+    pub fn update_indexes(&mut self, change: &RegistryChange, _logger: Option<&LogTree>) { ::tsox_core::fntrace::enter("update_indexes"); 
         let (project_path, _) = self.host.get_default_project(&change.requested_file);
         if project_path.0.is_empty() {
             return;
@@ -462,7 +462,7 @@ impl RegistryBuilder {
         );
     }
 
-    pub fn build(&self) -> Registry {
+    pub fn build(&self) -> Registry { ::tsox_core::fntrace::enter("build"); 
         let base = std::sync::Arc::clone(&self.base);
         Registry {
             to_path: Box::new(move |file_name: &str| (base.to_path)(file_name)),
@@ -483,7 +483,7 @@ impl Registry {
         change: &RegistryChange,
         host: Arc<dyn RegistryCloneHost>,
         logger: Option<&LogTree>,
-    ) -> Result<Registry, String> {
+    ) -> Result<Registry, String> { ::tsox_core::fntrace::enter("clone"); 
         let logger = logger.map(|l| l.fork("Building autoimport registry"));
         let mut builder = new_registry_builder(self, host);
         if let Some(prefs) = &change.user_preferences {

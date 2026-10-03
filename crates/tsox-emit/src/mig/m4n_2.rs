@@ -31,32 +31,32 @@ use crate::printer::mig::m4m_3::{
 };
 
 impl EmitContext {
-    pub fn set_assigned_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) {
+    pub fn set_assigned_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) { ::tsox_core::fntrace::enter("set_assigned_name"); 
         self.r39k12_assigned_name_set(node, name);
     }
 
-    pub fn set_class_this(&mut self, node: &Arc<Node>, class_this: &Arc<Node>) {
+    pub fn set_class_this(&mut self, node: &Arc<Node>, class_this: &Arc<Node>) { ::tsox_core::fntrace::enter("set_class_this"); 
         self.r39k12_class_this_set(node, class_this);
     }
 
-    pub fn set_comment_range(&mut self, node: &Arc<Node>, loc: TextRange) {
+    pub fn set_comment_range(&mut self, node: &Arc<Node>, loc: TextRange) { ::tsox_core::fntrace::enter("set_comment_range"); 
         let mut emit_node = self.emit_nodes_get_mut(node);
         emit_node.comment_range = loc;
         emit_node.flags |= HAS_COMMENT_RANGE;
     }
 
-    pub fn set_emit_flags(&mut self, node: &Arc<Node>, flags: EmitFlags) {
+    pub fn set_emit_flags(&mut self, node: &Arc<Node>, flags: EmitFlags) { ::tsox_core::fntrace::enter("set_emit_flags"); 
         self.emit_nodes_get_mut(node).emit_flags = flags;
     }
 
-    pub fn set_external_helpers_module_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) {
+    pub fn set_external_helpers_module_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) { ::tsox_core::fntrace::enter("set_external_helpers_module_name"); 
         let Some(parse_node) = self.parse_node(node) else {
             panic!("Node must be a parse tree node or have an Original pointer to a parse tree node.")
         };
         self.emit_nodes_get_mut(&parse_node).external_helpers_module_name = Some(Arc::clone(name));
     }
 
-    pub fn set_original(&self, node: &Arc<Node>, original: &Arc<Node>) {
+    pub fn set_original(&self, node: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("set_original"); 
         self.set_original_ex(node, original, false);
     }
 
@@ -65,7 +65,7 @@ impl EmitContext {
         node: &Arc<Node>,
         original: &Arc<Node>,
         allow_overwrite: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_original_ex"); 
         match self.r39k12_original_get(node) {
             None => {
                 self.r39k12_original_set(node, original);
@@ -97,11 +97,11 @@ impl EmitContext {
         }
     }
 
-    pub fn set_snippet_element(&mut self, node: &Arc<Node>, snippet_element: SnippetElement) {
+    pub fn set_snippet_element(&mut self, node: &Arc<Node>, snippet_element: SnippetElement) { ::tsox_core::fntrace::enter("set_snippet_element"); 
         self.emit_nodes_get_mut(node).snippet_element = Some(snippet_element);
     }
 
-    pub fn set_source_map_range(&mut self, node: &Arc<Node>, loc: TextRange) {
+    pub fn set_source_map_range(&mut self, node: &Arc<Node>, loc: TextRange) { ::tsox_core::fntrace::enter("set_source_map_range"); 
         let mut emit_node = self.emit_nodes_get_mut(node);
         emit_node.source_map_range = loc;
         emit_node.flags |= HAS_SOURCE_MAP_RANGE;
@@ -111,7 +111,7 @@ impl EmitContext {
         &mut self,
         node: &Arc<Node>,
         comments: Vec<SynthesizedComment>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("set_synthetic_leading_comments"); 
         self.emit_nodes_get_mut(node).leading_comments = comments;
         Arc::clone(node)
     }
@@ -120,7 +120,7 @@ impl EmitContext {
         &mut self,
         node: &Arc<Node>,
         comments: Vec<SynthesizedComment>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("set_synthetic_trailing_comments"); 
         self.emit_nodes_get_mut(node).trailing_comments = comments;
         Arc::clone(node)
     }
@@ -130,21 +130,21 @@ impl EmitContext {
         node: &Arc<Node>,
         kind: SyntaxKind,
         loc: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_token_source_map_range"); 
         self.emit_nodes_get_mut(node)
             .token_source_map_ranges
             .insert(kind, loc);
     }
 
-    pub fn set_type_node(&mut self, node: &Arc<Node>, type_node: &Arc<Node>) {
+    pub fn set_type_node(&mut self, node: &Arc<Node>, type_node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_type_node"); 
         self.emit_nodes_get_mut(node).type_node = Some(Arc::clone(type_node));
     }
 
-    pub fn snippet_element(&self, node: &Arc<Node>) -> Option<SnippetElement> {
+    pub fn snippet_element(&self, node: &Arc<Node>) -> Option<SnippetElement> { ::tsox_core::fntrace::enter("snippet_element"); 
         self.emit_nodes_try_get(node).and_then(|e| e.snippet_element.clone())
     }
 
-    pub fn source_map_range(&self, node: &Arc<Node>) -> TextRange {
+    pub fn source_map_range(&self, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("source_map_range"); 
         if let Some(emit_node) = self.emit_nodes_try_get(node) {
             if emit_node.flags & HAS_SOURCE_MAP_RANGE != 0 {
                 return emit_node.source_map_range;
@@ -153,25 +153,25 @@ impl EmitContext {
         node.loc
     }
 
-    pub fn start_lexical_environment(&mut self) {
+    pub fn start_lexical_environment(&mut self) { ::tsox_core::fntrace::enter("start_lexical_environment"); 
         self.let_scope_stack.push(VarScope::default());
     }
 
-    pub fn start_variable_environment(&mut self) {
+    pub fn start_variable_environment(&mut self) { ::tsox_core::fntrace::enter("start_variable_environment"); 
         self.var_scope_stack.push(VarScope::default());
         self.start_lexical_environment();
     }
 
-    pub fn text_source(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn text_source(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("text_source"); 
         self.r39k12_text_source_get(node)
     }
 
-    pub fn token_source_map_range(&self, node: &Arc<Node>, kind: SyntaxKind) -> Option<TextRange> {
+    pub fn token_source_map_range(&self, node: &Arc<Node>, kind: SyntaxKind) -> Option<TextRange> { ::tsox_core::fntrace::enter("token_source_map_range"); 
         self.emit_nodes_try_get(node)
             .and_then(|emit_node| emit_node.token_source_map_ranges.get(&kind).copied())
     }
 
-    pub fn unset_original(&self, node: &Arc<Node>) {
+    pub fn unset_original(&self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("unset_original"); 
         self.r39k12_original_remove(node);
     }
 
@@ -179,7 +179,7 @@ impl EmitContext {
         &mut self,
         node: &Arc<Node>,
         visitor: &mut NodeVisitor,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_embedded_statement"); 
         if let Some(embedded_statement) = visitor.visit_embedded_statement(node) {
             if !is_not_emitted_statement(&embedded_statement) {
                 return Some(embedded_statement);
@@ -196,7 +196,7 @@ impl EmitContext {
         &mut self,
         node: Option<Arc<Node>>,
         visitor: &mut NodeVisitor,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_function_body"); 
         let updated = visitor.visit_node_opt(node.as_ref());
         let declarations = self.end_variable_environment();
         if declarations.is_empty() {
@@ -239,7 +239,7 @@ impl EmitContext {
         &mut self,
         body: Option<Arc<Node>>,
         visitor: &mut NodeVisitor,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_iteration_body"); 
         let body = body?;
 
         self.start_lexical_environment();
@@ -279,7 +279,7 @@ impl EmitContext {
         &mut self,
         nodes: &NodeList,
         visitor: &mut NodeVisitor,
-    ) -> NodeList {
+    ) -> NodeList { ::tsox_core::fntrace::enter("visit_parameters"); 
         self.start_variable_environment();
         let scope = self.var_scope_stack.last_mut().expect("variable scope");
         let old_flags = scope.flags;
@@ -300,7 +300,7 @@ impl EmitContext {
         &mut self,
         nodes: &NodeList,
         visitor: &mut NodeVisitor,
-    ) -> NodeList {
+    ) -> NodeList { ::tsox_core::fntrace::enter("visit_variable_environment"); 
         self.start_variable_environment();
         let visited = visitor.visit_nodes(nodes);
         self.end_and_merge_variable_environment_list(Some(&visited))

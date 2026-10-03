@@ -18,7 +18,7 @@ impl EmitContext {
         statements: &[Arc<Node>],
         pred: fn(&EmitContext, &Arc<Node>) -> bool,
         start: usize,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("find_span_end_with_emit_context"); 
         let mut i = start;
         while i < statements.len() && pred(self, &statements[i]) {
             i += 1;
@@ -26,14 +26,14 @@ impl EmitContext {
         i
     }
 
-    pub fn add_initialization_statement(&mut self, node: &Arc<Node>) {
+    pub fn add_initialization_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("add_initialization_statement"); 
         self.set_emit_flags(node, EmitFlags::CUSTOM_PROLOGUE);
         panic!(
             "EmitContext varScopeStack not yet ported, Go addInitializationStatement needs it"
         );
     }
 
-    pub fn add_emit_helper(&mut self, node: &Arc<Node>, helpers: &[Arc<EmitHelper>]) {
+    pub fn add_emit_helper(&mut self, node: &Arc<Node>, helpers: &[Arc<EmitHelper>]) { ::tsox_core::fntrace::enter("add_emit_helper"); 
         let mut entry = self.emit_nodes_get_mut(node);
         for h in helpers {
             if !entry.helpers.iter().any(|e| Arc::ptr_eq(e, h)) {
@@ -42,7 +42,7 @@ impl EmitContext {
         }
     }
 
-    pub fn convert_to_function_block(&mut self, node: &Arc<Node>, multi_line: bool) -> Arc<Node> {
+    pub fn convert_to_function_block(&mut self, node: &Arc<Node>, multi_line: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_to_function_block"); 
         if is_block(node) {
             return node.clone();
         }
@@ -69,7 +69,7 @@ fn find_span_end(
     statements: &[Arc<Node>],
     pred: fn(&Arc<Node>) -> bool,
     start: usize,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("find_span_end"); 
     let mut i = start;
     while i < statements.len() && pred(&statements[i]) {
         i += 1;
@@ -77,6 +77,6 @@ fn find_span_end(
     i
 }
 
-pub fn is_hoisted_variable(node: &Arc<Node>) -> bool {
+pub fn is_hoisted_variable(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_hoisted_variable"); 
     is_identifier(&node.name().unwrap()) && node.initializer().is_none()
 }

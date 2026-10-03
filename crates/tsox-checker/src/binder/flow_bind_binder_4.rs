@@ -3,7 +3,7 @@
 use crate::binder::flow_bind::*;
 
 impl Binder {
-    pub(crate) fn bind_throw_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_throw_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_throw_statement"); 
         if let NodeData::ThrowStatement(data) = &node.data {
             self.bind(&data.expression);
         }
@@ -11,7 +11,7 @@ impl Binder {
         self.has_flow_effects = true;
     }
 
-    pub(crate) fn bind_try_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_try_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_try_statement"); 
         let stmt = match &node.data {
             NodeData::TryStatement(data) => data,
             _ => return,
@@ -126,7 +126,7 @@ impl Binder {
     pub(crate) fn finish_flow_node(
         node: &Arc<FlowNode>,
         unreachable: &Arc<FlowNode>,
-    ) -> Arc<FlowNode> {
+    ) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("finish_flow_node"); 
         if node.antecedents.is_empty() {
             return Arc::clone(unreachable);
         }
@@ -136,7 +136,7 @@ impl Binder {
         Arc::clone(node)
     }
 
-    pub(crate) fn bind_break_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_break_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_break_statement"); 
         let label_name = if let NodeData::BreakStatement(data) = &node.data {
             data.label.as_ref().map(|l| self.node_text(l))
         } else {
@@ -178,7 +178,7 @@ impl Binder {
         self.current_flow = Some(self.unreachable_flow());
     }
 
-    pub(crate) fn bind_continue_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_continue_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_continue_statement"); 
         let label_name = if let NodeData::ContinueStatement(data) = &node.data {
             data.label.as_ref().map(|l| self.node_text(l))
         } else {
@@ -220,7 +220,7 @@ impl Binder {
         self.current_flow = Some(self.unreachable_flow());
     }
 
-    pub(crate) fn set_continue_target(&mut self, loop_node: &Arc<Node>, target: &Arc<FlowNode>) {
+    pub(crate) fn set_continue_target(&mut self, loop_node: &Arc<Node>, target: &Arc<FlowNode>) { ::tsox_core::fntrace::enter("set_continue_target"); 
         let mut node = Arc::clone(loop_node);
         let mut cursor = &mut self.active_label_list;
         loop {
@@ -237,7 +237,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_labeled_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_labeled_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_labeled_statement"); 
         let stmt = match &node.data {
             NodeData::LabeledStatement(data) => data,
             _ => return,
@@ -285,7 +285,7 @@ impl Binder {
         };
     }
 
-    pub(crate) fn is_push_or_unshift_identifier(&self, name: &str) -> bool {
+    pub(crate) fn is_push_or_unshift_identifier(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("is_push_or_unshift_identifier"); 
         name == "push" || name == "unshift"
     }
 }

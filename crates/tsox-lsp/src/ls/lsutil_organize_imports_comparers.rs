@@ -15,7 +15,7 @@ pub type StatementComparer = Box<dyn Fn(&Arc<Node>, &Arc<Node>) -> i32>;
 
 pub fn get_detection_lists(
     preferences: &UserPreferences,
-) -> (Vec<StringComparer>, Vec<OrganizeImportsTypeOrder>) {
+) -> (Vec<StringComparer>, Vec<OrganizeImportsTypeOrder>) { ::tsox_core::fntrace::enter("get_detection_lists"); 
     let comparers_to_test: Vec<StringComparer> =
         if preferences.organize_imports_sort != OrganizeImportsSort::Auto {
             vec![get_organize_imports_preset_string_comparer(
@@ -47,7 +47,7 @@ pub fn get_detection_lists(
     (comparers_to_test, type_orders_to_test)
 }
 
-pub fn resolve_organize_imports_sort(preferences: &UserPreferences) -> OrganizeImportsSort {
+pub fn resolve_organize_imports_sort(preferences: &UserPreferences) -> OrganizeImportsSort { ::tsox_core::fntrace::enter("resolve_organize_imports_sort"); 
     if preferences.organize_imports_sort != OrganizeImportsSort::Auto {
         return preferences.organize_imports_sort;
     }
@@ -67,7 +67,7 @@ pub fn resolve_organize_imports_sort(preferences: &UserPreferences) -> OrganizeI
     }
 }
 
-fn get_organize_imports_ordinal_string_comparer(ignore_case: bool) -> StringComparer {
+fn get_organize_imports_ordinal_string_comparer(ignore_case: bool) -> StringComparer { ::tsox_core::fntrace::enter("get_organize_imports_ordinal_string_comparer"); 
     if ignore_case {
         Arc::new(|a: &str, b: &str| tsox_core::stringutil::compare_strings_case_insensitive(a, b))
     } else {
@@ -75,14 +75,14 @@ fn get_organize_imports_ordinal_string_comparer(ignore_case: bool) -> StringComp
     }
 }
 
-fn get_organize_imports_natural_string_comparer(case_sensitive: bool) -> StringComparer {
+fn get_organize_imports_natural_string_comparer(case_sensitive: bool) -> StringComparer { ::tsox_core::fntrace::enter("get_organize_imports_natural_string_comparer"); 
     Arc::new(move |a: &str, b: &str| compare_organize_imports_natural_strings(a, b, case_sensitive))
 }
 
 fn get_organize_imports_unicode_string_comparer(
     ignore_case: bool,
     preferences: &UserPreferences,
-) -> StringComparer {
+) -> StringComparer { ::tsox_core::fntrace::enter("get_organize_imports_unicode_string_comparer"); 
     let case_first = preferences.organize_imports_case_first;
     let numeric = preferences.organize_imports_numeric_collation.is_true();
     let accents = !preferences.organize_imports_accent_collation.is_false();
@@ -91,7 +91,7 @@ fn get_organize_imports_unicode_string_comparer(
     })
 }
 
-fn get_organize_imports_preset_string_comparer(sort: OrganizeImportsSort) -> StringComparer {
+fn get_organize_imports_preset_string_comparer(sort: OrganizeImportsSort) -> StringComparer { ::tsox_core::fntrace::enter("get_organize_imports_preset_string_comparer"); 
     match sort {
         OrganizeImportsSort::OrdinalIgnoreCase => {
             get_organize_imports_ordinal_string_comparer(true)
@@ -107,7 +107,7 @@ fn get_organize_imports_preset_string_comparer(sort: OrganizeImportsSort) -> Str
 pub(super) fn get_organize_imports_string_comparer(
     preferences: &UserPreferences,
     ignore_case: bool,
-) -> StringComparer {
+) -> StringComparer { ::tsox_core::fntrace::enter("get_organize_imports_string_comparer"); 
     if preferences.organize_imports_sort != OrganizeImportsSort::Auto {
         return get_organize_imports_preset_string_comparer(preferences.organize_imports_sort);
     }
@@ -120,7 +120,7 @@ pub(super) fn get_organize_imports_string_comparer(
 pub fn get_named_import_specifier_comparer(
     preferences: &UserPreferences,
     comparer: Option<StringComparer>,
-) -> StatementComparer {
+) -> StatementComparer { ::tsox_core::fntrace::enter("get_named_import_specifier_comparer"); 
     let cmp = match comparer {
         Some(c) => c,
         None => {
@@ -143,7 +143,7 @@ pub fn get_named_import_specifier_comparer(
 pub fn get_organize_imports_string_comparer_with_detection(
     _original_import_decls: &[Arc<Node>],
     preferences: &UserPreferences,
-) -> (StringComparer, bool) {
+) -> (StringComparer, bool) { ::tsox_core::fntrace::enter("get_organize_imports_string_comparer_with_detection"); 
     let comparer = get_comparers(preferences)
         .into_iter()
         .next()
@@ -151,7 +151,7 @@ pub fn get_organize_imports_string_comparer_with_detection(
     (comparer, false)
 }
 
-fn get_comparers(preferences: &UserPreferences) -> Vec<StringComparer> {
+fn get_comparers(preferences: &UserPreferences) -> Vec<StringComparer> { ::tsox_core::fntrace::enter("get_comparers"); 
     if preferences.organize_imports_sort != OrganizeImportsSort::Auto
         || !preferences.organize_imports_ignore_case.is_unknown()
     {
@@ -176,7 +176,7 @@ pub fn get_named_import_specifier_comparer_with_detection(
     _import_decl: &Arc<Node>,
     _source_file: Option<&tsox_frontend::ast::SourceFile>,
     preferences: &UserPreferences,
-) -> (StatementComparer, Tristate) {
+) -> (StatementComparer, Tristate) { ::tsox_core::fntrace::enter("get_named_import_specifier_comparer_with_detection"); 
     let (comparers_to_test, type_orders_to_test) = get_detection_lists(preferences);
     let specifier_comparer =
         get_named_import_specifier_comparer(preferences, comparers_to_test.into_iter().next());

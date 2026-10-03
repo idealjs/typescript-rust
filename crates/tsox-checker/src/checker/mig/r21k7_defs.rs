@@ -10,71 +10,71 @@ use crate::checker::types::{
 use tsox_frontend::ast::{Node, Symbol};
 
 impl Type {
-    pub fn literal_data(&self) -> Option<&LiteralTypeData> {
+    pub fn literal_data(&self) -> Option<&LiteralTypeData> { ::tsox_core::fntrace::enter("literal_data"); 
         match &self.data {
             TypeData::Literal(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn mapped_data(&self) -> Option<&MappedTypeData> {
+    pub fn mapped_data(&self) -> Option<&MappedTypeData> { ::tsox_core::fntrace::enter("mapped_data"); 
         match &self.data {
             TypeData::Mapped(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn indexed_access_data(&self) -> Option<&IndexedAccessTypeData> {
+    pub fn indexed_access_data(&self) -> Option<&IndexedAccessTypeData> { ::tsox_core::fntrace::enter("indexed_access_data"); 
         match &self.data {
             TypeData::IndexedAccess(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn conditional_data(&self) -> Option<&ConditionalTypeData> {
+    pub fn conditional_data(&self) -> Option<&ConditionalTypeData> { ::tsox_core::fntrace::enter("conditional_data"); 
         match &self.data {
             TypeData::Conditional(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn resolved_constraint_of_distributive(&self) -> Option<Arc<Type>> {
+    pub fn resolved_constraint_of_distributive(&self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolved_constraint_of_distributive"); 
         self.conditional_data()
             .and_then(|d| d.resolved_constraint_of_distributive.get().cloned())
     }
 
-    pub fn set_resolved_constraint_of_distributive(&self, t: Option<Arc<Type>>) {
+    pub fn set_resolved_constraint_of_distributive(&self, t: Option<Arc<Type>>) { ::tsox_core::fntrace::enter("set_resolved_constraint_of_distributive"); 
         if let (TypeData::Conditional(d), Some(t)) = (&self.data, t) {
             let _ = d.resolved_constraint_of_distributive.set(t);
         }
     }
 
-    pub fn resolved_apparent_type_of_mapped_type(&self) -> Option<Arc<Type>> {
+    pub fn resolved_apparent_type_of_mapped_type(&self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolved_apparent_type_of_mapped_type"); 
         self.mapped_data()
             .and_then(|d| d.resolved_apparent_type.get().cloned())
     }
 
-    pub fn set_resolved_apparent_type_of_mapped_type(&self, t: &Arc<Type>) {
+    pub fn set_resolved_apparent_type_of_mapped_type(&self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("set_resolved_apparent_type_of_mapped_type"); 
         if let TypeData::Mapped(d) = &self.data {
             let _ = d.resolved_apparent_type.set(Arc::clone(t));
         }
     }
 
-    pub fn resolved_apparent_type_of_intersection(&self) -> Option<Arc<Type>> {
+    pub fn resolved_apparent_type_of_intersection(&self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolved_apparent_type_of_intersection"); 
         match &self.data {
             TypeData::Intersection(d) => d.resolved_apparent_type.get().cloned(),
             _ => None,
         }
     }
 
-    pub fn set_resolved_apparent_type_of_intersection(&self, t: &Arc<Type>) {
+    pub fn set_resolved_apparent_type_of_intersection(&self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("set_resolved_apparent_type_of_intersection"); 
         if let TypeData::Intersection(d) = &self.data {
             let _ = d.resolved_apparent_type.set(Arc::clone(t));
         }
     }
 }
 
-pub(crate) fn get_property_name_for_property_name_node(node: &Node) -> String {
+pub(crate) fn get_property_name_for_property_name_node(node: &Node) -> String { ::tsox_core::fntrace::enter("get_property_name_for_property_name_node"); 
     use tsox_frontend::ast::SyntaxKind;
     match node.kind {
         SyntaxKind::Identifier | SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
@@ -89,36 +89,36 @@ pub(crate) fn get_property_name_for_property_name_node(node: &Node) -> String {
 }
 
 impl Checker {
-    pub(crate) fn get_constraint_of_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn get_constraint_of_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_of_type"); 
         if t.flags.contains(TypeFlags::TypeParameter) {
             return Some(self.get_constraint_from_type_parameter(t));
         }
         self.get_base_constraint_of_type(t)
     }
 
-    pub(crate) fn is_restrictive_instantiation(&mut self, _t: &Arc<Type>) -> bool {
+    pub(crate) fn is_restrictive_instantiation(&mut self, _t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_restrictive_instantiation"); 
         false
     }
 
     pub(crate) fn get_contextual_this_parameter_type(
         &mut self,
         container: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_this_parameter_type"); 
         self.contextual_this_parameter_type(container)
     }
 
     pub(crate) fn create_declared_type_of_class_or_interface(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_declared_type_of_class_or_interface"); 
         self.get_declared_type_of_symbol(symbol)
     }
 
-    pub(crate) fn get_global_import_attributes_type(&mut self) -> Arc<Type> {
+    pub(crate) fn get_global_import_attributes_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_global_import_attributes_type"); 
         self.unknown_type()
     }
 
-    pub(crate) fn adjust_type_with_facts(&mut self, t: &Arc<Type>, facts: TypeFacts) -> Arc<Type> {
+    pub(crate) fn adjust_type_with_facts(&mut self, t: &Arc<Type>, facts: TypeFacts) -> Arc<Type> { ::tsox_core::fntrace::enter("adjust_type_with_facts"); 
         let t = if self.strict_null_checks && t.flags.intersects(TypeFlags::Unknown) {
             self.unknown_union_type()
         } else {
@@ -159,7 +159,7 @@ impl Checker {
         reduced
     }
 
-    pub(crate) fn get_regular_type_of_object_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_regular_type_of_object_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_regular_type_of_object_type"); 
         Arc::clone(t)
     }
 
@@ -167,7 +167,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         _facts: TypeFacts,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("distribute_conditional_type_over_facts"); 
         Arc::clone(t)
     }
 }

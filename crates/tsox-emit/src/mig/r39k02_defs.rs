@@ -50,28 +50,28 @@ pub trait R39K02NodeExt {
 }
 
 impl R39K02NodeExt for Node {
-    fn is_declaration_file_node(&self) -> bool {
+    fn is_declaration_file_node(&self) -> bool { ::tsox_core::fntrace::enter("is_declaration_file_node"); 
         false
     }
 
-    fn is_external_module_node(&self) -> bool {
+    fn is_external_module_node(&self) -> bool { ::tsox_core::fntrace::enter("is_external_module_node"); 
         match &self.data {
             NodeData::SourceFile(d) => some(&d.statements.nodes, |n| is_external_module_indicator(n)),
             _ => false,
         }
     }
 
-    fn is_effective_external_module_node(&self, compiler_options: &CompilerOptions) -> bool {
+    fn is_effective_external_module_node(&self, compiler_options: &CompilerOptions) -> bool { ::tsox_core::fntrace::enter("is_effective_external_module_node"); 
         self.is_external_module_node()
             || (is_common_js_containing_module_kind(compiler_options.get_emit_module_kind())
                 && self.is_external_module_node())
     }
 
-    fn node_name_r39k02(&self) -> Option<Arc<Node>> {
+    fn node_name_r39k02(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_name_r39k02"); 
         Node::name(self).cloned()
     }
 
-    fn elements_list_r39k02(&self) -> &NodeList {
+    fn elements_list_r39k02(&self) -> &NodeList { ::tsox_core::fntrace::enter("elements_list_r39k02"); 
         match &self.data {
             NodeData::NamedImports(d) => &d.elements,
             NodeData::NamedExports(d) => &d.elements,
@@ -80,7 +80,7 @@ impl R39K02NodeExt for Node {
         }
     }
 
-    fn property_name_or_name_r39k02(&self) -> Arc<Node> {
+    fn property_name_or_name_r39k02(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("property_name_or_name_r39k02"); 
         match &self.data {
             NodeData::ExportSpecifier(d) => {
                 d.property_name.clone().unwrap_or_else(|| d.name.clone())
@@ -92,77 +92,77 @@ impl R39K02NodeExt for Node {
         }
     }
 
-    fn as_variable_declaration_r39k02(&self) -> &VariableDeclarationData {
+    fn as_variable_declaration_r39k02(&self) -> &VariableDeclarationData { ::tsox_core::fntrace::enter("as_variable_declaration_r39k02"); 
         match &self.data {
             NodeData::VariableDeclaration(d) => d,
             _ => panic!("AsVariableDeclaration on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_variable_declaration_list_r39k02(&self) -> &VariableDeclarationListData {
+    fn as_variable_declaration_list_r39k02(&self) -> &VariableDeclarationListData { ::tsox_core::fntrace::enter("as_variable_declaration_list_r39k02"); 
         match &self.data {
             NodeData::VariableDeclarationList(d) => d,
             _ => panic!("AsVariableDeclarationList on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_for_in_or_of_statement_r39k02(&self) -> &ForInOrOfStatementData {
+    fn as_for_in_or_of_statement_r39k02(&self) -> &ForInOrOfStatementData { ::tsox_core::fntrace::enter("as_for_in_or_of_statement_r39k02"); 
         match &self.data {
             NodeData::ForInOrOfStatement(d) => d,
             _ => panic!("AsForInOrOfStatement on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_case_or_default_clause_r39k02(&self) -> &CaseOrDefaultClauseData {
+    fn as_case_or_default_clause_r39k02(&self) -> &CaseOrDefaultClauseData { ::tsox_core::fntrace::enter("as_case_or_default_clause_r39k02"); 
         match &self.data {
             NodeData::CaseOrDefaultClause(d) => d,
             _ => panic!("AsCaseOrDefaultClause on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_switch_statement_r39k02(&self) -> &SwitchStatementData {
+    fn as_switch_statement_r39k02(&self) -> &SwitchStatementData { ::tsox_core::fntrace::enter("as_switch_statement_r39k02"); 
         match &self.data {
             NodeData::SwitchStatement(d) => d,
             _ => panic!("AsSwitchStatement on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_call_expression_r39k02(&self) -> &CallExpressionData {
+    fn as_call_expression_r39k02(&self) -> &CallExpressionData { ::tsox_core::fntrace::enter("as_call_expression_r39k02"); 
         match &self.data {
             NodeData::CallExpression(d) => d,
             _ => panic!("AsCallExpression on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_tagged_template_expression_r39k02(&self) -> &TaggedTemplateExpressionData {
+    fn as_tagged_template_expression_r39k02(&self) -> &TaggedTemplateExpressionData { ::tsox_core::fntrace::enter("as_tagged_template_expression_r39k02"); 
         match &self.data {
             NodeData::TaggedTemplateExpression(d) => d,
             _ => panic!("AsTaggedTemplateExpression on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_parenthesized_expression_r39k02(&self) -> &ParenthesizedExpressionData {
+    fn as_parenthesized_expression_r39k02(&self) -> &ParenthesizedExpressionData { ::tsox_core::fntrace::enter("as_parenthesized_expression_r39k02"); 
         match &self.data {
             NodeData::ParenthesizedExpression(d) => d,
             _ => panic!("AsParenthesizedExpression on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_partially_emitted_expression_r39k02(&self) -> &PartiallyEmittedExpressionData {
+    fn as_partially_emitted_expression_r39k02(&self) -> &PartiallyEmittedExpressionData { ::tsox_core::fntrace::enter("as_partially_emitted_expression_r39k02"); 
         match &self.data {
             NodeData::PartiallyEmittedExpression(d) => d,
             _ => panic!("AsPartiallyEmittedExpression on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_import_clause_r39k02(&self) -> &ImportClauseData {
+    fn as_import_clause_r39k02(&self) -> &ImportClauseData { ::tsox_core::fntrace::enter("as_import_clause_r39k02"); 
         match &self.data {
             NodeData::ImportClause(d) => d,
             _ => panic!("AsImportClause on wrong node kind: {:?}", self.kind),
         }
     }
 
-    fn as_import_equals_declaration_r39k02(&self) -> &ImportEqualsDeclarationData {
+    fn as_import_equals_declaration_r39k02(&self) -> &ImportEqualsDeclarationData { ::tsox_core::fntrace::enter("as_import_equals_declaration_r39k02"); 
         match &self.data {
             NodeData::ImportEqualsDeclaration(d) => d,
             _ => panic!("AsImportEqualsDeclaration on wrong node kind: {:?}", self.kind),
@@ -178,21 +178,21 @@ pub trait R39K02EmitResolverExt {
 }
 
 impl R39K02EmitResolverExt for EmitResolver {
-    fn is_referenced_alias_declaration_r39k02(&self, node: &Arc<Node>) -> bool {
+    fn is_referenced_alias_declaration_r39k02(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_referenced_alias_declaration_r39k02"); 
         if !is_parse_tree_node(node) {
             return true;
         }
         true
     }
 
-    fn is_value_alias_declaration_r39k02(&self, node: &Arc<Node>) -> bool {
+    fn is_value_alias_declaration_r39k02(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_value_alias_declaration_r39k02"); 
         match &node.data {
             NodeData::ImportSpecifier(d) => !d.is_type_only,
             _ => true,
         }
     }
 
-    fn is_top_level_value_import_equals_with_entity_name_r39k02(&self, node: &Arc<Node>) -> bool {
+    fn is_top_level_value_import_equals_with_entity_name_r39k02(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_top_level_value_import_equals_with_entity_name_r39k02"); 
         if !is_parse_tree_node(node)
             || node.kind != SyntaxKind::ImportEqualsDeclaration
             || !node.parent().is_some_and(|p| p.kind == SyntaxKind::SourceFile)
@@ -207,27 +207,27 @@ impl R39K02EmitResolverExt for EmitResolver {
         true
     }
 
-    fn mark_linked_references_recursively_r39k02(&self, file: &Arc<Node>) {
+    fn mark_linked_references_recursively_r39k02(&self, file: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_linked_references_recursively_r39k02"); 
         if !is_parse_tree_node(file) {
             return;
         }
     }
 }
 
-fn new_node_list_with_loc(nodes: Vec<Arc<Node>>, loc: TextRange) -> NodeList {
+fn new_node_list_with_loc(nodes: Vec<Arc<Node>>, loc: TextRange) -> NodeList { ::tsox_core::fntrace::enter("new_node_list_with_loc"); 
     let mut list = NodeList::new(nodes);
     list.loc = loc;
     list
 }
 
 impl<'a> CommonJSModuleTransformer<'a> {
-    fn has_export_equals(&self) -> bool {
+    fn has_export_equals(&self) -> bool { ::tsox_core::fntrace::enter("has_export_equals"); 
         self.current_module_info
             .as_ref()
             .is_some_and(|m| m.export_equals.is_some())
     }
 
-    fn visit_for_statement_no_stack(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_for_statement_no_stack(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_for_statement_no_stack"); 
         let for_stmt = node.as_for_statement();
         let initializer = for_stmt
             .initializer
@@ -257,7 +257,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         ))
     }
 
-    fn visit_for_in_or_of_statement_no_stack(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_for_in_or_of_statement_no_stack(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_for_in_or_of_statement_no_stack"); 
         let for_stmt = node.as_for_in_or_of_statement_r39k02();
         let initializer = Some(
             self.discarded_value_visitor()
@@ -280,7 +280,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         ))
     }
 
-    fn visit_call_expression_cjs(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_call_expression_cjs(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_call_expression_cjs"); 
         let call = node.as_call_expression_r39k02();
         if is_identifier(&call.expression) {
             let expression = self.visit_expression_identifier(call.expression.clone())?;
@@ -310,7 +310,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         &mut self,
         node: Arc<Node>,
         result_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_no_stack"); 
         if node.kind != SyntaxKind::SourceFile
             && !node
                 .subtree_facts()
@@ -377,7 +377,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         }
     }
 
-    pub(crate) fn transform_common_js_module(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn transform_common_js_module(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_common_js_module"); 
         let source_file = node.as_source_file();
         let original_statements = source_file.statements.nodes.clone();
         let statements_loc = source_file.statements.loc;
@@ -476,7 +476,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         Some(result)
     }
 
-    fn should_emit_underscore_underscore_es_module(&self) -> bool {
+    fn should_emit_underscore_underscore_es_module(&self) -> bool { ::tsox_core::fntrace::enter("should_emit_underscore_underscore_es_module"); 
         let module_info = match self.current_module_info.as_ref() {
             Some(m) => m,
             None => return false,
@@ -488,7 +488,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         module_info.export_equals.is_none() && current_source_file.is_external_module_node()
     }
 
-    fn create_underscore_underscore_es_module(&mut self) -> Arc<Node> {
+    fn create_underscore_underscore_es_module(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_underscore_underscore_es_module"); 
         let statement = self.factory().new_expression_statement(
             &self.factory().new_call_expression(
                 &self.factory().new_property_access_expression(
@@ -522,7 +522,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         statement
     }
 
-    fn append_export_equals_needed(&mut self, mut statements: Vec<Arc<Node>>) -> Vec<Arc<Node>> {
+    fn append_export_equals_needed(&mut self, mut statements: Vec<Arc<Node>>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_export_equals_needed"); 
         let export_equals = self
             .current_module_info
             .as_ref()
@@ -550,7 +550,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         statements
     }
 
-    fn visit_export_equals(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_export_equals(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_export_equals"); 
         let grandparent_node = self.push_node(node.clone());
         let expression = node.as_export_assignment().expression.clone();
         let result = self.visitor().visit_node(expression);
@@ -562,7 +562,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         &mut self,
         mut statements: Vec<Arc<Node>>,
         decl: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_import_declaration"); 
         if self.has_export_equals() {
             return statements;
         }
@@ -614,7 +614,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         &mut self,
         statements: Vec<Arc<Node>>,
         node: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_variable_statement"); 
         let declaration_list = node.as_variable_statement().declaration_list.clone();
         self.append_exports_of_variable_declaration_list(statements, &declaration_list, false)
     }
@@ -624,7 +624,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         mut statements: Vec<Arc<Node>>,
         node: &Arc<Node>,
         is_for_in_or_of_initializer: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_variable_declaration_list"); 
         if self.has_export_equals() {
             return statements;
         }
@@ -646,7 +646,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         mut statements: Vec<Arc<Node>>,
         decl: &Arc<Node>,
         is_for_in_or_of_initializer: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_binding_element"); 
         if self.has_export_equals() {
             return statements;
         }
@@ -680,7 +680,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         &mut self,
         mut statements: Vec<Arc<Node>>,
         decl: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_class_or_function_declaration"); 
         if self.has_export_equals() {
             return statements;
         }
@@ -719,7 +719,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         decl: &Arc<Node>,
         seen: Option<&mut HashSet<String>>,
         live_binding: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_declaration"); 
         if self.has_export_equals() {
             return statements;
         }
@@ -775,7 +775,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         location: Option<TextRange>,
         allow_comments: bool,
         live_binding: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_export_statement"); 
         if export_name.kind != SyntaxKind::StringLiteral {
             if seen.contains(export_name.text()) {
                 return statements;
@@ -799,7 +799,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         location: Option<TextRange>,
         allow_comments: bool,
         live_binding: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_export_statement"); 
         let exported = self.create_export_expression(&name, value, None, live_binding);
         let statement = self.factory().new_expression_statement(&exported);
         self.emit_context
@@ -818,7 +818,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         value: Arc<Node>,
         location: Option<TextRange>,
         live_binding: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_export_expression"); 
         let expression = if live_binding {
             self.factory().new_call_expression(
                 &self.factory().new_property_access_expression(
@@ -897,7 +897,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub(crate) fn transform_initialized_variable(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_initialized_variable"); 
         let decl = node.as_variable_declaration_r39k02();
         let initializer = decl.initializer.clone()?;
         let name = decl.name.clone();
@@ -928,7 +928,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         &mut self,
         assignment: Arc<Node>,
         value_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_destructuring_assignment"); 
         Some(assignment)
     }
 }
@@ -956,7 +956,7 @@ impl NodeFactoryCjsR39K02Ext for NodeFactory<'_> {
         condition: Option<&Arc<Node>>,
         incrementor: Option<&Arc<Node>>,
         statement: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_for_statement"); 
         let for_stmt = match &node.data {
             NodeData::ForStatement(d) => d,
             _ => panic!("update_for_statement on wrong kind"),
@@ -975,7 +975,7 @@ impl NodeFactoryCjsR39K02Ext for NodeFactory<'_> {
         Arc::new(updated)
     }
 
-    fn update_parenthesized_expression(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+    fn update_parenthesized_expression(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parenthesized_expression"); 
         let mut updated = Node::new(
             SyntaxKind::ParenthesizedExpression,
             NodeData::ParenthesizedExpression(ParenthesizedExpressionData {
@@ -987,7 +987,7 @@ impl NodeFactoryCjsR39K02Ext for NodeFactory<'_> {
         Arc::new(updated)
     }
 
-    fn update_partially_emitted_expression(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+    fn update_partially_emitted_expression(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_partially_emitted_expression"); 
         let mut updated = Node::new(
             SyntaxKind::PartiallyEmittedExpression,
             NodeData::PartiallyEmittedExpression(PartiallyEmittedExpressionData {
@@ -999,7 +999,7 @@ impl NodeFactoryCjsR39K02Ext for NodeFactory<'_> {
         Arc::new(updated)
     }
 
-    fn new_string_literal_from_node(&self, text_source_node: &Arc<Node>) -> Arc<Node> {
+    fn new_string_literal_from_node(&self, text_source_node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal_from_node"); 
         self.new_string_literal(&text_source_node.text().to_string(), TOKEN_FLAGS_NONE)
     }
 }

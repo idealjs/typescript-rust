@@ -2,25 +2,25 @@ use tsox_core::core::tristate::Tristate;
 
 use serde_json::Value;
 
-pub(super) fn parse_tristate(value: &Value) -> Tristate {
+pub(super) fn parse_tristate(value: &Value) -> Tristate { ::tsox_core::fntrace::enter("parse_tristate"); 
     match value {
         Value::Bool(b) => Tristate::from(*b),
         _ => Tristate::Unknown,
     }
 }
 
-pub(super) fn parse_bool(value: &Value) -> bool {
+pub(super) fn parse_bool(value: &Value) -> bool { ::tsox_core::fntrace::enter("parse_bool"); 
     matches!(value, Value::Bool(true))
 }
 
-pub(super) fn parse_i32(value: &Value) -> i32 {
+pub(super) fn parse_i32(value: &Value) -> i32 { ::tsox_core::fntrace::enter("parse_i32"); 
     match value {
         Value::Number(n) => n.as_i64().map(|i| i as i32).unwrap_or(0),
         _ => 0,
     }
 }
 
-pub(super) fn parse_string(value: &Value) -> String {
+pub(super) fn parse_string(value: &Value) -> String { ::tsox_core::fntrace::enter("parse_string"); 
     if let Value::String(s) = value {
         s.clone()
     } else {
@@ -28,7 +28,7 @@ pub(super) fn parse_string(value: &Value) -> String {
     }
 }
 
-pub(super) fn parse_string_array(value: &Value) -> Vec<String> {
+pub(super) fn parse_string_array(value: &Value) -> Vec<String> { ::tsox_core::fntrace::enter("parse_string_array"); 
     if let Value::Array(arr) = value {
         arr.iter()
             .filter_map(|item| {
@@ -46,7 +46,7 @@ pub(super) fn parse_string_array(value: &Value) -> Vec<String> {
 
 pub(super) fn parse_module_specifier_preference(
     value: &Value,
-) -> tsox_tsoptions::modulespecifiers::ImportModuleSpecifierPreference {
+) -> tsox_tsoptions::modulespecifiers::ImportModuleSpecifierPreference { ::tsox_core::fntrace::enter("parse_module_specifier_preference"); 
     if let Value::String(s) = value {
         match s.to_ascii_lowercase().as_str() {
             "project-relative" => {
@@ -65,7 +65,7 @@ pub(super) fn parse_module_specifier_preference(
 
 pub(super) fn parse_module_specifier_ending(
     value: &Value,
-) -> tsox_tsoptions::modulespecifiers::ImportModuleSpecifierEndingPreference {
+) -> tsox_tsoptions::modulespecifiers::ImportModuleSpecifierEndingPreference { ::tsox_core::fntrace::enter("parse_module_specifier_ending"); 
     if let Value::String(s) = value {
         match s.to_ascii_lowercase().as_str() {
             "minimal" => {
@@ -86,7 +86,7 @@ pub(super) fn parse_module_specifier_ending(
     }
 }
 
-pub(super) fn parse_case_sensitivity(value: &Value) -> Tristate {
+pub(super) fn parse_case_sensitivity(value: &Value) -> Tristate { ::tsox_core::fntrace::enter("parse_case_sensitivity"); 
     if let Value::String(s) = value {
         return match s.to_ascii_lowercase().as_str() {
             "caseinsensitive" => Tristate::True,

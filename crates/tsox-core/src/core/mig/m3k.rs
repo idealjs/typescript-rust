@@ -15,7 +15,7 @@ pub struct TypeAcquisition {
 }
 
 impl TypeAcquisition {
-    pub fn equals(&self, other: &TypeAcquisition) -> bool {
+    pub fn equals(&self, other: &TypeAcquisition) -> bool { crate::fntrace::enter("equals"); 
         self.enable == other.enable
             && self.include == other.include
             && self.exclude == other.exclude
@@ -26,11 +26,11 @@ impl TypeAcquisition {
 
 pub const VERSION: &str = "7.1.0-dev";
 
-pub fn version() -> &'static str {
+pub fn version() -> &'static str { crate::fntrace::enter("version"); 
     VERSION
 }
 
-pub fn version_major_minor() -> &'static str {
+pub fn version_major_minor() -> &'static str { crate::fntrace::enter("version_major_minor"); 
     static CACHE: OnceLock<String> = OnceLock::new();
     CACHE.get_or_init(|| {
         let mut seen_major = false;
@@ -57,7 +57,7 @@ pub struct ThrottleGroup {
     handles: Mutex<Vec<JoinHandle<Result<(), ThrottleError>>>>,
 }
 
-pub fn new_throttle_group(max_concurrency: usize) -> ThrottleGroup {
+pub fn new_throttle_group(max_concurrency: usize) -> ThrottleGroup { crate::fntrace::enter("new_throttle_group"); 
     let (tx, rx) = mpsc::sync_channel(max_concurrency);
     ThrottleGroup {
         semaphore_tx: tx,
@@ -70,7 +70,7 @@ impl ThrottleGroup {
     pub fn go(
         &self,
         f: impl FnOnce() -> Result<(), ThrottleError> + Send + 'static,
-    ) {
+    ) { crate::fntrace::enter("go"); 
         let tx = self.semaphore_tx.clone();
         let rx = Arc::clone(&self.semaphore_rx);
         let handle = std::thread::spawn(move || {
@@ -84,7 +84,7 @@ impl ThrottleGroup {
         self.handles.lock().unwrap().push(handle);
     }
 
-    pub fn wait(&self) -> Result<(), ThrottleError> {
+    pub fn wait(&self) -> Result<(), ThrottleError> { crate::fntrace::enter("wait"); 
         let handles: Vec<_> = self.handles.lock().unwrap().drain(..).collect();
         let mut first_err = None;
         for handle in handles {

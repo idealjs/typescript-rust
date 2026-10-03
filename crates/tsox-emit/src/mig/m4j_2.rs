@@ -58,7 +58,7 @@ pub struct ModifierVisitor {
 }
 
 impl ModifierVisitor {
-    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         let flags = modifier_to_flag(node.kind);
         if !flags.is_empty() && !flags.intersects(self.allowed_modifiers) {
             return None;
@@ -66,7 +66,7 @@ impl ModifierVisitor {
         Some(node.clone())
     }
 
-    pub fn visit_modifiers(&mut self, modifiers: &ModifierList) -> Option<ModifierList> {
+    pub fn visit_modifiers(&mut self, modifiers: &ModifierList) -> Option<ModifierList> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         let visited: Vec<Arc<Node>> = modifiers
             .list
             .nodes
@@ -81,7 +81,7 @@ pub fn extract_modifiers(
     emit_context: &Arc<EmitContext>,
     modifiers: Option<&ModifierList>,
     allowed: ModifierFlags,
-) -> Option<ModifierList> {
+) -> Option<ModifierList> { ::tsox_core::fntrace::enter("extract_modifiers"); 
     let modifiers = modifiers?;
     let mut tx = ModifierVisitor {
         emit_context: emit_context.clone(),
@@ -116,7 +116,7 @@ pub fn new_common_js_module_transformer(
     compiler_options: Arc<CompilerOptions>,
     resolver: Arc<dyn ReferenceResolver>,
     get_emit_module_format_of_file: Box<dyn Fn(&Arc<Node>) -> ModuleKind>,
-) -> CommonJsModuleTransformer {
+) -> CommonJsModuleTransformer { ::tsox_core::fntrace::enter("new_common_js_module_transformer"); 
     let language_version = compiler_options.get_emit_script_target();
     let module_kind = compiler_options.get_emit_module_kind();
     CommonJsModuleTransformer {
@@ -134,32 +134,32 @@ pub fn new_common_js_module_transformer(
 }
 
 impl CommonJsModuleTransformer {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    fn visitor(&mut self) -> CjsNodeVisitor<'_> {
+    fn visitor(&mut self) -> CjsNodeVisitor<'_> { ::tsox_core::fntrace::enter("visitor"); 
         CjsNodeVisitor {
             tx: self,
             kind: CjsVisitorKind::TopLevel,
         }
     }
 
-    fn assignment_pattern_visitor(&mut self) -> CjsNodeVisitor<'_> {
+    fn assignment_pattern_visitor(&mut self) -> CjsNodeVisitor<'_> { ::tsox_core::fntrace::enter("assignment_pattern_visitor"); 
         CjsNodeVisitor {
             tx: self,
             kind: CjsVisitorKind::AssignmentPattern,
         }
     }
 
-    fn discarded_value_visitor(&mut self) -> CjsNodeVisitor<'_> {
+    fn discarded_value_visitor(&mut self) -> CjsNodeVisitor<'_> { ::tsox_core::fntrace::enter("discarded_value_visitor"); 
         CjsNodeVisitor {
             tx: self,
             kind: CjsVisitorKind::DiscardedValue,
         }
     }
 
-    fn top_level_nested_visitor(&mut self) -> CjsNodeVisitor<'_> {
+    fn top_level_nested_visitor(&mut self) -> CjsNodeVisitor<'_> { ::tsox_core::fntrace::enter("top_level_nested_visitor"); 
         CjsNodeVisitor {
             tx: self,
             kind: CjsVisitorKind::TopLevelNested,
@@ -171,7 +171,7 @@ impl CommonJsModuleTransformer {
         kind: CjsVisitorKind,
         node: &Arc<Node>,
         visit: impl FnOnce(&mut Self, &Arc<Node>) -> Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_with"); 
         let grandparent_node = self.push_node(node);
         let result = visit(self, node);
         self.pop_node(grandparent_node);
@@ -182,7 +182,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         kind: CjsVisitorKind,
         nodes: &[Arc<Node>],
-    ) -> (Vec<Arc<Node>>, bool) {
+    ) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("visit_slice_with"); 
         let mut changed = false;
         let mut result = Vec::with_capacity(nodes.len());
         for node in nodes {
@@ -198,31 +198,31 @@ impl CommonJsModuleTransformer {
         (result, changed)
     }
 
-    fn visit_node_with(&mut self, kind: CjsVisitorKind, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_node_with(&mut self, kind: CjsVisitorKind, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node_with"); 
         let mut visitor = CjsNodeVisitor { tx: self, kind };
         visitor.visit_node(Some(node))
     }
 
-    pub fn push_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn push_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("push_node"); 
         let grandparent_node = self.parent_node.clone();
         self.parent_node = self.current_node.clone();
         self.current_node = Some(node.clone());
         grandparent_node
     }
 
-    pub fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) {
+    pub fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) { ::tsox_core::fntrace::enter("pop_node"); 
         self.current_node = self.parent_node.clone();
         self.parent_node = grandparent_node;
     }
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         let grandparent_node = self.push_node(node);
         let result = self.visit_no_stack(node, false);
         self.pop_node(grandparent_node);
         result
     }
 
-    pub fn visit_no_stack(&mut self, node: &Arc<Node>, result_is_discarded: bool) -> Option<Arc<Node>> {
+    pub fn visit_no_stack(&mut self, node: &Arc<Node>, result_is_discarded: bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_no_stack"); 
         if !is_source_file(node)
             && !node
                 .subtree_facts()
@@ -262,7 +262,7 @@ impl CommonJsModuleTransformer {
         }
     }
 
-    fn visit_source_file(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_source_file(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if node.is_declaration_file()
             || !(node.is_effective_external_module_node(&self.compiler_options)
                 || node.subtree_facts().intersects(SubtreeFacts::DynamicImport))
@@ -283,21 +283,21 @@ impl CommonJsModuleTransformer {
         Some(updated)
     }
 
-    pub fn visit_discarded_value(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_discarded_value(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_discarded_value"); 
         let grandparent_node = self.push_node(node);
         let result = self.visit_no_stack(node, true);
         self.pop_node(grandparent_node);
         result
     }
 
-    pub fn visit_assignment_pattern(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_assignment_pattern(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_assignment_pattern"); 
         let grandparent_node = self.push_node(node);
         let result = self.visit_assignment_pattern_no_stack(node);
         self.pop_node(grandparent_node);
         result
     }
 
-    pub fn visit_assignment_pattern_no_stack(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_assignment_pattern_no_stack(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_assignment_pattern_no_stack"); 
         match node.kind {
             SyntaxKind::ObjectLiteralExpression | SyntaxKind::ArrayLiteralExpression => {
                 self.visit_with(CjsVisitorKind::AssignmentPattern, node, |tx, n| {
@@ -320,11 +320,11 @@ impl CommonJsModuleTransformer {
         }
     }
 
-    fn assignment_pattern_visitor_visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn assignment_pattern_visitor_visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("assignment_pattern_visitor_visit_each_child"); 
         self.assignment_pattern_visitor().visit_each_child(node)
     }
 
-    pub fn should_emit_underscore_underscore_es_module(&self) -> bool {
+    pub fn should_emit_underscore_underscore_es_module(&self) -> bool { ::tsox_core::fntrace::enter("should_emit_underscore_underscore_es_module"); 
         self.current_module_info
             .as_ref()
             .unwrap()
@@ -336,7 +336,7 @@ impl CommonJsModuleTransformer {
                 .unwrap()
                 .is_effective_external_module_node(&self.compiler_options)
     }
-    pub fn create_underscore_underscore_es_module(&mut self) -> Arc<Node> {
+    pub fn create_underscore_underscore_es_module(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_underscore_underscore_es_module"); 
         let statement = self.factory().new_expression_statement(
             &self.factory().new_call_expression(
                 &self.factory().new_property_access_expression(
@@ -370,7 +370,7 @@ impl CommonJsModuleTransformer {
         statement
     }
 
-    pub fn transform_common_js_module(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn transform_common_js_module(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_common_js_module"); 
         Arc::get_mut(&mut self.emit_context)
             .expect("emit context uniquely owned")
             .start_variable_environment();
@@ -504,7 +504,7 @@ impl CommonJsModuleTransformer {
     pub fn append_export_equals_if_needed(
         &mut self,
         mut statements: Vec<Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_export_equals_if_needed"); 
         if let Some(export_equals) = self
             .current_module_info
             .as_ref()
@@ -534,7 +534,7 @@ impl CommonJsModuleTransformer {
         statements
     }
 
-    pub fn visit_export_equals(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_export_equals(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_export_equals"); 
         let grandparent_node = self.push_node(node);
         let result = self.visitor().visit_node(node.expression());
         self.pop_node(grandparent_node);
@@ -545,7 +545,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         mut statements: Vec<Arc<Node>>,
         decl: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_import_declaration"); 
         if self
             .current_module_info
             .as_ref()
@@ -602,7 +602,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         statements: Vec<Arc<Node>>,
         node: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_variable_statement"); 
         self.append_exports_of_variable_declaration_list(
             statements,
             &node.as_variable_statement().declaration_list,
@@ -615,7 +615,7 @@ impl CommonJsModuleTransformer {
         mut statements: Vec<Arc<Node>>,
         node: &Arc<Node>,
         is_for_in_or_of_initializer: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_variable_declaration_list"); 
         if self
             .current_module_info
             .as_ref()
@@ -639,7 +639,7 @@ impl CommonJsModuleTransformer {
         mut statements: Vec<Arc<Node>>,
         decl: &Arc<Node>,
         is_for_in_or_of_initializer: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_binding_element"); 
         if self
             .current_module_info
             .as_ref()
@@ -680,7 +680,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         mut statements: Vec<Arc<Node>>,
         decl: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_class_or_function_declaration"); 
         if self
             .current_module_info
             .as_ref()
@@ -724,7 +724,7 @@ impl CommonJsModuleTransformer {
         decl: &Arc<Node>,
         seen: &mut HashSet<String>,
         live_binding: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_declaration"); 
         if self
             .current_module_info
             .as_ref()
@@ -785,7 +785,7 @@ impl CommonJsModuleTransformer {
         location: Option<TextRange>,
         allow_comments: bool,
         live_binding: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_export_statement"); 
         if export_name.kind != SyntaxKind::StringLiteral {
             if seen.contains(export_name.text()) {
                 return statements;
@@ -809,7 +809,7 @@ impl CommonJsModuleTransformer {
         location: Option<TextRange>,
         allow_comments: bool,
         live_binding: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_export_statement"); 
         let expression = self.create_export_expression(name, value, None, live_binding);
         let statement = self.factory().new_expression_statement(&expression);
         if let Some(location) = location {
@@ -832,7 +832,7 @@ impl CommonJsModuleTransformer {
         value: &Arc<Node>,
         location: Option<TextRange>,
         live_binding: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_export_expression"); 
         let expression = if live_binding {
             self.factory().new_call_expression(
                 &self.factory().new_property_access_expression(
@@ -908,7 +908,7 @@ impl CommonJsModuleTransformer {
         expression
     }
 
-    pub fn create_require_call(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn create_require_call(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_require_call"); 
         let mut args: Vec<Arc<Node>> = Vec::new();
         let module_name = get_external_module_name_literal(
             &self.factory(),
@@ -940,7 +940,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         inner_expr: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_helper_expression_for_export"); 
         if get_export_needs_import_star_helper(node) {
             let helper = self.factory().new_import_star_helper(&inner_expr);
             return self.visitor().visit_node(Some(&helper)).unwrap();
@@ -952,7 +952,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         inner_expr: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_helper_expression_for_import"); 
         if get_import_needs_import_star_helper(node) {
             let helper = self.factory().new_import_star_helper(&inner_expr);
             return self.visitor().visit_node(Some(&helper)).unwrap();
@@ -964,7 +964,7 @@ impl CommonJsModuleTransformer {
         inner_expr
     }
 
-    pub fn transform_initialized_variable(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_initialized_variable(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_initialized_variable"); 
         if node.initializer().is_none() {
             return None;
         }
@@ -991,7 +991,7 @@ impl CommonJsModuleTransformer {
         Some(self.factory().new_assignment_expression(&property_access, node.initializer().unwrap()))
     }
 
-    pub fn destructuring_needs_flattening(&mut self, node: &Arc<Node>) -> bool {
+    pub fn destructuring_needs_flattening(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("destructuring_needs_flattening"); 
         if is_object_literal_expression(node) {
             for elem in node.properties() {
                 match elem.kind {
@@ -1058,7 +1058,7 @@ impl CommonJsModuleTransformer {
         name: &Arc<Node>,
         value: &Arc<Node>,
         location: Option<TextRange>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_all_export_expressions"); 
         let exported_names = self.get_exports(name).unwrap_or_default();
         if !exported_names.is_empty() {
             let mut expression = if self.is_direct_export(name) {
@@ -1109,13 +1109,13 @@ impl CommonJsModuleTransformer {
         self.factory().new_assignment_expression(name, value)
     }
 
-    pub fn is_direct_export(&mut self, name: &Arc<Node>) -> bool {
+    pub fn is_direct_export(&mut self, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_direct_export"); 
         let original = self.emit_context.most_original(name);
         let export_container = self.resolver.get_referenced_export_container(&original, false);
         export_container.is_some_and(|c| is_source_file(&c))
     }
 
-    pub fn get_exports(&mut self, name: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+    pub fn get_exports(&mut self, name: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("get_exports"); 
         if !is_generated_identifier(&self.emit_context, name) {
             let original = self.emit_context.most_original(name);
             let import_declaration = self.resolver.get_referenced_import_declaration(&original);
@@ -1177,7 +1177,7 @@ impl CommonJsModuleTransformer {
         None
     }
 
-    pub fn visit_for_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_for_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_for_statement"); 
         let (initializer, condition, incrementor, statement) = match &node.data {
             NodeData::ForStatement(d) => (
                 d.initializer.clone(),
@@ -1211,7 +1211,7 @@ impl CommonJsModuleTransformer {
         ))
     }
 
-    pub fn visit_for_in_or_of_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_for_in_or_of_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_for_in_or_of_statement"); 
         let (await_modifier, initializer, expression, statement) = match &node.data {
             NodeData::ForInOrOfStatement(d) => (
                 d.await_modifier.clone(),
@@ -1242,18 +1242,18 @@ impl CommonJsModuleTransformer {
         ))
     }
 
-    fn visit_iteration_body(&mut self, body: Option<Arc<Node>>) -> Option<Arc<Node>> {
+    fn visit_iteration_body(&mut self, body: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_iteration_body"); 
         let mut nested_visitor = NodeVisitor::default();
         Arc::get_mut(&mut self.emit_context)
             .expect("emit context uniquely owned")
             .visit_iteration_body(body, &mut nested_visitor)
     }
 
-    pub fn visit_expression_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_expression_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_expression_statement"); 
         self.discarded_value_visitor().visit_each_child(node)
     }
 
-    pub fn visit_void_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_void_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_void_expression"); 
         self.discarded_value_visitor().visit_each_child(node)
     }
 
@@ -1261,7 +1261,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         result_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_parenthesized_expression"); 
         let expression = match &node.data {
             NodeData::ParenthesizedExpression(d) => d.expression.clone(),
             _ => return Some(node.clone()),
@@ -1280,7 +1280,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         result_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_partially_emitted_expression"); 
         let expression = match &node.data {
             NodeData::PartiallyEmittedExpression(d) => d.expression.clone(),
             _ => return Some(node.clone()),
@@ -1299,7 +1299,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         result_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_binary_expression"); 
         if is_destructuring_assignment(node) {
             return self.visit_destructuring_assignment(node, result_is_discarded);
         }
@@ -1312,7 +1312,7 @@ impl CommonJsModuleTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    fn visit_assignment_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_assignment_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_assignment_expression"); 
         let (left, _operator_token, _right) = match &node.data {
             NodeData::BinaryExpression(d) => (d.left.clone(), d.operator_token.clone(), d.right.clone()),
             _ => return self.visitor().visit_each_child(node),
@@ -1339,7 +1339,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         value_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_destructuring_assignment"); 
         let left = match &node.data {
             NodeData::BinaryExpression(d) => d.left.clone(),
             _ => return self.visitor().visit_each_child(node),
@@ -1361,7 +1361,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         result_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_comma_expression"); 
         let (left, operator_token, right) = match &node.data {
             NodeData::BinaryExpression(d) => {
                 (d.left.clone(), d.operator_token.clone(), d.right.clone())
@@ -1391,7 +1391,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         result_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_prefix_unary_expression"); 
         let (operator, operand) = match &node.data {
             NodeData::PrefixUnaryExpression(d) => (d.operator, d.operand.clone()),
             _ => return self.visitor().visit_each_child(node),
@@ -1421,7 +1421,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         result_is_discarded: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_postfix_unary_expression"); 
         let (operand, operator) = match &node.data {
             NodeData::PostfixUnaryExpression(d) => (d.operand.clone(), d.operator),
             _ => return self.visitor().visit_each_child(node),
@@ -1474,7 +1474,7 @@ impl CommonJsModuleTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_call_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_call_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_call_expression"); 
         let (expression, question_dot_token, arguments) = match &node.data {
             NodeData::CallExpression(d) => (
                 d.expression.clone(),
@@ -1520,7 +1520,7 @@ impl CommonJsModuleTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    fn should_transform_import_call(&self) -> bool {
+    fn should_transform_import_call(&self) -> bool { ::tsox_core::fntrace::enter("should_transform_import_call"); 
         let file_node = self.current_source_file.clone();
         should_transform_import_call(
             "",
@@ -1536,7 +1536,7 @@ impl CommonJsModuleTransformer {
         &mut self,
         node: &Arc<Node>,
         rewrite_or_shim: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_import_call_expression"); 
         if self.module_kind == ModuleKind::None && self.language_version >= ScriptTarget::ES2020 {
             return self.visitor().visit_each_child(node);
         }
@@ -1585,7 +1585,7 @@ impl CommonJsModuleTransformer {
         Some(self.create_import_call_expression_common_js(argument.as_ref()))
     }
 
-    fn create_import_call_expression_common_js(&mut self, arg: Option<&Arc<Node>>) -> Arc<Node> {
+    fn create_import_call_expression_common_js(&mut self, arg: Option<&Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_import_call_expression_common_js"); 
         let need_sync_eval =
             arg.map_or(false, |a| !is_simple_inlineable_expression(a));
         let mut promise_resolve_arguments: Vec<Arc<Node>> = Vec::new();
@@ -1659,7 +1659,7 @@ impl CommonJsModuleTransformer {
         )
     }
 
-    fn shim_or_rewrite_import_or_require_call(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn shim_or_rewrite_import_or_require_call(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("shim_or_rewrite_import_or_require_call"); 
         let (expression, question_dot_token, arguments) = match &node.data {
             NodeData::CallExpression(d) => (
                 d.expression.clone(),
@@ -1710,7 +1710,7 @@ impl CommonJsModuleTransformer {
         ))
     }
 
-    pub fn visit_tagged_template_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_tagged_template_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_tagged_template_expression"); 
         let (tag, question_dot_token, template) = match &node.data {
             NodeData::TaggedTemplateExpression(d) => (
                 d.tag.clone(),
@@ -1737,7 +1737,7 @@ impl CommonJsModuleTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_shorthand_property_assignment(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_shorthand_property_assignment(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_shorthand_property_assignment"); 
         let (name, equals_token, object_assignment_initializer) = match &node.data {
             NodeData::ShorthandPropertyAssignment(d) => (
                 d.name.clone(),
@@ -1776,7 +1776,7 @@ impl CommonJsModuleTransformer {
         ))
     }
 
-    pub fn visit_identifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_identifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_identifier"); 
         if let Some(parent) = node.parent() {
             if is_identifier_reference(node, &parent) {
                 return self.visit_expression_identifier(node);
@@ -1785,7 +1785,7 @@ impl CommonJsModuleTransformer {
         Some(node.clone())
     }
 
-    pub fn visit_expression_identifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_expression_identifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_expression_identifier"); 
         let skip_for_generated = self
             .emit_context
             .get_auto_generate_info(node)
@@ -1874,7 +1874,7 @@ impl CommonJsModuleTransformer {
         Some(node.clone())
     }
 
-    pub fn visit_assignment_property(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_assignment_property(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_assignment_property"); 
         let (name, initializer) = match &node.data {
             NodeData::PropertyAssignment(d) => (d.name.clone(), d.initializer.clone()),
             _ => return self.visitor().visit_each_child(node),
@@ -1891,7 +1891,7 @@ impl CommonJsModuleTransformer {
         ))
     }
 
-    pub fn visit_shorthand_assignment_property(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_shorthand_assignment_property(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_shorthand_assignment_property"); 
         let (name, equals_token, object_assignment_initializer) = match &node.data {
             NodeData::ShorthandPropertyAssignment(d) => (
                 d.name.clone(),
@@ -1942,7 +1942,7 @@ impl CommonJsModuleTransformer {
         Some(updated)
     }
 
-    pub fn visit_assignment_rest_property(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_assignment_rest_property(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_assignment_rest_property"); 
         let expression = match &node.data {
             NodeData::SpreadAssignment(d) => d.expression.clone(),
             _ => return self.visitor().visit_each_child(node),
@@ -1953,7 +1953,7 @@ impl CommonJsModuleTransformer {
         Some(update_spread_assignment_r40k08(node, &expression))
     }
 
-    pub fn visit_assignment_rest_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_assignment_rest_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_assignment_rest_element"); 
         let expression = match &node.data {
             NodeData::SpreadElement(d) => d.expression.clone(),
             _ => return self.visitor().visit_each_child(node),
@@ -1964,7 +1964,7 @@ impl CommonJsModuleTransformer {
         Some(update_spread_element_r40k08(node, &expression))
     }
 
-    pub fn visit_assignment_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_assignment_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_assignment_element"); 
         if node.kind == SyntaxKind::BinaryExpression {
             let (left, operator_token, right) = match &node.data {
                 NodeData::BinaryExpression(d) => {
@@ -1991,7 +1991,7 @@ impl CommonJsModuleTransformer {
     fn visit_destructuring_assignment_target(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Option<Arc<Node>>> {
+    ) -> Option<Option<Arc<Node>>> { ::tsox_core::fntrace::enter("visit_destructuring_assignment_target"); 
         let grandparent_node = self.push_node(node);
         let result = match node.kind {
             SyntaxKind::ObjectLiteralExpression | SyntaxKind::ArrayLiteralExpression => {
@@ -2006,7 +2006,7 @@ impl CommonJsModuleTransformer {
     fn visit_destructuring_assignment_target_no_stack(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_destructuring_assignment_target_no_stack"); 
         if is_identifier(node)
             && (!is_generated_identifier(&self.emit_context, node)
                 || is_file_level_reserved_generated_identifier(
@@ -2070,7 +2070,7 @@ impl CommonJsModuleTransformer {
     }
 }
 
-fn find_ancestor_import_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_ancestor_import_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_import_declaration"); 
     let mut current = node.parent()?;
     loop {
         if current.kind == SyntaxKind::ImportDeclaration {
@@ -2080,7 +2080,7 @@ fn find_ancestor_import_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-fn set_node_loc(node: Arc<Node>, loc: TextRange) -> Arc<Node> {
+fn set_node_loc(node: Arc<Node>, loc: TextRange) -> Arc<Node> { ::tsox_core::fntrace::enter("set_node_loc"); 
     match Arc::try_unwrap(node) {
         Ok(mut n) => {
             n.loc = loc;
@@ -2090,7 +2090,7 @@ fn set_node_loc(node: Arc<Node>, loc: TextRange) -> Arc<Node> {
     }
 }
 
-fn new_string_literal_from_node_r40k08(f: &NodeFactory, text_source_node: &Arc<Node>) -> Arc<Node> {
+fn new_string_literal_from_node_r40k08(f: &NodeFactory, text_source_node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal_from_node_r40k08"); 
     f.new_string_literal(text_source_node.text(), TOKEN_FLAGS_NONE)
 }
 
@@ -2100,7 +2100,7 @@ fn update_for_statement_r40k08(
     condition: Option<&Arc<Node>>,
     incrementor: Option<&Arc<Node>>,
     statement: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_for_statement_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::ForStatement,
         NodeData::ForStatement(ForStatementData {
@@ -2121,7 +2121,7 @@ fn update_for_in_or_of_statement_r40k08(
     initializer: Arc<Node>,
     expression: Arc<Node>,
     statement: Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_for_in_or_of_statement_r40k08"); 
     let mut updated = Node::new(
         node.kind,
         NodeData::ForInOrOfStatement(ForInOrOfStatementData {
@@ -2136,7 +2136,7 @@ fn update_for_in_or_of_statement_r40k08(
     Arc::new(updated)
 }
 
-fn update_parenthesized_expression_r40k08(node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+fn update_parenthesized_expression_r40k08(node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parenthesized_expression_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::ParenthesizedExpression,
         NodeData::ParenthesizedExpression(ParenthesizedExpressionData {
@@ -2151,7 +2151,7 @@ fn update_parenthesized_expression_r40k08(node: &Arc<Node>, expression: &Arc<Nod
 fn update_partially_emitted_expression_r40k08(
     node: &Arc<Node>,
     expression: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_partially_emitted_expression_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::PartiallyEmittedExpression,
         NodeData::PartiallyEmittedExpression(PartiallyEmittedExpressionData {
@@ -2168,7 +2168,7 @@ fn update_binary_expression_r40k08(
     left: &Arc<Node>,
     operator_token: &Arc<Node>,
     right: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_binary_expression_r40k08"); 
     let (modifiers, type_node) = match &node.data {
         NodeData::BinaryExpression(d) => (d.modifiers.clone(), d.type_node.clone()),
         _ => (None, None),
@@ -2192,7 +2192,7 @@ fn update_prefix_unary_expression_r40k08(
     node: &Arc<Node>,
     operator: SyntaxKind,
     operand: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_prefix_unary_expression_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::PrefixUnaryExpression,
         NodeData::PrefixUnaryExpression(PrefixUnaryExpressionData {
@@ -2209,7 +2209,7 @@ fn update_postfix_unary_expression_r40k08(
     node: &Arc<Node>,
     operand: &Arc<Node>,
     operator: SyntaxKind,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_postfix_unary_expression_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::PostfixUnaryExpression,
         NodeData::PostfixUnaryExpression(PostfixUnaryExpressionData {
@@ -2227,7 +2227,7 @@ fn update_call_expression_r40k08(
     expression: Option<Arc<Node>>,
     question_dot_token: Option<Arc<Node>>,
     arguments: Arc<NodeList>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_call_expression_r40k08"); 
     let type_arguments = match &node.data {
         NodeData::CallExpression(d) => d.type_arguments.clone(),
         _ => None,
@@ -2254,7 +2254,7 @@ fn update_tagged_template_expression_r40k08(
     tag: &Arc<Node>,
     question_dot_token: Option<Arc<Node>>,
     template: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_tagged_template_expression_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::TaggedTemplateExpression,
         NodeData::TaggedTemplateExpression(TaggedTemplateExpressionData {
@@ -2273,7 +2273,7 @@ fn update_property_assignment_r40k08(
     node: &Arc<Node>,
     name: &Arc<Node>,
     initializer: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_assignment_r40k08"); 
     let (modifiers, postfix_token, type_node, fallback_initializer) = match &node.data {
         NodeData::PropertyAssignment(d) => (
             d.modifiers.clone(),
@@ -2302,7 +2302,7 @@ fn update_shorthand_property_assignment_r40k08(
     node: &Arc<Node>,
     name: &Arc<Node>,
     object_assignment_initializer: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_shorthand_property_assignment_r40k08"); 
     let (modifiers, postfix_token, type_node, equals_token, fallback_initializer) =
         match &node.data {
             NodeData::ShorthandPropertyAssignment(d) => (
@@ -2334,7 +2334,7 @@ fn update_shorthand_property_assignment_r40k08(
     Arc::new(updated)
 }
 
-fn update_spread_assignment_r40k08(node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+fn update_spread_assignment_r40k08(node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_spread_assignment_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::SpreadAssignment,
         NodeData::SpreadAssignment(SpreadAssignmentData {
@@ -2346,7 +2346,7 @@ fn update_spread_assignment_r40k08(node: &Arc<Node>, expression: &Arc<Node>) -> 
     Arc::new(updated)
 }
 
-fn update_spread_element_r40k08(node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+fn update_spread_element_r40k08(node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_spread_element_r40k08"); 
     let mut updated = Node::new(
         SyntaxKind::SpreadElement,
         NodeData::SpreadElement(SpreadElementData {

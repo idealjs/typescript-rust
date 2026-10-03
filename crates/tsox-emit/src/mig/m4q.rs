@@ -51,7 +51,7 @@ pub struct Printer {
 }
 
 impl Printer {
-    pub(crate) fn emit_member_name(&mut self, node: Option<&Node>) {
+    pub(crate) fn emit_member_name(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_member_name"); 
         let Some(node) = node else { return };
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node.as_identifier().as_node()),
@@ -62,7 +62,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_meta_property(&mut self, node: &Node) {
+    pub(crate) fn emit_meta_property(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_meta_property"); 
         let state = self.enter_node(node);
         let meta = node.as_meta_property();
         self.emit_token(meta.keyword_token(), meta.as_node().pos(), WriteKind::Punctuation, meta.as_node());
@@ -71,7 +71,7 @@ impl Printer {
         self.exit_node(meta.as_node(), state);
     }
 
-    pub(crate) fn emit_method_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_method_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_method_declaration"); 
         let state = self.enter_node(node);
         let method = node.as_method_declaration();
         self.emit_modifier_list(method.as_node(), method.modifiers(), true);
@@ -88,7 +88,7 @@ impl Printer {
         self.exit_node(method.as_node(), state);
     }
 
-    pub(crate) fn emit_method_signature(&mut self, node: &Node) {
+    pub(crate) fn emit_method_signature(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_method_signature"); 
         let state = self.enter_node(node);
         let method = node.as_method_signature_declaration();
         self.emit_modifier_list(method.as_node(), method.modifiers(), false);
@@ -104,7 +104,7 @@ impl Printer {
         self.exit_node(method.as_node(), state);
     }
 
-    pub(crate) fn emit_modifier_like(&mut self, node: &Node) {
+    pub(crate) fn emit_modifier_like(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_modifier_like"); 
         if is_decorator(node) {
             self.emit_decorator(node.as_decorator().as_node());
         } else if is_modifier(node) {
@@ -119,7 +119,7 @@ impl Printer {
         parent_node: &Node,
         modifiers: Option<&ModifierList>,
         allow_decorators: bool,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("emit_modifier_list"); 
         let Some(modifiers) = modifiers else {
             return parent_node.pos();
         };
@@ -205,7 +205,7 @@ impl Printer {
         end as usize
     }
 
-    pub(crate) fn emit_module_block(&mut self, node: &Node) {
+    pub(crate) fn emit_module_block(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_module_block"); 
         let state = self.enter_node(node);
         let block = node.as_module_block();
         self.generate_names(Some(block.as_node()));
@@ -232,7 +232,7 @@ impl Printer {
         self.exit_node(block.as_node(), state);
     }
 
-    pub(crate) fn emit_module_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_module_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_module_declaration"); 
         let state = self.enter_node(node);
         let module = node.as_module_declaration();
         self.emit_modifier_list(module.as_node(), module.modifiers(), false);
@@ -267,7 +267,7 @@ impl Printer {
         self.exit_node(module.as_node(), state);
     }
 
-    pub(crate) fn emit_module_export_name(&mut self, node: Option<&Node>) {
+    pub(crate) fn emit_module_export_name(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_module_export_name"); 
         let Some(node) = node else { return };
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node.as_identifier().as_node()),
@@ -278,7 +278,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_module_name(&mut self, node: Option<&Node>) {
+    pub(crate) fn emit_module_name(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_module_name"); 
         let Some(node) = node else { return };
         match node.kind {
             SyntaxKind::Identifier => self.emit_binding_identifier(node.as_identifier().as_node()),
@@ -287,7 +287,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_module_reference(&mut self, node: &Node) {
+    pub(crate) fn emit_module_reference(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_module_reference"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_reference(node.as_identifier().as_node()),
             SyntaxKind::QualifiedName => self.emit_qualified_name(node.as_qualified_name().as_node()),
@@ -298,7 +298,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_named_export_bindings(&mut self, node: &Node) {
+    pub(crate) fn emit_named_export_bindings(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_named_export_bindings"); 
         match node.kind {
             SyntaxKind::NamespaceExport => {
                 self.emit_namespace_export(node.as_namespace_export().as_node())
@@ -308,7 +308,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_named_exports(&mut self, node: &Node) {
+    pub(crate) fn emit_named_exports(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_named_exports"); 
         let state = self.enter_node(node);
         let exports = node.as_named_exports();
         self.write_punctuation("{");

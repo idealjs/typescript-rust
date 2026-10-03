@@ -3,7 +3,7 @@
 use crate::parser::types::*;
 
 impl Parser {
-    pub(crate) fn parse_mapped_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_mapped_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_mapped_type"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
 
@@ -60,7 +60,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_mapped_type_parameter(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_mapped_type_parameter(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_mapped_type_parameter"); 
         let pos = self.token_pos();
         let name = self.parse_identifier();
         self.expect(SyntaxKind::InKeyword);
@@ -79,7 +79,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_type_literal(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_literal(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_literal"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
@@ -94,7 +94,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_tuple_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_tuple_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_tuple_type"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBracketToken);
         let elements = self.parse_delimited_list(
@@ -112,7 +112,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_tuple_element_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_tuple_element_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_tuple_element_type"); 
         if self.is_start_of_named_tuple_element() {
             return self.parse_named_tuple_member();
         }
@@ -146,7 +146,7 @@ impl Parser {
         type_node
     }
 
-    pub(crate) fn is_start_of_named_tuple_element(&self) -> bool {
+    pub(crate) fn is_start_of_named_tuple_element(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_named_tuple_element"); 
         if self.token == SyntaxKind::DotDotDotToken {
             let next = self.look_ahead_token();
             if !is_identifier_or_keyword(next) {
@@ -172,7 +172,7 @@ impl Parser {
         false
     }
 
-    pub(crate) fn parse_named_tuple_member(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_named_tuple_member(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_named_tuple_member"); 
         let pos = self.token_pos();
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
         let name = self.parse_identifier();
@@ -192,7 +192,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_parenthesized_or_function_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_parenthesized_or_function_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parenthesized_or_function_type"); 
         let pos = self.token_pos();
         if self.is_start_of_function_type_with_open_paren() {
             let parameters = self.parse_parameter_list();
@@ -225,7 +225,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn is_start_of_function_type_with_open_paren(&self) -> bool {
+    pub(crate) fn is_start_of_function_type_with_open_paren(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_function_type_with_open_paren"); 
         let mut scanner = self.scanner.clone();
         let t1 = scanner.scan();
 

@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk_6::*;
 
 impl Checker {
-    pub(crate) fn has_property_of_type(&mut self, t: &Arc<Type>, name: &str) -> bool {
+    pub(crate) fn has_property_of_type(&mut self, t: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("has_property_of_type"); 
         if t.flags.contains(TypeFlags::IndexedAccess)
             && let Some(constraint) = self.constraint_of_indexed_access(t)
         {
@@ -210,7 +210,7 @@ impl Checker {
         true
     }
 
-    pub(crate) fn expression_has_side_effects(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn expression_has_side_effects(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("expression_has_side_effects"); 
         let mut cur = node;
         while let tsox_frontend::ast::NodeData::ParenthesizedExpression(p) = &cur.data {
             cur = &p.expression;
@@ -263,7 +263,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_indirect_call_comma(&self, comma: &Arc<Node>) -> bool {
+    pub(crate) fn is_indirect_call_comma(&self, comma: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_indirect_call_comma"); 
         let Some(paren) = comma.parent() else {
             return false;
         };
@@ -293,7 +293,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn pop_scope(&mut self) {
+    pub(crate) fn pop_scope(&mut self) { ::tsox_core::fntrace::enter("pop_scope"); 
         self.scope_stack.pop();
     }
 }

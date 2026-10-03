@@ -7,7 +7,7 @@ use tsox_frontend::ast::utilities::is_external_module;
 impl Checker {
     /// Go binder 绑定期的成员容器：向上找最近的 SourceFile/ModuleDeclaration，
     /// 跨入函数/类/枚举/接口则不是模块成员
-    pub(crate) fn binder_container_of_member(&self, n: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn binder_container_of_member(&self, n: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("binder_container_of_member"); 
         let mut cur = n.parent();
         while let Some(p) = cur {
             if matches!(
@@ -44,7 +44,7 @@ impl Checker {
     pub(crate) fn declaration_reached_binder_exported_branch(
         &mut self,
         d: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("declaration_reached_binder_exported_branch"); 
         if matches!(
             d.kind,
             SyntaxKind::ImportEqualsDeclaration
@@ -82,7 +82,7 @@ impl Checker {
     pub(crate) fn any_declaration_reached_binder_exported_branch(
         &mut self,
         declarations: &[Arc<Node>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("any_declaration_reached_binder_exported_branch"); 
         for d in declarations {
             if self.declaration_reached_binder_exported_branch(d) {
                 return true;

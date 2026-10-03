@@ -8,7 +8,7 @@ pub mod messages_generated;
 pub(crate) static LOCALE_MAPS: OnceLock<HashMap<&'static str, HashMap<String, String>>> =
     OnceLock::new();
 
-pub(crate) fn decompress_gzip(data: &[u8]) -> Vec<u8> {
+pub(crate) fn decompress_gzip(data: &[u8]) -> Vec<u8> { crate::fntrace::enter("decompress_gzip"); 
     use flate2::read::GzDecoder;
     use std::io::Read;
     let mut decoder = GzDecoder::new(data);
@@ -17,7 +17,7 @@ pub(crate) fn decompress_gzip(data: &[u8]) -> Vec<u8> {
     result
 }
 
-pub(crate) fn load_locale_map() -> HashMap<&'static str, HashMap<String, String>> {
+pub(crate) fn load_locale_map() -> HashMap<&'static str, HashMap<String, String>> { crate::fntrace::enter("load_locale_map"); 
     let mut maps = HashMap::new();
     for (tag, raw) in [
         ("cs-CZ", include_bytes!("loc_cs-CZ.json.gz").as_slice()),
@@ -42,7 +42,7 @@ pub(crate) fn load_locale_map() -> HashMap<&'static str, HashMap<String, String>
     maps
 }
 
-pub(crate) fn locale_maps() -> &'static HashMap<&'static str, HashMap<String, String>> {
+pub(crate) fn locale_maps() -> &'static HashMap<&'static str, HashMap<String, String>> { crate::fntrace::enter("locale_maps"); 
     LOCALE_MAPS.get_or_init(load_locale_map)
 }
 
@@ -59,7 +59,7 @@ pub enum Category {
 }
 
 impl Category {
-    pub fn name(self) -> &'static str {
+    pub fn name(self) -> &'static str { crate::fntrace::enter("name"); 
         match self {
             Category::Warning => "warning",
             Category::Error => "error",
@@ -70,7 +70,7 @@ impl Category {
 }
 
 impl std::fmt::Display for Category {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         f.write_str(self.name())
     }
 }
@@ -89,31 +89,31 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn code(&self) -> i32 {
+    pub fn code(&self) -> i32 { crate::fntrace::enter("code"); 
         self.code
     }
 
-    pub fn category(&self) -> Category {
+    pub fn category(&self) -> Category { crate::fntrace::enter("category"); 
         self.category
     }
 
-    pub fn key(&self) -> Key {
+    pub fn key(&self) -> Key { crate::fntrace::enter("key"); 
         self.key
     }
 
-    pub fn reports_unnecessary(&self) -> bool {
+    pub fn reports_unnecessary(&self) -> bool { crate::fntrace::enter("reports_unnecessary"); 
         self.reports_unnecessary
     }
 
-    pub fn reports_deprecated(&self) -> bool {
+    pub fn reports_deprecated(&self) -> bool { crate::fntrace::enter("reports_deprecated"); 
         self.reports_deprecated
     }
 
-    pub fn format(&self, args: &[&str]) -> String {
+    pub fn format(&self, args: &[&str]) -> String { crate::fntrace::enter("format"); 
         format_message(self.text, args)
     }
 
-    pub fn localize(&self, locale: &Locale, args: &[&str]) -> String {
+    pub fn localize(&self, locale: &Locale, args: &[&str]) -> String { crate::fntrace::enter("localize"); 
         let locale_str = locale.as_str();
         let maps = locale_maps();
         let text = maps
@@ -133,12 +133,12 @@ impl Message {
 }
 
 impl std::fmt::Display for Message {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         f.write_str(self.text)
     }
 }
 
-pub fn new_ad_hoc_message(text: &'static str) -> Message {
+pub fn new_ad_hoc_message(text: &'static str) -> Message { crate::fntrace::enter("new_ad_hoc_message"); 
     Message {
         code: -1,
         category: Category::Error,
@@ -150,7 +150,7 @@ pub fn new_ad_hoc_message(text: &'static str) -> Message {
     }
 }
 
-pub fn format_message(text: &str, args: &[&str]) -> String {
+pub fn format_message(text: &str, args: &[&str]) -> String { crate::fntrace::enter("format_message"); 
     if args.is_empty() {
         return text.to_string();
     }

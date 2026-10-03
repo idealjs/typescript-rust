@@ -8,10 +8,10 @@ pub trait CompilerHost: Send + Sync {
     fn fs_arc(&self) -> Arc<dyn FS>;
     fn current_directory(&self) -> &str;
     fn default_library_path(&self) -> &str;
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.fs().use_case_sensitive_file_names()
     }
-    fn content_mapper_project(&self) -> Option<Arc<dyn crate::mig::m3l_cm_2::Project>> {
+    fn content_mapper_project(&self) -> Option<Arc<dyn crate::mig::m3l_cm_2::Project>> { ::tsox_core::fntrace::enter("content_mapper_project"); 
         None
     }
     fn get_source_file(
@@ -27,7 +27,7 @@ pub trait CompilerHost: Send + Sync {
         &self,
         file_name: &str,
         path: &tsox_core::tspath::Path,
-    ) -> Option<ParsedCommandLine> {
+    ) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("get_resolved_project_reference"); 
         let sys = tsox_tsoptions::mig::m5j_2::ParseConfigHost {
             fs: self.fs_arc(),
             current_directory: self.current_directory().to_string(),
@@ -45,7 +45,7 @@ pub trait CompilerHost: Send + Sync {
 }
 
 impl ProgramOptions {
-    pub fn can_use_project_reference_source(&self) -> bool {
+    pub fn can_use_project_reference_source(&self) -> bool { ::tsox_core::fntrace::enter("can_use_project_reference_source"); 
         self.use_source_of_project_reference
             && !self
                 .config
@@ -65,7 +65,7 @@ pub struct CompilerHostImpl {
 }
 
 impl CompilerHostImpl {
-    pub fn new(fs: Arc<dyn FS>, current_directory: String, default_library_path: String) -> Self {
+    pub fn new(fs: Arc<dyn FS>, current_directory: String, default_library_path: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             fs,
             current_directory,
@@ -75,13 +75,13 @@ impl CompilerHostImpl {
 }
 
 impl CompilerHost for CompilerHostImpl {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
     fn get_source_file(
         &self,
         opts: &tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         let text = self.fs.read_file(&opts.file_name)?;
         Some(Arc::new(Parser::parse_source_file_text(
             &opts.file_name,
@@ -92,7 +92,7 @@ impl CompilerHost for CompilerHostImpl {
         &self,
         parse_options: &tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions,
         mapper: &crate::mig::m3l_cm::Mapper,
-    ) -> Result<crate::mig::m3l_cm_2::SourceFiles, crate::mig::m4v_3::ContentMapperError> {
+    ) -> Result<crate::mig::m3l_cm_2::SourceFiles, crate::mig::m4v_3::ContentMapperError> { ::tsox_core::fntrace::enter("get_content_mapped_source_files"); 
         let Some(project) = self.content_mapper_project() else {
             return Err(crate::mig::m4v_3::ContentMapperError::project_unavailable());
         };
@@ -115,13 +115,13 @@ impl CompilerHost for CompilerHostImpl {
         )?;
         Ok(files)
     }
-    fn fs_arc(&self) -> Arc<dyn FS> {
+    fn fs_arc(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs_arc"); 
         Arc::clone(&self.fs)
     }
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.current_directory
     }
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         &self.default_library_path
     }
 }
@@ -132,7 +132,7 @@ pub(crate) struct ResolutionHostAdapter {
 }
 
 impl ResolutionHostAdapter {
-    pub(crate) fn new(host: &dyn CompilerHost) -> Self {
+    pub(crate) fn new(host: &dyn CompilerHost) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             fs: host.fs_arc(),
             current_directory: host.current_directory().to_string(),
@@ -141,10 +141,10 @@ impl ResolutionHostAdapter {
 }
 
 impl tsox_tsoptions::module::ResolutionHost for ResolutionHostAdapter {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }

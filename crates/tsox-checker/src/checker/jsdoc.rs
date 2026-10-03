@@ -9,7 +9,7 @@ use tsox_frontend::ast::is_identifier;
 use super::checker::Checker;
 
 impl Checker {
-    pub fn check_unmatched_jsdoc_parameters(&mut self, node: &Arc<Node>) {
+    pub fn check_unmatched_jsdoc_parameters(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unmatched_jsdoc_parameters"); 
         let jsdoc_parameters = self.get_all_jsdoc_parameter_tags(node);
         if jsdoc_parameters.is_empty() {
             return;
@@ -114,11 +114,11 @@ impl Checker {
         }
     }
 
-    fn get_all_jsdoc_parameter_tags(&self, _node: &Arc<Node>) -> Vec<Arc<Node>> {
+    fn get_all_jsdoc_parameter_tags(&self, _node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_all_jsdoc_parameter_tags"); 
         Vec::new()
     }
 
-    pub fn contains_arguments_reference(&self, node: &Arc<Node>) -> bool {
+    pub fn contains_arguments_reference(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("contains_arguments_reference"); 
         let body: Option<Arc<Node>> = match &node.data {
             NodeData::FunctionDeclaration(d) => d.body.as_ref().map(Arc::clone),
             NodeData::FunctionExpression(d) => Some(Arc::clone(&d.body)),
@@ -135,7 +135,7 @@ impl Checker {
         found
     }
 
-    fn walk_for_arguments(&self, node: &Arc<Node>, found: &mut bool) {
+    fn walk_for_arguments(&self, node: &Arc<Node>, found: &mut bool) { ::tsox_core::fntrace::enter("walk_for_arguments"); 
         if *found {
             return;
         }

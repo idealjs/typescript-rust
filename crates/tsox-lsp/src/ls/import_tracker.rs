@@ -66,7 +66,7 @@ pub fn create_import_tracker(
     _source_files: &[Arc<SourceFile>],
     _source_files_set: &std::collections::HashSet<String>,
     _checker: &Checker,
-) -> ImportTracker {
+) -> ImportTracker { ::tsox_core::fntrace::enter("create_import_tracker"); 
     Box::new(
         |_export_symbol: &Arc<Symbol>, _export_info: &ExportInfo, _is_for_rename: bool| {
             ImportsResult {

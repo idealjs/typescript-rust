@@ -3,11 +3,11 @@ use std::sync::{Mutex, OnceLock};
 
 static RECORDED_ERRORS: OnceLock<Mutex<Vec<(DiagnosticKind, usize, usize)>>> = OnceLock::new();
 
-fn recorded_errors() -> &'static Mutex<Vec<(DiagnosticKind, usize, usize)>> {
+fn recorded_errors() -> &'static Mutex<Vec<(DiagnosticKind, usize, usize)>> { ::tsox_core::fntrace::enter("recorded_errors"); 
     RECORDED_ERRORS.get_or_init(|| Mutex::new(Vec::new()))
 }
 
-fn record_error(kind: DiagnosticKind, start: usize, length: usize) {
+fn record_error(kind: DiagnosticKind, start: usize, length: usize) { ::tsox_core::fntrace::enter("record_error"); 
     recorded_errors()
         .lock()
         .unwrap()
@@ -15,7 +15,7 @@ fn record_error(kind: DiagnosticKind, start: usize, length: usize) {
 }
 
 #[test]
-fn scan_identifiers_and_keywords() {
+fn scan_identifiers_and_keywords() { ::tsox_core::fntrace::enter("scan_identifiers_and_keywords"); 
     let mut s = Scanner::new("foo const let");
     assert_eq!(s.scan(), SyntaxKind::Identifier);
     assert_eq!(s.token_text(), "foo");
@@ -27,7 +27,7 @@ fn scan_identifiers_and_keywords() {
 }
 
 #[test]
-fn scan_private_identifier() {
+fn scan_private_identifier() { ::tsox_core::fntrace::enter("scan_private_identifier"); 
     let mut s = Scanner::new("#name = 1");
     assert_eq!(s.scan(), SyntaxKind::PrivateIdentifier);
     assert_eq!(s.token_text(), "#name");
@@ -37,7 +37,7 @@ fn scan_private_identifier() {
 }
 
 #[test]
-fn scan_shebang_at_file_start_is_trivia() {
+fn scan_shebang_at_file_start_is_trivia() { ::tsox_core::fntrace::enter("scan_shebang_at_file_start_is_trivia"); 
     let mut s = Scanner::new("#!/usr/bin/env node\nlet x = 1;");
     assert_eq!(s.scan(), SyntaxKind::LetKeyword);
     assert_eq!(s.scan(), SyntaxKind::Identifier);
@@ -45,7 +45,7 @@ fn scan_shebang_at_file_start_is_trivia() {
 }
 
 #[test]
-fn scan_numbers() {
+fn scan_numbers() { ::tsox_core::fntrace::enter("scan_numbers"); 
     let mut s = Scanner::new("42 3.14 0x1F 0b101 0o77 100n");
     assert_eq!(s.scan(), SyntaxKind::NumericLiteral);
     assert_eq!(s.token_text(), "42");
@@ -62,7 +62,7 @@ fn scan_numbers() {
 }
 
 #[test]
-fn scan_strings() {
+fn scan_strings() { ::tsox_core::fntrace::enter("scan_strings"); 
     let mut s = Scanner::new("\"hello\" 'world'");
     assert_eq!(s.scan(), SyntaxKind::StringLiteral);
     assert_eq!(s.token_text(), "\"hello\"");
@@ -71,7 +71,7 @@ fn scan_strings() {
 }
 
 #[test]
-fn scan_string_escape_sequences() {
+fn scan_string_escape_sequences() { ::tsox_core::fntrace::enter("scan_string_escape_sequences"); 
     let mut s = Scanner::new(r#""\x22""#);
     assert_eq!(s.scan(), SyntaxKind::StringLiteral);
     assert_eq!(s.token_text(), r#""\x22""#);
@@ -95,7 +95,7 @@ fn scan_string_escape_sequences() {
 }
 
 #[test]
-fn scan_punctuation() {
+fn scan_punctuation() { ::tsox_core::fntrace::enter("scan_punctuation"); 
     let mut s = Scanner::new("=> === ... ??=");
     assert_eq!(s.scan(), SyntaxKind::EqualsGreaterThanToken);
     assert_eq!(s.scan(), SyntaxKind::EqualsEqualsEqualsToken);
@@ -104,7 +104,7 @@ fn scan_punctuation() {
 }
 
 #[test]
-fn scan_non_ascii_unknown_characters_do_not_split_utf8() {
+fn scan_non_ascii_unknown_characters_do_not_split_utf8() { ::tsox_core::fntrace::enter("scan_non_ascii_unknown_characters_do_not_split_utf8"); 
     recorded_errors().lock().unwrap().clear();
     let mut s = Scanner::new("· 中 🦀").with_error_callback(record_error);
 
@@ -130,7 +130,7 @@ fn scan_non_ascii_unknown_characters_do_not_split_utf8() {
 }
 
 #[test]
-fn scan_comments() {
+fn scan_comments() { ::tsox_core::fntrace::enter("scan_comments"); 
     let mut s = Scanner::new("// comment\nfoo /* block */ bar");
     assert_eq!(s.scan(), SyntaxKind::Identifier);
     assert_eq!(s.token_text(), "foo");
@@ -140,7 +140,7 @@ fn scan_comments() {
 }
 
 #[test]
-fn scan_template_literal() {
+fn scan_template_literal() { ::tsox_core::fntrace::enter("scan_template_literal"); 
     let mut s = Scanner::new("`hello`");
     assert_eq!(s.scan(), SyntaxKind::NoSubstitutionTemplateLiteral);
     assert_eq!(s.token_text(), "`hello`");
@@ -150,13 +150,13 @@ fn scan_template_literal() {
 }
 
 #[test]
-fn keyword_lookup() {
+fn keyword_lookup() { ::tsox_core::fntrace::enter("keyword_lookup"); 
     assert_eq!(string_to_keyword("class"), Some(SyntaxKind::ClassKeyword));
     assert_eq!(string_to_keyword("foobar"), None);
 }
 
 #[test]
-fn re_scan_slash_token_basic_regex() {
+fn re_scan_slash_token_basic_regex() { ::tsox_core::fntrace::enter("re_scan_slash_token_basic_regex"); 
     let mut s = Scanner::new("/foo/g");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::SlashToken);
@@ -166,7 +166,7 @@ fn re_scan_slash_token_basic_regex() {
 }
 
 #[test]
-fn re_scan_slash_token_regex_with_flags() {
+fn re_scan_slash_token_regex_with_flags() { ::tsox_core::fntrace::enter("re_scan_slash_token_regex_with_flags"); 
     let mut s = Scanner::new("/pattern/gim");
     s.scan();
     s.re_scan_slash_token();
@@ -175,7 +175,7 @@ fn re_scan_slash_token_regex_with_flags() {
 }
 
 #[test]
-fn re_scan_slash_token_regex_with_char_class() {
+fn re_scan_slash_token_regex_with_char_class() { ::tsox_core::fntrace::enter("re_scan_slash_token_regex_with_char_class"); 
     let mut s = Scanner::new(r"/[\/]/");
     s.scan();
     s.re_scan_slash_token();
@@ -184,7 +184,7 @@ fn re_scan_slash_token_regex_with_char_class() {
 }
 
 #[test]
-fn re_scan_slash_token_regex_with_escape() {
+fn re_scan_slash_token_regex_with_escape() { ::tsox_core::fntrace::enter("re_scan_slash_token_regex_with_escape"); 
     let mut s = Scanner::new(r"/a\/b/");
     s.scan();
     s.re_scan_slash_token();
@@ -193,7 +193,7 @@ fn re_scan_slash_token_regex_with_escape() {
 }
 
 #[test]
-fn re_scan_slash_token_slash_equals() {
+fn re_scan_slash_token_slash_equals() { ::tsox_core::fntrace::enter("re_scan_slash_token_slash_equals"); 
     let mut s = Scanner::new("/=/");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::SlashEqualsToken);
@@ -203,7 +203,7 @@ fn re_scan_slash_token_slash_equals() {
 }
 
 #[test]
-fn re_scan_slash_token_unterminated() {
+fn re_scan_slash_token_unterminated() { ::tsox_core::fntrace::enter("re_scan_slash_token_unterminated"); 
     let mut s = Scanner::new("/foo");
     s.scan();
     s.re_scan_slash_token();
@@ -217,7 +217,7 @@ fn re_scan_slash_token_unterminated() {
 }
 
 #[test]
-fn re_scan_slash_token_unterminated_newline() {
+fn re_scan_slash_token_unterminated_newline() { ::tsox_core::fntrace::enter("re_scan_slash_token_unterminated_newline"); 
     let mut s = Scanner::new("/foo\nbar");
     s.scan();
     s.re_scan_slash_token();
@@ -231,7 +231,7 @@ fn re_scan_slash_token_unterminated_newline() {
 }
 
 #[test]
-fn re_scan_slash_token_valid_flags_no_errors() {
+fn re_scan_slash_token_valid_flags_no_errors() { ::tsox_core::fntrace::enter("re_scan_slash_token_valid_flags_no_errors"); 
     let mut s = Scanner::new("/pattern/dgimsy");
     s.scan();
     s.re_scan_slash_token();
@@ -241,7 +241,7 @@ fn re_scan_slash_token_valid_flags_no_errors() {
 }
 
 #[test]
-fn re_scan_slash_token_unknown_flag_reports_ts1499() {
+fn re_scan_slash_token_unknown_flag_reports_ts1499() { ::tsox_core::fntrace::enter("re_scan_slash_token_unknown_flag_reports_ts1499"); 
     let mut s = Scanner::new("/foo/zz");
     s.scan();
     s.re_scan_slash_token();
@@ -257,7 +257,7 @@ fn re_scan_slash_token_unknown_flag_reports_ts1499() {
 }
 
 #[test]
-fn re_scan_slash_token_duplicate_flag_reports_ts1500() {
+fn re_scan_slash_token_duplicate_flag_reports_ts1500() { ::tsox_core::fntrace::enter("re_scan_slash_token_duplicate_flag_reports_ts1500"); 
     let mut s = Scanner::new("/foo/gg");
     s.scan();
     s.re_scan_slash_token();
@@ -274,7 +274,7 @@ fn re_scan_slash_token_duplicate_flag_reports_ts1500() {
 }
 
 #[test]
-fn re_scan_slash_token_u_and_v_mutually_exclusive_reports_ts1502() {
+fn re_scan_slash_token_u_and_v_mutually_exclusive_reports_ts1502() { ::tsox_core::fntrace::enter("re_scan_slash_token_u_and_v_mutually_exclusive_reports_ts1502"); 
     let mut s = Scanner::new("/foo/uv");
     s.scan();
     s.re_scan_slash_token();
@@ -301,7 +301,7 @@ fn re_scan_slash_token_u_and_v_mutually_exclusive_reports_ts1502() {
 }
 
 #[test]
-fn re_scan_slash_token_mixed_flag_errors() {
+fn re_scan_slash_token_mixed_flag_errors() { ::tsox_core::fntrace::enter("re_scan_slash_token_mixed_flag_errors"); 
     let mut s = Scanner::new("/foo/guz");
     s.scan();
     s.re_scan_slash_token();
@@ -312,7 +312,7 @@ fn re_scan_slash_token_mixed_flag_errors() {
 }
 
 #[test]
-fn comment_directive_ts_expect_error_single_line() {
+fn comment_directive_ts_expect_error_single_line() { ::tsox_core::fntrace::enter("comment_directive_ts_expect_error_single_line"); 
     let mut s = Scanner::new("// @ts-expect-error\n");
     s.scan();
     let directives = s.comment_directives();
@@ -323,7 +323,7 @@ fn comment_directive_ts_expect_error_single_line() {
 }
 
 #[test]
-fn comment_directive_ts_ignore_single_line() {
+fn comment_directive_ts_ignore_single_line() { ::tsox_core::fntrace::enter("comment_directive_ts_ignore_single_line"); 
     let mut s = Scanner::new("// @ts-ignore");
     s.scan();
     let directives = s.comment_directives();
@@ -332,7 +332,7 @@ fn comment_directive_ts_ignore_single_line() {
 }
 
 #[test]
-fn comment_directive_triple_slash_ts_ignore() {
+fn comment_directive_triple_slash_ts_ignore() { ::tsox_core::fntrace::enter("comment_directive_triple_slash_ts_ignore"); 
     let mut s = Scanner::new("/// @ts-ignore");
     s.scan();
     let directives = s.comment_directives();
@@ -341,7 +341,7 @@ fn comment_directive_triple_slash_ts_ignore() {
 }
 
 #[test]
-fn comment_directive_multiline_ts_expect_error() {
+fn comment_directive_multiline_ts_expect_error() { ::tsox_core::fntrace::enter("comment_directive_multiline_ts_expect_error"); 
     let mut s = Scanner::new("/* @ts-expect-error */");
     s.scan();
     let directives = s.comment_directives();
@@ -350,7 +350,7 @@ fn comment_directive_multiline_ts_expect_error() {
 }
 
 #[test]
-fn comment_directive_no_directive_for_regular_comment() {
+fn comment_directive_no_directive_for_regular_comment() { ::tsox_core::fntrace::enter("comment_directive_no_directive_for_regular_comment"); 
     let mut s = Scanner::new("// just a regular comment");
     s.scan();
     assert!(s.comment_directives().is_empty());
@@ -361,7 +361,7 @@ fn comment_directive_no_directive_for_regular_comment() {
 }
 
 #[test]
-fn comment_directive_multiple_in_source() {
+fn comment_directive_multiple_in_source() { ::tsox_core::fntrace::enter("comment_directive_multiple_in_source"); 
     let mut s = Scanner::new("// @ts-ignore\nlet x = 1;\n// @ts-expect-error\n");
     while s.scan() != SyntaxKind::EndOfFile {}
     let directives = s.comment_directives();
@@ -371,7 +371,7 @@ fn comment_directive_multiple_in_source() {
 }
 
 #[test]
-fn skip_trivia_whitespace_and_newlines() {
+fn skip_trivia_whitespace_and_newlines() { ::tsox_core::fntrace::enter("skip_trivia_whitespace_and_newlines"); 
     assert_eq!(skip_trivia("  \t\n  x", 0), 6);
     assert_eq!(skip_trivia("\n\n\nx", 0), 3);
     assert_eq!(skip_trivia("x", 0), 0);
@@ -380,14 +380,14 @@ fn skip_trivia_whitespace_and_newlines() {
 }
 
 #[test]
-fn skip_trivia_single_line_comment() {
+fn skip_trivia_single_line_comment() { ::tsox_core::fntrace::enter("skip_trivia_single_line_comment"); 
     assert_eq!(skip_trivia("// comment\nx", 0), 11);
 
     assert_eq!(skip_trivia("// eof", 0), 6);
 }
 
 #[test]
-fn skip_trivia_multi_line_comment() {
+fn skip_trivia_multi_line_comment() { ::tsox_core::fntrace::enter("skip_trivia_multi_line_comment"); 
     assert_eq!(skip_trivia("/* comment */x", 0), 13);
 
     assert_eq!(skip_trivia("/* unterminated", 0), 15);
@@ -396,14 +396,14 @@ fn skip_trivia_multi_line_comment() {
 }
 
 #[test]
-fn skip_trivia_shebang_at_start() {
+fn skip_trivia_shebang_at_start() { ::tsox_core::fntrace::enter("skip_trivia_shebang_at_start"); 
     assert_eq!(skip_trivia("#!/usr/bin/env node\nlet x;", 0), 20);
 
     assert_eq!(skip_trivia(" #!/foo", 1), 1);
 }
 
 #[test]
-fn skip_trivia_combined() {
+fn skip_trivia_combined() { ::tsox_core::fntrace::enter("skip_trivia_combined"); 
     assert_eq!(
         skip_trivia("#!/usr/bin/env node\n// hello\n/* world */\nlet x;", 0),
         41
@@ -411,7 +411,7 @@ fn skip_trivia_combined() {
 }
 
 #[test]
-fn get_shebang_returns_text() {
+fn get_shebang_returns_text() { ::tsox_core::fntrace::enter("get_shebang_returns_text"); 
     assert_eq!(
         get_shebang("#!/usr/bin/env node\nlet x;"),
         "#!/usr/bin/env node"
@@ -421,7 +421,7 @@ fn get_shebang_returns_text() {
 }
 
 #[test]
-fn full_start_pos_tracks_leading_trivia() {
+fn full_start_pos_tracks_leading_trivia() { ::tsox_core::fntrace::enter("full_start_pos_tracks_leading_trivia"); 
     let mut s = Scanner::new("let x = 1;");
     s.scan();
     assert_eq!(s.full_start_pos(), 0);
@@ -440,7 +440,7 @@ fn full_start_pos_tracks_leading_trivia() {
 }
 
 #[test]
-fn full_start_pos_preserved_across_comments() {
+fn full_start_pos_preserved_across_comments() { ::tsox_core::fntrace::enter("full_start_pos_preserved_across_comments"); 
     let mut s = Scanner::new("// hi\nlet x;");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -459,7 +459,7 @@ fn full_start_pos_preserved_across_comments() {
 }
 
 #[test]
-fn get_leading_comment_ranges_basic() {
+fn get_leading_comment_ranges_basic() { ::tsox_core::fntrace::enter("get_leading_comment_ranges_basic"); 
     let text = "// first\n// second\nlet x;";
     let ranges = get_leading_comment_ranges(text, 0);
     assert_eq!(ranges.len(), 2);
@@ -473,7 +473,7 @@ fn get_leading_comment_ranges_basic() {
 }
 
 #[test]
-fn get_leading_comment_ranges_multi_line() {
+fn get_leading_comment_ranges_multi_line() { ::tsox_core::fntrace::enter("get_leading_comment_ranges_multi_line"); 
     let text = "/* hello */let x;";
     let ranges = get_leading_comment_ranges(text, 0);
     assert_eq!(ranges.len(), 1);
@@ -484,7 +484,7 @@ fn get_leading_comment_ranges_multi_line() {
 }
 
 #[test]
-fn get_leading_comment_ranges_from_middle() {
+fn get_leading_comment_ranges_from_middle() { ::tsox_core::fntrace::enter("get_leading_comment_ranges_from_middle"); 
     let text = "let x; // trailing\n// leading for next\nlet y;";
 
     let ranges = get_leading_comment_ranges(text, 18);
@@ -496,13 +496,13 @@ fn get_leading_comment_ranges_from_middle() {
 }
 
 #[test]
-fn get_leading_comment_ranges_none() {
+fn get_leading_comment_ranges_none() { ::tsox_core::fntrace::enter("get_leading_comment_ranges_none"); 
     let ranges = get_leading_comment_ranges("let x;", 0);
     assert!(ranges.is_empty());
 }
 
 #[test]
-fn get_trailing_comment_ranges_basic() {
+fn get_trailing_comment_ranges_basic() { ::tsox_core::fntrace::enter("get_trailing_comment_ranges_basic"); 
     let text = "let x; // trailing\nlet y;";
     let ranges = get_trailing_comment_ranges(text, 6);
     assert_eq!(ranges.len(), 1);
@@ -513,14 +513,14 @@ fn get_trailing_comment_ranges_basic() {
 }
 
 #[test]
-fn get_trailing_comment_ranges_stops_at_line_break() {
+fn get_trailing_comment_ranges_stops_at_line_break() { ::tsox_core::fntrace::enter("get_trailing_comment_ranges_stops_at_line_break"); 
     let text = "let x;\nlet y; // c\n";
     let ranges = get_trailing_comment_ranges(text, 0);
     assert!(ranges.is_empty());
 }
 
 #[test]
-fn get_trailing_comment_ranges_multi_line() {
+fn get_trailing_comment_ranges_multi_line() { ::tsox_core::fntrace::enter("get_trailing_comment_ranges_multi_line"); 
     let text = "let x; /* c */ let y;";
     let ranges = get_trailing_comment_ranges(text, 6);
     assert_eq!(ranges.len(), 1);
@@ -531,7 +531,7 @@ fn get_trailing_comment_ranges_multi_line() {
 }
 
 #[test]
-fn get_leading_comment_ranges_shebang_skipped() {
+fn get_leading_comment_ranges_shebang_skipped() { ::tsox_core::fntrace::enter("get_leading_comment_ranges_shebang_skipped"); 
     let text = "#!/usr/bin/env node\n// real comment\nlet x;";
     let ranges = get_leading_comment_ranges(text, 0);
     assert_eq!(ranges.len(), 1);
@@ -542,7 +542,7 @@ fn get_leading_comment_ranges_shebang_skipped() {
 }
 
 #[test]
-fn token_flags_preceding_line_break_set() {
+fn token_flags_preceding_line_break_set() { ::tsox_core::fntrace::enter("token_flags_preceding_line_break_set"); 
     let mut s = Scanner::new("foo\nbar");
     s.scan();
     assert!(!token_flags_contains(
@@ -558,7 +558,7 @@ fn token_flags_preceding_line_break_set() {
 }
 
 #[test]
-fn token_flags_single_quote_string() {
+fn token_flags_single_quote_string() { ::tsox_core::fntrace::enter("token_flags_single_quote_string"); 
     let mut s = Scanner::new("'abc'");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::StringLiteral);
@@ -577,7 +577,7 @@ fn token_flags_single_quote_string() {
 }
 
 #[test]
-fn token_flags_unterminated_string() {
+fn token_flags_unterminated_string() { ::tsox_core::fntrace::enter("token_flags_unterminated_string"); 
     let mut s = Scanner::new("'abc\ndef'");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::StringLiteral);
@@ -588,7 +588,7 @@ fn token_flags_unterminated_string() {
 }
 
 #[test]
-fn token_flags_terminated_string_no_unterminated() {
+fn token_flags_terminated_string_no_unterminated() { ::tsox_core::fntrace::enter("token_flags_terminated_string_no_unterminated"); 
     let mut s = Scanner::new("'abc'");
     s.scan();
     assert!(!token_flags_contains(
@@ -598,7 +598,7 @@ fn token_flags_terminated_string_no_unterminated() {
 }
 
 #[test]
-fn token_flags_hex_numeric_literal() {
+fn token_flags_hex_numeric_literal() { ::tsox_core::fntrace::enter("token_flags_hex_numeric_literal"); 
     let mut s = Scanner::new("0x1F");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::NumericLiteral);
@@ -614,7 +614,7 @@ fn token_flags_hex_numeric_literal() {
 }
 
 #[test]
-fn token_flags_binary_numeric_literal() {
+fn token_flags_binary_numeric_literal() { ::tsox_core::fntrace::enter("token_flags_binary_numeric_literal"); 
     let mut s = Scanner::new("0b1010");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::NumericLiteral);
@@ -625,7 +625,7 @@ fn token_flags_binary_numeric_literal() {
 }
 
 #[test]
-fn token_flags_octal_numeric_literal() {
+fn token_flags_octal_numeric_literal() { ::tsox_core::fntrace::enter("token_flags_octal_numeric_literal"); 
     let mut s = Scanner::new("0o777");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::NumericLiteral);
@@ -636,7 +636,7 @@ fn token_flags_octal_numeric_literal() {
 }
 
 #[test]
-fn token_flags_scientific_numeric_literal() {
+fn token_flags_scientific_numeric_literal() { ::tsox_core::fntrace::enter("token_flags_scientific_numeric_literal"); 
     let mut s = Scanner::new("10e2");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::NumericLiteral);
@@ -647,7 +647,7 @@ fn token_flags_scientific_numeric_literal() {
 }
 
 #[test]
-fn token_flags_contains_leading_zero() {
+fn token_flags_contains_leading_zero() { ::tsox_core::fntrace::enter("token_flags_contains_leading_zero"); 
     let mut s = Scanner::new("0888");
     s.scan();
     assert!(token_flags_contains(
@@ -663,7 +663,7 @@ fn token_flags_contains_leading_zero() {
 }
 
 #[test]
-fn token_flags_plain_decimal_none() {
+fn token_flags_plain_decimal_none() { ::tsox_core::fntrace::enter("token_flags_plain_decimal_none"); 
     let mut s = Scanner::new("123");
     s.scan();
     let flags = s.token_flags();
@@ -671,7 +671,7 @@ fn token_flags_plain_decimal_none() {
 }
 
 #[test]
-fn token_flags_reset_between_tokens() {
+fn token_flags_reset_between_tokens() { ::tsox_core::fntrace::enter("token_flags_reset_between_tokens"); 
     let mut s = Scanner::new("0x1F 'str'");
     s.scan();
     assert!(token_flags_contains(
@@ -691,7 +691,7 @@ fn token_flags_reset_between_tokens() {
 }
 
 #[test]
-fn token_flags_unterminated_template() {
+fn token_flags_unterminated_template() { ::tsox_core::fntrace::enter("token_flags_unterminated_template"); 
     let mut s = Scanner::new("`abc");
     s.scan();
     assert!(token_flags_contains(
@@ -701,7 +701,7 @@ fn token_flags_unterminated_template() {
 }
 
 #[test]
-fn skip_trivia_ex_stop_after_line_break() {
+fn skip_trivia_ex_stop_after_line_break() { ::tsox_core::fntrace::enter("skip_trivia_ex_stop_after_line_break"); 
     let text = "  \n  x";
     let opts = SkipTriviaOptions {
         stop_after_line_break: true,
@@ -713,7 +713,7 @@ fn skip_trivia_ex_stop_after_line_break() {
 }
 
 #[test]
-fn skip_trivia_ex_stop_at_comments() {
+fn skip_trivia_ex_stop_at_comments() { ::tsox_core::fntrace::enter("skip_trivia_ex_stop_at_comments"); 
     let text = "  // c\nx";
     let opts = SkipTriviaOptions {
         stop_at_comments: true,
@@ -726,7 +726,7 @@ fn skip_trivia_ex_stop_at_comments() {
 }
 
 #[test]
-fn skip_trivia_ex_in_jsdoc_consumes_leading_asterisk() {
+fn skip_trivia_ex_in_jsdoc_consumes_leading_asterisk() { ::tsox_core::fntrace::enter("skip_trivia_ex_in_jsdoc_consumes_leading_asterisk"); 
     let text = "\n * @param";
     let opts = SkipTriviaOptions {
         in_jsdoc: true,
@@ -738,7 +738,7 @@ fn skip_trivia_ex_in_jsdoc_consumes_leading_asterisk() {
 }
 
 #[test]
-fn skip_trivia_ex_jsdoc_star_only_after_line_break() {
+fn skip_trivia_ex_jsdoc_star_only_after_line_break() { ::tsox_core::fntrace::enter("skip_trivia_ex_jsdoc_star_only_after_line_break"); 
     let text = " * foo";
     let opts = SkipTriviaOptions {
         in_jsdoc: true,
@@ -749,7 +749,7 @@ fn skip_trivia_ex_jsdoc_star_only_after_line_break() {
 }
 
 #[test]
-fn is_conflict_marker_trivia_detects_markers() {
+fn is_conflict_marker_trivia_detects_markers() { ::tsox_core::fntrace::enter("is_conflict_marker_trivia_detects_markers"); 
     assert!(is_conflict_marker_trivia("<<<<<<< head\n", 0));
 
     assert!(is_conflict_marker_trivia("x\n>>>>>>> branch\n", 2));
@@ -770,14 +770,14 @@ fn is_conflict_marker_trivia_detects_markers() {
 }
 
 #[test]
-fn skip_trivia_ex_consumes_conflict_marker() {
+fn skip_trivia_ex_consumes_conflict_marker() { ::tsox_core::fntrace::enter("skip_trivia_ex_consumes_conflict_marker"); 
     let text = "<<<<<<< a\nshared\n=======\n>>>>>>> b\nx";
     let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
     assert_eq!(&text[pos..], "shared\n=======\n>>>>>>> b\nx");
 }
 
 #[test]
-fn skip_trivia_ex_reports_conflict_marker_error() {
+fn skip_trivia_ex_reports_conflict_marker_error() { ::tsox_core::fntrace::enter("skip_trivia_ex_reports_conflict_marker_error"); 
     use std::cell::RefCell;
     let text = "<<<<<<< a\nx";
     let reported: RefCell<Vec<(usize, usize)>> = RefCell::new(Vec::new());
@@ -795,7 +795,7 @@ fn skip_trivia_ex_reports_conflict_marker_error() {
 }
 
 #[test]
-fn skip_trivia_ex_pipe_divider_marker() {
+fn skip_trivia_ex_pipe_divider_marker() { ::tsox_core::fntrace::enter("skip_trivia_ex_pipe_divider_marker"); 
     let text = "<<<<<<< a\nlocal\n||||||| base\nshared\n=======\nremote\n>>>>>>> b\nx";
     let pos = skip_trivia_ex(text, 0, &SkipTriviaOptions::default(), None);
     assert_eq!(
@@ -805,7 +805,7 @@ fn skip_trivia_ex_pipe_divider_marker() {
 }
 
 #[test]
-fn token_flags_preceding_jsdoc_comment() {
+fn token_flags_preceding_jsdoc_comment() { ::tsox_core::fntrace::enter("token_flags_preceding_jsdoc_comment"); 
     let mut s = Scanner::new("/** doc */\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -817,7 +817,7 @@ fn token_flags_preceding_jsdoc_comment() {
 }
 
 #[test]
-fn token_flags_non_jsdoc_multi_line_comment() {
+fn token_flags_non_jsdoc_multi_line_comment() { ::tsox_core::fntrace::enter("token_flags_non_jsdoc_multi_line_comment"); 
     let mut s = Scanner::new("/* not jsdoc */\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -825,7 +825,7 @@ fn token_flags_non_jsdoc_multi_line_comment() {
 }
 
 #[test]
-fn token_flags_empty_jsdoc_comment_not_flagged() {
+fn token_flags_empty_jsdoc_comment_not_flagged() { ::tsox_core::fntrace::enter("token_flags_empty_jsdoc_comment_not_flagged"); 
     let mut s = Scanner::new("/**/\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -833,7 +833,7 @@ fn token_flags_empty_jsdoc_comment_not_flagged() {
 }
 
 #[test]
-fn token_flags_jsdoc_deprecated_tag() {
+fn token_flags_jsdoc_deprecated_tag() { ::tsox_core::fntrace::enter("token_flags_jsdoc_deprecated_tag"); 
     let mut s = Scanner::new("/**\n * @deprecated\n */\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -843,7 +843,7 @@ fn token_flags_jsdoc_deprecated_tag() {
 }
 
 #[test]
-fn token_flags_jsdoc_see_tag() {
+fn token_flags_jsdoc_see_tag() { ::tsox_core::fntrace::enter("token_flags_jsdoc_see_tag"); 
     let mut s = Scanner::new("/**\n * @see foo\n */\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -852,7 +852,7 @@ fn token_flags_jsdoc_see_tag() {
 }
 
 #[test]
-fn token_flags_jsdoc_link_tag() {
+fn token_flags_jsdoc_link_tag() { ::tsox_core::fntrace::enter("token_flags_jsdoc_link_tag"); 
     let mut s = Scanner::new("/**\n * {@link foo}\n */\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -860,7 +860,7 @@ fn token_flags_jsdoc_link_tag() {
 }
 
 #[test]
-fn token_flags_jsdoc_both_tags() {
+fn token_flags_jsdoc_both_tags() { ::tsox_core::fntrace::enter("token_flags_jsdoc_both_tags"); 
     let mut s = Scanner::new("/**\n * @deprecated\n * @see foo\n */\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -869,7 +869,7 @@ fn token_flags_jsdoc_both_tags() {
 }
 
 #[test]
-fn token_flags_jsdoc_tag_invalid_terminator() {
+fn token_flags_jsdoc_tag_invalid_terminator() { ::tsox_core::fntrace::enter("token_flags_jsdoc_tag_invalid_terminator"); 
     let mut s = Scanner::new("/**\n * @deprecatedX\n */\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -877,7 +877,7 @@ fn token_flags_jsdoc_tag_invalid_terminator() {
 }
 
 #[test]
-fn token_flags_jsdoc_tag_at_end_of_string() {
+fn token_flags_jsdoc_tag_at_end_of_string() { ::tsox_core::fntrace::enter("token_flags_jsdoc_tag_at_end_of_string"); 
     let mut s = Scanner::new("/**@deprecated*/\nlet x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::LetKeyword);
@@ -885,7 +885,7 @@ fn token_flags_jsdoc_tag_at_end_of_string() {
 }
 
 #[test]
-fn token_flags_jsdoc_flags_reset_between_tokens() {
+fn token_flags_jsdoc_flags_reset_between_tokens() { ::tsox_core::fntrace::enter("token_flags_jsdoc_flags_reset_between_tokens"); 
     let mut s = Scanner::new("/** @deprecated */\nlet x\nlet y");
     s.scan();
     assert!(s.has_preceding_jsdoc_with_deprecated_tag());
@@ -896,7 +896,7 @@ fn token_flags_jsdoc_flags_reset_between_tokens() {
 }
 
 #[test]
-fn token_flags_jsdoc_leading_asterisk_consumed() {
+fn token_flags_jsdoc_leading_asterisk_consumed() { ::tsox_core::fntrace::enter("token_flags_jsdoc_leading_asterisk_consumed"); 
     let mut s = Scanner::new("\n* x");
     s.set_skip_jsdoc_leading_asterisks(true);
     s.scan();
@@ -907,7 +907,7 @@ fn token_flags_jsdoc_leading_asterisk_consumed() {
 }
 
 #[test]
-fn token_flags_jsdoc_leading_asterisk_no_line_break() {
+fn token_flags_jsdoc_leading_asterisk_no_line_break() { ::tsox_core::fntrace::enter("token_flags_jsdoc_leading_asterisk_no_line_break"); 
     let mut s = Scanner::new("* x");
     s.set_skip_jsdoc_leading_asterisks(true);
     s.scan();
@@ -916,7 +916,7 @@ fn token_flags_jsdoc_leading_asterisk_no_line_break() {
 }
 
 #[test]
-fn token_flags_jsdoc_leading_asterisk_not_active() {
+fn token_flags_jsdoc_leading_asterisk_not_active() { ::tsox_core::fntrace::enter("token_flags_jsdoc_leading_asterisk_not_active"); 
     let mut s = Scanner::new("\n* x");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::AsteriskToken);
@@ -924,7 +924,7 @@ fn token_flags_jsdoc_leading_asterisk_not_active() {
 }
 
 #[test]
-fn token_flags_jsdoc_leading_asterisk_double_star_not_consumed() {
+fn token_flags_jsdoc_leading_asterisk_double_star_not_consumed() { ::tsox_core::fntrace::enter("token_flags_jsdoc_leading_asterisk_double_star_not_consumed"); 
     let mut s = Scanner::new("\n** x");
     s.set_skip_jsdoc_leading_asterisks(true);
     s.scan();
@@ -933,7 +933,7 @@ fn token_flags_jsdoc_leading_asterisk_double_star_not_consumed() {
 }
 
 #[test]
-fn token_flags_jsdoc_leading_asterisk_star_equals_not_consumed() {
+fn token_flags_jsdoc_leading_asterisk_star_equals_not_consumed() { ::tsox_core::fntrace::enter("token_flags_jsdoc_leading_asterisk_star_equals_not_consumed"); 
     let mut s = Scanner::new("\n*= x");
     s.set_skip_jsdoc_leading_asterisks(true);
     s.scan();
@@ -942,7 +942,7 @@ fn token_flags_jsdoc_leading_asterisk_star_equals_not_consumed() {
 }
 
 #[test]
-fn token_flags_jsdoc_leading_asterisk_only_first_consumed() {
+fn token_flags_jsdoc_leading_asterisk_only_first_consumed() { ::tsox_core::fntrace::enter("token_flags_jsdoc_leading_asterisk_only_first_consumed"); 
     let mut s = Scanner::new("\n* * x");
     s.set_skip_jsdoc_leading_asterisks(true);
     s.scan();
@@ -951,7 +951,7 @@ fn token_flags_jsdoc_leading_asterisk_only_first_consumed() {
 }
 
 #[test]
-fn token_flags_jsdoc_leading_asterisk_counter_nesting() {
+fn token_flags_jsdoc_leading_asterisk_counter_nesting() { ::tsox_core::fntrace::enter("token_flags_jsdoc_leading_asterisk_counter_nesting"); 
     let mut s = Scanner::new("\n* x");
     s.set_skip_jsdoc_leading_asterisks(true);
     s.set_skip_jsdoc_leading_asterisks(false);
@@ -961,7 +961,7 @@ fn token_flags_jsdoc_leading_asterisk_counter_nesting() {
 }
 
 #[test]
-fn has_jsdoc_tag_helper() {
+fn has_jsdoc_tag_helper() { ::tsox_core::fntrace::enter("has_jsdoc_tag_helper"); 
     assert!(has_jsdoc_tag("deprecated", &["deprecated"]));
     assert!(has_jsdoc_tag("deprecated foo", &["deprecated"]));
     assert!(has_jsdoc_tag("deprecated\tfoo", &["deprecated"]));
@@ -981,7 +981,7 @@ fn has_jsdoc_tag_helper() {
 }
 
 #[test]
-fn scan_jsdoc_comment_for_tags_helper() {
+fn scan_jsdoc_comment_for_tags_helper() { ::tsox_core::fntrace::enter("scan_jsdoc_comment_for_tags_helper"); 
     assert_eq!(
         scan_jsdoc_comment_for_tags("/** @deprecated */"),
         TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED
@@ -1006,7 +1006,7 @@ fn scan_jsdoc_comment_for_tags_helper() {
 }
 
 #[test]
-fn token_flags_unicode_escape() {
+fn token_flags_unicode_escape() { ::tsox_core::fntrace::enter("token_flags_unicode_escape"); 
     let mut s = Scanner::new("\"\\u00a0\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1020,7 +1020,7 @@ fn token_flags_unicode_escape() {
 }
 
 #[test]
-fn token_flags_extended_unicode_escape() {
+fn token_flags_extended_unicode_escape() { ::tsox_core::fntrace::enter("token_flags_extended_unicode_escape"); 
     let mut s = Scanner::new("\"\\u{10ffff}\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1034,7 +1034,7 @@ fn token_flags_extended_unicode_escape() {
 }
 
 #[test]
-fn token_flags_hex_escape() {
+fn token_flags_hex_escape() { ::tsox_core::fntrace::enter("token_flags_hex_escape"); 
     let mut s = Scanner::new("\"\\xa0\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1048,7 +1048,7 @@ fn token_flags_hex_escape() {
 }
 
 #[test]
-fn token_flags_invalid_hex_escape() {
+fn token_flags_invalid_hex_escape() { ::tsox_core::fntrace::enter("token_flags_invalid_hex_escape"); 
     let mut s = Scanner::new("\"\\xz\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1062,7 +1062,7 @@ fn token_flags_invalid_hex_escape() {
 }
 
 #[test]
-fn token_flags_invalid_unicode_escape() {
+fn token_flags_invalid_unicode_escape() { ::tsox_core::fntrace::enter("token_flags_invalid_unicode_escape"); 
     let mut s = Scanner::new("\"\\u00\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1076,7 +1076,7 @@ fn token_flags_invalid_unicode_escape() {
 }
 
 #[test]
-fn token_flags_invalid_extended_unicode_escape() {
+fn token_flags_invalid_extended_unicode_escape() { ::tsox_core::fntrace::enter("token_flags_invalid_extended_unicode_escape"); 
     let mut s = Scanner::new("\"\\u{}\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1090,7 +1090,7 @@ fn token_flags_invalid_extended_unicode_escape() {
 }
 
 #[test]
-fn token_flags_octal_escape_invalid() {
+fn token_flags_octal_escape_invalid() { ::tsox_core::fntrace::enter("token_flags_octal_escape_invalid"); 
     let mut s = Scanner::new("\"\\01\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1100,7 +1100,7 @@ fn token_flags_octal_escape_invalid() {
 }
 
 #[test]
-fn token_flags_escape_eight_nine_invalid() {
+fn token_flags_escape_eight_nine_invalid() { ::tsox_core::fntrace::enter("token_flags_escape_eight_nine_invalid"); 
     let mut s = Scanner::new("\"\\8\"");
     s.scan();
     assert!(token_flags_contains(
@@ -1110,7 +1110,7 @@ fn token_flags_escape_eight_nine_invalid() {
 }
 
 #[test]
-fn token_flags_nul_escape_not_invalid() {
+fn token_flags_nul_escape_not_invalid() { ::tsox_core::fntrace::enter("token_flags_nul_escape_not_invalid"); 
     let mut s = Scanner::new("\"\\0\"");
     s.scan();
     assert!(!token_flags_contains(
@@ -1120,7 +1120,7 @@ fn token_flags_nul_escape_not_invalid() {
 }
 
 #[test]
-fn token_flags_contains_separator_decimal() {
+fn token_flags_contains_separator_decimal() { ::tsox_core::fntrace::enter("token_flags_contains_separator_decimal"); 
     let mut s = Scanner::new("1_000");
     s.scan();
     assert!(token_flags_contains(
@@ -1134,7 +1134,7 @@ fn token_flags_contains_separator_decimal() {
 }
 
 #[test]
-fn token_flags_contains_separator_hex() {
+fn token_flags_contains_separator_hex() { ::tsox_core::fntrace::enter("token_flags_contains_separator_hex"); 
     let mut s = Scanner::new("0xFF_FF");
     s.scan();
     assert!(token_flags_contains(
@@ -1148,7 +1148,7 @@ fn token_flags_contains_separator_hex() {
 }
 
 #[test]
-fn token_flags_contains_separator_binary() {
+fn token_flags_contains_separator_binary() { ::tsox_core::fntrace::enter("token_flags_contains_separator_binary"); 
     let mut s = Scanner::new("0b1010_0101");
     s.scan();
     assert!(token_flags_contains(
@@ -1158,7 +1158,7 @@ fn token_flags_contains_separator_binary() {
 }
 
 #[test]
-fn token_flags_invalid_separator_consecutive() {
+fn token_flags_invalid_separator_consecutive() { ::tsox_core::fntrace::enter("token_flags_invalid_separator_consecutive"); 
     let mut s = Scanner::new("1__000");
     s.scan();
     assert!(token_flags_contains(
@@ -1172,7 +1172,7 @@ fn token_flags_invalid_separator_consecutive() {
 }
 
 #[test]
-fn token_flags_invalid_separator_trailing() {
+fn token_flags_invalid_separator_trailing() { ::tsox_core::fntrace::enter("token_flags_invalid_separator_trailing"); 
     let mut s = Scanner::new("1000_");
     s.scan();
     assert!(token_flags_contains(
@@ -1186,7 +1186,7 @@ fn token_flags_invalid_separator_trailing() {
 }
 
 #[test]
-fn token_flags_no_separator_plain_number() {
+fn token_flags_no_separator_plain_number() { ::tsox_core::fntrace::enter("token_flags_no_separator_plain_number"); 
     let mut s = Scanner::new("12345");
     s.scan();
     assert!(!token_flags_contains(
@@ -1200,7 +1200,7 @@ fn token_flags_no_separator_plain_number() {
 }
 
 #[test]
-fn token_flags_string_literal_flags_mask() {
+fn token_flags_string_literal_flags_mask() { ::tsox_core::fntrace::enter("token_flags_string_literal_flags_mask"); 
     let mut s = Scanner::new("'\\x41\\u0041'");
     s.scan();
     let flags = s.token_flags();
@@ -1215,7 +1215,7 @@ fn token_flags_string_literal_flags_mask() {
 }
 
 #[test]
-fn token_flags_numeric_literal_flags_mask() {
+fn token_flags_numeric_literal_flags_mask() { ::tsox_core::fntrace::enter("token_flags_numeric_literal_flags_mask"); 
     let mut s = Scanner::new("0xFF_FF");
     s.scan();
     let flags = s.token_flags();
@@ -1229,7 +1229,7 @@ fn token_flags_numeric_literal_flags_mask() {
 }
 
 #[test]
-fn legacy_octal_literal_sets_octal_flag() {
+fn legacy_octal_literal_sets_octal_flag() { ::tsox_core::fntrace::enter("legacy_octal_literal_sets_octal_flag"); 
     let mut s = Scanner::new("0777");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::NumericLiteral);
@@ -1242,7 +1242,7 @@ fn legacy_octal_literal_sets_octal_flag() {
 }
 
 #[test]
-fn legacy_octal_literal_single_digit() {
+fn legacy_octal_literal_single_digit() { ::tsox_core::fntrace::enter("legacy_octal_literal_single_digit"); 
     let mut s = Scanner::new("00");
     s.scan();
     assert!(token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -1252,7 +1252,7 @@ fn legacy_octal_literal_single_digit() {
 }
 
 #[test]
-fn leading_zero_non_octal_sets_leading_zero_flag() {
+fn leading_zero_non_octal_sets_leading_zero_flag() { ::tsox_core::fntrace::enter("leading_zero_non_octal_sets_leading_zero_flag"); 
     let mut s = Scanner::new("0888");
     s.scan();
     assert!(token_flags_contains(
@@ -1268,7 +1268,7 @@ fn leading_zero_non_octal_sets_leading_zero_flag() {
 }
 
 #[test]
-fn plain_zero_no_flags() {
+fn plain_zero_no_flags() { ::tsox_core::fntrace::enter("plain_zero_no_flags"); 
     let mut s = Scanner::new("0");
     s.scan();
     assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -1280,7 +1280,7 @@ fn plain_zero_no_flags() {
 }
 
 #[test]
-fn zero_with_fraction_no_flags() {
+fn zero_with_fraction_no_flags() { ::tsox_core::fntrace::enter("zero_with_fraction_no_flags"); 
     let mut s = Scanner::new("0.5");
     s.scan();
     assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -1292,7 +1292,7 @@ fn zero_with_fraction_no_flags() {
 }
 
 #[test]
-fn zero_with_exponent_no_flags() {
+fn zero_with_exponent_no_flags() { ::tsox_core::fntrace::enter("zero_with_exponent_no_flags"); 
     let mut s = Scanner::new("0e5");
     s.scan();
     assert!(!token_flags_contains(s.token_flags(), TOKEN_FLAGS_OCTAL));
@@ -1304,7 +1304,7 @@ fn zero_with_exponent_no_flags() {
 }
 
 #[test]
-fn zero_bigint_no_flags() {
+fn zero_bigint_no_flags() { ::tsox_core::fntrace::enter("zero_bigint_no_flags"); 
     let mut s = Scanner::new("0n");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::BigIntLiteral);
@@ -1313,7 +1313,7 @@ fn zero_bigint_no_flags() {
 }
 
 #[test]
-fn zero_separator_after_leading_zero() {
+fn zero_separator_after_leading_zero() { ::tsox_core::fntrace::enter("zero_separator_after_leading_zero"); 
     let mut s = Scanner::new("0_123");
     s.scan();
     assert!(token_flags_contains(
@@ -1331,7 +1331,7 @@ fn zero_separator_after_leading_zero() {
 }
 
 #[test]
-fn legacy_octal_with_minus_prefix() {
+fn legacy_octal_with_minus_prefix() { ::tsox_core::fntrace::enter("legacy_octal_with_minus_prefix"); 
     let mut s = Scanner::new("-0777");
     s.scan();
     assert_eq!(s.token(), SyntaxKind::MinusToken);
@@ -1346,19 +1346,19 @@ fn legacy_octal_with_minus_prefix() {
 }
 
 #[test]
-fn jsdoc_token_at_sign() {
+fn jsdoc_token_at_sign() { ::tsox_core::fntrace::enter("jsdoc_token_at_sign"); 
     let mut s = Scanner::new("@param");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::AtToken);
 }
 
 #[test]
-fn jsdoc_token_asterisk() {
+fn jsdoc_token_asterisk() { ::tsox_core::fntrace::enter("jsdoc_token_asterisk"); 
     let mut s = Scanner::new("*");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::AsteriskToken);
 }
 
 #[test]
-fn jsdoc_token_identifier_and_keyword() {
+fn jsdoc_token_identifier_and_keyword() { ::tsox_core::fntrace::enter("jsdoc_token_identifier_and_keyword"); 
     let mut s = Scanner::new("param");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::Identifier);
     let mut s = Scanner::new("return");
@@ -1366,20 +1366,20 @@ fn jsdoc_token_identifier_and_keyword() {
 }
 
 #[test]
-fn jsdoc_token_identifier_with_dash() {
+fn jsdoc_token_identifier_with_dash() { ::tsox_core::fntrace::enter("jsdoc_token_identifier_with_dash"); 
     let mut s = Scanner::new("custom-tag");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::Identifier);
     assert_eq!(s.token_text(), "custom-tag");
 }
 
 #[test]
-fn jsdoc_token_whitespace() {
+fn jsdoc_token_whitespace() { ::tsox_core::fntrace::enter("jsdoc_token_whitespace"); 
     let mut s = Scanner::new("   \t  ");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::WhitespaceTrivia);
 }
 
 #[test]
-fn jsdoc_token_newline() {
+fn jsdoc_token_newline() { ::tsox_core::fntrace::enter("jsdoc_token_newline"); 
     let mut s = Scanner::new("\n");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::NewLineTrivia);
     assert!(token_flags_contains(
@@ -1389,13 +1389,13 @@ fn jsdoc_token_newline() {
 }
 
 #[test]
-fn jsdoc_token_crlf_newline() {
+fn jsdoc_token_crlf_newline() { ::tsox_core::fntrace::enter("jsdoc_token_crlf_newline"); 
     let mut s = Scanner::new("\r\n");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::NewLineTrivia);
 }
 
 #[test]
-fn jsdoc_token_braces_and_brackets() {
+fn jsdoc_token_braces_and_brackets() { ::tsox_core::fntrace::enter("jsdoc_token_braces_and_brackets"); 
     let mut s = Scanner::new("{");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::OpenBraceToken);
     let mut s = Scanner::new("}");
@@ -1407,7 +1407,7 @@ fn jsdoc_token_braces_and_brackets() {
 }
 
 #[test]
-fn jsdoc_token_punctuation() {
+fn jsdoc_token_punctuation() { ::tsox_core::fntrace::enter("jsdoc_token_punctuation"); 
     let mut s = Scanner::new("(");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::OpenParenToken);
     let mut s = Scanner::new("`");
@@ -1417,37 +1417,37 @@ fn jsdoc_token_punctuation() {
 }
 
 #[test]
-fn jsdoc_token_eof() {
+fn jsdoc_token_eof() { ::tsox_core::fntrace::enter("jsdoc_token_eof"); 
     let mut s = Scanner::new("");
     assert_eq!(s.scan_jsdoc_token(), SyntaxKind::EndOfFile);
 }
 
 #[test]
-fn jsdoc_can_follow_at_identifier() {
+fn jsdoc_can_follow_at_identifier() { ::tsox_core::fntrace::enter("jsdoc_can_follow_at_identifier"); 
     let s = Scanner::new("param");
     assert!(s.can_follow_jsdoc_at());
 }
 
 #[test]
-fn jsdoc_can_follow_at_whitespace() {
+fn jsdoc_can_follow_at_whitespace() { ::tsox_core::fntrace::enter("jsdoc_can_follow_at_whitespace"); 
     let s = Scanner::new(" ");
     assert!(s.can_follow_jsdoc_at());
 }
 
 #[test]
-fn jsdoc_can_follow_at_eof() {
+fn jsdoc_can_follow_at_eof() { ::tsox_core::fntrace::enter("jsdoc_can_follow_at_eof"); 
     let s = Scanner::new("");
     assert!(s.can_follow_jsdoc_at());
 }
 
 #[test]
-fn jsdoc_can_follow_at_digit_false() {
+fn jsdoc_can_follow_at_digit_false() { ::tsox_core::fntrace::enter("jsdoc_can_follow_at_digit_false"); 
     let s = Scanner::new("1abc");
     assert!(!s.can_follow_jsdoc_at());
 }
 
 #[test]
-fn jsdoc_comment_text_token_prose() {
+fn jsdoc_comment_text_token_prose() { ::tsox_core::fntrace::enter("jsdoc_comment_text_token_prose"); 
     let mut s = Scanner::new("This is a description. ");
     assert_eq!(
         s.scan_jsdoc_comment_text_token(false),
@@ -1457,7 +1457,7 @@ fn jsdoc_comment_text_token_prose() {
 }
 
 #[test]
-fn jsdoc_comment_text_token_stops_at_brace() {
+fn jsdoc_comment_text_token_stops_at_brace() { ::tsox_core::fntrace::enter("jsdoc_comment_text_token_stops_at_brace"); 
     let mut s = Scanner::new("before {type} after");
     assert_eq!(
         s.scan_jsdoc_comment_text_token(false),
@@ -1469,7 +1469,7 @@ fn jsdoc_comment_text_token_stops_at_brace() {
 }
 
 #[test]
-fn jsdoc_comment_text_token_stops_at_newline() {
+fn jsdoc_comment_text_token_stops_at_newline() { ::tsox_core::fntrace::enter("jsdoc_comment_text_token_stops_at_newline"); 
     let mut s = Scanner::new("line1\nline2");
     assert_eq!(
         s.scan_jsdoc_comment_text_token(false),
@@ -1479,7 +1479,7 @@ fn jsdoc_comment_text_token_stops_at_newline() {
 }
 
 #[test]
-fn jsdoc_comment_text_token_at_tag_boundary() {
+fn jsdoc_comment_text_token_at_tag_boundary() { ::tsox_core::fntrace::enter("jsdoc_comment_text_token_at_tag_boundary"); 
     let mut s = Scanner::new("text @param");
     assert_eq!(
         s.scan_jsdoc_comment_text_token(false),
@@ -1489,7 +1489,7 @@ fn jsdoc_comment_text_token_at_tag_boundary() {
 }
 
 #[test]
-fn jsdoc_comment_text_token_in_backticks_ignores_at_and_brace() {
+fn jsdoc_comment_text_token_in_backticks_ignores_at_and_brace() { ::tsox_core::fntrace::enter("jsdoc_comment_text_token_in_backticks_ignores_at_and_brace"); 
     let mut s = Scanner::new("code {@code x} more");
     assert_eq!(
         s.scan_jsdoc_comment_text_token(true),
@@ -1500,7 +1500,7 @@ fn jsdoc_comment_text_token_in_backticks_ignores_at_and_brace() {
 }
 
 #[test]
-fn jsdoc_comment_text_token_empty_falls_through() {
+fn jsdoc_comment_text_token_empty_falls_through() { ::tsox_core::fntrace::enter("jsdoc_comment_text_token_empty_falls_through"); 
     let mut s = Scanner::new("{");
     assert_eq!(
         s.scan_jsdoc_comment_text_token(false),
@@ -1509,7 +1509,7 @@ fn jsdoc_comment_text_token_empty_falls_through() {
 }
 
 #[test]
-fn scan_string_preserves_lone_surrogates() {
+fn scan_string_preserves_lone_surrogates() { ::tsox_core::fntrace::enter("scan_string_preserves_lone_surrogates"); 
     let input = r#""🦀\ud7ff\ud800\ud801\uD83E\uDD80""#;
     let mut s = Scanner::new(input);
     assert_eq!(s.scan(), SyntaxKind::StringLiteral);

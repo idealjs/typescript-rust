@@ -18,7 +18,7 @@ mod lsproto {
     pub use crate::mig::m5m::ResolvedClientCapabilitiesContext as Context;
 }
 
-fn signature_help_documentation_format(ctx: &lsproto::Context) -> lsproto::MarkupKind {
+fn signature_help_documentation_format(ctx: &lsproto::Context) -> lsproto::MarkupKind { ::tsox_core::fntrace::enter("signature_help_documentation_format"); 
     let formats: Vec<lsproto::MarkupKind> = lsproto::get_client_capabilities(ctx)
         .raw
         .pointer("/textDocument/signatureHelp/signatureInformation/documentationFormat")
@@ -37,7 +37,7 @@ fn signature_help_documentation_format(ctx: &lsproto::Context) -> lsproto::Marku
     lsproto::preferred_markup_kind(&formats)
 }
 
-fn signature_help_capability_pointer(ctx: &lsproto::Context, leaf: &str) -> bool {
+fn signature_help_capability_pointer(ctx: &lsproto::Context, leaf: &str) -> bool { ::tsox_core::fntrace::enter("signature_help_capability_pointer"); 
     lsproto::get_client_capabilities(ctx)
         .raw
         .pointer(&format!("/textDocument/signatureHelp/signatureInformation/{leaf}"))
@@ -45,7 +45,7 @@ fn signature_help_capability_pointer(ctx: &lsproto::Context, leaf: &str) -> bool
         .unwrap_or(false)
 }
 
-fn vs_supports_visual_studio_extensions(ctx: &lsproto::Context) -> bool {
+fn vs_supports_visual_studio_extensions(ctx: &lsproto::Context) -> bool { ::tsox_core::fntrace::enter("vs_supports_visual_studio_extensions"); 
     lsproto::get_client_capabilities(ctx)
         .raw
         .pointer("/_vs_supportsVisualStudioExtensions")
@@ -63,7 +63,7 @@ impl LanguageService {
         source_file: &Arc<SourceFile>,
         c: &mut Checker,
         use_full_prefix: bool,
-    ) -> Option<crate::ls::types::SignatureHelp> {
+    ) -> Option<crate::ls::types::SignatureHelp> { ::tsox_core::fntrace::enter("create_signature_help_items"); 
         let doc_format = signature_help_documentation_format(ctx);
         let vs_capability = vs_supports_visual_studio_extensions(ctx);
 
@@ -189,7 +189,7 @@ impl LanguageService {
         c: &mut Checker,
         doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind,
         vs_capability: bool,
-    ) -> Vec<M5v2SignatureInformation> {
+    ) -> Vec<M5v2SignatureInformation> { ::tsox_core::fntrace::enter("m5v2_get_signature_help_item"); 
         let infos: Vec<M5wSignatureHelpItemInfo> = if is_type_parameter_list {
             self.item_info_for_type_parameters(
                 candidate,

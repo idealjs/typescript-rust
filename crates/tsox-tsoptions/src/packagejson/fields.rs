@@ -30,7 +30,7 @@ pub struct DependencyFields {
 }
 
 impl DependencyFields {
-    pub fn has_dependency(&self, name: &str) -> bool {
+    pub fn has_dependency(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("has_dependency"); 
         self.dependencies
             .get_value()
             .map_or(false, |d| d.contains_key(name))
@@ -48,7 +48,7 @@ impl DependencyFields {
                 .map_or(false, |d| d.contains_key(name))
     }
 
-    pub fn for_each_dependency<F: FnMut(&str, &str, &str) -> bool>(&self, mut f: F) {
+    pub fn for_each_dependency<F: FnMut(&str, &str, &str) -> bool>(&self, mut f: F) { ::tsox_core::fntrace::enter("for_each_dependency"); 
         if let Some(deps) = self.dependencies.get_value() {
             for (name, version) in deps {
                 if !f(name, version, "dependencies") {
@@ -79,7 +79,7 @@ impl DependencyFields {
         }
     }
 
-    pub fn get_runtime_dependency_names(&self) -> std::collections::HashSet<String> {
+    pub fn get_runtime_dependency_names(&self) -> std::collections::HashSet<String> { ::tsox_core::fntrace::enter("get_runtime_dependency_names"); 
         let mut names = std::collections::HashSet::new();
         if let Some(deps) = self.dependencies.get_value() {
             names.extend(deps.keys().cloned());

@@ -26,7 +26,7 @@ fn sync_project_watch<T: Clone + Send + Sync + Default>(
     errors: &mut Vec<String>,
     old_watcher: Option<&WatchedFiles<T>>,
     new_watcher: Option<&WatchedFiles<T>>,
-) {
+) { ::tsox_core::fntrace::enter("sync_project_watch"); 
     let Some(new_watcher) = new_watcher else {
         if let Some(old_watcher) = old_watcher {
             errors.extend(update_watch(session, logger, Some(old_watcher), None));
@@ -47,7 +47,7 @@ pub fn update_watch<T: Clone + Send + Sync + Default>(
     logger: Option<&dyn Logger>,
     old_watcher: Option<&WatchedFiles<T>>,
     new_watcher: Option<&WatchedFiles<T>>,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("update_watch"); 
     let mut errors = Vec::new();
     if let Some(new_watcher) = new_watcher {
         let w = new_watcher.watchers();
@@ -137,7 +137,7 @@ impl Session {
         &self,
         old_snapshot: &Snapshot,
         new_snapshot: &Snapshot,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("update_watches"); 
         let start = std::time::Instant::now();
         let mut errors: Vec<String> = Vec::new();
         let old_configs = old_snapshot.config_file_registry_configs();
@@ -226,7 +226,7 @@ impl Session {
         }
     }
 
-    pub fn enqueue_publish_global_diagnostics(&self) {
+    pub fn enqueue_publish_global_diagnostics(&self) { ::tsox_core::fntrace::enter("enqueue_publish_global_diagnostics"); 
         if !self.options.push_diagnostics_enabled || self.config().enable_validation.is_false() {
             return;
         }
@@ -243,7 +243,7 @@ impl Session {
         });
     }
 
-    pub fn trigger_ata_for_updated_projects(&self, new_snapshot: &Arc<Snapshot>) {
+    pub fn trigger_ata_for_updated_projects(&self, new_snapshot: &Arc<Snapshot>) { ::tsox_core::fntrace::enter("trigger_ata_for_updated_projects"); 
         for project in new_snapshot.projects() {
             if !project.should_trigger_ata(new_snapshot.id()) {
                 continue;
@@ -331,7 +331,7 @@ impl Session {
         change: &SnapshotChange,
         old_snapshot: &Arc<Snapshot>,
         new_snapshot: &Arc<Snapshot>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("warm_auto_import_cache"); 
         if change.file_changes.changed.len() != 1 {
             return;
         }
@@ -394,21 +394,21 @@ impl Session {
 }
 
 impl Snapshot {
-    pub fn projects(&self) -> Vec<&crate::project::project::Project> {
+    pub fn projects(&self) -> Vec<&crate::project::project::Project> { ::tsox_core::fntrace::enter("projects"); 
         self.project_collection
             .as_deref()
             .expect("project collection")
             .projects()
     }
 
-    pub fn projects_by_path(&self) -> Vec<(Path, &crate::project::project::Project)> {
+    pub fn projects_by_path(&self) -> Vec<(Path, &crate::project::project::Project)> { ::tsox_core::fntrace::enter("projects_by_path"); 
         self.project_collection
             .as_deref()
             .expect("project collection")
             .projects_by_path()
     }
 
-    pub fn project_by_path(&self, path: &Path) -> Option<&crate::project::project::Project> {
+    pub fn project_by_path(&self, path: &Path) -> Option<&crate::project::project::Project> { ::tsox_core::fntrace::enter("project_by_path"); 
         self.project_collection
             .as_deref()
             .expect("project collection")
@@ -420,7 +420,7 @@ impl Snapshot {
 
     pub fn config_file_registry_configs(
         &self,
-    ) -> &HashMap<Path, crate::project::config_file_registry::ConfigFileEntry> {
+    ) -> &HashMap<Path, crate::project::config_file_registry::ConfigFileEntry> { ::tsox_core::fntrace::enter("config_file_registry_configs"); 
         &self
             .config_file_registry
             .as_deref()
@@ -428,11 +428,11 @@ impl Snapshot {
             .configs
     }
 
-    pub fn fs_is_open_file(&self, file_name: &str) -> bool {
+    pub fn fs_is_open_file(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("fs_is_open_file"); 
         self.fs.as_ref().expect("fs").is_open_file(file_name)
     }
 
-    pub fn overlays(&self) -> Option<&HashMap<Path, Arc<crate::project::overlay_fs::Overlay>>> {
+    pub fn overlays(&self) -> Option<&HashMap<Path, Arc<crate::project::overlay_fs::Overlay>>> { ::tsox_core::fntrace::enter("overlays"); 
         self.fs.as_ref().map(|fs| &fs.overlays)
     }
 }

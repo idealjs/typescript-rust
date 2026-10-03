@@ -6,23 +6,23 @@ struct MockModuleSpecifierGenerationHost {
 }
 
 impl ModuleSpecifierGenerationHost for MockModuleSpecifierGenerationHost {
-    fn get_current_directory(&self) -> String {
+    fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.current_dir.clone()
     }
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.use_case_sensitive_file_names
     }
-    fn common_source_directory(&self) -> String {
+    fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         self.current_dir.clone()
     }
-    fn file_exists(&self, _path: &str) -> bool {
+    fn file_exists(&self, _path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         true
     }
 }
 
 #[test]
 
-fn test_get_each_file_name_of_module() {
+fn test_get_each_file_name_of_module() { ::tsox_core::fntrace::enter("test_get_each_file_name_of_module"); 
     struct TestCase {
         name: &'static str,
         importing_file: &'static str,
@@ -114,7 +114,7 @@ fn test_get_each_file_name_of_module() {
 
 #[test]
 
-fn test_get_each_file_name_of_module_with_symlinks() {
+fn test_get_each_file_name_of_module_with_symlinks() { ::tsox_core::fntrace::enter("test_get_each_file_name_of_module_with_symlinks"); 
     let host = MockModuleSpecifierGenerationHost {
         current_dir: "/project".to_string(),
         use_case_sensitive_file_names: true,
@@ -131,7 +131,7 @@ fn test_get_each_file_name_of_module_with_symlinks() {
 
 #[test]
 
-fn test_contains_node_modules() {
+fn test_contains_node_modules() { ::tsox_core::fntrace::enter("test_contains_node_modules"); 
     let cases: &[(&str, &str, bool)] = &[
         (
             "contains node_modules",
@@ -162,7 +162,7 @@ fn test_contains_node_modules() {
 
 #[test]
 
-fn test_contains_ignored_path() {
+fn test_contains_ignored_path() { ::tsox_core::fntrace::enter("test_contains_ignored_path"); 
     let cases: &[(&str, &str, bool)] = &[
         ("ignored path", "/project/node_modules/.pnpm/file.ts", true),
         ("not ignored path", "/project/src/file.ts", false),
@@ -179,7 +179,7 @@ fn test_contains_ignored_path() {
 
 #[test]
 
-fn test_try_get_real_file_name_for_non_js_declaration_file_name() {
+fn test_try_get_real_file_name_for_non_js_declaration_file_name() { ::tsox_core::fntrace::enter("test_try_get_real_file_name_for_non_js_declaration_file_name"); 
     let cases: &[(&str, &str, &str)] = &[
         (
             "json declaration file",
@@ -205,7 +205,7 @@ fn test_try_get_real_file_name_for_non_js_declaration_file_name() {
 
 #[test]
 
-fn test_try_get_module_name_from_exports_or_imports() {
+fn test_try_get_module_name_from_exports_or_imports() { ::tsox_core::fntrace::enter("test_try_get_module_name_from_exports_or_imports"); 
     let modes = [
         MatchingMode::Exact,
         MatchingMode::Directory,

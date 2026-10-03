@@ -26,7 +26,7 @@ pub struct CaseClauseTracker {
 }
 
 impl CaseClauseTracker {
-    fn add_value(&mut self, value: &ConstantValue) {
+    fn add_value(&mut self, value: &ConstantValue) { ::tsox_core::fntrace::enter("add_value"); 
         match value {
             ConstantValue::String(v) => {
                 self.existing_strings.insert(v.clone());
@@ -40,7 +40,7 @@ impl CaseClauseTracker {
         }
     }
 
-    pub fn has_value(&self, value: &ConstantValue) -> bool {
+    pub fn has_value(&self, value: &ConstantValue) -> bool { ::tsox_core::fntrace::enter("has_value"); 
         match value {
             ConstantValue::String(v) => self.existing_strings.contains(v),
             ConstantValue::Number(v) => self.existing_numbers.contains(&jsnum::Number(*v)),
@@ -53,7 +53,7 @@ impl CaseClauseTracker {
 pub fn new_case_clause_tracker(
     type_checker: &mut Checker,
     clauses: &[Arc<Node>],
-) -> CaseClauseTracker {
+) -> CaseClauseTracker { ::tsox_core::fntrace::enter("new_case_clause_tracker"); 
     let mut tracker = CaseClauseTracker {
         existing_strings: HashSet::new(),
         existing_numbers: HashSet::new(),
@@ -87,22 +87,22 @@ pub fn new_case_clause_tracker(
     tracker
 }
 
-pub fn tracker_has_value_m5q2b(tracker: &CaseClauseTracker, value: &ConstantValue) -> bool {
+pub fn tracker_has_value_m5q2b(tracker: &CaseClauseTracker, value: &ConstantValue) -> bool { ::tsox_core::fntrace::enter("tracker_has_value_m5q2b"); 
     tracker.has_value(value)
 }
 
 pub fn tracker_add_value_m5q2b(
     tracker: &mut CaseClauseTracker,
     value: &ConstantValue,
-) {
+) { ::tsox_core::fntrace::enter("tracker_add_value_m5q2b"); 
     tracker.add_value(value)
 }
 
-pub fn format_number(n: f64) -> String {
+pub fn format_number(n: f64) -> String { ::tsox_core::fntrace::enter("format_number"); 
     jsnum::Number(n).to_string()
 }
 
-pub fn format_number_abs(n: f64) -> String {
+pub fn format_number_abs(n: f64) -> String { ::tsox_core::fntrace::enter("format_number_abs"); 
     format_number(n.abs())
 }
 
@@ -117,7 +117,7 @@ pub fn get_jsdoc_param_annotation(
     options: &core::compiler_options::CompilerOptions,
     preferences: &UserPreferences,
     tabstop_counter: &mut i32,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_jsdoc_param_annotation"); 
     let mut param_name = param_name.to_string();
     if let Some(initializer) = initializer {
         param_name = get_jsdoc_param_name_with_initializer(&param_name, initializer);
@@ -214,7 +214,7 @@ pub fn get_jsdoc_param_annotation(
     }
 }
 
-pub fn is_literal_type_m5q2b(t: &tsox_checker::checker::types::Type) -> bool {
+pub fn is_literal_type_m5q2b(t: &tsox_checker::checker::types::Type) -> bool { ::tsox_core::fntrace::enter("is_literal_type_m5q2b"); 
     t.flags & (tsox_checker::checker::types::TypeFlags::STRING_LITERAL
         | tsox_checker::checker::types::TypeFlags::NUMBER_LITERAL
         | tsox_checker::checker::types::TypeFlags::BigIntLiteral
@@ -227,7 +227,7 @@ pub fn type_node_to_expression_m5q2b(
     target: core::compiler_options::ScriptTarget,
     quote_preference: QuotePreference,
     factory: &NodeFactory,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_node_to_expression_m5q2b"); 
     match type_node.kind {
         SyntaxKind::TypeReference => {
             let type_name = match &type_node.data {
@@ -265,7 +265,7 @@ fn entity_name_to_expression_m5q2b(
     target: core::compiler_options::ScriptTarget,
     quote_preference: QuotePreference,
     factory: &NodeFactory,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("entity_name_to_expression_m5q2b"); 
     if ast::is_identifier(entity_name) {
         return Some(Arc::clone(entity_name));
     }

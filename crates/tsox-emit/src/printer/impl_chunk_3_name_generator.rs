@@ -3,7 +3,7 @@
 use crate::printer::impl_chunk_3::*;
 
 impl NameGenerator {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             node_id_to_generated_name: HashMap::new(),
             node_id_to_generated_private_name: HashMap::new(),
@@ -19,7 +19,7 @@ impl NameGenerator {
     pub fn with_get_text_of_node<F>(mut self, f: F) -> Self
     where
         F: Fn(&Node) -> String + 'static,
-    {
+    { ::tsox_core::fntrace::enter("with_get_text_of_node"); 
         self.get_text_of_node = Box::new(f);
         self
     }
@@ -27,12 +27,12 @@ impl NameGenerator {
     pub fn with_is_unique_local_name<F>(mut self, f: F) -> Self
     where
         F: Fn(&str, &Node) -> bool + 'static,
-    {
+    { ::tsox_core::fntrace::enter("with_is_unique_local_name"); 
         self.is_unique_local_name = Some(Box::new(f));
         self
     }
 
-    pub fn push_scope(&mut self, reuse_temp_variable_scope: bool) {
+    pub fn push_scope(&mut self, reuse_temp_variable_scope: bool) { ::tsox_core::fntrace::enter("push_scope"); 
         self.private_name_generation_scope = Some(Box::new(NameGenerationScope {
             next: self.private_name_generation_scope.take(),
             ..NameGenerationScope::new()
@@ -45,7 +45,7 @@ impl NameGenerator {
         }
     }
 
-    pub fn pop_scope(&mut self, reuse_temp_variable_scope: bool) {
+    pub fn pop_scope(&mut self, reuse_temp_variable_scope: bool) { ::tsox_core::fntrace::enter("pop_scope"); 
         if let Some(scope) = self.private_name_generation_scope.take() {
             self.private_name_generation_scope = scope.next;
         }
@@ -59,7 +59,7 @@ impl NameGenerator {
     pub(crate) fn get_scope_mut(
         &mut self,
         private_name: bool,
-    ) -> &mut Option<Box<NameGenerationScope>> {
+    ) -> &mut Option<Box<NameGenerationScope>> { ::tsox_core::fntrace::enter("get_scope_mut"); 
         if private_name {
             &mut self.private_name_generation_scope
         } else {
@@ -67,7 +67,7 @@ impl NameGenerator {
         }
     }
 
-    pub(crate) fn get_temp_flags(&self, private_name: bool) -> i32 {
+    pub(crate) fn get_temp_flags(&self, private_name: bool) -> i32 { ::tsox_core::fntrace::enter("get_temp_flags"); 
         let scope = if private_name {
             &self.private_name_generation_scope
         } else {
@@ -76,7 +76,7 @@ impl NameGenerator {
         scope.as_ref().map_or(TEMP_FLAGS_AUTO, |s| s.temp_flags)
     }
 
-    pub(crate) fn set_temp_flags(&mut self, private_name: bool, flags: i32) {
+    pub(crate) fn set_temp_flags(&mut self, private_name: bool, flags: i32) { ::tsox_core::fntrace::enter("set_temp_flags"); 
         let scope = self.get_scope_mut(private_name);
         if scope.is_none() {
             *scope = Some(Box::new(NameGenerationScope::new()));
@@ -84,7 +84,7 @@ impl NameGenerator {
         scope.as_mut().unwrap().temp_flags = flags;
     }
 
-    pub(crate) fn get_temp_flags_for_formatted_name(&self, private_name: bool, key: &str) -> i32 {
+    pub(crate) fn get_temp_flags_for_formatted_name(&self, private_name: bool, key: &str) -> i32 { ::tsox_core::fntrace::enter("get_temp_flags_for_formatted_name"); 
         let scope = if private_name {
             &self.private_name_generation_scope
         } else {
@@ -101,7 +101,7 @@ impl NameGenerator {
         private_name: bool,
         key: String,
         flags: i32,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_temp_flags_for_formatted_name"); 
         let scope = self.get_scope_mut(private_name);
         if scope.is_none() {
             *scope = Some(Box::new(NameGenerationScope::new()));
@@ -119,7 +119,7 @@ impl NameGenerator {
         private_name: bool,
         scoped: bool,
         temp: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("reserve_name"); 
         if private_name || scoped {
             let scope = self.get_scope_mut(private_name);
             if scope.is_none() {
@@ -135,7 +135,7 @@ impl NameGenerator {
         }
     }
 
-    pub(crate) fn is_reserved_name(&self, name: &str, private_name: bool) -> bool {
+    pub(crate) fn is_reserved_name(&self, name: &str, private_name: bool) -> bool { ::tsox_core::fntrace::enter("is_reserved_name"); 
         if self.generated_names.contains(name) {
             return true;
         }
@@ -153,15 +153,15 @@ impl NameGenerator {
         false
     }
 
-    pub(crate) fn is_unique_name(&self, name: &str, private_name: bool) -> bool {
+    pub(crate) fn is_unique_name(&self, name: &str, private_name: bool) -> bool { ::tsox_core::fntrace::enter("is_unique_name"); 
         !self.is_reserved_name(name, private_name)
     }
 
-    pub(crate) fn check_unique_name(&self, name: &str, private_name: bool) -> bool {
+    pub(crate) fn check_unique_name(&self, name: &str, private_name: bool) -> bool { ::tsox_core::fntrace::enter("check_unique_name"); 
         self.is_unique_name(name, private_name)
     }
 
-    pub fn generate_name(&mut self, name: &GeneratedName) -> String {
+    pub fn generate_name(&mut self, name: &GeneratedName) -> String { ::tsox_core::fntrace::enter("generate_name"); 
         let auto_generate = &name.auto_generate;
         if auto_generate.flags.is_node() {
             self.generate_name_for_node_cached(
@@ -192,7 +192,7 @@ impl NameGenerator {
         flags: GeneratedIdentifierFlags,
         prefix: &str,
         suffix: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("generate_name_for_node_cached"); 
         let node = node.expect("node-based name requires a node");
         let node_id = node.id();
         if private_name {
@@ -222,7 +222,7 @@ impl NameGenerator {
         flags: GeneratedIdentifierFlags,
         prefix: &str,
         suffix: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("generate_name_for_node"); 
         match node.kind {
             SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier => {
                 let text = (self.get_text_of_node)(node);

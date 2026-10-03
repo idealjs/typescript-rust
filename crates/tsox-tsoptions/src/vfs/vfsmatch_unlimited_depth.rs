@@ -19,7 +19,7 @@ pub fn read_directory(
     excludes: &[&str],
     includes: &[&str],
     depth: i32,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("read_directory"); 
     match_files(
         path,
         extensions,
@@ -32,7 +32,7 @@ pub fn read_directory(
     )
 }
 
-pub fn is_implicit_glob(last_path_component: &str) -> bool {
+pub fn is_implicit_glob(last_path_component: &str) -> bool { ::tsox_core::fntrace::enter("is_implicit_glob"); 
     !last_path_component.contains('.')
         && !last_path_component.contains('*')
         && !last_path_component.contains('?')
@@ -40,7 +40,7 @@ pub fn is_implicit_glob(last_path_component: &str) -> bool {
 
 pub(crate) const WILDCARD_CHARS: &[char] = &['*', '?'];
 
-pub(crate) fn get_include_base_path(absolute: &str) -> String {
+pub(crate) fn get_include_base_path(absolute: &str) -> String { ::tsox_core::fntrace::enter("get_include_base_path"); 
     let wildcard_offset = absolute.find(|c: char| WILDCARD_CHARS.contains(&c));
     match wildcard_offset {
         None => {
@@ -64,7 +64,7 @@ pub fn get_base_paths(
     path: &str,
     includes: &[&str],
     use_case_sensitive_file_names: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_base_paths"); 
     let mut base_paths: Vec<String> = vec![path.to_string()];
 
     if !includes.is_empty() {
@@ -112,7 +112,7 @@ pub(crate) fn contains_path(
     parent: &str,
     child: &str,
     options: &tsox_core::tspath::ComparePathsOptions,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("contains_path"); 
     let parent_components = tsox_core::tspath::reduce_path_components(
         &tsox_core::tspath::get_path_components(parent, &options.current_directory),
     );
@@ -183,7 +183,7 @@ pub fn compile_glob_pattern(
     base_path: &str,
     usage: Usage,
     case_sensitive: bool,
-) -> Option<GlobPattern> {
+) -> Option<GlobPattern> { ::tsox_core::fntrace::enter("compile_glob_pattern"); 
     let mut parts = get_normalized_path_components(spec, base_path);
 
     if usage != Usage::Exclude {
@@ -219,7 +219,7 @@ pub fn compile_glob_pattern(
     })
 }
 
-pub(crate) fn get_normalized_path_components(path: &str, current_directory: &str) -> Vec<String> {
+pub(crate) fn get_normalized_path_components(path: &str, current_directory: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_normalized_path_components"); 
     let combined = tsox_core::tspath::combine_paths(current_directory, &[path]);
     let normalized = tsox_core::tspath::normalize_path(&combined);
     tsox_core::tspath::reduce_path_components(&tsox_core::tspath::get_path_components(
@@ -228,7 +228,7 @@ pub(crate) fn get_normalized_path_components(path: &str, current_directory: &str
     ))
 }
 
-pub(crate) fn parse_component(s: &str, is_include: bool) -> Component {
+pub(crate) fn parse_component(s: &str, is_include: bool) -> Component { ::tsox_core::fntrace::enter("parse_component"); 
     if s == "**" {
         return Component {
             kind: ComponentKind::DoubleAsterisk,
@@ -253,7 +253,7 @@ pub(crate) fn parse_component(s: &str, is_include: bool) -> Component {
     }
 }
 
-pub(crate) fn parse_segments(s: &str) -> Vec<Segment> {
+pub(crate) fn parse_segments(s: &str) -> Vec<Segment> { ::tsox_core::fntrace::enter("parse_segments"); 
     let wildcards = s.bytes().filter(|&b| b == b'*' || b == b'?').count();
     let mut result = Vec::with_capacity(2 * wildcards + 1);
     let mut start = 0usize;

@@ -5,7 +5,7 @@ use tsox_core::core::tristate::Tristate;
 use tsox_core::diagnostics::Category;
 
 impl Checker {
-    pub fn check_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_statement"); 
         // Go checkSourceElement：within_unreachable_code 按语句子树保存/恢复
         let saved_within_unreachable = self.within_unreachable_code;
         if !self.within_unreachable_code
@@ -18,7 +18,7 @@ impl Checker {
         self.within_unreachable_code = saved_within_unreachable;
     }
 
-    fn check_statement_inner(&mut self, node: &Arc<Node>) {
+    fn check_statement_inner(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_statement_inner"); 
         self.current_node = Some(Arc::clone(node));
 
         self.type_instantiation_count = 0;
@@ -665,12 +665,12 @@ impl Checker {
     }
 }
 
-fn node_flags_contains_unreachable(node: &Arc<Node>) -> bool {
+fn node_flags_contains_unreachable(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_flags_contains_unreachable"); 
     node.flags
         .contains(tsox_frontend::ast::NodeFlags::Unreachable)
 }
 
-fn parent_statements_of(node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+fn parent_statements_of(node: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("parent_statements_of"); 
     let parent = node.parent()?;
     match &parent.data {
         NodeData::Block(data) => Some(data.statements.iter().cloned().collect()),
@@ -684,7 +684,7 @@ fn parent_statements_of(node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
 impl Checker {
     /// Go checkSourceElementUnreachable：binder 已打标的语句报
     /// Unreachable code detected（合并连续不可达语句为一条）
-    pub(crate) fn check_source_element_unreachable(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn check_source_element_unreachable(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_source_element_unreachable"); 
         if !tsox_frontend::ast::is_potentially_executable_node(node) {
             return false;
         }
@@ -739,7 +739,7 @@ impl Checker {
 
     /// Go isSourceElementUnreachable：旗标分支优先（const enum 受
     /// preserveConstEnums、非实例化 module 例外），无旗标走 flow 可达性兜底
-    pub(crate) fn is_source_element_unreachable(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_source_element_unreachable(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_source_element_unreachable"); 
         if node
             .flags
             .contains(tsox_frontend::ast::NodeFlags::Unreachable)
@@ -773,7 +773,7 @@ impl Checker {
 impl Checker {
     /// Go resolveExternalModule 的 node16/nodenext ESM 分支：implied ESM 文件
     /// 的相对无扩展名说明符报 TS2835（建议 ./x.ts）/ TS2834
-    pub(crate) fn check_node_next_extension_rules(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_node_next_extension_rules(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_node_next_extension_rules"); 
         use tsox_core::core::compiler_options::ModuleKind;
         let NodeData::ImportDeclaration(d) = &node.data else {
             return;
@@ -859,7 +859,7 @@ impl Checker {
 
     /// 动态 import() 恒以 ESM 模式解析（含 CJS 文件内），node16+ 下相对
     /// 无扩展名说明符同样报 TS2835/TS2834
-    pub(crate) fn check_dynamic_import_extension_rules(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_dynamic_import_extension_rules(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_dynamic_import_extension_rules"); 
         use tsox_core::core::compiler_options::ModuleKind;
         let NodeData::CallExpression(call) = &node.data else {
             return;

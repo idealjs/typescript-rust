@@ -14,7 +14,7 @@ impl<'a> NodeFactory<'a> {
         expression: &Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
         arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_new_expression"); 
         Arc::new(Node::new(
             SyntaxKind::NewExpression,
             NodeData::NewExpression(ndg::NewExpressionData {

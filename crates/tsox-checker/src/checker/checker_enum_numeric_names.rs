@@ -6,7 +6,7 @@ use crate::checker::checker::*;
 // isNumericLiteralName（jsnum.FromString(text).String() == text）名报 TS2452。
 // 数值字面量文本按 Go 扫描器归一化语义处理（"1.0" 判为数值名）
 impl Checker {
-    pub(crate) fn check_enum_member_numeric_name(&mut self, member: &Arc<Node>) {
+    pub(crate) fn check_enum_member_numeric_name(&mut self, member: &Arc<Node>) { ::tsox_core::fntrace::enter("check_enum_member_numeric_name"); 
         let Some(name) = member.name() else {
             return;
         };

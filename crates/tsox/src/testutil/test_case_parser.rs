@@ -18,7 +18,7 @@ pub struct TestCaseContent {
     pub current_directory: String,
 }
 
-pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseContent {
+pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseContent { ::tsox_core::fntrace::enter("parse_test_files"); 
     let option_re = Regex::new(r"(?m)^//\s*@(\w+)\s*:\s*([^\r\n]*)").unwrap();
 
     let mut units: Vec<TestUnit> = Vec::new();
@@ -94,7 +94,7 @@ pub fn parse_test_files(content: &str, default_filename: &str) -> TestCaseConten
     }
 }
 
-pub fn extract_compiler_settings(content: &str) -> HashMap<String, String> {
+pub fn extract_compiler_settings(content: &str) -> HashMap<String, String> { ::tsox_core::fntrace::enter("extract_compiler_settings"); 
     let option_re = Regex::new(r"(?m)^//\s*@(\w+)\s*:\s*([^\r\n]*)").unwrap();
     let mut settings = HashMap::new();
     for caps in option_re.captures_iter(content) {

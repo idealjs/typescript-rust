@@ -18,55 +18,55 @@ impl GeneratedIdentifierFlags {
     pub const FILE_LEVEL: Self = Self(1 << 5);
     pub const ALLOW_NAME_SUBSTITUTION: Self = Self(1 << 6);
 
-    pub fn kind(self) -> Self {
+    pub fn kind(self) -> Self { ::tsox_core::fntrace::enter("kind"); 
         Self(self.0 & Self::KIND_MASK.0)
     }
-    pub fn is_auto(self) -> bool {
+    pub fn is_auto(self) -> bool { ::tsox_core::fntrace::enter("is_auto"); 
         self.kind() == Self::AUTO
     }
-    pub fn is_loop(self) -> bool {
+    pub fn is_loop(self) -> bool { ::tsox_core::fntrace::enter("is_loop"); 
         self.kind() == Self::LOOP
     }
-    pub fn is_unique(self) -> bool {
+    pub fn is_unique(self) -> bool { ::tsox_core::fntrace::enter("is_unique"); 
         self.kind() == Self::UNIQUE
     }
-    pub fn is_node(self) -> bool {
+    pub fn is_node(self) -> bool { ::tsox_core::fntrace::enter("is_node"); 
         self.kind() == Self::NODE
     }
-    pub fn is_reserved_in_nested_scopes(self) -> bool {
+    pub fn is_reserved_in_nested_scopes(self) -> bool { ::tsox_core::fntrace::enter("is_reserved_in_nested_scopes"); 
         self.0 & Self::RESERVED_IN_NESTED_SCOPES.0 != 0
     }
-    pub fn is_optimistic(self) -> bool {
+    pub fn is_optimistic(self) -> bool { ::tsox_core::fntrace::enter("is_optimistic"); 
         self.0 & Self::OPTIMISTIC.0 != 0
     }
-    pub fn is_file_level(self) -> bool {
+    pub fn is_file_level(self) -> bool { ::tsox_core::fntrace::enter("is_file_level"); 
         self.0 & Self::FILE_LEVEL.0 != 0
     }
 }
 
 impl std::ops::BitOr for GeneratedIdentifierFlags {
     type Output = Self;
-    fn bitor(self, rhs: Self) -> Self {
+    fn bitor(self, rhs: Self) -> Self { ::tsox_core::fntrace::enter("bitor"); 
         Self(self.0 | rhs.0)
     }
 }
 
 impl std::ops::BitAnd for GeneratedIdentifierFlags {
     type Output = Self;
-    fn bitand(self, rhs: Self) -> Self {
+    fn bitand(self, rhs: Self) -> Self { ::tsox_core::fntrace::enter("bitand"); 
         Self(self.0 & rhs.0)
     }
 }
 
 impl std::ops::BitOrAssign for GeneratedIdentifierFlags {
-    fn bitor_assign(&mut self, rhs: Self) {
+    fn bitor_assign(&mut self, rhs: Self) { ::tsox_core::fntrace::enter("bitor_assign"); 
         self.0 |= rhs.0;
     }
 }
 
 impl std::ops::Not for GeneratedIdentifierFlags {
     type Output = Self;
-    fn not(self) -> Self {
+    fn not(self) -> Self { ::tsox_core::fntrace::enter("not"); 
         Self(!self.0)
     }
 }
@@ -84,7 +84,7 @@ pub type AutoGenerateId = u32;
 pub(crate) static NEXT_AUTO_GENERATE_ID: AtomicU32 = AtomicU32::new(0);
 
 #[allow(dead_code)]
-pub(crate) fn next_auto_generate_id() -> AutoGenerateId {
+pub(crate) fn next_auto_generate_id() -> AutoGenerateId { ::tsox_core::fntrace::enter("next_auto_generate_id"); 
     NEXT_AUTO_GENERATE_ID.fetch_add(1, Ordering::Relaxed) + 1
 }
 
@@ -105,7 +105,7 @@ pub struct GeneratedName {
 }
 
 impl GeneratedName {
-    pub fn new(text: String, is_private: bool, auto_generate: AutoGenerateInfo) -> Self {
+    pub fn new(text: String, is_private: bool, auto_generate: AutoGenerateInfo) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             text,
             is_private,
@@ -113,7 +113,7 @@ impl GeneratedName {
         }
     }
 
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 }
@@ -129,11 +129,11 @@ pub struct EmitContext {
 }
 
 impl EmitContext {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self::default()
     }
 
-    pub fn next_auto_generate_id(&self) -> AutoGenerateId {
+    pub fn next_auto_generate_id(&self) -> AutoGenerateId { ::tsox_core::fntrace::enter("next_auto_generate_id"); 
         self.next_id.fetch_add(1, Ordering::Relaxed) + 1
     }
 }
@@ -143,7 +143,7 @@ pub struct NodeFactory<'a> {
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn new(emit_context: &'a EmitContext) -> Self {
+    pub fn new(emit_context: &'a EmitContext) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { emit_context }
     }
 
@@ -153,7 +153,7 @@ impl<'a> NodeFactory<'a> {
         text: &str,
         node: Option<Arc<Node>>,
         options: AutoGenerateOptions,
-    ) -> GeneratedName {
+    ) -> GeneratedName { ::tsox_core::fntrace::enter("new_generated_identifier"); 
         let id = self.emit_context.next_auto_generate_id();
         let display_text = if text.is_empty() && node.is_some() {
             node.as_ref().unwrap().text().to_string()
@@ -176,7 +176,7 @@ impl<'a> NodeFactory<'a> {
         text: &str,
         node: Option<Arc<Node>>,
         options: AutoGenerateOptions,
-    ) -> GeneratedName {
+    ) -> GeneratedName { ::tsox_core::fntrace::enter("new_generated_private_identifier"); 
         let id = self.emit_context.next_auto_generate_id();
         let display_text = if text.is_empty() {
             if let Some(ref n) = node {
@@ -201,31 +201,31 @@ impl<'a> NodeFactory<'a> {
         GeneratedName::new(formatted, true, auto_generate)
     }
 
-    pub fn new_temp_variable(&self) -> GeneratedName {
+    pub fn new_temp_variable(&self) -> GeneratedName { ::tsox_core::fntrace::enter("new_temp_variable"); 
         self.new_temp_variable_ex(AutoGenerateOptions::default())
     }
 
-    pub fn new_temp_variable_ex(&self, options: AutoGenerateOptions) -> GeneratedName {
+    pub fn new_temp_variable_ex(&self, options: AutoGenerateOptions) -> GeneratedName { ::tsox_core::fntrace::enter("new_temp_variable_ex"); 
         self.new_generated_identifier(GeneratedIdentifierFlags::AUTO, "", None, options)
     }
 
-    pub fn new_loop_variable(&self) -> GeneratedName {
+    pub fn new_loop_variable(&self) -> GeneratedName { ::tsox_core::fntrace::enter("new_loop_variable"); 
         self.new_loop_variable_ex(AutoGenerateOptions::default())
     }
 
-    pub fn new_loop_variable_ex(&self, options: AutoGenerateOptions) -> GeneratedName {
+    pub fn new_loop_variable_ex(&self, options: AutoGenerateOptions) -> GeneratedName { ::tsox_core::fntrace::enter("new_loop_variable_ex"); 
         self.new_generated_identifier(GeneratedIdentifierFlags::LOOP, "", None, options)
     }
 
-    pub fn new_unique_name(&self, text: &str) -> GeneratedName {
+    pub fn new_unique_name(&self, text: &str) -> GeneratedName { ::tsox_core::fntrace::enter("new_unique_name"); 
         self.new_unique_name_ex(text, AutoGenerateOptions::default())
     }
 
-    pub fn new_unique_name_ex(&self, text: &str, options: AutoGenerateOptions) -> GeneratedName {
+    pub fn new_unique_name_ex(&self, text: &str, options: AutoGenerateOptions) -> GeneratedName { ::tsox_core::fntrace::enter("new_unique_name_ex"); 
         self.new_generated_identifier(GeneratedIdentifierFlags::UNIQUE, text, None, options)
     }
 
-    pub fn new_generated_name_for_node(&self, node: &Arc<Node>) -> GeneratedName {
+    pub fn new_generated_name_for_node(&self, node: &Arc<Node>) -> GeneratedName { ::tsox_core::fntrace::enter("new_generated_name_for_node"); 
         self.new_generated_name_for_node_ex(node, AutoGenerateOptions::default())
     }
 
@@ -233,7 +233,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         node: &Arc<Node>,
         mut options: AutoGenerateOptions,
-    ) -> GeneratedName {
+    ) -> GeneratedName { ::tsox_core::fntrace::enter("new_generated_name_for_node_ex"); 
         if !options.prefix.is_empty() || !options.suffix.is_empty() {
             options.flags |= GeneratedIdentifierFlags::OPTIMISTIC;
         }
@@ -245,7 +245,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_unique_private_name(&self, text: &str) -> GeneratedName {
+    pub fn new_unique_private_name(&self, text: &str) -> GeneratedName { ::tsox_core::fntrace::enter("new_unique_private_name"); 
         self.new_unique_private_name_ex(text, AutoGenerateOptions::default())
     }
 
@@ -253,11 +253,11 @@ impl<'a> NodeFactory<'a> {
         &self,
         text: &str,
         options: AutoGenerateOptions,
-    ) -> GeneratedName {
+    ) -> GeneratedName { ::tsox_core::fntrace::enter("new_unique_private_name_ex"); 
         self.new_generated_private_identifier(GeneratedIdentifierFlags::UNIQUE, text, None, options)
     }
 
-    pub fn new_generated_private_name_for_node(&self, node: &Arc<Node>) -> GeneratedName {
+    pub fn new_generated_private_name_for_node(&self, node: &Arc<Node>) -> GeneratedName { ::tsox_core::fntrace::enter("new_generated_private_name_for_node"); 
         self.new_generated_private_name_for_node_ex(node, AutoGenerateOptions::default())
     }
 
@@ -265,7 +265,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         node: &Arc<Node>,
         mut options: AutoGenerateOptions,
-    ) -> GeneratedName {
+    ) -> GeneratedName { ::tsox_core::fntrace::enter("new_generated_private_name_for_node_ex"); 
         if !options.prefix.is_empty() || !options.suffix.is_empty() {
             options.flags |= GeneratedIdentifierFlags::OPTIMISTIC;
         }

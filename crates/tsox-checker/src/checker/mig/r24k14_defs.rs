@@ -12,7 +12,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         type_parameters: &[Arc<Type>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_argument_constraints"); 
         let mut type_arguments: Option<Vec<Arc<Type>>> = None;
         let mut mapper: Option<Arc<TypeMapper>> = None;
         let mut result = true;
@@ -46,7 +46,7 @@ impl Checker {
         &mut self,
         return_type: &Arc<Type>,
         function_flags: FunctionFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_generator_instantiation_assignability_to_return_type_no_error"); 
         let is_async = function_flags.contains(FunctionFlags::ASYNC);
         let generator_yield_type = self
             .get_iteration_type_of_generator_function_return_type(

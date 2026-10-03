@@ -17,7 +17,7 @@ pub enum QuoteChar {
 }
 
 impl QuoteChar {
-    pub fn as_char(self) -> char {
+    pub fn as_char(self) -> char { ::tsox_core::fntrace::enter("as_char"); 
         match self {
             QuoteChar::SingleQuote => '\'',
             QuoteChar::DoubleQuote => '"',
@@ -26,7 +26,7 @@ impl QuoteChar {
     }
 }
 
-pub fn jsx_escaped_chars_map(ch: char) -> Option<&'static str> {
+pub fn jsx_escaped_chars_map(ch: char) -> Option<&'static str> { ::tsox_core::fntrace::enter("jsx_escaped_chars_map"); 
     match ch {
         '"' => Some("&quot;"),
         '\'' => Some("&apos;"),
@@ -34,7 +34,7 @@ pub fn jsx_escaped_chars_map(ch: char) -> Option<&'static str> {
     }
 }
 
-pub fn escaped_chars_map(ch: char) -> Option<&'static str> {
+pub fn escaped_chars_map(ch: char) -> Option<&'static str> { ::tsox_core::fntrace::enter("escaped_chars_map"); 
     match ch {
         '\t' => Some("\\t"),
         '\u{0b}' => Some("\\v"),
@@ -54,14 +54,14 @@ pub fn escaped_chars_map(ch: char) -> Option<&'static str> {
     }
 }
 
-pub fn encode_jsx_character_entity(b: &mut String, char_code: u32) {
+pub fn encode_jsx_character_entity(b: &mut String, char_code: u32) { ::tsox_core::fntrace::enter("encode_jsx_character_entity"); 
     let hex_char_code = format!("{:X}", char_code);
     b.push_str("&#x");
     b.push_str(&hex_char_code);
     b.push(';');
 }
 
-pub fn encode_utf16_escape_sequence(b: &mut String, char_code: u32) {
+pub fn encode_utf16_escape_sequence(b: &mut String, char_code: u32) { ::tsox_core::fntrace::enter("encode_utf16_escape_sequence"); 
     let hex_char_code = format!("{:X}", char_code);
     b.push_str("\\u");
     for _ in hex_char_code.len()..4 {
@@ -70,7 +70,7 @@ pub fn encode_utf16_escape_sequence(b: &mut String, char_code: u32) {
     b.push_str(&hex_char_code);
 }
 
-pub fn escape_string_worker(s: &str, quote_char: QuoteChar, flags: GetLiteralTextFlags, b: &mut String) {
+pub fn escape_string_worker(s: &str, quote_char: QuoteChar, flags: GetLiteralTextFlags, b: &mut String) { ::tsox_core::fntrace::enter("escape_string_worker"); 
     let bytes = s.as_bytes();
     let mut pos = 0;
     let mut i = 0;
@@ -157,19 +157,19 @@ pub fn escape_string_worker(s: &str, quote_char: QuoteChar, flags: GetLiteralTex
     }
 }
 
-pub fn escape_string(s: &str, quote_char: QuoteChar) -> String {
+pub fn escape_string(s: &str, quote_char: QuoteChar) -> String { ::tsox_core::fntrace::enter("escape_string"); 
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(s, quote_char, GET_LITERAL_TEXT_FLAGS_NEVER_ASCII_ESCAPE, &mut b);
     b
 }
 
-pub fn escape_non_ascii_string(s: &str, quote_char: QuoteChar) -> String {
+pub fn escape_non_ascii_string(s: &str, quote_char: QuoteChar) -> String { ::tsox_core::fntrace::enter("escape_non_ascii_string"); 
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(s, quote_char, GET_LITERAL_TEXT_FLAGS_NONE, &mut b);
     b
 }
 
-pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String {
+pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String { ::tsox_core::fntrace::enter("escape_jsx_attribute_string"); 
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(
         s,

@@ -4,25 +4,25 @@ use tsox_core::core::tristate::Tristate;
 use tsox_frontend::parser::Parser;
 use tsox_tsoptions::vfs::InMemoryFS;
 
-fn parse(source: &str) -> SourceFile {
+fn parse(source: &str) -> SourceFile { ::tsox_core::fntrace::enter("parse"); 
     let (file, _diags) =
         Parser::parse_source_file_text_with_diagnostics("/test.ts", source.to_string());
     file
 }
 
-fn emit_to_string(source: &str) -> String {
+fn emit_to_string(source: &str) -> String { ::tsox_core::fntrace::enter("emit_to_string"); 
     let sf = parse(source);
     emit_js_text(&sf, &CompilerOptions::default())
 }
 
-fn emit_to_string_no_comments(source: &str) -> String {
+fn emit_to_string_no_comments(source: &str) -> String { ::tsox_core::fntrace::enter("emit_to_string_no_comments"); 
     let sf = parse(source);
     let mut opts = CompilerOptions::default();
     opts.remove_comments = Tristate::True;
     emit_js_text(&sf, &opts)
 }
 
-fn emit_to_string_es5(source: &str) -> String {
+fn emit_to_string_es5(source: &str) -> String { ::tsox_core::fntrace::enter("emit_to_string_es5"); 
     let sf = parse(source);
     let mut opts = CompilerOptions::default();
     opts.target = ScriptTarget::ES5;
@@ -30,27 +30,27 @@ fn emit_to_string_es5(source: &str) -> String {
 }
 
 #[test]
-fn emit_strips_interface_declaration() {
+fn emit_strips_interface_declaration() { ::tsox_core::fntrace::enter("emit_strips_interface_declaration"); 
     let js = emit_to_string("interface Foo { x: number; }\nlet y = 1;");
     assert!(!js.contains("interface"));
     assert!(js.contains("let y = 1;"));
 }
 
 #[test]
-fn emit_strips_type_alias() {
+fn emit_strips_type_alias() { ::tsox_core::fntrace::enter("emit_strips_type_alias"); 
     let js = emit_to_string("type MyType = number;\nlet y: MyType = 1;");
     assert!(!js.contains("type MyType"));
     assert!(js.contains("let y = 1;"));
 }
 
 #[test]
-fn emit_strips_variable_type_annotation() {
+fn emit_strips_variable_type_annotation() { ::tsox_core::fntrace::enter("emit_strips_variable_type_annotation"); 
     let js = emit_to_string("let x: number = 1;");
     assert_eq!(js.trim(), "let x = 1;");
 }
 
 #[test]
-fn emit_strips_multiple_variable_declarations() {
+fn emit_strips_multiple_variable_declarations() { ::tsox_core::fntrace::enter("emit_strips_multiple_variable_declarations"); 
     let js = emit_to_string("let a: number = 1;\nlet b: string = \"hello\";");
     assert!(js.contains("let a = 1;"));
     assert!(js.contains("let b = \"hello\";"));
@@ -59,7 +59,7 @@ fn emit_strips_multiple_variable_declarations() {
 }
 
 #[test]
-fn emit_strips_function_param_types() {
+fn emit_strips_function_param_types() { ::tsox_core::fntrace::enter("emit_strips_function_param_types"); 
     let js = emit_to_string("function foo(a: number, b: string): number { return a; }");
     assert!(js.contains("function foo(a, b)"));
     assert!(!js.contains(": number"));
@@ -67,34 +67,34 @@ fn emit_strips_function_param_types() {
 }
 
 #[test]
-fn emit_strips_function_return_type() {
+fn emit_strips_function_return_type() { ::tsox_core::fntrace::enter("emit_strips_function_return_type"); 
     let js = emit_to_string("function bar(): void { console.log(\"hi\"); }");
     assert!(js.contains("function bar()"));
     assert!(!js.contains(": void"));
 }
 
 #[test]
-fn emit_strips_type_parameters() {
+fn emit_strips_type_parameters() { ::tsox_core::fntrace::enter("emit_strips_type_parameters"); 
     let js = emit_to_string("function identity<T>(x: T): T { return x; }");
     assert!(js.contains("function identity(x)"));
     assert!(!js.contains("<T>"));
 }
 
 #[test]
-fn emit_strips_as_expression() {
+fn emit_strips_as_expression() { ::tsox_core::fntrace::enter("emit_strips_as_expression"); 
     let js = emit_to_string("function f(x: number) { return x; }");
     assert!(!js.contains(": number"));
     assert!(js.contains("return x;"));
 }
 
 #[test]
-fn emit_preserves_expression_statement() {
+fn emit_preserves_expression_statement() { ::tsox_core::fntrace::enter("emit_preserves_expression_statement"); 
     let js = emit_to_string("console.log(\"hello\");");
     assert_eq!(js.trim(), "console.log(\"hello\");");
 }
 
 #[test]
-fn emit_preserves_class() {
+fn emit_preserves_class() { ::tsox_core::fntrace::enter("emit_preserves_class"); 
     let js = emit_to_string(
         "class Foo { x: number = 1; method(a: string): void { this.x = a.length; } }",
     );
@@ -105,27 +105,27 @@ fn emit_preserves_class() {
 }
 
 #[test]
-fn emit_strips_property_type_annotation() {
+fn emit_strips_property_type_annotation() { ::tsox_core::fntrace::enter("emit_strips_property_type_annotation"); 
     let js = emit_to_string("class Bar { prop: string = \"hi\"; }");
     assert!(js.contains("prop = \"hi\""));
     assert!(!js.contains(": string"));
 }
 
 #[test]
-fn emit_preserves_if_statement() {
+fn emit_preserves_if_statement() { ::tsox_core::fntrace::enter("emit_preserves_if_statement"); 
     let js = emit_to_string("if (x > 0) { console.log(x); } else { console.log(0); }");
     assert!(js.contains("if (x > 0)"));
     assert!(js.contains("else"));
 }
 
 #[test]
-fn emit_preserves_for_loop() {
+fn emit_preserves_for_loop() { ::tsox_core::fntrace::enter("emit_preserves_for_loop"); 
     let js = emit_to_string("for (let i: number = 0; i < 10; i++) { console.log(i); }");
     assert!(js.contains("for (let i = 0; i < 10; i++)"));
 }
 
 #[test]
-fn emit_preserves_arrow_function() {
+fn emit_preserves_arrow_function() { ::tsox_core::fntrace::enter("emit_preserves_arrow_function"); 
     let js = emit_to_string("function fn(x: number): number { return x * 2; }");
     assert!(js.contains("function fn(x)"));
     assert!(js.contains("return x * 2;"));
@@ -133,7 +133,7 @@ fn emit_preserves_arrow_function() {
 }
 
 #[test]
-fn emit_writes_file_to_fs() {
+fn emit_writes_file_to_fs() { ::tsox_core::fntrace::enter("emit_writes_file_to_fs"); 
     let fs = InMemoryFS::new();
     fs.insert_file("/test.ts", "let x: number = 1;");
 
@@ -151,7 +151,7 @@ fn emit_writes_file_to_fs() {
 }
 
 #[test]
-fn emit_respects_out_dir() {
+fn emit_respects_out_dir() { ::tsox_core::fntrace::enter("emit_respects_out_dir"); 
     let fs = InMemoryFS::new();
     let sf = parse("let x = 1;");
     let mut sf_with_name = sf;
@@ -167,7 +167,7 @@ fn emit_respects_out_dir() {
 }
 
 #[test]
-fn emit_skips_json_files() {
+fn emit_skips_json_files() { ::tsox_core::fntrace::enter("emit_skips_json_files"); 
     let sf = parse("{}");
     let mut sf_with_name = sf;
     sf_with_name.file_name = "/test.json".to_string();
@@ -183,7 +183,7 @@ fn emit_skips_json_files() {
 }
 
 #[test]
-fn emit_output_extension_mjs() {
+fn emit_output_extension_mjs() { ::tsox_core::fntrace::enter("emit_output_extension_mjs"); 
     assert_eq!(get_output_extension("/test.mts"), ".mjs");
     assert_eq!(get_output_extension("/test.cts"), ".cjs");
     assert_eq!(get_output_extension("/test.ts"), ".js");
@@ -195,7 +195,7 @@ fn emit_output_extension_mjs() {
 }
 
 #[test]
-fn emit_program_emits_multiple_files() {
+fn emit_program_emits_multiple_files() { ::tsox_core::fntrace::enter("emit_program_emits_multiple_files"); 
     let fs = InMemoryFS::new();
 
     let sf1 = parse("let x: number = 1;");
@@ -223,7 +223,7 @@ fn emit_program_emits_multiple_files() {
 }
 
 #[test]
-fn emit_program_aggregates_diagnostics_on_write_failure() {
+fn emit_program_aggregates_diagnostics_on_write_failure() { ::tsox_core::fntrace::enter("emit_program_aggregates_diagnostics_on_write_failure"); 
     let sf = parse("let x: number = 1;");
     let mut sf = sf;
     sf.file_name = "/test.ts".to_string();
@@ -245,7 +245,7 @@ fn emit_program_aggregates_diagnostics_on_write_failure() {
 }
 
 #[test]
-fn emit_program_handles_empty_source() {
+fn emit_program_handles_empty_source() { ::tsox_core::fntrace::enter("emit_program_handles_empty_source"); 
     let fs = InMemoryFS::new();
     let sf = parse("");
     let mut sf = sf;
@@ -262,7 +262,7 @@ fn emit_program_handles_empty_source() {
 }
 
 #[test]
-fn emit_source_file_skips_js_when_no_emit_for_js_files() {
+fn emit_source_file_skips_js_when_no_emit_for_js_files() { ::tsox_core::fntrace::enter("emit_source_file_skips_js_when_no_emit_for_js_files"); 
     let fs = InMemoryFS::new();
     let sf = parse("let x = 1;");
     let mut sf = sf;
@@ -278,7 +278,7 @@ fn emit_source_file_skips_js_when_no_emit_for_js_files() {
 }
 
 #[test]
-fn emit_source_file_emits_js_by_default() {
+fn emit_source_file_emits_js_by_default() { ::tsox_core::fntrace::enter("emit_source_file_emits_js_by_default"); 
     let fs = InMemoryFS::new();
     let sf = parse("let x = 1;");
     let mut sf = sf;
@@ -292,27 +292,27 @@ fn emit_source_file_emits_js_by_default() {
 }
 
 #[test]
-fn emit_preserves_export_declaration() {
+fn emit_preserves_export_declaration() { ::tsox_core::fntrace::enter("emit_preserves_export_declaration"); 
     let js = emit_to_string("export const x = 1;");
     assert!(js.contains("export const x = 1;"));
 }
 
 #[test]
-fn emit_preserves_import_declaration() {
+fn emit_preserves_import_declaration() { ::tsox_core::fntrace::enter("emit_preserves_import_declaration"); 
     let js = emit_to_string("import { foo } from \"./bar\";");
     assert!(js.contains("import { foo }"));
     assert!(js.contains("from \"./bar\";"));
 }
 
 #[test]
-fn emit_strips_export_from_type_alias() {
+fn emit_strips_export_from_type_alias() { ::tsox_core::fntrace::enter("emit_strips_export_from_type_alias"); 
     let js = emit_to_string("export type ID = number;\nlet x: ID = 1;");
     assert!(!js.contains("type ID"));
     assert!(js.contains("let x = 1;"));
 }
 
 #[test]
-fn emit_preserves_class_with_constructor() {
+fn emit_preserves_class_with_constructor() { ::tsox_core::fntrace::enter("emit_preserves_class_with_constructor"); 
     let js = emit_to_string("class Foo { x: number; constructor(x: number) { this.x = x; } }");
     assert!(js.contains("class Foo"));
     assert!(js.contains("constructor(x)"));
@@ -321,7 +321,7 @@ fn emit_preserves_class_with_constructor() {
 }
 
 #[test]
-fn emit_preserves_while_loop() {
+fn emit_preserves_while_loop() { ::tsox_core::fntrace::enter("emit_preserves_while_loop"); 
     let js = emit_to_string("let i: number = 0; while (i < 10) { i++; }");
     assert!(js.contains("let i = 0;"));
     assert!(js.contains("while (i < 10)"));
@@ -329,7 +329,7 @@ fn emit_preserves_while_loop() {
 }
 
 #[test]
-fn emit_preserves_do_while_loop() {
+fn emit_preserves_do_while_loop() { ::tsox_core::fntrace::enter("emit_preserves_do_while_loop"); 
     let js = emit_to_string("let i: number = 0; do { i++; } while (i < 10);");
     assert!(js.contains("let i = 0;"));
     assert!(js.contains("do {"));
@@ -337,7 +337,7 @@ fn emit_preserves_do_while_loop() {
 }
 
 #[test]
-fn emit_strips_function_type_parameters_in_class_method() {
+fn emit_strips_function_type_parameters_in_class_method() { ::tsox_core::fntrace::enter("emit_strips_function_type_parameters_in_class_method"); 
     let js = emit_to_string("class Foo { method(x: number): number { return x; } }");
     assert!(js.contains("method(x)"));
     assert!(!js.contains(": number"));
@@ -345,61 +345,61 @@ fn emit_strips_function_type_parameters_in_class_method() {
 }
 
 #[test]
-fn remove_comments_strips_single_line_comment() {
+fn remove_comments_strips_single_line_comment() { ::tsox_core::fntrace::enter("remove_comments_strips_single_line_comment"); 
     let js = emit_to_string_no_comments("// This comment should be removed\nconst e = 5;");
     assert!(!js.contains("// This comment"));
     assert!(js.contains("const e = 5;"));
 }
 
 #[test]
-fn remove_comments_strips_multi_line_comment() {
+fn remove_comments_strips_multi_line_comment() { ::tsox_core::fntrace::enter("remove_comments_strips_multi_line_comment"); 
     let js = emit_to_string_no_comments("/* block comment */ const x = 1;");
     assert!(!js.contains("block comment"));
     assert!(js.contains("const x = 1;"));
 }
 
 #[test]
-fn remove_comments_strips_jsdoc_comment() {
+fn remove_comments_strips_jsdoc_comment() { ::tsox_core::fntrace::enter("remove_comments_strips_jsdoc_comment"); 
     let js = emit_to_string_no_comments("/** JSDoc */\nfunction foo() { return 1; }");
     assert!(!js.contains("JSDoc"));
     assert!(js.contains("function foo()"));
 }
 
 #[test]
-fn remove_comments_preserves_comments_in_strings() {
+fn remove_comments_preserves_comments_in_strings() { ::tsox_core::fntrace::enter("remove_comments_preserves_comments_in_strings"); 
     let js = emit_to_string_no_comments("// real comment\nconst s = \"// not a comment\";");
     assert!(!js.contains("real comment"));
     assert!(js.contains("\"// not a comment\""));
 }
 
 #[test]
-fn remove_comments_preserves_comments_in_template_literals() {
+fn remove_comments_preserves_comments_in_template_literals() { ::tsox_core::fntrace::enter("remove_comments_preserves_comments_in_template_literals"); 
     let js = emit_to_string_no_comments("// real comment\nconst s = `// not a comment ${1}`;");
     assert!(!js.contains("real comment"));
     assert!(js.contains("`// not a comment"));
 }
 
 #[test]
-fn remove_comments_does_not_affect_division() {
+fn remove_comments_does_not_affect_division() { ::tsox_core::fntrace::enter("remove_comments_does_not_affect_division"); 
     let js = emit_to_string_no_comments("const x = 10 / 2;");
     assert!(js.contains("10 / 2"));
 }
 
 #[test]
-fn remove_comments_strips_trailing_comment() {
+fn remove_comments_strips_trailing_comment() { ::tsox_core::fntrace::enter("remove_comments_strips_trailing_comment"); 
     let js = emit_to_string_no_comments("const x = 1; // trailing");
     assert!(js.contains("const x = 1;"));
     assert!(!js.contains("trailing"));
 }
 
 #[test]
-fn remove_comments_off_by_default() {
+fn remove_comments_off_by_default() { ::tsox_core::fntrace::enter("remove_comments_off_by_default"); 
     let js = emit_to_string("// comment\nconst x = 1;");
     assert!(js.contains("// comment"));
 }
 
 #[test]
-fn es5_downlevels_const_to_var() {
+fn es5_downlevels_const_to_var() { ::tsox_core::fntrace::enter("es5_downlevels_const_to_var"); 
     let js = emit_to_string_es5("const f: number = 6;");
     assert!(js.contains("var f = 6;"));
     assert!(!js.contains("const"));
@@ -407,33 +407,33 @@ fn es5_downlevels_const_to_var() {
 }
 
 #[test]
-fn es5_downlevels_let_to_var() {
+fn es5_downlevels_let_to_var() { ::tsox_core::fntrace::enter("es5_downlevels_let_to_var"); 
     let js = emit_to_string_es5("let x: number = 1;");
     assert!(js.contains("var x = 1;"));
     assert!(!js.contains("let"));
 }
 
 #[test]
-fn es5_downlevels_const_with_export() {
+fn es5_downlevels_const_with_export() { ::tsox_core::fntrace::enter("es5_downlevels_const_with_export"); 
     let js = emit_to_string_es5("const f: number = 6;\nexport { f };");
     assert!(js.contains("var f = 6;"));
     assert!(js.contains("export { f };"));
 }
 
 #[test]
-fn es5_preserves_var() {
+fn es5_preserves_var() { ::tsox_core::fntrace::enter("es5_preserves_var"); 
     let js = emit_to_string_es5("var x = 1;");
     assert!(js.contains("var x = 1;"));
 }
 
 #[test]
-fn es5_downlevels_nested_let_in_for_loop() {
+fn es5_downlevels_nested_let_in_for_loop() { ::tsox_core::fntrace::enter("es5_downlevels_nested_let_in_for_loop"); 
     let js = emit_to_string_es5("for (let i = 0; i < 10; i++) { console.log(i); }");
     assert!(js.contains("for (var i = 0;"));
 }
 
 #[test]
-fn es5_no_downlevel_when_target_es2015() {
+fn es5_no_downlevel_when_target_es2015() { ::tsox_core::fntrace::enter("es5_no_downlevel_when_target_es2015"); 
     let sf = parse("const x = 1;");
     let mut opts = CompilerOptions::default();
     opts.target = ScriptTarget::ES2015;
@@ -442,7 +442,7 @@ fn es5_no_downlevel_when_target_es2015() {
     assert!(!js.contains("var x"));
 }
 
-fn emit_to_string_commonjs(source: &str) -> String {
+fn emit_to_string_commonjs(source: &str) -> String { ::tsox_core::fntrace::enter("emit_to_string_commonjs"); 
     let sf = parse(source);
     let mut opts = CompilerOptions::default();
     opts.module = ModuleKind::CommonJS;
@@ -450,13 +450,13 @@ fn emit_to_string_commonjs(source: &str) -> String {
 }
 
 #[test]
-fn commonjs_starts_with_use_strict() {
+fn commonjs_starts_with_use_strict() { ::tsox_core::fntrace::enter("commonjs_starts_with_use_strict"); 
     let js = emit_to_string_commonjs("const x = 1;");
     assert!(js.starts_with("\"use strict\";\n"));
 }
 
 #[test]
-fn commonjs_export_named() {
+fn commonjs_export_named() { ::tsox_core::fntrace::enter("commonjs_export_named"); 
     let js = emit_to_string_commonjs("const x = 1;\nexport { x };");
     assert!(js.contains("const x = 1;"));
     assert!(js.contains("exports.x = x;"));
@@ -464,20 +464,20 @@ fn commonjs_export_named() {
 }
 
 #[test]
-fn commonjs_export_default_expression() {
+fn commonjs_export_default_expression() { ::tsox_core::fntrace::enter("commonjs_export_default_expression"); 
     let js = emit_to_string_commonjs("export default 42;");
     assert!(js.contains("exports.default = 42;"));
     assert!(!js.contains("export default"));
 }
 
 #[test]
-fn commonjs_export_equals() {
+fn commonjs_export_equals() { ::tsox_core::fntrace::enter("commonjs_export_equals"); 
     let js = emit_to_string_commonjs("const obj = {};\nexport = obj;");
     assert!(js.contains("module.exports = obj;"));
 }
 
 #[test]
-fn commonjs_export_const() {
+fn commonjs_export_const() { ::tsox_core::fntrace::enter("commonjs_export_const"); 
     let js = emit_to_string_commonjs("export const x = 1;");
     assert!(js.contains("const x = 1;"));
     assert!(js.contains("exports.x = x;"));
@@ -485,7 +485,7 @@ fn commonjs_export_const() {
 }
 
 #[test]
-fn commonjs_export_function() {
+fn commonjs_export_function() { ::tsox_core::fntrace::enter("commonjs_export_function"); 
     let js = emit_to_string_commonjs("export function foo() { return 1; }");
     assert!(js.contains("function foo()"));
     assert!(js.contains("exports.foo = foo;"));
@@ -493,7 +493,7 @@ fn commonjs_export_function() {
 }
 
 #[test]
-fn commonjs_export_class() {
+fn commonjs_export_class() { ::tsox_core::fntrace::enter("commonjs_export_class"); 
     let js = emit_to_string_commonjs("export class Foo { }");
     assert!(js.contains("class Foo"));
     assert!(js.contains("exports.Foo = Foo;"));
@@ -501,46 +501,46 @@ fn commonjs_export_class() {
 }
 
 #[test]
-fn commonjs_import_named() {
+fn commonjs_import_named() { ::tsox_core::fntrace::enter("commonjs_import_named"); 
     let js = emit_to_string_commonjs("import { foo } from \"./bar\";");
     assert!(js.contains("const { foo } = require(\"./bar\");"));
     assert!(!js.contains("import { foo }"));
 }
 
 #[test]
-fn commonjs_import_namespace() {
+fn commonjs_import_namespace() { ::tsox_core::fntrace::enter("commonjs_import_namespace"); 
     let js = emit_to_string_commonjs("import * as ns from \"./bar\";");
     assert!(js.contains("const ns = require(\"./bar\");"));
 }
 
 #[test]
-fn commonjs_import_default() {
+fn commonjs_import_default() { ::tsox_core::fntrace::enter("commonjs_import_default"); 
     let js = emit_to_string_commonjs("import d from \"./bar\";");
     assert!(js.contains("const { default: d } = require(\"./bar\");"));
 }
 
 #[test]
-fn commonjs_import_side_effect() {
+fn commonjs_import_side_effect() { ::tsox_core::fntrace::enter("commonjs_import_side_effect"); 
     let js = emit_to_string_commonjs("import \"./bar\";");
     assert!(js.contains("require(\"./bar\");"));
 }
 
 #[test]
-fn commonjs_import_type_stripped() {
+fn commonjs_import_type_stripped() { ::tsox_core::fntrace::enter("commonjs_import_type_stripped"); 
     let js = emit_to_string_commonjs("import type { foo } from \"./bar\";");
     assert!(!js.contains("import"));
     assert!(!js.contains("require"));
 }
 
 #[test]
-fn commonjs_export_multiple_named() {
+fn commonjs_export_multiple_named() { ::tsox_core::fntrace::enter("commonjs_export_multiple_named"); 
     let js = emit_to_string_commonjs("const x = 1;\nconst y = 2;\nexport { x, y };");
     assert!(js.contains("exports.x = x;"));
     assert!(js.contains("exports.y = y;"));
 }
 
 #[test]
-fn commonjs_export_reexport() {
+fn commonjs_export_reexport() { ::tsox_core::fntrace::enter("commonjs_export_reexport"); 
     let js = emit_to_string_commonjs("export { foo } from \"./bar\";");
     assert!(js.contains("const { foo } = require(\"./bar\");"));
     assert!(js.contains("exports.foo = foo;"));
@@ -551,7 +551,7 @@ fn emit_with_sourcemap(
     source_map: bool,
     inline: bool,
     inline_sources: bool,
-) -> (String, Option<String>, String) {
+) -> (String, Option<String>, String) { ::tsox_core::fntrace::enter("emit_with_sourcemap"); 
     let sf = parse(source);
     let mut opts = CompilerOptions::default();
     if source_map {
@@ -567,7 +567,7 @@ fn emit_with_sourcemap(
 }
 
 #[test]
-fn sourcemap_produces_valid_json() {
+fn sourcemap_produces_valid_json() { ::tsox_core::fntrace::enter("sourcemap_produces_valid_json"); 
     let (js, map_json, url) = emit_with_sourcemap("let x = 1;\nlet y = 2;\n", true, false, false);
 
     assert!(!js.contains("sourceMappingURL"));
@@ -586,7 +586,7 @@ fn sourcemap_produces_valid_json() {
 }
 
 #[test]
-fn sourcemap_inline_produces_data_url() {
+fn sourcemap_inline_produces_data_url() { ::tsox_core::fntrace::enter("sourcemap_inline_produces_data_url"); 
     let (js, map_json, url) = emit_with_sourcemap("let x = 1;\n", false, true, false);
 
     assert!(map_json.is_none());
@@ -597,7 +597,7 @@ fn sourcemap_inline_produces_data_url() {
 }
 
 #[test]
-fn sourcemap_inline_sources_includes_content() {
+fn sourcemap_inline_sources_includes_content() { ::tsox_core::fntrace::enter("sourcemap_inline_sources_includes_content"); 
     let (_js, map_json, _url) = emit_with_sourcemap("let x = 1;\n", true, false, true);
     let map = map_json.expect("map_json should be Some");
     assert!(map.contains("sourcesContent"));
@@ -605,7 +605,7 @@ fn sourcemap_inline_sources_includes_content() {
 }
 
 #[test]
-fn sourcemap_strips_type_annotations() {
+fn sourcemap_strips_type_annotations() { ::tsox_core::fntrace::enter("sourcemap_strips_type_annotations"); 
     let (js, map_json, _url) = emit_with_sourcemap("let x: number = 1;\n", true, false, false);
 
     assert!(js.contains("let x = 1;"));
@@ -616,7 +616,7 @@ fn sourcemap_strips_type_annotations() {
 }
 
 #[test]
-fn sourcemap_mappings_decode_to_correct_positions() {
+fn sourcemap_mappings_decode_to_correct_positions() { ::tsox_core::fntrace::enter("sourcemap_mappings_decode_to_correct_positions"); 
     use crate::sourcemap::MappingsDecoder;
     let (js, map_json, _url) = emit_with_sourcemap("let x = 1;\n", true, false, false);
     let map = map_json.expect("map_json should be Some");
@@ -652,14 +652,14 @@ fn sourcemap_mappings_decode_to_correct_positions() {
 }
 
 #[test]
-fn sourcemap_not_emitted_by_default() {
+fn sourcemap_not_emitted_by_default() { ::tsox_core::fntrace::enter("sourcemap_not_emitted_by_default"); 
     let sf = parse("let x = 1;\n");
     let js = emit_js_text(&sf, &CompilerOptions::default());
     assert!(!js.contains("sourceMappingURL"));
 }
 
 #[test]
-fn sourcemap_commonjs_use_strict_not_mapped() {
+fn sourcemap_commonjs_use_strict_not_mapped() { ::tsox_core::fntrace::enter("sourcemap_commonjs_use_strict_not_mapped"); 
     let mut opts = CompilerOptions::default();
     opts.source_map = Tristate::True;
     opts.module = ModuleKind::CommonJS;
@@ -671,7 +671,7 @@ fn sourcemap_commonjs_use_strict_not_mapped() {
 }
 
 #[test]
-fn sourcemap_write_file_creates_map() {
+fn sourcemap_write_file_creates_map() { ::tsox_core::fntrace::enter("sourcemap_write_file_creates_map"); 
     use std::cell::RefCell;
     let sf = parse("let x = 1;\nlet y: string = \"hi\";\n");
     let mut opts = CompilerOptions::default();
@@ -712,14 +712,14 @@ fn sourcemap_write_file_creates_map() {
     assert!(!js_file.contains(": string"));
 }
 
-fn emit_dts(source: &str) -> String {
+fn emit_dts(source: &str) -> String { ::tsox_core::fntrace::enter("emit_dts"); 
     let sf = parse(source);
     let opts = CompilerOptions::default();
     emit_declaration_text(&sf, &opts)
 }
 
 #[test]
-fn dts_function_strips_body() {
+fn dts_function_strips_body() { ::tsox_core::fntrace::enter("dts_function_strips_body"); 
     let dts = emit_dts("function add(a: number, b: number): number { return a + b; }");
     assert!(dts.contains("declare function add(a: number, b: number): number;"));
     assert!(!dts.contains("return"));
@@ -727,28 +727,28 @@ fn dts_function_strips_body() {
 }
 
 #[test]
-fn dts_export_function_adds_declare() {
+fn dts_export_function_adds_declare() { ::tsox_core::fntrace::enter("dts_export_function_adds_declare"); 
     let dts = emit_dts("export function foo(): void { console.log(1); }");
     assert!(dts.contains("export declare function foo(): void;"));
     assert!(!dts.contains("console"));
 }
 
 #[test]
-fn dts_variable_strips_initializer() {
+fn dts_variable_strips_initializer() { ::tsox_core::fntrace::enter("dts_variable_strips_initializer"); 
     let dts = emit_dts("const x: number = 42;");
     assert!(dts.contains("declare const x: number;"));
     assert!(!dts.contains("42"));
 }
 
 #[test]
-fn dts_export_variable_strips_initializer() {
+fn dts_export_variable_strips_initializer() { ::tsox_core::fntrace::enter("dts_export_variable_strips_initializer"); 
     let dts = emit_dts("export const PI: number = 3.14;");
     assert!(dts.contains("export declare const PI: number;"));
     assert!(!dts.contains("3.14"));
 }
 
 #[test]
-fn dts_interface_emitted_as_is() {
+fn dts_interface_emitted_as_is() { ::tsox_core::fntrace::enter("dts_interface_emitted_as_is"); 
     let dts = emit_dts("interface User { id: number; name: string; }");
     assert!(dts.contains("interface User {"));
     assert!(dts.contains("id: number;"));
@@ -756,21 +756,21 @@ fn dts_interface_emitted_as_is() {
 }
 
 #[test]
-fn dts_type_alias_emitted_as_is() {
+fn dts_type_alias_emitted_as_is() { ::tsox_core::fntrace::enter("dts_type_alias_emitted_as_is"); 
     let dts = emit_dts("type ID = string | number;");
     assert!(dts.contains("type ID = string | number;"));
     assert!(!dts.contains("declare"));
 }
 
 #[test]
-fn dts_enum_adds_declare() {
+fn dts_enum_adds_declare() { ::tsox_core::fntrace::enter("dts_enum_adds_declare"); 
     let dts = emit_dts("enum Color { Red, Green, Blue }");
     assert!(dts.contains("declare enum Color {"));
     assert!(dts.contains("Red"));
 }
 
 #[test]
-fn dts_runtime_statements_skipped() {
+fn dts_runtime_statements_skipped() { ::tsox_core::fntrace::enter("dts_runtime_statements_skipped"); 
     let dts = emit_dts("console.log(\"hello\");\nlet x: number = 1;");
     assert!(!dts.contains("console"));
     assert!(!dts.contains("hello"));
@@ -778,7 +778,7 @@ fn dts_runtime_statements_skipped() {
 }
 
 #[test]
-fn dts_multiple_declarations() {
+fn dts_multiple_declarations() { ::tsox_core::fntrace::enter("dts_multiple_declarations"); 
     let src = "export function add(a: number, b: number): number { return a + b; }\n\
                    export const PI: number = 3.14;\n\
                    export interface User { id: number; }\n\
@@ -793,13 +793,13 @@ fn dts_multiple_declarations() {
 }
 
 #[test]
-fn dts_class_adds_declare() {
+fn dts_class_adds_declare() { ::tsox_core::fntrace::enter("dts_class_adds_declare"); 
     let dts = emit_dts("export class Point { x: number; constructor(x: number) { this.x = x; } }");
     assert!(dts.contains("export declare class Point"));
 }
 
 #[test]
-fn dts_write_file_creates_dts() {
+fn dts_write_file_creates_dts() { ::tsox_core::fntrace::enter("dts_write_file_creates_dts"); 
     use std::cell::RefCell;
     let sf = parse("export function foo(): number { return 1; }\nexport const x: number = 42;\n");
     let mut opts = CompilerOptions::default();
@@ -834,7 +834,7 @@ fn dts_write_file_creates_dts() {
 }
 
 #[test]
-fn dts_emit_declaration_only_suppresses_js() {
+fn dts_emit_declaration_only_suppresses_js() { ::tsox_core::fntrace::enter("dts_emit_declaration_only_suppresses_js"); 
     use std::cell::RefCell;
     let sf = parse("export function foo(): number { return 1; }\n");
     let mut opts = CompilerOptions::default();
@@ -859,7 +859,7 @@ fn dts_emit_declaration_only_suppresses_js() {
 }
 
 #[test]
-fn dts_drops_value_imports_keeps_side_effect() {
+fn dts_drops_value_imports_keeps_side_effect() { ::tsox_core::fntrace::enter("dts_drops_value_imports_keeps_side_effect"); 
     let src = "import { useState } from 'react';\n\
                    import reactLogo from './assets/react.svg';\n\
                    import './App.css';\n\
@@ -876,7 +876,7 @@ fn dts_drops_value_imports_keeps_side_effect() {
 }
 
 #[test]
-fn dts_keeps_type_only_import() {
+fn dts_keeps_type_only_import() { ::tsox_core::fntrace::enter("dts_keeps_type_only_import"); 
     let src = "import type { Config } from './config';\n\
                    import { value } from './values';\n\
                    export const c: Config = {} as any;\n";
@@ -888,13 +888,13 @@ fn dts_keeps_type_only_import() {
 }
 
 #[test]
-fn dts_function_declare_keyword_and_semicolon() {
+fn dts_function_declare_keyword_and_semicolon() { ::tsox_core::fntrace::enter("dts_function_declare_keyword_and_semicolon"); 
     let dts = emit_dts("function add(a: number, b: number): number { return a + b; }");
     assert!(dts.contains("declare function add(a: number, b: number): number;"));
 }
 
 #[test]
-fn dts_class_strips_method_bodies() {
+fn dts_class_strips_method_bodies() { ::tsox_core::fntrace::enter("dts_class_strips_method_bodies"); 
     let src = "export class Counter {\n\
                    count: number;\n\
                    constructor(initial: number) { this.count = initial; }\n\
@@ -913,14 +913,14 @@ fn dts_class_strips_method_bodies() {
 }
 
 #[test]
-fn dts_variable_strips_initializer_without_type() {
+fn dts_variable_strips_initializer_without_type() { ::tsox_core::fntrace::enter("dts_variable_strips_initializer_without_type"); 
     let dts = emit_dts("const answer = 42;");
     assert!(dts.contains("declare const answer;"));
     assert!(!dts.contains("42"));
 }
 
 #[test]
-fn dts_variable_multiple_no_type() {
+fn dts_variable_multiple_no_type() { ::tsox_core::fntrace::enter("dts_variable_multiple_no_type"); 
     let dts = emit_dts("let a = 1;\nlet b = 2;");
     assert!(dts.contains("declare let a;"));
     assert!(dts.contains("declare let b;"));
@@ -929,7 +929,7 @@ fn dts_variable_multiple_no_type() {
 }
 
 #[test]
-fn type_eraser() {
+fn type_eraser() { ::tsox_core::fntrace::enter("type_eraser"); 
     let cases: &[(&str, &[&str], &[&str])] = &[
         ("interface I { x: number; }", &[], &["interface"]),
         ("type T = number;", &[], &["type T"]),
@@ -974,7 +974,7 @@ fn type_eraser() {
 }
 
 #[test]
-fn import_elision() {
+fn import_elision() { ::tsox_core::fntrace::enter("import_elision"); 
     for input in [
         "import type { foo } from \"./bar\";",
         "import type * as ns from \"./bar\";",
@@ -1012,13 +1012,13 @@ fn import_elision() {
     );
 }
 
-fn parse_tsx(source: &str) -> SourceFile {
+fn parse_tsx(source: &str) -> SourceFile { ::tsox_core::fntrace::enter("parse_tsx"); 
     let (file, _diags) =
         Parser::parse_source_file_text_with_diagnostics("/test.tsx", source.to_string());
     file
 }
 
-fn emit_to_string_jsx(source: &str) -> String {
+fn emit_to_string_jsx(source: &str) -> String { ::tsox_core::fntrace::enter("emit_to_string_jsx"); 
     let sf = parse_tsx(source);
     let mut opts = CompilerOptions::default();
     opts.jsx = JsxEmit::ReactJSX;
@@ -1026,7 +1026,7 @@ fn emit_to_string_jsx(source: &str) -> String {
 }
 
 #[test]
-fn jsx_self_closing_element() {
+fn jsx_self_closing_element() { ::tsox_core::fntrace::enter("jsx_self_closing_element"); 
     let js = emit_to_string_jsx("const x = <div />;");
     assert!(js.contains("_jsx(\"div\", {})"));
     assert!(
@@ -1036,31 +1036,31 @@ fn jsx_self_closing_element() {
 }
 
 #[test]
-fn jsx_element_with_string_attribute() {
+fn jsx_element_with_string_attribute() { ::tsox_core::fntrace::enter("jsx_element_with_string_attribute"); 
     let js = emit_to_string_jsx("const x = <div className=\"x\" />;");
     assert!(js.contains("_jsx(\"div\", { className: \"x\" })"));
 }
 
 #[test]
-fn jsx_element_with_expression_attribute() {
+fn jsx_element_with_expression_attribute() { ::tsox_core::fntrace::enter("jsx_element_with_expression_attribute"); 
     let js = emit_to_string_jsx("const x = <div onClick={handler} />;");
     assert!(js.contains("onClick: handler"));
 }
 
 #[test]
-fn jsx_element_with_boolean_attribute() {
+fn jsx_element_with_boolean_attribute() { ::tsox_core::fntrace::enter("jsx_element_with_boolean_attribute"); 
     let js = emit_to_string_jsx("const x = <input disabled />;");
     assert!(js.contains("disabled: true"));
 }
 
 #[test]
-fn jsx_element_with_single_text_child() {
+fn jsx_element_with_single_text_child() { ::tsox_core::fntrace::enter("jsx_element_with_single_text_child"); 
     let js = emit_to_string_jsx("const x = <h1>Hello</h1>;");
     assert!(js.contains("_jsx(\"h1\", { children: \"Hello\" })"));
 }
 
 #[test]
-fn jsx_element_with_single_element_child() {
+fn jsx_element_with_single_element_child() { ::tsox_core::fntrace::enter("jsx_element_with_single_element_child"); 
     let js = emit_to_string_jsx("const x = <div><span /></div>;");
     assert!(
         js.contains("children: _jsx(\"span\", {})"),
@@ -1069,14 +1069,14 @@ fn jsx_element_with_single_element_child() {
 }
 
 #[test]
-fn jsx_element_with_multiple_children() {
+fn jsx_element_with_multiple_children() { ::tsox_core::fntrace::enter("jsx_element_with_multiple_children"); 
     let js = emit_to_string_jsx("const x = <div><span /><p /></div>;");
     assert!(js.contains("_jsxs(\"div\","));
     assert!(js.contains("children: [_jsx(\"span\", {}), _jsx(\"p\", {})]"));
 }
 
 #[test]
-fn jsx_fragment() {
+fn jsx_fragment() { ::tsox_core::fntrace::enter("jsx_fragment"); 
     let js = emit_to_string_jsx("const x = <><span /><p /></>;");
     assert!(js.contains("_jsxs(_Fragment,"));
     assert!(
@@ -1086,19 +1086,19 @@ fn jsx_fragment() {
 }
 
 #[test]
-fn jsx_fragment_empty() {
+fn jsx_fragment_empty() { ::tsox_core::fntrace::enter("jsx_fragment_empty"); 
     let js = emit_to_string_jsx("const x = <></>;");
     assert!(js.contains("_jsx(_Fragment, {})"));
 }
 
 #[test]
-fn jsx_expression_child() {
+fn jsx_expression_child() { ::tsox_core::fntrace::enter("jsx_expression_child"); 
     let js = emit_to_string_jsx("const x = <div>{count}</div>;");
     assert!(js.contains("children: count"));
 }
 
 #[test]
-fn jsx_mixed_children() {
+fn jsx_mixed_children() { ::tsox_core::fntrace::enter("jsx_mixed_children"); 
     let js = emit_to_string_jsx("const x = <p>Edit <code>file</code> now</p>;");
     assert!(js.contains("_jsxs(\"p\","));
     assert!(js.contains("\"Edit \""));
@@ -1107,25 +1107,25 @@ fn jsx_mixed_children() {
 }
 
 #[test]
-fn jsx_component_tag() {
+fn jsx_component_tag() { ::tsox_core::fntrace::enter("jsx_component_tag"); 
     let js = emit_to_string_jsx("const x = <Foo bar=\"1\" />;");
     assert!(js.contains("_jsx(Foo, { bar: \"1\" })"));
 }
 
 #[test]
-fn jsx_member_expression_tag() {
+fn jsx_member_expression_tag() { ::tsox_core::fntrace::enter("jsx_member_expression_tag"); 
     let js = emit_to_string_jsx("const x = <Foo.Bar />;");
     assert!(js.contains("_jsx(Foo.Bar, {})"));
 }
 
 #[test]
-fn jsx_namespaced_attribute() {
+fn jsx_namespaced_attribute() { ::tsox_core::fntrace::enter("jsx_namespaced_attribute"); 
     let js = emit_to_string_jsx("const x = <div aria-hidden=\"true\" />;");
     assert!(js.contains("\"aria-hidden\": \"true\""));
 }
 
 #[test]
-fn jsx_import_injection() {
+fn jsx_import_injection() { ::tsox_core::fntrace::enter("jsx_import_injection"); 
     let js = emit_to_string_jsx("const x = <div />;");
     let import_line = js
         .lines()
@@ -1138,7 +1138,7 @@ fn jsx_import_injection() {
 }
 
 #[test]
-fn jsx_import_only_used_helpers() {
+fn jsx_import_only_used_helpers() { ::tsox_core::fntrace::enter("jsx_import_only_used_helpers"); 
     let js = emit_to_string_jsx("const x = <div><a /><b /></div>;");
     assert!(!js.contains("Fragment as _Fragment"));
     assert!(js.contains("jsx as _jsx"));
@@ -1146,20 +1146,20 @@ fn jsx_import_only_used_helpers() {
 }
 
 #[test]
-fn jsx_preserves_expression_in_attribute() {
+fn jsx_preserves_expression_in_attribute() { ::tsox_core::fntrace::enter("jsx_preserves_expression_in_attribute"); 
     let js = emit_to_string_jsx("const x = <button onClick={() => fn(1)}>click</button>;");
     assert!(js.contains("onClick: () => fn(1)"));
     assert!(js.contains("children: \"click\""));
 }
 
 #[test]
-fn jsx_nested_elements() {
+fn jsx_nested_elements() { ::tsox_core::fntrace::enter("jsx_nested_elements"); 
     let js = emit_to_string_jsx("const x = <div><span><p /></span></div>;");
     assert!(js.contains("children: _jsx(\"span\", { children: _jsx(\"p\", {}) })"));
 }
 
 #[test]
-fn jsx_no_transform_when_not_tsx() {
+fn jsx_no_transform_when_not_tsx() { ::tsox_core::fntrace::enter("jsx_no_transform_when_not_tsx"); 
     let (sf, _diags) =
         Parser::parse_source_file_text_with_diagnostics("/test.ts", "const x = 1;".to_string());
     let mut opts = CompilerOptions::default();
@@ -1169,13 +1169,13 @@ fn jsx_no_transform_when_not_tsx() {
 }
 
 #[test]
-fn jsx_empty_element_no_children_prop() {
+fn jsx_empty_element_no_children_prop() { ::tsox_core::fntrace::enter("jsx_empty_element_no_children_prop"); 
     let js = emit_to_string_jsx("const x = <section id=\"main\"></section>;");
     assert!(js.contains("_jsx(\"section\", { id: \"main\" })"));
 }
 
 #[test]
-fn type_eraser_strips_abstract_class_modifier() {
+fn type_eraser_strips_abstract_class_modifier() { ::tsox_core::fntrace::enter("type_eraser_strips_abstract_class_modifier"); 
     let js = emit_to_string("abstract class Foo { abstract bar(): void; }");
     assert!(!js.contains("abstract"));
     assert!(js.contains("class Foo"));
@@ -1183,21 +1183,21 @@ fn type_eraser_strips_abstract_class_modifier() {
 }
 
 #[test]
-fn type_eraser_strips_readonly_modifier() {
+fn type_eraser_strips_readonly_modifier() { ::tsox_core::fntrace::enter("type_eraser_strips_readonly_modifier"); 
     let js = emit_to_string("class Foo { readonly x: number = 1; }");
     assert!(!js.contains("readonly"));
     assert!(js.contains("x = 1;"));
 }
 
 #[test]
-fn type_eraser_strips_override_modifier() {
+fn type_eraser_strips_override_modifier() { ::tsox_core::fntrace::enter("type_eraser_strips_override_modifier"); 
     let js = emit_to_string("class Foo { override m(): void {} }");
     assert!(!js.contains("override"));
     assert!(js.contains("m()"));
 }
 
 #[test]
-fn type_eraser_strips_implements_clause() {
+fn type_eraser_strips_implements_clause() { ::tsox_core::fntrace::enter("type_eraser_strips_implements_clause"); 
     let js = emit_to_string("interface I { x: number; }\nclass Foo implements I { x = 1; }");
     assert!(!js.contains("implements"));
     assert!(!js.contains("interface"));
@@ -1206,7 +1206,7 @@ fn type_eraser_strips_implements_clause() {
 }
 
 #[test]
-fn type_eraser_keeps_extends_strips_implements() {
+fn type_eraser_keeps_extends_strips_implements() { ::tsox_core::fntrace::enter("type_eraser_keeps_extends_strips_implements"); 
     let js =
         emit_to_string("class Base {}\ninterface I {}\nclass Foo extends Base implements I {}");
     assert!(js.contains("extends Base"));
@@ -1214,13 +1214,13 @@ fn type_eraser_keeps_extends_strips_implements() {
 }
 
 #[test]
-fn type_eraser_strips_declare_keyword() {
+fn type_eraser_strips_declare_keyword() { ::tsox_core::fntrace::enter("type_eraser_strips_declare_keyword"); 
     let js = emit_to_string("declare const x: number;\nlet y = x;");
     assert!(!js.contains("declare"));
 }
 
 #[test]
-fn type_eraser_strips_type_assertion() {
+fn type_eraser_strips_type_assertion() { ::tsox_core::fntrace::enter("type_eraser_strips_type_assertion"); 
     let js = emit_to_string("let x = <number>5;");
     assert!(
         !js.contains("<number>"),
@@ -1230,7 +1230,7 @@ fn type_eraser_strips_type_assertion() {
 }
 
 #[test]
-fn import_elision_import_type_named() {
+fn import_elision_import_type_named() { ::tsox_core::fntrace::enter("import_elision_import_type_named"); 
     let js = emit_to_string("import type { Foo } from \"./bar\";\nlet x = 1;");
     assert!(!js.contains("import"));
     assert!(!js.contains("Foo"));
@@ -1238,7 +1238,7 @@ fn import_elision_import_type_named() {
 }
 
 #[test]
-fn import_elision_import_type_default() {
+fn import_elision_import_type_default() { ::tsox_core::fntrace::enter("import_elision_import_type_default"); 
     let js = emit_to_string("import type Foo from \"./bar\";\nlet x = 1;");
     assert!(!js.contains("import"));
     assert!(!js.contains("Foo"));
@@ -1246,7 +1246,7 @@ fn import_elision_import_type_default() {
 }
 
 #[test]
-fn import_elision_import_type_namespace() {
+fn import_elision_import_type_namespace() { ::tsox_core::fntrace::enter("import_elision_import_type_namespace"); 
     let js = emit_to_string("import type * as ns from \"./bar\";\nlet x = 1;");
     assert!(!js.contains("import"));
     assert!(!js.contains("require"));
@@ -1254,7 +1254,7 @@ fn import_elision_import_type_namespace() {
 }
 
 #[test]
-fn import_elision_mixed_named_bindings() {
+fn import_elision_mixed_named_bindings() { ::tsox_core::fntrace::enter("import_elision_mixed_named_bindings"); 
     let js = emit_to_string("import { type Foo, Bar } from \"./bar\";\nlet x = Bar;");
     assert!(
         !js.contains("Foo"),
@@ -1268,7 +1268,7 @@ fn import_elision_mixed_named_bindings() {
 }
 
 #[test]
-fn import_elision_mixed_named_bindings_trailing() {
+fn import_elision_mixed_named_bindings_trailing() { ::tsox_core::fntrace::enter("import_elision_mixed_named_bindings_trailing"); 
     let js = emit_to_string("import { Bar, type Foo } from \"./bar\";\nlet x = Bar;");
     assert!(!js.contains("Foo"));
     assert!(js.contains("Bar"));
@@ -1276,7 +1276,7 @@ fn import_elision_mixed_named_bindings_trailing() {
 }
 
 #[test]
-fn import_elision_mixed_default_and_type_named() {
+fn import_elision_mixed_default_and_type_named() { ::tsox_core::fntrace::enter("import_elision_mixed_default_and_type_named"); 
     let js = emit_to_string("import Foo, { type Bar } from \"./bar\";\nlet x = Foo;");
     assert!(js.contains("Foo"));
     assert!(!js.contains("Bar"));
@@ -1284,14 +1284,14 @@ fn import_elision_mixed_default_and_type_named() {
 }
 
 #[test]
-fn import_elision_preserves_value_import() {
+fn import_elision_preserves_value_import() { ::tsox_core::fntrace::enter("import_elision_preserves_value_import"); 
     let js = emit_to_string("import { foo } from \"./bar\";\nlet x = foo;");
     assert!(js.contains("import { foo }"));
     assert!(js.contains("from \"./bar\";"));
 }
 
 #[test]
-fn import_elision_all_inline_type_only() {
+fn import_elision_all_inline_type_only() { ::tsox_core::fntrace::enter("import_elision_all_inline_type_only"); 
     let js = emit_to_string("import { type Foo, type Bar } from \"./bar\";\nlet x = 1;");
     assert!(!js.contains("import"));
     assert!(!js.contains("Foo"));

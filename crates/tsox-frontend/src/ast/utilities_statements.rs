@@ -1,6 +1,6 @@
 use crate::ast::*;
 
-fn is_declaration_statement_kind(kind: SyntaxKind) -> bool {
+fn is_declaration_statement_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_declaration_statement_kind"); 
     matches!(
         kind,
         SyntaxKind::FunctionDeclaration
@@ -20,11 +20,11 @@ fn is_declaration_statement_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn is_declaration_statement(node: &Node) -> bool {
+pub fn is_declaration_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_declaration_statement"); 
     is_declaration_statement_kind(node.kind)
 }
 
-fn is_statement_kind_but_not_declaration_kind(kind: SyntaxKind) -> bool {
+fn is_statement_kind_but_not_declaration_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_statement_kind_but_not_declaration_kind"); 
     matches!(
         kind,
         SyntaxKind::BreakStatement
@@ -49,11 +49,11 @@ fn is_statement_kind_but_not_declaration_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn is_statement_but_not_declaration(node: &Node) -> bool {
+pub fn is_statement_but_not_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_statement_but_not_declaration"); 
     is_statement_kind_but_not_declaration_kind(node.kind)
 }
 
-pub fn is_function_block(node: &Node) -> bool {
+pub fn is_function_block(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_block"); 
     if node.kind != SyntaxKind::Block {
         return false;
     }
@@ -63,7 +63,7 @@ pub fn is_function_block(node: &Node) -> bool {
     }
 }
 
-pub fn is_block_statement(node: &Node) -> bool {
+pub fn is_block_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_block_statement"); 
     if node.kind != SyntaxKind::Block {
         return false;
     }
@@ -75,14 +75,14 @@ pub fn is_block_statement(node: &Node) -> bool {
     !is_function_block(node)
 }
 
-pub fn is_statement(node: &Node) -> bool {
+pub fn is_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_statement"); 
     let kind = node.kind;
     is_statement_kind_but_not_declaration_kind(kind)
         || is_declaration_statement_kind(kind)
         || is_block_statement(node)
 }
 
-pub fn is_iteration_statement(node: &Node, look_in_labeled_statements: bool) -> bool {
+pub fn is_iteration_statement(node: &Node, look_in_labeled_statements: bool) -> bool { ::tsox_core::fntrace::enter("is_iteration_statement"); 
     match node.kind {
         SyntaxKind::ForStatement
         | SyntaxKind::ForInStatement
@@ -101,7 +101,7 @@ pub fn is_iteration_statement(node: &Node, look_in_labeled_statements: bool) -> 
     }
 }
 
-pub fn is_prologue_directive(node: &Node) -> bool {
+pub fn is_prologue_directive(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_prologue_directive"); 
     if node.kind != SyntaxKind::ExpressionStatement {
         return false;
     }
@@ -114,7 +114,7 @@ pub fn is_prologue_directive(node: &Node) -> bool {
 /// Go IsPotentiallyExecutableNode：KindFirstStatement..KindLastStatement
 /// 语句（var 须有初始化或块级绑定）或 class/enum/module 声明；
 /// 函数/接口/类型别名/import/export 不算可执行
-pub fn is_potentially_executable_node(node: &Node) -> bool {
+pub fn is_potentially_executable_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_potentially_executable_node"); 
     match node.kind {
         SyntaxKind::BreakStatement
         | SyntaxKind::ContinueStatement

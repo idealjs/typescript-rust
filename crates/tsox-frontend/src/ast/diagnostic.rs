@@ -23,7 +23,7 @@ pub struct Diagnostic {
 }
 
 impl PartialEq for Diagnostic {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         let same_file = match (&self.file, &other.file) {
             (Some(a), Some(b)) => std::sync::Arc::ptr_eq(a, b),
             (None, None) => true,
@@ -49,7 +49,7 @@ impl Diagnostic {
         loc: TextRange,
         message: Message,
         args: Vec<String>,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             file,
             loc,
@@ -66,7 +66,7 @@ impl Diagnostic {
         }
     }
 
-    pub fn is_error(&self) -> bool {
+    pub fn is_error(&self) -> bool { ::tsox_core::fntrace::enter("is_error"); 
         self.category == Category::Error
     }
 }
@@ -86,11 +86,11 @@ pub struct DiagnosticsCollectionInner {
 }
 
 impl DiagnosticsCollection {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self::default()
     }
 
-    pub fn add(&self, diagnostic: Diagnostic) {
+    pub fn add(&self, diagnostic: Diagnostic) { ::tsox_core::fntrace::enter("add"); 
         let mut inner = self.inner.lock().unwrap();
         if Self::is_duplicate(&inner, &diagnostic) {
             return;
@@ -112,7 +112,7 @@ impl DiagnosticsCollection {
 
     /// Go DiagnosticsCollection.Add：同 file+loc+code 且全等（消息/实参/链/related）
     /// 的诊断只保留第一条
-    fn is_duplicate(inner: &DiagnosticsCollectionInner, diagnostic: &Diagnostic) -> bool {
+    fn is_duplicate(inner: &DiagnosticsCollectionInner, diagnostic: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("is_duplicate"); 
         let candidates: &[Diagnostic] = match diagnostic.file.as_ref() {
             Some(file) => inner
                 .file_diagnostics
@@ -126,7 +126,7 @@ impl DiagnosticsCollection {
             .any(|d| d.loc == diagnostic.loc && d.code == diagnostic.code && equal_diagnostics(d, diagnostic))
     }
 
-    pub fn add_or_append_related(&self, mut diagnostic: Diagnostic) {
+    pub fn add_or_append_related(&self, mut diagnostic: Diagnostic) { ::tsox_core::fntrace::enter("add_or_append_related"); 
         let mut inner = self.inner.lock().unwrap();
         let file_name = diagnostic.file.as_ref().map(|f| f.file_name.clone());
         let matches = |d: &Diagnostic| {
@@ -164,23 +164,23 @@ impl DiagnosticsCollection {
         }
     }
 
-    pub fn count(&self) -> usize {
+    pub fn count(&self) -> usize { ::tsox_core::fntrace::enter("count"); 
         self.inner.lock().unwrap().count
     }
 
-    pub fn take_inner(&self) -> DiagnosticsCollectionInner {
+    pub fn take_inner(&self) -> DiagnosticsCollectionInner { ::tsox_core::fntrace::enter("take_inner"); 
         std::mem::take(&mut *self.inner.lock().unwrap())
     }
 
-    pub fn set_inner(&self, inner: DiagnosticsCollectionInner) {
+    pub fn set_inner(&self, inner: DiagnosticsCollectionInner) { ::tsox_core::fntrace::enter("set_inner"); 
         *self.inner.lock().unwrap() = inner;
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.count() == 0
     }
 
-    pub fn get_all(&self) -> Vec<Diagnostic> {
+    pub fn get_all(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_all"); 
         let inner = self.inner.lock().unwrap();
         let mut result = Vec::with_capacity(inner.count);
         result.extend(inner.non_file_diagnostics.iter().cloned());
@@ -190,7 +190,7 @@ impl DiagnosticsCollection {
         result
     }
 
-    pub fn get_for_file(&self, file_name: &str) -> Vec<Diagnostic> {
+    pub fn get_for_file(&self, file_name: &str) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_for_file"); 
         let inner = self.inner.lock().unwrap();
         inner
             .file_diagnostics
@@ -201,7 +201,7 @@ impl DiagnosticsCollection {
 }
 
 impl Diagnostic {
-    pub fn with_text(self, text: impl Into<String>) -> Diagnostic {
+    pub fn with_text(self, text: impl Into<String>) -> Diagnostic { ::tsox_core::fntrace::enter("with_text"); 
         Diagnostic {
             file: self.file,
             loc: self.loc,
@@ -220,7 +220,7 @@ impl Diagnostic {
 }
 
 /// Go EqualDiagnostics：消息身份（key+实参）+ 位置 + 类别 + 链 + related 全等
-fn equal_diagnostics(a: &Diagnostic, b: &Diagnostic) -> bool {
+fn equal_diagnostics(a: &Diagnostic, b: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("equal_diagnostics"); 
     a.message_key == b.message_key
         && a.message_args == b.message_args
         && a.category == b.category

@@ -22,7 +22,7 @@ pub struct TypeAcquisition {
 }
 
 impl TypeAcquisition {
-    pub fn disable_filename_based_type_acquisition_is_true(&self) -> bool {
+    pub fn disable_filename_based_type_acquisition_is_true(&self) -> bool { ::tsox_core::fntrace::enter("disable_filename_based_type_acquisition_is_true"); 
         self.disable_filename_based_type_acquisition.is_true()
     }
 }
@@ -40,7 +40,7 @@ pub trait AtaLogger: Send + Sync {
 pub fn is_typing_up_to_date(
     cached_typing: &CachedTyping,
     available_typing_versions: &HashMap<String, String>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_typing_up_to_date"); 
     let _use_version = available_typing_versions.get("latest");
     let use_version = match available_typing_versions.get("latest") {
         Some(v) => v.as_str(),
@@ -58,7 +58,7 @@ pub fn discover_typings(
     project_root_path: &str,
     _package_name_to_typing_location: &HashMap<String, CachedTyping>,
     _types_registry: &HashMap<String, HashMap<String, String>>,
-) -> (Vec<String>, Vec<String>, Vec<String>) {
+) -> (Vec<String>, Vec<String>, Vec<String>) { ::tsox_core::fntrace::enter("discover_typings"); 
     let mut inferred_typings: HashMap<String, String> = HashMap::new();
 
     let js_file_names: Vec<&String> = file_names
@@ -110,14 +110,14 @@ pub fn discover_typings(
 pub(crate) fn add_inferred_typing(
     inferred_typings: &mut HashMap<String, String>,
     typing_name: &str,
-) {
+) { ::tsox_core::fntrace::enter("add_inferred_typing"); 
     inferred_typings.entry(typing_name.to_string()).or_default();
 }
 
 pub(crate) fn add_inferred_typings(
     inferred_typings: &mut HashMap<String, String>,
     typing_names: &[String],
-) {
+) { ::tsox_core::fntrace::enter("add_inferred_typings"); 
     for typing_name in typing_names {
         add_inferred_typing(inferred_typings, typing_name);
     }
@@ -126,7 +126,7 @@ pub(crate) fn add_inferred_typings(
 pub(crate) fn get_typing_names_from_source_file_names(
     inferred_typings: &mut HashMap<String, String>,
     file_names: &[&String],
-) {
+) { ::tsox_core::fntrace::enter("get_typing_names_from_source_file_names"); 
     let mut has_jsx_file = false;
     let mut from_file_names: Vec<String> = Vec::new();
     for file_name in file_names {
@@ -149,7 +149,7 @@ pub(crate) fn get_typing_names_from_source_file_names(
     }
 }
 
-pub fn remove_min_and_version_numbers(file_name: &str) -> String {
+pub fn remove_min_and_version_numbers(file_name: &str) -> String { ::tsox_core::fntrace::enter("remove_min_and_version_numbers"); 
     let bytes = file_name.as_bytes();
     let mut end = file_name.len();
     let mut pos = end;

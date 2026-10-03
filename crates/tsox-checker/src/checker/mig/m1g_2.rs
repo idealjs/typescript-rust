@@ -33,7 +33,7 @@ impl Checker {
         declaration: &Arc<Node>,
         include_optionality: bool,
         check_mode: CheckMode,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_for_variable_like_declaration"); 
         if is_variable_declaration(declaration) {
             let grand_parent = declaration.parent().and_then(|p| p.parent());
             if let Some(grand_parent) = grand_parent {
@@ -205,7 +205,7 @@ impl Checker {
         pattern: &Arc<Node>,
         include_pattern_in_type: bool,
         report_errors: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_binding_pattern"); 
         if include_pattern_in_type {
             contextual_binding_patterns_push(Arc::clone(pattern));
         }
@@ -225,7 +225,7 @@ impl Checker {
         pattern: &Arc<Node>,
         include_pattern_in_type: bool,
         report_errors: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_object_binding_pattern"); 
         let mut members = SymbolTable::new();
         let mut string_index_info: Option<Arc<IndexInfo>> = None;
         let mut object_flags =
@@ -296,7 +296,7 @@ impl Checker {
         pattern: &Arc<Node>,
         include_pattern_in_type: bool,
         report_errors: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_array_binding_pattern"); 
         let element_list = elements(pattern);
         let last_element = element_list.last().cloned();
         let rest_element = last_element.filter(|e| is_binding_element(e) && has_dot_dot_dot_token(e));
@@ -354,7 +354,7 @@ impl Checker {
         element: &Arc<Node>,
         include_pattern_in_type: bool,
         report_errors: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_binding_element"); 
         if let Some(_initializer) = initializer(element) {
             let mut contextual_type = self.unknown_type();
             if let Some(name) = get_name_of_declaration(element) {

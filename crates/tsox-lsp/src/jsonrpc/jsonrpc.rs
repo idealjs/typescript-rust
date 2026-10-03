@@ -11,7 +11,7 @@ impl Serialize for JsonrpcVersion {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
-    {
+    { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_str("2.0")
     }
 }
@@ -20,7 +20,7 @@ impl<'de> Deserialize<'de> for JsonrpcVersion {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
-    {
+    { ::tsox_core::fntrace::enter("deserialize"); 
         let s: String = Deserialize::deserialize(deserializer)?;
         if s != "2.0" {
             return Err(serde::de::Error::custom("invalid JSON-RPC version"));
@@ -36,29 +36,29 @@ pub enum Id {
 }
 
 impl Id {
-    pub fn new_string(s: &str) -> Self {
+    pub fn new_string(s: &str) -> Self { ::tsox_core::fntrace::enter("new_string"); 
         Id::Str(s.to_string())
     }
 
-    pub fn new_int(i: i32) -> Self {
+    pub fn new_int(i: i32) -> Self { ::tsox_core::fntrace::enter("new_int"); 
         Id::Int(i)
     }
 
-    pub fn as_string(&self) -> String {
+    pub fn as_string(&self) -> String { ::tsox_core::fntrace::enter("as_string"); 
         match self {
             Id::Str(s) => s.clone(),
             Id::Int(i) => i.to_string(),
         }
     }
 
-    pub fn try_int(&self) -> Option<i32> {
+    pub fn try_int(&self) -> Option<i32> { ::tsox_core::fntrace::enter("try_int"); 
         match self {
             Id::Int(i) => Some(*i),
             Id::Str(_) => None,
         }
     }
 
-    pub fn must_int(&self) -> i32 {
+    pub fn must_int(&self) -> i32 { ::tsox_core::fntrace::enter("must_int"); 
         match self {
             Id::Int(i) => *i,
             Id::Str(_) => panic!("ID is not an integer"),
@@ -70,7 +70,7 @@ impl Serialize for Id {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
-    {
+    { ::tsox_core::fntrace::enter("serialize"); 
         match self {
             Id::Int(i) => serializer.serialize_i32(*i),
             Id::Str(s) => serializer.serialize_str(s),
@@ -82,7 +82,7 @@ impl<'de> Deserialize<'de> for Id {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
-    {
+    { ::tsox_core::fntrace::enter("deserialize"); 
         let value = Value::deserialize(deserializer)?;
         match value {
             Value::String(s) => Ok(Id::Str(s)),
@@ -107,7 +107,7 @@ pub struct ResponseError {
 }
 
 impl std::fmt::Display for ResponseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(f, "[{}]: {}", self.code, self.message)
     }
 }
@@ -144,7 +144,7 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn kind(&self) -> MessageKind {
+    pub fn kind(&self) -> MessageKind { ::tsox_core::fntrace::enter("kind"); 
         if self.id.is_some() && self.method.is_empty() {
             MessageKind::Response
         } else if self.id.is_none() {
@@ -154,15 +154,15 @@ impl Message {
         }
     }
 
-    pub fn is_request(&self) -> bool {
+    pub fn is_request(&self) -> bool { ::tsox_core::fntrace::enter("is_request"); 
         self.id.is_some() && !self.method.is_empty()
     }
 
-    pub fn is_notification(&self) -> bool {
+    pub fn is_notification(&self) -> bool { ::tsox_core::fntrace::enter("is_notification"); 
         self.id.is_none() && !self.method.is_empty()
     }
 
-    pub fn is_response(&self) -> bool {
+    pub fn is_response(&self) -> bool { ::tsox_core::fntrace::enter("is_response"); 
         self.id.is_some() && self.method.is_empty()
     }
 }

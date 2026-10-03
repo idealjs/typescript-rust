@@ -24,7 +24,7 @@ use tsox_core::collections::set::Set;
 use tsox_core::tspath::Path;
 
 impl serde::Serialize for super::m5n::RefreshSupport {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         let mut s = serializer.serialize_struct("RefreshSupport", 1)?;
         s.serialize_field("refreshSupport", &self.refresh_support)?;
         s.end()
@@ -32,7 +32,7 @@ impl serde::Serialize for super::m5n::RefreshSupport {
 }
 
 impl serde::Serialize for super::m5n::WorkspaceResolvedClientCapabilities {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         let mut s = serializer.serialize_struct("WorkspaceResolvedClientCapabilities", 4)?;
         s.serialize_field("configuration", &self.configuration)?;
         s.serialize_field("diagnostics", &self.diagnostics)?;
@@ -43,7 +43,7 @@ impl serde::Serialize for super::m5n::WorkspaceResolvedClientCapabilities {
 }
 
 impl serde::Serialize for super::m5n::ResolvedClientCapabilities {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         let mut s = serializer.serialize_struct("ResolvedClientCapabilities", 1)?;
         s.serialize_field("workspace", &self.workspace)?;
         s.end()
@@ -51,7 +51,7 @@ impl serde::Serialize for super::m5n::ResolvedClientCapabilities {
 }
 
 impl Server {
-    pub fn handle_initialize(&mut self, params: &InitializeParams) -> LspResult<serde_json::Value> {
+    pub fn handle_initialize(&mut self, params: &InitializeParams) -> LspResult<serde_json::Value> { ::tsox_core::fntrace::enter("handle_initialize"); 
         if self.initialize_params.is_some() {
             return Err(LspError::new(ErrorCode::InvalidRequest, "server already initialized"));
         }
@@ -129,7 +129,7 @@ impl Server {
         }))
     }
 
-    pub fn read_loop(&mut self) -> LspResult<()> {
+    pub fn read_loop(&mut self) -> LspResult<()> { ::tsox_core::fntrace::enter("read_loop"); 
         loop {
             if self.background_ctx.is_done() {
                 return Err(LspError::new(ErrorCode::EOF, "context canceled"));
@@ -197,18 +197,18 @@ impl Server {
         }
     }
 
-    pub fn cancel_request(&self, raw_id: &JsonrpcId) {
+    pub fn cancel_request(&self, raw_id: &JsonrpcId) { ::tsox_core::fntrace::enter("cancel_request"); 
         let mut pending = self.pending_client_requests.lock().unwrap();
         if let Some(pending_req) = pending.remove(raw_id) {
             (pending_req.cancel)();
         }
     }
 
-    pub fn read(&self) -> LspResult<lsproto::Message> {
+    pub fn read(&self) -> LspResult<lsproto::Message> { ::tsox_core::fntrace::enter("read"); 
         self.r.read()
     }
 
-    pub fn dispatch_loop(self: &Arc<Self>) -> LspResult<()> {
+    pub fn dispatch_loop(self: &Arc<Self>) -> LspResult<()> { ::tsox_core::fntrace::enter("dispatch_loop"); 
         loop {
             let req = match self.request_queue.get() {
                 Some(req) => req,
@@ -258,7 +258,7 @@ impl Server {
         }
     }
 
-    fn handle_dispatch_error(&self, req: &lsproto::RequestMessage, err: &LspError) -> LspResult<()> {
+    fn handle_dispatch_error(&self, req: &lsproto::RequestMessage, err: &LspError) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_dispatch_error"); 
         if err.is_code(ErrorCode::RequestCancelled) {
             self.send_error(req.id.clone(), &LspError::new(ErrorCode::RequestCancelled, "request cancelled"))
         } else if err.is_code(ErrorCode::EOF) {
@@ -268,7 +268,7 @@ impl Server {
         }
     }
 
-    fn remove_request(&self, req: &lsproto::RequestMessage, cancel: &Option<Arc<dyn Fn() + Send + Sync>>) {
+    fn remove_request(&self, req: &lsproto::RequestMessage, cancel: &Option<Arc<dyn Fn() + Send + Sync>>) { ::tsox_core::fntrace::enter("remove_request"); 
         if let Some(id) = &req.id {
             if let Some(cancel_fn) = cancel {
                 (cancel_fn.clone())();
@@ -280,7 +280,7 @@ impl Server {
     pub fn handle_request_or_notification(
         &self,
         req: &lsproto::RequestMessage,
-    ) -> LspResult<Option<Box<dyn FnOnce() -> LspResult<()> + Send>>> {
+    ) -> LspResult<Option<Box<dyn FnOnce() -> LspResult<()> + Send>>> { ::tsox_core::fntrace::enter("handle_request_or_notification"); 
         let handler = handlers().get(&req.method);
         if let Some(handler) = handler {
             let start = std::time::Instant::now();
@@ -341,7 +341,7 @@ impl Server {
         Ok(None)
     }
 
-    pub fn recover(&self, req: &lsproto::RequestMessage, payload: &(dyn std::any::Any + Send)) {
+    pub fn recover(&self, req: &lsproto::RequestMessage, payload: &(dyn std::any::Any + Send)) { ::tsox_core::fntrace::enter("recover"); 
         let panic_info = if let Some(s) = payload.downcast_ref::<&str>() {
             Some((*s).to_string())
         } else {
@@ -380,7 +380,7 @@ impl Server {
         &'a self,
         uri: &lsproto::DocumentUri,
         req: &'a lsproto::RequestMessage,
-    ) -> LspResult<(Arc<LanguageService>, Option<CrossProjectOrchestrator<'a>>)> {
+    ) -> LspResult<(Arc<LanguageService>, Option<CrossProjectOrchestrator<'a>>)> { ::tsox_core::fntrace::enter("get_language_service_and_cross_project_orchestrator"); 
         let resolved = self
             .session
             .as_ref()
@@ -409,11 +409,11 @@ pub struct CrossProjectOrchestrator<'a> {
 }
 
 impl<'a> CrossProjectOrchestrator<'a> {
-    pub fn get_default_project(&self) -> Option<&Project> {
+    pub fn get_default_project(&self) -> Option<&Project> { ::tsox_core::fntrace::enter("get_default_project"); 
         self.default_project.as_ref()
     }
 
-    pub fn get_all_projects_for_initial_request(&self) -> &[Project] {
+    pub fn get_all_projects_for_initial_request(&self) -> &[Project] { ::tsox_core::fntrace::enter("get_all_projects_for_initial_request"); 
         &self.all_projects
     }
 
@@ -421,7 +421,7 @@ impl<'a> CrossProjectOrchestrator<'a> {
         &self,
         p: &'a Project,
         uri: &str,
-    ) -> Option<LanguageService> {
+    ) -> Option<LanguageService> { ::tsox_core::fntrace::enter("get_language_service_for_project_with_file"); 
         self.server
             .session
             .as_ref()
@@ -429,7 +429,7 @@ impl<'a> CrossProjectOrchestrator<'a> {
             .get_language_service_for_project_with_file(p, &lsproto::DocumentUri(uri.to_string()))
     }
 
-    pub fn get_projects_for_file(&self, uri: &str) -> LspResult<Vec<Arc<Project>>> {
+    pub fn get_projects_for_file(&self, uri: &str) -> LspResult<Vec<Arc<Project>>> { ::tsox_core::fntrace::enter("get_projects_for_file"); 
         let projects = self
             .server
             .session
@@ -442,7 +442,7 @@ impl<'a> CrossProjectOrchestrator<'a> {
     pub fn get_projects_loading_project_tree(
         &self,
         requested_project_trees: &Set<Path>,
-    ) -> Vec<Arc<crate::project::snapshot::Snapshot>> {
+    ) -> Vec<Arc<crate::project::snapshot::Snapshot>> { ::tsox_core::fntrace::enter("get_projects_loading_project_tree"); 
         let mut result = Vec::new();
         self.server
             .session
@@ -458,7 +458,7 @@ impl<'a> CrossProjectOrchestrator<'a> {
     }
 }
 
-fn content_mapper_fallback_response(method: &str, err: &LspError) -> Option<(serde_json::Value, bool)> {
+fn content_mapper_fallback_response(method: &str, err: &LspError) -> Option<(serde_json::Value, bool)> { ::tsox_core::fntrace::enter("content_mapper_fallback_response"); 
     if !err.is_code(ErrorCode::NoProjectForUnknownScriptKind) {
         return None;
     }
@@ -485,7 +485,7 @@ fn content_mapper_fallback_response(method: &str, err: &LspError) -> Option<(ser
 
 fn unmarshal_params_or_invalid<T: DeserializeOwned + m5m::LspNoParams>(
     req: &lsproto::RequestMessage,
-) -> LspResult<T> {
+) -> LspResult<T> { ::tsox_core::fntrace::enter("unmarshal_params_or_invalid"); 
     m5m::unmarshal_params::<T>(req.params.as_ref()).map_err(|e| LspError {
         code: ErrorCode::InvalidParams,
         message: e,
@@ -499,7 +499,7 @@ pub fn register_notification_handler<Req>(
     fn_: Arc<dyn Fn(&Server, &Req) -> LspResult<()> + Send + Sync>,
 ) where
     Req: DeserializeOwned + m5m::LspNoParams + 'static,
-{
+{ ::tsox_core::fntrace::enter("register_notification_handler"); 
     handlers.insert(
         method,
         Arc::new(move |s: &Server, req: &lsproto::RequestMessage| {
@@ -520,7 +520,7 @@ pub fn register_request_handler<Req, Resp>(
 ) where
     Req: DeserializeOwned + m5m::LspNoParams + 'static,
     Resp: serde::Serialize + 'static,
-{
+{ ::tsox_core::fntrace::enter("register_request_handler"); 
     handlers.insert(method, Arc::new(move |s: &Server, req: &lsproto::RequestMessage| {
         if s.session.is_none() && req.method != METHOD_INITIALIZE {
             return Err(LspError::new(ErrorCode::ServerNotInitialized, "server not initialized"));
@@ -541,7 +541,7 @@ pub fn register_language_service_document_request_handler<Req>(
     handlers: &mut HandlerMap,
     method: lsproto::Method,
     fn_: LanguageServiceDocumentHandlerFn,
-) {
+) { ::tsox_core::fntrace::enter("register_language_service_document_request_handler"); 
     let method_for_closure = method.clone();
     handlers.insert(method, Arc::new(move |s: &Server, req: &lsproto::RequestMessage| {
         let params = m5m::unmarshal_params::<serde_json::Value>(req.params.as_ref())
@@ -564,7 +564,7 @@ pub fn register_language_service_with_auto_imports_request_handler(
     handlers: &mut HandlerMap,
     method: lsproto::Method,
     fn_: LanguageServiceAutoImportsHandlerFn,
-) {
+) { ::tsox_core::fntrace::enter("register_language_service_with_auto_imports_request_handler"); 
     let method_for_closure = method.clone();
     handlers.insert(method, Arc::new(move |s: &Server, req: &lsproto::RequestMessage| {
         let method = &method_for_closure;
@@ -600,7 +600,7 @@ pub fn register_multi_project_reference_request_handler(
     handlers: &mut HandlerMap,
     method: lsproto::Method,
     fn_: MultiProjectReferenceHandlerFn,
-) {
+) { ::tsox_core::fntrace::enter("register_multi_project_reference_request_handler"); 
     handlers.insert(method, Arc::new(move |s: &Server, req: &lsproto::RequestMessage| {
         let params = m5m::unmarshal_params::<serde_json::Value>(req.params.as_ref())
             .map_err(|e| LspError::new(ErrorCode::InvalidParams, e))?;
@@ -613,11 +613,11 @@ pub fn register_multi_project_reference_request_handler(
     }));
 }
 
-fn text_document_uri(params: &serde_json::Value) -> String {
+fn text_document_uri(params: &serde_json::Value) -> String { ::tsox_core::fntrace::enter("text_document_uri"); 
     params["textDocument"]["uri"].as_str().unwrap_or_default().to_string()
 }
 
-fn text_document_position_uri(params: &serde_json::Value) -> String {
+fn text_document_position_uri(params: &serde_json::Value) -> String { ::tsox_core::fntrace::enter("text_document_position_uri"); 
     text_document_uri(params)
 }
 
@@ -633,7 +633,7 @@ pub type LanguageServiceAutoImportsHandlerFn =
 pub type MultiProjectReferenceHandlerFn =
     Arc<dyn Fn(&LanguageService, &serde_json::Value, &CrossProjectOrchestrator) -> LspResult<serde_json::Value> + Send + Sync>;
 
-pub fn handlers() -> &'static HandlerMap {
+pub fn handlers() -> &'static HandlerMap { ::tsox_core::fntrace::enter("handlers"); 
     static HANDLERS: std::sync::OnceLock<HandlerMap> = std::sync::OnceLock::new();
     HANDLERS.get_or_init(|| {
         let mut map = HandlerMap::new();
@@ -642,25 +642,25 @@ pub fn handlers() -> &'static HandlerMap {
     })
 }
 
-pub fn register_all_handlers(handlers: &mut HandlerMap) {
+pub fn register_all_handlers(handlers: &mut HandlerMap) { ::tsox_core::fntrace::enter("register_all_handlers"); 
     // m5n_3 的 handle_* 入参与返回类型目前是 m5n_3.rs 私有 mod lsproto 的本地类型，
     // 本文件无法命名这些类型完成类型化注册；待 m5n_3 公开参数类型（或上移到 crate::lsp::lsproto）
     // 后，用本文件提供的 register_* 系列helper 逐条按 Go server.go 的 handlers 表接线。
     // 见 progress_notes_r58F.md 交接。
 }
 
-pub fn is_user_facing_request_failed_error(err: &LspError) -> bool {
+pub fn is_user_facing_request_failed_error(err: &LspError) -> bool { ::tsox_core::fntrace::enter("is_user_facing_request_failed_error"); 
     err.message.contains("userFacingRequestFailed")
 }
 
-fn now_millis() -> i64 {
+fn now_millis() -> i64 { ::tsox_core::fntrace::enter("now_millis"); 
     SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_millis() as i64).unwrap_or(0)
 }
 
 use std::sync::mpsc;
 
 impl Server {
-    pub fn send_result(&self, id: &Option<JsonrpcId>, result: &serde_json::Value) -> LspResult<()> {
+    pub fn send_result(&self, id: &Option<JsonrpcId>, result: &serde_json::Value) -> LspResult<()> { ::tsox_core::fntrace::enter("send_result"); 
         self.send_response(&lsproto::ResponseMessage {
             jsonrpc: Default::default(),
             id: id.clone(),
@@ -669,7 +669,7 @@ impl Server {
         })
     }
 
-    pub fn send_error(&self, id: Option<JsonrpcId>, err: &LspError) -> LspResult<()> {
+    pub fn send_error(&self, id: Option<JsonrpcId>, err: &LspError) -> LspResult<()> { ::tsox_core::fntrace::enter("send_error"); 
         if id.is_none() && !err.is_code(ErrorCode::InvalidRequest) {
             self.logger.error(&format!("error handling notification: {}", err.message));
             return Ok(());
@@ -687,14 +687,14 @@ impl Server {
         })
     }
 
-    pub fn send_response(&self, resp: &lsproto::ResponseMessage) -> LspResult<()> {
+    pub fn send_response(&self, resp: &lsproto::ResponseMessage) -> LspResult<()> { ::tsox_core::fntrace::enter("send_response"); 
         self.send(&lsproto::Message {
             kind: MessageKind::Response,
             msg: lsproto::MessageData::Response(resp.clone()),
         })
     }
 
-    pub fn send(&self, msg: &lsproto::Message) -> LspResult<()> {
+    pub fn send(&self, msg: &lsproto::Message) -> LspResult<()> { ::tsox_core::fntrace::enter("send"); 
         self.outgoing_queue
             .put(msg.clone())
             .map_err(|_| LspError::new(ErrorCode::InternalError, "outgoing queue closed"))
@@ -706,7 +706,7 @@ pub trait RequestInfoLike {
 }
 
 impl RequestInfoLike for &lsproto::RequestInfo {
-    fn new_request_message(&self, id: Option<JsonrpcId>, params: serde_json::Value) -> lsproto::RequestMessage {
+    fn new_request_message(&self, id: Option<JsonrpcId>, params: serde_json::Value) -> lsproto::RequestMessage { ::tsox_core::fntrace::enter("new_request_message"); 
         lsproto::RequestInfo::new_request_message(self, id, params)
     }
 }
@@ -716,7 +716,7 @@ pub trait NotificationInfoLike {
 }
 
 impl NotificationInfoLike for &lsproto::NotificationInfo {
-    fn new_notification_message(&self, params: serde_json::Value) -> lsproto::RequestMessage {
+    fn new_notification_message(&self, params: serde_json::Value) -> lsproto::RequestMessage { ::tsox_core::fntrace::enter("new_notification_message"); 
         lsproto::NotificationInfo::new_notification_message(self, params)
     }
 }
@@ -725,7 +725,7 @@ pub fn send_client_request<R: serde::Serialize>(
     s: &Server,
     info: impl RequestInfoLike,
     params: R,
-) -> LspResult<serde_json::Value> {
+) -> LspResult<serde_json::Value> { ::tsox_core::fntrace::enter("send_client_request"); 
     let id = JsonrpcId::Str(format!("ts{}", s.client_seq.fetch_add(1, Ordering::SeqCst) + 1));
     let params_value = serde_json::to_value(&params)
         .map_err(|e| LspError::new(ErrorCode::InternalError, format!("failed to marshal message: {e}")))?;
@@ -753,7 +753,7 @@ pub fn send_client_request_fire_and_forget<R: serde::Serialize>(
     s: &Server,
     info: impl RequestInfoLike,
     params: R,
-) -> LspResult<()> {
+) -> LspResult<()> { ::tsox_core::fntrace::enter("send_client_request_fire_and_forget"); 
     let id = JsonrpcId::Str(format!("ts{}", s.client_seq.fetch_add(1, Ordering::SeqCst) + 1));
     let params_value = serde_json::to_value(&params)
         .map_err(|e| LspError::new(ErrorCode::InternalError, format!("failed to marshal message: {e}")))?;
@@ -765,7 +765,7 @@ pub fn send_notification<P: serde::Serialize>(
     s: &Server,
     info: impl NotificationInfoLike,
     params: P,
-) -> LspResult<()> {
+) -> LspResult<()> { ::tsox_core::fntrace::enter("send_notification"); 
     let params_value = serde_json::to_value(&params)
         .map_err(|e| LspError::new(ErrorCode::InternalError, format!("failed to marshal message: {e}")))?;
     s.send(&info.new_notification_message(params_value).message())

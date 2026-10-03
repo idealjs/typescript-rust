@@ -9,23 +9,23 @@ pub(crate) const URL_SCHEME_SEPARATOR: &str = "://";
 pub struct Path(pub String);
 
 impl Path {
-    pub fn as_str(&self) -> &str {
+    pub fn as_str(&self) -> &str { crate::fntrace::enter("as_str"); 
         &self.0
     }
 
-    pub fn get_directory_path(&self) -> Path {
+    pub fn get_directory_path(&self) -> Path { crate::fntrace::enter("get_directory_path"); 
         Path(get_directory_path(&self.0))
     }
 
-    pub fn remove_trailing_directory_separator(&self) -> Path {
+    pub fn remove_trailing_directory_separator(&self) -> Path { crate::fntrace::enter("remove_trailing_directory_separator"); 
         Path(remove_trailing_directory_separator(&self.0))
     }
 
-    pub fn ensure_trailing_directory_separator(&self) -> Path {
+    pub fn ensure_trailing_directory_separator(&self) -> Path { crate::fntrace::enter("ensure_trailing_directory_separator"); 
         Path(ensure_trailing_directory_separator(&self.0))
     }
 
-    pub fn contains_path(&self, child: &Path) -> bool {
+    pub fn contains_path(&self, child: &Path) -> bool { crate::fntrace::enter("contains_path"); 
         if self.0.is_empty() {
             return false;
         }
@@ -37,53 +37,53 @@ impl Path {
 }
 
 impl std::fmt::Display for Path {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         write!(f, "{}", self.0)
     }
 }
 
 impl From<&str> for Path {
-    fn from(s: &str) -> Path {
+    fn from(s: &str) -> Path { crate::fntrace::enter("from"); 
         Path(s.to_string())
     }
 }
 
 impl From<String> for Path {
-    fn from(s: String) -> Path {
+    fn from(s: String) -> Path { crate::fntrace::enter("from"); 
         Path(s)
     }
 }
 
-pub(crate) fn is_any_directory_separator(char: u8) -> bool {
+pub(crate) fn is_any_directory_separator(char: u8) -> bool { crate::fntrace::enter("is_any_directory_separator"); 
     char == b'/' || char == b'\\'
 }
 
-pub fn is_url(path: &str) -> bool {
+pub fn is_url(path: &str) -> bool { crate::fntrace::enter("is_url"); 
     get_encoded_root_length(path) < 0
 }
 
-pub fn is_rooted_disk_path(path: &str) -> bool {
+pub fn is_rooted_disk_path(path: &str) -> bool { crate::fntrace::enter("is_rooted_disk_path"); 
     get_encoded_root_length(path) > 0
 }
 
-pub fn is_disk_path_root(path: &str) -> bool {
+pub fn is_disk_path_root(path: &str) -> bool { crate::fntrace::enter("is_disk_path_root"); 
     let root_length = get_encoded_root_length(path);
     root_length > 0 && root_length as usize == path.len()
 }
 
-pub fn is_dynamic_file_name(file_name: &str) -> bool {
+pub fn is_dynamic_file_name(file_name: &str) -> bool { crate::fntrace::enter("is_dynamic_file_name"); 
     file_name.starts_with("^/")
 }
 
-pub fn path_is_absolute(path: &str) -> bool {
+pub fn path_is_absolute(path: &str) -> bool { crate::fntrace::enter("path_is_absolute"); 
     get_encoded_root_length(path) != 0
 }
 
-pub fn has_trailing_directory_separator(path: &str) -> bool {
+pub fn has_trailing_directory_separator(path: &str) -> bool { crate::fntrace::enter("has_trailing_directory_separator"); 
     !path.is_empty() && is_any_directory_separator(*path.as_bytes().last().unwrap())
 }
 
-pub fn combine_paths(first_path: &str, paths: &[&str]) -> String {
+pub fn combine_paths(first_path: &str, paths: &[&str]) -> String { crate::fntrace::enter("combine_paths"); 
     let first_path = normalize_slashes(first_path);
     let mut result = first_path;
 
@@ -104,13 +104,13 @@ pub fn combine_paths(first_path: &str, paths: &[&str]) -> String {
     result
 }
 
-pub fn get_path_components(path: &str, current_directory: &str) -> Vec<String> {
+pub fn get_path_components(path: &str, current_directory: &str) -> Vec<String> { crate::fntrace::enter("get_path_components"); 
     let combined = combine_paths(current_directory, &[path]);
     let root_length = get_root_length(&combined);
     path_components(&combined, root_length)
 }
 
-pub(crate) fn path_components(path: &str, root_length: usize) -> Vec<String> {
+pub(crate) fn path_components(path: &str, root_length: usize) -> Vec<String> { crate::fntrace::enter("path_components"); 
     let root = &path[..root_length];
     let rest: Vec<&str> = path[root_length..].split('/').collect();
     let mut components = vec![root.to_string()];
@@ -122,11 +122,11 @@ pub(crate) fn path_components(path: &str, root_length: usize) -> Vec<String> {
     components
 }
 
-pub fn is_volume_character(char: u8) -> bool {
+pub fn is_volume_character(char: u8) -> bool { crate::fntrace::enter("is_volume_character"); 
     char.is_ascii_alphabetic()
 }
 
-pub fn get_encoded_root_length(path: &str) -> i32 {
+pub fn get_encoded_root_length(path: &str) -> i32 { crate::fntrace::enter("get_encoded_root_length"); 
     let bytes = path.as_bytes();
     let ln = bytes.len();
     if ln == 0 {
@@ -190,7 +190,7 @@ pub fn get_encoded_root_length(path: &str) -> i32 {
     0
 }
 
-pub(crate) fn get_file_url_volume_separator_end(url: &str, start: usize) -> i32 {
+pub(crate) fn get_file_url_volume_separator_end(url: &str, start: usize) -> i32 { crate::fntrace::enter("get_file_url_volume_separator_end"); 
     if url.len() <= start {
         return -1;
     }
@@ -207,7 +207,7 @@ pub(crate) fn get_file_url_volume_separator_end(url: &str, start: usize) -> i32 
     -1
 }
 
-pub fn get_root_length(path: &str) -> usize {
+pub fn get_root_length(path: &str) -> usize { crate::fntrace::enter("get_root_length"); 
     let root_length = get_encoded_root_length(path);
     if root_length < 0 {
         (!root_length) as usize
@@ -216,7 +216,7 @@ pub fn get_root_length(path: &str) -> usize {
     }
 }
 
-pub fn get_directory_path(path: &str) -> String {
+pub fn get_directory_path(path: &str) -> String { crate::fntrace::enter("get_directory_path"); 
     let path = normalize_slashes(path);
     let root_length = get_root_length(&path);
     if root_length == path.len() {
@@ -233,7 +233,7 @@ pub fn get_directory_path(path: &str) -> String {
     path[..last_slash].to_string()
 }
 
-pub fn get_path_from_path_components(components: &[String]) -> String {
+pub fn get_path_from_path_components(components: &[String]) -> String { crate::fntrace::enter("get_path_from_path_components"); 
     if components.is_empty() {
         return String::new();
     }
@@ -249,11 +249,11 @@ pub fn get_path_from_path_components(components: &[String]) -> String {
     format!("{}{}", root, components[1..].join("/"))
 }
 
-pub fn normalize_slashes(path: &str) -> String {
+pub fn normalize_slashes(path: &str) -> String { crate::fntrace::enter("normalize_slashes"); 
     path.replace('\\', "/")
 }
 
-pub fn reduce_path_components(components: &[String]) -> Vec<String> {
+pub fn reduce_path_components(components: &[String]) -> Vec<String> { crate::fntrace::enter("reduce_path_components"); 
     if components.is_empty() {
         return vec![];
     }
@@ -277,7 +277,7 @@ pub fn reduce_path_components(components: &[String]) -> Vec<String> {
     reduced
 }
 
-pub fn resolve_path(path: &str, paths: &[&str]) -> String {
+pub fn resolve_path(path: &str, paths: &[&str]) -> String { crate::fntrace::enter("resolve_path"); 
     let combined = if !paths.is_empty() {
         combine_paths(path, paths)
     } else {

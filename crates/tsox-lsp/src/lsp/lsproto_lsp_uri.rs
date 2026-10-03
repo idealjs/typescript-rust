@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct DocumentUri(pub String);
 
 impl DocumentUri {
-    pub fn file_name(&self) -> String {
+    pub fn file_name(&self) -> String { ::tsox_core::fntrace::enter("file_name"); 
         let uri = &self.0;
 
         if tsox_checker::bundled::is_bundled(uri) {
@@ -49,14 +49,14 @@ impl DocumentUri {
         format!("^/{scheme}/{authority}/{file_path}")
     }
 
-    pub fn path(&self, use_case_sensitive_file_names: bool) -> tsox_core::tspath::Path {
+    pub fn path(&self, use_case_sensitive_file_names: bool) -> tsox_core::tspath::Path { ::tsox_core::fntrace::enter("path"); 
         let file_name = self.file_name();
         tsox_core::tspath::to_path(&file_name, "", use_case_sensitive_file_names)
     }
 }
 
 impl fmt::Display for DocumentUri {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         f.write_str(&self.0)
     }
 }
@@ -65,7 +65,7 @@ pub type Uri = String;
 
 pub type Method = String;
 
-fn split_once(s: &str, sep: char) -> (&str, &str, bool) {
+fn split_once(s: &str, sep: char) -> (&str, &str, bool) { ::tsox_core::fntrace::enter("split_once"); 
     match s.find(sep) {
         Some(idx) => (&s[..idx], &s[idx + sep.len_utf8()..], true),
         None => (s, "", false),

@@ -12,7 +12,7 @@ use crate::format::mig::m4t_2::{
 use crate::scanner::mig::m3i::get_source_text_of_node_from_source_file;
 use std::sync::Arc;
 
-pub fn can_use_original_text(node: &Arc<Node>, flags: GetLiteralTextFlags) -> bool {
+pub fn can_use_original_text(node: &Arc<Node>, flags: GetLiteralTextFlags) -> bool { ::tsox_core::fntrace::enter("can_use_original_text"); 
     if node_is_synthesized(node)
         || node.parent().is_none()
         || flags & GET_LITERAL_TEXT_FLAGS_TERMINATE_UNTERMINATED_LITERALS != 0
@@ -41,7 +41,7 @@ pub fn get_literal_text(
     node: &Arc<Node>,
     source_file: Option<&Arc<SourceFile>>,
     flags: GetLiteralTextFlags,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_literal_text"); 
     if source_file.is_some() && can_use_original_text(node, flags) {
         return get_source_text_of_node_from_source_file(source_file.unwrap(), node, false);
     }
@@ -134,13 +134,13 @@ pub fn get_literal_text(
     }
 }
 
-pub fn is_not_prologue_directive(node: &Arc<Node>) -> bool {
+pub fn is_not_prologue_directive(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_not_prologue_directive"); 
     !is_prologue_directive(node)
 }
 
 /// Go TemplateLiteralLikeData().RawText;NoSubstitutionTemplateLiteralData
 /// 尚无 raw_text 字段,返回空串(等价回退到 cooked text 分支)
-fn template_literal_like_raw_text(node: &Node) -> &str {
+fn template_literal_like_raw_text(node: &Node) -> &str { ::tsox_core::fntrace::enter("template_literal_like_raw_text"); 
     match &node.data {
         NodeData::TemplateHead(d) => &d.raw_text,
         NodeData::TemplateMiddle(d) => &d.raw_text,

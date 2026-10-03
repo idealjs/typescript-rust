@@ -17,7 +17,7 @@ struct CountingFS {
 }
 
 impl CountingFS {
-    fn new(inner: InMemoryFS) -> Self {
+    fn new(inner: InMemoryFS) -> Self { ::tsox_core::fntrace::enter("new"); 
         CountingFS {
             inner,
             directory_exists_calls: Mutex::new(Vec::new()),
@@ -33,54 +33,54 @@ impl CountingFS {
         }
     }
 
-    fn directory_exists_calls(&self) -> usize {
+    fn directory_exists_calls(&self) -> usize { ::tsox_core::fntrace::enter("directory_exists_calls"); 
         self.directory_exists_calls.lock().unwrap().len()
     }
 
-    fn file_exists_calls(&self) -> usize {
+    fn file_exists_calls(&self) -> usize { ::tsox_core::fntrace::enter("file_exists_calls"); 
         self.file_exists_calls.lock().unwrap().len()
     }
 
-    fn get_accessible_entries_calls(&self) -> usize {
+    fn get_accessible_entries_calls(&self) -> usize { ::tsox_core::fntrace::enter("get_accessible_entries_calls"); 
         self.get_accessible_entries_calls.lock().unwrap().len()
     }
 
-    fn realpath_calls(&self) -> usize {
+    fn realpath_calls(&self) -> usize { ::tsox_core::fntrace::enter("realpath_calls"); 
         self.realpath_calls.lock().unwrap().len()
     }
 
-    fn stat_calls(&self) -> usize {
+    fn stat_calls(&self) -> usize { ::tsox_core::fntrace::enter("stat_calls"); 
         self.stat_calls.lock().unwrap().len()
     }
 
-    fn read_file_calls(&self) -> usize {
+    fn read_file_calls(&self) -> usize { ::tsox_core::fntrace::enter("read_file_calls"); 
         self.read_file_calls.lock().unwrap().len()
     }
 
-    fn use_case_sensitive_calls(&self) -> u32 {
+    fn use_case_sensitive_calls(&self) -> u32 { ::tsox_core::fntrace::enter("use_case_sensitive_calls"); 
         *self.use_case_sensitive_calls.lock().unwrap()
     }
 
-    fn walk_dir_calls(&self) -> usize {
+    fn walk_dir_calls(&self) -> usize { ::tsox_core::fntrace::enter("walk_dir_calls"); 
         self.walk_dir_calls.lock().unwrap().len()
     }
 
-    fn remove_calls(&self) -> usize {
+    fn remove_calls(&self) -> usize { ::tsox_core::fntrace::enter("remove_calls"); 
         self.remove_calls.lock().unwrap().len()
     }
 
-    fn write_file_calls(&self) -> Vec<(String, String)> {
+    fn write_file_calls(&self) -> Vec<(String, String)> { ::tsox_core::fntrace::enter("write_file_calls"); 
         self.write_file_calls.lock().unwrap().clone()
     }
 }
 
 impl FS for CountingFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         *self.use_case_sensitive_calls.lock().unwrap() += 1;
         self.inner.use_case_sensitive_file_names()
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.file_exists_calls
             .lock()
             .unwrap()
@@ -88,12 +88,12 @@ impl FS for CountingFS {
         self.inner.file_exists(path)
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.read_file_calls.lock().unwrap().push(path.to_string());
         self.inner.read_file(path)
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         self.write_file_calls
             .lock()
             .unwrap()
@@ -101,16 +101,16 @@ impl FS for CountingFS {
         self.inner.write_file(path, data)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         self.inner.append_file(path, data)
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         self.remove_calls.lock().unwrap().push(path.to_string());
         self.inner.remove(path)
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.directory_exists_calls
             .lock()
             .unwrap()
@@ -118,7 +118,7 @@ impl FS for CountingFS {
         self.inner.directory_exists(path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.get_accessible_entries_calls
             .lock()
             .unwrap()
@@ -126,12 +126,12 @@ impl FS for CountingFS {
         self.inner.get_accessible_entries(path)
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         self.stat_calls.lock().unwrap().push(path.to_string());
         self.inner.stat(path)
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         self.realpath_calls.lock().unwrap().push(path.to_string());
         self.inner.realpath(path)
     }
@@ -140,13 +140,13 @@ impl FS for CountingFS {
         &self,
         root: &str,
         walk_fn: &mut dyn FnMut(&str, &FileInfo),
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("walk_dir"); 
         self.walk_dir_calls.lock().unwrap().push(root.to_string());
         self.inner.walk_dir(root, walk_fn)
     }
 }
 
-fn create_mock_fs() -> CountingFS {
+fn create_mock_fs() -> CountingFS { ::tsox_core::fntrace::enter("create_mock_fs"); 
     let inner = InMemoryFS::with_case_sensitivity(true);
     inner.insert_dir("/some");
     inner.insert_dir("/some/path");
@@ -155,7 +155,7 @@ fn create_mock_fs() -> CountingFS {
 }
 
 #[test]
-fn test_cached_directory_exists() {
+fn test_cached_directory_exists() { ::tsox_core::fntrace::enter("test_cached_directory_exists"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -188,7 +188,7 @@ fn test_cached_directory_exists() {
 }
 
 #[test]
-fn test_cached_file_exists() {
+fn test_cached_file_exists() { ::tsox_core::fntrace::enter("test_cached_file_exists"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -221,7 +221,7 @@ fn test_cached_file_exists() {
 }
 
 #[test]
-fn test_cached_get_accessible_entries() {
+fn test_cached_get_accessible_entries() { ::tsox_core::fntrace::enter("test_cached_get_accessible_entries"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -254,7 +254,7 @@ fn test_cached_get_accessible_entries() {
 }
 
 #[test]
-fn test_cached_realpath() {
+fn test_cached_realpath() { ::tsox_core::fntrace::enter("test_cached_realpath"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -287,7 +287,7 @@ fn test_cached_realpath() {
 }
 
 #[test]
-fn test_cached_stat() {
+fn test_cached_stat() { ::tsox_core::fntrace::enter("test_cached_stat"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -320,7 +320,7 @@ fn test_cached_stat() {
 }
 
 #[test]
-fn test_cached_read_file() {
+fn test_cached_read_file() { ::tsox_core::fntrace::enter("test_cached_read_file"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -350,7 +350,7 @@ fn test_cached_read_file() {
 }
 
 #[test]
-fn test_cached_use_case_sensitive_file_names() {
+fn test_cached_use_case_sensitive_file_names() { ::tsox_core::fntrace::enter("test_cached_use_case_sensitive_file_names"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -380,7 +380,7 @@ fn test_cached_use_case_sensitive_file_names() {
 }
 
 #[test]
-fn test_cached_walk_dir() {
+fn test_cached_walk_dir() { ::tsox_core::fntrace::enter("test_cached_walk_dir"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -412,7 +412,7 @@ fn test_cached_walk_dir() {
 }
 
 #[test]
-fn test_cached_remove() {
+fn test_cached_remove() { ::tsox_core::fntrace::enter("test_cached_remove"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 
@@ -442,7 +442,7 @@ fn test_cached_remove() {
 }
 
 #[test]
-fn test_cached_write_file() {
+fn test_cached_write_file() { ::tsox_core::fntrace::enter("test_cached_write_file"); 
     let underlying = Arc::new(create_mock_fs());
     let cached = CachedFS::new(underlying.clone());
 

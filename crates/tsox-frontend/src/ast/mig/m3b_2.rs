@@ -13,15 +13,15 @@ use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
 use tsox_core::core::text::TextRange;
 
-pub fn diagnostics(_file: &SourceFile) -> &'static [crate::ast::diagnostic::Diagnostic] {
+pub fn diagnostics(_file: &SourceFile) -> &'static [crate::ast::diagnostic::Diagnostic] { ::tsox_core::fntrace::enter("diagnostics"); 
     &[]
 }
 
-pub fn js_diagnostics(_file: &SourceFile) -> &'static [crate::ast::diagnostic::Diagnostic] {
+pub fn js_diagnostics(_file: &SourceFile) -> &'static [crate::ast::diagnostic::Diagnostic] { ::tsox_core::fntrace::enter("js_diagnostics"); 
     &[]
 }
 
-pub fn jsdoc_diagnostics(_file: &SourceFile) -> &'static [crate::ast::diagnostic::Diagnostic] {
+pub fn jsdoc_diagnostics(_file: &SourceFile) -> &'static [crate::ast::diagnostic::Diagnostic] { ::tsox_core::fntrace::enter("jsdoc_diagnostics"); 
     &[]
 }
 
@@ -49,51 +49,51 @@ pub struct MappedDiagnosticDirective {
     pub source: String,
 }
 
-pub fn path(file: &SourceFile) -> String {
+pub fn path(file: &SourceFile) -> String { ::tsox_core::fntrace::enter("path"); 
     tsox_core::tspath::normalize_path(&file.file_name)
 }
 
-pub fn parse_options(file: &SourceFile) -> SourceFileParseOptions {
+pub fn parse_options(file: &SourceFile) -> SourceFileParseOptions { ::tsox_core::fntrace::enter("parse_options"); 
     SourceFileParseOptions {
         path: tsox_core::tspath::normalize_path(&file.file_name),
         file_name: file.file_name.clone(),
     }
 }
 
-pub fn original_text(file: &SourceFile) -> &str {
+pub fn original_text(file: &SourceFile) -> &str { ::tsox_core::fntrace::enter("original_text"); 
     &file.text
 }
 
-pub fn original_file_name(file: &SourceFile) -> &str {
+pub fn original_file_name(file: &SourceFile) -> &str { ::tsox_core::fntrace::enter("original_file_name"); 
     &file.file_name
 }
 
-pub fn diagnostic_directives(_file: &SourceFile) -> &'static [MappedDiagnosticDirective] {
+pub fn diagnostic_directives(_file: &SourceFile) -> &'static [MappedDiagnosticDirective] { ::tsox_core::fntrace::enter("diagnostic_directives"); 
     &[]
 }
 
-pub fn is_content_mapper_failure_stub(_file: &SourceFile) -> bool {
+pub fn is_content_mapper_failure_stub(_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_content_mapper_failure_stub"); 
     false
 }
 
-pub fn is_content_mapper_supplemental(_file: &SourceFile) -> bool {
+pub fn is_content_mapper_supplemental(_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_content_mapper_supplemental"); 
     false
 }
 
-pub fn is_js(file: &SourceFile) -> bool {
+pub fn is_js(file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_js"); 
     file.script_kind == crate::ast::node_source_file::ScriptKind::Js
         || file.script_kind == crate::ast::node_source_file::ScriptKind::Jsx
 }
 
-pub fn is_bound(_file: &SourceFile) -> bool {
+pub fn is_bound(_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_bound"); 
     false
 }
 
-pub fn ecma_line_map(file: &SourceFile) -> Vec<usize> {
+pub fn ecma_line_map(file: &SourceFile) -> Vec<usize> { ::tsox_core::fntrace::enter("ecma_line_map"); 
     compute_ecma_line_starts(&file.text)
 }
 
-fn compute_ecma_line_starts(text: &str) -> Vec<usize> {
+fn compute_ecma_line_starts(text: &str) -> Vec<usize> { ::tsox_core::fntrace::enter("compute_ecma_line_starts"); 
     let mut starts = vec![0];
     for (i, b) in text.bytes().enumerate() {
         if b == b'\n' {
@@ -103,7 +103,7 @@ fn compute_ecma_line_starts(text: &str) -> Vec<usize> {
     starts
 }
 
-pub fn get_position_map(file: &SourceFile) -> crate::ast::positionmap::PositionMap {
+pub fn get_position_map(file: &SourceFile) -> crate::ast::positionmap::PositionMap { ::tsox_core::fntrace::enter("get_position_map"); 
     crate::ast::positionmap::compute_position_map(&file.text)
 }
 
@@ -120,7 +120,7 @@ pub fn get_or_create_token(
     end: usize,
     parent: &Arc<Node>,
     flags: crate::ast::node_data_generated::TokenFlags,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_or_create_token"); 
     use crate::ast::node_flags::NodeFlags;
     assert!(
         !parent.flags.contains(NodeFlags::Reparsed),
@@ -136,7 +136,7 @@ fn create_token(
     pos: usize,
     end: usize,
     flags: crate::ast::node_data_generated::TokenFlags,
-) -> Node {
+) -> Node { ::tsox_core::fntrace::enter("create_token"); 
     use crate::ast::node_data_generated::{
         BigIntLiteralData, IdentifierData, JsxTextData, NoSubstitutionTemplateLiteralData,
         NumericLiteralData, PrivateIdentifierData, RegularExpressionLiteralData,
@@ -228,7 +228,7 @@ pub struct SourceFileDataKey<T> {
 }
 
 impl<T> SourceFileDataKey<T> {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             key: SOURCE_FILE_DATA_KEY_COUNTER.fetch_add(1, Ordering::Relaxed) + 1,
             _phantom: std::marker::PhantomData,
@@ -237,7 +237,7 @@ impl<T> SourceFileDataKey<T> {
 }
 
 impl<T> Default for SourceFileDataKey<T> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
@@ -248,7 +248,7 @@ pub struct SourceFileDataStore {
 }
 
 impl SourceFileDataStore {
-    fn cell_of(&self, key: u64) -> Arc<Mutex<Option<Box<dyn Any + Send>>>> {
+    fn cell_of(&self, key: u64) -> Arc<Mutex<Option<Box<dyn Any + Send>>>> { ::tsox_core::fntrace::enter("cell_of"); 
         let mut cells = self.cells.lock().unwrap();
         cells.entry(key).or_insert_with(|| Arc::new(Mutex::new(None))).clone()
     }
@@ -262,7 +262,7 @@ pub fn get_or_compute_source_file_data<T, F>(
 where
     T: Clone + Any + Send + 'static,
     F: FnOnce(&SourceFile) -> T,
-{
+{ ::tsox_core::fntrace::enter("get_or_compute_source_file_data"); 
     assert!(_key.key != 0, "invalid SourceFileDataKey; use new()");
     compute(file)
 }
@@ -273,28 +273,28 @@ pub struct NodeFactory {
 }
 
 impl NodeFactory {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             node_count: AtomicU64::new(0),
             text_count: AtomicU64::new(0),
         }
     }
 
-    pub fn node_count(&self) -> u64 {
+    pub fn node_count(&self) -> u64 { ::tsox_core::fntrace::enter("node_count"); 
         self.node_count.load(Ordering::Relaxed)
     }
 
-    pub fn text_count(&self) -> u64 {
+    pub fn text_count(&self) -> u64 { ::tsox_core::fntrace::enter("text_count"); 
         self.text_count.load(Ordering::Relaxed)
     }
 
-    pub fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> crate::ast::node_node_list::NodeList {
+    pub fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> crate::ast::node_node_list::NodeList { ::tsox_core::fntrace::enter("new_node_list"); 
         let mut list = crate::ast::node_node_list::NodeList::new(nodes);
         list.loc = TextRange::undefined();
         list
     }
 
-    pub fn new_modifier_list(&self, nodes: Vec<Arc<Node>>) -> ModifierList {
+    pub fn new_modifier_list(&self, nodes: Vec<Arc<Node>>) -> ModifierList { ::tsox_core::fntrace::enter("new_modifier_list"); 
         let flags = crate::ast::utilities_modifiers::modifiers_to_flags(&nodes);
         ModifierList::new(nodes, flags)
     }
@@ -302,11 +302,11 @@ impl NodeFactory {
     pub fn new_modifier(
         &self,
         kind: crate::ast::syntax_kind_generated::SyntaxKind,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_modifier"); 
         self.new_token(kind)
     }
 
-    pub fn new_token(&self, kind: crate::ast::syntax_kind_generated::SyntaxKind) -> Arc<Node> {
+    pub fn new_token(&self, kind: crate::ast::syntax_kind_generated::SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_token"); 
         self.node_count.fetch_add(1, Ordering::Relaxed);
         Arc::new(Node::new(kind, NodeData::Token))
     }
@@ -317,7 +317,7 @@ impl NodeFactory {
         pos: usize,
         end: usize,
         has_trailing_new_line: bool,
-    ) -> crate::scanner::CommentRange {
+    ) -> crate::scanner::CommentRange { ::tsox_core::fntrace::enter("new_comment_range"); 
         use crate::ast::syntax_kind_generated::SyntaxKind;
         let range_kind = if kind == SyntaxKind::MultiLineCommentTrivia {
             crate::scanner::is_jsx_line_break::CommentRangeKind::MultiLine
@@ -338,7 +338,7 @@ impl NodeFactory {
         text: String,
         statements: Arc<crate::ast::node_node_list::NodeList>,
         end_of_file_token: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_source_file"); 
         assert!(
             tsox_core::tspath::get_encoded_root_length(&opts.file_name) != 0
                 && opts.file_name == tsox_core::tspath::normalize_path(&opts.file_name),
@@ -358,7 +358,7 @@ impl NodeFactory {
 }
 
 impl Default for NodeFactory {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
@@ -366,20 +366,20 @@ impl Default for NodeFactory {
 pub fn get_declaration_map(
     file: &SourceFile,
     symbols: &NodeSymbolMap,
-) -> HashMap<String, Vec<Arc<Node>>> {
+) -> HashMap<String, Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("get_declaration_map"); 
     let mut result: HashMap<String, Vec<Arc<Node>>> = HashMap::new();
 
     fn add_declaration(
         declaration: &Arc<Node>,
         result: &mut HashMap<String, Vec<Arc<Node>>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_declaration"); 
         let name = super::m3b::get_declaration_name(declaration);
         if !name.is_empty() {
             result.entry(name).or_default().push(declaration.clone());
         }
     }
 
-    fn node_body(node: &Node) -> Option<Arc<Node>> {
+    fn node_body(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_body"); 
         match &node.data {
             NodeData::FunctionDeclaration(d) => d.body.clone(),
             NodeData::FunctionExpression(d) => Some(d.body.clone()),
@@ -395,7 +395,7 @@ pub fn get_declaration_map(
         node: &Arc<Node>,
         symbols: &NodeSymbolMap,
         result: &mut HashMap<String, Vec<Arc<Node>>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("visit"); 
         match node.kind {
             crate::ast::syntax_kind_generated::SyntaxKind::FunctionDeclaration
             | crate::ast::syntax_kind_generated::SyntaxKind::FunctionExpression
@@ -541,7 +541,7 @@ pub fn get_declaration_map(
         node: &Arc<Node>,
         symbols: &NodeSymbolMap,
         result: &mut HashMap<String, Vec<Arc<Node>>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("visit_name_holding_declaration"); 
         if let Some(name) = node.name() {
             let name = name.clone();
             if is_binding_pattern(&name) {

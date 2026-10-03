@@ -30,7 +30,7 @@ pub mod api {
         }
 
         impl Session {
-            pub fn new(lsp_session: Arc<crate::project::session::Session>) -> Arc<Self> {
+            pub fn new(lsp_session: Arc<crate::project::session::Session>) -> Arc<Self> { ::tsox_core::fntrace::enter("new"); 
                 Arc::new(Session { lsp_session })
             }
         }
@@ -56,7 +56,7 @@ pub enum ErrorCode {
 }
 
 impl std::fmt::Display for ErrorCode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         let name = match self {
             ErrorCode::ParseError => "ParseError",
             ErrorCode::InvalidRequest => "InvalidRequest",
@@ -85,11 +85,11 @@ pub struct LspError {
 }
 
 impl LspError {
-    pub fn new(code: ErrorCode, message: impl Into<String>) -> Self {
+    pub fn new(code: ErrorCode, message: impl Into<String>) -> Self { ::tsox_core::fntrace::enter("new"); 
         LspError { code, message: message.into(), request: None }
     }
 
-    pub fn is_code(&self, code: ErrorCode) -> bool {
+    pub fn is_code(&self, code: ErrorCode) -> bool { ::tsox_core::fntrace::enter("is_code"); 
         self.code == code
     }
 }
@@ -99,11 +99,11 @@ pub struct MessageMarshalError {
 }
 
 impl MessageMarshalError {
-    pub fn error(&self) -> String {
+    pub fn error(&self) -> String { ::tsox_core::fntrace::enter("error"); 
         format!("failed to marshal message: {}", self.err.message)
     }
 
-    pub fn unwrap(&self) -> Vec<ErrorCode> {
+    pub fn unwrap(&self) -> Vec<ErrorCode> { ::tsox_core::fntrace::enter("unwrap"); 
         vec![ErrorCode::InternalError]
     }
 }
@@ -111,11 +111,11 @@ impl MessageMarshalError {
 pub struct UserFacingRequestFailedError(pub String);
 
 impl UserFacingRequestFailedError {
-    pub fn error(&self) -> String {
+    pub fn error(&self) -> String { ::tsox_core::fntrace::enter("error"); 
         self.0.clone()
     }
 
-    pub fn unwrap(&self) -> ErrorCode {
+    pub fn unwrap(&self) -> ErrorCode { ::tsox_core::fntrace::enter("unwrap"); 
         ErrorCode::RequestFailed
     }
 }
@@ -133,7 +133,7 @@ pub struct LspReader {
 }
 
 impl LspReader {
-    pub fn read(&self) -> LspResult<lsproto::Message> {
+    pub fn read(&self) -> LspResult<lsproto::Message> { ::tsox_core::fntrace::enter("read"); 
         let data = self.base.lock().unwrap().inner.read().map_err(|e| {
             if e.kind() == std::io::ErrorKind::UnexpectedEof {
                 LspError::new(ErrorCode::EOF, e.to_string())
@@ -147,12 +147,12 @@ impl LspReader {
 }
 
 impl Reader for LspReader {
-    fn read(&self) -> LspResult<lsproto::Message> {
+    fn read(&self) -> LspResult<lsproto::Message> { ::tsox_core::fntrace::enter("read"); 
         LspReader::read(self)
     }
 }
 
-pub fn to_reader(r: impl std::io::Read + Send + Sync + 'static) -> Arc<dyn Reader> {
+pub fn to_reader(r: impl std::io::Read + Send + Sync + 'static) -> Arc<dyn Reader> { ::tsox_core::fntrace::enter("to_reader"); 
     Arc::new(LspReader { base: Mutex::new(BaseReader::new(Box::new(r))) })
 }
 
@@ -161,7 +161,7 @@ pub struct LspWriter {
 }
 
 impl LspWriter {
-    pub fn write(&self, msg: &lsproto::Message) -> Result<(), LspError> {
+    pub fn write(&self, msg: &lsproto::Message) -> Result<(), LspError> { ::tsox_core::fntrace::enter("write"); 
         let data = serde_json::to_vec(msg).map_err(|e| {
             LspError::new(ErrorCode::InternalError, format!("failed to marshal message: {e}"))
         })?;
@@ -175,12 +175,12 @@ impl LspWriter {
 }
 
 impl Writer for LspWriter {
-    fn write(&self, msg: &lsproto::Message) -> Result<(), LspError> {
+    fn write(&self, msg: &lsproto::Message) -> Result<(), LspError> { ::tsox_core::fntrace::enter("write"); 
         LspWriter::write(self, msg)
     }
 }
 
-pub fn to_writer(w: impl std::io::Write + Send + Sync + 'static) -> Arc<dyn Writer> {
+pub fn to_writer(w: impl std::io::Write + Send + Sync + 'static) -> Arc<dyn Writer> { ::tsox_core::fntrace::enter("to_writer"); 
     Arc::new(LspWriter { base: Mutex::new(BaseWriter::new(Box::new(w))) })
 }
 
@@ -190,7 +190,7 @@ pub struct BackgroundCtx {
 }
 
 impl BackgroundCtx {
-    pub fn is_done(&self) -> bool {
+    pub fn is_done(&self) -> bool { ::tsox_core::fntrace::enter("is_done"); 
         self.cancelled.load(Ordering::SeqCst)
     }
 }
@@ -205,7 +205,7 @@ pub struct RequestContext {
 pub fn with_request_id_cancellable(
     ctx: RequestContext,
     request_id: &str,
-) -> (RequestContext, Arc<dyn Fn() + Send + Sync>) {
+) -> (RequestContext, Arc<dyn Fn() + Send + Sync>) { ::tsox_core::fntrace::enter("with_request_id_cancellable"); 
     let cancelled = Arc::new(AtomicBool::new(false));
     let handle = cancelled.clone();
     let ctx = RequestContext {
@@ -222,18 +222,18 @@ pub struct InitCompleteChannel {
 }
 
 impl InitCompleteChannel {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self::default()
     }
 
-    pub fn close(&self) {
+    pub fn close(&self) { ::tsox_core::fntrace::enter("close"); 
         let (lock, cvar) = &*self.done;
         let mut done = lock.lock().unwrap();
         *done = true;
         cvar.notify_all();
     }
 
-    pub fn waiter(&self) -> InitCompleteWaiter {
+    pub fn waiter(&self) -> InitCompleteWaiter { ::tsox_core::fntrace::enter("waiter"); 
         InitCompleteWaiter { done: self.done.clone() }
     }
 }
@@ -243,7 +243,7 @@ pub struct InitCompleteWaiter {
 }
 
 impl InitCompleteWaiter {
-    pub fn wait(&self) {
+    pub fn wait(&self) { ::tsox_core::fntrace::enter("wait"); 
         let (lock, cvar) = &*self.done;
         let mut done = lock.lock().unwrap();
         while !*done {
@@ -257,25 +257,25 @@ pub struct SyncSet<T: Eq + std::hash::Hash + Clone> {
 }
 
 impl<T: Eq + std::hash::Hash + Clone> Default for SyncSet<T> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         SyncSet { inner: Mutex::new(HashSet::new()) }
     }
 }
 
 impl<T: Eq + std::hash::Hash + Clone> SyncSet<T> {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self::default()
     }
 
-    pub fn add(&self, value: &T) {
+    pub fn add(&self, value: &T) { ::tsox_core::fntrace::enter("add"); 
         self.inner.lock().unwrap().insert(value.clone());
     }
 
-    pub fn has(&self, value: &T) -> bool {
+    pub fn has(&self, value: &T) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.inner.lock().unwrap().contains(value)
     }
 
-    pub fn delete(&self, value: &T) {
+    pub fn delete(&self, value: &T) { ::tsox_core::fntrace::enter("delete"); 
         self.inner.lock().unwrap().remove(value);
     }
 }
@@ -380,7 +380,7 @@ pub struct CancelParams {
 }
 
 impl Default for CancelParams {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         CancelParams { id: crate::jsonrpc::jsonrpc::Id::Int(0) }
     }
 }
@@ -591,7 +591,7 @@ pub struct SpawnedProcess {
 impl Server {
     pub fn new(
         opts: &ServerOptions,
-    ) -> Arc<Server> {
+    ) -> Arc<Server> { ::tsox_core::fntrace::enter("new"); 
         if opts.cwd.is_empty() {
             panic!("Cwd is required");
         }
@@ -642,19 +642,19 @@ impl Server {
         s
     }
 
-    pub fn session(&self) -> Option<&Arc<Session>> {
+    pub fn session(&self) -> Option<&Arc<Session>> { ::tsox_core::fntrace::enter("session"); 
         self.session.as_ref()
     }
 
-    pub fn init_complete(&self) -> InitCompleteWaiter {
+    pub fn init_complete(&self) -> InitCompleteWaiter { ::tsox_core::fntrace::enter("init_complete"); 
         self.init_complete.waiter()
     }
 
-    pub fn get_locale(&self) -> Locale {
+    pub fn get_locale(&self) -> Locale { ::tsox_core::fntrace::enter("get_locale"); 
         self.locale_lock.read().unwrap().clone()
     }
 
-    pub fn set_locale(&self, locale_string: &str) {
+    pub fn set_locale(&self, locale_string: &str) { ::tsox_core::fntrace::enter("set_locale"); 
         let new_locale = if locale_string != "auto" {
             let Some(parsed) = Locale::parse(locale_string) else {
                 return;
@@ -666,25 +666,25 @@ impl Server {
         *self.locale_lock.write().unwrap() = new_locale;
     }
 
-    pub fn progress_start(&self, message: &Message, args: &[String]) {
+    pub fn progress_start(&self, message: &Message, args: &[String]) { ::tsox_core::fntrace::enter("progress_start"); 
         if let Some(progress) = &self.project_progress {
             progress.start(message.clone(), args.to_vec());
         }
     }
 
-    pub fn progress_finish(&self, message: &Message, args: &[String]) {
+    pub fn progress_finish(&self, message: &Message, args: &[String]) { ::tsox_core::fntrace::enter("progress_finish"); 
         if let Some(progress) = &self.project_progress {
             progress.finish(message.clone(), args.to_vec());
         }
     }
 
-    pub fn publish_diagnostics(&self, params: &lsproto::PublishDiagnosticsParams) -> LspResult<()> {
+    pub fn publish_diagnostics(&self, params: &lsproto::PublishDiagnosticsParams) -> LspResult<()> { ::tsox_core::fntrace::enter("publish_diagnostics"); 
         let value = serde_json::to_value(params)
             .map_err(|e| LspError::new(ErrorCode::InternalError, format!("failed to marshal message: {e}")))?;
         crate::mig::m5n_2::send_notification(self, &*TEXT_DOCUMENT_PUBLISH_DIAGNOSTICS_INFO, value)
     }
 
-    pub fn send_telemetry(&self, telemetry: &lsproto::TelemetryEvent) -> LspResult<()> {
+    pub fn send_telemetry(&self, telemetry: &lsproto::TelemetryEvent) -> LspResult<()> { ::tsox_core::fntrace::enter("send_telemetry"); 
         if !self.telemetry_enabled.load(Ordering::SeqCst) {
             panic!("SendTelemetry called with telemetry disabled");
         }
@@ -693,7 +693,7 @@ impl Server {
         crate::mig::m5n_2::send_notification(self, &*TELEMETRY_EVENT_INFO, value)
     }
 
-    pub fn is_active(&self) -> bool {
+    pub fn is_active(&self) -> bool { ::tsox_core::fntrace::enter("is_active"); 
         let last = self.last_request_time_ms.load(Ordering::SeqCst);
         if last == 0 {
             return true;
@@ -705,7 +705,7 @@ impl Server {
         }
     }
 
-    pub fn refresh_diagnostics(&self) -> LspResult<()> {
+    pub fn refresh_diagnostics(&self) -> LspResult<()> { ::tsox_core::fntrace::enter("refresh_diagnostics"); 
         if !self.client_capabilities.workspace.diagnostics.refresh_support {
             return Ok(());
         }
@@ -714,7 +714,7 @@ impl Server {
         Ok(())
     }
 
-    pub fn refresh_inlay_hints(&self) -> LspResult<()> {
+    pub fn refresh_inlay_hints(&self) -> LspResult<()> { ::tsox_core::fntrace::enter("refresh_inlay_hints"); 
         if !self.client_capabilities.workspace.inlay_hint.refresh_support {
             return Ok(());
         }
@@ -723,7 +723,7 @@ impl Server {
         Ok(())
     }
 
-    pub fn refresh_code_lens(&self) -> LspResult<()> {
+    pub fn refresh_code_lens(&self) -> LspResult<()> { ::tsox_core::fntrace::enter("refresh_code_lens"); 
         if !self.client_capabilities.workspace.code_lens.refresh_support {
             return Ok(());
         }
@@ -736,7 +736,7 @@ impl Server {
         &self,
         id: &crate::project::watch::WatcherID,
         watchers: &[lsproto::FileSystemWatcher],
-    ) -> LspResult<()> {
+    ) -> LspResult<()> { ::tsox_core::fntrace::enter("watch_files"); 
         if let Some(builtin) = &self.builtin_watcher {
             builtin
                 .watch_files(&id.to_string(), watchers)
@@ -764,7 +764,7 @@ impl Server {
         Ok(())
     }
 
-    pub fn unwatch_files(&self, id: &crate::project::watch::WatcherID) -> LspResult<()> {
+    pub fn unwatch_files(&self, id: &crate::project::watch::WatcherID) -> LspResult<()> { ::tsox_core::fntrace::enter("unwatch_files"); 
         if let Some(builtin) = &self.builtin_watcher {
             if !self.watchers.has(id) {
                 return Err(LspError::new(ErrorCode::InternalError, format!("no file watcher exists with ID {id}")));
@@ -793,7 +793,7 @@ impl Server {
         Err(LspError::new(ErrorCode::InternalError, format!("no file watcher exists with ID {id}")))
     }
 
-    pub fn request_configuration(&self) -> LspResult<lsutil::UserPreferences> {
+    pub fn request_configuration(&self) -> LspResult<lsutil::UserPreferences> { ::tsox_core::fntrace::enter("request_configuration"); 
         let caps = &self.client_capabilities;
         if !caps.workspace.configuration {
             if let Some(user_prefs) = &self.initialization_options.user_preferences {
@@ -832,7 +832,7 @@ impl Server {
         Ok(crate::ls::lsutil_user_preferences_preferences::parse_user_preferences(&config_map))
     }
 
-    pub fn npm_install(&self, cwd: &str, args: &[String]) -> Result<Vec<u8>, String> {
+    pub fn npm_install(&self, cwd: &str, args: &[String]) -> Result<Vec<u8>, String> { ::tsox_core::fntrace::enter("npm_install"); 
         match &self.npm_install {
             Some(f) => f(cwd, args),
             None => Err("NpmInstall not configured".to_string()),
@@ -842,7 +842,7 @@ impl Server {
     pub fn set_compiler_options_for_inferred_projects(
         &mut self,
         options: &tsox_core::core::compiler_options::CompilerOptions,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_compiler_options_for_inferred_projects"); 
         self.compiler_options_for_inferred_projects = Some(Box::new(options.clone()));
         if let Some(session) = &self.session {
             session.did_change_compiler_options_for_inferred_projects(Some(options.clone()));
@@ -865,7 +865,7 @@ pub struct ServerOptions {
     pub set_parent_process_id: Option<Arc<dyn Fn(i32) + Send + Sync>>,
 }
 
-pub fn new_project_loading_progress(server: &Arc<Server>, delay: Duration) -> Arc<ProjectLoadingProgress> {
+pub fn new_project_loading_progress(server: &Arc<Server>, delay: Duration) -> Arc<ProjectLoadingProgress> { ::tsox_core::fntrace::enter("new_project_loading_progress"); 
     let reporter = ServerProgressReporter::new(server);
     new_project_loading_progress_from_reporter(Arc::new(reporter), delay)
 }
@@ -873,7 +873,7 @@ pub fn new_project_loading_progress(server: &Arc<Server>, delay: Duration) -> Ar
 pub fn new_project_loading_progress_from_reporter(
     reporter: Arc<dyn ProgressReporter>,
     delay: Duration,
-) -> Arc<ProjectLoadingProgress> {
+) -> Arc<ProjectLoadingProgress> { ::tsox_core::fntrace::enter("new_project_loading_progress_from_reporter"); 
     ProjectLoadingProgress::new(reporter, delay)
 }
 
@@ -882,22 +882,22 @@ pub struct ServerProgressReporter {
 }
 
 impl ServerProgressReporter {
-    pub fn new(server: &Arc<Server>) -> Self {
+    pub fn new(server: &Arc<Server>) -> Self { ::tsox_core::fntrace::enter("new"); 
         ServerProgressReporter { server: server.clone() }
     }
 }
 
 impl ProgressReporter for ServerProgressReporter {
-    fn is_done(&self) -> bool {
+    fn is_done(&self) -> bool { ::tsox_core::fntrace::enter("is_done"); 
         self.server.background_ctx.is_done()
     }
 
-    fn localize(&self, msg: &Message, args: &[String]) -> String {
+    fn localize(&self, msg: &Message, args: &[String]) -> String { ::tsox_core::fntrace::enter("localize"); 
         let args: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
         msg.localize(&self.server.get_locale(), &args)
     }
 
-    fn create_work_done_progress(&self, token: &str) {
+    fn create_work_done_progress(&self, token: &str) { ::tsox_core::fntrace::enter("create_work_done_progress"); 
         let _ = crate::mig::m5n_2::send_client_request_fire_and_forget(
             &self.server,
             &*WINDOW_WORK_DONE_PROGRESS_CREATE_INFO,
@@ -907,7 +907,7 @@ impl ProgressReporter for ServerProgressReporter {
         );
     }
 
-    fn send_progress(&self, token: &str, value: lsproto::WorkDoneProgressBeginOrReportOrEnd) {
+    fn send_progress(&self, token: &str, value: lsproto::WorkDoneProgressBeginOrReportOrEnd) { ::tsox_core::fntrace::enter("send_progress"); 
         let _ = crate::mig::m5n_2::send_notification(
             &self.server,
             &*PROGRESS_INFO,

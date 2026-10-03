@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_invalid_initializer_reference"); 
         if self.emit_standard_class_fields {
             return false;
         }

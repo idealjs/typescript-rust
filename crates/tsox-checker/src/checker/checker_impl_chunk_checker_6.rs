@@ -4,11 +4,11 @@ use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
     // Go ast.IsAmbientModule：名字为字符串字面量或 global 的模块声明
-    pub(crate) fn is_ambient_module(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_ambient_module(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_ambient_module"); 
         tsox_frontend::ast::is_ambient_module(node)
     }
 
-    pub(crate) fn is_module_augmentation_external(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_module_augmentation_external(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_augmentation_external"); 
         let parent = match node.parent() {
             Some(p) => p,
             None => return false,
@@ -28,7 +28,7 @@ impl Checker {
         }
     }
 
-    pub fn is_late_visibility_painted_statement(node: &Arc<Node>) -> bool {
+    pub fn is_late_visibility_painted_statement(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_late_visibility_painted_statement"); 
         matches!(
             node.kind,
             SyntaxKind::ImportDeclaration
@@ -43,7 +43,7 @@ impl Checker {
         )
     }
 
-    pub fn get_any_import_syntax(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_any_import_syntax(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_any_import_syntax"); 
         match node.kind {
             SyntaxKind::ImportEqualsDeclaration => Some(Arc::clone(node)),
             SyntaxKind::ImportClause => node.parent(),

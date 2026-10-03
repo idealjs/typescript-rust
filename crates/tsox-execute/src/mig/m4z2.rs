@@ -55,7 +55,7 @@ pub fn new_program(
     host: Option<Arc<dyn Host + Send + Sync>>,
     nested_emit_now: Option<Arc<dyn Fn() -> SystemTime + Send + Sync>>,
     testing: bool,
-) -> Program {
+) -> Program { ::tsox_core::fntrace::enter("new_program"); 
     let snapshot = program_to_snapshot(&program, old_program, testing);
     let mut incremental_program = Program {
         snapshot,
@@ -85,11 +85,11 @@ pub fn new_program(
 }
 
 impl Program {
-    pub fn get_testing_data(&self) -> Option<&TestingData> {
+    pub fn get_testing_data(&self) -> Option<&TestingData> { ::tsox_core::fntrace::enter("get_testing_data"); 
         self.testing_data.as_ref()
     }
 
-    pub fn begin_nested_emit(&self) -> Box<dyn Fn() + '_> {
+    pub fn begin_nested_emit(&self) -> Box<dyn Fn() + '_> { ::tsox_core::fntrace::enter("begin_nested_emit"); 
         let Some(now) = self.nested_emit_now.clone() else {
             return Box::new(|| {});
         };
@@ -112,67 +112,67 @@ impl Program {
         })
     }
 
-    pub fn take_nested_emit_time(&self) -> Duration {
+    pub fn take_nested_emit_time(&self) -> Duration { ::tsox_core::fntrace::enter("take_nested_emit_time"); 
         std::mem::take(&mut *self.nested_emit_time.lock().unwrap())
     }
 
-    pub fn panic_if_no_program(&self, method: &str) {
+    pub fn panic_if_no_program(&self, method: &str) { ::tsox_core::fntrace::enter("panic_if_no_program"); 
         if self.program.is_none() {
             panic!("{method}: should not be called without program");
         }
     }
 
-    pub fn compiler_program(&self) -> &tsox_compile::compiler::Program {
+    pub fn compiler_program(&self) -> &tsox_compile::compiler::Program { ::tsox_core::fntrace::enter("compiler_program"); 
         self.program.as_deref().unwrap()
     }
 
-    pub fn get_program(&self) -> &tsox_compile::compiler::Program {
+    pub fn get_program(&self) -> &tsox_compile::compiler::Program { ::tsox_core::fntrace::enter("get_program"); 
         self.panic_if_no_program("get_program");
         self.compiler_program()
     }
 
-    pub fn program(&self) -> &tsox_compile::compiler::Program {
+    pub fn program(&self) -> &tsox_compile::compiler::Program { ::tsox_core::fntrace::enter("program"); 
         self.panic_if_no_program("program");
         self.compiler_program()
     }
 
-    pub fn has_changed_dts_file(&self) -> bool {
+    pub fn has_changed_dts_file(&self) -> bool { ::tsox_core::fntrace::enter("has_changed_dts_file"); 
         self.snapshot
             .has_changed_dts_file
             .load(std::sync::atomic::Ordering::SeqCst)
     }
 
-    pub fn options(&self) -> Option<&tsox_core::core::compiler_options::CompilerOptions> {
+    pub fn options(&self) -> Option<&tsox_core::core::compiler_options::CompilerOptions> { ::tsox_core::fntrace::enter("options"); 
         self.snapshot.options.as_ref()
     }
 
-    pub fn common_source_directory(&self) -> String {
+    pub fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         self.panic_if_no_program("common_source_directory");
         self.compiler_program().common_source_directory()
     }
 
-    pub fn is_source_file_default_library(&self, path: &Path) -> bool {
+    pub fn is_source_file_default_library(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("is_source_file_default_library"); 
         self.panic_if_no_program("is_source_file_default_library");
         self.compiler_program()
             .is_source_file_default_library(path.as_str())
     }
 
-    pub fn get_source_files(&self) -> Vec<Arc<SourceFile>> {
+    pub fn get_source_files(&self) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_files"); 
         self.panic_if_no_program("get_source_files");
         self.compiler_program().get_source_files()
     }
 
-    pub fn get_source_file(&self, path: &str) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self, path: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         self.panic_if_no_program("get_source_file");
         self.compiler_program().get_source_file(path)
     }
 
-    pub fn get_source_file_by_path(&self, path: &str) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file_by_path(&self, path: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_by_path"); 
         self.panic_if_no_program("get_source_file_by_path");
         self.compiler_program().get_source_file_by_path(path)
     }
 
-    pub fn get_config_file_parsing_diagnostics(&self) -> Vec<Diagnostic> {
+    pub fn get_config_file_parsing_diagnostics(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_config_file_parsing_diagnostics"); 
         self.panic_if_no_program("get_config_file_parsing_diagnostics");
         self.compiler_program()
             .get_config_file_parsing_diagnostics()
@@ -181,7 +181,7 @@ impl Program {
             .collect()
     }
 
-    pub fn get_syntactic_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> {
+    pub fn get_syntactic_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_syntactic_diagnostics"); 
         self.panic_if_no_program("get_syntactic_diagnostics");
         self.compiler_program()
             .get_syntactic_diagnostics(file)
@@ -190,7 +190,7 @@ impl Program {
             .collect()
     }
 
-    pub fn get_bind_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> {
+    pub fn get_bind_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_bind_diagnostics"); 
         self.panic_if_no_program("get_bind_diagnostics");
         self.compiler_program()
             .get_bind_diagnostics(file)
@@ -199,7 +199,7 @@ impl Program {
             .collect()
     }
 
-    pub fn get_program_diagnostics(&self) -> Vec<Diagnostic> {
+    pub fn get_program_diagnostics(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_program_diagnostics"); 
         self.panic_if_no_program("get_program_diagnostics");
         self.compiler_program()
             .get_program_diagnostics()
@@ -208,7 +208,7 @@ impl Program {
             .collect()
     }
 
-    pub fn get_global_diagnostics(&self) -> Vec<Diagnostic> {
+    pub fn get_global_diagnostics(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_global_diagnostics"); 
         self.panic_if_no_program("get_global_diagnostics");
         self.compiler_program()
             .get_global_diagnostics()
@@ -217,7 +217,7 @@ impl Program {
             .collect()
     }
 
-    pub fn get_semantic_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> {
+    pub fn get_semantic_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_semantic_diagnostics"); 
         self.panic_if_no_program("get_semantic_diagnostics");
         if self
             .snapshot
@@ -242,7 +242,7 @@ impl Program {
         diagnostics
     }
 
-    pub fn get_semantic_diagnostics_of_file(&self, file: &Arc<SourceFile>) -> Vec<Diagnostic> {
+    pub fn get_semantic_diagnostics_of_file(&self, file: &Arc<SourceFile>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_semantic_diagnostics_of_file"); 
         let mut cached_diagnostics = self
             .snapshot
             .semantic_diagnostics_per_file
@@ -274,7 +274,7 @@ impl Program {
         diagnostics
     }
 
-    pub fn get_declaration_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> {
+    pub fn get_declaration_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_declaration_diagnostics"); 
         self.panic_if_no_program("get_declaration_diagnostics");
         let options = EmitOptions {
             target_source_files: file.cloned().map(|f| vec![f]),
@@ -286,7 +286,7 @@ impl Program {
         }
     }
 
-    pub fn get_suggestion_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> {
+    pub fn get_suggestion_diagnostics(&self, file: Option<&Arc<SourceFile>>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_suggestion_diagnostics"); 
         self.panic_if_no_program("get_suggestion_diagnostics");
         self.compiler_program()
             .get_suggestion_diagnostics(file)
@@ -295,7 +295,7 @@ impl Program {
             .collect()
     }
 
-    pub fn collect_semantic_diagnostics_of_affected_files(&self, file: Option<&Arc<SourceFile>>) {
+    pub fn collect_semantic_diagnostics_of_affected_files(&self, file: Option<&Arc<SourceFile>>) { ::tsox_core::fntrace::enter("collect_semantic_diagnostics_of_affected_files"); 
         if self.snapshot.can_use_incremental_state() {
             collect_all_affected_files(self);
             if self.snapshot.semantic_diagnostics_per_file.len()
@@ -364,7 +364,7 @@ impl Program {
             .store(true, std::sync::atomic::Ordering::SeqCst);
     }
 
-    pub fn emit_build_info(&self, options: &EmitOptions) -> Option<EmitResult> {
+    pub fn emit_build_info(&self, options: &EmitOptions) -> Option<EmitResult> { ::tsox_core::fntrace::enter("emit_build_info"); 
         let program = self.compiler_program();
         let build_info_file_name = get_build_info_file_name(
             self.snapshot.options.as_ref()?,
@@ -457,7 +457,7 @@ impl Program {
         })
     }
 
-    pub fn ensure_has_errors_for_state(&self, program: &tsox_compile::compiler::Program) {
+    pub fn ensure_has_errors_for_state(&self, program: &tsox_compile::compiler::Program) { ::tsox_core::fntrace::enter("ensure_has_errors_for_state"); 
         let mut has_include_processing_diagnostics: Option<bool> = None;
         let mut has_emit_diagnostics;
         if self.snapshot.can_use_incremental_state() {
@@ -553,7 +553,7 @@ impl Program {
         }
     }
 
-    pub fn ensure_package_jsons_for_state(&self) {
+    pub fn ensure_package_jsons_for_state(&self) { ::tsox_core::fntrace::enter("ensure_package_jsons_for_state"); 
         let config = tspath::get_directory_path(
             &self.compiler_program().command_line().config_name(),
         );
@@ -593,7 +593,7 @@ impl Program {
         *self.snapshot.missing_package_jsons.lock().unwrap() = missing_package_jsons;
     }
 
-    pub fn package_json_lookup_paths(&self) -> Vec<String> {
+    pub fn package_json_lookup_paths(&self) -> Vec<String> { ::tsox_core::fntrace::enter("package_json_lookup_paths"); 
         let config = tspath::get_directory_path(
             &self.compiler_program().command_line().config_name(),
         );
@@ -619,7 +619,7 @@ impl Program {
         tsox_core::core::mig::m3j_2::deduplicate(&package_jsons)
     }
 
-    pub fn emit(&self, options: EmitOptions) -> EmitResult {
+    pub fn emit(&self, options: EmitOptions) -> EmitResult { ::tsox_core::fntrace::enter("emit"); 
         let program = self.compiler_program();
         let default_options = tsox_core::core::compiler_options::CompilerOptions::default();
         let snapshot_options = self.snapshot.options.as_ref().unwrap_or(&default_options);
@@ -707,7 +707,7 @@ fn handle_no_emit_options(
     incremental: &Program,
     options: &tsox_core::core::compiler_options::CompilerOptions,
     files: Option<&[Arc<SourceFile>]>,
-) -> Option<EmitResult> {
+) -> Option<EmitResult> { ::tsox_core::fntrace::enter("handle_no_emit_options"); 
     if !options.no_emit.is_true() {
         if !options.no_emit_on_error.is_true() {
             return None;
@@ -754,7 +754,7 @@ fn handle_no_emit_options(
     Some(EmitResult::default())
 }
 
-pub fn normalize_package_jsons(package_jsons: Option<Vec<String>>) -> Option<Vec<String>> {
+pub fn normalize_package_jsons(package_jsons: Option<Vec<String>>) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("normalize_package_jsons"); 
     let mut package_jsons = package_jsons.unwrap_or_default();
     package_jsons.sort();
     Some(tsox_core::core::mig::m3j_2::deduplicate(
@@ -765,7 +765,7 @@ pub fn normalize_package_jsons(package_jsons: Option<Vec<String>>) -> Option<Vec
 fn get_build_info_file_name(
     options: &tsox_core::core::compiler_options::CompilerOptions,
     opts: &tspath::ComparePathsOptions,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_build_info_file_name"); 
     if !options.is_incremental() && !options.build.is_true() {
         return String::new();
     }

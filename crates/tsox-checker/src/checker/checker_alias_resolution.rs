@@ -21,7 +21,7 @@ const ALIAS_DECLARATION_KINDS: &[SyntaxKind] = &[
 ];
 
 impl Checker {
-    pub(crate) fn resolve_alias_base(&mut self, symbol: Arc<Symbol>) -> Arc<Symbol> {
+    pub(crate) fn resolve_alias_base(&mut self, symbol: Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_alias_base"); 
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return symbol;
         }
@@ -58,7 +58,7 @@ impl Checker {
         resolved.unwrap_or_else(|| Arc::clone(&symbol))
     }
 
-    fn report_circular_import_alias(&mut self, symbol: &Arc<Symbol>) {
+    fn report_circular_import_alias(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("report_circular_import_alias"); 
         let Some(decl) = symbol
             .declarations
             .iter()
@@ -87,13 +87,13 @@ impl Checker {
     }
 }
 
-fn is_pure_alias(symbol: &Arc<Symbol>) -> bool {
+fn is_pure_alias(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_pure_alias"); 
     symbol.flags == SymbolFlags::Alias
         || (symbol.flags.intersects(SymbolFlags::Alias)
             && symbol.flags.intersects(SymbolFlags::Assignment))
 }
 
-fn qualified_entity_text(node: &Arc<Node>) -> String {
+fn qualified_entity_text(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("qualified_entity_text"); 
     match &node.data {
         NodeData::Identifier(data) => data.text.clone(),
         NodeData::QualifiedName(data) => {

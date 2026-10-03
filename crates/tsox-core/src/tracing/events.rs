@@ -10,7 +10,7 @@ pub enum Phase {
 }
 
 impl Phase {
-    pub(super) fn as_str(self) -> &'static str {
+    pub(super) fn as_str(self) -> &'static str { crate::fntrace::enter("as_str"); 
         match self {
             Phase::Parse => "parse",
             Phase::Program => "program",

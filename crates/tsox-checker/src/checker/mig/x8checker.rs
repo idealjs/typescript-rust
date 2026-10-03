@@ -1,6 +1,6 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 
-pub fn min_and_max<T>(slice: &[T], get_value: impl Fn(&T) -> i32) -> (i32, i32) {
+pub fn min_and_max<T>(slice: &[T], get_value: impl Fn(&T) -> i32) -> (i32, i32) { ::tsox_core::fntrace::enter("min_and_max"); 
     let mut min_value = 0;
     let mut max_value = 0;
     for (i, element) in slice.iter().enumerate() {

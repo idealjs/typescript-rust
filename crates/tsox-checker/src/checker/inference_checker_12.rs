@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         call_node: &Arc<tsox_frontend::ast::Node>,
         arg_node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_argument"); 
         self.get_contextual_type_for_argument_ex(call_node, arg_node, ContextFlags::None)
     }
 
@@ -18,7 +18,7 @@ impl Checker {
         call_node: &Arc<tsox_frontend::ast::Node>,
         arg_node: &Arc<tsox_frontend::ast::Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_argument_ex"); 
         use tsox_frontend::ast::NodeData;
 
         let args = match &call_node.data {
@@ -180,7 +180,7 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_binary_operand"); 
         use tsox_frontend::ast::NodeData;
 
         let parent = node.parent()?;
@@ -214,7 +214,7 @@ impl Checker {
         }
     }
 
-    fn assignment_fallback_target_type(&mut self, left: &Arc<Node>) -> Option<Arc<Type>> {
+    fn assignment_fallback_target_type(&mut self, left: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("assignment_fallback_target_type"); 
         self.assignment_target_type(left)
             .or_else(|| Some(self.get_type_of_node(left)))
     }
@@ -223,7 +223,7 @@ impl Checker {
         &self,
         bin_node: &Arc<Node>,
         left: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("binary_declares_assignment_target"); 
         use tsox_frontend::ast::NodeData;
 
         let (base, member): (&Arc<Node>, Option<&str>) = match &left.data {
@@ -255,7 +255,7 @@ impl Checker {
     pub(crate) fn get_contextual_type_for_assignment_expression(
         &mut self,
         binary_node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_assignment_expression"); 
         use tsox_frontend::ast::NodeData;
 
         let NodeData::BinaryExpression(bin) = &binary_node.data else {
@@ -322,7 +322,7 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_object_literal_element"); 
         use tsox_frontend::ast::NodeData;
 
         let object_literal = node.parent()?;
@@ -366,7 +366,7 @@ impl Checker {
         node: &tsox_frontend::ast::Node,
         parent: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_array_literal_element"); 
         let contextual_type = self.get_contextual_type(parent, _context_flags)?;
 
         let elements = match &parent.data {
@@ -421,7 +421,7 @@ impl Checker {
         length: i64,
         first_spread: i64,
         last_spread: i64,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("contextual_element_of_constituent"); 
         if crate::checker::utilities::is_tuple_type(t) {
             let element_types = Self::tuple_type_arguments(t);
             let (fixed_length, combined_flags) = match &t.data {
@@ -484,7 +484,7 @@ impl Checker {
         &mut self,
         inference: &InferenceInfo,
         _signature: &Arc<Signature>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_covariant_inference"); 
         if inference.candidates.is_empty() {
             return None;
         }
@@ -546,7 +546,7 @@ impl Checker {
     pub(crate) fn get_contravariant_inference(
         &mut self,
         inference: &InferenceInfo,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contravariant_inference"); 
         if inference.contra_candidates.is_empty() {
             return None;
         }
@@ -563,7 +563,7 @@ impl Checker {
     pub(crate) fn union_object_and_array_literal_candidates(
         &mut self,
         candidates: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("union_object_and_array_literal_candidates"); 
         if candidates.len() > 1 {
             let object_literals: Vec<Arc<Type>> = candidates
                 .iter()
@@ -588,7 +588,7 @@ impl Checker {
         candidates.to_vec()
     }
 
-    pub(crate) fn has_primitive_constraint(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn has_primitive_constraint(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_primitive_constraint"); 
         let constraint = self.get_constraint_of_type_parameter(t);
         if let Some(constraint) = constraint {
             let c = if constraint.flags.contains(TypeFlags::Conditional) {
@@ -614,7 +614,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn is_type_parameter_at_top_level(&self, t: &Type, tp: &Type, depth: i32) -> bool {
+    pub(crate) fn is_type_parameter_at_top_level(&self, t: &Type, tp: &Type, depth: i32) -> bool { ::tsox_core::fntrace::enter("is_type_parameter_at_top_level"); 
         if crate::checker::utilities::type_parameters_match(t, tp) {
             return true;
         }

@@ -3,7 +3,7 @@
 use super::*;
 
 impl Program {
-    pub fn new(opts: ProgramOptions) -> Arc<Self> {
+    pub fn new(opts: ProgramOptions) -> Arc<Self> { ::tsox_core::fntrace::enter("new"); 
         let host = opts.host;
         let mut options = opts.config.compiler_options.clone();
         let config_file_name = opts.config.config_file_name.clone();
@@ -678,18 +678,18 @@ impl Program {
         program
     }
 
-    pub fn options(&self) -> &CompilerOptions {
+    pub fn options(&self) -> &CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         &self.options
     }
 
-    pub fn block_emitting_of_file(&mut self, emit_file_name: &str, diag: Arc<Diagnostic>) {
+    pub fn block_emitting_of_file(&mut self, emit_file_name: &str, diag: Arc<Diagnostic>) { ::tsox_core::fntrace::enter("block_emitting_of_file"); 
         self.has_emit_blocking_diagnostics
             .insert(self.to_path(emit_file_name).0);
         self.program_diagnostics.push(diag);
     }
 }
 
-pub fn new_program(opts: ProgramOptions) -> Arc<Program> {
+pub fn new_program(opts: ProgramOptions) -> Arc<Program> { ::tsox_core::fntrace::enter("new_program"); 
     Program::new(opts)
 }
 
@@ -698,7 +698,7 @@ fn apply_module_detection_force(
     options: &CompilerOptions,
     host: &dyn CompilerHost,
     files: &[Arc<SourceFile>],
-) {
+) { ::tsox_core::fntrace::enter("apply_module_detection_force"); 
     use tsox_core::core::compiler_options::ModuleDetectionKind;
     let detection = options.get_emit_module_detection_kind();
     if !matches!(

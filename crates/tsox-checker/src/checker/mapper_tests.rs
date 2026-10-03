@@ -3,7 +3,7 @@ use crate::checker::types::*;
 use std::sync::OnceLock;
 
 #[test]
-fn simple_mapper() {
+fn simple_mapper() { ::tsox_core::fntrace::enter("simple_mapper"); 
     let source = Arc::new(Type::new(
         TypeFlags::TypeParameter,
         TypeData::TypeParameter(TypeParameterData {
@@ -28,7 +28,7 @@ fn simple_mapper() {
 }
 
 #[test]
-fn this_type_parameter_mapper() {
+fn this_type_parameter_mapper() { ::tsox_core::fntrace::enter("this_type_parameter_mapper"); 
     let source = Arc::new(Type::new(
         TypeFlags::TypeParameter,
         TypeData::TypeParameter(TypeParameterData {
@@ -52,7 +52,7 @@ fn this_type_parameter_mapper() {
 }
 
 #[test]
-fn merge_mappers() {
+fn merge_mappers() { ::tsox_core::fntrace::enter("merge_mappers"); 
     let m1 = new_function_type_mapper(|t: &Arc<Type>| {
         Arc::new(Type::new(
             t.flags,
@@ -76,7 +76,7 @@ fn merge_mappers() {
 }
 
 #[test]
-fn merge_with_none() {
+fn merge_with_none() { ::tsox_core::fntrace::enter("merge_with_none"); 
     let m1 = new_function_type_mapper(|t: &Arc<Type>| {
         Arc::new(Type::new(
             t.flags,
@@ -95,7 +95,7 @@ fn merge_with_none() {
 }
 
 #[test]
-fn simple_mapper_returns_input_when_no_match() {
+fn simple_mapper_returns_input_when_no_match() { ::tsox_core::fntrace::enter("simple_mapper_returns_input_when_no_match"); 
     let source = Arc::new(Type::new(
         TypeFlags::TypeParameter,
         TypeData::TypeParameter(TypeParameterData {
@@ -130,7 +130,7 @@ fn simple_mapper_returns_input_when_no_match() {
 }
 
 #[test]
-fn array_mapper_returns_input_when_no_match() {
+fn array_mapper_returns_input_when_no_match() { ::tsox_core::fntrace::enter("array_mapper_returns_input_when_no_match"); 
     let source = Arc::new(Type::new(
         TypeFlags::TypeParameter,
         TypeData::TypeParameter(TypeParameterData {

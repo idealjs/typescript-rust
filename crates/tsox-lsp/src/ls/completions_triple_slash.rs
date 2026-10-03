@@ -7,7 +7,7 @@ use super::language_service::LanguageService;
 
 /// Go parseTripleSlashDirectiveFragment：`/// <reference path|types="fragment`
 /// 形式（fragment 未闭合），返回 (kind, toComplete)
-fn parse_triple_slash_fragment(text: &str) -> Option<(&'static str, &str)> {
+fn parse_triple_slash_fragment(text: &str) -> Option<(&'static str, &str)> { ::tsox_core::fntrace::enter("parse_triple_slash_fragment"); 
     let rest = text.strip_prefix("///")?;
     let rest = rest.trim_start();
     if !rest.starts_with('<') {
@@ -36,7 +36,7 @@ fn parse_triple_slash_fragment(text: &str) -> Option<(&'static str, &str)> {
     Some((kind, rest))
 }
 
-fn dir_of(file_name: &str) -> String {
+fn dir_of(file_name: &str) -> String { ::tsox_core::fntrace::enter("dir_of"); 
     match file_name.rfind('/') {
         Some(0) => "/".to_string(),
         Some(i) => file_name[..i].to_string(),
@@ -44,7 +44,7 @@ fn dir_of(file_name: &str) -> String {
     }
 }
 
-fn normalize_path(path: &str) -> String {
+fn normalize_path(path: &str) -> String { ::tsox_core::fntrace::enter("normalize_path"); 
     let mut parts: Vec<&str> = Vec::new();
     for part in path.split('/') {
         match part {
@@ -66,7 +66,7 @@ pub fn triple_slash_reference_labels(
     file: &SourceFile,
     text: &str,
     position: usize,
-) -> Option<Vec<String>> {
+) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("triple_slash_reference_labels"); 
     let pos = position.min(text.len());
     let line_start = text[..pos].rfind('\n').map(|i| i + 1).unwrap_or(0);
     let (kind, to_complete) = parse_triple_slash_fragment(&text[line_start..pos])?;

@@ -41,7 +41,7 @@ pub struct ConfiguredContentMappers {
 
 pub fn collect_configured_content_mappers(
     command_lines: &[&ParsedCommandLine],
-) -> ConfiguredContentMappers {
+) -> ConfiguredContentMappers { ::tsox_core::fntrace::enter("collect_configured_content_mappers"); 
     let mut seen_extensions = std::collections::HashSet::new();
     let mut extensions: Vec<String> = Vec::new();
     for command_line in command_lines {
@@ -58,7 +58,7 @@ pub fn collect_configured_content_mappers(
 }
 
 impl ConfigFileRegistry {
-    pub fn content_mappers(&self) -> ConfiguredContentMappers {
+    pub fn content_mappers(&self) -> ConfiguredContentMappers { ::tsox_core::fntrace::enter("content_mappers"); 
         let command_lines: Vec<&ParsedCommandLine> = self
             .configs
             .values()
@@ -67,11 +67,11 @@ impl ConfigFileRegistry {
         collect_configured_content_mappers(&command_lines)
     }
 
-    pub fn is_tracked(&self, path: &Path) -> bool {
+    pub fn is_tracked(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("is_tracked"); 
         self.configs.contains_key(path)
     }
 
-    pub fn clone_registry(&self) -> ConfigFileRegistry {
+    pub fn clone_registry(&self) -> ConfigFileRegistry { ::tsox_core::fntrace::enter("clone_registry"); 
         ConfigFileRegistry {
             configs: self.configs.clone(),
             config_file_names: self.config_file_names.clone(),
@@ -82,7 +82,7 @@ impl ConfigFileRegistry {
     pub fn for_each_test_config_entry(
         &self,
         mut cb: impl FnMut(&Path, &TestConfigEntry),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_test_config_entry"); 
         for (path, entry) in &self.configs {
             cb(path, &TestConfigEntry {
                 file_name: entry.file_name.clone(),
@@ -93,7 +93,7 @@ impl ConfigFileRegistry {
         }
     }
 
-    pub fn get_test_config_entry(&self, path: &Path) -> Option<TestConfigEntry> {
+    pub fn get_test_config_entry(&self, path: &Path) -> Option<TestConfigEntry> { ::tsox_core::fntrace::enter("get_test_config_entry"); 
         self.configs.get(path).map(|entry| TestConfigEntry {
             file_name: entry.file_name.clone(),
             retaining_projects: entry.retaining_projects.keys().cloned().collect(),
@@ -105,7 +105,7 @@ impl ConfigFileRegistry {
     pub fn for_each_test_config_file_names_entry(
         &self,
         mut cb: impl FnMut(&Path, &TestConfigFileNamesEntry),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_test_config_file_names_entry"); 
         for (path, entry) in &self.config_file_names {
             cb(path, &TestConfigFileNamesEntry {
                 nearest_config_file_name: entry.nearest_config_file_name.clone(),
@@ -114,7 +114,7 @@ impl ConfigFileRegistry {
         }
     }
 
-    pub fn get_test_config_file_names_entry(&self, path: &Path) -> Option<TestConfigFileNamesEntry> {
+    pub fn get_test_config_file_names_entry(&self, path: &Path) -> Option<TestConfigFileNamesEntry> { ::tsox_core::fntrace::enter("get_test_config_file_names_entry"); 
         self.config_file_names.get(path).map(|entry| TestConfigFileNamesEntry {
             nearest_config_file_name: entry.nearest_config_file_name.clone(),
             ancestors: entry.ancestors.clone(),
@@ -123,7 +123,7 @@ impl ConfigFileRegistry {
 }
 
 impl ConfigFileEntry {
-    pub fn clone_entry(&self) -> ConfigFileEntry {
+    pub fn clone_entry(&self) -> ConfigFileEntry { ::tsox_core::fntrace::enter("clone_entry"); 
         ConfigFileEntry {
             file_name: self.file_name.clone(),
             pending_reload: self.pending_reload,
@@ -137,7 +137,7 @@ impl ConfigFileEntry {
 }
 
 impl ConfigFileNames {
-    pub fn clone_names(&self) -> ConfigFileNames {
+    pub fn clone_names(&self) -> ConfigFileNames { ::tsox_core::fntrace::enter("clone_names"); 
         ConfigFileNames {
             nearest_config_file_name: self.nearest_config_file_name.clone(),
             ancestors: self.ancestors.clone(),
@@ -148,14 +148,14 @@ impl ConfigFileNames {
 pub fn new_config_file_entry(
     has_relative_pattern_capability: bool,
     file_name: &str,
-) -> ConfigFileEntry {
+) -> ConfigFileEntry { ::tsox_core::fntrace::enter("new_config_file_entry"); 
     ConfigFileEntry::new(has_relative_pattern_capability, file_name.to_string())
 }
 
 pub fn new_extended_config_file_entry(
     file_name: &str,
     extending_config_path: Path,
-) -> ConfigFileEntry {
+) -> ConfigFileEntry { ::tsox_core::fntrace::enter("new_extended_config_file_entry"); 
     let mut entry = ConfigFileEntry::new(true, file_name.to_string());
     entry.retaining_configs.insert(extending_config_path, ());
     entry
@@ -176,7 +176,7 @@ pub fn new_compiler_host(
     source: Arc<dyn FileSource>,
     to_path: Arc<dyn Fn(&str) -> Path + Send + Sync>,
     logger: Option<Arc<LogTree>>,
-) -> CompilerHostImpl {
+) -> CompilerHostImpl { ::tsox_core::fntrace::enter("new_compiler_host"); 
     let mut host = CompilerHostImpl::new(
         current_directory,
         project.config_file_path.clone(),
@@ -195,7 +195,7 @@ impl CompilerHostImpl {
         &self,
         file_name: &str,
         path: &Path,
-    ) -> Option<ParsedCommandLine> {
+    ) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("get_resolved_project_reference"); 
         if !self.has_builder() {
             return self
                 .config_file_registry()
@@ -209,7 +209,7 @@ impl CompilerHostImpl {
     pub fn get_source_file(
         &self,
         opts: &SourceFileParseOptions,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         self.ensure_alive();
         let fh = self
             .source_fs()
@@ -225,7 +225,7 @@ impl CompilerHostImpl {
         &self,
         parse_options: &SourceFileParseOptions,
         mapper: &Mapper,
-    ) -> Result<SourceFiles, TransformError> {
+    ) -> Result<SourceFiles, TransformError> { ::tsox_core::fntrace::enter("get_content_mapped_source_files"); 
         self.ensure_alive();
         let Some(fh) = self
             .source_fs()
@@ -269,15 +269,15 @@ impl CompilerHostImpl {
         }
     }
 
-    pub fn ensure_content_mapper_project(&self) {
+    pub fn ensure_content_mapper_project(&self) { ::tsox_core::fntrace::enter("ensure_content_mapper_project"); 
         self.init_content_mapper_project(|| None);
     }
 
-    pub fn content_mapper_project_handle(&self) -> Option<Arc<dyn MapperProject>> {
+    pub fn content_mapper_project_handle(&self) -> Option<Arc<dyn MapperProject>> { ::tsox_core::fntrace::enter("content_mapper_project_handle"); 
         self.content_mapper_project()
     }
 
-    pub fn trace(&self, msg: &Message, args: &[String]) {
+    pub fn trace(&self, msg: &Message, args: &[String]) { ::tsox_core::fntrace::enter("trace"); 
         if let Some(logger) = self.logger() {
             let args: Vec<&str> = args.iter().map(String::as_str).collect();
             logger.log(&msg.localize(&Locale::default_locale(), &args));

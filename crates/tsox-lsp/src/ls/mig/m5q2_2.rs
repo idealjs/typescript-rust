@@ -64,7 +64,7 @@ impl crate::ls::language_service::LanguageService {
         position: usize,
         optional_replacement_span: Option<&lsproto::Range>,
         include_symbols: bool,
-    ) -> Option<Result<CompletionList, String>> {
+    ) -> Option<Result<CompletionList, String>> { ::tsox_core::fntrace::enter("completion_info_from_data"); 
         let keyword_filters = data.keyword_filters;
         let is_new_identifier_location = data.is_new_identifier_location;
         let context_token = data.context_token.clone();
@@ -239,7 +239,7 @@ impl crate::ls::language_service::LanguageService {
         file: &Arc<SourceFile>,
         compiler_options: &core::compiler_options::CompilerOptions,
         include_symbols: bool,
-    ) -> Option<(HashSet<String>, Vec<lsproto::CompletionItem>)> {
+    ) -> Option<(HashSet<String>, Vec<lsproto::CompletionItem>)> { ::tsox_core::fntrace::enter("get_completion_entries_from_symbols"); 
         let closest_symbol_declaration = data.location.as_ref()
             .and_then(|location| super::m5q_3::get_closest_symbol_declaration(data.context_token.as_ref(), location));
         let use_semicolons = crate::ls::lsutil_utilities::probably_uses_semicolons(file);
@@ -787,7 +787,7 @@ impl crate::ls::language_service::LanguageService {
         )))
     }
 
-    fn empty_completion_item(&self) -> lsproto::CompletionItem {
+    fn empty_completion_item(&self) -> lsproto::CompletionItem { ::tsox_core::fntrace::enter("empty_completion_item"); 
         lsproto::CompletionItem::default()
     }
 
@@ -796,7 +796,7 @@ impl crate::ls::language_service::LanguageService {
         location: Option<&Arc<Node>>,
         file: &Arc<SourceFile>,
         position: usize,
-    ) -> Option<CompletionList> {
+    ) -> Option<CompletionList> { ::tsox_core::fntrace::enter("get_jsx_closing_tag_completion"); 
         use super::m5q_3::get_default_commit_characters;
         use tsox_frontend::ast::mig::m3e_4::{find_ancestor_or_quit, FindAncestorResult};
 
@@ -876,7 +876,7 @@ impl crate::ls::language_service::LanguageService {
         items: &mut [lsproto::CompletionItem],
         default_commit_characters: Option<&Vec<String>>,
         optional_replacement_span: Option<&lsproto::Range>,
-    ) -> Option<CompletionItemDefaults> {
+    ) -> Option<CompletionItemDefaults> { ::tsox_core::fntrace::enter("set_item_defaults"); 
         let mut item_defaults: Option<CompletionItemDefaults> = None;
         if let Some(default_commit_characters) = default_commit_characters {
             let supports_item_commit_characters =
@@ -955,7 +955,7 @@ impl crate::ls::language_service::LanguageService {
         symbol: &Arc<Symbol>,
         enclosing_declaration: &Arc<Node>,
         file: &Arc<SourceFile>,
-    ) -> Option<super::m5r::SymbolOriginInfoObjectLiteralMethod> {
+    ) -> Option<super::m5r::SymbolOriginInfoObjectLiteralMethod> { ::tsox_core::fntrace::enter("get_entry_for_object_literal_method_completion"); 
         let mut snippet_printer = create_snippet_printer(
             tsox_frontend::format::mig::m4o_2::PrinterOptions {
                 remove_comments: true,
@@ -998,7 +998,7 @@ impl crate::ls::language_service::LanguageService {
         })
     }
 
-    fn print_object_literal_method_label_detail(&self, method: &Arc<Node>, file: &Arc<SourceFile>) -> String {
+    fn print_object_literal_method_label_detail(&self, method: &Arc<Node>, file: &Arc<SourceFile>) -> String { ::tsox_core::fntrace::enter("print_object_literal_method_label_detail"); 
         let NodeData::MethodDeclaration(method_declaration) = &method.data else {
             return String::new();
         };
@@ -1045,7 +1045,7 @@ impl crate::ls::language_service::LanguageService {
         enclosing_declaration: &Arc<Node>,
         file: &Arc<SourceFile>,
         is_snippet: bool,
-    ) -> Option<Option<Arc<Node>>> {
+    ) -> Option<Option<Arc<Node>>> { ::tsox_core::fntrace::enter("create_object_literal_method"); 
         use tsox_checker::checker::symboltracker::NodeBuilderFlags;
         use tsox_checker::checker::types::{SignatureKind, TypeFlags, UnionReduction};
 
@@ -1175,7 +1175,7 @@ impl crate::ls::language_service::LanguageService {
         members: &[Arc<Symbol>],
         enclosing_declaration: &Arc<Node>,
         file: &Arc<SourceFile>,
-    ) -> Vec<ObjectLiteralMethodSymbol> {
+    ) -> Vec<ObjectLiteralMethodSymbol> { ::tsox_core::fntrace::enter("collect_object_literal_method_symbols"); 
         if ast::is_source_file_js(file) {
             return Vec::new();
         }
@@ -1218,7 +1218,7 @@ impl crate::ls::language_service::LanguageService {
 fn case_clause_tracker_has_literal(
     tracker: &super::m5q2b_6::CaseClauseTracker,
     literal: &super::m5q_3::LiteralValue,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("case_clause_tracker_has_literal"); 
     use tsox_checker::checker::mig::m2a::r18k8_flags::ConstantValue;
     let value = match literal {
         super::m5q_3::LiteralValue::String(s) => ConstantValue::String(s.clone()),
@@ -1228,11 +1228,11 @@ fn case_clause_tracker_has_literal(
     tracker.has_value(&value)
 }
 
-fn is_named_imports_or_exports_fn(node: &Node) -> bool {
+fn is_named_imports_or_exports_fn(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_named_imports_or_exports_fn"); 
     ast::is_named_imports(node) || ast::is_named_exports(node)
 }
 
-pub fn generate_identifier_for_arbitrary_string(text: &str) -> String {
+pub fn generate_identifier_for_arbitrary_string(text: &str) -> String { ::tsox_core::fntrace::enter("generate_identifier_for_arbitrary_string"); 
     let mut needs_underscore = false;
     let mut identifier = String::new();
 
@@ -1266,20 +1266,20 @@ pub fn generate_identifier_for_arbitrary_string(text: &str) -> String {
     identifier
 }
 
-fn is_identifier_start_char(c: char) -> bool {
+fn is_identifier_start_char(c: char) -> bool { ::tsox_core::fntrace::enter("is_identifier_start_char"); 
     c.is_ascii_alphabetic()
         || c == '_'
         || c == '$'
         || (!c.is_ascii() && unicode_ident::is_xid_start(c))
 }
 
-fn client_capabilities_context() -> crate::mig::m5m::ResolvedClientCapabilitiesContext {
+fn client_capabilities_context() -> crate::mig::m5m::ResolvedClientCapabilitiesContext { ::tsox_core::fntrace::enter("client_capabilities_context"); 
     crate::mig::m5m::ResolvedClientCapabilitiesContext {
         capabilities: None,
     }
 }
 
-fn keyword_item_kind(kind: Option<i32>) -> Option<lsproto::CompletionItemKind> {
+fn keyword_item_kind(kind: Option<i32>) -> Option<lsproto::CompletionItemKind> { ::tsox_core::fntrace::enter("keyword_item_kind"); 
     kind.map(|k| match k {
         2 => lsproto::CompletionItemKind::Method,
         3 => lsproto::CompletionItemKind::Function,
@@ -1307,7 +1307,7 @@ fn keyword_completion_item(
     insert_text: Option<String>,
     filter_text: Option<String>,
     commit_characters: Option<Vec<String>>,
-) -> lsproto::CompletionItem {
+) -> lsproto::CompletionItem { ::tsox_core::fntrace::enter("keyword_completion_item"); 
     let mut item = lsproto::CompletionItem::default();
     item.label = label;
     item.kind = kind;
@@ -1323,7 +1323,7 @@ fn append_js_completion_entries(
     position: usize,
     unique_names: &mut HashSet<String>,
     sorted_entries: &mut Vec<lsproto::CompletionItem>,
-) {
+) { ::tsox_core::fntrace::enter("append_js_completion_entries"); 
     let name_table = tsox_frontend::ast::mig::m3b::get_name_table(file);
     for (name, pos) in name_table.iter() {
         if *pos as usize == position {

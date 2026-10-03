@@ -27,7 +27,7 @@ impl FormatSpanWorker {
         previous_parent: Arc<Node>,
         context_node: Option<Arc<Node>>,
         dynamic_indentation: Option<&crate::format::indenter::IndenterRef>,
-    ) -> LineAction {
+    ) -> LineAction { ::tsox_core::fntrace::enter("process_pair"); 
         self.formatting_context.update_context(
             previous_item.clone(),
             previous_parent.clone(),
@@ -124,7 +124,7 @@ impl FormatSpanWorker {
         previous_start_line: usize,
         current_range: &TextRangeWithKind,
         current_start_line: usize,
-    ) -> LineAction {
+    ) -> LineAction { ::tsox_core::fntrace::enter("apply_rule_edits"); 
         let on_later_line = current_start_line != previous_start_line;
         let action = rule.action;
         // Go switch 是动作值相等匹配（非位测试），复合动作不命中任何分支
@@ -210,7 +210,7 @@ impl FormatSpanWorker {
         parent: Arc<Node>,
         context_node: Option<Arc<Node>>,
         dynamic_indentation: Option<&crate::format::indenter::IndenterRef>,
-    ) -> LineAction {
+    ) -> LineAction { ::tsox_core::fntrace::enter("process_range"); 
         let range_has_error = (self.range_contains_error)(r.loc);
         let mut line_action = LineAction::None;
         if !range_has_error {
@@ -252,7 +252,7 @@ impl FormatSpanWorker {
         parent: Arc<Node>,
         context_node: Option<Arc<Node>>,
         dynamic_indentation: Option<&crate::format::indenter::IndenterRef>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("process_trivia"); 
         for trivia_item in trivia {
             if util::is_comment(trivia_item.kind)
                 && trivia_item.loc.contained_by(&self.original_range)
@@ -272,13 +272,13 @@ impl FormatSpanWorker {
         }
     }
 
-    pub(super) fn record_delete(&mut self, start: usize, length: usize) {
+    pub(super) fn record_delete(&mut self, start: usize, length: usize) { ::tsox_core::fntrace::enter("record_delete"); 
         if length != 0 {
             self.edits.push(TextChange { pos: start, end: start + length, new_text: String::new() });
         }
     }
 
-    pub(super) fn record_replace(&mut self, start: usize, length: usize, new_text: &str) {
+    pub(super) fn record_replace(&mut self, start: usize, length: usize, new_text: &str) { ::tsox_core::fntrace::enter("record_replace"); 
         if length != 0 || !new_text.is_empty() {
             self.edits.push(TextChange {
                 pos: start,
@@ -288,7 +288,7 @@ impl FormatSpanWorker {
         }
     }
 
-    pub(super) fn record_insert(&mut self, start: usize, text: &str) {
+    pub(super) fn record_insert(&mut self, start: usize, text: &str) { ::tsox_core::fntrace::enter("record_insert"); 
         if !text.is_empty() {
             self.edits.push(TextChange { pos: start, end: start, new_text: text.to_string() });
         }
@@ -296,7 +296,7 @@ impl FormatSpanWorker {
 }
 
 /// Go getRuleActionExclusion
-fn get_rule_action_exclusion(action: RuleAction) -> RuleAction {
+fn get_rule_action_exclusion(action: RuleAction) -> RuleAction { ::tsox_core::fntrace::enter("get_rule_action_exclusion"); 
     let mut mask = RuleAction::NONE;
     if action.intersects(RuleAction::STOP_PROCESSING_SPACE_ACTIONS) {
         mask = RuleAction(mask.0 | RuleAction::MODIFY_SPACE_ACTION.0);

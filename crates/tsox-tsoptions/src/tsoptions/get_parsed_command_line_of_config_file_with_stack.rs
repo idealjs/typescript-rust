@@ -9,7 +9,7 @@ pub(crate) fn get_parsed_command_line_of_config_file_with_stack(
     fs: &dyn FS,
     resolution_stack: &[String],
     cache: &mut ExtendedConfigCache,
-) -> ParsedCommandLine {
+) -> ParsedCommandLine { ::tsox_core::fntrace::enter("get_parsed_command_line_of_config_file_with_stack"); 
     let mut result = ParsedCommandLine::default();
     result.compiler_options = base_options.clone();
     result.config_file_name = config_file_name.to_string();
@@ -268,7 +268,7 @@ pub(crate) fn extends_as_paths(
     config_file_name: &str,
     current_dir: &str,
     fs: &dyn FS,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("extends_as_paths"); 
     let specs: Vec<String> = match extends {
         tsox_core::json::Value::String(s) => vec![s.clone()],
         tsox_core::json::Value::Array(arr) => arr
@@ -288,7 +288,7 @@ pub(crate) fn resolve_single_extends_path(
     config_file_name: &str,
     current_dir: &str,
     fs: &dyn FS,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("resolve_single_extends_path"); 
     let config_dir = tsox_core::tspath::get_directory_path(config_file_name);
 
     if tsox_core::tspath::is_external_module_name_relative(s) {

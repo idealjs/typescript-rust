@@ -59,26 +59,26 @@ pub trait Program: Send + Sync {
 
     fn common_source_directory(&self) -> String;
 
-    fn get_resolved_module(&self, _file_name: &str, _module_name: &str) -> Option<String> {
+    fn get_resolved_module(&self, _file_name: &str, _module_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("get_resolved_module"); 
         None
     }
 
     fn get_resolved_modules(
         &self,
     ) -> std::collections::HashMap<String, Vec<(String, Option<tsox_tsoptions::module::ResolvedModule>)>>
-    {
+    { ::tsox_core::fntrace::enter("get_resolved_modules"); 
         std::collections::HashMap::new()
     }
 
-    fn read_file(&self, _file_name: &str) -> Option<String> {
+    fn read_file(&self, _file_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         None
     }
 
-    fn canonicalize_path(&self, path: &str) -> String {
+    fn canonicalize_path(&self, path: &str) -> String { ::tsox_core::fntrace::enter("canonicalize_path"); 
         path.to_string()
     }
 
-    fn get_source_file_for_resolved_module(&self, _resolved_path: &str) -> Option<Arc<SourceFile>> {
+    fn get_source_file_for_resolved_module(&self, _resolved_path: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_for_resolved_module"); 
         None
     }
 
@@ -87,22 +87,22 @@ pub trait Program: Send + Sync {
         _specifier: &str,
         _containing_file: &str,
         _resolution_mode: tsox_core::core::compiler_options::ModuleKind,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("resolve_external_module_path"); 
         None
     }
 
     fn get_emit_module_format_of_file(
         &self,
         _file_name: &str,
-    ) -> tsox_core::core::compiler_options::ModuleKind {
+    ) -> tsox_core::core::compiler_options::ModuleKind { ::tsox_core::fntrace::enter("get_emit_module_format_of_file"); 
         tsox_core::core::compiler_options::ModuleKind::None
     }
 
-    fn source_file_may_be_emitted(&self, _file_name: &str) -> bool {
+    fn source_file_may_be_emitted(&self, _file_name: &str) -> bool { ::tsox_core::fntrace::enter("source_file_may_be_emitted"); 
         true
     }
 
-    fn diagnostics(&self) -> &[Arc<tsox_frontend::ast::Diagnostic>] {
+    fn diagnostics(&self) -> &[Arc<tsox_frontend::ast::Diagnostic>] { ::tsox_core::fntrace::enter("diagnostics"); 
         &[]
     }
 }
@@ -118,26 +118,26 @@ where
     K: HasId,
     V: Default,
 {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             _marker: std::marker::PhantomData,
             data: HashMap::new(),
         }
     }
 
-    pub fn get_or_default(&mut self, key: &K) -> &mut V {
+    pub fn get_or_default(&mut self, key: &K) -> &mut V { ::tsox_core::fntrace::enter("get_or_default"); 
         self.data.entry(key.id()).or_default()
     }
 
-    pub fn get(&self, key: &K) -> Option<&V> {
+    pub fn get(&self, key: &K) -> Option<&V> { ::tsox_core::fntrace::enter("get"); 
         self.data.get(&key.id())
     }
 
-    pub fn get_mut(&mut self, key: &K) -> Option<&mut V> {
+    pub fn get_mut(&mut self, key: &K) -> Option<&mut V> { ::tsox_core::fntrace::enter("get_mut"); 
         self.data.get_mut(&key.id())
     }
 
-    pub fn insert(&mut self, key: &K, value: V) {
+    pub fn insert(&mut self, key: &K, value: V) { ::tsox_core::fntrace::enter("insert"); 
         self.data.insert(key.id(), value);
     }
 }
@@ -149,24 +149,24 @@ pub trait HasId {
 }
 
 impl HasId for Node {
-    fn id(&self) -> u64 {
+    fn id(&self) -> u64 { ::tsox_core::fntrace::enter("id"); 
         Node::id(self)
     }
 }
 
 impl HasId for Symbol {
-    fn id(&self) -> u64 {
+    fn id(&self) -> u64 { ::tsox_core::fntrace::enter("id"); 
         self.id()
     }
 }
 
 impl HasId for SourceFile {
-    fn id(&self) -> u64 {
+    fn id(&self) -> u64 { ::tsox_core::fntrace::enter("id"); 
         self.id()
     }
 }
 
-pub(crate) fn noop_entity_fn(_: &Arc<Node>, _: Option<&Arc<Node>>) -> EvalResult {
+pub(crate) fn noop_entity_fn(_: &Arc<Node>, _: Option<&Arc<Node>>) -> EvalResult { ::tsox_core::fntrace::enter("noop_entity_fn"); 
     EvalResult::none()
 }
 

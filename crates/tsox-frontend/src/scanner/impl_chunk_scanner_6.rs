@@ -3,7 +3,7 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
-    pub fn re_scan_slash_token(&mut self) -> SyntaxKind {
+    pub fn re_scan_slash_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_slash_token"); 
         if self.token != SyntaxKind::SlashToken && self.token != SyntaxKind::SlashEqualsToken {
             return self.token;
         }
@@ -158,7 +158,7 @@ impl Scanner {
         self.token
     }
 
-    pub(crate) fn check_reg_exp_flag_availability(&mut self, flag: u16, pos: usize) {
+    pub(crate) fn check_reg_exp_flag_availability(&mut self, flag: u16, pos: usize) { ::tsox_core::fntrace::enter("check_reg_exp_flag_availability"); 
         let available_from = match flag {
             REG_EXP_FLAG_D => Some(ScriptTarget::ES2022),
             REG_EXP_FLAG_S => Some(ScriptTarget::ES2018),
@@ -178,11 +178,11 @@ impl Scanner {
         }
     }
 
-    pub fn scan_jsx_token(&mut self) -> SyntaxKind {
+    pub fn scan_jsx_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_jsx_token"); 
         self.scan_jsx_token_ex(true)
     }
 
-    pub fn scan_jsx_token_ex(&mut self, allow_multiline_jsx_text: bool) -> SyntaxKind {
+    pub fn scan_jsx_token_ex(&mut self, allow_multiline_jsx_text: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_jsx_token_ex"); 
         self.has_preceding_line_break = self.preceding_line_break;
         self.preceding_line_break = false;
         self.token_pos = self.pos;
@@ -256,7 +256,7 @@ impl Scanner {
         self.token
     }
 
-    pub fn scan_jsx_identifier(&mut self) -> SyntaxKind {
+    pub fn scan_jsx_identifier(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_jsx_identifier"); 
         if is_identifier_or_keyword_token(self.token) {
             loop {
                 if self.pos >= self.end {
@@ -292,7 +292,7 @@ impl Scanner {
         self.token
     }
 
-    pub fn scan_jsx_attribute_value(&mut self) -> SyntaxKind {
+    pub fn scan_jsx_attribute_value(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_jsx_attribute_value"); 
         while self.pos < self.end {
             let c = self.text[self.pos..].chars().next().unwrap();
             if !is_jsx_whitespace_like(c) {
@@ -316,7 +316,7 @@ impl Scanner {
         self.scan()
     }
 
-    pub fn can_follow_jsdoc_at(&self) -> bool {
+    pub fn can_follow_jsdoc_at(&self) -> bool { ::tsox_core::fntrace::enter("can_follow_jsdoc_at"); 
         if self.pos >= self.end {
             return true;
         }

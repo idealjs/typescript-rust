@@ -103,7 +103,7 @@ impl NodeAsR36k17Ext for Node {
         PropertyDeclarationData
     );
 
-    fn elements(&self) -> &NodeList {
+    fn elements(&self) -> &NodeList { ::tsox_core::fntrace::enter("elements"); 
         match &self.data {
             NodeData::NamedImports(d) => &d.elements,
             NodeData::NamedExports(d) => &d.elements,
@@ -112,7 +112,7 @@ impl NodeAsR36k17Ext for Node {
         }
     }
 
-    fn property_name_or_name(&self) -> Arc<Node> {
+    fn property_name_or_name(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("property_name_or_name"); 
         match &self.data {
             NodeData::ExportSpecifier(d) => {
                 d.property_name.clone().unwrap_or_else(|| d.name.clone())
@@ -126,7 +126,7 @@ impl NodeAsR36k17Ext for Node {
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_unscoped_helper_name(&self, text: &str) -> Arc<Node> {
+    pub fn new_unscoped_helper_name(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_unscoped_helper_name"); 
         let generated = self.new_unique_name_ex(
             text,
             AutoGenerateOptions {
@@ -138,7 +138,7 @@ impl<'a> NodeFactory<'a> {
         self.generated_name_node(&generated)
     }
 
-    pub fn new_external_module_reference(&self, expression: Arc<Node>) -> Arc<Node> {
+    pub fn new_external_module_reference(&self, expression: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_external_module_reference"); 
         Arc::new(Node::new(
             SyntaxKind::ExternalModuleReference,
             NodeData::ExternalModuleReference(ExternalModuleReferenceData { expression }),
@@ -151,7 +151,7 @@ impl<'a> NodeFactory<'a> {
         is_type_only: bool,
         name: Arc<Node>,
         module_reference: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_equals_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ImportEqualsDeclaration,
             NodeData::ImportEqualsDeclaration(ImportEqualsDeclarationData {
@@ -163,7 +163,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_named_imports(&self, elements: Arc<NodeList>) -> Arc<Node> {
+    pub fn new_named_imports(&self, elements: Arc<NodeList>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_named_imports"); 
         Arc::new(Node::new(
             SyntaxKind::NamedImports,
             NodeData::NamedImports(NamedImportsData { elements }),
@@ -175,7 +175,7 @@ impl<'a> NodeFactory<'a> {
         is_type_only: bool,
         property_name: Option<Arc<Node>>,
         name: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_specifier"); 
         Arc::new(Node::new(
             SyntaxKind::ImportSpecifier,
             NodeData::ImportSpecifier(ImportSpecifierData {
@@ -186,7 +186,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_named_exports(&self, elements: &NodeList) -> Arc<Node> {
+    pub fn new_named_exports(&self, elements: &NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("new_named_exports"); 
         Arc::new(Node::new(
             SyntaxKind::NamedExports,
             NodeData::NamedExports(NamedExportsData {
@@ -205,7 +205,7 @@ impl<'a> NodeFactory<'a> {
         import_clause: Option<Arc<Node>>,
         module_specifier: Arc<Node>,
         attributes: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_import_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::ImportDeclaration,
             NodeData::ImportDeclaration(ImportDeclarationData {
@@ -226,7 +226,7 @@ impl<'a> NodeFactory<'a> {
         phase_modifier: Option<SyntaxKind>,
         name: Option<Arc<Node>>,
         named_bindings: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_import_clause"); 
         let mut updated = Node::new(
             SyntaxKind::ImportClause,
             NodeData::ImportClause(ImportClauseData {
@@ -240,7 +240,7 @@ impl<'a> NodeFactory<'a> {
         Arc::new(updated)
     }
 
-    pub fn update_named_imports(&self, node: &Arc<Node>, elements: &NodeList) -> Arc<Node> {
+    pub fn update_named_imports(&self, node: &Arc<Node>, elements: &NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("update_named_imports"); 
         let mut updated = Node::new(
             SyntaxKind::NamedImports,
             NodeData::NamedImports(NamedImportsData {
@@ -255,7 +255,7 @@ impl<'a> NodeFactory<'a> {
         Arc::new(updated)
     }
 
-    pub fn update_named_exports(&self, node: &Arc<Node>, elements: &NodeList) -> Arc<Node> {
+    pub fn update_named_exports(&self, node: &Arc<Node>, elements: &NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("update_named_exports"); 
         let mut updated = Node::new(
             SyntaxKind::NamedExports,
             NodeData::NamedExports(NamedExportsData {
@@ -278,7 +278,7 @@ impl<'a> NodeFactory<'a> {
         export_clause: Option<Arc<Node>>,
         module_specifier: Option<Arc<Node>>,
         attributes: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_export_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::ExportDeclaration,
             NodeData::ExportDeclaration(ExportDeclarationData {

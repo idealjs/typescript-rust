@@ -17,88 +17,88 @@ pub type BoolOptionSelector = fn(&FormatCodeSettings) -> bool;
 pub type AnyOptionSelector<'a, T> = fn(&FormatCodeSettings) -> T;
 pub type BoxedContextPredicate = Box<dyn Fn(&mut FormattingContext) -> bool>;
 
-pub fn semicolon_option(options: &FormatCodeSettings) -> SemicolonPreference {
+pub fn semicolon_option(options: &FormatCodeSettings) -> SemicolonPreference { ::tsox_core::fntrace::enter("semicolon_option"); 
     options.semicolons
 }
 
 pub fn insert_space_after_opening_and_before_closing_nonempty_brackets_option(
     options: &FormatCodeSettings,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("insert_space_after_opening_and_before_closing_nonempty_brackets_option"); 
     options.insert_space_after_opening_and_before_closing_nonempty_brackets
 }
 
 pub fn insert_space_after_opening_and_before_closing_nonempty_parenthesis_option(
     options: &FormatCodeSettings,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("insert_space_after_opening_and_before_closing_nonempty_parenthesis_option"); 
     options.insert_space_after_opening_and_before_closing_nonempty_parenthesis
 }
 
 pub fn insert_space_after_opening_and_before_closing_template_string_braces_option(
     options: &FormatCodeSettings,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("insert_space_after_opening_and_before_closing_template_string_braces_option"); 
     options.insert_space_after_opening_and_before_closing_template_string_braces
 }
 
 pub fn insert_space_after_semicolon_in_for_statements_option(
     options: &FormatCodeSettings,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("insert_space_after_semicolon_in_for_statements_option"); 
     options.insert_space_after_semicolon_in_for_statements
 }
 
-pub fn insert_space_after_type_assertion_option(options: &FormatCodeSettings) -> Tristate {
+pub fn insert_space_after_type_assertion_option(options: &FormatCodeSettings) -> Tristate { ::tsox_core::fntrace::enter("insert_space_after_type_assertion_option"); 
     options.insert_space_after_type_assertion
 }
 
 pub fn insert_space_before_and_after_binary_operators_option(
     options: &FormatCodeSettings,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("insert_space_before_and_after_binary_operators_option"); 
     options.insert_space_before_and_after_binary_operators
 }
 
 pub fn insert_space_before_function_parenthesis_option(
     options: &FormatCodeSettings,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("insert_space_before_function_parenthesis_option"); 
     options.insert_space_before_function_parenthesis
 }
 
-pub fn insert_space_before_type_annotation_option(options: &FormatCodeSettings) -> Tristate {
+pub fn insert_space_before_type_annotation_option(options: &FormatCodeSettings) -> Tristate { ::tsox_core::fntrace::enter("insert_space_before_type_annotation_option"); 
     options.insert_space_before_type_annotation
 }
 
 pub fn place_open_brace_on_new_line_for_control_blocks_option(
     options: &FormatCodeSettings,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("place_open_brace_on_new_line_for_control_blocks_option"); 
     options.place_open_brace_on_new_line_for_control_blocks
 }
 
 pub fn place_open_brace_on_new_line_for_functions_option(
     options: &FormatCodeSettings,
-) -> Tristate {
+) -> Tristate { ::tsox_core::fntrace::enter("place_open_brace_on_new_line_for_functions_option"); 
     options.place_open_brace_on_new_line_for_functions
 }
 
 pub fn option_equals<T: PartialEq + Clone + 'static>(
     option_name: AnyOptionSelector<'static, T>,
     option_value: T,
-) -> BoxedContextPredicate {
+) -> BoxedContextPredicate { ::tsox_core::fntrace::enter("option_equals"); 
     Box::new(move |context: &mut FormattingContext| {
         option_name(&context.options) == option_value
     })
 }
 
-pub fn is_option_enabled(option_name: OptionSelector) -> BoxedContextPredicate {
+pub fn is_option_enabled(option_name: OptionSelector) -> BoxedContextPredicate { ::tsox_core::fntrace::enter("is_option_enabled"); 
     Box::new(move |context: &mut FormattingContext| {
         option_name(&context.options).is_true()
     })
 }
 
-pub fn is_option_disabled(option_name: OptionSelector) -> BoxedContextPredicate {
+pub fn is_option_disabled(option_name: OptionSelector) -> BoxedContextPredicate { ::tsox_core::fntrace::enter("is_option_disabled"); 
     Box::new(move |context: &mut FormattingContext| {
         option_name(&context.options).is_false()
     })
 }
 
-pub fn is_option_disabled_or_undefined(option_name: OptionSelector) -> BoxedContextPredicate {
+pub fn is_option_disabled_or_undefined(option_name: OptionSelector) -> BoxedContextPredicate { ::tsox_core::fntrace::enter("is_option_disabled_or_undefined"); 
     Box::new(move |context: &mut FormattingContext| {
         option_name(&context.options).is_false_or_unknown()
     })
@@ -106,28 +106,28 @@ pub fn is_option_disabled_or_undefined(option_name: OptionSelector) -> BoxedCont
 
 pub fn is_option_disabled_or_undefined_or_tokens_on_same_line(
     option_name: OptionSelector,
-) -> BoxedContextPredicate {
+) -> BoxedContextPredicate { ::tsox_core::fntrace::enter("is_option_disabled_or_undefined_or_tokens_on_same_line"); 
     Box::new(move |context: &mut FormattingContext| {
         option_name(&context.options).is_false_or_unknown() || context.tokens_are_on_same_line()
     })
 }
 
-pub fn is_option_enabled_or_undefined(option_name: OptionSelector) -> BoxedContextPredicate {
+pub fn is_option_enabled_or_undefined(option_name: OptionSelector) -> BoxedContextPredicate { ::tsox_core::fntrace::enter("is_option_enabled_or_undefined"); 
     Box::new(move |context: &mut FormattingContext| {
         option_name(&context.options).is_true_or_unknown()
     })
 }
 
 impl FormattingContext {
-    pub fn is_function_call_context(&mut self) -> bool {
+    pub fn is_function_call_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_function_call_context"); 
         self.context_node_kind() == SyntaxKind::CallExpression
     }
 
-    pub fn is_new_context(&mut self) -> bool {
+    pub fn is_new_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_new_context"); 
         self.context_node_kind() == SyntaxKind::NewExpression
     }
 
-    pub fn is_semicolon_insertion_context(&mut self) -> bool {
+    pub fn is_semicolon_insertion_context(&mut self) -> bool { ::tsox_core::fntrace::enter("is_semicolon_insertion_context"); 
         position_is_asi_candidate(
             self.current_token_span.loc.end(),
             self.current_token_parent.as_ref(),
@@ -142,16 +142,16 @@ fn position_is_asi_candidate(
     _pos: usize,
     _context: Option<&Arc<Node>>,
     _file: &Arc<crate::ast::SourceFile>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("position_is_asi_candidate"); 
     false
 }
 
-pub fn starts_with_slash_token(t: SyntaxKind) -> bool {
+pub fn starts_with_slash_token(t: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("starts_with_slash_token"); 
     t == SyntaxKind::SlashToken || t == SyntaxKind::SlashEqualsToken
 }
 
 impl FormattingScanner {
-    pub fn get_start_pos(&self) -> usize {
+    pub fn get_start_pos(&self) -> usize { ::tsox_core::fntrace::enter("get_start_pos"); 
         self.get_token_full_start()
     }
 }
@@ -159,7 +159,7 @@ impl FormattingScanner {
 pub const MASK_BIT_SIZE: usize = 5;
 pub const MAP_ROW_LENGTH: usize = SyntaxKind::DeferKeyword as usize + 1;
 
-pub fn get_rule_bucket_index(row: SyntaxKind, column: SyntaxKind) -> usize {
+pub fn get_rule_bucket_index(row: SyntaxKind, column: SyntaxKind) -> usize { ::tsox_core::fntrace::enter("get_rule_bucket_index"); 
     debug_assert!(
         (row as usize) <= SyntaxKind::DeferKeyword as usize
             && (column as usize) <= SyntaxKind::DeferKeyword as usize
@@ -167,14 +167,14 @@ pub fn get_rule_bucket_index(row: SyntaxKind, column: SyntaxKind) -> usize {
     (row as usize) * MAP_ROW_LENGTH + column as usize
 }
 
-pub fn token_range_from_ex(prefix: &[SyntaxKind], tokens: &[SyntaxKind]) -> TokenRange {
+pub fn token_range_from_ex(prefix: &[SyntaxKind], tokens: &[SyntaxKind]) -> TokenRange { ::tsox_core::fntrace::enter("token_range_from_ex"); 
     let mut all = Vec::with_capacity(prefix.len() + tokens.len());
     all.extend_from_slice(prefix);
     all.extend_from_slice(tokens);
     TokenRange { tokens: all, is_specific: true }
 }
 
-pub fn token_range_from_range(start: SyntaxKind, end: SyntaxKind) -> TokenRange {
+pub fn token_range_from_range(start: SyntaxKind, end: SyntaxKind) -> TokenRange { ::tsox_core::fntrace::enter("token_range_from_range"); 
     let mut tokens = Vec::with_capacity(end as usize - start as usize + 1);
     let mut token = start as i16;
     while token <= end as i16 {
@@ -186,12 +186,12 @@ pub fn token_range_from_range(start: SyntaxKind, end: SyntaxKind) -> TokenRange 
 
 /// Go ast.Kind(token):SyntaxKind 为 #[repr(i16)] 连续枚举,
 /// 仅用于 token 区间(start..=end 均为 token kind)
-fn syntax_kind_from_i16(token: i16) -> SyntaxKind {
+fn syntax_kind_from_i16(token: i16) -> SyntaxKind { ::tsox_core::fntrace::enter("syntax_kind_from_i16"); 
     debug_assert!(token >= 0 && token <= SyntaxKind::DeferKeyword as i16);
     unsafe { std::mem::transmute::<i16, SyntaxKind>(token) }
 }
 
-pub fn range_has_no_errors(_r: TextRange) -> bool {
+pub fn range_has_no_errors(_r: TextRange) -> bool { ::tsox_core::fntrace::enter("range_has_no_errors"); 
     false
 }
 
@@ -199,7 +199,7 @@ pub fn create_text_change_from_start_length(
     start: usize,
     length: usize,
     new_text: &str,
-) -> TextChange {
+) -> TextChange { ::tsox_core::fntrace::enter("create_text_change_from_start_length"); 
     TextChange {
         pos: start,
         end: start + length,
@@ -207,7 +207,7 @@ pub fn create_text_change_from_start_length(
     }
 }
 
-pub fn get_first_non_decorator_token_of_node(node: &Arc<Node>) -> SyntaxKind {
+pub fn get_first_non_decorator_token_of_node(node: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("get_first_non_decorator_token_of_node"); 
     if can_have_modifiers(node) {
         let modifier_nodes: Vec<Arc<Node>> = node
             .modifiers()
@@ -249,7 +249,7 @@ pub fn get_first_non_decorator_token_of_node(node: &Arc<Node>) -> SyntaxKind {
     SyntaxKind::Unknown
 }
 
-fn name_kind_of_declaration(node: &Arc<Node>) -> SyntaxKind {
+fn name_kind_of_declaration(node: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("name_kind_of_declaration"); 
     match get_name_of_declaration(node) {
         Some(name) => name.kind,
         None => SyntaxKind::Unknown,

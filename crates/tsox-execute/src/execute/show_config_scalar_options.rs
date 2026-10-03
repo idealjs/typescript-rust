@@ -7,7 +7,7 @@ use tsox_tsoptions::tsoptions as opts;
 pub(crate) fn insert_enum_options(
     map: &mut tsox_core::json::Map<String, tsox_core::json::Value>,
     options: &CompilerOptions,
-) {
+) { ::tsox_core::fntrace::enter("insert_enum_options"); 
     if let Some(s) = opts::script_target_name(options.target) {
         map.insert("target".to_string(), Value::String(s.to_string()));
     }
@@ -32,7 +32,7 @@ pub(crate) fn insert_path_and_string_options(
     map: &mut tsox_core::json::Map<String, tsox_core::json::Value>,
     options: &CompilerOptions,
     config_file_name: &str,
-) {
+) { ::tsox_core::fntrace::enter("insert_path_and_string_options"); 
     let config_dir = tsox_core::tspath::get_directory_path(config_file_name);
     let to_relative = |val: &str| -> String {
         if val.is_empty() {
@@ -83,7 +83,7 @@ pub(crate) fn insert_path_and_string_options(
 pub(crate) fn insert_list_options(
     map: &mut tsox_core::json::Map<String, tsox_core::json::Value>,
     options: &CompilerOptions,
-) {
+) { ::tsox_core::fntrace::enter("insert_list_options"); 
     if !options.lib.is_empty() {
         map.insert(
             "lib".to_string(),

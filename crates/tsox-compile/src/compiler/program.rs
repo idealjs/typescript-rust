@@ -3,7 +3,7 @@
 use super::*;
 
 impl Program {
-    pub fn new(opts: ProgramOptions) -> Self {
+    pub fn new(opts: ProgramOptions) -> Self { ::tsox_core::fntrace::enter("new"); 
         let host = opts.host;
         let mut options = opts.config.compiler_options.clone();
         let config_file_name = opts.config.config_file_name.clone();
@@ -309,7 +309,7 @@ impl Program {
         }
     }
 
-    pub fn options(&self) -> &CompilerOptions {
+    pub fn options(&self) -> &CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         &self.options
     }
 

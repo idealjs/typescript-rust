@@ -25,7 +25,7 @@ use crate::mig::wt1b_4::flatten_comma_list;
 use crate::mig::x6a::is_anonymous_class_needing_assigned_name;
 use crate::printer::NodeFactory;
 
-fn new_class_static_block_declaration_m4f6(body: &Arc<Node>) -> Arc<Node> {
+fn new_class_static_block_declaration_m4f6(body: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_static_block_declaration_m4f6"); 
     Arc::new(Node::new(
         SyntaxKind::ClassStaticBlockDeclaration,
         NodeData::ClassStaticBlockDeclaration(tsox_frontend::ast::node_data_generated::ClassStaticBlockDeclarationData {
@@ -36,14 +36,14 @@ fn new_class_static_block_declaration_m4f6(body: &Arc<Node>) -> Arc<Node> {
 }
 
 impl ClassFieldsTransformer<'_> {
-    pub fn transform_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_field_initializer"); 
         if is_private_identifier_class_element_declaration(node) {
             return self.transform_private_field_initializer(node);
         }
         self.transform_public_field_initializer(node)
     }
 
-    pub fn transform_private_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_private_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_private_field_initializer"); 
         if self.should_transform_class_element_to_weak_map(node) {
             let name = node.name().expect("property declaration requires a name");
             let info = self
@@ -117,7 +117,7 @@ impl ClassFieldsTransformer<'_> {
         ))
     }
 
-    pub fn transform_public_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_public_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_public_field_initializer"); 
         if self.should_transform_initializers && !is_auto_accessor_property_declaration(node) {
             let initializer_present = node_initializer(node).is_some();
             let expr = self.get_property_name_expression_if_needed(
@@ -177,7 +177,7 @@ impl ClassFieldsTransformer<'_> {
         &mut self,
         name: &Arc<Node>,
         should_hoist: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_property_name_expression_if_needed"); 
         if !is_computed_property_name(name) {
             return None;
         }
@@ -219,7 +219,7 @@ impl ClassFieldsTransformer<'_> {
         &mut self,
         property: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_or_class_static_block"); 
         let expression = if property.kind == SyntaxKind::ClassStaticBlockDeclaration {
             self.set_current_class_element_and_opt(
                 Some(Arc::clone(property)),

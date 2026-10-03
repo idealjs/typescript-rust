@@ -4,7 +4,7 @@ use crate::checker::exports_union_reduction::UnionReduction;
 use crate::checker::typenode_composites::*;
 
 impl Checker {
-    pub(crate) fn get_type_from_array_or_tuple_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_array_or_tuple_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_array_or_tuple_type_node"); 
         match &node.data {
             NodeData::ArrayTypeNode(d) => {
                 let elem_type = self.get_type_from_type_node(&d.element_type);
@@ -43,13 +43,13 @@ impl Checker {
     }
 
 
-    pub(crate) fn get_type_from_optional_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_optional_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_optional_type_node"); 
         let inner = node.type_node().expect("OptionalType has type").clone();
         let t = self.get_type_from_type_node(&inner);
         self.add_optionality(&t)
     }
 
-    pub(crate) fn get_type_from_union_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_union_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_union_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -83,7 +83,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_from_intersection_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_intersection_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_intersection_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -131,12 +131,12 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_from_named_tuple_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_named_tuple_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_named_tuple_type_node"); 
         let inner = node.type_node().expect("NamedTupleMember has type").clone();
         self.get_type_from_type_node(&inner)
     }
 
-    pub(crate) fn get_type_from_rest_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_rest_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_rest_type_node"); 
         let inner = node.type_node().expect("RestType has type").clone();
         match self.array_element_type_node(&inner) {
             Some(element_node) => self.get_type_from_type_node(&element_node),
@@ -144,7 +144,7 @@ impl Checker {
         }
     }
 
-    fn array_element_type_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn array_element_type_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("array_element_type_node"); 
         match &node.data {
             NodeData::ParenthesizedTypeNode(p) => {
                 self.array_element_type_node(&p.type_node)

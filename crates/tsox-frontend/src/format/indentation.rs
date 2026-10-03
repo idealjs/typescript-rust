@@ -13,8 +13,8 @@ use super::indenter::should_indent_child_node;
 use super::util;
 
 /// Go findEnclosingNode：完全包含给定 range 的最小节点。
-pub(crate) fn find_enclosing_node(r: TextRange, file: &SourceFile) -> Arc<Node> {
-    fn find(n: &Arc<Node>, r: TextRange, file: &SourceFile) -> Arc<Node> {
+pub(crate) fn find_enclosing_node(r: TextRange, file: &SourceFile) -> Arc<Node> { ::tsox_core::fntrace::enter("find_enclosing_node"); 
+    fn find(n: &Arc<Node>, r: TextRange, file: &SourceFile) -> Arc<Node> { ::tsox_core::fntrace::enter("find"); 
         let mut candidate: Option<Arc<Node>> = None;
         crate::ast::node_data_generated::for_each_child(n, |c| {
             if c.flags.contains(crate::ast::NodeFlags::Reparsed) {
@@ -41,7 +41,7 @@ pub(crate) fn get_scan_start_position(
     enclosing_node: &Arc<Node>,
     original_range: TextRange,
     file: &SourceFile,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_scan_start_position"); 
     let start = util::with_token_start(file, enclosing_node).pos();
     if start == original_range.pos() && enclosing_node.end() == original_range.end() {
         return start;
@@ -65,7 +65,7 @@ pub(crate) fn get_own_or_inherited_delta(
     n: &Arc<Node>,
     options: &FormatCodeSettings,
     file: &SourceFile,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_own_or_inherited_delta"); 
     let mut previous_line: i64 = -1;
     let mut child: Option<Arc<Node>> = None;
     let mut current = Some(Arc::clone(n));
@@ -93,7 +93,7 @@ pub(crate) fn get_indentation_for_node(
     ignore_actual_indentation_range: &TextRange,
     file: &SourceFile,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_indentation_for_node"); 
     let token_pos = util::token_pos_of_node(file, n);
     let (startline, startpos) = util::line_and_byte_offset_of_position(file, token_pos);
     get_indentation_for_node_worker(
@@ -118,7 +118,7 @@ pub(crate) fn get_indentation_for_node_worker(
     file: &SourceFile,
     is_next_child: bool,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_indentation_for_node_worker"); 
     
     let mut current = Arc::clone(current);
     let mut current_start_line = current_start_line;
@@ -212,7 +212,7 @@ fn get_containing_list_or_parent_start(
     parent: &Arc<Node>,
     child: &Arc<Node>,
     file: &SourceFile,
-) -> (usize, usize) {
+) -> (usize, usize) { ::tsox_core::fntrace::enter("get_containing_list_or_parent_start"); 
     let start_pos = match super::lists::get_containing_list(child, file) {
         Some((_, list)) => list.loc.pos(),
         None => util::token_pos_of_node(file, parent),
@@ -229,7 +229,7 @@ fn get_actual_indentation_for_node(
     parent_and_child_share_line: bool,
     file: &SourceFile,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_actual_indentation_for_node"); 
     use crate::ast::SyntaxKind;
     let is_declaration = matches!(
         current.kind,
@@ -289,7 +289,7 @@ fn is_argument_and_start_line_overlaps_expression_being_called(
     child: &Arc<Node>,
     child_start_line: usize,
     file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_argument_and_start_line_overlaps_expression_being_called"); 
     if parent.kind != crate::ast::SyntaxKind::CallExpression {
         return false;
     }
@@ -309,7 +309,7 @@ pub(crate) fn get_actual_indentation_for_list_item(
     file: &SourceFile,
     options: &FormatCodeSettings,
     list_indents_child: bool,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_actual_indentation_for_list_item"); 
     use crate::ast::SyntaxKind;
     if let Some(parent) = node.parent() {
         if parent.kind == SyntaxKind::VariableDeclarationList {
@@ -342,7 +342,7 @@ pub(crate) fn get_actual_indentation_for_list_start_line(
     list: Option<&Arc<crate::ast::node::NodeList>>,
     file: &SourceFile,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_actual_indentation_for_list_start_line"); 
     let Some(list) = list else { return -1 };
     let (line, char) = util::line_and_byte_offset_of_position(file, list.loc.pos());
     find_column_for_first_non_whitespace_character_in_line(line, char, file, options)
@@ -354,7 +354,7 @@ pub(crate) fn derive_actual_indentation_from_list(
     index: usize,
     file: &SourceFile,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("derive_actual_indentation_from_list"); 
     let node = &list.nodes[index];
     let (mut line, mut char) = util::line_and_byte_offset_of_position(
         file,
@@ -385,7 +385,7 @@ fn find_column_for_first_non_whitespace_character_in_line(
     char: usize,
     file: &SourceFile,
     options: &FormatCodeSettings,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("find_column_for_first_non_whitespace_character_in_line"); 
     let line_start = util::position_of_line_and_byte_offset(file, line, 0);
     util::find_first_non_whitespace_column(file, line_start, line_start + char, options.editor_settings.tab_size)
         as i64

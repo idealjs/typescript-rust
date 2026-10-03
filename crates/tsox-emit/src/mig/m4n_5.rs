@@ -31,7 +31,7 @@ impl<'a> NodeFactory<'a> {
         env_binding: &Arc<Node>,
         value: &Arc<Node>,
         async_: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_add_disposable_resource_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, add_disposable_resource_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__addDisposableResource"),
@@ -50,7 +50,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_async_delegator_helper(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_async_delegator_helper(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_async_delegator_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, await_helper());
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, async_delegator_helper());
         self.new_call_expression(
@@ -66,7 +66,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         generator_func: &Arc<Node>,
         has_lexical_this: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_async_generator_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, await_helper());
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, async_generator_helper());
         self.emit_context_mut().add_emit_flags(
@@ -91,7 +91,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_async_values_helper(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_async_values_helper(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_async_values_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, async_values_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__asyncValues"),
@@ -102,7 +102,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_await_helper(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_await_helper(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_await_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, await_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__await"),
@@ -119,7 +119,7 @@ impl<'a> NodeFactory<'a> {
         arguments_expression: Option<&Arc<Node>>,
         parameters: Option<Arc<NodeList>>,
         body: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_awaiter_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, awaiter_helper());
 
         let params = match parameters {
@@ -174,7 +174,7 @@ impl<'a> NodeFactory<'a> {
         state: &Arc<Node>,
         kind: PrivateIdentifierKind,
         fn_: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_private_field_get_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, class_private_field_get_helper());
         let kind_literal = self.new_string_literal(&kind.to_string(), 0);
         let mut args = vec![Arc::clone(receiver), Arc::clone(state), kind_literal];
@@ -194,7 +194,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         state: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_private_field_in_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, class_private_field_in_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__classPrivateFieldIn"),
@@ -212,7 +212,7 @@ impl<'a> NodeFactory<'a> {
         value: &Arc<Node>,
         kind: PrivateIdentifierKind,
         fn_: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_private_field_set_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, class_private_field_set_helper());
         let kind_literal = self.new_string_literal(&kind.to_string(), 0);
         let mut args = vec![
@@ -239,7 +239,7 @@ impl<'a> NodeFactory<'a> {
         target: &Arc<Node>,
         member_name: Option<&Arc<Node>>,
         descriptor: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_decorate_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, decorate_helper());
 
         let mut arguments_array =
@@ -264,7 +264,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_dispose_resources_helper(&self, env_binding: &Arc<Node>) -> Arc<Node> {
+    pub fn new_dispose_resources_helper(&self, env_binding: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_dispose_resources_helper"); 
         r36k26_defs::EmitContextCommentRangeR36k26::request_emit_helper(self.emit_context, dispose_resources_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__disposeResources"),

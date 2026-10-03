@@ -27,7 +27,7 @@ pub struct Tracer {
 }
 
 impl Tracer {
-    pub fn write(&mut self, message: &'static diagnostics::Message, args: Vec<String>) {
+    pub fn write(&mut self, message: &'static diagnostics::Message, args: Vec<String>) { ::tsox_core::fntrace::enter("write"); 
         self.traces.push(DiagAndArgs {
             message,
             args,
@@ -39,21 +39,21 @@ pub(crate) fn write_tracer(
     t: Option<&mut Tracer>,
     message: &'static diagnostics::Message,
     args: Vec<String>,
-) {
+) { ::tsox_core::fntrace::enter("write_tracer"); 
     if let Some(t) = t {
         t.traces.push(DiagAndArgs { message, args });
     }
 }
 
-pub(crate) fn continue_searching() -> Option<Resolved> {
+pub(crate) fn continue_searching() -> Option<Resolved> { ::tsox_core::fntrace::enter("continue_searching"); 
     None
 }
 
-pub(crate) fn unresolved() -> Option<Resolved> {
+pub(crate) fn unresolved() -> Option<Resolved> { ::tsox_core::fntrace::enter("unresolved"); 
     Some(Resolved::default())
 }
 
-pub(crate) fn matches_pattern_with_trailer(target: &str, name: &str) -> bool {
+pub(crate) fn matches_pattern_with_trailer(target: &str, name: &str) -> bool { ::tsox_core::fntrace::enter("matches_pattern_with_trailer"); 
     if target.ends_with('*') {
         return false;
     }
@@ -65,7 +65,7 @@ pub(crate) fn matches_pattern_with_trailer(target: &str, name: &str) -> bool {
     name.starts_with(before) && name.ends_with(after)
 }
 
-pub fn get_node_resolution_features(options: &CompilerOptions) -> NodeResolutionFeatures {
+pub fn get_node_resolution_features(options: &CompilerOptions) -> NodeResolutionFeatures { ::tsox_core::fntrace::enter("get_node_resolution_features"); 
     let mut features = NodeResolutionFeatures::NONE;
     match options.get_module_resolution_kind() {
         ModuleResolutionKind::Node16 => features = NodeResolutionFeatures::NODE16_DEFAULT,
@@ -94,7 +94,7 @@ impl ParsedPatternsCache {
     pub fn get(
         &self,
         path_mappings: &Arc<OrderedMap<String, Vec<String>>>,
-    ) -> Arc<ParsedPatterns> {
+    ) -> Arc<ParsedPatterns> { ::tsox_core::fntrace::enter("get"); 
         let key = Arc::as_ptr(path_mappings) as usize;
         if let Some(patterns) = self.cache.lock().unwrap().get(&key) {
             return patterns.clone();
@@ -126,7 +126,7 @@ pub struct InfoCache {
 }
 
 impl InfoCache {
-    pub fn new(current_directory: &str, use_case_sensitive_file_names: bool) -> Self {
+    pub fn new(current_directory: &str, use_case_sensitive_file_names: bool) -> Self { ::tsox_core::fntrace::enter("new"); 
         InfoCache {
             cache: Mutex::new(HashMap::new()),
             current_directory: current_directory.to_string(),
@@ -146,7 +146,7 @@ pub fn new_caches(
     current_directory: &str,
     use_case_sensitive_file_names: bool,
     _options: &CompilerOptions,
-) -> Caches {
+) -> Caches { ::tsox_core::fntrace::enter("new_caches"); 
     Caches {
         package_json_info_cache: InfoCache::new(current_directory, use_case_sensitive_file_names),
         module_resolution_cache: ModuleResolutionCache::default(),
@@ -162,7 +162,7 @@ pub trait ResolvedProjectReference {
     fn compiler_options(&self) -> &CompilerOptions;
 }
 
-pub fn get_redirect_config_name(redirect: Option<&dyn ResolvedProjectReference>) -> String {
+pub fn get_redirect_config_name(redirect: Option<&dyn ResolvedProjectReference>) -> String { ::tsox_core::fntrace::enter("get_redirect_config_name"); 
     match redirect {
         None => String::new(),
         Some(r) => r.config_name(),
@@ -170,7 +170,7 @@ pub fn get_redirect_config_name(redirect: Option<&dyn ResolvedProjectReference>)
 }
 
 impl std::fmt::Display for Extensions {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         let mut result = Vec::new();
         if self.contains(Extensions::TYPESCRIPT) {
             result.push("TypeScript");
@@ -188,11 +188,11 @@ impl std::fmt::Display for Extensions {
     }
 }
 
-fn type_script_version() -> semver::Version {
+fn type_script_version() -> semver::Version { ::tsox_core::fntrace::enter("type_script_version"); 
     semver::must_parse(tsox_core::core::mig::m3k::version())
 }
 
-pub fn is_applicable_versioned_types_key(key: &str) -> bool {
+pub fn is_applicable_versioned_types_key(key: &str) -> bool { ::tsox_core::fntrace::enter("is_applicable_versioned_types_key"); 
     let Some(range_str) = key.strip_prefix("types@") else {
         return false;
     };
@@ -206,7 +206,7 @@ pub fn get_resolution_diagnostic(
     options: &CompilerOptions,
     resolved_module: &ResolvedModule,
     file: &SourceFile,
-) -> Option<&'static diagnostics::Message> {
+) -> Option<&'static diagnostics::Message> { ::tsox_core::fntrace::enter("get_resolution_diagnostic"); 
     let need_jsx = || -> Option<&'static diagnostics::Message> {
         if options.jsx != JsxEmit::None {
             return None;
@@ -255,7 +255,7 @@ pub fn get_resolution_diagnostic(
     }
 }
 
-pub fn try_get_js_extension_for_file<'a>(file_name: &'a str, options: &CompilerOptions) -> &'a str {
+pub fn try_get_js_extension_for_file<'a>(file_name: &'a str, options: &CompilerOptions) -> &'a str { ::tsox_core::fntrace::enter("try_get_js_extension_for_file"); 
     let ext = tspath::try_get_extension_from_path(file_name);
     match ext {
         EXTENSION_TS | EXTENSION_DTS => EXTENSION_JS,
@@ -276,7 +276,7 @@ pub fn try_get_js_extension_for_file<'a>(file_name: &'a str, options: &CompilerO
 pub fn get_automatic_type_directive_names(
     options: &CompilerOptions,
     host: &dyn ResolutionHost,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_automatic_type_directive_names"); 
     if !options.uses_wildcard_types() {
         return options.types.clone();
     }

@@ -13,7 +13,7 @@ pub struct LinkStore<K: Eq + std::hash::Hash, V> {
 }
 
 impl<K: Eq + std::hash::Hash + Clone, V> LinkStore<K, V> {
-    pub fn get(&mut self, key: &K) -> &mut V {
+    pub fn get(&mut self, key: &K) -> &mut V { crate::fntrace::enter("get"); 
         if let Some(&value) = self.entries.get(key) {
             return unsafe { &mut *value };
         }
@@ -22,11 +22,11 @@ impl<K: Eq + std::hash::Hash + Clone, V> LinkStore<K, V> {
         unsafe { &mut *value }
     }
 
-    pub fn has(&self, key: &K) -> bool {
+    pub fn has(&self, key: &K) -> bool { crate::fntrace::enter("has"); 
         self.entries.contains_key(key)
     }
 
-    pub fn try_get(&self, key: &K) -> Option<&V> {
+    pub fn try_get(&self, key: &K) -> Option<&V> { crate::fntrace::enter("try_get"); 
         self.entries.get(key).map(|&value| unsafe { &*value })
     }
 }
@@ -42,7 +42,7 @@ pub struct PagedLinkStore<V> {
 }
 
 impl<V> Default for PagedLinkStore<V> {
-    fn default() -> Self {
+    fn default() -> Self { crate::fntrace::enter("default"); 
         Self {
             page_map: HashMap::new(),
             page_list: Vec::new(),
@@ -68,17 +68,17 @@ impl<V> PagedLinkStore<V> {
         }
     }
 
-    pub fn get(&mut self, key: u64) -> &mut Option<V> {
+    pub fn get(&mut self, key: u64) -> &mut Option<V> { crate::fntrace::enter("get"); 
         let page_index = key >> PAGE_SHIFT;
         let page = self.get_or_create_page(page_index);
         &mut page[(key & PAGE_MASK) as usize]
     }
 
-    pub fn has(&self, key: u64) -> bool {
+    pub fn has(&self, key: u64) -> bool { crate::fntrace::enter("has"); 
         self.try_get(key).is_some()
     }
 
-    pub fn try_get(&self, key: u64) -> Option<&V> {
+    pub fn try_get(&self, key: u64) -> Option<&V> { crate::fntrace::enter("try_get"); 
         let page_index = key >> PAGE_SHIFT;
         let page: Option<&Box<[Option<V>; PAGE_SIZE]>> = if page_index < MAX_PAGE_COUNT {
             let index = page_index as usize;
@@ -155,7 +155,7 @@ pub const EXCLUSIVELY_PREFIXED_NODE_CORE_MODULES: &[&str] = &[
     "node:test/reporters",
 ];
 
-pub fn node_core_modules() -> &'static HashMap<&'static str, bool> {
+pub fn node_core_modules() -> &'static HashMap<&'static str, bool> { crate::fntrace::enter("node_core_modules"); 
     static NODE_CORE_MODULES: OnceLock<HashMap<&'static str, bool>> = OnceLock::new();
     NODE_CORE_MODULES.get_or_init(|| {
         let mut modules = HashMap::new();
@@ -171,7 +171,7 @@ pub fn node_core_modules() -> &'static HashMap<&'static str, bool> {
     })
 }
 
-pub fn non_relative_module_name_for_typing_cache(module_name: &str) -> String {
+pub fn non_relative_module_name_for_typing_cache(module_name: &str) -> String { crate::fntrace::enter("non_relative_module_name_for_typing_cache"); 
     if node_core_modules().get(module_name).copied().unwrap_or(false) {
         return "node".to_string();
     }
@@ -182,7 +182,7 @@ pub fn find_best_pattern_match<T: Clone>(
     values: &[T],
     get_pattern: impl Fn(&T) -> &crate::core::core::Pattern,
     candidate: &str,
-) -> Option<T> {
+) -> Option<T> { crate::fntrace::enter("find_best_pattern_match"); 
     let mut best_pattern: Option<T> = None;
     let mut longest_match_prefix_length: isize = -1;
     for value in values {
@@ -197,11 +197,11 @@ pub fn find_best_pattern_match<T: Clone>(
     best_pattern
 }
 
-pub fn resolve_project_reference_path(project_reference: &crate::core::project_reference::ProjectReference) -> String {
+pub fn resolve_project_reference_path(project_reference: &crate::core::project_reference::ProjectReference) -> String { crate::fntrace::enter("resolve_project_reference_path"); 
     resolve_config_file_name_of_project_reference(&project_reference.path)
 }
 
-pub fn resolve_config_file_name_of_project_reference(path: &str) -> String {
+pub fn resolve_config_file_name_of_project_reference(path: &str) -> String { crate::fntrace::enter("resolve_config_file_name_of_project_reference"); 
     if file_extension_is(path, EXTENSION_JSON) {
         return path.to_string();
     }
@@ -209,7 +209,7 @@ pub fn resolve_config_file_name_of_project_reference(path: &str) -> String {
 }
 
 impl CompilerOptions {
-    pub fn get_effective_type_roots(&self, current_directory: &str) -> (Vec<String>, bool) {
+    pub fn get_effective_type_roots(&self, current_directory: &str) -> (Vec<String>, bool) { crate::fntrace::enter("get_effective_type_roots"); 
         if !self.type_roots.is_empty() {
             return (self.type_roots.clone(), true);
         }
@@ -231,7 +231,7 @@ impl CompilerOptions {
         (type_roots, false)
     }
 
-    pub fn get_paths_base_path(&self, current_directory: &str) -> String {
+    pub fn get_paths_base_path(&self, current_directory: &str) -> String { crate::fntrace::enter("get_paths_base_path"); 
         if self.paths.as_ref().is_none_or(|paths| paths.is_empty()) {
             return String::new();
         }
@@ -242,7 +242,7 @@ impl CompilerOptions {
     }
 }
 
-pub fn get_new_line_kind(s: &str) -> crate::core::compiler_options_kinds::NewLineKind {
+pub fn get_new_line_kind(s: &str) -> crate::core::compiler_options_kinds::NewLineKind { crate::fntrace::enter("get_new_line_kind"); 
     match s {
         "\r\n" => crate::core::compiler_options_kinds::NewLineKind::CRLF,
         "\n" => crate::core::compiler_options_kinds::NewLineKind::LF,
@@ -265,7 +265,7 @@ pub struct RequestContext {
 }
 
 impl std::fmt::Debug for RequestContext {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         f.debug_struct("RequestContext")
             .field("request_id", &self.request_id)
             .field("checker_lifetime", &self.checker_lifetime)
@@ -274,11 +274,11 @@ impl std::fmt::Debug for RequestContext {
 }
 
 impl RequestContext {
-    pub fn after_func(&self, f: Box<dyn FnOnce() + Send>) {
+    pub fn after_func(&self, f: Box<dyn FnOnce() + Send>) { crate::fntrace::enter("after_func"); 
         self.after_funcs.lock().unwrap().push(f);
     }
 
-    pub fn finish_request(&self) {
+    pub fn finish_request(&self) { crate::fntrace::enter("finish_request"); 
         let funcs = std::mem::take(&mut *self.after_funcs.lock().unwrap());
         for f in funcs {
             f();
@@ -286,7 +286,7 @@ impl RequestContext {
     }
 }
 
-pub fn with_request_id(ctx: &RequestContext, id: &str) -> RequestContext {
+pub fn with_request_id(ctx: &RequestContext, id: &str) -> RequestContext { crate::fntrace::enter("with_request_id"); 
     RequestContext {
         request_id: id.to_string(),
         checker_lifetime: ctx.checker_lifetime,
@@ -294,14 +294,14 @@ pub fn with_request_id(ctx: &RequestContext, id: &str) -> RequestContext {
     }
 }
 
-pub fn get_request_id(ctx: &RequestContext) -> String {
+pub fn get_request_id(ctx: &RequestContext) -> String { crate::fntrace::enter("get_request_id"); 
     ctx.request_id.clone()
 }
 
 pub fn with_checker_lifetime(
     ctx: &RequestContext,
     lifetime: CheckerLifetime,
-) -> RequestContext {
+) -> RequestContext { crate::fntrace::enter("with_checker_lifetime"); 
     RequestContext {
         request_id: ctx.request_id.clone(),
         checker_lifetime: Some(lifetime),
@@ -309,7 +309,7 @@ pub fn with_checker_lifetime(
     }
 }
 
-pub fn get_checker_lifetime(ctx: &RequestContext) -> CheckerLifetime {
+pub fn get_checker_lifetime(ctx: &RequestContext) -> CheckerLifetime { crate::fntrace::enter("get_checker_lifetime"); 
     ctx.checker_lifetime
         .unwrap_or(CheckerLifetime::Temporary)
 }

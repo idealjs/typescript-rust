@@ -1,7 +1,7 @@
 use crate::checker::types_impl_chunk::{Type, TypeData, ObjectTypeData};
 
 impl Type {
-    pub fn as_object_mut(&mut self) -> Option<&mut ObjectTypeData> {
+    pub fn as_object_mut(&mut self) -> Option<&mut ObjectTypeData> { ::tsox_core::fntrace::enter("as_object_mut"); 
         match &mut self.data {
             TypeData::Object(o) => Some(o),
             TypeData::Interface(i) => Some(&mut i.object),

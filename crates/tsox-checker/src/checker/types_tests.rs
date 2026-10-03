@@ -1,7 +1,7 @@
 use crate::checker::types::*;
 
 #[test]
-fn ternary_and_or() {
+fn ternary_and_or() { ::tsox_core::fntrace::enter("ternary_and_or"); 
     assert_eq!(Ternary::True.and(Ternary::False), Ternary::False);
     assert_eq!(Ternary::True.or(Ternary::False), Ternary::True);
     assert_eq!(Ternary::Unknown.and(Ternary::Maybe), Ternary::Unknown);
@@ -12,7 +12,7 @@ fn ternary_and_or() {
 }
 
 #[test]
-fn type_flags_composites() {
+fn type_flags_composites() { ::tsox_core::fntrace::enter("type_flags_composites"); 
     assert!(TYPE_FLAGS_LITERAL.contains(TypeFlags::StringLiteral));
     assert!(TYPE_FLAGS_LITERAL.contains(TypeFlags::NumberLiteral));
     assert!(TYPE_FLAGS_NULLABLE.contains(TypeFlags::Undefined));
@@ -24,20 +24,20 @@ fn type_flags_composites() {
 }
 
 #[test]
-fn object_flags_composites() {
+fn object_flags_composites() { ::tsox_core::fntrace::enter("object_flags_composites"); 
     assert!(OBJECT_FLAGS_CLASS_OR_INTERFACE.contains(ObjectFlags::Class));
     assert!(OBJECT_FLAGS_CLASS_OR_INTERFACE.contains(ObjectFlags::Interface));
 }
 
 #[test]
-fn signature_flags_propagating() {
+fn signature_flags_propagating() { ::tsox_core::fntrace::enter("signature_flags_propagating"); 
     assert!(SIGNATURE_FLAGS_PROPAGATING_FLAGS.contains(SignatureFlags::HasRestParameter));
     assert!(SIGNATURE_FLAGS_PROPAGATING_FLAGS.contains(SignatureFlags::Construct));
     assert!(!SIGNATURE_FLAGS_PROPAGATING_FLAGS.contains(SignatureFlags::IsInnerCallChain));
 }
 
 #[test]
-fn literal_value_to_string() {
+fn literal_value_to_string() { ::tsox_core::fntrace::enter("literal_value_to_string"); 
     assert_eq!(
         LiteralValue::String("hello".to_string()).to_string(),
         "\"hello\""
@@ -48,7 +48,7 @@ fn literal_value_to_string() {
 }
 
 #[test]
-fn type_data_pattern_matching() {
+fn type_data_pattern_matching() { ::tsox_core::fntrace::enter("type_data_pattern_matching"); 
     let t = Type::new(
         TypeFlags::String,
         TypeData::Intrinsic(IntrinsicTypeData {
@@ -61,7 +61,7 @@ fn type_data_pattern_matching() {
 }
 
 #[test]
-fn structured_type_call_construct_signatures() {
+fn structured_type_call_construct_signatures() { ::tsox_core::fntrace::enter("structured_type_call_construct_signatures"); 
     let mut structured = StructuredTypeData::default();
     structured.call_signature_count = 2;
 
@@ -75,7 +75,7 @@ fn structured_type_call_construct_signatures() {
 }
 
 #[test]
-fn cache_hash_key() {
+fn cache_hash_key() { ::tsox_core::fntrace::enter("cache_hash_key"); 
     let k1 = CacheHashKey::new(1, 2);
     let k2 = CacheHashKey::new(1, 2);
     let k3 = CacheHashKey::new(3, 4);

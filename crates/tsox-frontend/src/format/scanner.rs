@@ -17,7 +17,7 @@ pub(crate) struct TextRangeWithKind {
 }
 
 impl TextRangeWithKind {
-    pub(crate) fn new(pos: usize, end: usize, kind: SyntaxKind) -> Self {
+    pub(crate) fn new(pos: usize, end: usize, kind: SyntaxKind) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { loc: TextRange::new(pos, end), kind }
     }
 }
@@ -59,7 +59,7 @@ pub(crate) fn new_formatting_scanner(
     start_pos: usize,
     end_pos: usize,
     worker: &mut dyn FormatSpanWorkerLike,
-) -> Vec<crate::format::TextChange> {
+) -> Vec<crate::format::TextChange> { ::tsox_core::fntrace::enter("new_formatting_scanner"); 
     let mut scan = Scanner::new(text.to_string());
     // Go newFormattingScanner：SetSkipTrivia(false)，trivia 作为 token 产出
     scan.set_skip_trivia(false);
@@ -89,7 +89,7 @@ pub(crate) trait FormatSpanWorkerLike {
 }
 
 impl FormattingScanner {
-    pub(crate) fn advance(&mut self) {
+    pub(crate) fn advance(&mut self) { ::tsox_core::fntrace::enter("advance"); 
         self.has_last_token_info = false;
         let is_started = self.s.full_start_pos() != self.start_pos;
 
@@ -123,7 +123,7 @@ impl FormattingScanner {
         self.saved_pos = self.s.token_pos();
     }
 
-    pub(crate) fn read_token_info(&mut self, n: Option<&Arc<Node>>) -> TokenInfo {
+    pub(crate) fn read_token_info(&mut self, n: Option<&Arc<Node>>) -> TokenInfo { ::tsox_core::fntrace::enter("read_token_info"); 
         let last_kind = self
             .last_token_info
             .token
@@ -203,7 +203,7 @@ impl FormattingScanner {
         &mut self,
         n: Option<&Arc<Node>>,
         expected_scan_action: ScanAction,
-    ) -> SyntaxKind {
+    ) -> SyntaxKind { ::tsox_core::fntrace::enter("get_next_token"); 
         let token = self.s.token();
         self.last_scan_action = ScanAction::Scan;
         let kind_of = |n: &Arc<Node>| n.kind;
@@ -262,11 +262,11 @@ impl FormattingScanner {
         token
     }
 
-    pub(crate) fn read_eof_token_range(&self) -> TextRangeWithKind {
+    pub(crate) fn read_eof_token_range(&self) -> TextRangeWithKind { ::tsox_core::fntrace::enter("read_eof_token_range"); 
         TextRangeWithKind::new(self.s.full_start_pos(), self.s.token_end(), SyntaxKind::EndOfFile)
     }
 
-    pub(crate) fn is_on_token(&self) -> bool {
+    pub(crate) fn is_on_token(&self) -> bool { ::tsox_core::fntrace::enter("is_on_token"); 
         let mut current = self.s.token();
         if self.has_last_token_info {
             if let Some(tok) = &self.last_token_info.token {
@@ -276,7 +276,7 @@ impl FormattingScanner {
         current != SyntaxKind::EndOfFile && !is_trivia(current)
     }
 
-    pub(crate) fn is_on_eof(&self) -> bool {
+    pub(crate) fn is_on_eof(&self) -> bool { ::tsox_core::fntrace::enter("is_on_eof"); 
         let mut current = self.s.token();
         if self.has_last_token_info {
             if let Some(tok) = &self.last_token_info.token {
@@ -286,7 +286,7 @@ impl FormattingScanner {
         current == SyntaxKind::EndOfFile
     }
 
-    pub(crate) fn skip_to_end_of(&mut self, pos: usize) {
+    pub(crate) fn skip_to_end_of(&mut self, pos: usize) { ::tsox_core::fntrace::enter("skip_to_end_of"); 
         let end = self.s.end();
         self.s.set_range(pos, end);
         self.saved_pos = self.s.full_start_pos();
@@ -297,7 +297,7 @@ impl FormattingScanner {
         self.trailing_trivia = Vec::new();
     }
 
-    pub(crate) fn skip_to_start_of(&mut self, pos: usize) {
+    pub(crate) fn skip_to_start_of(&mut self, pos: usize) { ::tsox_core::fntrace::enter("skip_to_start_of"); 
         let end = self.s.end();
         self.s.set_range(pos, end);
         self.saved_pos = self.s.full_start_pos();
@@ -308,15 +308,15 @@ impl FormattingScanner {
         self.trailing_trivia = Vec::new();
     }
 
-    pub(crate) fn get_current_leading_trivia(&self) -> &[TextRangeWithKind] {
+    pub(crate) fn get_current_leading_trivia(&self) -> &[TextRangeWithKind] { ::tsox_core::fntrace::enter("get_current_leading_trivia"); 
         &self.leading_trivia
     }
 
-    pub(crate) fn last_trailing_trivia_was_new_line(&self) -> bool {
+    pub(crate) fn last_trailing_trivia_was_new_line(&self) -> bool { ::tsox_core::fntrace::enter("last_trailing_trivia_was_new_line"); 
         self.was_new_line
     }
 
-    pub(crate) fn get_token_full_start(&self) -> usize {
+    pub(crate) fn get_token_full_start(&self) -> usize { ::tsox_core::fntrace::enter("get_token_full_start"); 
         if self.has_last_token_info {
             if let Some(tok) = &self.last_token_info.token {
                 return tok.loc.pos();
@@ -326,7 +326,7 @@ impl FormattingScanner {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn get_token_end(&self) -> usize {
+    pub(crate) fn get_token_end(&self) -> usize { ::tsox_core::fntrace::enter("get_token_end"); 
         if self.has_last_token_info {
             if let Some(tok) = &self.last_token_info.token {
                 return tok.loc.end();
@@ -336,11 +336,11 @@ impl FormattingScanner {
     }
 }
 
-fn is_trivia(kind: SyntaxKind) -> bool {
+fn is_trivia(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_trivia"); 
     crate::ast::node_data_generated::is_trivia_kind(kind)
 }
 
-fn expected_scan_action_for(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) -> ScanAction {
+fn expected_scan_action_for(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) -> ScanAction { ::tsox_core::fntrace::enter("expected_scan_action_for"); 
     if should_rescan_greater_than_token(n) {
         ScanAction::RescanGreaterThanToken
     } else if should_rescan_slash_token(n) {
@@ -358,7 +358,7 @@ fn expected_scan_action_for(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) 
     }
 }
 
-fn should_rescan_jsx_text(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) -> bool {
+fn should_rescan_jsx_text(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) -> bool { ::tsox_core::fntrace::enter("should_rescan_jsx_text"); 
     if n.kind == SyntaxKind::JsxText {
         return true;
     }
@@ -368,7 +368,7 @@ fn should_rescan_jsx_text(n: &Arc<Node>, last_token_kind: Option<SyntaxKind>) ->
     last_token_kind == Some(SyntaxKind::JsxText)
 }
 
-fn should_rescan_jsx_attribute_value(n: &Arc<Node>) -> bool {
+fn should_rescan_jsx_attribute_value(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_rescan_jsx_attribute_value"); 
     let Some(parent) = n.parent() else {
         return false;
     };
@@ -381,7 +381,7 @@ fn should_rescan_jsx_attribute_value(n: &Arc<Node>) -> bool {
     d.initializer.as_ref().is_some_and(|i| Arc::ptr_eq(i, n))
 }
 
-fn should_rescan_greater_than_token(n: &Arc<Node>) -> bool {
+fn should_rescan_greater_than_token(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_rescan_greater_than_token"); 
     use SyntaxKind::*;
     matches!(
         n.kind,
@@ -393,15 +393,15 @@ fn should_rescan_greater_than_token(n: &Arc<Node>) -> bool {
     )
 }
 
-fn should_rescan_slash_token(n: &Arc<Node>) -> bool {
+fn should_rescan_slash_token(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_rescan_slash_token"); 
     n.kind == SyntaxKind::RegularExpressionLiteral
 }
 
-fn should_rescan_template_token(n: &Arc<Node>) -> bool {
+fn should_rescan_template_token(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_rescan_template_token"); 
     matches!(n.kind, SyntaxKind::TemplateMiddle | SyntaxKind::TemplateTail)
 }
 
-fn should_rescan_jsx_identifier(n: &Arc<Node>) -> bool {
+fn should_rescan_jsx_identifier(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_rescan_jsx_identifier"); 
     use SyntaxKind::*;
     let Some(parent) = n.parent() else {
         return false;
@@ -418,7 +418,7 @@ fn should_rescan_jsx_identifier(n: &Arc<Node>) -> bool {
     }
 }
 
-fn is_leftmost_jsx_tag_name(node: &Arc<Node>) -> bool {
+fn is_leftmost_jsx_tag_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_leftmost_jsx_tag_name"); 
     let mut n = node.clone();
     loop {
         let Some(parent) = n.parent() else {
@@ -439,7 +439,7 @@ fn is_leftmost_jsx_tag_name(node: &Arc<Node>) -> bool {
     }
 }
 
-fn is_jsx_tag_name(n: &Arc<Node>) -> bool {
+fn is_jsx_tag_name(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_tag_name"); 
     let Some(parent) = n.parent() else {
         return false;
     };
@@ -451,11 +451,11 @@ fn is_jsx_tag_name(n: &Arc<Node>) -> bool {
     )
 }
 
-fn is_keyword_kind(kind: SyntaxKind) -> bool {
+fn is_keyword_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword_kind"); 
     is_keyword(kind)
 }
 
-fn fix_token_kind(info: &mut TokenInfo, container: &Arc<Node>) {
+fn fix_token_kind(info: &mut TokenInfo, container: &Arc<Node>) { ::tsox_core::fntrace::enter("fix_token_kind"); 
     if let Some(tok) = &mut info.token {
         if crate::ast::node_data_generated::is_token_kind(container.kind) && tok.kind != container.kind {
             tok.kind = container.kind;

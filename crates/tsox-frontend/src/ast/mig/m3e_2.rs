@@ -27,7 +27,7 @@ pub fn get_external_module_indicator_options(
     file_name: &str,
     options: &CompilerOptions,
     metadata: &SourceFileMetaData,
-) -> ExternalModuleIndicatorOptions {
+) -> ExternalModuleIndicatorOptions { ::tsox_core::fntrace::enter("get_external_module_indicator_options"); 
     if tsox_core::tspath::is_declaration_file_name(file_name) {
         return ExternalModuleIndicatorOptions::default();
     }
@@ -61,7 +61,7 @@ pub fn is_file_forced_to_be_module_by_format(
     file_name: &str,
     options: &CompilerOptions,
     metadata: &SourceFileMetaData,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_file_forced_to_be_module_by_format"); 
     get_implied_node_format_for_emit_worker(file_name, options.get_emit_module_kind(), metadata.clone())
         == tsox_core::core::compiler_options::ModuleKind::ESNext
         || tsox_core::tspath::file_extension_is_one_of(
@@ -73,14 +73,14 @@ pub fn is_file_forced_to_be_module_by_format(
 pub fn set_external_module_indicator_with_options(
     file: &mut SourceFile,
     opts: ExternalModuleIndicatorOptions,
-) {
+) { ::tsox_core::fntrace::enter("set_external_module_indicator_with_options"); 
     file.external_module_indicator = get_external_module_indicator(file, opts);
 }
 
 pub fn get_external_module_indicator(
     file: &SourceFile,
     opts: ExternalModuleIndicatorOptions,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_indicator"); 
     if file.script_kind == crate::ast::node_source_file::ScriptKind::Json {
         return None;
     }
@@ -101,7 +101,7 @@ pub fn get_external_module_indicator(
     None
 }
 
-pub fn is_file_probably_external_module(source_file: &SourceFile) -> Option<Arc<Node>> {
+pub fn is_file_probably_external_module(source_file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("is_file_probably_external_module"); 
     let statements = match &source_file.node.data {
         crate::ast::node_data_generated::NodeData::SourceFile(d) => &d.statements.nodes,
         _ => return None,
@@ -114,7 +114,7 @@ pub fn is_file_probably_external_module(source_file: &SourceFile) -> Option<Arc<
     get_import_meta_if_necessary(source_file)
 }
 
-pub fn is_an_external_module_indicator_node(node: &Arc<Node>) -> bool {
+pub fn is_an_external_module_indicator_node(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_an_external_module_indicator_node"); 
     if node.has_syntactic_modifier(crate::ast::node_flags::ModifierFlags::Export) {
         return true;
     }
@@ -129,7 +129,7 @@ pub fn is_an_external_module_indicator_node(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn get_import_meta_if_necessary(source_file: &SourceFile) -> Option<Arc<Node>> {
+pub fn get_import_meta_if_necessary(source_file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_import_meta_if_necessary"); 
     if source_file
         .node
         .flags
@@ -140,7 +140,7 @@ pub fn get_import_meta_if_necessary(source_file: &SourceFile) -> Option<Arc<Node
     None
 }
 
-pub fn is_import_meta(node: &Arc<Node>) -> bool {
+pub fn is_import_meta(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_import_meta"); 
     if node.kind != SyntaxKind::MetaProperty {
         return false;
     }
@@ -152,9 +152,9 @@ pub fn is_import_meta(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn find_child_node(root: &Arc<Node>, check: impl Fn(&Arc<Node>) -> bool) -> Option<Arc<Node>> {
+pub fn find_child_node(root: &Arc<Node>, check: impl Fn(&Arc<Node>) -> bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_child_node"); 
     let mut result: Option<Arc<Node>> = None;
-    fn visit(node: &Arc<Node>, check: &impl Fn(&Arc<Node>) -> bool, result: &mut Option<Arc<Node>>) -> bool {
+    fn visit(node: &Arc<Node>, check: &impl Fn(&Arc<Node>) -> bool, result: &mut Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("visit"); 
         if check(node) {
             *result = Some(node.clone());
             return true;
@@ -167,12 +167,12 @@ pub fn find_child_node(root: &Arc<Node>, check: impl Fn(&Arc<Node>) -> bool) -> 
     result
 }
 
-pub fn is_file_module_from_using_jsx_tag(file: &SourceFile) -> Option<Arc<Node>> {
+pub fn is_file_module_from_using_jsx_tag(file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("is_file_module_from_using_jsx_tag"); 
     walk_tree_for_jsx_tags(&file.node)
 }
 
-pub fn walk_tree_for_jsx_tags(node: &Arc<Node>) -> Option<Arc<Node>> {
-    fn visitor(node: &Arc<Node>, found: &mut Option<Arc<Node>>) -> bool {
+pub fn walk_tree_for_jsx_tags(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("walk_tree_for_jsx_tags"); 
+    fn visitor(node: &Arc<Node>, found: &mut Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("visitor"); 
         if found.is_some() {
             return true;
         }

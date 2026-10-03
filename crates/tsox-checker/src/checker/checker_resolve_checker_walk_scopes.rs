@@ -12,7 +12,7 @@ impl Checker {
         module_meaning: SymbolFlags,
         enum_meaning: SymbolFlags,
         type_meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("scope_stack_lookup"); 
         let symbol_map = self.program.symbol_map();
         for &container_id in self.scope_stack.iter().rev() {
             // Go NameResolver：全局脚本文件的 locals 不参与作用域查找
@@ -200,7 +200,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn meaning_hit(&self, sym: &Arc<Symbol>, meaning: SymbolFlags) -> bool {
+    pub(crate) fn meaning_hit(&self, sym: &Arc<Symbol>, meaning: SymbolFlags) -> bool { ::tsox_core::fntrace::enter("meaning_hit"); 
         sym.flags.intersects(meaning) || self.alias_chain_hits_meaning(sym, meaning)
     }
 }

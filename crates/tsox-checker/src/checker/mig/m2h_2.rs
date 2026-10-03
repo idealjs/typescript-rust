@@ -23,7 +23,7 @@ impl Checker {
         erase: bool,
         report_errors: bool,
         intersection_state: IntersectionState,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("signature_related_to"); 
         let mut check_mode = SignatureCheckMode::None;
         if relation == RelationKind::Subtype {
             check_mode = SignatureCheckMode::StrictTopSignature;
@@ -48,7 +48,7 @@ impl Checker {
         message: Option<tsox_core::diagnostics::Message>,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_relation_error"); 
         let (source_type, target_type) = self.get_type_names_for_error_display(source, target);
         let mut generalized_source = Arc::clone(source);
         let mut generalized_source_type = source_type.clone();
@@ -187,7 +187,7 @@ impl Checker {
         self.relater_report_error(message.unwrap(), vec![generalized_source_type, target_type]);
     }
 
-    pub fn trace_unions_or_intersections_too_large(&mut self, source: &Arc<Type>, target: &Arc<Type>) {
+    pub fn trace_unions_or_intersections_too_large(&mut self, source: &Arc<Type>, target: &Arc<Type>) { ::tsox_core::fntrace::enter("trace_unions_or_intersections_too_large"); 
         let tr = self.tracer.clone();
         if !tr.is_enabled() {
             return;

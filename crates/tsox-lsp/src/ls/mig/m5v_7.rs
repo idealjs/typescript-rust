@@ -16,7 +16,7 @@ use crate::lsp::lsproto_lsp::Range;
 
 type ClientCapabilities = crate::mig::m5m::ResolvedClientCapabilities;
 
-fn semantic_tokens_client_token_types(caps: &ClientCapabilities) -> Vec<String> {
+fn semantic_tokens_client_token_types(caps: &ClientCapabilities) -> Vec<String> { ::tsox_core::fntrace::enter("semantic_tokens_client_token_types"); 
     caps.raw
         .pointer("/textDocument/semanticTokens/tokenTypes")
         .and_then(|v| v.as_array())
@@ -29,7 +29,7 @@ fn semantic_tokens_client_token_types(caps: &ClientCapabilities) -> Vec<String> 
         .unwrap_or_default()
 }
 
-fn semantic_tokens_client_token_modifiers(caps: &ClientCapabilities) -> Vec<String> {
+fn semantic_tokens_client_token_modifiers(caps: &ClientCapabilities) -> Vec<String> { ::tsox_core::fntrace::enter("semantic_tokens_client_token_modifiers"); 
     caps.raw
         .pointer("/textDocument/semanticTokens/tokenModifiers")
         .and_then(|v| v.as_array())
@@ -134,7 +134,7 @@ pub struct SemanticTokensLegend {
 
 pub fn semantic_tokens_legend(
     client_capabilities: &ResolvedSemanticTokensClientCapabilities,
-) -> SemanticTokensLegend {
+) -> SemanticTokensLegend { ::tsox_core::fntrace::enter("semantic_tokens_legend"); 
     let types: Vec<String> = TOKEN_TYPE_NAMES
         .iter()
         .filter(|t| client_capabilities.token_types.iter().any(|c| c == *t))
@@ -165,7 +165,7 @@ impl LanguageService {
         c: &mut Checker,
         file: &Arc<SourceFile>,
         program: &tsox_compile::compiler::Program,
-    ) -> Vec<M5vSemanticToken> {
+    ) -> Vec<M5vSemanticToken> { ::tsox_core::fntrace::enter("m5v_collect_semantic_tokens"); 
         self.m5v_collect_semantic_tokens_in_range(
             ctx,
             c,
@@ -184,7 +184,7 @@ impl LanguageService {
         program: &tsox_compile::compiler::Program,
         span_start: usize,
         span_end: usize,
-    ) -> Vec<M5vSemanticToken> {
+    ) -> Vec<M5vSemanticToken> { ::tsox_core::fntrace::enter("m5v_collect_semantic_tokens_in_range"); 
         let raw = self.collect_semantic_tokens_in_range(c, file, program, span_start, span_end);
         raw.into_iter()
             .map(|t| M5vSemanticToken {
@@ -197,7 +197,7 @@ impl LanguageService {
     }
 }
 
-pub fn sort_semantic_tokens(tokens: &mut [M5vSemanticToken], converters: &crate::mig::m5u_conv::M5uConverters) {
+pub fn sort_semantic_tokens(tokens: &mut [M5vSemanticToken], converters: &crate::mig::m5u_conv::M5uConverters) { ::tsox_core::fntrace::enter("sort_semantic_tokens"); 
     tokens.sort_by(|a, b| {
         let (a_range, _) = semantic_token_lsp_range(a, converters);
         let (b_range, _) = semantic_token_lsp_range(b, converters);
@@ -220,7 +220,7 @@ pub fn sort_semantic_tokens(tokens: &mut [M5vSemanticToken], converters: &crate:
 pub fn semantic_token_lsp_range(
     token: &M5vSemanticToken,
     converters: &crate::mig::m5u_conv::M5uConverters,
-) -> (Range, u32) {
+) -> (Range, u32) { ::tsox_core::fntrace::enter("semantic_token_lsp_range"); 
     let start = tsox_frontend::scanner::mig::x5a::get_token_pos_of_node(
         &token.node,
         &token.file,
@@ -236,7 +236,7 @@ pub fn semantic_token_lsp_range(
     )
 }
 
-pub fn reclassify_by_type(c: &mut Checker, node: &Arc<Node>, tt: u32) -> u32 {
+pub fn reclassify_by_type(c: &mut Checker, node: &Arc<Node>, tt: u32) -> u32 { ::tsox_core::fntrace::enter("reclassify_by_type"); 
     if tt == TOKEN_TYPE_VARIABLE || tt == TOKEN_TYPE_PROPERTY || tt == TOKEN_TYPE_PARAMETER {
         let typ = c.get_type_at_location(node);
         let test = |condition: &dyn Fn(&Arc<Type>) -> bool| -> bool {
@@ -285,7 +285,7 @@ pub fn reclassify_by_type(c: &mut Checker, node: &Arc<Node>, tt: u32) -> u32 {
     tt
 }
 
-pub fn is_local_declaration(decl: &Arc<Node>, source_file: &Arc<SourceFile>) -> bool {
+pub fn is_local_declaration(decl: &Arc<Node>, source_file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_local_declaration"); 
     let mut decl = Arc::clone(decl);
     if ast::is_binding_element(&decl) {
         if let Some(d) = get_declaration_for_binding_element(&decl) {
@@ -321,11 +321,11 @@ pub fn is_local_declaration(decl: &Arc<Node>, source_file: &Arc<SourceFile>) -> 
     false
 }
 
-fn is_in_same_file_as_source_file(decl: &Arc<Node>, source_file: &Arc<SourceFile>) -> bool {
+fn is_in_same_file_as_source_file(decl: &Arc<Node>, source_file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_in_same_file_as_source_file"); 
     ast::get_source_file_of_node(decl).is_some_and(|n| n.id() == source_file.node.id())
 }
 
-pub fn get_declaration_for_binding_element(element: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_declaration_for_binding_element(element: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaration_for_binding_element"); 
     let mut element = Arc::clone(element);
     loop {
         let parent = element.parent()?;
@@ -342,7 +342,7 @@ pub fn get_declaration_for_binding_element(element: &Arc<Node>) -> Option<Arc<No
     }
 }
 
-pub fn is_in_import_clause(node: &Arc<Node>) -> bool {
+pub fn is_in_import_clause(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_import_clause"); 
     let parent = node.parent();
     parent.is_some()
         && parent
@@ -352,7 +352,7 @@ pub fn is_in_import_clause(node: &Arc<Node>) -> bool {
             })
 }
 
-pub fn is_expression_in_call_expression(node: &Arc<Node>) -> bool {
+pub fn is_expression_in_call_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_expression_in_call_expression"); 
     let mut node = Arc::clone(node);
     while ast::mig::m3g_2::is_right_side_of_qualified_name_or_property_access(&node) {
         node = node.parent().unwrap();
@@ -364,7 +364,7 @@ pub fn is_expression_in_call_expression(node: &Arc<Node>) -> bool {
         })
 }
 
-pub fn is_infinity_or_nan_string(text: &str) -> bool {
+pub fn is_infinity_or_nan_string(text: &str) -> bool { ::tsox_core::fntrace::enter("is_infinity_or_nan_string"); 
     text == "Infinity" || text == "NaN"
 }
 
@@ -372,7 +372,7 @@ pub fn encode_semantic_tokens(
     ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext,
     tokens: &[M5vSemanticToken],
     converters: &crate::mig::m5u_conv::M5uConverters,
-) -> Vec<u32> {
+) -> Vec<u32> { ::tsox_core::fntrace::enter("encode_semantic_tokens"); 
     let mut type_mapping: std::collections::HashMap<u32, u32> = std::collections::HashMap::new();
     let mut modifier_mapping: std::collections::HashMap<usize, u32> = std::collections::HashMap::new();
 

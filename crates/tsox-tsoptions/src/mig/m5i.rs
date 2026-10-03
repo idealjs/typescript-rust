@@ -14,27 +14,27 @@ pub struct SourceOutputAndProjectReference {
 }
 
 impl ParsedCommandLine {
-    pub fn project_references(&self) -> &[tsox_core::core::project_reference::ProjectReference] {
+    pub fn project_references(&self) -> &[tsox_core::core::project_reference::ProjectReference] { ::tsox_core::fntrace::enter("project_references"); 
         &self.references
     }
 
-    pub fn set_compiler_options(&mut self, o: CompilerOptions) {
+    pub fn set_compiler_options(&mut self, o: CompilerOptions) { ::tsox_core::fntrace::enter("set_compiler_options"); 
         self.compiler_options = o;
     }
 
-    pub fn set_parsed_options(&mut self, o: ParsedCommandLine) {
+    pub fn set_parsed_options(&mut self, o: ParsedCommandLine) { ::tsox_core::fntrace::enter("set_parsed_options"); 
         *self = o;
     }
 
-    pub fn set_type_acquisition(&mut self, o: tsox_core::core::mig::m3k::TypeAcquisition) {
+    pub fn set_type_acquisition(&mut self, o: tsox_core::core::mig::m3k::TypeAcquisition) { ::tsox_core::fntrace::enter("set_type_acquisition"); 
         self.type_acquisition = Some(o);
     }
 
-    pub fn type_acquisition(&self) -> Option<&tsox_core::core::mig::m3k::TypeAcquisition> {
+    pub fn type_acquisition(&self) -> Option<&tsox_core::core::mig::m3k::TypeAcquisition> { ::tsox_core::fntrace::enter("type_acquisition"); 
         self.type_acquisition.as_ref()
     }
 
-    pub fn wildcard_directories(&self) -> HashMap<String, bool> {
+    pub fn wildcard_directories(&self) -> HashMap<String, bool> { ::tsox_core::fntrace::enter("wildcard_directories"); 
         super::m5j_3::get_wildcard_directories(
             &self.include,
             &self.exclude,
@@ -45,7 +45,7 @@ impl ParsedCommandLine {
         )
     }
 
-    pub fn file_glob_patterns(&self) -> (String, String) {
+    pub fn file_glob_patterns(&self) -> (String, String) { ::tsox_core::fntrace::enter("file_glob_patterns"); 
         const FILE_GLOB: &str = "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json}";
         const RECURSIVE_FILE_GLOB: &str = "**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts,json}";
         let mapper_extensions = self.content_mapper_extensions();
@@ -65,7 +65,7 @@ impl ParsedCommandLine {
         (file_glob.clone(), format!("**/{file_glob}"))
     }
 
-    pub fn wildcard_directory_globs(&self) -> Vec<tsox_core::glob::Glob> {
+    pub fn wildcard_directory_globs(&self) -> Vec<tsox_core::glob::Glob> { ::tsox_core::fntrace::enter("wildcard_directory_globs"); 
         let wildcard_directories = self.wildcard_directories();
         if wildcard_directories.is_empty() {
             return Vec::new();
@@ -85,13 +85,13 @@ impl ParsedCommandLine {
         globs
     }
 
-    pub fn with_file_names(&self, file_names: Vec<String>) -> ParsedCommandLine {
+    pub fn with_file_names(&self, file_names: Vec<String>) -> ParsedCommandLine { ::tsox_core::fntrace::enter("with_file_names"); 
         let mut result = self.clone();
         result.file_names = file_names;
         result
     }
 
-    pub fn possibly_matches_file_name(&self, file_name: &str) -> bool {
+    pub fn possibly_matches_file_name(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("possibly_matches_file_name"); 
         let path = tsox_core::tspath::to_path(file_name, "", self.use_case_sensitive_file_names());
         if self.file_names.iter().any(|f| {
             tsox_core::tspath::to_path(f, "", self.use_case_sensitive_file_names()) == path
@@ -122,7 +122,7 @@ impl ParsedCommandLine {
         false
     }
 
-    pub fn possibly_matches_directory_name(&self, directory_path: &Path) -> bool {
+    pub fn possibly_matches_directory_name(&self, directory_path: &Path) -> bool { ::tsox_core::fntrace::enter("possibly_matches_directory_name"); 
         for (wildcard_dir, recursive) in &self.wildcard_directories() {
             let wildcard_dir_path =
                 tsox_core::tspath::to_path(wildcard_dir, "", self.use_case_sensitive_file_names());
@@ -137,7 +137,7 @@ impl ParsedCommandLine {
         false
     }
 
-    pub fn reload_file_names_of_parsed_command_line(&self, fs: &dyn FS) -> ParsedCommandLine {
+    pub fn reload_file_names_of_parsed_command_line(&self, fs: &dyn FS) -> ParsedCommandLine { ::tsox_core::fntrace::enter("reload_file_names_of_parsed_command_line"); 
         let mut result = self.clone();
         let (file_names, literal_file_names_len) = get_file_names_from_config_specs(
             &self.files_spec,
@@ -153,7 +153,7 @@ impl ParsedCommandLine {
     }
 }
 
-fn contains_path_str(parent: &str, child: &str) -> bool {
+fn contains_path_str(parent: &str, child: &str) -> bool { ::tsox_core::fntrace::enter("contains_path_str"); 
     use tsox_core::tspath::Path;
     Path::from(parent).contains_path(&Path::from(child))
 }
@@ -178,7 +178,7 @@ mod outputpaths {
     pub fn get_output_declaration_file_name_worker(
         input_file_name: &str,
         options: &CompilerOptions,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_output_declaration_file_name_worker"); 
         let dir = if options.declaration_dir.is_empty() {
             &options.out_dir
         } else {
@@ -200,7 +200,7 @@ mod outputpaths {
         change_to_declaration_extension(&output)
     }
 
-    fn change_to_declaration_extension(path: &str) -> String {
+    fn change_to_declaration_extension(path: &str) -> String { ::tsox_core::fntrace::enter("change_to_declaration_extension"); 
         let path_without_extension = tsox_core::tspath::remove_file_extension(path);
         format!(
             "{}{}",
@@ -213,7 +213,7 @@ mod outputpaths {
 fn get_supported_extensions(
     compiler_options: &CompilerOptions,
     extra_extensions: &[String],
-) -> Vec<Vec<String>> {
+) -> Vec<Vec<String>> { ::tsox_core::fntrace::enter("get_supported_extensions"); 
     let builtins: Vec<Vec<String>> = if compiler_options.get_allow_js() {
         vec![
             vec![
@@ -254,7 +254,7 @@ fn get_supported_extensions(
 fn get_supported_extensions_with_json_if_resolve_json_module(
     compiler_options: &CompilerOptions,
     supported_extensions: &[Vec<String>],
-) -> Vec<Vec<String>> {
+) -> Vec<Vec<String>> { ::tsox_core::fntrace::enter("get_supported_extensions_with_json_if_resolve_json_module"); 
     if !compiler_options.get_resolve_json_module() {
         return supported_extensions.to_vec();
     }
@@ -273,7 +273,7 @@ fn has_file_with_higher_priority_extension(
     file: &str,
     extensions: &[Vec<String>],
     has_file: &dyn Fn(&str) -> bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_file_with_higher_priority_extension"); 
     let mut extension_group: Vec<&str> = Vec::new();
     for group in extensions {
         let group_refs: Vec<&str> = group.iter().map(String::as_str).collect();
@@ -317,7 +317,7 @@ fn remove_wildcard_files_with_lower_priority_extension(
     wildcard_files: &mut tsox_core::collections::ordered_map::OrderedMap<String, String>,
     extensions: &[Vec<String>],
     key_mapper: &dyn Fn(&str) -> String,
-) {
+) { ::tsox_core::fntrace::enter("remove_wildcard_files_with_lower_priority_extension"); 
     let mut extension_group: Vec<&str> = Vec::new();
     for group in extensions {
         let group_refs: Vec<&str> = group.iter().map(String::as_str).collect();
@@ -344,7 +344,7 @@ fn get_file_names_from_config_specs(
     options: &CompilerOptions,
     host: &dyn FS,
     extra_extensions: &[String],
-) -> (Vec<String>, usize) {
+) -> (Vec<String>, usize) { ::tsox_core::fntrace::enter("get_file_names_from_config_specs"); 
     let base_path = tsox_core::tspath::normalize_path(&tsox_core::tspath::get_directory_path(
         &options.config_file_path,
     ));

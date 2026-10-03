@@ -20,7 +20,7 @@ impl Checker {
         check_mode: CheckMode,
         report_errors: bool,
         diagnostic_output: &mut Vec<ast::Diagnostic>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_signature_applicable"); 
         if ast::mig::m3g::is_jsx_call_like(node) {
             return self.check_applicable_signature_for_jsx_call_like_element(
                 node,
@@ -154,7 +154,7 @@ impl Checker {
         type_with_this: &Arc<Type>,
         base_with_this: &Arc<Type>,
         broad_diag: msg::Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("issue_member_specific_error"); 
         let mut issued_member_error = false;
         for member in ast::mig::m3b::members(node) {
             if ast::is_static(&member) {
@@ -208,7 +208,7 @@ impl Checker {
         early_symbols: &mut SymbolTable,
         late_symbols: &mut SymbolTable,
         decl: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("late_bind_member"); 
         if self
             .symbol_node_links
             .get(decl)
@@ -300,7 +300,7 @@ impl Checker {
             .and_then(|l| l.resolved_symbol.clone())
     }
 
-    pub fn mark_decorator_alias_referenced(&mut self, node: &Arc<Node>) {
+    pub fn mark_decorator_alias_referenced(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_decorator_alias_referenced"); 
         if self.compiler_options.emit_decorator_metadata.is_false_or_unknown() {
             return;
         }
@@ -396,7 +396,7 @@ impl Checker {
         declaration: &Arc<Node>,
         t: &Arc<Type>,
         widening_kind: WideningKind,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_implicit_any"); 
         if ast::is_in_js_file(declaration)
             && !self
                 .get_source_file_of_node(declaration)

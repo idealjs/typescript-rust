@@ -8,11 +8,11 @@ pub fn context_with_value<V: Any + Send + Sync>(
     ctx: Context,
     key: &'static str,
     value: V,
-) -> Context {
+) -> Context { crate::fntrace::enter("context_with_value"); 
     ctx.with_value(key, value)
 }
 
-pub fn utf16_len(s: &str) -> usize {
+pub fn utf16_len(s: &str) -> usize { crate::fntrace::enter("utf16_len"); 
     match s.find(|c: char| !c.is_ascii()) {
         None => s.len(),
         Some(i) => {
@@ -25,6 +25,6 @@ pub fn utf16_len(s: &str) -> usize {
     }
 }
 
-pub fn with_request_id(ctx: Context, id: impl Into<String>) -> Context {
+pub fn with_request_id(ctx: Context, id: impl Into<String>) -> Context { crate::fntrace::enter("with_request_id"); 
     context_with_value(ctx, REQUEST_ID_KEY, id.into())
 }

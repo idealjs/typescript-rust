@@ -22,7 +22,7 @@ pub struct WatcherBase {
 }
 
 impl Default for WatcherBase {
-    fn default() -> Self {
+    fn default() -> Self { crate::fntrace::enter("default"); 
         WatcherBase {
             self_backend: Mutex::new(None),
             mu: Mutex::new(WatcherBaseMu {
@@ -34,7 +34,7 @@ impl Default for WatcherBase {
     }
 }
 
-fn panic_message(payload: Box<dyn Any + Send>) -> FswatchError {
+fn panic_message(payload: Box<dyn Any + Send>) -> FswatchError { crate::fntrace::enter("panic_message"); 
     if let Some(s) = payload.downcast_ref::<&str>() {
         return (*s).to_string();
     }
@@ -45,7 +45,7 @@ fn panic_message(payload: Box<dyn Any + Send>) -> FswatchError {
 }
 
 impl WatcherBase {
-    pub fn init(&self, self_backend: Arc<dyn WatcherBackend>) {
+    pub fn init(&self, self_backend: Arc<dyn WatcherBackend>) { crate::fntrace::enter("init"); 
         *self.self_backend.lock().unwrap() = Some(Arc::downgrade(&self_backend));
         let mut mu = self.mu.lock().unwrap();
         mu.subscriptions.clear();
@@ -53,7 +53,7 @@ impl WatcherBase {
         *self.started.0.lock().unwrap() = false;
     }
 
-    fn get_self(&self) -> Option<Arc<dyn WatcherBackend>> {
+    fn get_self(&self) -> Option<Arc<dyn WatcherBackend>> { crate::fntrace::enter("get_self"); 
         self.self_backend
             .lock()
             .unwrap()
@@ -61,7 +61,7 @@ impl WatcherBase {
             .and_then(|w| w.upgrade())
     }
 
-    pub fn notify_started(&self) {
+    pub fn notify_started(&self) { crate::fntrace::enter("notify_started"); 
         let (lock, cv) = &self.started;
         let mut started = lock.lock().unwrap();
         if !*started {
@@ -70,9 +70,9 @@ impl WatcherBase {
         }
     }
 
-    pub fn shutdown(&self) {}
+    pub fn shutdown(&self) { crate::fntrace::enter("shutdown"); }
 
-    pub fn run(self: &Arc<Self>) -> Result<(), FswatchError> {
+    pub fn run(self: &Arc<Self>) -> Result<(), FswatchError> { crate::fntrace::enter("run"); 
         let self_backend = self
             .get_self()
             .ok_or_else(|| "fswatch: watcher base not initialized".to_string())?;
@@ -100,7 +100,7 @@ impl WatcherBase {
         }
     }
 
-    pub fn handle_start_error(&self, err: &FswatchError) {
+    pub fn handle_start_error(&self, err: &FswatchError) { crate::fntrace::enter("handle_start_error"); 
         let subs: Vec<Arc<DirWatch>> = {
             let mut mu = self.mu.lock().unwrap();
             mu.start_err = Some(err.clone());
@@ -112,11 +112,11 @@ impl WatcherBase {
         self.notify_started();
     }
 
-    pub fn watch_add(&self, w: &Arc<DirWatch>) -> Result<(), FswatchError> {
+    pub fn watch_add(&self, w: &Arc<DirWatch>) -> Result<(), FswatchError> { crate::fntrace::enter("watch_add"); 
         self.watch_add_many(std::slice::from_ref(w))
     }
 
-    pub fn watch_add_many(&self, watches: &[Arc<DirWatch>]) -> Result<(), FswatchError> {
+    pub fn watch_add_many(&self, watches: &[Arc<DirWatch>]) -> Result<(), FswatchError> { crate::fntrace::enter("watch_add_many"); 
         let self_backend = self
             .get_self()
             .ok_or_else(|| "fswatch: watcher base not initialized".to_string())?;
@@ -154,7 +154,7 @@ impl WatcherBase {
         Ok(())
     }
 
-    pub fn watch_remove(&self, w: &Arc<DirWatch>) {
+    pub fn watch_remove(&self, w: &Arc<DirWatch>) { crate::fntrace::enter("watch_remove"); 
         let mut mu = self.mu.lock().unwrap();
         if mu
             .subscriptions
@@ -167,7 +167,7 @@ impl WatcherBase {
         }
     }
 
-    pub fn handle_watcher_error(&self, werr: &DirWatchError) {
+    pub fn handle_watcher_error(&self, werr: &DirWatchError) { crate::fntrace::enter("handle_watcher_error"); 
         self.watch_remove(&werr.dir_watch);
         werr
             .dir_watch

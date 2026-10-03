@@ -29,7 +29,7 @@ pub struct ProjectLoadingProgress {
 }
 
 impl ProjectLoadingProgress {
-    pub fn new(reporter: Arc<dyn ProgressReporter>, delay: Duration) -> Arc<Self> {
+    pub fn new(reporter: Arc<dyn ProgressReporter>, delay: Duration) -> Arc<Self> { ::tsox_core::fntrace::enter("new"); 
         let (tx, rx) = mpsc::channel::<ProgressEvent>();
         let reporter_clone = Arc::clone(&reporter);
         let handle = thread::spawn(move || {
@@ -42,7 +42,7 @@ impl ProjectLoadingProgress {
         })
     }
 
-    pub fn start(&self, message: Message, args: Vec<String>) {
+    pub fn start(&self, message: Message, args: Vec<String>) { ::tsox_core::fntrace::enter("start"); 
         let text = self.reporter.localize(&message, &args);
         let _ = self.tx.send(ProgressEvent {
             message,
@@ -51,7 +51,7 @@ impl ProjectLoadingProgress {
         });
     }
 
-    pub fn finish(&self, message: Message, args: Vec<String>) {
+    pub fn finish(&self, message: Message, args: Vec<String>) { ::tsox_core::fntrace::enter("finish"); 
         let text = self.reporter.localize(&message, &args);
         let _ = self.tx.send(ProgressEvent {
             message,
@@ -64,7 +64,7 @@ impl ProjectLoadingProgress {
         rx: mpsc::Receiver<ProgressEvent>,
         reporter: Arc<dyn ProgressReporter>,
         delay: Duration,
-    ) {
+    ) { ::tsox_core::fntrace::enter("run"); 
         let mut loading: HashMap<String, i32> = HashMap::new();
         let mut token = String::new();
         let mut token_id = 0i32;
@@ -136,7 +136,7 @@ impl ProjectLoadingProgress {
         token: &str,
         text: &str,
         begun: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("begin_or_report"); 
         if !begun {
             let title = "Loading".to_string();
             reporter.send_progress(

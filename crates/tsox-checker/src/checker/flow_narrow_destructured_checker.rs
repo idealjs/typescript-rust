@@ -10,7 +10,7 @@ impl Checker {
         &self,
         expr: &Arc<Node>,
         pattern: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("binding_pattern_sibling_access"); 
         if expr.kind != SyntaxKind::Identifier {
             return None;
         }
@@ -36,7 +36,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         location: &Arc<Node>,
         location_flow: &Arc<FlowNode>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("narrow_destructured_symbol_type"); 
         let decl = Arc::clone(symbol.value_declaration.as_ref()?);
         if !matches!(decl.kind, SyntaxKind::BindingElement) {
             return None;
@@ -105,7 +105,7 @@ impl Checker {
         pattern_parent: &Arc<Node>,
         parent_type: &Arc<Type>,
         location_flow: &Arc<FlowNode>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("narrow_destructured_by_element_access"); 
         if parent_type.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
             return Some(Arc::clone(parent_type));
         }
@@ -170,7 +170,7 @@ impl Checker {
         pattern: &Arc<Node>,
         location_flow: &Arc<FlowNode>,
         constraint: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("narrow_binding_pattern_reference"); 
         let target = FlowRef::Node(Arc::clone(pattern));
         let key = self.flow_cache_key(&target, location_flow, constraint);
         if let Some(cached) = self.flow_type_cache.get(&key) {
@@ -184,7 +184,7 @@ impl Checker {
         Some(narrowed)
     }
 
-    fn type_for_binding_pattern_parent(&mut self, parent: &Arc<Node>) -> Option<Arc<Type>> {
+    fn type_for_binding_pattern_parent(&mut self, parent: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_for_binding_pattern_parent"); 
         let (type_node, initializer) = match &parent.data {
             NodeData::VariableDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
             NodeData::ParameterDeclaration(d) => (d.type_node.clone(), d.initializer.clone()),
@@ -200,7 +200,7 @@ impl Checker {
         }
     }
 
-    fn constituents_base_constraint_union(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn constituents_base_constraint_union(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("constituents_base_constraint_union"); 
         let constituents = self.constituent_types(t);
         if !constituents.iter().any(|c| c.flags.intersects(TYPE_FLAGS_INSTANTIABLE)) {
             return Arc::clone(t);
@@ -222,7 +222,7 @@ impl Checker {
         decl: &Arc<Node>,
         pattern_parent: &Arc<Node>,
         parent_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("binding_element_type_from_parent_type"); 
         if parent_type.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
             return Some(Arc::clone(parent_type));
         }

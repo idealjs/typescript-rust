@@ -10,7 +10,7 @@ use crate::ls::types::{DocumentSymbol, SymbolKind};
 
 pub const M5X_MAX_LENGTH: usize = 150;
 
-fn spanmap_feature_document_symbols() -> u32 {
+fn spanmap_feature_document_symbols() -> u32 { ::tsox_core::fntrace::enter("spanmap_feature_document_symbols"); 
     crate::mig::m6b_2::FEATURE_DOCUMENT_SYMBOLS as u32
 }
 
@@ -25,7 +25,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         file: &Arc<SourceFile>,
         document_uri: &DocumentUri,
-    ) -> Vec<crate::ls::types::SymbolInformation> {
+    ) -> Vec<crate::ls::types::SymbolInformation> { ::tsox_core::fntrace::enter("get_document_symbol_informations"); 
         let doc_symbols = crate::ls::symbols::get_document_symbols_for_children(
             &file.node,
             file,
@@ -37,7 +37,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         programs: &[Arc<tsox_compile::compiler::Program>],
         query: &str,
-    ) -> Vec<crate::ls::types::SymbolInformation> {
+    ) -> Vec<crate::ls::types::SymbolInformation> { ::tsox_core::fntrace::enter("provide_workspace_symbols"); 
         let preferences = self.user_preferences();
         let exclude_library_symbols = preferences.exclude_library_symbols_in_nav_to.is_true();
         let mut source_files: HashMap<String, Arc<SourceFile>> = HashMap::new();
@@ -116,13 +116,13 @@ impl crate::ls::language_service::LanguageService {
 pub fn flatten_document_symbols(
     doc_symbols: Vec<DocumentSymbol>,
     document_uri: &DocumentUri,
-) -> Vec<crate::ls::types::SymbolInformation> {
+) -> Vec<crate::ls::types::SymbolInformation> { ::tsox_core::fntrace::enter("flatten_document_symbols"); 
     fn flatten(
         symbols: &[DocumentSymbol],
         container_name: Option<String>,
         document_uri: &DocumentUri,
         result: &mut Vec<crate::ls::types::SymbolInformation>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("flatten"); 
         for symbol in symbols {
             result.push(crate::ls::types::SymbolInformation {
                 name: symbol.name.clone(),
@@ -147,7 +147,7 @@ pub fn flatten_document_symbols(
     result
 }
 
-pub fn is_prototype_expando(target: &Arc<Node>) -> bool {
+pub fn is_prototype_expando(target: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_prototype_expando"); 
     if ast::is_access_expression(target) {
         let access_name = ast::mig::m3e_4::get_element_or_property_access_name(target);
         return access_name.map(|n| ast::node_text(&n) == "prototype").unwrap_or(false);
@@ -155,7 +155,7 @@ pub fn is_prototype_expando(target: &Arc<Node>) -> bool {
     false
 }
 
-pub fn merge_expandos(symbols: Vec<DocumentSymbol>) -> Vec<DocumentSymbol> {
+pub fn merge_expandos(symbols: Vec<DocumentSymbol>) -> Vec<DocumentSymbol> { ::tsox_core::fntrace::enter("merge_expandos"); 
     let mut symbols: Vec<Option<DocumentSymbol>> = symbols.into_iter().map(Some).collect();
     let mut name_to_expando_target_index: HashMap<String, Vec<usize>> = HashMap::new();
     let mut name_to_namespace_index: HashMap<String, usize> = HashMap::new();
@@ -218,7 +218,7 @@ pub fn merge_expandos(symbols: Vec<DocumentSymbol>) -> Vec<DocumentSymbol> {
     symbols.into_iter().flatten().collect()
 }
 
-pub fn merge_children(target: &mut DocumentSymbol, source: &DocumentSymbol) {
+pub fn merge_children(target: &mut DocumentSymbol, source: &DocumentSymbol) { ::tsox_core::fntrace::enter("merge_children"); 
     if let Some(source_children) = &source.children {
         match &mut target.children {
             None => target.children = Some(source_children.clone()),
@@ -235,7 +235,7 @@ pub fn merge_children(target: &mut DocumentSymbol, source: &DocumentSymbol) {
     }
 }
 
-pub fn is_anonymous_name(name: &str) -> bool {
+pub fn is_anonymous_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_anonymous_name"); 
     name == "<function>"
         || name == "<class>"
         || name == "export="
@@ -247,7 +247,7 @@ pub fn is_anonymous_name(name: &str) -> bool {
         || name.ends_with(") callback")
 }
 
-pub fn get_text_of_name(node: &Arc<Node>) -> String {
+pub fn get_text_of_name(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_text_of_name"); 
     match node.kind {
         SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier | SyntaxKind::NumericLiteral => {
             ast::node_text(node).to_string()
@@ -275,7 +275,7 @@ pub fn get_text_of_name(node: &Arc<Node>) -> String {
     }
 }
 
-pub fn get_unnamed_node_label(node: &Arc<Node>) -> String {
+pub fn get_unnamed_node_label(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_unnamed_node_label"); 
     if let Some(parent) = node.parent() {
         let parent = crate::ls::mig::m5x::walk_up_parenthesized_expressions(&parent);
         if ast::is_export_assignment(&parent) {
@@ -332,7 +332,7 @@ pub fn get_unnamed_node_label(node: &Arc<Node>) -> String {
     }
 }
 
-pub fn get_call_expression_name(node: &Arc<Node>) -> String {
+pub fn get_call_expression_name(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_call_expression_name"); 
     match node.kind {
         SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier => ast::node_text(node).to_string(),
         SyntaxKind::PropertyAccessExpression => {
@@ -352,7 +352,7 @@ pub fn get_call_expression_name(node: &Arc<Node>) -> String {
     }
 }
 
-pub fn get_call_expression_literal_args(call_expr: &Arc<Node>) -> String {
+pub fn get_call_expression_literal_args(call_expr: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_call_expression_literal_args"); 
     let mut parts: Vec<String> = Vec::new();
     for arg in crate::ls::mig::m5x_3::call_expression_arguments(call_expr) {
         if ast::is_string_literal_like(&arg) || ast::is_template_expression(&arg) {
@@ -362,7 +362,7 @@ pub fn get_call_expression_literal_args(call_expr: &Arc<Node>) -> String {
     parts.join(", ")
 }
 
-pub fn clean_callback_text(text: &str) -> String {
+pub fn clean_callback_text(text: &str) -> String { ::tsox_core::fntrace::enter("clean_callback_text"); 
     let truncated = tsox_core::stringutil::mig::m3m_2::truncate_by_runes(text, M5X_MAX_LENGTH);
     let mut text = text.to_string();
     if truncated.len() < text.len() {
@@ -373,7 +373,7 @@ pub fn clean_callback_text(text: &str) -> String {
         .collect()
 }
 
-pub fn get_interior_module(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_interior_module(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_interior_module"); 
     let mut current = Arc::clone(node);
     while let Some(body) = crate::ls::mig::m5x_3::module_declaration_body(&current) {
         if !ast::is_module_declaration(&body) {
@@ -388,16 +388,16 @@ pub fn should_exclude_file(
     file: &Arc<SourceFile>,
     program: &Arc<tsox_compile::compiler::Program>,
     exclude_library_symbols: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_exclude_file"); 
     exclude_library_symbols
         && (is_inside_node_modules(&file.file_name) || program.is_lib_file(file))
 }
 
-pub fn is_inside_node_modules(file_name: &str) -> bool {
+pub fn is_inside_node_modules(file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_inside_node_modules"); 
     file_name.contains("/node_modules/")
 }
 
-pub fn get_match_score(s: &str, pattern: &str) -> i64 {
+pub fn get_match_score(s: &str, pattern: &str) -> i64 { ::tsox_core::fntrace::enter("get_match_score"); 
     let mut score: i64 = 0;
     let mut chars = s.char_indices().peekable();
     let mut rest = s;
@@ -417,7 +417,7 @@ pub fn get_match_score(s: &str, pattern: &str) -> i64 {
     score
 }
 
-pub fn compare_declaration_infos(d1: &M5xDeclarationInfo, d2: &M5xDeclarationInfo) -> std::cmp::Ordering {
+pub fn compare_declaration_infos(d1: &M5xDeclarationInfo, d2: &M5xDeclarationInfo) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_declaration_infos"); 
     if d1.match_score != d2.match_score {
         return d1.match_score.cmp(&d2.match_score);
     }

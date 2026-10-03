@@ -5,7 +5,7 @@ use tsox_frontend::ast::Node;
 use std::sync::Arc;
 
 impl Checker {
-    pub(crate) fn merge_module_augmentation(&mut self, name_node: &Arc<Node>, module_node: &Arc<Node>) {
+    pub(crate) fn merge_module_augmentation(&mut self, name_node: &Arc<Node>, module_node: &Arc<Node>) { ::tsox_core::fntrace::enter("merge_module_augmentation"); 
         // 同文件多处增强共享合并符号：仅处理首个声明（Go combined-symbol guard）
         let Some(aug_sym) = self.program.symbol_map().symbol_of(module_node).cloned() else {
             return;
@@ -75,7 +75,7 @@ impl Checker {
         &mut self,
         target: &Arc<Symbol>,
         source: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("module_augmentation_merge_conflict"); 
         let conflict = target
             .flags
             .intersects(get_excluded_symbol_flags(source.flags))
@@ -99,7 +99,7 @@ impl Checker {
         &mut self,
         target: &Arc<Symbol>,
         source: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_cannot_augment_with_value_exports"); 
         if self
             .global_this_symbol
             .as_ref()
@@ -129,7 +129,7 @@ impl Checker {
         &mut self,
         target: &Arc<Symbol>,
         augmentation: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("merge_augmentation_exports"); 
         for (key, aug_export) in augmentation.exports.entries.iter() {
             if let Some(existing) = target.exports.entries.get(key).cloned() {
                 if Arc::ptr_eq(&existing, aug_export) {

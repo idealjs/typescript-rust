@@ -17,7 +17,7 @@ impl Checker {
         node: &Arc<Node>,
         flags: &SymbolFlags,
         container: &Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_symbol_kind"); 
         if flags.intersects(SymbolFlags::VARIABLE | SymbolFlags::Property | SymbolFlags::ACCESSOR) {
             // 调用位/new 位/签名 union 的特殊形态（迁移自旧管线）
             if let Some(parts) = self.hover_variable_call_site_parts(symbol, node) {
@@ -84,7 +84,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         container: Option<&Arc<Node>>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("hover_symbol_name"); 
         if let Some(c) = container
             && symbol.declarations.iter().any(|d| {
                 let mut cur = Some(Arc::clone(d));
@@ -108,7 +108,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         _container: &Option<Arc<Node>>,
         node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_variable"); 
         b.write_new_line();
         if symbol
             .check_flags
@@ -210,7 +210,7 @@ impl Checker {
                 b.extend(self.type_to_display_parts(&t));
     }
 
-    fn hover_write_enum_member(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) {
+    fn hover_write_enum_member(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("hover_write_enum_member"); 
         b.write_new_line();
         b.write_punctuation("(");
         b.write_text("enum member", DisplayPartKind::Text);
@@ -232,7 +232,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) -> Option<Vec<SymbolDisplayPart>> {
+    ) -> Option<Vec<SymbolDisplayPart>> { ::tsox_core::fntrace::enter("hover_variable_call_site_parts"); 
         if let Some(call) = Checker::enclosing_call_or_new(node)
             && call.kind == SyntaxKind::NewExpression
             && let Some(sig) = self.resolved_call_signature(&call)
@@ -317,7 +317,7 @@ impl Checker {
         b: &mut HoverPartsBuilder,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_function"); 
         let is_method = symbol.flags.intersects(SymbolFlags::Method)
             || symbol.declarations.iter().any(|d| {
                 matches!(d.kind, SyntaxKind::MethodDeclaration | SyntaxKind::MethodSignature)
@@ -348,7 +348,7 @@ impl Checker {
     fn hover_signature_of_method_declaration(
         &mut self,
         parent: &Arc<Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("hover_signature_of_method_declaration"); 
         let NodeData::MethodDeclaration(d) = &parent.data else {
             return None;
         };
@@ -367,7 +367,7 @@ impl Checker {
     }
 
     /// 交集类型变量调用位：取首个带调用签名的成分（Go 结构化成员合并的近似）
-    fn first_call_signature_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Signature>> {
+    fn first_call_signature_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("first_call_signature_of_symbol"); 
         let t = self.get_type_of_symbol(symbol);
         if !t.is_intersection() {
             return None;
@@ -384,7 +384,7 @@ impl Checker {
         None
     }
 
-    fn hover_write_type_parameter(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) {
+    fn hover_write_type_parameter(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("hover_write_type_parameter"); 
         b.write_new_line();
         b.write_punctuation("(");
         b.write_text("type parameter", DisplayPartKind::Text);
@@ -452,7 +452,7 @@ impl Checker {
         }
     }
 
-    fn hover_write_type_alias(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) {
+    fn hover_write_type_alias(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("hover_write_type_alias"); 
         b.write_new_line();
         b.write_keyword("type ");
         b.write_text(&symbol.name, DisplayPartKind::InterfaceName);
@@ -471,7 +471,7 @@ impl Checker {
         ));
     }
 
-    pub(crate) fn hover_write_declared_type_params(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) {
+    pub(crate) fn hover_write_declared_type_params(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("hover_write_declared_type_params"); 
         // 声明节点的类型参数直渲染（名字/extends/default），不依赖已构建的类型
         for decl in &symbol.declarations {
             let tps = match &decl.data {
@@ -487,7 +487,7 @@ impl Checker {
     }
 
     /// 类型别名的类型参数声明
-    fn type_alias_type_param_decls(&self, symbol: &Arc<Symbol>) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+    fn type_alias_type_param_decls(&self, symbol: &Arc<Symbol>) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("type_alias_type_param_decls"); 
         for decl in &symbol.declarations {
             if let tsox_frontend::ast::NodeData::TypeAliasDeclaration(d) = &decl.data {
                 return d.type_parameters.clone();
@@ -497,7 +497,7 @@ impl Checker {
     }
 }
 
-fn shorthand_widen_type(checker: &mut Checker, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+fn shorthand_widen_type(checker: &mut Checker, symbol: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("shorthand_widen_type"); 
     // reverse-mapped 合成符号复制了源属性声明（含 shorthand），但类型始终经
     // reverse links 惰性推断（Go getTypeOfReverseMappedSymbol），不做 shorthand 改道
     if symbol
@@ -518,7 +518,7 @@ fn shorthand_widen_type(checker: &mut Checker, symbol: &Arc<Symbol>) -> Option<A
 
 impl Checker {
     /// node 是 PAE 名字段，且所在访问是可选链最外层、链下方存在 ?.
-    fn is_outermost_optional_chain_access(&self, node: &Arc<Node>) -> bool {
+    fn is_outermost_optional_chain_access(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_outermost_optional_chain_access"); 
         let Some(parent) = node.parent() else {
             return false;
         };
@@ -552,7 +552,7 @@ impl Checker {
         self.receiver_chain_has_question_dot(&parent)
     }
 
-    fn receiver_chain_has_question_dot(&self, access: &Arc<Node>) -> bool {
+    fn receiver_chain_has_question_dot(&self, access: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("receiver_chain_has_question_dot"); 
         let NodeData::PropertyAccessExpression(d) = &access.data else {
             return false;
         };
@@ -583,7 +583,7 @@ impl Checker {
         }
     }
 
-    fn add_optional_chain_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn add_optional_chain_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("add_optional_chain_undefined"); 
         let undef = self.undefined_type();
         if t.flags.contains(TypeFlags::Undefined) {
             return Arc::clone(t);

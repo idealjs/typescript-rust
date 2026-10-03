@@ -8,7 +8,7 @@ pub fn create_instantiated_symbol_table_opt(
     checker: &mut Checker,
     symbols: &[Arc<Symbol>],
     m: Option<&Arc<crate::checker::types_impl_chunk::TypeMapper>>,
-) -> SymbolTable {
+) -> SymbolTable { ::tsox_core::fntrace::enter("create_instantiated_symbol_table_opt"); 
     if symbols.is_empty() {
         return SymbolTable::new();
     }
@@ -22,7 +22,7 @@ pub fn create_instantiated_symbol_table_opt(
     result
 }
 
-pub fn r25k2_as_heritage_clause(n: &Node) -> &tsox_frontend::ast::node_data_generated::HeritageClauseData {
+pub fn r25k2_as_heritage_clause(n: &Node) -> &tsox_frontend::ast::node_data_generated::HeritageClauseData { ::tsox_core::fntrace::enter("r25k2_as_heritage_clause"); 
     match &n.data {
         NodeData::HeritageClause(d) => d,
         _ => panic!("AsHeritageClause on wrong node kind"),
@@ -30,7 +30,7 @@ pub fn r25k2_as_heritage_clause(n: &Node) -> &tsox_frontend::ast::node_data_gene
 }
 
 impl Checker {
-    pub(crate) fn add_undefined_to_globals_or_error_on_redeclaration(&mut self) {
+    pub(crate) fn add_undefined_to_globals_or_error_on_redeclaration(&mut self) { ::tsox_core::fntrace::enter("add_undefined_to_globals_or_error_on_redeclaration"); 
         let name = self
             .undefined_symbol
             .as_ref()

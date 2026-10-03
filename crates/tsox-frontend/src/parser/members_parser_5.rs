@@ -3,7 +3,7 @@
 use crate::parser::members::*;
 
 impl Parser {
-    pub(crate) fn parse_error_for_missing_semicolon_after(&mut self, node: &Arc<Node>) {
+    pub(crate) fn parse_error_for_missing_semicolon_after(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("parse_error_for_missing_semicolon_after"); 
         let expression_text = if node.kind == SyntaxKind::Identifier {
             node.text().to_string()
         } else {
@@ -131,7 +131,7 @@ impl Parser {
         &mut self,
         name_diagnostic: Message,
         blank_diagnostic: Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("parse_error_for_invalid_name"); 
         if self.token == SyntaxKind::OpenBraceToken {
             self.parse_error_at_current_token(blank_diagnostic, &[]);
         } else {
@@ -145,7 +145,7 @@ impl Parser {
         pos: usize,
         modifiers: Option<Arc<ModifierList>>,
         accessor_kind: SyntaxKind,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_accessor_declaration"); 
         self.next_token();
         let name = self.parse_property_name();
         let saved_yield = self.yield_context;
@@ -198,7 +198,7 @@ impl Parser {
         }
     }
 
-    pub fn diagnostics(&self) -> &[ParserDiagnostic] {
+    pub fn diagnostics(&self) -> &[ParserDiagnostic] { ::tsox_core::fntrace::enter("diagnostics"); 
         &self.diagnostics
     }
 }

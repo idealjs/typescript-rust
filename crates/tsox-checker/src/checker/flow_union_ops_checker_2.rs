@@ -7,7 +7,7 @@ impl Checker {
         &self,
         type_: &Arc<Type>,
         falsy_flags: TypeFlags,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_falsy_from_union"); 
         let constituents = self.constituent_types(type_);
         let remaining: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -63,7 +63,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn filter_to_falsy(&self, type_: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn filter_to_falsy(&self, type_: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_to_falsy"); 
         let constituents = self.constituent_types(type_);
         let falsy_flags =
             TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Void | TypeFlags::BooleanLiteral;
@@ -123,7 +123,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("intersect_or_narrow"); 
         // Go getNarrowedTypeWorker（assumeTrue）：对候选（谓词）成分逐个与源
         // 成分做 strictSubtype/subtype 四级阶梯，取更具体侧且谓词侧优先
         //（{} 与全可选属性类型双向可赋值，须靠 strictSubtype 分出谓词侧）；
@@ -184,7 +184,7 @@ impl Checker {
         self.get_intersection_type(vec![Arc::clone(type_), Arc::clone(value_type)])
     }
 
-    pub(crate) fn types_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+    pub(crate) fn types_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("types_overlap"); 
         if a.flags.contains(TypeFlags::Union)
             || b.flags.contains(TypeFlags::Union)
             || a.flags.contains(TypeFlags::Intersection)
@@ -204,7 +204,7 @@ impl Checker {
         self.literals_overlap(a, b)
     }
 
-    pub(crate) fn literals_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+    pub(crate) fn literals_overlap(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("literals_overlap"); 
         let a_is_literal = a.flags.intersects(
             TypeFlags::StringLiteral
                 | TypeFlags::NumberLiteral
@@ -233,7 +233,7 @@ impl Checker {
         a.flags.intersects(b.flags)
     }
 
-    pub(crate) fn is_symbol_identifier(&self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_symbol_identifier(&self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_symbol_identifier"); 
         if matches!(
             node.kind,
             SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement
@@ -262,7 +262,7 @@ impl Checker {
         node_name == &symbol.name
     }
 
-    pub(crate) fn expr_matches_target(&self, node: &Arc<Node>, target: &FlowRef) -> bool {
+    pub(crate) fn expr_matches_target(&self, node: &Arc<Node>, target: &FlowRef) -> bool { ::tsox_core::fntrace::enter("expr_matches_target"); 
         match target {
             FlowRef::Symbol(symbol) => self.is_symbol_identifier(node, symbol),
             FlowRef::Node(reference) => self.is_matching_reference(reference, node),

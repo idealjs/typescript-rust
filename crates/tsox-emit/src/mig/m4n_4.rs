@@ -37,7 +37,7 @@ pub struct AssignedNameOptions {
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn create_expression_from_entity_name(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn create_expression_from_entity_name(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_expression_from_entity_name"); 
         if is_qualified_name(node) {
             let left = self.create_expression_from_entity_name(&node.as_qualified_name().left);
             let mut right = deep_clone_node(&node.as_qualified_name().right);
@@ -66,7 +66,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         node: &Arc<Node>,
         bound_value: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_for_of_binding_statement"); 
         if is_variable_declaration_list(node) {
             let first_declaration =
                 Arc::clone(&node.as_variable_declaration_list().declarations.nodes[0]);
@@ -104,7 +104,7 @@ impl<'a> NodeFactory<'a> {
         statement
     }
 
-    pub fn ensure_use_strict(&self, statements: Vec<Arc<Node>>) -> Vec<Arc<Node>> {
+    pub fn ensure_use_strict(&self, statements: Vec<Arc<Node>>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("ensure_use_strict"); 
         if let Some(first) = statements.first() {
             if is_prologue_directive(first)
                 && first.expression().map(|e| e.text()).as_deref() == Some("use strict")
@@ -119,11 +119,11 @@ impl<'a> NodeFactory<'a> {
         result
     }
 
-    pub fn get_declaration_name(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_declaration_name(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_declaration_name"); 
         self.get_declaration_name_ex(node, NameOptions::default())
     }
 
-    pub fn get_declaration_name_ex(&self, node: &Arc<Node>, opts: NameOptions) -> Arc<Node> {
+    pub fn get_declaration_name_ex(&self, node: &Arc<Node>, opts: NameOptions) -> Arc<Node> { ::tsox_core::fntrace::enter("get_declaration_name_ex"); 
         self.get_name(
             node,
             EmitFlags::NONE,
@@ -135,11 +135,11 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn get_export_name(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_export_name(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_export_name"); 
         self.get_export_name_ex(node, AssignedNameOptions::default())
     }
 
-    pub fn get_export_name_ex(&self, node: &Arc<Node>, opts: AssignedNameOptions) -> Arc<Node> {
+    pub fn get_export_name_ex(&self, node: &Arc<Node>, opts: AssignedNameOptions) -> Arc<Node> { ::tsox_core::fntrace::enter("get_export_name_ex"); 
         self.get_name(node, EmitFlags::EXPORT_NAME, opts)
     }
 
@@ -149,7 +149,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         allow_comments: bool,
         allow_source_maps: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_external_module_or_namespace_export_name"); 
         if let Some(ns) = ns {
             if has_syntactic_modifier(node, ModifierFlags::Export) {
                 let name_opts = NameOptions {
@@ -173,11 +173,11 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn get_local_name(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_local_name(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_local_name"); 
         self.get_local_name_ex(node, AssignedNameOptions::default())
     }
 
-    pub fn get_local_name_ex(&self, node: &Arc<Node>, opts: AssignedNameOptions) -> Arc<Node> {
+    pub fn get_local_name_ex(&self, node: &Arc<Node>, opts: AssignedNameOptions) -> Arc<Node> { ::tsox_core::fntrace::enter("get_local_name_ex"); 
         self.get_name(node, EmitFlags::LOCAL_NAME, opts)
     }
 
@@ -186,7 +186,7 @@ impl<'a> NodeFactory<'a> {
         ns: &Arc<Node>,
         name: &Arc<Node>,
         opts: NameOptions,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_namespace_member_name"); 
         let name = if !(self.emit_context).has_auto_generate_info(name) {
             deep_clone_node(name)
         } else {
@@ -207,7 +207,7 @@ impl<'a> NodeFactory<'a> {
         qualified_name
     }
 
-    pub fn inline_expressions(&self, expressions: Vec<Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn inline_expressions(&self, expressions: Vec<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("inline_expressions"); 
         if expressions.is_empty() {
             return None;
         }
@@ -224,7 +224,7 @@ impl<'a> NodeFactory<'a> {
         Some(expression)
     }
 
-    pub fn new_array_slice_call(&self, array: &Arc<Node>, start: i32) -> Arc<Node> {
+    pub fn new_array_slice_call(&self, array: &Arc<Node>, start: i32) -> Arc<Node> { ::tsox_core::fntrace::enter("new_array_slice_call"); 
         let mut args = Vec::new();
         if start != 0 {
             args.push(self.new_numeric_literal(&start.to_string(), 0));
@@ -236,7 +236,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         attributes_segments: Vec<Arc<Node>>,
         script_target: ScriptTarget,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_assign_helper"); 
         self.new_call_expression(
             &self.new_property_access_expression(
                 &self.new_identifier("Object"),
@@ -255,7 +255,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         left: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_assignment_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -265,7 +265,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_comma_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    pub fn new_comma_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_comma_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -275,7 +275,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_false_expression(&self) -> Arc<Node> {
+    pub fn new_false_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_false_expression"); 
         self.new_keyword_expression(SyntaxKind::FalseKeyword)
     }
 }

@@ -14,7 +14,7 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-pub(crate) fn conditional_type_instantiations_get(root_key: usize, key: u64) -> Option<Arc<Type>> {
+pub(crate) fn conditional_type_instantiations_get(root_key: usize, key: u64) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("conditional_type_instantiations_get"); 
     CONDITIONAL_INSTANTIATIONS.with(|cache| {
         cache
             .borrow()
@@ -24,7 +24,7 @@ pub(crate) fn conditional_type_instantiations_get(root_key: usize, key: u64) -> 
     })
 }
 
-pub(crate) fn conditional_type_instantiations_insert(root_key: usize, key: u64, t: Arc<Type>) {
+pub(crate) fn conditional_type_instantiations_insert(root_key: usize, key: u64, t: Arc<Type>) { ::tsox_core::fntrace::enter("conditional_type_instantiations_insert"); 
     CONDITIONAL_INSTANTIATIONS.with(|cache| {
         cache
             .borrow_mut()
@@ -34,7 +34,7 @@ pub(crate) fn conditional_type_instantiations_insert(root_key: usize, key: u64, 
     });
 }
 
-pub(crate) fn type_resolution_has_property_shared(checker: &Checker, r: &TypeResolution) -> bool {
+pub(crate) fn type_resolution_has_property_shared(checker: &Checker, r: &TypeResolution) -> bool { ::tsox_core::fntrace::enter("type_resolution_has_property_shared"); 
     match r.property_name {
         TypeSystemPropertyName::Type => r
             .target
@@ -87,7 +87,7 @@ pub(crate) fn type_resolution_has_property_shared(checker: &Checker, r: &TypeRes
 }
 
 impl Checker {
-    pub fn evaluate(&mut self, expr: &Arc<Node>, location: Option<&Arc<Node>>) -> EvalResult {
+    pub fn evaluate(&mut self, expr: &Arc<Node>, location: Option<&Arc<Node>>) -> EvalResult { ::tsox_core::fntrace::enter("evaluate"); 
         let mut entity_fn =
             |expr: &Arc<Node>, loc: Option<&Arc<Node>>| self.evaluate_entity(expr, loc);
         tsox_frontend::evaluator::evaluate_expression(expr, location, &mut entity_fn)

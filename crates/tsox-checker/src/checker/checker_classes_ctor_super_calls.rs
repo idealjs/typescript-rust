@@ -7,7 +7,7 @@ use tsox_frontend::scanner::skip_trivia;
 impl Checker {
     // Go checkConstructorDeclaration 尾段：派生类构造器 super 调用
     // 检查（缺失/extends null/根层级要求）
-    pub(crate) fn check_constructor_super_calls(&mut self, ctor: &Arc<Node>, body: &Arc<Node>) {
+    pub(crate) fn check_constructor_super_calls(&mut self, ctor: &Arc<Node>, body: &Arc<Node>) { ::tsox_core::fntrace::enter("check_constructor_super_calls"); 
         let Some(class_decl) = ctor.parent() else {
             return;
         };
@@ -51,7 +51,7 @@ impl Checker {
         class_decl: &Arc<Node>,
         super_call: &Arc<Node>,
         body: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_super_call_root_level"); 
         if self.emit_standard_class_fields {
             return;
         }
@@ -109,7 +109,7 @@ impl Checker {
 
     // Go scanner.GetErrorRangeForNode KindConstructor 分支：报错定位到
     // constructor 关键字 token
-    fn constructor_keyword_loc(&self, ctor: &Arc<Node>) -> tsox_core::core::text::TextRange {
+    fn constructor_keyword_loc(&self, ctor: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("constructor_keyword_loc"); 
         let Some(file) = &self.current_file else {
             return ctor.loc;
         };
@@ -130,7 +130,7 @@ impl Checker {
 }
 
 // Go ast.GetClassExtendsHeritageElement
-pub(crate) fn class_extends_heritage_element(class_node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn class_extends_heritage_element(class_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_extends_heritage_element"); 
     let heritage = match &class_node.data {
         NodeData::ClassDeclaration(d) => d.heritage_clauses.clone(),
         NodeData::ClassExpression(d) => d.heritage_clauses.clone(),
@@ -144,7 +144,7 @@ pub(crate) fn class_extends_heritage_element(class_node: &Arc<Node>) -> Option<A
     })
 }
 
-pub(crate) fn expression_with_type_arguments_expression(node: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn expression_with_type_arguments_expression(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("expression_with_type_arguments_expression"); 
     match &node.data {
         NodeData::ExpressionWithTypeArguments(d) => Arc::clone(&d.expression),
         _ => Arc::clone(node),
@@ -152,14 +152,14 @@ pub(crate) fn expression_with_type_arguments_expression(node: &Arc<Node>) -> Arc
 }
 
 // Go classDeclarationExtendsNull 的语法位近似：extends 表达式为 null 字面量
-pub(crate) fn class_decl_extends_null(class_node: &Arc<Node>) -> bool {
+pub(crate) fn class_decl_extends_null(class_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_decl_extends_null"); 
     class_extends_heritage_element(class_node)
         .map(|e| expression_with_type_arguments_expression(&e).kind == SyntaxKind::NullKeyword)
         .unwrap_or(false)
 }
 
 // Go findFirstSuperCall：不进入嵌套函数体
-fn find_first_super_call(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_first_super_call(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_super_call"); 
     if is_super_call(node) {
         return Some(Arc::clone(node));
     }
@@ -177,7 +177,7 @@ fn find_first_super_call(node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 // Go isPrivateIdentifierClassElementDeclaration
-fn is_private_identifier_class_element_declaration(member: &Arc<Node>) -> bool {
+fn is_private_identifier_class_element_declaration(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_class_element_declaration"); 
     member
         .name()
         .is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier)
@@ -190,7 +190,7 @@ fn is_private_identifier_class_element_declaration(member: &Arc<Node>) -> bool {
         )
 }
 
-fn class_members(class_decl: &Arc<Node>) -> Arc<NodeList> {
+fn class_members(class_decl: &Arc<Node>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("class_members"); 
     match &class_decl.data {
         NodeData::ClassDeclaration(d) => Arc::clone(&d.members),
         NodeData::ClassExpression(d) => Arc::clone(&d.members),
@@ -198,14 +198,14 @@ fn class_members(class_decl: &Arc<Node>) -> Arc<NodeList> {
     }
 }
 
-fn ctor_parameters(ctor: &Arc<Node>) -> Arc<NodeList> {
+fn ctor_parameters(ctor: &Arc<Node>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("ctor_parameters"); 
     match &ctor.data {
         NodeData::ConstructorDeclaration(d) => Arc::clone(&d.parameters),
         _ => Arc::new(NodeList::new(vec![])),
     }
 }
 
-fn block_statements(body: &Arc<Node>) -> Arc<NodeList> {
+fn block_statements(body: &Arc<Node>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("block_statements"); 
     match &body.data {
         NodeData::Block(b) => Arc::clone(&b.statements),
         _ => Arc::new(NodeList::new(vec![])),
@@ -214,7 +214,7 @@ fn block_statements(body: &Arc<Node>) -> Arc<NodeList> {
 
 // Go superCallIsRootLevelInConstructor：super 调用经括号上溯后须为
 // 构造器 body 的顶层表达式语句
-fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
+fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("walk_up_parenthesized_expressions"); 
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::ParenthesizedExpression {
         let Some(parent) = current.parent() else {
@@ -226,7 +226,7 @@ fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
 }
 
 // Go nodeImmediatelyReferencesSuperOrThis
-fn node_immediately_references_super_or_this(node: &Arc<Node>) -> bool {
+fn node_immediately_references_super_or_this(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_immediately_references_super_or_this"); 
     match node.kind {
         SyntaxKind::SuperKeyword | SyntaxKind::ThisKeyword => true,
         SyntaxKind::ArrowFunction
@@ -251,7 +251,7 @@ fn node_immediately_references_super_or_this(node: &Arc<Node>) -> bool {
     }
 }
 
-fn node_immediately_references_children(node: &Arc<Node>) -> bool {
+fn node_immediately_references_children(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_immediately_references_children"); 
     let mut found = false;
     for_each_child(node, |child| {
         if !found {
@@ -263,7 +263,7 @@ fn node_immediately_references_children(node: &Arc<Node>) -> bool {
 }
 
 // Go ast.SkipOuterExpressions（OEKAll 等价集合）
-fn skip_outer_expressions(node: &Arc<Node>) -> Arc<Node> {
+fn skip_outer_expressions(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_outer_expressions"); 
     let mut current = Arc::clone(node);
     loop {
         let next = match &current.data {

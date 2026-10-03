@@ -17,7 +17,7 @@ impl Checker {
         interface_decls: &[Arc<Node>],
         has_type_args: bool,
         arg_types: Vec<Arc<crate::checker::types::Type>>,
-    ) -> InterfacePassOutcome {
+    ) -> InterfacePassOutcome { ::tsox_core::fntrace::enter("resolve_interface_pass"); 
         match interface_decls.first() {
             Some(first) => {
                 let data = match &first.data {

@@ -7,7 +7,7 @@ impl Checker {
         &self,
         module_symbol: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("module_local_member_symbol"); 
         if let Some(sym) = module_symbol.members.get(name) {
             return if sym.export_symbol.is_some() {
                 None
@@ -32,7 +32,7 @@ impl Checker {
         &mut self,
         module_symbol: &Arc<Symbol>,
         name: &str,
-    ) -> ModuleMemberLookup {
+    ) -> ModuleMemberLookup { ::tsox_core::fntrace::enter("module_member_lookup"); 
         use ModuleMemberLookup as M;
 
         // resolveJsonModule：json 模块 named exports = 顶层对象属性
@@ -115,7 +115,7 @@ impl Checker {
     // Go checkExportDeclaration 的 export * / export * as ns 分支：解析模块
     // 命中且 exports 表含 export= 条目（hasExportAssignmentSymbol）时在
     // module specifier 上报 TS2498
-    pub(crate) fn check_export_star_export_equals(&mut self, spec: &Arc<Node>) {
+    pub(crate) fn check_export_star_export_equals(&mut self, spec: &Arc<Node>) { ::tsox_core::fntrace::enter("check_export_star_export_equals"); 
         if spec.kind != SyntaxKind::StringLiteral {
             return;
         }
@@ -158,14 +158,14 @@ impl Checker {
 
     // Go getExternalModuleMember：export= 模块的具名成员解析优先取
     // resolved 目标符号类型上的属性（var Foo: {a,b}; export = Foo）
-    fn target_type_has_property(&mut self, target: &Arc<Symbol>, name: &str) -> bool {
+    fn target_type_has_property(&mut self, target: &Arc<Symbol>, name: &str) -> bool { ::tsox_core::fntrace::enter("target_type_has_property"); 
         let t = self.get_type_of_symbol(target);
         self.get_property_of_type(&t, name).is_some()
     }
 }
 
 impl Checker {
-    pub(crate) fn module_is_json_source_file(&mut self, module_symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn module_is_json_source_file(&mut self, module_symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("module_is_json_source_file"); 
         let file_node = module_symbol
             .declarations
             .iter()

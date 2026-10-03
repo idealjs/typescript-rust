@@ -39,7 +39,7 @@ pub struct ContentMapper {
 }
 
 impl ContentMapper {
-    pub fn diagnostic_name(&self) -> String {
+    pub fn diagnostic_name(&self) -> String { ::tsox_core::fntrace::enter("diagnostic_name"); 
         if !self.manifest.name.is_empty() {
             return self.manifest.name.clone();
         }
@@ -49,14 +49,14 @@ impl ContentMapper {
         self.contribution_id.clone()
     }
 
-    pub fn identity(&self) -> String {
+    pub fn identity(&self) -> String { ::tsox_core::fntrace::enter("identity"); 
         if !self.contribution_id.is_empty() {
             return format!("{} ({})", self.contribution_id, self.manifest_identity());
         }
         self.manifest_identity()
     }
 
-    pub fn manifest_identity(&self) -> String {
+    pub fn manifest_identity(&self) -> String { ::tsox_core::fntrace::enter("manifest_identity"); 
         if self.manifest.name.is_empty() {
             return String::new();
         }
@@ -67,7 +67,7 @@ impl ContentMapper {
     }
 }
 
-fn contains_path(parent: &str, target: &str, options: &ComparePathsOptions) -> bool {
+fn contains_path(parent: &str, target: &str, options: &ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("contains_path"); 
     let parent = tspath::combine_paths(&options.current_directory, &[parent]);
     let target = tspath::combine_paths(&options.current_directory, &[target]);
     if parent.is_empty() || target.is_empty() {
@@ -109,7 +109,7 @@ pub fn new_parsed_command_line(
     root_file_names: Vec<String>,
     project_references: Vec<ProjectReference>,
     compare_paths_options: ComparePathsOptions,
-) -> ParsedCommandLine {
+) -> ParsedCommandLine { ::tsox_core::fntrace::enter("new_parsed_command_line"); 
     ParsedCommandLine {
         compiler_options,
         file_names: root_file_names,
@@ -120,7 +120,7 @@ pub fn new_parsed_command_line(
 }
 
 impl ParsedCommandLine {
-    pub fn config_name(&self) -> String {
+    pub fn config_name(&self) -> String { ::tsox_core::fntrace::enter("config_name"); 
         if self.config_file.is_none() {
             return String::new();
         }
@@ -132,17 +132,17 @@ impl ParsedCommandLine {
             .clone()
     }
 
-    pub fn source_to_project_reference(&self) -> &OrderedMap<String, SourceOutputAndProjectReference> {
+    pub fn source_to_project_reference(&self) -> &OrderedMap<String, SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("source_to_project_reference"); 
         &self.source_to_project_reference
     }
 
     pub fn output_dts_to_project_reference(
         &self,
-    ) -> &OrderedMap<String, SourceOutputAndProjectReference> {
+    ) -> &OrderedMap<String, SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("output_dts_to_project_reference"); 
         &self.output_dts_to_project_reference
     }
 
-    pub fn parse_input_output_names(&mut self) {
+    pub fn parse_input_output_names(&mut self) { ::tsox_core::fntrace::enter("parse_input_output_names"); 
         if self.source_and_output_maps_once.get().is_some() {
             return;
         }
@@ -176,7 +176,7 @@ impl ParsedCommandLine {
         self.source_and_output_maps_once.set(());
     }
 
-    pub fn common_source_directory(&mut self) -> String {
+    pub fn common_source_directory(&mut self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         if self.common_source_directory_once.get().is_none() {
             let files = || {
                 filter(&self.file_names, |file| {
@@ -220,15 +220,15 @@ impl ParsedCommandLine {
         self.common_source_directory.clone()
     }
 
-    pub fn get_current_directory(&self) -> String {
+    pub fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.compare_paths_options.current_directory.clone()
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.compare_paths_options.use_case_sensitive_file_names
     }
 
-    pub fn get_output_declaration_and_source_file_names(&self) -> Vec<(String, String)> {
+    pub fn get_output_declaration_and_source_file_names(&self) -> Vec<(String, String)> { ::tsox_core::fntrace::enter("get_output_declaration_and_source_file_names"); 
         self.file_names
             .iter()
             .map(|file_name| {
@@ -248,7 +248,7 @@ impl ParsedCommandLine {
             .collect()
     }
 
-    pub fn get_output_file_names(&self) -> Vec<String> {
+    pub fn get_output_file_names(&self) -> Vec<String> { ::tsox_core::fntrace::enter("get_output_file_names"); 
         let mut result = Vec::new();
         for file_name in &self.file_names {
             if tsox_core::tspath::is_declaration_file_name(file_name) {
@@ -291,11 +291,11 @@ impl ParsedCommandLine {
         result
     }
 
-    pub fn get_build_info_file_name(&self) -> String {
+    pub fn get_build_info_file_name(&self) -> String { ::tsox_core::fntrace::enter("get_build_info_file_name"); 
         outputpaths::get_build_info_file_name(&self.compiler_options, &self.compare_paths_options)
     }
 
-    pub fn literal_file_names(&self) -> &[String] {
+    pub fn literal_file_names(&self) -> &[String] { ::tsox_core::fntrace::enter("literal_file_names"); 
         if self.config_file.is_some() {
             &self.file_names[..self.literal_file_names_len]
         } else {
@@ -303,15 +303,15 @@ impl ParsedCommandLine {
         }
     }
 
-    pub fn compiler_options(&self) -> &CompilerOptions {
+    pub fn compiler_options(&self) -> &CompilerOptions { ::tsox_core::fntrace::enter("compiler_options"); 
         &self.compiler_options
     }
 
-    pub fn file_names(&self) -> &[String] {
+    pub fn file_names(&self) -> &[String] { ::tsox_core::fntrace::enter("file_names"); 
         &self.file_names
     }
 
-    pub fn file_names_by_path(&mut self) -> &OrderedMap<String, String> {
+    pub fn file_names_by_path(&mut self) -> &OrderedMap<String, String> { ::tsox_core::fntrace::enter("file_names_by_path"); 
         if self.file_names_by_path_once.get().is_none() {
             let mut file_names_by_path = OrderedMap::with_capacity(self.file_names.len());
             let current_directory = self.get_current_directory();
@@ -330,15 +330,15 @@ impl ParsedCommandLine {
         &self.file_names_by_path
     }
 
-    pub fn content_mappers(&self) -> &[ContentMapper] {
+    pub fn content_mappers(&self) -> &[ContentMapper] { ::tsox_core::fntrace::enter("content_mappers"); 
         &self.content_mappers
     }
 
-    pub fn content_mapper_extensions(&self) -> Vec<String> {
+    pub fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions"); 
         flat_map(self.content_mappers(), |m| m.definition.extensions.as_slice())
     }
 
-    pub fn get_content_mapper_for_file_name(&self, file_name: &str) -> Option<&ContentMapper> {
+    pub fn get_content_mapper_for_file_name(&self, file_name: &str) -> Option<&ContentMapper> { ::tsox_core::fntrace::enter("get_content_mapper_for_file_name"); 
         let ignore_case = !self.use_case_sensitive_file_names();
         let extensions = self.content_mapper_extensions();
         let extension_refs: Vec<&str> = extensions.iter().map(String::as_str).collect();
@@ -351,14 +351,14 @@ impl ParsedCommandLine {
         })
     }
 
-    pub fn extended_source_files(&self) -> &[String] {
+    pub fn extended_source_files(&self) -> &[String] { ::tsox_core::fntrace::enter("extended_source_files"); 
         match &self.config_file {
             Some(config_file) => &config_file.extended_source_files,
             None => &[],
         }
     }
 
-    pub fn get_config_file_parsing_diagnostics(&self) -> Vec<Diagnostic> {
+    pub fn get_config_file_parsing_diagnostics(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_config_file_parsing_diagnostics"); 
         if let Some(config_file) = &self.config_file {
             let mut result =
                 tsox_frontend::ast::mig::m3b_2::diagnostics(config_file.source_file.as_ref())
@@ -370,7 +370,7 @@ impl ParsedCommandLine {
         }
     }
 
-    pub fn get_matched_file_spec(&self, file_name: &str) -> Option<String> {
+    pub fn get_matched_file_spec(&self, file_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("get_matched_file_spec"); 
         Some(
             self.config_file
                 .as_ref()?
@@ -380,7 +380,7 @@ impl ParsedCommandLine {
         )
     }
 
-    pub fn get_matched_include_spec(&self, file_name: &str) -> Option<(String, bool)> {
+    pub fn get_matched_include_spec(&self, file_name: &str) -> Option<(String, bool)> { ::tsox_core::fntrace::enter("get_matched_include_spec"); 
         let config_file = self.config_file.as_ref()?;
         let config_file_specs = config_file.config_file_specs.as_ref()?;
         if config_file_specs.validated_include_specs.is_empty() {
@@ -398,7 +398,7 @@ impl ParsedCommandLine {
         ))
     }
 
-    pub fn locale(&mut self) -> locale::Locale {
+    pub fn locale(&mut self) -> locale::Locale { ::tsox_core::fntrace::enter("locale"); 
         self.locale_once.get_or_init(|| {
             if let Some(parsed) = locale::Locale::parse(&self.compiler_options.locale) {
                 self.locale = parsed;
@@ -407,7 +407,7 @@ impl ParsedCommandLine {
         self.locale.clone()
     }
 
-    pub fn resolved_project_reference_paths(&mut self) -> Vec<String> {
+    pub fn resolved_project_reference_paths(&mut self) -> Vec<String> { ::tsox_core::fntrace::enter("resolved_project_reference_paths"); 
         self.resolved_project_reference_paths_once.get_or_init(|| {
             self.resolved_project_reference_paths = self
                 .references
@@ -420,7 +420,7 @@ impl ParsedCommandLine {
 }
 
 impl ParsedBuildCommandLine {
-    pub fn locale(&self) -> locale::Locale {
+    pub fn locale(&self) -> locale::Locale { ::tsox_core::fntrace::enter("locale"); 
         let mut locale_result = locale::Locale::default();
         self.locale_once.get_or_init(|| {
             if let Some(parsed) = locale::Locale::parse(&self.compiler_options.locale) {
@@ -439,19 +439,19 @@ pub trait OutputPathsHost {
 }
 
 impl OutputPathsHost for ParsedCommandLine {
-    fn common_source_directory(&self) -> String {
+    fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         self.common_source_directory.clone()
     }
 
-    fn content_mapper_extensions(&self) -> Vec<String> {
+    fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions"); 
         self.content_mapper_extensions()
     }
 
-    fn get_current_directory(&self) -> String {
+    fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.get_current_directory()
     }
 
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.use_case_sensitive_file_names()
     }
 }
@@ -471,7 +471,7 @@ mod outputpaths {
         current_directory: &str,
         use_case_sensitive_file_names: bool,
         check_source_files_belong_to_path: impl Fn(&[String], &str) -> bool,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_common_source_directory"); 
         let mut common_source_directory;
         if !options.root_dir.is_empty() {
             common_source_directory = options.root_dir.clone();
@@ -497,7 +497,7 @@ mod outputpaths {
         file_names: &[String],
         current_directory: &str,
         use_case_sensitive_file_names: bool,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("compute_common_source_directory_of_filenames"); 
         let mut common_path_components: Vec<String> = Vec::new();
         let mut have_common = false;
         for source_file in file_names {
@@ -543,7 +543,7 @@ mod outputpaths {
         input_file_name: &str,
         options: &CompilerOptions,
         host: &ParsedCommandLine,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_output_declaration_file_name_worker"); 
         let mut dir = options.declaration_dir.clone();
         if dir.is_empty() {
             dir = options.out_dir.clone();
@@ -558,7 +558,7 @@ mod outputpaths {
         input_file_name: &str,
         options: &CompilerOptions,
         host: &ParsedCommandLine,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_output_js_file_name"); 
         if options.emit_declaration_only.is_true() || is_content_mapped_file_name(input_file_name, host)
         {
             return String::new();
@@ -579,7 +579,7 @@ mod outputpaths {
         String::new()
     }
 
-    fn is_content_mapped_file_name(file_name: &str, host: &ParsedCommandLine) -> bool {
+    fn is_content_mapped_file_name(file_name: &str, host: &ParsedCommandLine) -> bool { ::tsox_core::fntrace::enter("is_content_mapped_file_name"); 
         let extensions = host.content_mapper_extensions();
         let extension_refs: Vec<&str> = extensions.iter().map(String::as_str).collect();
         !get_longest_extension_from_path(
@@ -594,14 +594,14 @@ mod outputpaths {
         input_file_name: &str,
         options: &CompilerOptions,
         host: &ParsedCommandLine,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_output_js_file_name_worker"); 
         tspath::change_extension(
             &get_output_path_without_changing_extension(input_file_name, &options.out_dir, host),
             &get_output_extension(input_file_name, options.jsx),
         )
     }
 
-    pub fn get_output_extension(file_name: &str, jsx: JsxEmit) -> String {
+    pub fn get_output_extension(file_name: &str, jsx: JsxEmit) -> String { ::tsox_core::fntrace::enter("get_output_extension"); 
         if tspath::file_extension_is(file_name, tspath::EXTENSION_JSON) {
             return tspath::EXTENSION_JSON.to_string();
         }
@@ -619,7 +619,7 @@ mod outputpaths {
         tspath::EXTENSION_JS.to_string()
     }
 
-    fn change_to_declaration_extension(path: &str, host: &ParsedCommandLine) -> String {
+    fn change_to_declaration_extension(path: &str, host: &ParsedCommandLine) -> String { ::tsox_core::fntrace::enter("change_to_declaration_extension"); 
         let extensions = host.content_mapper_extensions();
         let extension_refs: Vec<&str> = extensions.iter().map(String::as_str).collect();
         let extension = get_longest_extension_from_path(path, &extension_refs, false);
@@ -644,7 +644,7 @@ mod outputpaths {
         input_file_name: &str,
         output_directory: &str,
         host: &ParsedCommandLine,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_output_path_without_changing_extension"); 
         if !output_directory.is_empty() {
             let relative = get_relative_path_from_directory(
                 &<ParsedCommandLine as OutputPathsHost>::common_source_directory(host),
@@ -659,7 +659,7 @@ mod outputpaths {
         input_file_name.to_string()
     }
 
-    pub fn get_source_map_file_path(js_file_path: &str, options: &CompilerOptions) -> String {
+    pub fn get_source_map_file_path(js_file_path: &str, options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_source_map_file_path"); 
         if options.source_map.is_true() && !options.inline_source_map.is_true() {
             return format!("{}.map", js_file_path);
         }
@@ -669,7 +669,7 @@ mod outputpaths {
     pub fn get_build_info_file_name(
         options: &CompilerOptions,
         opts: &ComparePathsOptions,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_build_info_file_name"); 
         if !options.is_incremental() && !options.build.is_true() {
             return String::new();
         }

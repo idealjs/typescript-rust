@@ -13,7 +13,7 @@ use super::m4p::Printer;
 use super::m4p::r39k22_defs::{LF_HERITAGE_CLAUSE_TYPES, R39k22NodeExt};
 
 impl Printer {
-    pub fn emit_heritage_clause(&mut self, node: &Arc<Node>) {
+    pub fn emit_heritage_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_heritage_clause"); 
         let state = self.enter_node(node);
         self.write_space();
         self.emit_token(node.heritage_token22(), node.pos(), WriteKind::Keyword, node);
@@ -27,7 +27,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_heritage_clause_element(&mut self, node: &Arc<Node>) {
+    pub fn emit_heritage_clause_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_heritage_clause_element"); 
         match node.kind {
             SyntaxKind::ExpressionWithTypeArguments => self.emit_expression_with_type_arguments(node),
             SyntaxKind::TypeReference => self.emit_type_reference(node),
@@ -35,11 +35,11 @@ impl Printer {
         }
     }
 
-    pub fn emit_heritage_clause_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_heritage_clause_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_heritage_clause_node"); 
         self.emit_heritage_clause(node);
     }
 
-    pub fn emit_enum_member(&mut self, node: &Arc<Node>) {
+    pub fn emit_enum_member(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_enum_member"); 
         let state = self.enter_node(node);
         let name = node.name().unwrap();
         self.emit_property_name(name);
@@ -47,15 +47,15 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_enum_member_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_enum_member_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_enum_member_node"); 
         self.emit_enum_member(node);
     }
 
-    pub fn emit_jsdoc_node(&mut self, _node: &Arc<Node>) {
+    pub fn emit_jsdoc_node(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsdoc_node"); 
         panic!("not implemented");
     }
 
-    pub fn emit_helpers(&mut self, node: &Arc<Node>) -> bool {
+    pub fn emit_helpers(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("emit_helpers"); 
         let mut helpers_emitted = false;
         let source_file: Option<&Arc<SourceFile>> = self.current_source_file.as_ref();
         let should_skip = self.options.no_emit_helpers

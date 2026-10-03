@@ -28,7 +28,7 @@ impl EmitContext {
     pub fn add_default_value_assignment_for_binding_pattern(
         &mut self,
         parameter: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("add_default_value_assignment_for_binding_pattern"); 
         let generated_name = self
             .factory()
             .generated_name_node(&self.factory().new_generated_name_for_node(parameter));
@@ -77,7 +77,7 @@ impl EmitContext {
         parameter: &Arc<Node>,
         name: &Arc<Node>,
         initializer: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("add_default_value_assignment_for_initializer"); 
         self.add_emit_flags(
             initializer,
             EmitFlags::NO_SOURCE_MAP | EmitFlags::NO_COMMENTS,
@@ -121,7 +121,7 @@ impl EmitContext {
         )
     }
 
-    pub fn add_default_value_assignment_if_needed(&mut self, parameter: &Arc<Node>) -> Arc<Node> {
+    pub fn add_default_value_assignment_if_needed(&mut self, parameter: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("add_default_value_assignment_if_needed"); 
         if parameter.dot_dot_dot_token().is_some() {
             return Arc::clone(parameter);
         }
@@ -138,7 +138,7 @@ impl EmitContext {
     pub fn add_default_value_assignments_if_needed(
         &mut self,
         node_list: Option<&NodeList>,
-    ) -> NodeList {
+    ) -> NodeList { ::tsox_core::fntrace::enter("add_default_value_assignments_if_needed"); 
         let Some(node_list) = node_list else {
             return NodeList::new(Vec::new());
         };
@@ -164,7 +164,7 @@ impl EmitContext {
     pub fn end_and_merge_lexical_environment(
         &mut self,
         statements: &[Arc<Node>],
-    ) -> (Vec<Arc<Node>>, bool) {
+    ) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("end_and_merge_lexical_environment"); 
         let declarations = self.end_lexical_environment();
         self.merge_environment_inner(statements, &declarations)
     }
@@ -172,7 +172,7 @@ impl EmitContext {
     pub fn end_and_merge_variable_environment(
         &mut self,
         statements: &[Arc<Node>],
-    ) -> (Vec<Arc<Node>>, bool) {
+    ) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("end_and_merge_variable_environment"); 
         let declarations = self.end_variable_environment();
         self.merge_environment_inner(statements, &declarations)
     }
@@ -181,7 +181,7 @@ impl EmitContext {
         &self,
         node: &Arc<Node>,
         auto_generate_id: AutoGenerateId,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_node_for_generated_name_worker"); 
         let mut node = Arc::clone(node);
         let mut original = self.original(&node);
         while let Some(current_original) = original {
@@ -203,15 +203,15 @@ impl EmitContext {
         node
     }
 
-    pub fn is_custom_prologue(&self, node: &Arc<Node>) -> bool {
+    pub fn is_custom_prologue(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_custom_prologue"); 
         self.emit_flags(node).contains(EmitFlags::CUSTOM_PROLOGUE)
     }
 
-    pub fn is_hoisted_function(&self, node: &Arc<Node>) -> bool {
+    pub fn is_hoisted_function(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_hoisted_function"); 
         self.is_custom_prologue(node) && is_function_declaration(node)
     }
 
-    pub fn is_hoisted_variable_statement(&self, node: &Arc<Node>) -> bool {
+    pub fn is_hoisted_variable_statement(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_hoisted_variable_statement"); 
         self.is_custom_prologue(node)
             && is_variable_statement(node)
             && every(
@@ -224,7 +224,7 @@ impl EmitContext {
             )
     }
 
-    pub fn on_clone(&mut self, updated: &Arc<Node>, original: &Arc<Node>) {
+    pub fn on_clone(&mut self, updated: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("on_clone"); 
         self.set_original(updated, original);
         if is_identifier(updated) || is_private_identifier(updated) {
             if let Some(auto_generate) = self.get_auto_generate_info(original) {
@@ -235,15 +235,15 @@ impl EmitContext {
         }
     }
 
-    pub fn on_create(&self, node: &mut Node) {
+    pub fn on_create(&self, node: &mut Node) { ::tsox_core::fntrace::enter("on_create"); 
         node.flags.insert(NodeFlags::Synthesized);
     }
 
-    pub fn on_update(&mut self, updated: &Arc<Node>, original: &Arc<Node>) {
+    pub fn on_update(&mut self, updated: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("on_update"); 
         self.set_original(updated, original);
     }
 }
 
-pub fn is_hoisted_variable(node: &Arc<Node>) -> bool {
+pub fn is_hoisted_variable(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_hoisted_variable"); 
     node.name().is_some_and(|n| is_identifier(n)) && node.initializer().is_none()
 }

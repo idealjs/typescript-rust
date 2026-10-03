@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn test_normalize_slashes() {
+fn test_normalize_slashes() { crate::fntrace::enter("test_normalize_slashes"); 
     assert_eq!(normalize_slashes("a"), "a");
     assert_eq!(normalize_slashes("a/b"), "a/b");
     assert_eq!(normalize_slashes("a\\b"), "a/b");
@@ -10,7 +10,7 @@ fn test_normalize_slashes() {
 }
 
 #[test]
-fn test_get_root_length() {
+fn test_get_root_length() { crate::fntrace::enter("test_get_root_length"); 
     assert_eq!(get_root_length("a"), 0);
     assert_eq!(get_root_length("/"), 1);
     assert_eq!(get_root_length("/path"), 1);
@@ -38,7 +38,7 @@ fn test_get_root_length() {
 }
 
 #[test]
-fn test_path_is_absolute() {
+fn test_path_is_absolute() { crate::fntrace::enter("test_path_is_absolute"); 
     assert!(path_is_absolute("/path/to/file.ext"));
     assert!(path_is_absolute("c:/path/to/file.ext"));
     assert!(path_is_absolute("file:///path/to/file.ext"));
@@ -47,7 +47,7 @@ fn test_path_is_absolute() {
 }
 
 #[test]
-fn test_is_url() {
+fn test_is_url() { crate::fntrace::enter("test_is_url"); 
     assert!(!is_url("a"));
     assert!(!is_url("/"));
     assert!(!is_url("c:"));
@@ -70,7 +70,7 @@ fn test_is_url() {
 }
 
 #[test]
-fn test_is_rooted_disk_path() {
+fn test_is_rooted_disk_path() { crate::fntrace::enter("test_is_rooted_disk_path"); 
     assert!(!is_rooted_disk_path("a"));
     assert!(is_rooted_disk_path("/"));
     assert!(is_rooted_disk_path("c:"));
@@ -88,7 +88,7 @@ fn test_is_rooted_disk_path() {
 }
 
 #[test]
-fn test_get_directory_path() {
+fn test_get_directory_path() { crate::fntrace::enter("test_get_directory_path"); 
     assert_eq!(get_directory_path(""), "");
     assert_eq!(get_directory_path("a"), "");
     assert_eq!(get_directory_path("a/b"), "a");
@@ -124,7 +124,7 @@ fn test_get_directory_path() {
 }
 
 #[test]
-fn test_get_path_components() {
+fn test_get_path_components() { crate::fntrace::enter("test_get_path_components"); 
     assert_eq!(get_path_components("", ""), vec![""]);
     assert_eq!(get_path_components("a", ""), vec!["", "a"]);
     assert_eq!(get_path_components("./a", ""), vec!["", ".", "a"]);
@@ -183,7 +183,7 @@ fn test_get_path_components() {
 }
 
 #[test]
-fn test_combine_paths() {
+fn test_combine_paths() { crate::fntrace::enter("test_combine_paths"); 
     assert_eq!(
         combine_paths("path", &["to", "file.ext"]),
         "path/to/file.ext"
@@ -229,7 +229,7 @@ fn test_combine_paths() {
 }
 
 #[test]
-fn test_resolve_path() {
+fn test_resolve_path() { crate::fntrace::enter("test_resolve_path"); 
     assert_eq!(resolve_path("", &[]), "");
     assert_eq!(resolve_path(".", &[]), "");
     assert_eq!(resolve_path("./", &[]), "");
@@ -261,7 +261,7 @@ fn test_resolve_path() {
 }
 
 #[test]
-fn test_get_normalized_absolute_path() {
+fn test_get_normalized_absolute_path() { crate::fntrace::enter("test_get_normalized_absolute_path"); 
     assert_eq!(get_normalized_absolute_path("/", ""), "/");
     assert_eq!(get_normalized_absolute_path("/.", ""), "/");
     assert_eq!(get_normalized_absolute_path("/./", ""), "/");
@@ -354,7 +354,7 @@ fn test_get_normalized_absolute_path() {
 }
 
 #[test]
-fn test_to_file_name_lower_case() {
+fn test_to_file_name_lower_case() { crate::fntrace::enter("test_to_file_name_lower_case"); 
     assert_eq!(
         to_file_name_lower_case("/user/UserName/projects/Project/file.ts"),
         "/user/username/projects/project/file.ts"
@@ -366,7 +366,7 @@ fn test_to_file_name_lower_case() {
 }
 
 #[test]
-fn test_to_path() {
+fn test_to_path() { crate::fntrace::enter("test_to_path"); 
     assert_eq!(
         to_path("file.ext", "path/to", false).as_str(),
         "path/to/file.ext"
@@ -382,7 +382,7 @@ fn test_to_path() {
 }
 
 #[test]
-fn test_path_is_relative() {
+fn test_path_is_relative() { crate::fntrace::enter("test_path_is_relative"); 
     assert!(path_is_relative("."));
     assert!(path_is_relative(".."));
     assert!(path_is_relative("./"));
@@ -397,14 +397,14 @@ fn test_path_is_relative() {
 }
 
 #[test]
-fn test_is_dynamic_file_name() {
+fn test_is_dynamic_file_name() { crate::fntrace::enter("test_is_dynamic_file_name"); 
     assert!(is_dynamic_file_name("^/untitled/foo.ts"));
     assert!(!is_dynamic_file_name("/path/to/file.ts"));
     assert!(!is_dynamic_file_name(""));
 }
 
 #[test]
-fn test_untitled_path_root_length() {
+fn test_untitled_path_root_length() { crate::fntrace::enter("test_untitled_path_root_length"); 
     assert_eq!(get_encoded_root_length("^/untitled"), 2);
     assert_eq!(get_root_length("^/untitled"), 2);
 
@@ -412,7 +412,7 @@ fn test_untitled_path_root_length() {
 }
 
 #[test]
-fn test_contains_ignored_path() {
+fn test_contains_ignored_path() { crate::fntrace::enter("test_contains_ignored_path"); 
     let tests: &[(&str, &str, bool)] = &[
         (
             "node_modules dot path",
@@ -461,7 +461,7 @@ fn test_contains_ignored_path() {
 }
 
 #[test]
-fn test_ignored_paths_patterns() {
+fn test_ignored_paths_patterns() { crate::fntrace::enter("test_ignored_paths_patterns"); 
     let expected_patterns = ["/node_modules/.", "/.git", ".#"];
 
     for pattern in expected_patterns {
@@ -476,7 +476,7 @@ fn test_ignored_paths_patterns() {
 }
 
 #[test]
-fn test_ignored_paths_edge_cases() {
+fn test_ignored_paths_edge_cases() { crate::fntrace::enter("test_ignored_paths_edge_cases"); 
     let tests: &[(&str, &str, bool)] = &[
         ("pattern at start", "/node_modules./file.ts", false),
         ("pattern at end", "/project/file.ts.#", true),
@@ -500,21 +500,21 @@ fn test_ignored_paths_edge_cases() {
 }
 
 #[test]
-fn test_get_base_file_name() {
+fn test_get_base_file_name() { crate::fntrace::enter("test_get_base_file_name"); 
     assert_eq!(get_base_file_name("/path/to/file.ext"), "file.ext");
     assert_eq!(get_base_file_name("/path/to/"), "to");
     assert_eq!(get_base_file_name("/"), "");
 }
 
 #[test]
-fn test_normalize_path() {
+fn test_normalize_path() { crate::fntrace::enter("test_normalize_path"); 
     assert_eq!(normalize_path("/path/./to/../file.ext"), "/path/file.ext");
     assert_eq!(normalize_path("./file.ext"), "file.ext");
     assert_eq!(normalize_path("path/to/file.ext"), "path/to/file.ext");
 }
 
 #[test]
-fn test_extension_functions() {
+fn test_extension_functions() { crate::fntrace::enter("test_extension_functions"); 
     assert!(has_ts_file_extension("file.ts"));
     assert!(has_ts_file_extension("file.tsx"));
     assert!(has_ts_file_extension("file.d.ts"));
@@ -528,7 +528,7 @@ fn test_extension_functions() {
 }
 
 #[test]
-fn test_trailing_directory_separator() {
+fn test_trailing_directory_separator() { crate::fntrace::enter("test_trailing_directory_separator"); 
     assert!(has_trailing_directory_separator("path/"));
     assert!(has_trailing_directory_separator("path\\"));
     assert!(!has_trailing_directory_separator("path"));
@@ -539,7 +539,7 @@ fn test_trailing_directory_separator() {
 }
 
 #[test]
-fn test_for_each_ancestor_directory() {
+fn test_for_each_ancestor_directory() { crate::fntrace::enter("test_for_each_ancestor_directory"); 
     let mut ancestors = Vec::new();
     for_each_ancestor_directory("/a/b/c", |dir| {
         ancestors.push(dir.to_string());
@@ -556,7 +556,7 @@ fn test_for_each_ancestor_directory() {
 }
 
 #[test]
-fn test_reduce_path_components() {
+fn test_reduce_path_components() { crate::fntrace::enter("test_reduce_path_components"); 
     assert_eq!(reduce_path_components(&vec!["".to_string()]), vec![""]);
     assert_eq!(
         reduce_path_components(&vec!["".to_string(), ".".to_string()]),
@@ -611,7 +611,7 @@ fn test_reduce_path_components() {
 }
 
 #[test]
-fn test_get_normalized_absolute_path_without_root() {
+fn test_get_normalized_absolute_path_without_root() { crate::fntrace::enter("test_get_normalized_absolute_path_without_root"); 
     assert_eq!(
         get_normalized_absolute_path_without_root("/a/b/c.txt", "/a/b"),
         "a/b/c.txt"
@@ -627,7 +627,7 @@ fn test_get_normalized_absolute_path_without_root() {
 }
 
 #[test]
-fn test_get_relative_path_to_directory_or_url() {
+fn test_get_relative_path_to_directory_or_url() { crate::fntrace::enter("test_get_relative_path_to_directory_or_url"); 
     let opts = ComparePathsOptions::default();
 
     assert_eq!(
@@ -713,7 +713,7 @@ fn test_get_relative_path_to_directory_or_url() {
 }
 
 #[test]
-fn test_get_common_parents() {
+fn test_get_common_parents() { crate::fntrace::enter("test_get_common_parents"); 
     let opts = ComparePathsOptions::default();
 
     let (got, ignored) = get_common_parents(&[], 1, &opts);
@@ -797,7 +797,7 @@ fn test_get_common_parents() {
 }
 
 #[test]
-fn test_untitled_path_handling() {
+fn test_untitled_path_handling() { crate::fntrace::enter("test_untitled_path_handling"); 
     let untitled_path = "^/untitled/ts-nul-authority/Untitled-2";
 
     let root_length = get_encoded_root_length(untitled_path);
@@ -829,7 +829,7 @@ fn test_untitled_path_handling() {
 }
 
 #[test]
-fn test_untitled_path_edge_cases() {
+fn test_untitled_path_edge_cases() { crate::fntrace::enter("test_untitled_path_edge_cases"); 
     let test_cases: &[(&str, i32, bool)] = &[
         ("^/", 2, true),
         ("^/untitled/ts-nul-authority/test", 2, true),
@@ -858,7 +858,7 @@ fn test_untitled_path_edge_cases() {
 }
 
 #[test]
-fn test_starts_with_directory() {
+fn test_starts_with_directory() { crate::fntrace::enter("test_starts_with_directory"); 
     let tests: &[(&str, &str, &str, bool, bool)] = &[
         (
             "exact match case sensitive",
@@ -965,7 +965,7 @@ fn test_starts_with_directory() {
 }
 
 #[test]
-fn test_starts_with_directory_edge_cases() {
+fn test_starts_with_directory_edge_cases() { crate::fntrace::enter("test_starts_with_directory_edge_cases"); 
     let tests: &[(&str, &str, &str, bool, bool)] = &[
         (
             "file name shorter than directory",

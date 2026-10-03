@@ -4,7 +4,7 @@ use crate::checker::checker::Checker;
 use tsox_frontend::ast::{Node, NodeData, NodeList, SyntaxKind};
 
 impl Checker {
-    pub(crate) fn check_type_parameters_on_node(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_type_parameters_on_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_parameters_on_node"); 
         let Some(params) = node_type_parameters(node) else {
             return;
         };
@@ -56,7 +56,7 @@ impl Checker {
         default_type: &Arc<Node>,
         params: &[Arc<Node>],
         index: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_type_parameter_default_references"); 
         let mut refs: Vec<Arc<Node>> = Vec::new();
         collect_type_references(default_type, &mut refs);
         for reference in refs {
@@ -88,7 +88,7 @@ impl Checker {
     }
 }
 
-fn collect_type_references(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) {
+fn collect_type_references(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("collect_type_references"); 
     if node.kind == SyntaxKind::TypeReference {
         out.push(Arc::clone(node));
     }
@@ -98,7 +98,7 @@ fn collect_type_references(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) {
     });
 }
 
-pub(crate) fn node_type_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+pub(crate) fn node_type_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("node_type_parameters"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => d.type_parameters.clone(),
         NodeData::ClassExpression(d) => d.type_parameters.clone(),

@@ -8,7 +8,7 @@ pub(crate) use std::io::Write;
 pub fn marshal_indent<T: serde::Serialize>(
     value: &T,
     indent: &str,
-) -> Result<String, serde_json::Error> {
+) -> Result<String, serde_json::Error> { crate::fntrace::enter("marshal_indent"); 
     if indent.is_empty() {
         return marshal(value);
     }
@@ -18,24 +18,24 @@ pub fn marshal_indent<T: serde::Serialize>(
     Ok(reindent(&s, indent))
 }
 
-pub fn marshal<T: serde::Serialize>(value: &T) -> Result<String, serde_json::Error> {
+pub fn marshal<T: serde::Serialize>(value: &T) -> Result<String, serde_json::Error> { crate::fntrace::enter("marshal"); 
     serde_json::to_string(value)
 }
 
-pub fn unmarshal<'de, T: serde::Deserialize<'de>>(data: &'de str) -> Result<T, serde_json::Error> {
+pub fn unmarshal<'de, T: serde::Deserialize<'de>>(data: &'de str) -> Result<T, serde_json::Error> { crate::fntrace::enter("unmarshal"); 
     serde_json::from_str(data)
 }
 
 pub fn unmarshal_slice<'de, T: serde::Deserialize<'de>>(
     data: &'de [u8],
-) -> Result<T, serde_json::Error> {
+) -> Result<T, serde_json::Error> { crate::fntrace::enter("unmarshal_slice"); 
     serde_json::from_slice(data)
 }
 
 pub fn marshal_write<W: Write, T: serde::Serialize>(
     writer: &mut W,
     value: &T,
-) -> Result<(), serde_json::Error> {
+) -> Result<(), serde_json::Error> { crate::fntrace::enter("marshal_write"); 
     serde_json::to_writer(writer, value)
 }
 
@@ -43,7 +43,7 @@ pub fn marshal_indent_write<W: Write, T: serde::Serialize>(
     writer: &mut W,
     value: &T,
     indent: &str,
-) -> Result<(), serde_json::Error> {
+) -> Result<(), serde_json::Error> { crate::fntrace::enter("marshal_indent_write"); 
     if indent.is_empty() {
         return marshal_write(writer, value);
     }
@@ -53,7 +53,7 @@ pub fn marshal_indent_write<W: Write, T: serde::Serialize>(
         .map_err(|e| serde_json::Error::io(e))
 }
 
-pub(crate) fn reindent(s: &str, indent: &str) -> String {
+pub(crate) fn reindent(s: &str, indent: &str) -> String { crate::fntrace::enter("reindent"); 
     let mut result = String::with_capacity(s.len());
     for line in s.lines() {
         let trimmed = line.trim_start_matches(' ');

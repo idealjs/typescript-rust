@@ -27,13 +27,13 @@ pub struct ReferenceResolverHooks {
 }
 
 impl Default for ReferenceResolverHooks {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
 impl ReferenceResolverHooks {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             resolve_name_fn: None,
             get_resolved_symbol_fn: None,

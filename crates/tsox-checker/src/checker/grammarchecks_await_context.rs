@@ -7,7 +7,7 @@ use tsox_frontend::ast::Diagnostic;
 impl Checker {
     // Go checkGrammarAwaitOrAwaitUsing（AwaitExpression 形态）非 AwaitContext
     // 且非顶层上下文：TS1308 + TS1356 related；返回是否已按函数内分支处理
-    pub(crate) fn check_await_expression_in_non_async_context(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn check_await_expression_in_non_async_context(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_await_expression_in_non_async_context"); 
         if node.flags.contains(NodeFlags::AwaitContext) {
             return false;
         }
@@ -40,7 +40,7 @@ impl Checker {
 
     // Go checkGrammarForInOrForOfStatement 的 for-await 分支：
     // 非 AwaitContext 时按顶层/函数内分别报 TS1375/TS1378/TS1103
-    pub(crate) fn check_for_await_out_of_context(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn check_for_await_out_of_context(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_for_await_out_of_context"); 
         let tsox_frontend::ast::NodeData::ForInOrOfStatement(data) = &node.data else {
             return false;
         };
@@ -106,12 +106,12 @@ impl Checker {
 
     // Go ast.IsInTopLevelContext = GetThisContainer(includeArrowFunctions)
     // 为 SourceFile
-    fn node_is_in_top_level_context(&self, node: &Arc<Node>) -> bool {
+    fn node_is_in_top_level_context(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_in_top_level_context"); 
         crate::checker::checker_this_container::get_this_container(node, true, false).kind
             == SyntaxKind::SourceFile
     }
 
-    fn node_has_async_modifier(node: &Arc<Node>) -> bool {
+    fn node_has_async_modifier(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_has_async_modifier"); 
         node.modifiers()
             .as_ref()
             .is_some_and(|m| m.flags().contains(ModifierFlags::Async))
@@ -119,7 +119,7 @@ impl Checker {
 }
 
 // Go scanner.GetRangeOfTokenAtPosition
-fn token_range_at(text: &str, pos: usize) -> tsox_core::core::text::TextRange {
+fn token_range_at(text: &str, pos: usize) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("token_range_at"); 
     let start = pos.min(text.len());
     let mut scanner = tsox_frontend::scanner::Scanner::new(&text[start..]);
     scanner.scan();
@@ -133,7 +133,7 @@ fn push_async_hint_related(
     diagnostic: &mut Diagnostic,
     file: &Arc<tsox_frontend::ast::SourceFile>,
     container: &Arc<Node>,
-) {
+) { ::tsox_core::fntrace::enter("push_async_hint_related"); 
     let range = error_range_for_container(&file.text, container);
     diagnostic.related_information.push(Diagnostic::new(
         Some(Arc::clone(file)),
@@ -145,7 +145,7 @@ fn push_async_hint_related(
 
 // Go scanner.GetErrorRangeForNode 的 function-like 子集：
 // 声明类取名字（含赋值名回退），箭头函数按块体首行截断
-fn error_range_for_container(text: &str, node: &Arc<Node>) -> tsox_core::core::text::TextRange {
+fn error_range_for_container(text: &str, node: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("error_range_for_container"); 
     if node.kind == SyntaxKind::ArrowFunction {
         let pos = skip_trivia(text, node.loc.pos());
         if let tsox_frontend::ast::NodeData::ArrowFunction(d) = &node.data {
@@ -171,11 +171,11 @@ fn error_range_for_container(text: &str, node: &Arc<Node>) -> tsox_core::core::t
     }
 }
 
-fn line_index_of(text: &str, pos: usize) -> usize {
+fn line_index_of(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("line_index_of"); 
     text[..pos.min(text.len())].matches('\n').count()
 }
 
-fn end_of_line(text: &str, line: usize) -> usize {
+fn end_of_line(text: &str, line: usize) -> usize { ::tsox_core::fntrace::enter("end_of_line"); 
     let mut rest = text;
     let mut offset = 0;
     for _ in 0..line {
@@ -201,7 +201,7 @@ fn end_of_line(text: &str, line: usize) -> usize {
     trimmed + 1
 }
 
-fn skip_trivia(text: &str, pos: usize) -> usize {
+fn skip_trivia(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_trivia"); 
     let bytes = text.as_bytes();
     let mut i = pos.min(bytes.len());
     while i < bytes.len() {

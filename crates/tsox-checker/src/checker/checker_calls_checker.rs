@@ -7,7 +7,7 @@ impl Checker {
     /// 超出形参数报 TS2554，错误位取首个多余实参到末实参
     /// 返回 true 表示已报元数错误（Go chooseOverload 在 hasCorrectArity
     /// 失败后不进入实参适用性检查，调用方据此跳过解析）
-    pub(crate) fn check_tagged_template_arity(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn check_tagged_template_arity(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_tagged_template_arity"); 
         let tsox_frontend::ast::NodeData::TaggedTemplateExpression(data) = &node.data else {
             return false;
         };
@@ -77,7 +77,7 @@ impl Checker {
         arguments: &Arc<NodeList>,
         callee_expr: &Arc<Node>,
         is_new: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_call_arity"); 
         let arg_count = arguments.len();
 
         if let Some(spread_idx) = arguments
@@ -159,7 +159,7 @@ impl Checker {
         &self,
         arguments: &Arc<NodeList>,
         max_count: usize,
-    ) -> TextRange {
+    ) -> TextRange { ::tsox_core::fntrace::enter("extra_arguments_range"); 
         if max_count >= arguments.nodes.len() {
             return arguments.loc;
         }
@@ -180,7 +180,7 @@ impl Checker {
         node: &Arc<Node>,
         sig: &Arc<Signature>,
         arguments: &Arc<NodeList>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("signature_accepts_arguments"); 
         if arguments.len() < sig.min_argument_count.max(0) as usize {
             return false;
         }
@@ -281,7 +281,7 @@ impl Checker {
         node: &Arc<Node>,
         signatures: &[Arc<Signature>],
         arguments: &Arc<NodeList>,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("find_matching_signature"); 
         self.find_matching_signature_opt(node, signatures, arguments)
             .unwrap_or(0)
     }
@@ -293,7 +293,7 @@ impl Checker {
         node: &Arc<Node>,
         signatures: &[Arc<Signature>],
         arguments: &Arc<NodeList>,
-    ) -> Option<usize> {
+    ) -> Option<usize> { ::tsox_core::fntrace::enter("find_matching_signature_opt"); 
         self.speculation_depth += 1;
         let result = (|| {
             for (idx, sig) in signatures.iter().enumerate() {
@@ -333,7 +333,7 @@ impl Checker {
         self.speculation_depth -= 1;
         result
     }
-    pub(crate) fn check_call_arguments(&mut self, node: &Arc<Node>, is_new: bool) {
+    pub(crate) fn check_call_arguments(&mut self, node: &Arc<Node>, is_new: bool) { ::tsox_core::fntrace::enter("check_call_arguments"); 
         let (callee_expr, arguments) = match &node.data {
             tsox_frontend::ast::NodeData::CallExpression(data) => {
                 (&data.expression, data.arguments.clone())
@@ -400,7 +400,7 @@ impl Checker {
     }
 }
 
-fn skip_trivia_call_range(text: &str, pos: usize) -> usize {
+fn skip_trivia_call_range(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_trivia_call_range"); 
     let bytes = text.as_bytes();
     let mut i = pos.min(bytes.len());
     while i < bytes.len() {

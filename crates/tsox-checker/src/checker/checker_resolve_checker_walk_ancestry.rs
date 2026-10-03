@@ -15,7 +15,7 @@ impl Checker {
         module_meaning: SymbolFlags,
         enum_meaning: SymbolFlags,
         type_meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("ancestry_lookup"); 
         let symbol_map = self.program.symbol_map();
 
             let mut child = Arc::clone(node);

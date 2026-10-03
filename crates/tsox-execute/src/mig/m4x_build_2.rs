@@ -29,25 +29,25 @@ pub type SourceFileParseOptions = tsox_frontend::ast::mig::m3e_2::SourceFilePars
 pub type ParseCache<K, V> = SyncMap<K, V>;
 
 impl Host {
-    pub fn fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> {
+    pub fn fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> { ::tsox_core::fntrace::enter("fs"); 
         self.host.fs().clone()
     }
 
-    pub fn default_library_path(&self) -> String {
+    pub fn default_library_path(&self) -> String { ::tsox_core::fntrace::enter("default_library_path"); 
         self.host.default_library_path().to_string()
     }
 
-    pub fn current_directory(&self) -> String {
+    pub fn current_directory(&self) -> String { ::tsox_core::fntrace::enter("current_directory"); 
         self.host.get_current_directory().to_string()
     }
 
-    pub fn trace(&self, msg: &'static tsox_core::diagnostics::Message, args: &[String]) {
+    pub fn trace(&self, msg: &'static tsox_core::diagnostics::Message, args: &[String]) { ::tsox_core::fntrace::enter("trace"); 
         panic!(
             "build.Orchestrator.host does not support tracing; use a different host for tracing"
         );
     }
 
-    pub fn get_source_file(&self, opts: SourceFileParseOptions) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self, opts: SourceFileParseOptions) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         if tsox_core::tspath::is_declaration_file_name(&opts.file_name)
             || tsox_core::tspath::file_extension_is(&opts.file_name, ".json")
         {
@@ -72,11 +72,11 @@ impl Host {
         parse_options: SourceFileParseOptions,
         mapper: &tsox_compile::mig::m3l_cm::Mapper,
     ) -> Result<tsox_compile::mig::m3l_cm_2::SourceFiles, tsox_compile::mig::m4v_3::ContentMapperError>
-    {
+    { ::tsox_core::fntrace::enter("get_content_mapped_source_files"); 
         Err(tsox_compile::mig::m4v_3::ContentMapperError::project_unavailable())
     }
 
-    pub fn content_mapper_project(&self) -> Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>> {
+    pub fn content_mapper_project(&self) -> Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>> { ::tsox_core::fntrace::enter("content_mapper_project"); 
         panic!(
             "build.Orchestrator.host does not support content mapper project; use an individual project's compiler host instead"
         );
@@ -86,7 +86,7 @@ impl Host {
         &self,
         file_name: &str,
         path: Path,
-    ) -> Option<Arc<ParsedCommandLine>> {
+    ) -> Option<Arc<ParsedCommandLine>> { ::tsox_core::fntrace::enter("get_resolved_project_reference"); 
         if let Some(existing) = self.resolved_references.load(&path) {
             return Some(existing);
         }
@@ -118,7 +118,7 @@ impl Host {
     pub fn read_build_info(
         &self,
         config: &ParsedCommandLine,
-    ) -> Option<crate::mig::m4y_2::BuildInfo> {
+    ) -> Option<crate::mig::m4y_2::BuildInfo> { ::tsox_core::fntrace::enter("read_build_info"); 
         let mut orchestrator = self.orchestrator.lock().unwrap();
         let config_path = orchestrator.to_path(&config.config_name());
         let task = orchestrator.get_task(&config_path);
@@ -130,11 +130,11 @@ impl Host {
         build_info
     }
 
-    pub fn get_m_time(&self, file: &str) -> SystemTime {
+    pub fn get_m_time(&self, file: &str) -> SystemTime { ::tsox_core::fntrace::enter("get_m_time"); 
         self.load_or_store_m_time(file, None, true)
     }
 
-    pub fn set_m_time(&self, file: &str, m_time: SystemTime) -> Result<(), std::io::Error> {
+    pub fn set_m_time(&self, file: &str, m_time: SystemTime) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("set_m_time"); 
         self.fs()
             .chtimes(file, SystemTime::UNIX_EPOCH, m_time)
     }
@@ -144,7 +144,7 @@ impl Host {
         file: &str,
         old_cache: Option<&SyncMap<Path, SystemTime>>,
         store: bool,
-    ) -> SystemTime {
+    ) -> SystemTime { ::tsox_core::fntrace::enter("load_or_store_m_time"); 
         let path = self.orchestrator.lock().unwrap().to_path(file);
         if let Some(existing) = self.m_times.load(&path) {
             return existing;
@@ -173,7 +173,7 @@ impl Host {
         m_time
     }
 
-    pub fn store_m_time(&self, file: &str, m_time: SystemTime) {
+    pub fn store_m_time(&self, file: &str, m_time: SystemTime) { ::tsox_core::fntrace::enter("store_m_time"); 
         let path = self.orchestrator.lock().unwrap().to_path(file);
         self.m_times.store(path, m_time);
     }
@@ -182,7 +182,7 @@ impl Host {
         &self,
         file: &str,
         old_cache: &SyncMap<Path, SystemTime>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("store_m_time_from_old_cache"); 
         let path = self.orchestrator.lock().unwrap().to_path(file);
         if let Some(m_time) = old_cache.load(&path) {
             self.m_times.store(path, m_time);
@@ -204,7 +204,7 @@ impl CompilerHost {
         host: Arc<Host>,
         trace: crate::mig::m5a::TraceFn,
         content_mapper_project: Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>>,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         let fs = host.fs();
         let current_directory = host.current_directory();
         let default_library_path = host.default_library_path();
@@ -218,23 +218,23 @@ impl CompilerHost {
         }
     }
 
-    pub fn fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> {
+    pub fn fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> { ::tsox_core::fntrace::enter("fs"); 
         self.host.fs()
     }
 
-    pub fn default_library_path(&self) -> String {
+    pub fn default_library_path(&self) -> String { ::tsox_core::fntrace::enter("default_library_path"); 
         self.host.default_library_path()
     }
 
-    pub fn current_directory(&self) -> String {
+    pub fn current_directory(&self) -> String { ::tsox_core::fntrace::enter("current_directory"); 
         self.host.current_directory()
     }
 
-    pub fn trace_message(&self, msg: &'static tsox_core::diagnostics::Message, args: &[String]) {
+    pub fn trace_message(&self, msg: &'static tsox_core::diagnostics::Message, args: &[String]) { ::tsox_core::fntrace::enter("trace_message"); 
         (self.trace)(msg, args);
     }
 
-    pub fn get_source_file(&self, opts: SourceFileParseOptions) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self, opts: SourceFileParseOptions) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         self.host.get_source_file(opts)
     }
 
@@ -243,7 +243,7 @@ impl CompilerHost {
         parse_options: SourceFileParseOptions,
         mapper: &tsox_compile::mig::m3l_cm::Mapper,
     ) -> Result<tsox_compile::mig::m3l_cm_2::SourceFiles, tsox_compile::mig::m4v_3::ContentMapperError>
-    {
+    { ::tsox_core::fntrace::enter("get_content_mapped_source_files"); 
         let content_mapper_project = match self.content_mapper_project.as_ref() {
             None => return Err(tsox_compile::mig::m4v_3::ContentMapperError::project_unavailable()),
             Some(project) => project.clone(),
@@ -275,7 +275,7 @@ impl CompilerHost {
 
     pub fn content_mapper_project_value(
         &self,
-    ) -> Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>> {
+    ) -> Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>> { ::tsox_core::fntrace::enter("content_mapper_project_value"); 
         self.content_mapper_project.clone()
     }
 
@@ -283,32 +283,32 @@ impl CompilerHost {
         &self,
         file_name: &str,
         path: Path,
-    ) -> Option<Arc<ParsedCommandLine>> {
+    ) -> Option<Arc<ParsedCommandLine>> { ::tsox_core::fntrace::enter("get_resolved_project_reference"); 
         self.host.get_resolved_project_reference(file_name, path)
     }
 }
 
 impl tsox_compile::compiler::CompilerHost for CompilerHost {
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
 
-    fn fs_arc(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> {
+    fn fs_arc(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> { ::tsox_core::fntrace::enter("fs_arc"); 
         Arc::clone(&self.fs)
     }
 
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.current_directory
     }
 
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         &self.default_library_path
     }
 
     fn get_source_file(
         &self,
         opts: &tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         self.get_source_file(SourceFileParseOptions {
             file_name: opts.file_name.clone(),
             path: opts.path.clone(),
@@ -321,7 +321,7 @@ impl tsox_compile::compiler::CompilerHost for CompilerHost {
         parse_options: &tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions,
         mapper: &tsox_compile::mig::m3l_cm::Mapper,
     ) -> Result<tsox_compile::mig::m3l_cm_2::SourceFiles, tsox_compile::mig::m4v_3::ContentMapperError>
-    {
+    { ::tsox_core::fntrace::enter("get_content_mapped_source_files"); 
         self.get_content_mapped_source_files(
             SourceFileParseOptions {
                 file_name: parse_options.file_name.clone(),

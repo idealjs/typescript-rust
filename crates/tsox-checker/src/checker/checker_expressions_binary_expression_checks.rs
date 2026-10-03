@@ -4,7 +4,7 @@ use crate::checker::checker_expressions::*;
 use crate::checker::utilities_is_optional_symbol::is_literal_expression_of_object;
 
 impl Checker {
-    pub fn check_binary_expression(&mut self, node: &Arc<Node>) {
+    pub fn check_binary_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_binary_expression"); 
         if let tsox_frontend::ast::NodeData::BinaryExpression(data) = &node.data {
             self.check_binary_arith_pre(node, data);
 

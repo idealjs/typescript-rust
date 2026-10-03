@@ -19,7 +19,7 @@ use crate::mig::m4g::r33k7_defs::PrivateIdentifierKind;
 use crate::printer::NodeFactory;
 
 impl fmt::Display for PrivateIdentifierKind {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         match self {
             PrivateIdentifierKind::Field => write!(f, "f"),
             PrivateIdentifierKind::Method => write!(f, "m"),
@@ -40,7 +40,7 @@ pub trait R36K29NodeExt {
 }
 
 impl R36K29NodeExt for Arc<Node> {
-    fn template_literal_flags(&self) -> Option<TokenFlags> {
+    fn template_literal_flags(&self) -> Option<TokenFlags> { ::tsox_core::fntrace::enter("template_literal_flags"); 
         match &self.data {
             NodeData::NoSubstitutionTemplateLiteral(d) => Some(d.template_flags),
             NodeData::TemplateHead(d) => Some(d.template_flags),
@@ -50,42 +50,42 @@ impl R36K29NodeExt for Arc<Node> {
         }
     }
 
-    fn as_template_expression(&self) -> &TemplateExpressionData {
+    fn as_template_expression(&self) -> &TemplateExpressionData { ::tsox_core::fntrace::enter("as_template_expression"); 
         match &self.data {
             NodeData::TemplateExpression(d) => d,
             _ => panic!("unexpected node"),
         }
     }
 
-    fn as_template_span(&self) -> &TemplateSpanData {
+    fn as_template_span(&self) -> &TemplateSpanData { ::tsox_core::fntrace::enter("as_template_span"); 
         match &self.data {
             NodeData::TemplateSpan(d) => d,
             _ => panic!("unexpected node"),
         }
     }
 
-    fn as_variable_statement(&self) -> &VariableStatementData {
+    fn as_variable_statement(&self) -> &VariableStatementData { ::tsox_core::fntrace::enter("as_variable_statement"); 
         match &self.data {
             NodeData::VariableStatement(d) => d,
             _ => panic!("unexpected node"),
         }
     }
 
-    fn as_source_file_data(&self) -> &SourceFileData {
+    fn as_source_file_data(&self) -> &SourceFileData { ::tsox_core::fntrace::enter("as_source_file_data"); 
         match &self.data {
             NodeData::SourceFile(d) => d,
             _ => panic!("unexpected node"),
         }
     }
 
-    fn as_block(&self) -> &BlockData {
+    fn as_block(&self) -> &BlockData { ::tsox_core::fntrace::enter("as_block"); 
         match &self.data {
             NodeData::Block(d) => d,
             _ => panic!("unexpected node"),
         }
     }
 
-    fn as_for_statement(&self) -> &ForStatementData {
+    fn as_for_statement(&self) -> &ForStatementData { ::tsox_core::fntrace::enter("as_for_statement"); 
         match &self.data {
             NodeData::ForStatement(d) => d,
             _ => panic!("unexpected node"),
@@ -98,7 +98,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         elements: &NodeList,
         multi_line: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_array_literal_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ArrayLiteralExpression,
             NodeData::ArrayLiteralExpression(tsox_frontend::ast::node_data_generated::ArrayLiteralExpressionData {
@@ -119,7 +119,7 @@ impl<'a> NodeFactory<'a> {
         postfix_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_assignment"); 
         Arc::new(Node::new(
             SyntaxKind::PropertyAssignment,
             NodeData::PropertyAssignment(PropertyAssignmentData {
@@ -141,7 +141,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<&Arc<Node>>,
         equals_token: Option<&Arc<Node>>,
         object_assignment_initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_shorthand_property_assignment"); 
         Arc::new(Node::new(
             SyntaxKind::ShorthandPropertyAssignment,
             NodeData::ShorthandPropertyAssignment(ShorthandPropertyAssignmentData {
@@ -164,7 +164,7 @@ impl<'a> NodeFactory<'a> {
         exclamation_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_variable_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::VariableDeclaration,
             NodeData::VariableDeclaration(VariableDeclarationData {
@@ -183,7 +183,7 @@ impl<'a> NodeFactory<'a> {
         property_name: Option<&Arc<Node>>,
         name: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_binding_element"); 
         Arc::new(Node::new(
             SyntaxKind::BindingElement,
             NodeData::BindingElement(BindingElementData {
@@ -203,7 +203,7 @@ impl<'a> NodeFactory<'a> {
         postfix_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_declaration_data"); 
         Arc::new(Node::new(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(tsox_frontend::ast::node_data_generated::PropertyDeclarationData {
@@ -223,7 +223,7 @@ impl<'a> NodeFactory<'a> {
         is_export_equals: bool,
         type_node: Option<&Arc<Node>>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_export_assignment"); 
         Arc::new(Node::new(
             SyntaxKind::ExportAssignment,
             NodeData::ExportAssignment(ExportAssignmentData {
@@ -235,7 +235,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn update_source_file(&self, node: &Arc<Node>, statements: Arc<NodeList>) -> Arc<Node> {
+    pub fn update_source_file(&self, node: &Arc<Node>, statements: Arc<NodeList>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_source_file"); 
         let data = node.as_source_file_data();
         let mut updated = Node::new(
             SyntaxKind::SourceFile,
@@ -257,7 +257,7 @@ impl<'a> NodeFactory<'a> {
         export_clause: &Arc<Node>,
         module_specifier: Option<Arc<Node>>,
         attributes: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_export_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ExportDeclaration,
             NodeData::ExportDeclaration(ndg29_export_declaration(
@@ -270,11 +270,11 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_modifier_list(&self, modifiers: Vec<Arc<Node>>) -> Arc<ModifierList> {
+    pub fn new_modifier_list(&self, modifiers: Vec<Arc<Node>>) -> Arc<ModifierList> { ::tsox_core::fntrace::enter("new_modifier_list"); 
         Arc::new(ModifierList::new(modifiers, ModifierFlags::default()))
     }
 
-    pub fn new_modifier(&self, kind: SyntaxKind) -> Arc<Node> {
+    pub fn new_modifier(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_modifier"); 
         Arc::new(Node::new(kind, NodeData::Token))
     }
 }
@@ -285,7 +285,7 @@ fn ndg29_export_declaration(
     export_clause: Option<Arc<Node>>,
     module_specifier: Option<Arc<Node>>,
     attributes: Option<Arc<Node>>,
-) -> tsox_frontend::ast::node_data_generated::ExportDeclarationData {
+) -> tsox_frontend::ast::node_data_generated::ExportDeclarationData { ::tsox_core::fntrace::enter("ndg29_export_declaration"); 
     tsox_frontend::ast::node_data_generated::ExportDeclarationData {
         modifiers,
         is_type_only,

@@ -3,7 +3,7 @@
 use crate::project::session::*;
 
 impl Session {
-    pub fn new(init: SessionInit) -> Self {
+    pub fn new(init: SessionInit) -> Self { ::tsox_core::fntrace::enter("new"); 
         let current_directory = init.options.current_directory.clone();
         let use_case_sensitive = init.fs.use_case_sensitive_file_names();
 
@@ -70,23 +70,23 @@ impl Session {
         }
     }
 
-    pub fn fs(&self) -> Option<&Arc<dyn FS>> {
+    pub fn fs(&self) -> Option<&Arc<dyn FS>> { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref().map(|ofs| &ofs.fs)
     }
 
-    pub fn current_directory(&self) -> &str {
+    pub fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.options.current_directory
     }
 
-    pub fn snapshot(&self) -> Option<Arc<Snapshot>> {
+    pub fn snapshot(&self) -> Option<Arc<Snapshot>> { ::tsox_core::fntrace::enter("snapshot"); 
         self.snapshot.read().unwrap().clone()
     }
 
-    pub fn config(&self) -> UserPreferences {
+    pub fn config(&self) -> UserPreferences { ::tsox_core::fntrace::enter("config"); 
         self.workspace_user_preferences.lock().unwrap().clone()
     }
 
-    pub fn configure(&self, config: UserPreferences) {
+    pub fn configure(&self, config: UserPreferences) { ::tsox_core::fntrace::enter("configure"); 
         let mut prefs = self.workspace_user_preferences.lock().unwrap();
         let old = prefs.clone();
         self.pending_user_config_changes
@@ -100,7 +100,7 @@ impl Session {
         self.refresh_ata_if_needed(&old);
     }
 
-    pub fn initialize_with_user_config(&self, config: UserPreferences) {
+    pub fn initialize_with_user_config(&self, config: UserPreferences) { ::tsox_core::fntrace::enter("initialize_with_user_config"); 
         self.configure(config);
     }
 
@@ -110,7 +110,7 @@ impl Session {
         version: i32,
         content: &str,
         language_kind: &lsproto::LanguageKind,
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_open_file"); 
         self.cancel_warm_auto_import_cache();
         self.schedule_idle_cache_clean();
         self.cancel_scheduled_snapshot_update();
@@ -142,7 +142,7 @@ impl Session {
         );
     }
 
-    pub fn did_close_file(&self, uri: &lsproto::DocumentUri) {
+    pub fn did_close_file(&self, uri: &lsproto::DocumentUri) { ::tsox_core::fntrace::enter("did_close_file"); 
         self.cancel_warm_auto_import_cache();
         self.schedule_idle_cache_clean();
         {
@@ -161,7 +161,7 @@ impl Session {
         uri: &lsproto::DocumentUri,
         version: i32,
         changes: &[lsproto::TextDocumentContentChangePartialOrWholeDocument],
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_change_file"); 
         self.cancel_diagnostics_refresh();
         self.cancel_warm_auto_import_cache();
         self.schedule_idle_cache_clean();
@@ -175,7 +175,7 @@ impl Session {
         });
     }
 
-    pub fn did_save_file(&self, uri: &lsproto::DocumentUri) {
+    pub fn did_save_file(&self, uri: &lsproto::DocumentUri) { ::tsox_core::fntrace::enter("did_save_file"); 
         self.schedule_idle_cache_clean();
         let mut pending = self.pending_file_changes.lock().unwrap();
         pending.push(FileChange {
@@ -185,7 +185,7 @@ impl Session {
         });
     }
 
-    pub fn did_change_watched_files(&self, changes: &[lsproto::FileEvent]) {
+    pub fn did_change_watched_files(&self, changes: &[lsproto::FileEvent]) { ::tsox_core::fntrace::enter("did_change_watched_files"); 
         let mut file_changes: Vec<FileChange> = Vec::with_capacity(changes.len());
         for change in changes {
             let kind = match change.change_type {
@@ -214,7 +214,7 @@ impl Session {
     pub fn did_change_compiler_options_for_inferred_projects(
         &self,
         options: Option<tsox_core::core::compiler_options::CompilerOptions>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_change_compiler_options_for_inferred_projects"); 
         let overlays = self
             .fs
             .as_ref()
@@ -230,7 +230,7 @@ impl Session {
         );
     }
 
-    pub fn schedule_snapshot_update(&self, reason: UpdateReason) {
+    pub fn schedule_snapshot_update(&self, reason: UpdateReason) { ::tsox_core::fntrace::enter("schedule_snapshot_update"); 
         let _ = reason;
         self.scheduled_snapshot_update_generation
             .fetch_add(1, Ordering::SeqCst);
@@ -238,20 +238,20 @@ impl Session {
         *self.scheduled_snapshot_update_at.lock().unwrap() = Some(Instant::now() + delay);
     }
 
-    pub fn snapshot_update_due(&self) -> bool {
+    pub fn snapshot_update_due(&self) -> bool { ::tsox_core::fntrace::enter("snapshot_update_due"); 
         match *self.scheduled_snapshot_update_at.lock().unwrap() {
             Some(when) => Instant::now() >= when,
             None => false,
         }
     }
 
-    pub fn cancel_scheduled_snapshot_update(&self) {
+    pub fn cancel_scheduled_snapshot_update(&self) { ::tsox_core::fntrace::enter("cancel_scheduled_snapshot_update"); 
         self.scheduled_snapshot_update_generation
             .fetch_add(1, Ordering::SeqCst);
         *self.scheduled_snapshot_update_at.lock().unwrap() = None;
     }
 
-    pub fn schedule_diagnostics_refresh(&self) {
+    pub fn schedule_diagnostics_refresh(&self) { ::tsox_core::fntrace::enter("schedule_diagnostics_refresh"); 
         self.diagnostics_refresh_generation
             .fetch_add(1, Ordering::SeqCst);
         let delay = self.options.debounce_delay;
@@ -266,32 +266,32 @@ impl Session {
         }
     }
 
-    pub fn diagnostics_refresh_due(&self) -> bool {
+    pub fn diagnostics_refresh_due(&self) -> bool { ::tsox_core::fntrace::enter("diagnostics_refresh_due"); 
         match *self.diagnostics_refresh_at.lock().unwrap() {
             Some(when) => Instant::now() >= when,
             None => false,
         }
     }
 
-    pub fn cancel_diagnostics_refresh(&self) {
+    pub fn cancel_diagnostics_refresh(&self) { ::tsox_core::fntrace::enter("cancel_diagnostics_refresh"); 
         self.diagnostics_refresh_generation
             .fetch_add(1, Ordering::SeqCst);
         *self.diagnostics_refresh_at.lock().unwrap() = None;
     }
 
-    pub fn cancel_warm_auto_import_cache(&self) {
+    pub fn cancel_warm_auto_import_cache(&self) { ::tsox_core::fntrace::enter("cancel_warm_auto_import_cache"); 
         self.warm_auto_import_active.store(false, Ordering::SeqCst);
     }
 
-    pub fn schedule_idle_cache_clean(&self) {
+    pub fn schedule_idle_cache_clean(&self) { ::tsox_core::fntrace::enter("schedule_idle_cache_clean"); 
         *self.idle_cache_clean_at.lock().unwrap() = Some(Instant::now() + IDLE_CACHE_CLEAN_DELAY);
     }
 
-    pub fn cancel_idle_cache_clean(&self) {
+    pub fn cancel_idle_cache_clean(&self) { ::tsox_core::fntrace::enter("cancel_idle_cache_clean"); 
         *self.idle_cache_clean_at.lock().unwrap() = None;
     }
 
-    pub fn close(&self) {
+    pub fn close(&self) { ::tsox_core::fntrace::enter("close"); 
         self.cancel_scheduled_snapshot_update();
         self.cancel_diagnostics_refresh();
         self.cancel_warm_auto_import_cache();

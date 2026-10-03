@@ -9,7 +9,7 @@ pub fn get_each_file_name_of_module(
     imported_file_name: &str,
     host: &dyn ModuleSpecifierGenerationHost,
     _prefer_symlinks: bool,
-) -> Vec<ModulePath> {
+) -> Vec<ModulePath> { ::tsox_core::fntrace::enter("get_each_file_name_of_module"); 
     let cwd = host.get_current_directory();
     let normalized = tsox_core::tspath::get_normalized_absolute_path(imported_file_name, &cwd);
     let in_nm = super::paths::contains_node_modules(&normalized);
@@ -23,7 +23,7 @@ pub fn get_each_file_name_of_module(
 pub fn should_allow_importing_ts_extension(
     compiler_options: &CompilerOptions,
     from_file_name: &str,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_allow_importing_ts_extension"); 
     compiler_options.get_allow_importing_ts_extensions()
         || (!from_file_name.is_empty()
             && tsox_core::tspath::is_declaration_file_name(from_file_name))
@@ -36,7 +36,7 @@ pub fn get_allowed_endings_in_preferred_order(
     _importing_source_file: &dyn SourceFileForSpecifierGeneration,
     _old_import_specifier: &str,
     _syntax_implied_node_format: ResolutionMode,
-) -> Vec<ModuleSpecifierEnding> {
+) -> Vec<ModuleSpecifierEnding> { ::tsox_core::fntrace::enter("get_allowed_endings_in_preferred_order"); 
     vec![ModuleSpecifierEnding::Minimal]
 }
 
@@ -46,7 +46,7 @@ pub fn get_module_specifier_preferences(
     _compiler_options: &CompilerOptions,
     _importing_source_file: &dyn SourceFileForSpecifierGeneration,
     old_import_specifier: &str,
-) -> ModuleSpecifierPreferences {
+) -> ModuleSpecifierPreferences { ::tsox_core::fntrace::enter("get_module_specifier_preferences"); 
     let excludes = prefs.auto_import_specifier_exclude_regexes.clone();
     let relative_preference;
     if !old_import_specifier.is_empty() {
@@ -81,7 +81,7 @@ pub fn get_module_specifiers(
     _user_preferences: &UserPreferences,
     _options: &ModuleSpecifierOptions,
     _for_auto_imports: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_module_specifiers"); 
     Vec::new()
 }
 
@@ -94,7 +94,7 @@ pub fn get_module_specifiers_with_info(
     _user_preferences: &UserPreferences,
     _options: &ModuleSpecifierOptions,
     _for_auto_imports: bool,
-) -> (Vec<String>, ResultKind) {
+) -> (Vec<String>, ResultKind) { ::tsox_core::fntrace::enter("get_module_specifiers_with_info"); 
     (Vec::new(), ResultKind::None)
 }
 
@@ -106,7 +106,7 @@ pub fn get_module_specifiers_for_file_with_info(
     _user_preferences: &UserPreferences,
     _options: &ModuleSpecifierOptions,
     _for_auto_imports: bool,
-) -> (Vec<String>, ResultKind) {
+) -> (Vec<String>, ResultKind) { ::tsox_core::fntrace::enter("get_module_specifiers_for_file_with_info"); 
     (Vec::new(), ResultKind::None)
 }
 
@@ -117,7 +117,7 @@ pub fn get_module_specifier(
     _compiler_options: &CompilerOptions,
     _preferences: &UserPreferences,
     _options: &ModuleSpecifierOptions,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("get_module_specifier"); 
     None
 }
 
@@ -129,7 +129,7 @@ pub fn update_module_specifier(
     _preferences: &UserPreferences,
     _old_import_specifier: &str,
     _options: &ModuleSpecifierOptions,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("update_module_specifier"); 
     None
 }
 
@@ -140,7 +140,7 @@ pub fn get_node_modules_package_name(
     _host: &dyn ModuleSpecifierGenerationHost,
     _preferences: &UserPreferences,
     _options: &ModuleSpecifierOptions,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_node_modules_package_name"); 
     String::new()
 }
 
@@ -152,10 +152,10 @@ pub fn process_entrypoint_ending(
     _options: &CompilerOptions,
     _importing_source_file: &dyn SourceFileForSpecifierGeneration,
     _allowed_endings: &[ModuleSpecifierEnding],
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("process_entrypoint_ending"); 
     String::new()
 }
 
-pub fn get_js_extension_for_file(file_name: &str, _options: &CompilerOptions) -> String {
+pub fn get_js_extension_for_file(file_name: &str, _options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_js_extension_for_file"); 
     super::paths::extension_from_path(file_name)
 }

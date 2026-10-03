@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-pub fn has_js_doc_tag(text: &str, tags: &[&str]) -> bool {
+pub fn has_js_doc_tag(text: &str, tags: &[&str]) -> bool { ::tsox_core::fntrace::enter("has_js_doc_tag"); 
     for tag in tags {
         let Some(rest) = text.strip_prefix(tag) else {
             continue;

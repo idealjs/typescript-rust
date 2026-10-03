@@ -141,33 +141,33 @@ pub struct Relation {
 }
 
 impl Relation {
-    pub fn new(kind: RelationKind) -> Self {
+    pub fn new(kind: RelationKind) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             kind,
             results: HashMap::new(),
         }
     }
 
-    pub fn get(&self, key: &CacheHashKey) -> RelationComparisonResult {
+    pub fn get(&self, key: &CacheHashKey) -> RelationComparisonResult { ::tsox_core::fntrace::enter("get"); 
         self.results.get(key).copied().unwrap_or_default()
     }
 
-    pub fn set(&mut self, key: CacheHashKey, result: RelationComparisonResult) {
+    pub fn set(&mut self, key: CacheHashKey, result: RelationComparisonResult) { ::tsox_core::fntrace::enter("set"); 
         self.results.insert(key, result);
     }
 
-    pub fn size(&self) -> usize {
+    pub fn size(&self) -> usize { ::tsox_core::fntrace::enter("size"); 
         self.results.len()
     }
 
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self) { ::tsox_core::fntrace::enter("clear"); 
         self.results.clear();
     }
 }
 
 pub(crate) fn error_range_for_node(
     node: &std::sync::Arc<tsox_frontend::ast::Node>,
-) -> tsox_core::core::text::TextRange {
+) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("error_range_for_node"); 
     use tsox_frontend::ast::SyntaxKind;
     match node.kind {
         SyntaxKind::VariableDeclaration

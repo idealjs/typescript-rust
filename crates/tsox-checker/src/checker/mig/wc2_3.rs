@@ -42,7 +42,7 @@ impl Checker {
         t: &Arc<Type>,
         m: Option<&TypeMapper>,
         alias: Option<&TypeAlias>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_object_type_instantiation"); 
         let declaration = if t.object_flags.intersects(OBJECT_FLAGS_REFERENCE) {
             t.as_type_reference().and_then(|d| d.node.clone())
         } else if t.object_flags.intersects(OBJECT_FLAGS_INSTANTIATION_EXPRESSION_TYPE) {
@@ -143,7 +143,7 @@ impl Checker {
         &mut self,
         signature: &Arc<Signature>,
         call_chain_flags: SignatureFlags,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_optional_call_signature"); 
         if signature.flags & SignatureFlags::CallChainFlags == call_chain_flags {
             return Arc::clone(signature);
         }
@@ -164,7 +164,7 @@ impl Checker {
         result
     }
 
-    pub fn get_optional_expression_type(&mut self, expr_type: &Arc<Type>, expression: &Arc<Node>) -> Arc<Type> {
+    pub fn get_optional_expression_type(&mut self, expr_type: &Arc<Type>, expression: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_optional_expression_type"); 
         if is_expression_of_optional_chain_root(expression) {
             return self.get_non_nullable_type(expr_type);
         }
@@ -174,7 +174,7 @@ impl Checker {
         Arc::clone(expr_type)
     }
 
-    pub fn get_or_create_substitution_type(&mut self, base_type: &Arc<Type>, constraint: &Arc<Type>) -> Arc<Type> {
+    pub fn get_or_create_substitution_type(&mut self, base_type: &Arc<Type>, constraint: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_or_create_substitution_type"); 
         let key = SubstitutionTypeKey {
             base_id: base_type.id(),
             constraint_id: constraint.id(),
@@ -187,7 +187,7 @@ impl Checker {
         result
     }
 
-    pub fn get_or_create_type_from_signature(&mut self, sig: &Arc<Signature>) -> Arc<Type> {
+    pub fn get_or_create_type_from_signature(&mut self, sig: &Arc<Signature>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_or_create_type_from_signature"); 
         if let Some(existing) = sig.isolated_signature_type.get().cloned() {
             return existing;
         }
@@ -212,7 +212,7 @@ impl Checker {
         t
     }
 
-    pub fn get_outer_inference_type_parameters(&self) -> Vec<Arc<Type>> {
+    pub fn get_outer_inference_type_parameters(&self) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_outer_inference_type_parameters"); 
         let mut result = vec![];
         for info in &self.inference_context_infos {
             if let Some(context) = &info.context {
@@ -224,7 +224,7 @@ impl Checker {
         result
     }
 
-    pub fn get_outer_type_parameters(&mut self, node: &Arc<Node>, include_this_types: bool) -> Vec<Arc<Type>> {
+    pub fn get_outer_type_parameters(&mut self, node: &Arc<Node>, include_this_types: bool) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_outer_type_parameters"); 
         let Some(parent) = node.parent() else {
             return vec![];
         };
@@ -288,14 +288,14 @@ impl Checker {
         outer_and_own
     }
 
-    pub fn get_outer_type_parameters_of_class_or_interface(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
+    pub fn get_outer_type_parameters_of_class_or_interface(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_outer_type_parameters_of_class_or_interface"); 
         let Some(declaration) = self.get_class_or_interface_like_declaration(symbol) else {
             return vec![];
         };
         self.get_outer_type_parameters(&declaration, false)
     }
 
-    pub fn get_parameter_type_node_for_decorator_check(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_parameter_type_node_for_decorator_check(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_parameter_type_node_for_decorator_check"); 
         let type_node = node.type_();
         if parameter_declaration_dot_dot_dot_token(node).is_some() {
             return get_rest_parameter_element_type(type_node);
@@ -307,7 +307,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         parameter: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_parameter_type_of_full_signature"); 
         let signature = self.get_signature_of_full_signature_type(node)?;
         let pos = node
             .parameters()
@@ -320,7 +320,7 @@ impl Checker {
         }
     }
 
-    pub fn get_parent_element_access(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_parent_element_access(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_parent_element_access"); 
         let Some(ancestor) = node.parent().and_then(|p| p.parent()) else {
             return None;
         };
@@ -338,13 +338,13 @@ impl Checker {
         }
     }
 
-    pub fn get_resolved_symbol_or_nil(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_resolved_symbol_or_nil(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_resolved_symbol_or_nil"); 
         self.symbol_node_links
             .get(node)
             .and_then(|l| l.resolved_symbol.clone())
     }
 
-    pub fn get_synthetic_element_access(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_synthetic_element_access(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_synthetic_element_access"); 
         let parent_access = self.get_parent_element_access(node)?;
         if get_flow_node_of_node(&parent_access).is_some() {
             if let Some(prop_name) = self.get_destructuring_property_name(node) {
@@ -379,7 +379,7 @@ impl Checker {
         None
     }
 
-    pub fn get_type_of_accessors(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_accessors(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_accessors"); 
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(t) = &links.resolved_type {
                 return Arc::clone(t);
@@ -460,7 +460,7 @@ impl Checker {
             .unwrap_or(t)
     }
 
-    pub fn get_type_of_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_alias"); 
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(t) = &links.resolved_type {
                 return Arc::clone(t);
@@ -507,7 +507,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_concrete_property_of_contextual_type"); 
         let prop = self.get_property_of_type(t, &name.to_string())?;
         if self.is_circular_mapped_property(&prop) {
             return None;
@@ -517,7 +517,7 @@ impl Checker {
         Some(self.remove_missing_type(prop_type, optional))
     }
 
-    pub fn get_type_of_func_class_enum_module_worker(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_func_class_enum_module_worker(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_func_class_enum_module_worker"); 
         if symbol.flags.intersects(SymbolFlags::MODULE) && is_shorthand_ambient_module_symbol(symbol) {
             return self.any_type();
         }
@@ -546,7 +546,7 @@ impl Checker {
         t
     }
 
-    pub fn get_type_of_mapped_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_mapped_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_mapped_symbol"); 
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(t) = &links.resolved_type {
                 return Arc::clone(t);
@@ -621,7 +621,7 @@ impl Checker {
             .unwrap_or(prop_type)
     }
 
-    pub fn get_type_of_parameter(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_parameter(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_parameter"); 
         let declaration = symbol.value_declaration.clone();
         let has_initializer_or_optional = declaration
             .as_ref()
@@ -631,7 +631,7 @@ impl Checker {
         self.add_optionality_ex(&symbol_type, false, has_initializer_or_optional)
     }
 
-    pub fn get_type_of_property_in_base_class(&mut self, property: &Arc<Symbol>) -> Option<Arc<Type>> {
+    pub fn get_type_of_property_in_base_class(&mut self, property: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_in_base_class"); 
         let class_type = self.get_declaring_class(property)?;
         let base_class_types = self.get_base_types(&class_type);
         if !base_class_types.is_empty() {
@@ -644,7 +644,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_or_index_signature_of_type"); 
         if let Some(prop_type) = self.get_type_of_property_of_type(t, &name.to_string()) {
             return Some(prop_type);
         }
@@ -657,7 +657,7 @@ impl Checker {
         None
     }
 
-    pub fn get_type_of_variable_or_parameter_or_property(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_variable_or_parameter_or_property(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_variable_or_parameter_or_property"); 
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(t) = &links.resolved_type {
                 return Arc::clone(t);
@@ -676,7 +676,7 @@ impl Checker {
         t
     }
 
-    pub fn get_type_of_variable_or_parameter_or_property_worker(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_variable_or_parameter_or_property_worker(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_variable_or_parameter_or_property_worker"); 
         if symbol.flags.intersects(SymbolFlags::Prototype) {
             return self.get_type_of_prototype_property(symbol);
         }
@@ -758,7 +758,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_only_alias_declaration_ex"); 
         let mut symbol = Arc::clone(symbol);
         while symbol.flags.intersects(SymbolFlags::Alias) && !symbol.flags.intersects(meaning) {
             let resolved = self.resolve_alias(&symbol);
@@ -775,7 +775,7 @@ impl Checker {
         None
     }
 
-    pub fn get_type_only_declaration_of_entity_name(&mut self, name: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_type_only_declaration_of_entity_name(&mut self, name: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_only_declaration_of_entity_name"); 
         let symbol = self.resolve_entity_name(
             name,
             SymbolFlags::VALUE | SymbolFlags::TYPE | SymbolFlags::NAMESPACE,
@@ -790,7 +790,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_parameters_for_type_and_symbol"); 
         if !self.is_error_type(t) {
             if symbol.flags.intersects(SymbolFlags::TypeAlias) {
                 if let Some(links) = self.type_alias_links.get(symbol) {
@@ -808,7 +808,7 @@ impl Checker {
         vec![]
     }
 
-    pub fn get_type_parameters_for_type_reference_or_import(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> {
+    pub fn get_type_parameters_for_type_reference_or_import(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_parameters_for_type_reference_or_import"); 
         let t = self.get_type_from_type_node(node);
         if !self.is_error_type(&t) {
             if let Some(symbol) = self.get_resolved_symbol_or_nil(node) {
@@ -818,7 +818,7 @@ impl Checker {
         vec![]
     }
 
-    pub fn get_type_parameters_from_declaration(&mut self, declaration: &Arc<Node>) -> Vec<Arc<Type>> {
+    pub fn get_type_parameters_from_declaration(&mut self, declaration: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_parameters_from_declaration"); 
         if let Some(sig) = self.get_signature_of_full_signature_type(declaration) {
             return sig.type_parameters.clone();
         }
@@ -836,11 +836,11 @@ impl Checker {
         result
     }
 
-    pub fn get_type_reference_arity(&self, t: &Arc<Type>) -> i32 {
+    pub fn get_type_reference_arity(&self, t: &Arc<Type>) -> i32 { ::tsox_core::fntrace::enter("get_type_reference_arity"); 
         target_interface_type_parameters(t).len() as i32
     }
 
-    pub fn get_type_with_facts(&mut self, t: &Arc<Type>, include: TypeFacts) -> Arc<Type> {
+    pub fn get_type_with_facts(&mut self, t: &Arc<Type>, include: TypeFacts) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_with_facts"); 
         filter_type_self(self, t, |c, t| c.has_type_facts(t, include))
     }
 
@@ -850,7 +850,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         original_symbol: &Arc<Symbol>,
         module_specifier: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_with_synthetic_default_import_type"); 
         if !self.is_error_type(t) {
             let key = CachedTypeKey {
                 kind: CachedTypeKind::SyntheticType,
@@ -904,7 +904,7 @@ impl Checker {
         t: &Arc<Type>,
         this_argument: Option<&Arc<Type>>,
         need_apparent_type: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_with_this_argument"); 
         if t.object_flags.intersects(OBJECT_FLAGS_REFERENCE) {
             let Some(target) = t.target() else {
                 return Arc::clone(t);
@@ -938,7 +938,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn get_unary_result_type(&mut self, operand_type: &Arc<Type>) -> Arc<Type> {
+    pub fn get_unary_result_type(&mut self, operand_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_unary_result_type"); 
         if self.maybe_type_of_kind(operand_type, TYPE_FLAGS_BIG_INT_LIKE) {
             if self.is_type_assignable_to_kind(operand_type, TYPE_FLAGS_ANY_OR_UNKNOWN)
                 || self.maybe_type_of_kind(operand_type, TYPE_FLAGS_NUMBER_LIKE)
@@ -950,7 +950,7 @@ impl Checker {
         self.number_type()
     }
 
-    pub fn get_undefined_property(&mut self, prop: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn get_undefined_property(&mut self, prop: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_undefined_property"); 
         if let Some(cached) = self.undefined_properties.get(&prop.name) {
             return Arc::clone(cached);
         }
@@ -967,7 +967,7 @@ impl Checker {
         types: Vec<Arc<Type>>,
         is_union: bool,
         union_reduction: UnionReduction,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_union_or_intersection_type"); 
         if is_union {
             self.get_union_type_ex(types, union_reduction)
         } else {
@@ -981,7 +981,7 @@ impl Checker {
         precomputed_object_flags: ObjectFlags,
         alias: Option<&TypeAlias>,
         origin: Option<&Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_union_type_from_sorted_list"); 
         if types.is_empty() {
             return self.never_type();
         }
@@ -1024,7 +1024,7 @@ impl Checker {
         union_reduction: UnionReduction,
         alias: Option<&TypeAlias>,
         origin: Option<&Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_union_type_worker"); 
         let (mut type_set, includes) = self.add_types_to_union(&types);
         if union_reduction != UnionReduction::None {
             if includes.intersects(TYPE_FLAGS_ANY_OR_UNKNOWN) {
@@ -1131,7 +1131,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         rest_symbol: &Arc<Symbol>,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("get_uniq_associated_names_from_tuple_type"); 
         let element_infos = t
             .target_tuple_type()
             .map(|d| d.element_infos.clone())
@@ -1165,7 +1165,7 @@ impl Checker {
         names
     }
 
-    pub fn get_unique_literal_type_for_type_parameter(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_unique_literal_type_for_type_parameter(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_unique_literal_type_for_type_parameter"); 
         if t.flags.intersects(TypeFlags::TypeParameter) {
             return self.unique_literal_type();
         }
@@ -1176,7 +1176,7 @@ impl Checker {
         &mut self,
         context: &InferenceContext,
         type_parameters: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_unique_type_parameters"); 
         let mut old_type_parameters: Vec<Arc<Type>> = vec![];
         let mut new_type_parameters: Vec<Arc<Type>> = vec![];
         let mut result: Vec<Arc<Type>> = Vec::with_capacity(type_parameters.len());
@@ -1217,7 +1217,7 @@ impl Checker {
         contextual_signature_return_type: Option<&Arc<Type>>,
         kind: IterationTypeKind,
         is_async_generator: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_widened_literal_like_type_for_contextual_iteration_type_if_needed"); 
         let t = t?;
         if is_unit_type(t) {
             let contextual_type = contextual_signature_return_type.and_then(|c| {
@@ -1233,7 +1233,7 @@ impl Checker {
         t: Option<&Arc<Type>>,
         contextual_signature_return_type: Option<&Arc<Type>>,
         is_async: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_widened_literal_like_type_for_contextual_return_type_if_needed"); 
         let t = t?;
         if is_unit_type(t) {
             let contextual_type = match contextual_signature_return_type {
@@ -1250,7 +1250,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         contextual_type: Option<&Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_literal_like_type_for_contextual_type"); 
         let mut t = Arc::clone(t);
         if let Some(contextual_type) = contextual_type {
             if !self.is_literal_of_contextual_type(&t, contextual_type) {
@@ -1260,7 +1260,7 @@ impl Checker {
         self.get_regular_type_of_literal_type(&t)
     }
 
-    pub fn get_widened_property(&mut self, prop: &Arc<Symbol>, context: Option<&WideningContext>) -> Arc<Symbol> {
+    pub fn get_widened_property(&mut self, prop: &Arc<Symbol>, context: Option<&WideningContext>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_widened_property"); 
         if !prop.flags.intersects(SymbolFlags::Property) {
             return Arc::clone(prop);
         }
@@ -1273,7 +1273,7 @@ impl Checker {
         self.create_symbol_with_type(prop, &widened)
     }
 
-    pub fn get_widened_type_with_context(&mut self, t: &Arc<Type>, context: Option<&WideningContext>) -> Arc<Type> {
+    pub fn get_widened_type_with_context(&mut self, t: &Arc<Type>, context: Option<&WideningContext>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_type_with_context"); 
         if !t.object_flags.intersects(OBJECT_FLAGS_REQUIRES_WIDENING) {
             return Arc::clone(t);
         }
@@ -1350,7 +1350,7 @@ impl Checker {
         result.unwrap_or_else(|| Arc::clone(t))
     }
 
-    pub fn get_widened_unique_es_symbol_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_widened_unique_es_symbol_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_unique_es_symbol_type"); 
         if t.flags.intersects(TypeFlags::UniqueESSymbol) {
             return self.es_symbol_type();
         }
@@ -1361,7 +1361,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn get_write_type_of_accessors(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_write_type_of_accessors(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_write_type_of_accessors"); 
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(t) = &links.write_type {
                 return Arc::clone(t);
@@ -1406,7 +1406,7 @@ impl Checker {
             .unwrap_or_else(|| self.any_type())
     }
 
-    pub fn get_write_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_write_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_write_type_of_symbol"); 
         if symbol.check_flags.intersects(ast::CheckFlags::SyntheticProperty) {
             if symbol.check_flags.intersects(ast::CheckFlags::DeferredType) {
                 return self.get_write_type_of_symbol_with_deferred_type(symbol);
@@ -1438,7 +1438,7 @@ impl Checker {
         expression_type: &Arc<Type>,
         sent_type: &Arc<Type>,
         is_async: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_yielded_type_of_yield_expression"); 
         let error_node = node.expression().cloned().unwrap_or_else(|| Arc::clone(node));
         let is_yield_star = yield_expression_asterisk_token(node).is_some();
         let mut yielded_type = Arc::clone(expression_type);
@@ -1462,7 +1462,7 @@ impl Checker {
             .unwrap_or_else(|| Arc::clone(&yielded_type))
     }
 
-    pub fn has_context_sensitive_return_expression(&mut self, node: &Arc<Node>) -> bool {
+    pub fn has_context_sensitive_return_expression(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_context_sensitive_return_expression"); 
         if node_type_parameters(node).map_or(true, |list| list.is_empty()) && node.type_().is_none() {
             if let Some(body) = node.body() {
                 if !ast::is_block(&body) {
@@ -1482,7 +1482,7 @@ impl Checker {
 }
 
 impl Checker {
-    pub fn check_jsx_attribute_with_mode(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_jsx_attribute_with_mode(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_jsx_attribute_with_mode"); 
         if let Some(initializer) = tsox_frontend::ast::mig::m3b::initializer(node) {
             return self.check_expression_for_mutable_location(initializer, check_mode);
         }

@@ -3,7 +3,7 @@
 use crate::checker::relater_index_signatures::*;
 
 impl Checker {
-    pub fn is_object_type_with_inferable_index(&self, t: &Arc<Type>) -> bool {
+    pub fn is_object_type_with_inferable_index(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_object_type_with_inferable_index"); 
         if t.flags.contains(TypeFlags::Intersection) {
             if let Some(ui) = t.as_union_or_intersection() {
                 return ui
@@ -51,7 +51,7 @@ impl Checker {
         source: &Arc<Type>,
         target_info: &IndexInfo,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("members_related_to_index_info"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let Some(target_key) = target_info.key_type.as_ref() else {
             return Ternary::True;
@@ -119,7 +119,7 @@ impl Checker {
         result
     }
 
-    pub fn is_applicable_index_type(&mut self, key: &Arc<Type>, target_key: &Arc<Type>) -> bool {
+    pub fn is_applicable_index_type(&mut self, key: &Arc<Type>, target_key: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_applicable_index_type"); 
         if Arc::ptr_eq(key, target_key) {
             return true;
         }
@@ -144,7 +144,7 @@ impl Checker {
         applicable
     }
 
-    pub fn get_literal_type_from_property(&mut self, prop: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_literal_type_from_property(&mut self, prop: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_literal_type_from_property"); 
         let non_public =
             crate::checker::exports::get_declaration_modifier_flags_from_symbol(prop)
                 .intersects(tsox_frontend::ast::ModifierFlags::NonPublicAccessibilityModifier);
@@ -170,6 +170,6 @@ impl Checker {
     }
 }
 
-pub(crate) fn canonical_numeric_literal_name(name: &str) -> bool {
+pub(crate) fn canonical_numeric_literal_name(name: &str) -> bool { ::tsox_core::fntrace::enter("canonical_numeric_literal_name"); 
     tsox_core::jsnum::Number::from_string(name).to_string() == name
 }

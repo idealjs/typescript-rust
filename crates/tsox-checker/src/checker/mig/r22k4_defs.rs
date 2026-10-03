@@ -19,13 +19,13 @@ use crate::checker::mig::m2a::r19k11_defs::R19K11NodeExt;
 use crate::checker::mig::m2e::r19k3_defs::NodeAccessExtR19k3;
 
 impl Checker {
-    pub fn node_check_flags(&mut self, node: &Arc<Node>, flags: NodeCheckFlags) {
+    pub fn node_check_flags(&mut self, node: &Arc<Node>, flags: NodeCheckFlags) { ::tsox_core::fntrace::enter("node_check_flags"); 
         if let Some(links) = self.node_links.get_mut(node) {
             links.flags |= flags;
         }
     }
 
-    pub fn signature_is_resolving_signature(&self, sig: &Arc<Signature>) -> bool {
+    pub fn signature_is_resolving_signature(&self, sig: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("signature_is_resolving_signature"); 
         Arc::ptr_eq(sig, &self.resolving_signature())
     }
 
@@ -36,7 +36,7 @@ impl Checker {
         left_type: &Arc<Type>,
         right_type: &Arc<Type>,
         operator: SyntaxKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_for_disallowed_essymbol_operand"); 
         let offending_symbol_operand = if self
             .maybe_type_of_kind_considering_base_constraint(left_type, TYPE_FLAGS_ES_SYMBOL_LIKE)
         {
@@ -66,7 +66,7 @@ impl Checker {
         right: &Arc<Node>,
         left_type: &Arc<Type>,
         right_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_assignment_operator"); 
         if !is_assignment_operator(operator) {
             return;
         }
@@ -90,7 +90,7 @@ impl Checker {
         }
     }
 
-    pub fn check_deprecated_signature(&mut self, sig: &Arc<Signature>, node: &Arc<Node>) {
+    pub fn check_deprecated_signature(&mut self, sig: &Arc<Signature>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_deprecated_signature"); 
         if sig
             .flags
             .contains(SignatureFlags::IsSignatureCandidateForOverloadFailure)
@@ -115,7 +115,7 @@ impl Checker {
         }
     }
 
-    pub fn class_declaration_extends_null(&mut self, class_decl: &Arc<Node>) -> bool {
+    pub fn class_declaration_extends_null(&mut self, class_decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_declaration_extends_null"); 
         let Some(class_symbol) = self.get_symbol_of_declaration_opt(class_decl) else {
             return false;
         };
@@ -128,7 +128,7 @@ impl Checker {
         }
     }
 
-    pub fn is_indirect_call(&self, node: &Arc<Node>) -> bool {
+    pub fn is_indirect_call(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_indirect_call"); 
         let binary = node.as_binary_expression_node();
         let left = &binary.left;
         let right = &binary.right;
@@ -157,7 +157,7 @@ impl Checker {
         source_type: &Arc<Type>,
         check_mode: CheckMode,
         right_is_this: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("check_destructuring_assignment_for_binary"); 
         let mut source_type = Arc::clone(source_type);
         let mut target = Arc::clone(node);
         if is_binary_expression(&target)
@@ -181,7 +181,7 @@ impl Checker {
         Arc::clone(&source_type)
     }
 
-    pub fn get_essymbol_like_type_for_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_essymbol_like_type_for_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_essymbol_like_type_for_node"); 
         let _ = node;
         self.es_symbol_type()
     }

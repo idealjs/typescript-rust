@@ -28,7 +28,7 @@ pub struct AutoImportRegistry {
 }
 
 impl AutoImportRegistry {
-    pub fn new(to_path: Box<dyn Fn(&str) -> Path + Send + Sync>) -> Self {
+    pub fn new(to_path: Box<dyn Fn(&str) -> Path + Send + Sync>) -> Self { ::tsox_core::fntrace::enter("new"); 
         AutoImportRegistry { _to_path: to_path }
     }
 
@@ -37,7 +37,7 @@ impl AutoImportRegistry {
         _file_name: &str,
         _project_path: &Path,
         _prefs: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_prepared_for_importing_file"); 
         false
     }
 }
@@ -48,7 +48,7 @@ pub struct AutoImportRegistryCloneHost {
 }
 
 impl AutoImportRegistryCloneHost {
-    pub fn new(current_directory: String) -> Self {
+    pub fn new(current_directory: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         AutoImportRegistryCloneHost {
             _files: Mutex::new(Vec::new()),
             current_directory,
@@ -57,31 +57,31 @@ impl AutoImportRegistryCloneHost {
 }
 
 impl RegistryCloneHost for AutoImportRegistryCloneHost {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         todo!("AutoImportRegistryCloneHost::fs requires snapshotFSBuilder integration")
     }
 
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 
-    fn get_default_project(&self, _path: &Path) -> (Path, Option<Arc<Program>>) {
+    fn get_default_project(&self, _path: &Path) -> (Path, Option<Arc<Program>>) { ::tsox_core::fntrace::enter("get_default_project"); 
         (Path::default(), None)
     }
 
-    fn get_package_json(&self, _file_name: &str) -> Option<PackageJsonInfoCacheEntry> {
+    fn get_package_json(&self, _file_name: &str) -> Option<PackageJsonInfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_json"); 
         None
     }
 
-    fn get_program_for_project(&self, _project_path: &Path) -> Option<Arc<Program>> {
+    fn get_program_for_project(&self, _project_path: &Path) -> Option<Arc<Program>> { ::tsox_core::fntrace::enter("get_program_for_project"); 
         None
     }
 
-    fn get_source_file(&self, _file_name: &str, _path: &Path) -> Option<Arc<SourceFile>> {
+    fn get_source_file(&self, _file_name: &str, _path: &Path) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         None
     }
 
-    fn dispose(&self) {
+    fn dispose(&self) { ::tsox_core::fntrace::enter("dispose"); 
         self._files.lock().unwrap().clear();
     }
 }

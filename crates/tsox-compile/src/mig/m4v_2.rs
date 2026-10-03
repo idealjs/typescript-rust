@@ -428,7 +428,7 @@ pub struct ModeAwareCacheKey {
 }
 
 impl ModeAwareCacheKey {
-    pub fn new(name: String, mode: ResolutionMode) -> Self {
+    pub fn new(name: String, mode: ResolutionMode) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { name, mode }
     }
 }
@@ -460,31 +460,31 @@ pub struct ContentMapperError {
 }
 
 impl ContentMapperError {
-    pub fn project_unavailable() -> Self {
+    pub fn project_unavailable() -> Self { ::tsox_core::fntrace::enter("project_unavailable"); 
         Self::default()
     }
 
-    pub fn as_project_error(&self) -> Option<&ProjectError> {
+    pub fn as_project_error(&self) -> Option<&ProjectError> { ::tsox_core::fntrace::enter("as_project_error"); 
         self.project_error.as_ref()
     }
 
-    pub fn as_initialize_error(&self) -> Option<&InitializeError> {
+    pub fn as_initialize_error(&self) -> Option<&InitializeError> { ::tsox_core::fntrace::enter("as_initialize_error"); 
         self.initialize_error.as_ref()
     }
 
-    pub fn as_transform_error(&self) -> Option<&TransformError> {
+    pub fn as_transform_error(&self) -> Option<&TransformError> { ::tsox_core::fntrace::enter("as_transform_error"); 
         self.transform_error.as_ref()
     }
 
-    pub fn as_mapping_error(&self) -> Option<&MappingError> {
+    pub fn as_mapping_error(&self) -> Option<&MappingError> { ::tsox_core::fntrace::enter("as_mapping_error"); 
         self.mapping_error.as_ref()
     }
 
-    pub fn as_supplemental_file_collision_error(&self) -> Option<&SupplementalFileCollisionError> {
+    pub fn as_supplemental_file_collision_error(&self) -> Option<&SupplementalFileCollisionError> { ::tsox_core::fntrace::enter("as_supplemental_file_collision_error"); 
         self.supplemental_file_collision.as_ref()
     }
 
-    pub fn is_initialize_transform_error(&self) -> bool {
+    pub fn is_initialize_transform_error(&self) -> bool { ::tsox_core::fntrace::enter("is_initialize_transform_error"); 
         self.initialize_error.is_some()
             || self
                 .transform_error
@@ -532,7 +532,7 @@ pub struct ParseTask {
 }
 
 impl ParseTask {
-    pub fn add_sub_task(&mut self, sub_task: ResolvedRef, lib_file: Option<LibFile>) {
+    pub fn add_sub_task(&mut self, sub_task: ResolvedRef, lib_file: Option<LibFile>) { ::tsox_core::fntrace::enter("add_sub_task"); 
         let normalized_file_path = normalize_path(&sub_task.file_name);
         self.sub_tasks.push(Arc::new(Mutex::new(ParseTask {
             normalized_file_path,
@@ -545,7 +545,7 @@ impl ParseTask {
         })));
     }
 
-    pub fn redirect(&mut self, file_name: &str) {
+    pub fn redirect(&mut self, file_name: &str) { ::tsox_core::fntrace::enter("redirect"); 
         let lib_file = self.lib_file.clone();
         let redirected = Arc::new(Mutex::new(ParseTask {
             normalized_file_path: normalize_path(file_name),
@@ -557,7 +557,7 @@ impl ParseTask {
         self.redirected_parse_task = Some(redirected);
     }
 
-    pub fn load_automatic_type_directives(&mut self, loader: &mut FileLoader) {
+    pub fn load_automatic_type_directives(&mut self, loader: &mut FileLoader) { ::tsox_core::fntrace::enter("load_automatic_type_directives"); 
         let (to_parse, type_resolutions_in_file, type_resolutions_trace, p_diagnostics) =
             loader.resolve_automatic_type_directives(&self.normalized_file_path.clone());
         self.type_resolutions_in_file = type_resolutions_in_file;
@@ -568,7 +568,7 @@ impl ParseTask {
         }
     }
 
-    pub fn load(&mut self, loader: &mut FileLoader) {
+    pub fn load(&mut self, loader: &mut FileLoader) { ::tsox_core::fntrace::enter("load"); 
         self.loaded = true;
         if self.is_for_automatic_type_directive {
             self.load_automatic_type_directives(loader);
@@ -753,7 +753,7 @@ pub struct ContentMapperSourceFileInfo {
 }
 
 impl Default for ContentMapperSourceFileInfo {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             content_mapper: String::new(),
             transform_identity: String::new(),
@@ -774,25 +774,25 @@ pub struct HasFileName {
 }
 
 impl HasFileName {
-    pub fn new(file_name: String, path: Path) -> Self {
+    pub fn new(file_name: String, path: Path) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { file_name, path }
     }
 }
 
 impl MapperHasFileName for HasFileName {
-    fn path(&self) -> String {
+    fn path(&self) -> String { ::tsox_core::fntrace::enter("path"); 
         self.path.0.clone()
     }
-    fn file_name(&self) -> String {
+    fn file_name(&self) -> String { ::tsox_core::fntrace::enter("file_name"); 
         self.file_name.clone()
     }
 }
 
-fn mapper_key(mapper: &ContentMapper) -> String {
+fn mapper_key(mapper: &ContentMapper) -> String { ::tsox_core::fntrace::enter("mapper_key"); 
     mapper.definition.package.clone()
 }
 
-fn content_mapper_assembled(mapper: &ContentMapper) -> Mapper {
+fn content_mapper_assembled(mapper: &ContentMapper) -> Mapper { ::tsox_core::fntrace::enter("content_mapper_assembled"); 
     // Go GetContentMapperForFileName 返回装配了 Manifest/PackageDirectory 的全量 *contentmapper.Mapper。
     // m5h_3 描述符自 r54-k03 起携带 manifest/package_directory/contribution_id,原样透传装配。
     Mapper {
@@ -815,7 +815,7 @@ fn content_mapper_assembled(mapper: &ContentMapper) -> Mapper {
 
 fn to_host_parse_options(
     opts: &SourceFileParseOptions,
-) -> tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions {
+) -> tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions { ::tsox_core::fntrace::enter("to_host_parse_options"); 
     tsox_frontend::ast::mig::m3b_2::SourceFileParseOptions {
         file_name: opts.file_name.clone(),
         path: opts.path.clone(),
@@ -823,7 +823,7 @@ fn to_host_parse_options(
 }
 
 impl From<crate::mig::m4v_3::ContentMapperError> for ContentMapperError {
-    fn from(err: crate::mig::m4v_3::ContentMapperError) -> Self {
+    fn from(err: crate::mig::m4v_3::ContentMapperError) -> Self { ::tsox_core::fntrace::enter("from"); 
         if err.0 == "content mapper project is unavailable" {
             return ContentMapperError::project_unavailable();
         }
@@ -831,7 +831,7 @@ impl From<crate::mig::m4v_3::ContentMapperError> for ContentMapperError {
     }
 }
 
-fn transform_identity_hex(transform_identity: u128) -> String {
+fn transform_identity_hex(transform_identity: u128) -> String { ::tsox_core::fntrace::enter("transform_identity_hex"); 
     transform_identity
         .to_be_bytes()
         .iter()
@@ -839,7 +839,7 @@ fn transform_identity_hex(transform_identity: u128) -> String {
         .collect()
 }
 
-fn new_import_declaration_node(module_specifier: Arc<Node>) -> Arc<Node> {
+fn new_import_declaration_node(module_specifier: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_declaration_node"); 
     Arc::new(Node::new(
         SyntaxKind::ImportDeclaration,
         NodeData::ImportDeclaration(ImportDeclarationData {
@@ -857,16 +857,16 @@ struct LoaderResolutionHost {
 }
 
 impl tsox_tsoptions::module::ResolutionHost for LoaderResolutionHost {
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
 
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }
 
-fn loader_host(opts: &ProgramOptions) -> Arc<dyn CompilerHost> {
+fn loader_host(opts: &ProgramOptions) -> Arc<dyn CompilerHost> { ::tsox_core::fntrace::enter("loader_host"); 
     opts.host.clone()
 }
 
@@ -876,7 +876,7 @@ fn new_resolver(
     typings_location: String,
     project_name: &str,
     _content_mapper_extensions: &[String],
-) -> Resolver {
+) -> Resolver { ::tsox_core::fntrace::enter("new_resolver"); 
     Resolver::new(
         host,
         Arc::new(compiler_options.clone()),
@@ -888,13 +888,13 @@ fn new_resolver(
 fn get_compiler_options_with_redirect(
     base: &CompilerOptions,
     redirect: Option<&Arc<ParsedCommandLine>>,
-) -> CompilerOptions {
+) -> CompilerOptions { ::tsox_core::fntrace::enter("get_compiler_options_with_redirect"); 
     redirect
         .map(|command_line| command_line.compiler_options().clone())
         .unwrap_or_else(|| base.clone())
 }
 
-fn parse_source_file(opts: &SourceFileParseOptions, text: &str, _script_kind: ScriptKind) -> Arc<SourceFile> {
+fn parse_source_file(opts: &SourceFileParseOptions, text: &str, _script_kind: ScriptKind) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("parse_source_file"); 
     Arc::new(tsox_frontend::parser::Parser::parse_source_file_text(
         &opts.file_name,
         text.to_string(),
@@ -906,24 +906,24 @@ fn new_diagnostic(
     range: TextRange,
     message: Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("new_diagnostic"); 
     Diagnostic::new(file, range, message, args)
 }
 
-fn new_text_range(start: usize, end: usize) -> TextRange {
+fn new_text_range(start: usize, end: usize) -> TextRange { ::tsox_core::fntrace::enter("new_text_range"); 
     TextRange::new(start, end)
 }
 
-fn add_message_chain(mut diagnostic: Diagnostic, message_chain: Diagnostic) -> Diagnostic {
+fn add_message_chain(mut diagnostic: Diagnostic, message_chain: Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("add_message_chain"); 
     diagnostic.message_chain.push(message_chain);
     diagnostic
 }
 
-fn is_external_module(file: &SourceFile) -> bool {
+fn is_external_module(file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_external_module"); 
     file.external_module_indicator.is_some()
 }
 
-fn libs() -> Vec<&'static str> {
+fn libs() -> Vec<&'static str> { ::tsox_core::fntrace::enter("libs"); 
     LIB_MAP.iter().map(|(name, _)| *name).collect()
 }
 
@@ -988,11 +988,11 @@ pub struct RedirectsFile {
 }
 
 impl RedirectsFile {
-    pub fn file_name(&self) -> &str {
+    pub fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    pub fn path(&self) -> &Path {
+    pub fn path(&self) -> &Path { ::tsox_core::fntrace::enter("path"); 
         &self.path
     }
 }
@@ -1024,7 +1024,7 @@ pub struct JsxRuntimeImportSpecifier {
     pub specifier: Arc<Node>,
 }
 
-pub fn process_all_program_files(opts: ProgramOptions, single_threaded: bool) -> ProcessedFiles {
+pub fn process_all_program_files(opts: ProgramOptions, single_threaded: bool) -> ProcessedFiles { ::tsox_core::fntrace::enter("process_all_program_files"); 
     let compiler_options = opts.config.compiler_options().clone();
     let root_files = opts.config.file_names().to_vec();
     let supported_extensions = get_supported_extensions(
@@ -1120,14 +1120,14 @@ pub fn process_all_program_files(opts: ProgramOptions, single_threaded: bool) ->
 }
 
 impl FileLoader {
-    fn resolution_host(&self) -> LoaderResolutionHost {
+    fn resolution_host(&self) -> LoaderResolutionHost { ::tsox_core::fntrace::enter("resolution_host"); 
         LoaderResolutionHost {
             fs: self.opts.host.fs_arc(),
             current_directory: self.opts.host.current_directory().to_string(),
         }
     }
 
-    pub fn to_path(&self, file: &str) -> Path {
+    pub fn to_path(&self, file: &str) -> Path { ::tsox_core::fntrace::enter("to_path"); 
         to_path(
             file,
             self.opts.host.current_directory(),
@@ -1135,7 +1135,7 @@ impl FileLoader {
         )
     }
 
-    pub fn add_root_task(&mut self, file_name: &str, lib_file: Option<LibFile>, include_reason: FileIncludeReason) {
+    pub fn add_root_task(&mut self, file_name: &str, lib_file: Option<LibFile>, include_reason: FileIncludeReason) { ::tsox_core::fntrace::enter("add_root_task"); 
         let abs_path = get_normalized_absolute_path(file_name, self.opts.host.current_directory());
         if self.opts.config.compiler_options().allow_non_ts_extensions.is_true() || has_extension(&abs_path) {
             self.root_tasks.push(Arc::new(Mutex::new(ParseTask {
@@ -1147,7 +1147,7 @@ impl FileLoader {
         }
     }
 
-    pub fn add_root_file_task(&mut self, file_name: &str, lib_file: Option<LibFile>, include_reason: Arc<FileIncludeReason>) {
+    pub fn add_root_file_task(&mut self, file_name: &str, lib_file: Option<LibFile>, include_reason: Arc<FileIncludeReason>) { ::tsox_core::fntrace::enter("add_root_file_task"); 
         let curr_dir = self.opts.host.current_directory().to_string();
         let abs_path = get_normalized_absolute_path(file_name, &curr_dir);
         let mut containing_file = curr_dir.clone();
@@ -1179,7 +1179,7 @@ impl FileLoader {
         self.root_tasks.push(Arc::new(Mutex::new(root_task)));
     }
 
-    pub fn add_automatic_type_directive_tasks(&mut self) {
+    pub fn add_automatic_type_directive_tasks(&mut self) { ::tsox_core::fntrace::enter("add_automatic_type_directive_tasks"); 
         let compiler_options = self.opts.config.compiler_options();
         let containing_directory = if !compiler_options.config_file_path.is_empty() {
             get_directory_path(&compiler_options.config_file_path)
@@ -1202,7 +1202,7 @@ impl FileLoader {
         ModeAwareCacheResolvedTypeReferenceDirective,
         Vec<DiagAndArgs>,
         Vec<Arc<ProcessingDiagnostic>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("resolve_automatic_type_directives"); 
         let mut to_parse = Vec::new();
         let mut type_resolutions_in_file = ModeAwareCacheResolvedTypeReferenceDirective::default();
         let mut type_resolutions_trace = Vec::new();
@@ -1260,7 +1260,7 @@ impl FileLoader {
         (to_parse, type_resolutions_in_file, type_resolutions_trace, p_diagnostics)
     }
 
-    pub fn add_project_reference_tasks(&mut self, single_threaded: bool) {
+    pub fn add_project_reference_tasks(&mut self, single_threaded: bool) { ::tsox_core::fntrace::enter("add_project_reference_tasks"); 
         self.project_reference_file_mapper = Some(Arc::new(ProjectReferenceFileMapper {
             opts: self.opts.clone(),
             host: Some(Box::new(ResolutionHostAdapter::new(self.opts.host.as_ref()))),
@@ -1289,11 +1289,11 @@ impl FileLoader {
         parser.parse(root_tasks, reference_loader);
     }
 
-    pub fn sort_libs(&self, lib_files: &mut [Arc<SourceFile>]) {
+    pub fn sort_libs(&self, lib_files: &mut [Arc<SourceFile>]) { ::tsox_core::fntrace::enter("sort_libs"); 
         lib_files.sort_by_key(|f| self.get_default_lib_file_priority(f));
     }
 
-    pub fn get_default_lib_file_priority(&self, a: &Arc<SourceFile>) -> usize {
+    pub fn get_default_lib_file_priority(&self, a: &Arc<SourceFile>) -> usize { ::tsox_core::fntrace::enter("get_default_lib_file_priority"); 
         let default_library_path = remove_trailing_directory_separator(&self.default_library_path);
         let a_file_name = a.file_name.clone();
         if a_file_name.starts_with(&default_library_path)
@@ -1313,7 +1313,7 @@ impl FileLoader {
         libs().len() + 2
     }
 
-    pub fn load_source_file_meta_data(&self, file_name: &str) -> SourceFileMetaData {
+    pub fn load_source_file_meta_data(&self, file_name: &str) -> SourceFileMetaData { ::tsox_core::fntrace::enter("load_source_file_meta_data"); 
         if self.opts.skip_module_resolution {
             return SourceFileMetaData {
                 implied_node_format: get_implied_node_format_for_file(file_name, ""),
@@ -1356,7 +1356,7 @@ impl FileLoader {
         }
     }
 
-    pub fn parse_source_file(&self, t: &ParseTask) -> Option<Arc<SourceFile>> {
+    pub fn parse_source_file(&self, t: &ParseTask) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("parse_source_file"); 
         let path = self.to_path(&t.normalized_file_path);
         let options = self
             .project_reference_file_mapper
@@ -1384,7 +1384,7 @@ impl FileLoader {
         self.opts.host.get_source_file(&to_host_parse_options(&parse_options))
     }
 
-    pub fn parse_content_mapped_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> {
+    pub fn parse_content_mapped_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("parse_content_mapped_file"); 
         let Some(mapper) = self.opts.config.get_content_mapper_for_file_name(&opts.file_name) else {
             return Some(self.empty_content_mapped_file(opts, "", ""));
         };
@@ -1402,7 +1402,7 @@ impl FileLoader {
         Some(self.empty_content_mapped_file(opts, &mapper_identity, &transform_identity))
     }
 
-    pub fn get_content_mapper_transform_identity(&self, mapper: &ContentMapper) -> String {
+    pub fn get_content_mapper_transform_identity(&self, mapper: &ContentMapper) -> String { ::tsox_core::fntrace::enter("get_content_mapper_transform_identity"); 
         let full_mapper = content_mapper_assembled(mapper);
         if let Some(project) = self.opts.host.content_mapper_project() {
             if let Ok(identity) = project.identity(&full_mapper) {
@@ -1412,7 +1412,7 @@ impl FileLoader {
         transform_identity_hex(full_mapper.transform_identity(self.opts.config.compiler_options()))
     }
 
-    pub fn empty_content_mapped_file(&self, opts: &SourceFileParseOptions, mapper_identity: &str, transform_identity: &str) -> Arc<SourceFile> {
+    pub fn empty_content_mapped_file(&self, opts: &SourceFileParseOptions, mapper_identity: &str, transform_identity: &str) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("empty_content_mapped_file"); 
         let content = self.opts.host.fs().read_file(&opts.file_name);
         let source_file = parse_source_file(opts, "", ScriptKind::Ts);
         let info = ContentMapperSourceFileInfo {
@@ -1429,7 +1429,7 @@ impl FileLoader {
         source_file
     }
 
-    pub fn content_mapper_unavailable(&self, mapper: &ContentMapper) -> bool {
+    pub fn content_mapper_unavailable(&self, mapper: &ContentMapper) -> bool { ::tsox_core::fntrace::enter("content_mapper_unavailable"); 
         let bookkeeping = self.content_mapper_mu.lock().unwrap();
         bookkeeping.content_mapper_init_failed.contains(&mapper_key(mapper))
             || bookkeeping
@@ -1440,7 +1440,7 @@ impl FileLoader {
                 >= MAX_CONTENT_MAPPER_FAILURES
     }
 
-    pub fn record_content_mapper_initialization_failure(&self, mapper: &ContentMapper, label: &str, err: &ContentMapperError) {
+    pub fn record_content_mapper_initialization_failure(&self, mapper: &ContentMapper, label: &str, err: &ContentMapperError) { ::tsox_core::fntrace::enter("record_content_mapper_initialization_failure"); 
         let mut bookkeeping = self.content_mapper_mu.lock().unwrap();
         if bookkeeping.content_mapper_init_failed.contains(&mapper_key(mapper)) {
             return;
@@ -1451,7 +1451,7 @@ impl FileLoader {
             .push(content_mapper_initialization_diagnostic(label, err));
     }
 
-    pub fn record_content_mapper_failure(&self, mapper: &ContentMapper, label: &str) -> bool {
+    pub fn record_content_mapper_failure(&self, mapper: &ContentMapper, label: &str) -> bool { ::tsox_core::fntrace::enter("record_content_mapper_failure"); 
         let mut bookkeeping = self.content_mapper_mu.lock().unwrap();
         let key = mapper_key(mapper);
         if bookkeeping.content_mapper_failures.get(&key).copied().unwrap_or(0) >= MAX_CONTENT_MAPPER_FAILURES {
@@ -1468,7 +1468,7 @@ impl FileLoader {
         true
     }
 
-    pub fn is_supported_extension(&self, canonical_file_name: &str) -> bool {
+    pub fn is_supported_extension(&self, canonical_file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_supported_extension"); 
         for group in &self.supported_extensions_with_json_if_resolve_json_module {
             if file_extension_is_one_of(
                 canonical_file_name,
@@ -1486,7 +1486,7 @@ impl FileLoader {
         reference_text: &str,
         containing_file: &str,
         include_reason: &FileIncludeReason,
-    ) -> (String, Option<SourceFileFromReferenceDiagnostic>) {
+    ) -> (String, Option<SourceFileFromReferenceDiagnostic>) { ::tsox_core::fntrace::enter("get_source_file_from_reference"); 
         let options = self.opts.config.compiler_options();
         let allow_non_ts_extensions = options.allow_non_ts_extensions.is_true();
         let diagnostic_file_name = normalize_slashes(reference_text);
@@ -1573,7 +1573,7 @@ impl FileLoader {
         module_name: &str,
         containing_file: &str,
         index: usize,
-    ) -> (Option<ResolvedRef>, Option<Arc<ProcessingDiagnostic>>) {
+    ) -> (Option<ResolvedRef>, Option<Arc<ProcessingDiagnostic>>) { ::tsox_core::fntrace::enter("resolve_tripleslash_path_reference"); 
         let base_path = get_directory_path(containing_file);
         let referenced_file_name = if !is_rooted_disk_path(module_name) {
             combine_paths(&base_path, &[module_name])
@@ -1623,7 +1623,7 @@ impl FileLoader {
         )
     }
 
-    pub fn resolve_type_reference_directives(&self, t: &mut ParseTask) {
+    pub fn resolve_type_reference_directives(&self, t: &mut ParseTask) { ::tsox_core::fntrace::enter("resolve_type_reference_directives"); 
         let file = t.file.as_ref().unwrap().clone();
         if file.type_reference_directives.is_empty() {
             return;
@@ -1686,7 +1686,7 @@ impl FileLoader {
         t.type_resolutions_trace = type_resolutions_trace;
     }
 
-    pub fn resolve_imports_and_module_augmentations(&self, t: &mut ParseTask) {
+    pub fn resolve_imports_and_module_augmentations(&self, t: &mut ParseTask) { ::tsox_core::fntrace::enter("resolve_imports_and_module_augmentations"); 
         let file = t.file.as_ref().unwrap().clone();
         let meta = t.metadata.clone();
 
@@ -1817,7 +1817,7 @@ impl FileLoader {
         }
     }
 
-    pub fn create_synthetic_import(&self, text: &str, file: &Arc<SourceFile>) -> Arc<Node> {
+    pub fn create_synthetic_import(&self, text: &str, file: &Arc<SourceFile>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_synthetic_import"); 
         let _guard = self.factory_mu.lock().unwrap();
         let external_helpers_module_reference = self.factory.new_string_literal(text, TokenFlags::None);
         let import_decl = new_import_declaration_node(external_helpers_module_reference.clone());
@@ -1826,7 +1826,7 @@ impl FileLoader {
         external_helpers_module_reference
     }
 
-    pub fn path_for_lib_file(&mut self, name: &str) -> LibFile {
+    pub fn path_for_lib_file(&mut self, name: &str) -> LibFile { ::tsox_core::fntrace::enter("path_for_lib_file"); 
         if let Some(cached) = self.path_for_lib_file_cache.get(name) {
             return LibFile { name: cached.name.clone(), path: cached.path.clone(), replaced: cached.replaced };
         }
@@ -1864,7 +1864,7 @@ impl FileLoader {
         lib_file
     }
 
-    pub fn resolve_library(&self, library_name: &str, resolve_from: &str) -> (ResolvedModule, Vec<DiagAndArgs>) {
+    pub fn resolve_library(&self, library_name: &str, resolve_from: &str) -> (ResolvedModule, Vec<DiagAndArgs>) { ::tsox_core::fntrace::enter("resolve_library"); 
         let (resolved, trace) = self
             .resolver
             .as_ref()
@@ -1874,7 +1874,7 @@ impl FileLoader {
     }
 }
 
-pub fn content_mapper_transform_diagnostic(file: &Arc<SourceFile>, label: &str, err: &ContentMapperError) -> Diagnostic {
+pub fn content_mapper_transform_diagnostic(file: &Arc<SourceFile>, label: &str, err: &ContentMapperError) -> Diagnostic { ::tsox_core::fntrace::enter("content_mapper_transform_diagnostic"); 
     if let Some(collision) = err.as_supplemental_file_collision_error() {
         return content_mapper_transform_diagnostic_chain(
             file,
@@ -2036,7 +2036,7 @@ pub fn content_mapper_transform_diagnostic(file: &Arc<SourceFile>, label: &str, 
     }
 }
 
-pub fn content_mapper_project_error_diagnostic(err: &ContentMapperError) -> tsox_core::diagnostics::Message {
+pub fn content_mapper_project_error_diagnostic(err: &ContentMapperError) -> tsox_core::diagnostics::Message { ::tsox_core::fntrace::enter("content_mapper_project_error_diagnostic"); 
     if let Some(project_error) = err.as_project_error() {
         match project_error.kind {
             ProjectErrorKind::MalformedResponse => {
@@ -2064,11 +2064,11 @@ pub fn content_mapper_transform_diagnostic_chain(
     label: &str,
     message: tsox_core::diagnostics::Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("content_mapper_transform_diagnostic_chain"); 
     content_mapper_transform_diagnostic_with_detail(file, label, new_compiler_diagnostic(message, args))
 }
 
-pub fn content_mapper_transform_diagnostic_with_detail(file: &Arc<SourceFile>, label: &str, detail: Diagnostic) -> Diagnostic {
+pub fn content_mapper_transform_diagnostic_with_detail(file: &Arc<SourceFile>, label: &str, detail: Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("content_mapper_transform_diagnostic_with_detail"); 
     let mut diagnostic = new_diagnostic(
         Some(file.clone()),
         new_text_range(0, 0),
@@ -2079,7 +2079,7 @@ pub fn content_mapper_transform_diagnostic_with_detail(file: &Arc<SourceFile>, l
     diagnostic
 }
 
-pub fn content_mapper_mapping_diagnostic(file: &Arc<SourceFile>, label: &str, problem: &MappingError) -> Diagnostic {
+pub fn content_mapper_mapping_diagnostic(file: &Arc<SourceFile>, label: &str, problem: &MappingError) -> Diagnostic { ::tsox_core::fntrace::enter("content_mapper_mapping_diagnostic"); 
     let loc = new_text_range(0, 0);
     match problem.kind {
         MappingErrorKind::Overlap => new_diagnostic(
@@ -2115,7 +2115,7 @@ pub fn content_mapper_mapping_diagnostic(file: &Arc<SourceFile>, label: &str, pr
     }
 }
 
-pub fn content_mapper_initialization_diagnostic(label: &str, err: &ContentMapperError) -> Diagnostic {
+pub fn content_mapper_initialization_diagnostic(label: &str, err: &ContentMapperError) -> Diagnostic { ::tsox_core::fntrace::enter("content_mapper_initialization_diagnostic"); 
     let mut label = label.to_string();
     if let Some(initialize_error) = err.as_initialize_error() {
         if label.is_empty() {
@@ -2205,14 +2205,14 @@ pub fn content_mapper_initialization_diagnostic(label: &str, err: &ContentMapper
     )
 }
 
-pub fn content_mapper_project_diagnostic(err: &ContentMapperError) -> Diagnostic {
+pub fn content_mapper_project_diagnostic(err: &ContentMapperError) -> Diagnostic { ::tsox_core::fntrace::enter("content_mapper_project_diagnostic"); 
     if err.as_initialize_error().is_some() {
         return content_mapper_initialization_diagnostic("", err);
     }
     new_compiler_diagnostic(content_mapper_project_error_diagnostic(err), Vec::new())
 }
 
-pub fn get_library_name_from_lib_file_name(lib_file_name: &str) -> String {
+pub fn get_library_name_from_lib_file_name(lib_file_name: &str) -> String { ::tsox_core::fntrace::enter("get_library_name_from_lib_file_name"); 
     let components: Vec<&str> = lib_file_name.split('.').collect();
     let mut path = String::from("@typescript/lib-");
     if components.len() > 1 {
@@ -2231,7 +2231,7 @@ pub fn get_library_name_from_lib_file_name(lib_file_name: &str) -> String {
     path
 }
 
-pub fn get_inferred_library_name_resolve_from(options: &CompilerOptions, current_directory: &str, lib_file_name: &str) -> String {
+pub fn get_inferred_library_name_resolve_from(options: &CompilerOptions, current_directory: &str, lib_file_name: &str) -> String { ::tsox_core::fntrace::enter("get_inferred_library_name_resolve_from"); 
     let containing_directory = if !options.config_file_path.is_empty() {
         get_directory_path(&options.config_file_path)
     } else {
@@ -2248,7 +2248,7 @@ pub fn get_mode_for_type_reference_directive_in_file(
     file: &Arc<SourceFile>,
     meta: &SourceFileMetaData,
     options: &CompilerOptions,
-) -> ResolutionMode {
+) -> ResolutionMode { ::tsox_core::fntrace::enter("get_mode_for_type_reference_directive_in_file"); 
     if ref_.resolution_mode != ResolutionMode::None {
         ref_.resolution_mode
     } else {
@@ -2260,7 +2260,7 @@ pub fn get_default_resolution_mode_for_file(
     file_name: &str,
     meta: &SourceFileMetaData,
     options: &CompilerOptions,
-) -> ResolutionMode {
+) -> ResolutionMode { ::tsox_core::fntrace::enter("get_default_resolution_mode_for_file"); 
     if import_syntax_affects_module_resolution(options) {
         get_implied_node_format_for_emit_worker(file_name, options.get_emit_module_kind(), meta.clone())
     } else {
@@ -2273,7 +2273,7 @@ pub fn get_mode_for_usage_location(
     meta: &SourceFileMetaData,
     usage: &Arc<Node>,
     options: &CompilerOptions,
-) -> ResolutionMode {
+) -> ResolutionMode { ::tsox_core::fntrace::enter("get_mode_for_usage_location"); 
     let Some(parent) = usage.parent() else {
         return ResolutionMode::None;
     };
@@ -2327,13 +2327,13 @@ pub fn get_mode_for_usage_location(
     ResolutionMode::None
 }
 
-fn attributes_resolution_mode_override(attributes: Option<&Arc<Node>>) -> Option<ResolutionMode> {
+fn attributes_resolution_mode_override(attributes: Option<&Arc<Node>>) -> Option<ResolutionMode> { ::tsox_core::fntrace::enter("attributes_resolution_mode_override"); 
     let attributes = attributes?;
     let (mode, ok) = get_resolution_mode_override(attributes, None);
     ok.then_some(mode)
 }
 
-pub fn import_syntax_affects_module_resolution(options: &CompilerOptions) -> bool {
+pub fn import_syntax_affects_module_resolution(options: &CompilerOptions) -> bool { ::tsox_core::fntrace::enter("import_syntax_affects_module_resolution"); 
     let module_resolution = options.get_module_resolution_kind();
     ((module_resolution as i32) >= (ModuleResolutionKind::Node16 as i32)
         && (module_resolution as i32) <= (ModuleResolutionKind::NodeNext as i32))
@@ -2346,7 +2346,7 @@ pub fn get_emit_syntax_for_usage_location_worker(
     meta: &SourceFileMetaData,
     usage: &Arc<Node>,
     options: &CompilerOptions,
-) -> ResolutionMode {
+) -> ResolutionMode { ::tsox_core::fntrace::enter("get_emit_syntax_for_usage_location_worker"); 
     let parent = usage.parent();
     if let Some(parent) = parent.as_ref() {
         if is_require_call(parent, false)
@@ -2397,12 +2397,12 @@ struct CollectFilesState {
 }
 
 impl FilesParser {
-    pub fn parse(&mut self, loader: &mut FileLoader, tasks: &[Arc<Mutex<ParseTask>>]) {
+    pub fn parse(&mut self, loader: &mut FileLoader, tasks: &[Arc<Mutex<ParseTask>>]) { ::tsox_core::fntrace::enter("parse"); 
         self.start(loader, tasks, 0);
         self.wg.run_and_wait();
     }
 
-    fn start(&mut self, loader: &mut FileLoader, tasks: &[Arc<Mutex<ParseTask>>], depth: i32) {
+    fn start(&mut self, loader: &mut FileLoader, tasks: &[Arc<Mutex<ParseTask>>], depth: i32) { ::tsox_core::fntrace::enter("start"); 
         for task in tasks.iter() {
             {
                 let mut t = task.lock().unwrap();
@@ -2431,7 +2431,7 @@ impl FilesParser {
         loaded: bool,
         task: &Arc<Mutex<ParseTask>>,
         depth: i32,
-    ) {
+    ) { ::tsox_core::fntrace::enter("process_task"); 
         let mut start_subtasks = false;
         if loaded {
             let existing = {
@@ -2498,7 +2498,7 @@ impl FilesParser {
         }
     }
 
-    pub fn get_processed_files(&self, loader: &mut FileLoader) -> ProcessedFiles {
+    pub fn get_processed_files(&self, loader: &mut FileLoader) -> ProcessedFiles { ::tsox_core::fntrace::enter("get_processed_files"); 
         let total_file_count = loader.total_file_count.load(Ordering::SeqCst) as usize;
         let lib_file_count = loader.lib_file_count.load(Ordering::SeqCst) as usize;
         let use_case_sensitive_file_names = loader.compare_paths_options.use_case_sensitive_file_names;
@@ -2592,7 +2592,7 @@ impl FilesParser {
         loader: &mut FileLoader,
         tasks: &[Arc<Mutex<ParseTask>>],
         state: &mut CollectFilesState,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_files"); 
         for task in tasks.iter() {
             let include_reason = task.lock().unwrap().include_reason.clone();
             let mut current = task.clone();
@@ -2859,7 +2859,7 @@ impl FilesParser {
         include_processor: &mut IncludeProcessor,
         task: &Arc<Mutex<ParseTask>>,
         reason: &Arc<FileIncludeReason>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_include_reason"); 
         let (redirected, loaded, path) = {
             let t = task.lock().unwrap();
             (t.redirected_parse_task.clone(), t.loaded, t.path.clone())

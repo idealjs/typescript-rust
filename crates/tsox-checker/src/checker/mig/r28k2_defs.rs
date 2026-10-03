@@ -12,14 +12,14 @@ use tsox_frontend::ast::{Node, Symbol, SymbolFlags, SyntaxKind};
 
 static OPTIONAL_TYPE: OnceLock<Arc<Type>> = OnceLock::new();
 
-pub(crate) fn optional_type_of(c: &mut Checker) -> Arc<Type> {
+pub(crate) fn optional_type_of(c: &mut Checker) -> Arc<Type> { ::tsox_core::fntrace::enter("optional_type_of"); 
     OPTIONAL_TYPE
         .get_or_init(|| c.new_intrinsic_type(TypeFlags::UNDEFINED, "undefined"))
         .clone()
 }
 
 impl Checker {
-    pub(crate) fn get_regular_type_of_expression(&mut self, expr: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_regular_type_of_expression(&mut self, expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_regular_type_of_expression"); 
         let expr = if crate::checker::mig::m1a::is_right_side_of_access_expression(expr) {
             expr.parent().unwrap_or_else(|| Arc::clone(expr))
         } else {
@@ -34,7 +34,7 @@ impl Checker {
         declaration: &Arc<Node>,
         parent_type: &Arc<Type>,
         no_tuple_bounds_check: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_binding_element_type_from_parent_type"); 
         if is_type_any(parent_type) {
             return Arc::clone(parent_type);
         }
@@ -193,7 +193,7 @@ impl Checker {
     }
 }
 
-fn has_dot_dot_dot_token(node: &Arc<Node>) -> bool {
+fn has_dot_dot_dot_token(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_dot_dot_dot_token"); 
     matches!(
         &node.data,
         tsox_frontend::ast::NodeData::BindingElement(d) if d.dot_dot_dot_token.is_some()
@@ -205,7 +205,7 @@ impl<'a> NodeBuilder<'a> {
         &mut self,
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("expand_symbol_for_hover_nodes"); 
         self.enter_context(
             None,
             NodeBuilderFlags::IGNORE_ERRORS
@@ -265,7 +265,7 @@ impl<'a> NodeBuilder<'a> {
         enclosing_declaration: Option<&Arc<Node>>,
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("signature_to_signature_declaration_ex"); 
         let signature = Arc::new(signature.clone());
         self.enter_context(enclosing_declaration, flags, internal_flags, None);
         let result = self
@@ -280,7 +280,7 @@ impl<'a> NodeBuilder<'a> {
         enclosing_declaration: Option<&Arc<Node>>,
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_to_type_node_ex"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, None);
         let result = self.impl_.type_to_type_node(t);
         self.exit_context(result)
@@ -292,7 +292,7 @@ impl<'a> NodeBuilder<'a> {
         enclosing_declaration: Option<&Arc<Node>>,
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_predicate_to_type_predicate_node_ex"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, None);
         let result = self.impl_.type_predicate_to_type_predicate_node(predicate);
         self.exit_context(Some(result))

@@ -45,11 +45,11 @@ pub enum ModuleKind {
 }
 
 impl ModuleKind {
-    pub fn is_non_node_esm(&self) -> bool {
+    pub fn is_non_node_esm(&self) -> bool { crate::fntrace::enter("is_non_node_esm"); 
         *self >= ModuleKind::ES2015 && *self <= ModuleKind::ESNext
     }
 
-    pub fn supports_import_attributes(&self) -> bool {
+    pub fn supports_import_attributes(&self) -> bool { crate::fntrace::enter("supports_import_attributes"); 
         (*self >= ModuleKind::Node18 && *self <= ModuleKind::NodeNext)
             || *self == ModuleKind::Preserve
             || *self == ModuleKind::ESNext
@@ -57,7 +57,7 @@ impl ModuleKind {
 }
 
 impl std::fmt::Display for ModuleKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         let name = match self {
             ModuleKind::None => "None",
             ModuleKind::CommonJS => "CommonJS",
@@ -91,7 +91,7 @@ pub enum ModuleResolutionKind {
 }
 
 impl std::fmt::Display for ModuleResolutionKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         match self {
             ModuleResolutionKind::Unknown => write!(f, "Unknown"),
             ModuleResolutionKind::Classic => write!(f, "Classic"),
@@ -128,7 +128,7 @@ pub enum JsxEmit {
 }
 
 impl std::fmt::Display for JsxEmit {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         match self {
             JsxEmit::None => write!(f, "none"),
             JsxEmit::Preserve => write!(f, "preserve"),
@@ -150,7 +150,7 @@ pub enum NewLineKind {
 }
 
 impl NewLineKind {
-    pub fn from_str(s: &str) -> NewLineKind {
+    pub fn from_str(s: &str) -> NewLineKind { crate::fntrace::enter("from_str"); 
         match s {
             "\r\n" => NewLineKind::CRLF,
             "\n" => NewLineKind::LF,
@@ -158,7 +158,7 @@ impl NewLineKind {
         }
     }
 
-    pub fn get_new_line_character(&self) -> &'static str {
+    pub fn get_new_line_character(&self) -> &'static str { crate::fntrace::enter("get_new_line_character"); 
         match self {
             NewLineKind::CRLF => "\r\n",
             _ => "\n",
@@ -167,7 +167,7 @@ impl NewLineKind {
 }
 
 impl From<i64> for ScriptTarget {
-    fn from(v: i64) -> Self {
+    fn from(v: i64) -> Self { crate::fntrace::enter("from"); 
         match v {
             1 => ScriptTarget::ES5,
             2 => ScriptTarget::ES2015,
@@ -189,7 +189,7 @@ impl From<i64> for ScriptTarget {
 }
 
 impl From<i64> for ModuleKind {
-    fn from(v: i64) -> Self {
+    fn from(v: i64) -> Self { crate::fntrace::enter("from"); 
         match v {
             1 => ModuleKind::CommonJS,
             2 => ModuleKind::AMD,
@@ -210,7 +210,7 @@ impl From<i64> for ModuleKind {
 }
 
 impl From<i64> for ModuleResolutionKind {
-    fn from(v: i64) -> Self {
+    fn from(v: i64) -> Self { crate::fntrace::enter("from"); 
         match v {
             1 => ModuleResolutionKind::Classic,
             2 => ModuleResolutionKind::Node10,
@@ -223,7 +223,7 @@ impl From<i64> for ModuleResolutionKind {
 }
 
 impl From<i64> for ModuleDetectionKind {
-    fn from(v: i64) -> Self {
+    fn from(v: i64) -> Self { crate::fntrace::enter("from"); 
         match v {
             1 => ModuleDetectionKind::Auto,
             2 => ModuleDetectionKind::Legacy,
@@ -234,7 +234,7 @@ impl From<i64> for ModuleDetectionKind {
 }
 
 impl From<i64> for JsxEmit {
-    fn from(v: i64) -> Self {
+    fn from(v: i64) -> Self { crate::fntrace::enter("from"); 
         match v {
             1 => JsxEmit::Preserve,
             2 => JsxEmit::ReactNative,
@@ -247,7 +247,7 @@ impl From<i64> for JsxEmit {
 }
 
 impl From<i64> for NewLineKind {
-    fn from(v: i64) -> Self {
+    fn from(v: i64) -> Self { crate::fntrace::enter("from"); 
         match v {
             1 => NewLineKind::CRLF,
             2 => NewLineKind::LF,

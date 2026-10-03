@@ -3,23 +3,23 @@ use std::sync::Arc;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SourceFile;
 
-pub fn get_last_child(_node: &Arc<Node>, _source_file: &SourceFile) -> Option<Arc<Node>> {
+pub fn get_last_child(_node: &Arc<Node>, _source_file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_last_child"); 
     None
 }
 
-pub fn get_last_token(node: Option<&Arc<Node>>, _source_file: &SourceFile) -> Option<Arc<Node>> {
+pub fn get_last_token(node: Option<&Arc<Node>>, _source_file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_last_token"); 
     node.cloned()
 }
 
-pub fn get_last_visited_child(_node: &Arc<Node>, _source_file: &SourceFile) -> Option<Arc<Node>> {
+pub fn get_last_visited_child(_node: &Arc<Node>, _source_file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_last_visited_child"); 
     None
 }
 
-pub fn get_first_token(_node: &Arc<Node>, _source_file: &SourceFile) -> Option<Arc<Node>> {
+pub fn get_first_token(_node: &Arc<Node>, _source_file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_first_token"); 
     None
 }
 
-pub fn assert_has_real_position(node: &Arc<Node>) {
+pub fn assert_has_real_position(node: &Arc<Node>) { ::tsox_core::fntrace::enter("assert_has_real_position"); 
     if node.loc.pos < 0 || node.loc.end < 0 {
         panic!("Node must have a real position for this operation.");
     }

@@ -2,12 +2,12 @@ use super::*;
 use std::collections::HashSet;
 use std::sync::Arc;
 
-fn is_windows_rooted(path: &str) -> bool {
+fn is_windows_rooted(path: &str) -> bool { ::tsox_core::fntrace::enter("is_windows_rooted"); 
     let b = path.as_bytes();
     b.len() >= 3 && b[1] == b':' && (b[2] == b'/' || b[2] == b'\\') && b[0].is_ascii_alphabetic()
 }
 
-fn is_normalized(path: &str) -> bool {
+fn is_normalized(path: &str) -> bool { ::tsox_core::fntrace::enter("is_normalized"); 
     if path.is_empty() {
         return false;
     }
@@ -29,7 +29,7 @@ fn is_normalized(path: &str) -> bool {
     true
 }
 
-fn from_map(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
+fn from_map(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS { ::tsox_core::fntrace::enter("from_map"); 
     let fs = InMemoryFS::with_case_sensitivity(case_sensitive);
 
     let mut seen_posix = false;
@@ -107,7 +107,7 @@ fn from_map(files: &[(&str, &str)], case_sensitive: bool) -> InMemoryFS {
 }
 
 #[test]
-fn test_insensitive() {
+fn test_insensitive() { ::tsox_core::fntrace::enter("test_insensitive"); 
     let contents = "bar";
     let fs = from_map(
         &[
@@ -130,7 +130,7 @@ fn test_insensitive() {
 }
 
 #[test]
-fn test_insensitive_upper() {
+fn test_insensitive_upper() { ::tsox_core::fntrace::enter("test_insensitive_upper"); 
     let contents = "bar";
     let fs = from_map(
         &[
@@ -147,7 +147,7 @@ fn test_insensitive_upper() {
 }
 
 #[test]
-fn test_sensitive() {
+fn test_sensitive() { ::tsox_core::fntrace::enter("test_sensitive"); 
     let contents = "bar";
     let fs = from_map(
         &[
@@ -173,19 +173,19 @@ fn test_sensitive() {
 
 #[test]
 #[should_panic(expected = "duplicate path")]
-fn test_sensitive_duplicate_path() {
+fn test_sensitive_duplicate_path() { ::tsox_core::fntrace::enter("test_sensitive_duplicate_path"); 
     let _fs = from_map(&[("/foo", "bar"), ("/Foo", "baz")], false);
 }
 
 #[test]
-fn test_insensitive_duplicate_path() {
+fn test_insensitive_duplicate_path() { ::tsox_core::fntrace::enter("test_insensitive_duplicate_path"); 
     let fs = from_map(&[("/foo", "bar"), ("/Foo", "baz")], true);
     assert_eq!(fs.read_file("/foo"), Some("bar".to_string()));
     assert_eq!(fs.read_file("/Foo"), Some("baz".to_string()));
 }
 
 #[test]
-fn test_writable_fs() {
+fn test_writable_fs() { ::tsox_core::fntrace::enter("test_writable_fs"); 
     let fs = InMemoryFS::with_case_sensitivity(false);
 
     fs.write_file("/foo/bar/baz", "hello, world").unwrap();
@@ -202,7 +202,7 @@ fn test_writable_fs() {
 }
 
 #[test]
-fn test_writable_fs_write_under_file() {
+fn test_writable_fs_write_under_file() { ::tsox_core::fntrace::enter("test_writable_fs_write_under_file"); 
     let fs = InMemoryFS::with_case_sensitivity(false);
     fs.write_file("/foo/bar/baz", "hello, world").unwrap();
 
@@ -214,7 +214,7 @@ fn test_writable_fs_write_under_file() {
 }
 
 #[test]
-fn test_writable_fs_delete() {
+fn test_writable_fs_delete() { ::tsox_core::fntrace::enter("test_writable_fs_delete"); 
     let fs = InMemoryFS::with_case_sensitivity(false);
 
     fs.write_file("/foo/bar/file.ts", "remove").unwrap();
@@ -232,7 +232,7 @@ fn test_writable_fs_delete() {
 }
 
 #[test]
-fn test_writable_fs_delete_directory_recursive() {
+fn test_writable_fs_delete_directory_recursive() { ::tsox_core::fntrace::enter("test_writable_fs_delete_directory_recursive"); 
     let fs = InMemoryFS::with_case_sensitivity(false);
     fs.write_file("/foo/bar/test/remove2.ts", "remove2")
         .unwrap();
@@ -244,7 +244,7 @@ fn test_writable_fs_delete_directory_recursive() {
 }
 
 #[test]
-fn test_stress() {
+fn test_stress() { ::tsox_core::fntrace::enter("test_stress"); 
     let fs = Arc::new(InMemoryFS::with_case_sensitivity(false));
     let num_threads = std::thread::available_parallelism()
         .map(|n| n.get())
@@ -286,12 +286,12 @@ fn test_stress() {
 
 #[test]
 #[should_panic(expected = "not a directory")]
-fn test_parent_dir_file() {
+fn test_parent_dir_file() { ::tsox_core::fntrace::enter("test_parent_dir_file"); 
     let _fs = from_map(&[("/foo", "bar"), ("/foo/oops", "baz")], false);
 }
 
 #[test]
-fn test_from_map_posix() {
+fn test_from_map_posix() { ::tsox_core::fntrace::enter("test_from_map_posix"); 
     let fs = from_map(
         &[
             ("/string", "hello, world"),
@@ -306,7 +306,7 @@ fn test_from_map_posix() {
 }
 
 #[test]
-fn test_from_map_windows() {
+fn test_from_map_windows() { ::tsox_core::fntrace::enter("test_from_map_windows"); 
     let fs = from_map(
         &[
             ("c:/string", "hello, world"),
@@ -322,37 +322,37 @@ fn test_from_map_windows() {
 
 #[test]
 #[should_panic(expected = "mixed posix and windows paths")]
-fn test_from_map_mixed() {
+fn test_from_map_mixed() { ::tsox_core::fntrace::enter("test_from_map_mixed"); 
     let _fs = from_map(&[("/string", "x"), ("c:/bytes", "x")], false);
 }
 
 #[test]
 #[should_panic(expected = "non-rooted path")]
-fn test_from_map_non_rooted() {
+fn test_from_map_non_rooted() { ::tsox_core::fntrace::enter("test_from_map_non_rooted"); 
     let _fs = from_map(&[("string", "x")], false);
 }
 
 #[test]
 #[should_panic(expected = "non-normalized path")]
-fn test_from_map_non_normalized() {
+fn test_from_map_non_normalized() { ::tsox_core::fntrace::enter("test_from_map_non_normalized"); 
     let _fs = from_map(&[("/string/", "x")], false);
 }
 
 #[test]
 #[should_panic(expected = "non-normalized path")]
-fn test_from_map_non_normalized2() {
+fn test_from_map_non_normalized2() { ::tsox_core::fntrace::enter("test_from_map_non_normalized2"); 
     let _fs = from_map(&[("/string/../foo", "x")], false);
 }
 
 #[test]
-fn test_from_map_invalid_file() {
+fn test_from_map_invalid_file() { ::tsox_core::fntrace::enter("test_from_map_invalid_file"); 
     let fs = from_map(&[("/a", "1"), ("/b", "text")], true);
     assert_eq!(fs.read_file("/a"), Some("1".to_string()));
     assert_eq!(fs.read_file("/b"), Some("text".to_string()));
 }
 
 #[test]
-fn test_vfs_test_map_fs() {
+fn test_vfs_test_map_fs() { ::tsox_core::fntrace::enter("test_vfs_test_map_fs"); 
     let fs = from_map(
         &[
             ("/foo.ts", "hello, world"),
@@ -374,7 +374,7 @@ fn test_vfs_test_map_fs() {
 }
 
 #[test]
-fn test_vfs_test_map_fs_windows() {
+fn test_vfs_test_map_fs_windows() { ::tsox_core::fntrace::enter("test_vfs_test_map_fs_windows"); 
     let fs = from_map(
         &[
             ("c:/foo.ts", "hello, world"),
@@ -393,14 +393,14 @@ fn test_vfs_test_map_fs_windows() {
 }
 
 #[test]
-fn test_bom() {
+fn test_bom() { ::tsox_core::fntrace::enter("test_bom"); 
     let expected = "hello, world";
     let fs = from_map(&[("/foo.ts", "\u{FEFF}hello, world")], true);
     assert_eq!(fs.read_file("/foo.ts"), Some(expected.to_string()));
 }
 
 #[test]
-fn test_symlink() {
+fn test_symlink() { ::tsox_core::fntrace::enter("test_symlink"); 
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.insert_file("/foo.ts", "hello, world");
     fs.insert_dir("/dir");
@@ -427,7 +427,7 @@ fn test_symlink() {
 }
 
 #[test]
-fn test_writable_fs_symlink() {
+fn test_writable_fs_symlink() { ::tsox_core::fntrace::enter("test_writable_fs_symlink"); 
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/foo", "hello").unwrap();
     fs.create_symlink("/link", "/foo");
@@ -443,7 +443,7 @@ fn test_writable_fs_symlink() {
 }
 
 #[test]
-fn test_writable_fs_symlink_chain() {
+fn test_writable_fs_symlink_chain() { ::tsox_core::fntrace::enter("test_writable_fs_symlink_chain"); 
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/d", "x").unwrap();
     fs.create_symlink("/a", "/b");
@@ -457,7 +457,7 @@ fn test_writable_fs_symlink_chain() {
 }
 
 #[test]
-fn test_writable_fs_symlink_chain_not_dir() {
+fn test_writable_fs_symlink_chain_not_dir() { ::tsox_core::fntrace::enter("test_writable_fs_symlink_chain_not_dir"); 
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/d", "x").unwrap();
     fs.create_symlink("/a", "/b");
@@ -472,7 +472,7 @@ fn test_writable_fs_symlink_chain_not_dir() {
 }
 
 #[test]
-fn test_writable_fs_symlink_delete() {
+fn test_writable_fs_symlink_delete() { ::tsox_core::fntrace::enter("test_writable_fs_symlink_delete"); 
     let fs = InMemoryFS::with_case_sensitivity(true);
     fs.write_file("/foo", "hello").unwrap();
     fs.create_symlink("/link", "/foo");

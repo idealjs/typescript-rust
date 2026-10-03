@@ -8,7 +8,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_tuple_type_related_to"); 
         let source_tuple = match &source.data {
             TypeData::Tuple(t) => t,
             _ => return false,
@@ -77,7 +77,7 @@ impl Checker {
         true
     }
 
-    pub(crate) fn get_tuple_element_type(&self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
+    pub(crate) fn get_tuple_element_type(&self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_tuple_element_type"); 
         match &t.data {
             TypeData::Tuple(tuple) => tuple
                 .element_infos
@@ -92,7 +92,7 @@ impl Checker {
         source: ElementFlags,
         target: ElementFlags,
         _relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_element_flags_compatible"); 
         if source.contains(ElementFlags::Required) {
             target.contains(ElementFlags::Required) || target.contains(ElementFlags::Optional)
         } else if source.contains(ElementFlags::Optional) {
@@ -111,7 +111,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_union_or_intersection_related_to"); 
         let s = source.flags;
         let t = target.flags;
 
@@ -201,7 +201,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("source_intersection_needs_extra_check"); 
         if !target.flags.contains(TypeFlags::Object)
             || crate::checker::utilities_is_optional_symbol::is_array_or_tuple_type(target)
             || self.is_generic_mapped_type(target)
@@ -229,7 +229,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("source_intersection_extra_optionals_check"); 
         let target_props = self.get_properties_of_type(target);
         for target_prop in target_props {
             if target_prop.flags.contains(SymbolFlags::Prototype)
@@ -259,7 +259,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("extra_intersection_properties_check"); 
         let saved_depth = self.relater_intersection_target_depth;
         self.relater_intersection_target_depth = 0;
         let ok = self
@@ -273,7 +273,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("extra_intersection_properties_check_inner"); 
         let source_props = self.get_properties_of_type(source);
         if !source_props.is_empty()
             && relation != RelationKind::Comparable
@@ -320,7 +320,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("intersection_source_structurally_related"); 
         let Some(ui) = source.as_union_or_intersection() else {
             return false;
         };
@@ -450,7 +450,7 @@ impl Checker {
         constituents: &[Arc<Type>],
         name: &str,
         visited: &mut Vec<usize>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("intersection_lookup_property"); 
         for c in constituents {
             if let Some(sym) = self.lookup_property_on_single_type(c, name, visited) {
                 return Some(sym);

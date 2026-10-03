@@ -45,7 +45,7 @@ impl Session {
     pub fn handle_get_completions_at_position(
         &self,
         params: &GetCompletionsAtPositionParams,
-    ) -> Result<Option<CompletionInfoResponse>, String> {
+    ) -> Result<Option<CompletionInfoResponse>, String> { ::tsox_core::fntrace::enter("handle_get_completions_at_position"); 
         let mut ctx = core_context();
         if params.include_symbol {
             ctx = tsox_core::core::mig::m3j_3::with_checker_lifetime(

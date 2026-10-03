@@ -30,7 +30,7 @@ impl Checker {
         t: &Arc<Type>,
         literal: &Arc<Node>,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_literal_expression"); 
         if assume_true {
             return self.narrow_type_by_type_name(t, &literal.text());
         }
@@ -44,7 +44,7 @@ impl Checker {
         t: &Arc<Type>,
         expr: &Arc<Node>,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_private_identifier_in_in_expression"); 
         let right = expr.right();
         let target = self.get_reference_candidate(&right);
         if !self.is_matching_reference(f.reference.as_ref().unwrap(), &target) {
@@ -72,7 +72,7 @@ impl Checker {
         t: &Arc<Type>,
         data: &Arc<Node>,
         clause_check: &dyn Fn(&Arc<Type>) -> bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_switch_optional_chain_containment"); 
         let clause_start = data.as_flow_switch_clause_data().clause_start;
         let clause_end = data.as_flow_switch_clause_data().clause_end;
         let switch_statement = Arc::clone(&data.as_flow_switch_clause_data().switch_statement);
@@ -95,7 +95,7 @@ impl Checker {
         operator: SyntaxKind,
         literal: &Arc<Node>,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_typeof"); 
         let mut assume_true = assume_true;
         if operator == SyntaxKind::ExclamationEqualsToken || operator == SyntaxKind::ExclamationEqualsEqualsToken {
             assume_true = !assume_true;
@@ -129,7 +129,7 @@ impl Checker {
         self.narrow_type_by_literal_expression(t, literal, assume_true)
     }
 
-    pub(crate) fn new_flow_type(&self, t: &Arc<Type>, incomplete: bool) -> FlowType {
+    pub(crate) fn new_flow_type(&self, t: &Arc<Type>, incomplete: bool) -> FlowType { ::tsox_core::fntrace::enter("new_flow_type"); 
         let t = if incomplete && t.flags.contains(TypeFlags::NEVER) {
             self.silent_never_type()
         } else {
@@ -138,7 +138,7 @@ impl Checker {
         FlowType { t: Some(t), incomplete }
     }
 
-    pub(crate) fn try_get_element_access_expression_name(&mut self, node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn try_get_element_access_expression_name(&mut self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("try_get_element_access_expression_name"); 
         let argument = node.as_element_access_expression().argument_expression.clone();
         if is_string_or_numeric_literal_like(&argument) {
             return Some(argument.text().to_string());
@@ -149,7 +149,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn try_get_name_from_entity_name_expression(&mut self, node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn try_get_name_from_entity_name_expression(&mut self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("try_get_name_from_entity_name_expression"); 
         let symbol = self.resolve_entity_name(node, SymbolFlags::VALUE, true, false, None)?;
         if !(self.is_constant_variable(&symbol) || symbol.flags.contains(SymbolFlags::EnumMember)) {
             return None;
@@ -182,7 +182,7 @@ impl Checker {
         declared_type: &Arc<Type>,
         initial_type: Option<&Arc<Type>>,
         flow_container: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("write_flow_cache_key"); 
         match node.kind {
             SyntaxKind::Identifier | SyntaxKind::ThisKeyword => {
                 if node.kind == SyntaxKind::Identifier && !tsox_frontend::ast::is_this_in_type_query(node) {
@@ -267,7 +267,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_grammar_import_attributes_type(&mut self, attributes: &Arc<Node>) -> bool {
+    pub(crate) fn check_grammar_import_attributes_type(&mut self, attributes: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_import_attributes_type"); 
         let members = &attributes.as_type_literal_node().members.nodes;
         if members.is_empty() {
             return false;
@@ -313,7 +313,7 @@ impl Checker {
     pub(crate) fn check_grammar_top_level_elements_for_required_declare_modifier(
         &mut self,
         file: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_top_level_elements_for_required_declare_modifier"); 
         for decl in &file.as_source_file().statements.nodes {
             if is_declaration_node(decl) || decl.kind == SyntaxKind::VariableStatement {
                 if self.check_grammar_top_level_element_for_required_declare_modifier(decl) {
@@ -325,7 +325,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn get_identifier_from_entity_name_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_identifier_from_entity_name_expression(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_identifier_from_entity_name_expression"); 
     match node.kind {
         SyntaxKind::Identifier => Some(Arc::clone(node)),
         SyntaxKind::PropertyAccessExpression => Some(Arc::clone(&node.as_property_access_expression().name)),
@@ -333,7 +333,7 @@ pub(crate) fn get_identifier_from_entity_name_expression(node: &Arc<Node>) -> Op
     }
 }
 
-pub(crate) fn is_initializer_big_int_literal_expression(expr: &Arc<Node>) -> bool {
+pub(crate) fn is_initializer_big_int_literal_expression(expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_initializer_big_int_literal_expression"); 
     if expr.kind == SyntaxKind::BigIntLiteral {
         return true;
     }
@@ -344,7 +344,7 @@ pub(crate) fn is_initializer_big_int_literal_expression(expr: &Arc<Node>) -> boo
     false
 }
 
-pub(crate) fn is_initializer_string_or_number_literal_expression(expr: &Arc<Node>) -> bool {
+pub(crate) fn is_initializer_string_or_number_literal_expression(expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_initializer_string_or_number_literal_expression"); 
     if is_string_or_numeric_literal_like(expr) {
         return true;
     }
@@ -356,7 +356,7 @@ pub(crate) fn is_initializer_string_or_number_literal_expression(expr: &Arc<Node
     false
 }
 
-pub(crate) fn try_get_name_from_type(t: &Arc<Type>) -> Option<String> {
+pub(crate) fn try_get_name_from_type(t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("try_get_name_from_type"); 
     if t.flags.contains(TypeFlags::UniqueESSymbol) {
         return Some(t.as_unique_es_symbol_type()?.name.clone());
     }

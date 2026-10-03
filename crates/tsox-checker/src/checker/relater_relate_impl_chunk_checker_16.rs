@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("properties_identical_to"); 
         if !source.flags.contains(TypeFlags::Object)
             || !target.flags.contains(TypeFlags::Object)
         {
@@ -35,7 +35,7 @@ impl Checker {
         target: &Arc<Type>,
         source_prop: &Arc<Symbol>,
         target_prop: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("compare_properties_identical"); 
         if Arc::ptr_eq(source_prop, target_prop) {
             return true;
         }
@@ -72,7 +72,7 @@ impl Checker {
         self.is_type_related_to(&source_type, &target_type, RelationKind::Identity)
     }
 
-    pub fn get_target_symbol(&self, s: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn get_target_symbol(&self, s: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_target_symbol"); 
         if s.check_flags
             .contains(tsox_frontend::ast::CheckFlags::Instantiated)
             && let Some(links) = self.value_symbol_links.get(s)
@@ -83,7 +83,7 @@ impl Checker {
         Arc::clone(s)
     }
 
-    pub(crate) fn is_readonly_symbol_for_identity(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_readonly_symbol_for_identity(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_readonly_symbol_for_identity"); 
         symbol
             .check_flags
             .contains(tsox_frontend::ast::CheckFlags::Readonly)
@@ -96,7 +96,7 @@ impl Checker {
     }
 }
 
-fn symbol_declarations_overlap(a: &Arc<Symbol>, b: &Arc<Symbol>) -> bool {
+fn symbol_declarations_overlap(a: &Arc<Symbol>, b: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_declarations_overlap"); 
     a.declarations
         .iter()
         .any(|d| b.declarations.iter().any(|e| Arc::ptr_eq(d, e)))

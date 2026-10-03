@@ -12,60 +12,60 @@ pub struct TrackingFS {
 }
 
 impl TrackingFS {
-    pub fn new(inner: Arc<dyn FS>) -> Self {
+    pub fn new(inner: Arc<dyn FS>) -> Self { ::tsox_core::fntrace::enter("new"); 
         TrackingFS {
             inner,
             seen_files: Mutex::new(HashSet::new()),
         }
     }
 
-    fn track(&self, path: &str) {
+    fn track(&self, path: &str) { ::tsox_core::fntrace::enter("track"); 
         self.seen_files.lock().unwrap().insert(path.to_string());
     }
 }
 
 impl FS for TrackingFS {
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.track(path);
         self.inner.read_file(path)
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.track(path);
         self.inner.file_exists(path)
     }
 
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.inner.use_case_sensitive_file_names()
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         self.inner.write_file(path, data)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         self.inner.append_file(path, data)
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         self.inner.remove(path)
     }
 
-    fn chtimes(&self, path: &str, atime: SystemTime, mtime: SystemTime) -> std::io::Result<()> {
+    fn chtimes(&self, path: &str, atime: SystemTime, mtime: SystemTime) -> std::io::Result<()> { ::tsox_core::fntrace::enter("chtimes"); 
         self.inner.chtimes(path, atime, mtime)
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.track(path);
         self.inner.directory_exists(path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.track(path);
         self.inner.get_accessible_entries(path)
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         self.track(path);
         self.inner.stat(path)
     }
@@ -74,7 +74,7 @@ impl FS for TrackingFS {
         &self,
         root: &str,
         walk_fn: &mut dyn FnMut(&str, &FileInfo),
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("walk_dir"); 
         self.track(root);
         self.inner.walk_dir(root, &mut |path, info| {
             self.track(path);
@@ -82,7 +82,7 @@ impl FS for TrackingFS {
         })
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         self.track(path);
         self.inner.realpath(path)
     }
@@ -94,12 +94,12 @@ impl CachedFS {
         path: &str,
         atime: SystemTime,
         mtime: SystemTime,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("chtimes"); 
         self.fs.chtimes(path, atime, mtime)
     }
 }
 
-pub fn root_length(p: &str) -> usize {
+pub fn root_length(p: &str) -> usize { ::tsox_core::fntrace::enter("root_length"); 
     let l = tsox_core::tspath::get_encoded_root_length(p);
     if l == 0 {
         panic!("vfs: path {p:?} is not absolute");
@@ -110,7 +110,7 @@ pub fn root_length(p: &str) -> usize {
     }
 }
 
-pub fn split_path(p: &str) -> (String, String) {
+pub fn split_path(p: &str) -> (String, String) { ::tsox_core::fntrace::enter("split_path"); 
     let p = tsox_core::tspath::normalize_path(p);
     let l = root_length(&p);
     let (root_name, rest) = p.split_at(l);
@@ -118,7 +118,7 @@ pub fn split_path(p: &str) -> (String, String) {
     (root_name.to_string(), rest)
 }
 
-pub fn decode_bytes(s: &str) -> String {
+pub fn decode_bytes(s: &str) -> String { ::tsox_core::fntrace::enter("decode_bytes"); 
     let b = s.as_bytes();
     if b.len() >= 2 {
         match [b[0], b[1]] {
@@ -133,7 +133,7 @@ pub fn decode_bytes(s: &str) -> String {
     s.to_string()
 }
 
-pub fn decode_utf16(b: &[u8], little_endian: bool) -> String {
+pub fn decode_utf16(b: &[u8], little_endian: bool) -> String { ::tsox_core::fntrace::enter("decode_utf16"); 
     let units: Vec<u16> = b
         .chunks_exact(2)
         .map(|c| {
@@ -165,7 +165,7 @@ pub struct FSMock {
     pub append_file_func: Option<Box<dyn Fn(&str, &str) -> std::io::Result<()> + Send + Sync>>,
 }
 
-pub fn wrap_mock(fs: Arc<dyn FS>) -> FSMock {
+pub fn wrap_mock(fs: Arc<dyn FS>) -> FSMock { ::tsox_core::fntrace::enter("wrap_mock"); 
     let f_directory_exists = Arc::clone(&fs);
     let f_file_exists = Arc::clone(&fs);
     let f_get_accessible_entries = Arc::clone(&fs);
@@ -220,12 +220,12 @@ pub struct WrappedFS {
     pub replacements: Replacements,
 }
 
-pub fn wrap(fs: Arc<dyn FS>, replacements: Replacements) -> WrappedFS {
+pub fn wrap(fs: Arc<dyn FS>, replacements: Replacements) -> WrappedFS { ::tsox_core::fntrace::enter("wrap"); 
     WrappedFS { fs, replacements }
 }
 
 impl WrappedFS {
-    pub fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    pub fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         if let Some(f) = &self.replacements.append_file {
             return f(path, data);
         }

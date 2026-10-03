@@ -7,7 +7,7 @@ use tsox_core::core::text::TextRange;
 use tsox_core::core::compiler_options::ResolutionMode;
 use tsox_frontend::ast::NodeData;
 
-pub fn syntax_list_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn syntax_list_children(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("syntax_list_children"); 
     match &node.data {
         NodeData::SyntaxList(data) => data.children.clone(),
         _ => Vec::new(),
@@ -31,19 +31,19 @@ pub struct OutputPathsValue {
 }
 
 impl OutputPathsValue {
-    pub fn declaration_file_path(&self) -> String {
+    pub fn declaration_file_path(&self) -> String { ::tsox_core::fntrace::enter("declaration_file_path"); 
         self.declaration_path.clone()
     }
 
-    pub fn js_file_path(&self) -> String {
+    pub fn js_file_path(&self) -> String { ::tsox_core::fntrace::enter("js_file_path"); 
         self.js_path.clone()
     }
 
-    pub fn source_map_file_path(&self) -> String {
+    pub fn source_map_file_path(&self) -> String { ::tsox_core::fntrace::enter("source_map_file_path"); 
         self.source_map_path.clone()
     }
 
-    pub fn declaration_map_path(&self) -> String {
+    pub fn declaration_map_path(&self) -> String { ::tsox_core::fntrace::enter("declaration_map_path"); 
         self.declaration_map_path.clone()
     }
 }
@@ -74,7 +74,7 @@ pub struct DeclarationEmitHostFns {
 }
 
 impl DeclarationEmitHost {
-    pub fn new(fns: DeclarationEmitHostFns) -> Self {
+    pub fn new(fns: DeclarationEmitHostFns) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             get_current_directory_fn: fns.get_current_directory,
             use_case_sensitive_file_names_fn: fns.use_case_sensitive_file_names,
@@ -86,11 +86,11 @@ impl DeclarationEmitHost {
         }
     }
 
-    pub fn get_current_directory(&self) -> String {
+    pub fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         (self.get_current_directory_fn)()
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         (self.use_case_sensitive_file_names_fn)()
     }
 
@@ -98,15 +98,15 @@ impl DeclarationEmitHost {
         &self,
         origin: &Arc<SourceFile>,
         reference: &FileReference,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_from_reference"); 
         (self.get_source_file_from_reference_fn)(origin, reference)
     }
 
-    pub fn get_output_paths_for(&self, file: &SourceFile, force_dts_paths: bool) -> OutputPathsValue {
+    pub fn get_output_paths_for(&self, file: &SourceFile, force_dts_paths: bool) -> OutputPathsValue { ::tsox_core::fntrace::enter("get_output_paths_for"); 
         (self.get_output_paths_for_fn)(file, force_dts_paths)
     }
 
-    pub fn source_file_may_be_emitted(&self, file: &SourceFile, force_dts_emit: bool) -> bool {
+    pub fn source_file_may_be_emitted(&self, file: &SourceFile, force_dts_emit: bool) -> bool { ::tsox_core::fntrace::enter("source_file_may_be_emitted"); 
         (self.source_file_may_be_emitted_fn)(file, force_dts_emit)
     }
 
@@ -114,11 +114,11 @@ impl DeclarationEmitHost {
         &self,
         node: &Arc<Node>,
         flags: ModifierFlags,
-    ) -> ModifierFlags {
+    ) -> ModifierFlags { ::tsox_core::fntrace::enter("get_effective_declaration_flags"); 
         (self.get_effective_declaration_flags_fn)(node, flags)
     }
 
-    pub fn get_emit_resolver(&self) -> EmitResolver {
+    pub fn get_emit_resolver(&self) -> EmitResolver { ::tsox_core::fntrace::enter("get_emit_resolver"); 
         (self.get_emit_resolver_fn)()
     }
 }

@@ -6,7 +6,7 @@ pub(crate) fn merge_compiler_options_with_skip(
     dst: &mut CompilerOptions,
     src: &CompilerOptions,
     skip_fields: &HashSet<String>,
-) {
+) { ::tsox_core::fntrace::enter("merge_compiler_options_with_skip"); 
     macro_rules! merge_tri {
         ($field:ident, $json_name:literal) => {
             if dst.$field.is_unknown() && !skip_fields.contains($json_name) {
@@ -135,7 +135,7 @@ pub(crate) fn expand_file_names(
     options: &CompilerOptions,
     base_dir: &str,
     fs: &dyn FS,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("expand_file_names"); 
     let mut result: Vec<String> = Vec::new();
     let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
 
@@ -198,12 +198,12 @@ pub(crate) fn expand_file_names(
     result
 }
 
-pub(crate) fn is_excluded(path: &str, exclude_globs: &[Glob], exclude_dirs: &[String]) -> bool {
+pub(crate) fn is_excluded(path: &str, exclude_globs: &[Glob], exclude_dirs: &[String]) -> bool { ::tsox_core::fntrace::enter("is_excluded"); 
     exclude_globs.iter().any(|g| g.is_match(path))
         || exclude_dirs.iter().any(|dir| path_is_under_dir(path, dir))
 }
 
-pub(crate) fn path_is_under_dir(path: &str, dir: &str) -> bool {
+pub(crate) fn path_is_under_dir(path: &str, dir: &str) -> bool { ::tsox_core::fntrace::enter("path_is_under_dir"); 
     path == dir
         || path
             .strip_prefix(dir)
@@ -211,11 +211,11 @@ pub(crate) fn path_is_under_dir(path: &str, dir: &str) -> bool {
 }
 
 #[allow(dead_code)]
-pub(crate) fn is_supported_source_file(path: &str) -> bool {
+pub(crate) fn is_supported_source_file(path: &str) -> bool { ::tsox_core::fntrace::enter("is_supported_source_file"); 
     is_supported_source_file_ex(path, false)
 }
 
-pub(crate) fn is_supported_source_file_ex(path: &str, allow_js: bool) -> bool {
+pub(crate) fn is_supported_source_file_ex(path: &str, allow_js: bool) -> bool { ::tsox_core::fntrace::enter("is_supported_source_file_ex"); 
     let ext = path.rfind('.').map(|i| &path[i..]).unwrap_or("");
     if matches!(
         ext,
@@ -229,7 +229,7 @@ pub(crate) fn is_supported_source_file_ex(path: &str, allow_js: bool) -> bool {
     false
 }
 
-pub(crate) fn match_glob_spec(spec: &str, base_dir: &str, fs: &dyn FS) -> Vec<String> {
+pub(crate) fn match_glob_spec(spec: &str, base_dir: &str, fs: &dyn FS) -> Vec<String> { ::tsox_core::fntrace::enter("match_glob_spec"); 
     let mut results = Vec::new();
 
     let abs_spec = if tsox_core::tspath::path_is_absolute(spec) {
@@ -253,12 +253,12 @@ pub(crate) fn match_glob_spec(spec: &str, base_dir: &str, fs: &dyn FS) -> Vec<St
     results
 }
 
-pub(crate) fn contains_glob_char(spec: &str) -> bool {
+pub(crate) fn contains_glob_char(spec: &str) -> bool { ::tsox_core::fntrace::enter("contains_glob_char"); 
     spec.chars()
         .any(|c| c == '*' || c == '?' || c == '{' || c == '[')
 }
 
-pub(crate) fn glob_base_dir(spec: &str) -> String {
+pub(crate) fn glob_base_dir(spec: &str) -> String { ::tsox_core::fntrace::enter("glob_base_dir"); 
     let first_meta = spec
         .chars()
         .position(|c| c == '*' || c == '?' || c == '{' || c == '[');
@@ -274,7 +274,7 @@ pub(crate) fn glob_base_dir(spec: &str) -> String {
     }
 }
 
-pub(crate) fn walk_and_collect_files(dir: &str, fs: &dyn FS, results: &mut Vec<String>) {
+pub(crate) fn walk_and_collect_files(dir: &str, fs: &dyn FS, results: &mut Vec<String>) { ::tsox_core::fntrace::enter("walk_and_collect_files"); 
     let entries = fs.get_accessible_entries(dir);
     for file in &entries.files {
         results.push(tsox_core::tspath::combine_paths(dir, &[file]));

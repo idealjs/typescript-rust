@@ -6,7 +6,7 @@ pub(crate) fn generate_fragment_call(
     children: &Arc<NodeList>,
     source: &str,
     usage: &mut JsxRuntimeUsage,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("generate_fragment_call"); 
     usage.used_fragment = true;
 
     let children_prop = convert_children(children, source, usage);
@@ -28,7 +28,7 @@ pub(crate) fn generate_fragment_call(
     format!("{}(_Fragment, {})", callee, props_str)
 }
 
-pub(crate) fn tag_name_to_string(tag_name: &Node, source: &str) -> String {
+pub(crate) fn tag_name_to_string(tag_name: &Node, source: &str) -> String { ::tsox_core::fntrace::enter("tag_name_to_string"); 
     if let NodeData::Identifier(d) = &tag_name.data {
         if is_intrinsic_jsx_name(&d.text) {
             return format!("\"{}\"", d.text);
@@ -44,7 +44,7 @@ pub(crate) fn attributes_to_props(
     attributes: &Node,
     source: &str,
     usage: &mut JsxRuntimeUsage,
-) -> (Vec<String>, Option<String>) {
+) -> (Vec<String>, Option<String>) { ::tsox_core::fntrace::enter("attributes_to_props"); 
     let mut props = Vec::new();
     let mut key_arg = None;
 
@@ -82,7 +82,7 @@ pub(crate) fn attributes_to_props(
     (props, key_arg)
 }
 
-pub(crate) fn attribute_name_to_string(name: &Node, source: &str) -> String {
+pub(crate) fn attribute_name_to_string(name: &Node, source: &str) -> String { ::tsox_core::fntrace::enter("attribute_name_to_string"); 
     if let NodeData::Identifier(d) = &name.data {
         return if is_valid_identifier(&d.text) {
             d.text.clone()
@@ -100,7 +100,7 @@ pub(crate) fn attribute_value_to_string(
     init: &Node,
     source: &str,
     usage: &mut JsxRuntimeUsage,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("attribute_value_to_string"); 
     match init.kind {
         SyntaxKind::StringLiteral => source[init.pos()..init.end()].to_string(),
         SyntaxKind::JsxExpression => {
@@ -124,7 +124,7 @@ pub(crate) fn convert_children(
     children: &Arc<NodeList>,
     source: &str,
     usage: &mut JsxRuntimeUsage,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("convert_children"); 
     let semantic: Vec<Arc<Node>> = children
         .iter()
         .filter(|c| !is_whitespace_only_jsx_text(c))
@@ -146,7 +146,7 @@ pub(crate) fn convert_children(
     Some(format!("[{}]", parts.join(", ")))
 }
 
-pub(crate) fn is_static_children(children: &Arc<NodeList>) -> bool {
+pub(crate) fn is_static_children(children: &Arc<NodeList>) -> bool { ::tsox_core::fntrace::enter("is_static_children"); 
     let semantic: Vec<&Arc<Node>> = children
         .iter()
         .filter(|c| !is_whitespace_only_jsx_text(c))
@@ -164,7 +164,7 @@ pub(crate) fn transform_jsx_child(
     child: &Node,
     source: &str,
     usage: &mut JsxRuntimeUsage,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("transform_jsx_child"); 
     match child.kind {
         SyntaxKind::JsxText | SyntaxKind::JsxTextAllWhiteSpaces => {
             let fixed = fixup_jsx_text(child.text());
@@ -187,7 +187,7 @@ pub(crate) fn transform_jsx_child(
     }
 }
 
-pub(crate) fn emit_expr_with_jsx(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
+pub(crate) fn emit_expr_with_jsx(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String { ::tsox_core::fntrace::enter("emit_expr_with_jsx"); 
     let start = node.pos();
     let end = node.end();
 
@@ -243,7 +243,7 @@ pub(crate) fn collect_nested_jsx_in_expr(
     source: &str,
     repls: &mut Vec<(usize, usize, String)>,
     usage: &mut JsxRuntimeUsage,
-) {
+) { ::tsox_core::fntrace::enter("collect_nested_jsx_in_expr"); 
     tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
         match child.kind {
             SyntaxKind::JsxElement
@@ -260,14 +260,14 @@ pub(crate) fn collect_nested_jsx_in_expr(
     });
 }
 
-pub(crate) fn is_intrinsic_jsx_name(text: &str) -> bool {
+pub(crate) fn is_intrinsic_jsx_name(text: &str) -> bool { ::tsox_core::fntrace::enter("is_intrinsic_jsx_name"); 
     !text
         .bytes()
         .next()
         .map_or(false, |c| c.is_ascii_uppercase())
 }
 
-pub(crate) fn is_valid_identifier(text: &str) -> bool {
+pub(crate) fn is_valid_identifier(text: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_identifier"); 
     let mut chars = text.chars();
     match chars.next() {
         Some(c) if c.is_alphabetic() || c == '_' || c == '$' => {}
@@ -276,10 +276,10 @@ pub(crate) fn is_valid_identifier(text: &str) -> bool {
     chars.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
 }
 
-pub(crate) fn is_whitespace_only_jsx_text(node: &Node) -> bool {
+pub(crate) fn is_whitespace_only_jsx_text(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_whitespace_only_jsx_text"); 
     matches!(&node.data, NodeData::JsxText(d) if d.contains_only_trivia_white_spaces)
 }
 
-pub(crate) fn is_spread_jsx_expression(node: &Node) -> bool {
+pub(crate) fn is_spread_jsx_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_spread_jsx_expression"); 
     matches!(&node.data, NodeData::JsxExpression(d) if d.dot_dot_dot_token.is_some())
 }

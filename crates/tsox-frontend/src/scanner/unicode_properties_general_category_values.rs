@@ -88,22 +88,22 @@ pub static GENERAL_CATEGORY_VALUES: LazyLock<HashSet<&'static str>> = LazyLock::
     ])
 });
 
-pub fn non_binary_property_canonical(name: &str) -> Option<&'static str> {
+pub fn non_binary_property_canonical(name: &str) -> Option<&'static str> { ::tsox_core::fntrace::enter("non_binary_property_canonical"); 
     NON_BINARY_UNICODE_PROPERTIES
         .iter()
         .find(|(alias, _)| *alias == name)
         .map(|(_, canonical)| *canonical)
 }
 
-pub fn is_binary_unicode_property(name: &str) -> bool {
+pub fn is_binary_unicode_property(name: &str) -> bool { ::tsox_core::fntrace::enter("is_binary_unicode_property"); 
     BINARY_UNICODE_PROPERTIES.contains(name)
 }
 
-pub fn is_binary_unicode_property_of_strings(name: &str) -> bool {
+pub fn is_binary_unicode_property_of_strings(name: &str) -> bool { ::tsox_core::fntrace::enter("is_binary_unicode_property_of_strings"); 
     BINARY_UNICODE_PROPERTIES_OF_STRINGS.contains(name)
 }
 
-pub fn is_valid_unicode_property_value(property: &str, value: &str) -> bool {
+pub fn is_valid_unicode_property_value(property: &str, value: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_unicode_property_value"); 
     match property {
         "General_Category" => GENERAL_CATEGORY_VALUES.contains(value),
         "Script" | "Script_Extensions" => SCRIPT_VALUES.contains(value),

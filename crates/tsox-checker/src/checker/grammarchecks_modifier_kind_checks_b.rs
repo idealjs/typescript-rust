@@ -11,7 +11,7 @@ impl Checker {
         block_scope_kind: NodeFlags,
         last_async: &mut Option<Arc<Node>>,
         last_declare: &mut Option<Arc<Node>>,
-    ) -> Option<bool> {
+    ) -> Option<bool> { ::tsox_core::fntrace::enter("check_modifier_kind_b"); 
         match modifier.kind {
             SyntaxKind::ExportKeyword => {
                 if flags.contains(ModifierFlags::Export) {

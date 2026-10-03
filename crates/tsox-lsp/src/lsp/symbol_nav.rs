@@ -3,7 +3,7 @@ use std::sync::Arc;
 pub(super) fn resolve_identifier_symbol(
     symbol_map: &tsox_frontend::ast::NodeSymbolMap,
     node: &Arc<tsox_frontend::ast::Node>,
-) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("resolve_identifier_symbol"); 
     use tsox_frontend::ast::NodeData;
     use tsox_frontend::ast::SymbolFlags;
     let name = match &node.data {
@@ -35,7 +35,7 @@ pub(super) fn resolve_identifier_symbol(
 pub(super) fn resolve_symbol_for_node(
     symbol_map: &tsox_frontend::ast::NodeSymbolMap,
     node: &Arc<tsox_frontend::ast::Node>,
-) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("resolve_symbol_for_node"); 
     if node.kind == tsox_frontend::ast::SyntaxKind::Identifier {
         if let Some(parent) = node.parent().as_ref() {
             if let Some(name) = parent.name() {
@@ -54,7 +54,7 @@ pub(super) fn resolve_symbol_for_node(
 pub(super) fn is_declaration_name(
     symbol_map: &tsox_frontend::ast::NodeSymbolMap,
     node: &Arc<tsox_frontend::ast::Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_declaration_name"); 
     if node.kind != tsox_frontend::ast::SyntaxKind::Identifier {
         return false;
     }
@@ -68,7 +68,7 @@ pub(super) fn is_declaration_name(
     false
 }
 
-pub(super) fn is_property_access_name(node: &Arc<tsox_frontend::ast::Node>) -> bool {
+pub(super) fn is_property_access_name(node: &Arc<tsox_frontend::ast::Node>) -> bool { ::tsox_core::fntrace::enter("is_property_access_name"); 
     use tsox_frontend::ast::NodeData;
     if node.kind != tsox_frontend::ast::SyntaxKind::Identifier {
         return false;
@@ -84,7 +84,7 @@ pub(super) fn is_property_access_name(node: &Arc<tsox_frontend::ast::Node>) -> b
 pub(super) fn walk_all_nodes(
     node: &Arc<tsox_frontend::ast::Node>,
     visitor: &mut impl FnMut(&Arc<tsox_frontend::ast::Node>),
-) {
+) { ::tsox_core::fntrace::enter("walk_all_nodes"); 
     visitor(node);
     let mut children = Vec::new();
     tsox_frontend::ast::for_each_child(node, |child| {
@@ -102,7 +102,7 @@ pub(super) fn find_all_references(
 ) -> Vec<(
     Arc<tsox_frontend::ast::SourceFile>,
     Arc<tsox_frontend::ast::Node>,
-)> {
+)> { ::tsox_core::fntrace::enter("find_all_references"); 
     use tsox_frontend::ast::SyntaxKind;
     let symbol_map = program.symbol_map();
     let mut refs = Vec::new();

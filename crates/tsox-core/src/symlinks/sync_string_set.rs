@@ -4,7 +4,7 @@ use super::*;
 
 pub type SyncStringSet = Arc<Mutex<HashSet<String>>>;
 
-pub(crate) fn new_sync_string_set() -> SyncStringSet {
+pub(crate) fn new_sync_string_set() -> SyncStringSet { crate::fntrace::enter("new_sync_string_set"); 
     Arc::new(Mutex::new(HashSet::new()))
 }
 
@@ -25,7 +25,7 @@ pub struct KnownSymlinks {
 }
 
 impl KnownSymlinks {
-    pub fn new(current_directory: &str, use_case_sensitive_file_names: bool) -> Self {
+    pub fn new(current_directory: &str, use_case_sensitive_file_names: bool) -> Self { crate::fntrace::enter("new"); 
         Self {
             directories: SyncMap::new(),
             directories_by_realpath: SyncMap::new(),
@@ -36,24 +36,24 @@ impl KnownSymlinks {
         }
     }
 
-    pub fn has_directory(&self, symlink_path: &Path) -> bool {
+    pub fn has_directory(&self, symlink_path: &Path) -> bool { crate::fntrace::enter("has_directory"); 
         let p = symlink_path.ensure_trailing_directory_separator();
         self.directories.load(&p).is_some()
     }
 
-    pub fn directories(&self) -> &SyncMap<Path, KnownDirectoryLink> {
+    pub fn directories(&self) -> &SyncMap<Path, KnownDirectoryLink> { crate::fntrace::enter("directories"); 
         &self.directories
     }
 
-    pub fn directories_by_realpath(&self) -> &SyncMap<Path, SyncStringSet> {
+    pub fn directories_by_realpath(&self) -> &SyncMap<Path, SyncStringSet> { crate::fntrace::enter("directories_by_realpath"); 
         &self.directories_by_realpath
     }
 
-    pub fn files(&self) -> &SyncMap<Path, String> {
+    pub fn files(&self) -> &SyncMap<Path, String> { crate::fntrace::enter("files"); 
         &self.files
     }
 
-    pub fn files_by_realpath(&self) -> &SyncMap<Path, SyncStringSet> {
+    pub fn files_by_realpath(&self) -> &SyncMap<Path, SyncStringSet> { crate::fntrace::enter("files_by_realpath"); 
         &self.files_by_realpath
     }
 
@@ -62,7 +62,7 @@ impl KnownSymlinks {
         symlink: &str,
         symlink_path: Path,
         real_directory: KnownDirectoryLink,
-    ) {
+    ) { crate::fntrace::enter("set_directory"); 
         if self.directories.load(&symlink_path).is_none() {
             let (set, _) = self
                 .directories_by_realpath
@@ -72,7 +72,7 @@ impl KnownSymlinks {
         self.directories.store(symlink_path, real_directory);
     }
 
-    pub fn set_file(&self, symlink: &str, symlink_path: Path, realpath: &str) {
+    pub fn set_file(&self, symlink: &str, symlink_path: Path, realpath: &str) { crate::fntrace::enter("set_file"); 
         if self.files.load(&symlink_path).is_none() {
             let realpath_path =
                 tspath::to_path(realpath, &self.cwd, self.use_case_sensitive_file_names);
@@ -84,7 +84,7 @@ impl KnownSymlinks {
         self.files.store(symlink_path, realpath.to_string());
     }
 
-    pub fn process_resolution(&self, original_path: &str, resolved_file_name: &str) {
+    pub fn process_resolution(&self, original_path: &str, resolved_file_name: &str) { crate::fntrace::enter("process_resolution"); 
         if original_path.is_empty() || resolved_file_name.is_empty() {
             return;
         }
@@ -119,7 +119,7 @@ impl KnownSymlinks {
         }
     }
 
-    pub fn guess_directory_symlink(&self, a: &str, b: &str, cwd: &str) -> (String, String) {
+    pub fn guess_directory_symlink(&self, a: &str, b: &str, cwd: &str) -> (String, String) { crate::fntrace::enter("guess_directory_symlink"); 
         let mut a_parts =
             tspath::get_path_components(&tspath::get_normalized_absolute_path(a, cwd), "");
         let mut b_parts =
@@ -151,7 +151,7 @@ impl KnownSymlinks {
         }
     }
 
-    pub fn is_node_modules_or_scoped_package_directory(&self, s: &str) -> bool {
+    pub fn is_node_modules_or_scoped_package_directory(&self, s: &str) -> bool { crate::fntrace::enter("is_node_modules_or_scoped_package_directory"); 
         !s.is_empty()
             && (tspath::get_canonical_file_name(s, self.use_case_sensitive_file_names)
                 == "node_modules"
@@ -162,7 +162,7 @@ impl KnownSymlinks {
         &self,
         for_each_resolved_module: impl Fn(&dyn Fn(&str, &str)),
         for_each_resolved_type_reference_directive: impl Fn(&dyn Fn(&str, &str)),
-    ) {
+    ) { crate::fntrace::enter("set_symlinks_from_resolutions"); 
         for_each_resolved_module(&|original_path, resolved_file_name| {
             self.process_resolution(original_path, resolved_file_name);
         });

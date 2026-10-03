@@ -6,7 +6,7 @@ impl Parser {
     pub(crate) fn parse_namespace_declaration_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_namespace_declaration_with_modifiers"); 
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         let keyword = self.token;
 
@@ -92,7 +92,7 @@ impl Parser {
         &mut self,
         pos: usize,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_ambient_external_module_declaration"); 
         let keyword = self.token;
         let name = if self.token == SyntaxKind::GlobalKeyword {
             self.parse_identifier()
@@ -136,7 +136,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_string_literal_name(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_string_literal_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_string_literal_name"); 
         let text = self.scanner.token_text().to_string();
         let pos = self.token_pos();
         let end = self.token_end();
@@ -152,7 +152,7 @@ impl Parser {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn parse_namespace_name(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_namespace_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_namespace_name"); 
         let name = self.parse_identifier();
 
         if self.token == SyntaxKind::DotToken {
@@ -173,7 +173,7 @@ impl Parser {
         name
     }
 
-    pub(crate) fn parse_import_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_import_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_declaration"); 
         let pos = self.token_pos();
         self.parse_import_declaration_with_modifiers(pos, None)
     }
@@ -182,7 +182,7 @@ impl Parser {
         &mut self,
         pos: usize,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_declaration_with_modifiers"); 
         self.next_token();
 
         let after_import_pos = self.token_pos();
@@ -265,17 +265,17 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
         name: Arc<Node>,
         is_type_only: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_equals_with_modifiers"); 
         self.parse_import_equals_tail(pos, modifiers, name, is_type_only)
     }
 
-    pub(crate) fn token_after_import_definitely_produces_import_declaration(&self) -> bool {
+    pub(crate) fn token_after_import_definitely_produces_import_declaration(&self) -> bool { ::tsox_core::fntrace::enter("token_after_import_definitely_produces_import_declaration"); 
         self.token == SyntaxKind::AsteriskToken || self.token == SyntaxKind::OpenBraceToken
     }
 
     pub(crate) fn token_after_imported_identifier_definitely_produces_import_declaration(
         &self,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("token_after_imported_identifier_definitely_produces_import_declaration"); 
         self.token == SyntaxKind::CommaToken || self.token == SyntaxKind::FromKeyword
     }
 
@@ -284,14 +284,14 @@ impl Parser {
         pos: usize,
         name: Arc<Node>,
         is_type_only: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_equals_declaration"); 
         self.parse_import_equals_tail(pos, None, name, is_type_only)
     }
 }
 
 impl Parser {
     /// 浅消费一个平衡的 `{ ... }` 块（module attributes 等不求值场景）
-    pub(crate) fn skip_balanced_brace_block(&mut self) {
+    pub(crate) fn skip_balanced_brace_block(&mut self) { ::tsox_core::fntrace::enter("skip_balanced_brace_block"); 
         if self.token != SyntaxKind::OpenBraceToken {
             return;
         }

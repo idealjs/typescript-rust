@@ -3,14 +3,14 @@
 use crate::parser::declarations::*;
 
 impl Parser {
-    pub(crate) fn can_parse_module_export_name(&self) -> bool {
+    pub(crate) fn can_parse_module_export_name(&self) -> bool { ::tsox_core::fntrace::enter("can_parse_module_export_name"); 
         is_identifier_or_keyword(self.token) || self.token == SyntaxKind::StringLiteral
     }
 
     pub(crate) fn parse_module_export_name(
         &mut self,
         disallow_keywords: bool,
-    ) -> (Arc<Node>, bool) {
+    ) -> (Arc<Node>, bool) { ::tsox_core::fntrace::enter("parse_module_export_name"); 
         if self.token == SyntaxKind::StringLiteral {
             return (self.parse_string_literal_node(), true);
         }
@@ -19,7 +19,7 @@ impl Parser {
         (self.parse_identifier_name_or_keyword(), name_ok)
     }
 
-    pub(crate) fn parse_identifier_name_or_keyword(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_identifier_name_or_keyword(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_identifier_name_or_keyword"); 
         if self.is_identifier() {
             self.parse_identifier()
         } else if is_keyword(self.token) {
@@ -42,7 +42,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_string_literal_node(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_string_literal_node(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_string_literal_node"); 
         let text = self.scanner.token_value();
         let pos = self.token_pos();
         let end = self.token_end();
@@ -57,14 +57,14 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_export_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_export_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_export_declaration"); 
         self.parse_export_declaration_with_pre(Vec::new())
     }
 
     pub(crate) fn parse_export_declaration_with_pre(
         &mut self,
         pre: Vec<(SyntaxKind, usize, usize)>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_export_declaration_with_pre"); 
         let pos = self.token_pos();
         let export_end = self.token_end();
         self.next_token();
@@ -237,7 +237,7 @@ impl Parser {
         &mut self,
         pos: usize,
         is_type_only: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_export_declaration_tail"); 
         let export_clause = if self.parse_optional(SyntaxKind::AsteriskToken) {
             if self.parse_optional(SyntaxKind::AsKeyword) {
                 let (name, _) = self.parse_module_export_name(false);
@@ -275,7 +275,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_named_exports(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_named_exports(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_named_exports"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let elements = self.parse_list(

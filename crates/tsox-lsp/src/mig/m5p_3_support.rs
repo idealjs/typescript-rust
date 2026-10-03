@@ -58,7 +58,7 @@ pub struct CodeActionContext {
     pub only: Vec<String>,
 }
 
-fn ls_diagnostic(d: &lsproto::Diagnostic) -> crate::ls::types::Diagnostic {
+fn ls_diagnostic(d: &lsproto::Diagnostic) -> crate::ls::types::Diagnostic { ::tsox_core::fntrace::enter("ls_diagnostic"); 
     crate::ls::types::Diagnostic {
         range: d.range.clone(),
         severity: d.severity,
@@ -69,7 +69,7 @@ fn ls_diagnostic(d: &lsproto::Diagnostic) -> crate::ls::types::Diagnostic {
     }
 }
 
-fn ls_code_action_params(p: &CodeActionParams) -> crate::ls::types::CodeActionParams {
+fn ls_code_action_params(p: &CodeActionParams) -> crate::ls::types::CodeActionParams { ::tsox_core::fntrace::enter("ls_code_action_params"); 
     crate::ls::types::CodeActionParams {
         text_document: crate::ls::types::TextDocumentIdentifier { uri: p.text_document.uri.clone() },
         range: p.range.clone(),
@@ -97,7 +97,7 @@ macro_rules! ls_fix_ctx {
     };
 }
 
-fn code_action_from_ls(a: crate::ls::types::CodeAction) -> CodeAction {
+fn code_action_from_ls(a: crate::ls::types::CodeAction) -> CodeAction { ::tsox_core::fntrace::enter("code_action_from_ls"); 
     CodeAction {
         description: a.title,
         changes: a.edits,
@@ -106,14 +106,14 @@ fn code_action_from_ls(a: crate::ls::types::CodeAction) -> CodeAction {
     }
 }
 
-fn combined_code_actions_from_ls(c: crate::ls::code_actions::CombinedCodeActions) -> CombinedCodeActions {
+fn combined_code_actions_from_ls(c: crate::ls::code_actions::CombinedCodeActions) -> CombinedCodeActions { ::tsox_core::fntrace::enter("combined_code_actions_from_ls"); 
     CombinedCodeActions {
         description: c.description,
         changes: c.changes,
     }
 }
 
-pub fn code_fix_providers() -> Vec<Arc<CodeFixProvider>> {
+pub fn code_fix_providers() -> Vec<Arc<CodeFixProvider>> { ::tsox_core::fntrace::enter("code_fix_providers"); 
     vec![
         Arc::new(CodeFixProvider {
             id: 1,

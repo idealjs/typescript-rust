@@ -487,6 +487,9 @@ fn run_case(
     let ext = ".errors.txt";
 
     let out_path = std::env::temp_dir().join(format!("tsox_submodule_{idx}_{stem}.out"));
+    let fn_trace_path = std::env::var_os("TSOX_FN_TRACE_DIR")
+        .map(|d| std::path::Path::new(&d).join(format!("{stem}.txt")).to_string_lossy().into_owned())
+        .unwrap_or_default();
     let _ = std::fs::remove_file(&out_path);
     let worker = Command::new(exe)
         .arg("--exact")
@@ -498,6 +501,7 @@ fn run_case(
         })
         .env("TSOX_SUBMODULE_WORKER", case_path)
         .env("TSOX_SUBMODULE_OUT", &out_path)
+        .env("TSOX_FN_TRACE", &fn_trace_path)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(if std::env::var_os("TSOX_PROBE_PHASES").is_some() {
@@ -644,6 +648,7 @@ fn submodule_compiler_cases() {
         std::env::var("TSOX_SUBMODULE_OUT"),
     ) {
 
+        tsox_core::fntrace::maybe_init();
         let case_path = case_path.clone();
         let payload = std::thread::Builder::new()
             .stack_size(256 * 1024 * 1024)
@@ -686,6 +691,11 @@ fn submodule_compiler_cases() {
             .expect("spawn worker compile thread")
             .join()
             .unwrap_or_else(|_| "[]".to_string());
+        if let Ok(p) = std::env::var("TSOX_FN_TRACE") {
+            if !p.is_empty() {
+                tsox_core::fntrace::flush_to(&p);
+            }
+        }
         let _ = std::fs::write(&out_path, payload);
         return;
     }

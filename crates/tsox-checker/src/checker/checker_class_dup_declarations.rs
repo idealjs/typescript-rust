@@ -12,13 +12,13 @@ impl Checker {
         m: &Arc<Node>,
         name: &str,
         is_static: bool,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("raw_member_display_name"); 
         self_member_name_text(m, name, is_static)
             .and_then(|_| m.name())
             .and_then(|n| self.node_source_text(&n).or_else(|| Some(n.text().to_string())))
     }
 
-    pub(crate) fn check_type_literal_duplicate_declarations(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_type_literal_duplicate_declarations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_literal_duplicate_declarations"); 
         let members: &[Arc<Node>] = match &node.data {
             tsox_frontend::ast::NodeData::TypeLiteralNode(d) => &d.members.nodes,
             _ => return,
@@ -92,7 +92,7 @@ impl Checker {
     }
 }
 
-fn member_type_of(m: &Arc<Node>) -> Option<Arc<Node>> {
+fn member_type_of(m: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("member_type_of"); 
     match &m.data {
         tsox_frontend::ast::NodeData::PropertySignatureDeclaration(d) => {
             let tn = Arc::clone(&d.type_node);
@@ -103,7 +103,7 @@ fn member_type_of(m: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 impl Checker {
-    pub(crate) fn check_class_type_for_duplicate_declarations(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_class_type_for_duplicate_declarations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_type_for_duplicate_declarations"); 
         let members: &[Arc<Node>] = match &node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.members.nodes,
             tsox_frontend::ast::NodeData::InterfaceDeclaration(d) => &d.members.nodes,
@@ -112,7 +112,7 @@ impl Checker {
         self.check_members_duplicate_declarations(members);
     }
 
-    fn check_members_duplicate_declarations(&mut self, members: &[Arc<Node>]) {
+    fn check_members_duplicate_declarations(&mut self, members: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_members_duplicate_declarations"); 
 
         let member_name = |m: &Arc<Node>| -> Option<String> {
             let n = m.name()?;
@@ -217,7 +217,7 @@ impl Checker {
         name: &str,
         is_static: bool,
         param_props: &[(String, &Arc<Node>)],
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_duplicate_class_member"); 
         // 基线显示首个声明的原始名（含字符串引号、0.0 原样）
         let display: String = members
             .iter()
@@ -278,7 +278,7 @@ impl Checker {
     }
 }
 
-fn self_member_name_text(m: &Arc<Node>, name: &str, is_static: bool) -> Option<String> {
+fn self_member_name_text(m: &Arc<Node>, name: &str, is_static: bool) -> Option<String> { ::tsox_core::fntrace::enter("self_member_name_text"); 
     let n = m.name()?;
     let matched = match n.kind {
         SyntaxKind::Identifier | SyntaxKind::StringLiteral => n.text().to_string(),
@@ -306,7 +306,7 @@ impl Checker {
         &mut self,
         members: &[Arc<Node>],
         member_name: impl Fn(&Arc<Node>) -> Option<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_class_property_type_consistency"); 
         for (idx, m) in members.iter().enumerate() {
             if m.kind != SyntaxKind::PropertyDeclaration {
                 continue;
@@ -355,7 +355,7 @@ impl Checker {
 
     // Go 属性/访问器合并符号的声明类型：属性取注解或初始化式类型，
     // getter 取返回注解或首个 return 表达式，setter 取参数注解
-    fn property_or_accessor_declared_type(&mut self, m: &Arc<Node>) -> Option<Arc<crate::checker::types::Type>> {
+    fn property_or_accessor_declared_type(&mut self, m: &Arc<Node>) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("property_or_accessor_declared_type"); 
         match &m.data {
             tsox_frontend::ast::NodeData::PropertyDeclaration(pd) => {
                 if let Some(tn) = &pd.type_node {

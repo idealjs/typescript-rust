@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub fn check_type_alias_and_specifiers(&mut self, node: &Arc<Node>) {
+    pub fn check_type_alias_and_specifiers(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_alias_and_specifiers"); 
         if matches!(
             node.kind,
             SyntaxKind::ImportDeclaration | SyntaxKind::ExportDeclaration

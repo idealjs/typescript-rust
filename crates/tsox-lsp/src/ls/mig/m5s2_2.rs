@@ -15,7 +15,7 @@ use super::m5s_3::{ImpExpKind, RefSearch, RefState};
 use tsox_frontend::ast::mig::m3b;
 use tsox_frontend::ast::NodeData;
 
-fn node_body(node: &Node) -> Option<&Arc<Node>> {
+fn node_body(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node_body"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.body.as_ref(),
         NodeData::FunctionExpression(d) => Some(&d.body),
@@ -28,7 +28,7 @@ fn node_body(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn jsx_element_opening_and_closing(node: &Node) -> Option<(Arc<Node>, Arc<Node>)> {
+pub fn jsx_element_opening_and_closing(node: &Node) -> Option<(Arc<Node>, Arc<Node>)> { ::tsox_core::fntrace::enter("jsx_element_opening_and_closing"); 
     match &node.data {
         NodeData::JsxElement(d) => Some((Arc::clone(&d.opening_element), Arc::clone(&d.closing_element))),
         _ => None,
@@ -36,7 +36,7 @@ pub fn jsx_element_opening_and_closing(node: &Node) -> Option<(Arc<Node>, Arc<No
 }
 
 impl<'a> RefState<'a> {
-    pub fn add_implementation_references(&mut self, ref_node: &Arc<Node>, add_ref: &mut impl FnMut(&Arc<Node>)) {
+    pub fn add_implementation_references(&mut self, ref_node: &Arc<Node>, add_ref: &mut impl FnMut(&Arc<Node>)) { ::tsox_core::fntrace::enter("add_implementation_references"); 
         if is_declaration_name(ref_node)
             && ref_node.parent().map_or(false, |p| super::m5x_3::is_implementation(&p))
         {
@@ -112,7 +112,7 @@ impl<'a> RefState<'a> {
         symbol: &Arc<Symbol>,
         search: &RefSearch,
         add_references_here: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_constructor_references"); 
         if is_new_expression_target(reference_location, false, false) && add_references_here {
             self.add_reference(reference_location.clone(), Some(symbol.clone()), EntryKind::Node);
         }
@@ -142,7 +142,7 @@ impl<'a> RefState<'a> {
         symbol: &Arc<Symbol>,
         search: &RefSearch,
         add_references_here: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_class_static_this_references"); 
         if add_references_here {
             self.add_reference(reference_location.clone(), Some(symbol.clone()), EntryKind::Node);
         }
@@ -166,7 +166,7 @@ impl<'a> RefState<'a> {
         }
     }
 
-    pub fn find_inherited_constructor_references(&mut self, class_declaration: &Arc<Node>) {
+    pub fn find_inherited_constructor_references(&mut self, class_declaration: &Arc<Node>) { ::tsox_core::fntrace::enter("find_inherited_constructor_references"); 
         if super::m5t_4::has_own_constructor(class_declaration) {
             return;
         }
@@ -185,13 +185,13 @@ impl<'a> RefState<'a> {
     }
 }
 
-fn add_if_implementation_expression(expr: &Arc<Node>, add_ref: &mut impl FnMut(&Arc<Node>)) {
+fn add_if_implementation_expression(expr: &Arc<Node>, add_ref: &mut impl FnMut(&Arc<Node>)) { ::tsox_core::fntrace::enter("add_if_implementation_expression"); 
     if super::m5x_3::is_implementation_expression(expr) {
         add_ref(expr);
     }
 }
 
-fn visit_static_this_reference(node: &Arc<Node>, add_ref: &mut impl FnMut(&Arc<Node>, EntryKind)) {
+fn visit_static_this_reference(node: &Arc<Node>, add_ref: &mut impl FnMut(&Arc<Node>, EntryKind)) { ::tsox_core::fntrace::enter("visit_static_this_reference"); 
     if node.kind == SyntaxKind::ThisKeyword {
         add_ref(node, EntryKind::Node);
     } else if !ast::is_function_like(node) && !ast::is_class_like(node) {
@@ -202,8 +202,8 @@ fn visit_static_this_reference(node: &Arc<Node>, add_ref: &mut impl FnMut(&Arc<N
     }
 }
 
-pub fn find_first_jsx_node(root: &Arc<Node>) -> Option<Arc<Node>> {
-    fn visit(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn find_first_jsx_node(root: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_jsx_node"); 
+    fn visit(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         match node.kind {
             SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
                 return Some(node.clone());

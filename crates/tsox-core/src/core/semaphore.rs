@@ -9,7 +9,7 @@ pub struct SemaphoreGuard<'a> {
 }
 
 impl<'a> SemaphoreGuard<'a> {
-    pub(crate) fn new(release: impl FnOnce() + 'a) -> Self {
+    pub(crate) fn new(release: impl FnOnce() + 'a) -> Self { crate::fntrace::enter("new"); 
         Self {
             release: Some(Box::new(release)),
         }
@@ -17,7 +17,7 @@ impl<'a> SemaphoreGuard<'a> {
 }
 
 impl<'a> Drop for SemaphoreGuard<'a> {
-    fn drop(&mut self) {
+    fn drop(&mut self) { crate::fntrace::enter("drop"); 
         if let Some(release) = self.release.take() {
             release();
         }
@@ -27,7 +27,7 @@ impl<'a> Drop for SemaphoreGuard<'a> {
 pub struct UnlimitedSemaphore;
 
 impl Semaphore for UnlimitedSemaphore {
-    fn acquire(&self) -> SemaphoreGuard<'_> {
+    fn acquire(&self) -> SemaphoreGuard<'_> { crate::fntrace::enter("acquire"); 
         SemaphoreGuard::new(|| {})
     }
 }
@@ -42,7 +42,7 @@ pub struct LimitedSemaphore {
 }
 
 impl LimitedSemaphore {
-    pub fn new(max_concurrency: usize) -> Self {
+    pub fn new(max_concurrency: usize) -> Self { crate::fntrace::enter("new"); 
         assert!(max_concurrency > 0, "max_concurrency must be positive");
         Self {
             inner: Mutex::new(Inner {
@@ -54,7 +54,7 @@ impl LimitedSemaphore {
 }
 
 impl Semaphore for LimitedSemaphore {
-    fn acquire(&self) -> SemaphoreGuard<'_> {
+    fn acquire(&self) -> SemaphoreGuard<'_> { crate::fntrace::enter("acquire"); 
         let mut guard = self.inner.lock().unwrap();
         while guard.available == 0 {
             guard = self.cvar.wait(guard).unwrap();
@@ -70,13 +70,13 @@ impl Semaphore for LimitedSemaphore {
 }
 
 impl UnlimitedSemaphore {
-    pub fn try_acquire(&self) -> Option<SemaphoreGuard<'_>> {
+    pub fn try_acquire(&self) -> Option<SemaphoreGuard<'_>> { crate::fntrace::enter("try_acquire"); 
         Some(SemaphoreGuard::new(|| {}))
     }
 }
 
 impl LimitedSemaphore {
-    pub fn try_acquire(&self) -> Option<SemaphoreGuard<'_>> {
+    pub fn try_acquire(&self) -> Option<SemaphoreGuard<'_>> { crate::fntrace::enter("try_acquire"); 
         let mut guard = self.inner.lock().unwrap();
         if guard.available == 0 {
             return None;

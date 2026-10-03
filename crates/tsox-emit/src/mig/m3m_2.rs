@@ -27,7 +27,7 @@ use super::m3n_4::get_type_parameter_constraint_visibility_diagnostic_message;
 
 pub fn create_get_symbol_accessibility_diagnostic_for_node(
     node: &Arc<Node>,
-) -> GetSymbolAccessibilityDiagnostic {
+) -> GetSymbolAccessibilityDiagnostic { ::tsox_core::fntrace::enter("create_get_symbol_accessibility_diagnostic_for_node"); 
     if ast::is_variable_declaration(node)
         || ast::is_property_declaration(node)
         || ast::is_property_signature_declaration(node)

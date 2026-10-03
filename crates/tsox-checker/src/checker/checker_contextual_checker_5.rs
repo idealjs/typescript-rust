@@ -8,7 +8,7 @@ impl Checker {
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
         name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_variable_used_before_assigned"); 
         if self.definite_assignment_violation_type(node, symbol).is_some() {
             let file = self.current_file.clone();
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
@@ -24,7 +24,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("definite_assignment_violation_type"); 
         if self.definite_assignment_check_depth > 0 {
             return None;
         }
@@ -229,14 +229,14 @@ impl Checker {
         None
     }
 
-    pub(crate) fn push_ts2304_suppression(&mut self) {
+    pub(crate) fn push_ts2304_suppression(&mut self) { ::tsox_core::fntrace::enter("push_ts2304_suppression"); 
         self.suppress_cannot_find_name_in_type_nodes += 1;
         if self.suppress_source_file.is_none() {
             self.suppress_source_file = self.current_file.as_ref().map(|f| f.node.id());
         }
     }
 
-    pub(crate) fn pop_ts2304_suppression(&mut self) {
+    pub(crate) fn pop_ts2304_suppression(&mut self) { ::tsox_core::fntrace::enter("pop_ts2304_suppression"); 
         self.suppress_cannot_find_name_in_type_nodes = self
             .suppress_cannot_find_name_in_type_nodes
             .saturating_sub(1);
@@ -245,7 +245,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn ts2304_reporting_allowed_for(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn ts2304_reporting_allowed_for(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("ts2304_reporting_allowed_for"); 
         if self.suppress_cannot_find_name_in_type_nodes == 0 {
             return true;
         }
@@ -264,26 +264,26 @@ impl Checker {
         }
     }
 
-    pub(crate) fn push_scope(&mut self, node: &Arc<Node>) {
+    pub(crate) fn push_scope(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_scope"); 
         self.scope_stack.push(node.id());
     }
 
-    pub(crate) fn push_function_scope(&mut self, node: &Arc<Node>) {
+    pub(crate) fn push_function_scope(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_function_scope"); 
         self.function_scope_count += 1;
         self.scope_stack.push(node.id());
     }
 
-    pub(crate) fn pop_function_scope(&mut self) {
+    pub(crate) fn pop_function_scope(&mut self) { ::tsox_core::fntrace::enter("pop_function_scope"); 
         self.function_scope_count -= 1;
         self.scope_stack.pop();
     }
 
-    pub(crate) fn push_arrow_function_scope(&mut self, node: &Arc<Node>) {
+    pub(crate) fn push_arrow_function_scope(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_arrow_function_scope"); 
         self.arrow_function_scope_count += 1;
         self.scope_stack.push(node.id());
     }
 
-    pub(crate) fn pop_arrow_function_scope(&mut self) {
+    pub(crate) fn pop_arrow_function_scope(&mut self) { ::tsox_core::fntrace::enter("pop_arrow_function_scope"); 
         self.arrow_function_scope_count -= 1;
         self.scope_stack.pop();
     }

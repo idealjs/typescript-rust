@@ -45,27 +45,27 @@ pub struct LexicalArguments {
 }
 
 impl AsyncTransformer {
-    fn emit_context(&self) -> &EmitContext {
+    fn emit_context(&self) -> &EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         &self.emit_context
     }
 
-    fn emit_context_mut(&mut self) -> &mut EmitContext {
+    fn emit_context_mut(&mut self) -> &mut EmitContext { ::tsox_core::fntrace::enter("emit_context_mut"); 
         &mut self.emit_context
     }
 
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    fn visitor(&self) -> Visitor {
+    fn visitor(&self) -> Visitor { ::tsox_core::fntrace::enter("visitor"); 
         Visitor::default()
     }
 
-    fn fallback_node_visitor(&self) -> NodeVisitor {
+    fn fallback_node_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("fallback_node_visitor"); 
         NodeVisitor::default()
     }
 
-    fn set_context_flag(&mut self, flag: AsyncContextFlags, val: bool) {
+    fn set_context_flag(&mut self, flag: AsyncContextFlags, val: bool) { ::tsox_core::fntrace::enter("set_context_flag"); 
         if val {
             self.context_flags |= flag;
         } else {
@@ -73,15 +73,15 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn in_context(&self, flags: AsyncContextFlags) -> bool {
+    pub fn in_context(&self, flags: AsyncContextFlags) -> bool { ::tsox_core::fntrace::enter("in_context"); 
         self.context_flags & flags != 0
     }
 
-    pub fn in_top_level_context(&self) -> bool {
+    pub fn in_top_level_context(&self) -> bool { ::tsox_core::fntrace::enter("in_top_level_context"); 
         !self.in_context(ASYNC_CONTEXT_NON_TOP_LEVEL)
     }
 
-    pub fn in_has_lexical_this_context(&self) -> bool {
+    pub fn in_has_lexical_this_context(&self) -> bool { ::tsox_core::fntrace::enter("in_has_lexical_this_context"); 
         self.in_context(ASYNC_CONTEXT_HAS_LEXICAL_THIS)
     }
 
@@ -90,7 +90,7 @@ impl AsyncTransformer {
         flags: AsyncContextFlags,
         cb: impl FnOnce(&mut Self, Option<Arc<Node>>) -> Option<Arc<Node>>,
         node: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("doWithContext"); 
         let flags_to_set = flags & !self.context_flags;
         if flags_to_set != 0 {
             self.set_context_flag(flags_to_set, true);
@@ -102,7 +102,7 @@ impl AsyncTransformer {
         }
     }
 
-    fn track_super_access(&mut self, node: &Arc<Node>) {
+    fn track_super_access(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("track_super_access"); 
         let Some(captured) = self.captured_super_properties.as_mut() else {
             return;
         };
@@ -122,7 +122,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn fallback_visitor(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn fallback_visitor(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("fallback_visitor"); 
         if self.captured_super_properties.is_none() && self.lexical_arguments.binding.is_none() {
             return Some(node.clone());
         }
@@ -150,7 +150,7 @@ impl AsyncTransformer {
         self.fallback_node_visitor().visit_each_child(&node)
     }
 
-    pub fn is_variable_declaration_list_with_colliding_name(&self, node: Option<&Arc<Node>>) -> bool {
+    pub fn is_variable_declaration_list_with_colliding_name(&self, node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_list_with_colliding_name"); 
         match node {
             None => false,
             Some(node) => {
@@ -165,7 +165,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn hoist_variable_declaration_list(&mut self, node: &Arc<Node>) {
+    pub fn hoist_variable_declaration_list(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("hoist_variable_declaration_list"); 
         for decl in &crate::mig::m4e::r39k01_defs::R39K01DataExt::as_variable_declaration_list(&**node)
             .declarations
             .nodes
@@ -174,7 +174,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn hoist_variable(&mut self, node: &Arc<Node>) {
+    pub fn hoist_variable(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("hoist_variable"); 
         let name = match node.name() {
             None => return,
             Some(name) => name,
@@ -193,7 +193,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn collides_with_parameter_name(&self, node: &Arc<Node>) -> bool {
+    pub fn collides_with_parameter_name(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("collides_with_parameter_name"); 
         let name = match node.name() {
             None => return false,
             Some(name) => name,
@@ -218,7 +218,7 @@ impl AsyncTransformer {
         false
     }
 
-    pub fn create_capture_arguments_statement(&mut self) -> Arc<Node> {
+    pub fn create_capture_arguments_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_capture_arguments_statement"); 
         let name = self.lexical_arguments.binding.clone().unwrap();
         let init = self.factory().new_identifier("arguments");
         let variable = self.factory().new_variable_declaration(&name, None, None, Some(&init));
@@ -230,7 +230,7 @@ impl AsyncTransformer {
         statement
     }
 
-    pub fn get_original_if_function_like(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_original_if_function_like(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_original_if_function_like"); 
         let original = self.emit_context().most_original(node);
         if is_function_like_declaration(&original) {
             return original;
@@ -239,7 +239,7 @@ impl AsyncTransformer {
     }
 }
 
-pub fn assignment_target_contains_super_property(node: &Arc<Node>) -> bool {
+pub fn assignment_target_contains_super_property(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("assignment_target_contains_super_property"); 
     match node.kind {
         SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
             node.expression().map(|e| e.kind == SyntaxKind::SuperKeyword).unwrap_or(false)
@@ -290,7 +290,7 @@ pub fn assignment_target_contains_super_property(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_update_expression(node: &Arc<Node>) -> bool {
+pub fn is_update_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_update_expression"); 
     if is_prefix_unary_expression(node) {
         let op = node.as_prefix_unary_expression().operator;
         return op == SyntaxKind::PlusPlusToken || op == SyntaxKind::MinusMinusToken;
@@ -302,7 +302,7 @@ pub fn is_update_expression(node: &Arc<Node>) -> bool {
     false
 }
 
-pub fn is_simple_parameter_list(params: &[Arc<Node>]) -> bool {
+pub fn is_simple_parameter_list(params: &[Arc<Node>]) -> bool { ::tsox_core::fntrace::enter("is_simple_parameter_list"); 
     for param in params {
         let p = crate::mig::m4e::r37k1_defs::R37K1DataExt::as_parameter_declaration(&**param);
         if p.initializer.is_some() || !param.name().map(|n| is_identifier(n)).unwrap_or(false) {
@@ -312,7 +312,7 @@ pub fn is_simple_parameter_list(params: &[Arc<Node>]) -> bool {
     true
 }
 
-pub fn is_node_with_possible_hoisted_declaration(node: &Arc<Node>) -> bool {
+pub fn is_node_with_possible_hoisted_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_node_with_possible_hoisted_declaration"); 
     matches!(
         node.kind,
         SyntaxKind::Block

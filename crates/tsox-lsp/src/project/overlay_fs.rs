@@ -35,7 +35,7 @@ pub struct FileBase {
 }
 
 impl FileBase {
-    pub fn new(file_name: String, content: String, hash: Hash128) -> Self {
+    pub fn new(file_name: String, content: String, hash: Hash128) -> Self { ::tsox_core::fntrace::enter("new"); 
         FileBase {
             file_name,
             content,
@@ -45,10 +45,10 @@ impl FileBase {
 }
 
 impl FileContent for FileBase {
-    fn content(&self) -> &str {
+    fn content(&self) -> &str { ::tsox_core::fntrace::enter("content"); 
         &self.content
     }
-    fn hash(&self) -> Hash128 {
+    fn hash(&self) -> Hash128 { ::tsox_core::fntrace::enter("hash"); 
         self.hash
     }
 }
@@ -60,7 +60,7 @@ pub struct DiskFile {
 }
 
 impl DiskFile {
-    pub fn new(file_name: String, content: String) -> Self {
+    pub fn new(file_name: String, content: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         let hash = hash_string_128(&content);
         DiskFile {
             base: FileBase::new(file_name, content, hash),
@@ -71,28 +71,28 @@ impl DiskFile {
 }
 
 impl FileContent for DiskFile {
-    fn content(&self) -> &str {
+    fn content(&self) -> &str { ::tsox_core::fntrace::enter("content"); 
         self.base.content()
     }
-    fn hash(&self) -> Hash128 {
+    fn hash(&self) -> Hash128 { ::tsox_core::fntrace::enter("hash"); 
         self.base.hash()
     }
 }
 
 impl FileHandle for DiskFile {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.base.file_name
     }
-    fn version(&self) -> i32 {
+    fn version(&self) -> i32 { ::tsox_core::fntrace::enter("version"); 
         0
     }
-    fn matches_disk_text(&self) -> bool {
+    fn matches_disk_text(&self) -> bool { ::tsox_core::fntrace::enter("matches_disk_text"); 
         !self.needs_reload
     }
-    fn is_overlay(&self) -> bool {
+    fn is_overlay(&self) -> bool { ::tsox_core::fntrace::enter("is_overlay"); 
         false
     }
-    fn kind(&self) -> i32 {
+    fn kind(&self) -> i32 { ::tsox_core::fntrace::enter("kind"); 
         script_kind_from_file_name(&self.base.file_name)
     }
 }
@@ -105,7 +105,7 @@ pub struct Overlay {
 }
 
 impl Overlay {
-    pub fn new(file_name: String, content: String, version: i32, kind: i32) -> Self {
+    pub fn new(file_name: String, content: String, version: i32, kind: i32) -> Self { ::tsox_core::fntrace::enter("new"); 
         let hash = hash_string_128(&content);
         Overlay {
             base: FileBase::new(file_name, content, hash),
@@ -115,34 +115,34 @@ impl Overlay {
         }
     }
 
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.base.content
     }
 }
 
 impl FileContent for Overlay {
-    fn content(&self) -> &str {
+    fn content(&self) -> &str { ::tsox_core::fntrace::enter("content"); 
         self.base.content()
     }
-    fn hash(&self) -> Hash128 {
+    fn hash(&self) -> Hash128 { ::tsox_core::fntrace::enter("hash"); 
         self.base.hash()
     }
 }
 
 impl FileHandle for Overlay {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.base.file_name
     }
-    fn version(&self) -> i32 {
+    fn version(&self) -> i32 { ::tsox_core::fntrace::enter("version"); 
         self.version
     }
-    fn matches_disk_text(&self) -> bool {
+    fn matches_disk_text(&self) -> bool { ::tsox_core::fntrace::enter("matches_disk_text"); 
         self.matches_disk_text
     }
-    fn is_overlay(&self) -> bool {
+    fn is_overlay(&self) -> bool { ::tsox_core::fntrace::enter("is_overlay"); 
         true
     }
-    fn kind(&self) -> i32 {
+    fn kind(&self) -> i32 { ::tsox_core::fntrace::enter("kind"); 
         self.kind
     }
 }
@@ -160,7 +160,7 @@ impl OverlayFS {
         overlays: HashMap<Path, Arc<Overlay>>,
         position_encoding: lsproto::PositionEncodingKind,
         to_path: Box<dyn Fn(&str) -> Path + Send + Sync>,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         OverlayFS {
             fs,
             position_encoding,
@@ -169,11 +169,11 @@ impl OverlayFS {
         }
     }
 
-    pub fn overlays(&self) -> HashMap<Path, Arc<Overlay>> {
+    pub fn overlays(&self) -> HashMap<Path, Arc<Overlay>> { ::tsox_core::fntrace::enter("overlays"); 
         self.overlays.read().unwrap().clone()
     }
 
-    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         let overlays = self.overlays.read().unwrap();
         let path = (self.to_path)(file_name);
         if let Some(overlay) = overlays.get(&path) {
@@ -190,7 +190,7 @@ impl OverlayFS {
     pub fn process_changes(
         &self,
         changes: &[FileChange],
-    ) -> (FileChangeSummary, HashMap<Path, Arc<Overlay>>) {
+    ) -> (FileChangeSummary, HashMap<Path, Arc<Overlay>>) { ::tsox_core::fntrace::enter("process_changes"); 
         let mut result = FileChangeSummary::default();
         let mut new_overlays = self.overlays.read().unwrap().clone();
 
@@ -242,7 +242,7 @@ impl OverlayFS {
     }
 }
 
-pub fn hash_string_128(s: &str) -> Hash128 {
+pub fn hash_string_128(s: &str) -> Hash128 { ::tsox_core::fntrace::enter("hash_string_128"); 
     use std::hash::Hasher;
     use xxhash_rust::xxh3::Xxh3;
     let mut hasher = Xxh3::new();
@@ -256,7 +256,7 @@ pub fn hash_string_128(s: &str) -> Hash128 {
     Hash128 { lo, hi }
 }
 
-pub fn script_kind_from_file_name(file_name: &str) -> i32 {
+pub fn script_kind_from_file_name(file_name: &str) -> i32 { ::tsox_core::fntrace::enter("script_kind_from_file_name"); 
     let ext = file_name.rsplit('.').next().unwrap_or("");
     match ext {
         "ts" => 3,

@@ -1,6 +1,6 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 
-pub fn matches_pattern_with_trailer(target: &str, name: &str) -> bool {
+pub fn matches_pattern_with_trailer(target: &str, name: &str) -> bool { ::tsox_core::fntrace::enter("matches_pattern_with_trailer"); 
     if target.ends_with('*') {
         return false;
     }

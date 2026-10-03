@@ -47,7 +47,7 @@ pub fn combine_location_array<T: HasLocation>(
     combined: &mut Vec<T>,
     locations: &[T],
     seen: &mut std::collections::HashSet<String>,
-) {
+) { ::tsox_core::fntrace::enter("combine_location_array"); 
     for loc in locations {
         let l = loc.get_location();
         let key = format!(
@@ -69,12 +69,12 @@ pub trait HasLocations {
 }
 
 impl HasLocation for Location {
-    fn get_location(&self) -> &Location {
+    fn get_location(&self) -> &Location { ::tsox_core::fntrace::enter("get_location"); 
         self
     }
 }
 
-pub fn combine_response_locations<T: HasLocations>(results: &[T]) -> Option<Vec<Location>> {
+pub fn combine_response_locations<T: HasLocations>(results: &[T]) -> Option<Vec<Location>> { ::tsox_core::fntrace::enter("combine_response_locations"); 
     let mut combined: Vec<Location> = Vec::new();
     let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
     for resp in results {
@@ -99,7 +99,7 @@ pub fn combine_response_locations<T: HasLocations>(results: &[T]) -> Option<Vec<
 
 pub fn combine_rename_edits(
     edits: &[std::collections::HashMap<DocumentUri, Vec<crate::lsp::lsproto_lsp::TextEdit>>],
-) -> std::collections::HashMap<DocumentUri, Vec<crate::lsp::lsproto_lsp::TextEdit>> {
+) -> std::collections::HashMap<DocumentUri, Vec<crate::lsp::lsproto_lsp::TextEdit>> { ::tsox_core::fntrace::enter("combine_rename_edits"); 
     let mut combined: std::collections::HashMap<
         DocumentUri,
         Vec<crate::lsp::lsproto_lsp::TextEdit>,
@@ -130,13 +130,13 @@ pub fn combine_rename_edits(
 }
 
 impl HasLocations for Vec<Location> {
-    fn get_locations(&self) -> Option<&Vec<Location>> {
+    fn get_locations(&self) -> Option<&Vec<Location>> { ::tsox_core::fntrace::enter("get_locations"); 
         Some(self)
     }
 }
 
 impl HasLocations for Option<Vec<Location>> {
-    fn get_locations(&self) -> Option<&Vec<Location>> {
+    fn get_locations(&self) -> Option<&Vec<Location>> { ::tsox_core::fntrace::enter("get_locations"); 
         self.as_ref()
     }
 }

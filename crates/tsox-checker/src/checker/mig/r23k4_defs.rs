@@ -12,7 +12,7 @@ pub trait R23k4NodeExt {
 }
 
 impl R23k4NodeExt for Node {
-    fn as_mapped_type_node(&self) -> &MappedTypeNodeData {
+    fn as_mapped_type_node(&self) -> &MappedTypeNodeData { ::tsox_core::fntrace::enter("as_mapped_type_node"); 
         match &self.data {
             NodeData::MappedTypeNode(d) => d,
             _ => panic!("AsMappedTypeNode on wrong node kind"),
@@ -21,7 +21,7 @@ impl R23k4NodeExt for Node {
 }
 
 impl Checker {
-    pub fn set_tuple_type_this_type(&mut self, t: &mut Arc<Type>, mut this_type: Arc<Type>) {
+    pub fn set_tuple_type_this_type(&mut self, t: &mut Arc<Type>, mut this_type: Arc<Type>) { ::tsox_core::fntrace::enter("set_tuple_type_this_type"); 
         if let Some(tp_data) = Arc::get_mut(&mut this_type).and_then(|m| match &mut m.data {
             TypeData::TypeParameter(d) => Some(d),
             _ => None,
@@ -36,7 +36,7 @@ impl Checker {
         }
     }
 
-    pub fn get_tuple_type_this_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_tuple_type_this_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_tuple_type_this_type"); 
         match &t.data {
             TypeData::Tuple(d) => d
                 .interface_data
@@ -57,7 +57,7 @@ impl Checker {
         fixed_length: usize,
         combined_flags: ElementFlags,
         readonly: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_tuple_type_data"); 
         let t_ptr: *const Type = Arc::as_ptr(t);
         let Some(t_mut) = Arc::get_mut(t) else {
             return;

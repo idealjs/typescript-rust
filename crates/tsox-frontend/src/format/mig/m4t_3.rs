@@ -12,7 +12,7 @@ pub trait Source {
     fn ecma_line_map(&self) -> Vec<i32>;
 }
 
-pub fn get_ecma_line_starts(source_file: &SourceFile) -> Vec<i32> {
+pub fn get_ecma_line_starts(source_file: &SourceFile) -> Vec<i32> { ::tsox_core::fntrace::enter("get_ecma_line_starts"); 
     source_file
         .line_map
         .line_starts
@@ -21,7 +21,7 @@ pub fn get_ecma_line_starts(source_file: &SourceFile) -> Vec<i32> {
         .collect()
 }
 
-pub fn range_is_on_single_line(r: TextRange, source_file: &SourceFile) -> bool {
+pub fn range_is_on_single_line(r: TextRange, source_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("range_is_on_single_line"); 
     range_start_is_on_same_line_as_range_end(r, r, source_file)
 }
 
@@ -29,7 +29,7 @@ pub fn range_start_positions_are_on_same_line(
     range1: TextRange,
     range2: TextRange,
     source_file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("range_start_positions_are_on_same_line"); 
     positions_are_on_same_line(
         get_start_position_of_range(range1, source_file, false),
         get_start_position_of_range(range2, source_file, false),
@@ -41,7 +41,7 @@ pub fn range_end_positions_are_on_same_line(
     range1: TextRange,
     range2: TextRange,
     source_file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("range_end_positions_are_on_same_line"); 
     positions_are_on_same_line(range1.end() as i64, range2.end() as i64, source_file)
 }
 
@@ -49,7 +49,7 @@ pub fn range_start_is_on_same_line_as_range_end(
     range1: TextRange,
     range2: TextRange,
     source_file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("range_start_is_on_same_line_as_range_end"); 
     positions_are_on_same_line(
         get_start_position_of_range(range1, source_file, false),
         range2.end() as i64,
@@ -61,7 +61,7 @@ pub fn range_end_is_on_same_line_as_range_start(
     range1: TextRange,
     range2: TextRange,
     source_file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("range_end_is_on_same_line_as_range_start"); 
     positions_are_on_same_line(
         range1.end() as i64,
         get_start_position_of_range(range2, source_file, false),
@@ -69,7 +69,7 @@ pub fn range_end_is_on_same_line_as_range_start(
     )
 }
 
-pub fn get_start_position_of_range(r: TextRange, source_file: &SourceFile, include_comments: bool) -> i64 {
+pub fn get_start_position_of_range(r: TextRange, source_file: &SourceFile, include_comments: bool) -> i64 { ::tsox_core::fntrace::enter("get_start_position_of_range"); 
     if position_is_synthesized(r.pos()) {
         return -1;
     }
@@ -81,11 +81,11 @@ pub fn get_start_position_of_range(r: TextRange, source_file: &SourceFile, inclu
     ) as i64
 }
 
-pub fn positions_are_on_same_line(pos1: i64, pos2: i64, source_file: &SourceFile) -> bool {
+pub fn positions_are_on_same_line(pos1: i64, pos2: i64, source_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("positions_are_on_same_line"); 
     get_lines_between_positions(source_file, pos1, pos2) == 0
 }
 
-pub fn get_lines_between_positions(source_file: &SourceFile, pos1: i64, pos2: i64) -> i64 {
+pub fn get_lines_between_positions(source_file: &SourceFile, pos1: i64, pos2: i64) -> i64 { ::tsox_core::fntrace::enter("get_lines_between_positions"); 
     if pos1 == pos2 {
         return 0;
     }
@@ -108,7 +108,7 @@ pub fn get_lines_between_range_end_and_range_start(
     range2: TextRange,
     source_file: &SourceFile,
     include_second_range_comments: bool,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_lines_between_range_end_and_range_start"); 
     let range2_start = get_start_position_of_range(range2, source_file, include_second_range_comments);
     get_lines_between_positions(source_file, range1.end() as i64, range2_start)
 }
@@ -118,7 +118,7 @@ pub fn get_lines_between_position_and_preceding_non_whitespace_character(
     stop_pos: i64,
     source_file: &SourceFile,
     include_comments: bool,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_lines_between_position_and_preceding_non_whitespace_character"); 
     let start_pos = skip_trivia_ex(
         &source_file.text,
         pos.max(0) as usize,
@@ -138,7 +138,7 @@ pub fn get_lines_between_position_and_next_non_whitespace_character(
     stop_pos: i64,
     source_file: &SourceFile,
     include_comments: bool,
-) -> i64 {
+) -> i64 { ::tsox_core::fntrace::enter("get_lines_between_position_and_next_non_whitespace_character"); 
     let next_pos = skip_trivia_ex(
         &source_file.text,
         pos.max(0) as usize,
@@ -148,7 +148,7 @@ pub fn get_lines_between_position_and_next_non_whitespace_character(
     get_lines_between_positions(source_file, pos, if stop_pos < next_pos { stop_pos } else { next_pos })
 }
 
-pub fn get_previous_non_whitespace_position(pos: i64, stop_pos: i64, source_file: &SourceFile) -> i64 {
+pub fn get_previous_non_whitespace_position(pos: i64, stop_pos: i64, source_file: &SourceFile) -> i64 { ::tsox_core::fntrace::enter("get_previous_non_whitespace_position"); 
     let bytes = source_file.text.as_bytes();
     let mut pos = pos;
     while pos >= stop_pos {
@@ -169,7 +169,7 @@ pub struct LineCharacterCache {
     pub has_cached: bool,
 }
 
-pub fn new_line_character_cache(source: &dyn Source) -> LineCharacterCache {
+pub fn new_line_character_cache(source: &dyn Source) -> LineCharacterCache { ::tsox_core::fntrace::enter("new_line_character_cache"); 
     LineCharacterCache {
         line_map: source.ecma_line_map(),
         text: source.text().to_string(),
@@ -181,7 +181,7 @@ pub fn new_line_character_cache(source: &dyn Source) -> LineCharacterCache {
 }
 
 impl LineCharacterCache {
-    pub fn get_line_and_character(&mut self, pos: i64) -> (i64, i64) {
+    pub fn get_line_and_character(&mut self, pos: i64) -> (i64, i64) { ::tsox_core::fntrace::enter("get_line_and_character"); 
         let line = compute_line_of_position(&self.line_map, pos as i32) as i64;
         let line_start = self.line_map[line as usize] as i64;
         let end_pos = pos.min(self.text.len() as i64);

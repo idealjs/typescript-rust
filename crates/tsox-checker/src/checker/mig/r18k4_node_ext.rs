@@ -101,11 +101,11 @@ impl NodeAccessExt for Node {
         VariableDeclarationListData
     );
 
-    fn typ(&self) -> Option<&Arc<Node>> {
+    fn typ(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("typ"); 
         self.type_node()
     }
 
-    fn attributes(&self) -> &Node {
+    fn attributes(&self) -> &Node { ::tsox_core::fntrace::enter("attributes"); 
         match &self.data {
             NodeData::JsxOpeningElement(d) => &d.attributes,
             NodeData::JsxSelfClosingElement(d) => &d.attributes,
@@ -113,11 +113,11 @@ impl NodeAccessExt for Node {
         }
     }
 
-    fn argument_list(&self) -> Option<&NodeList> {
+    fn argument_list(&self) -> Option<&NodeList> { ::tsox_core::fntrace::enter("argument_list"); 
         tsox_frontend::ast::mig::x1a::argument_list(self)
     }
 
-    fn for_each_child<F: FnMut(&Arc<Node>) -> bool>(&self, visitor: F) -> bool {
+    fn for_each_child<F: FnMut(&Arc<Node>) -> bool>(&self, visitor: F) -> bool { ::tsox_core::fntrace::enter("for_each_child"); 
         tsox_frontend::ast::node_data_generated::for_each_child(self, visitor)
     }
 }

@@ -13,7 +13,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
         declaration: Option<&Arc<Node>>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("hover_documentation_for_symbol"); 
         if let Some(doc) = self.hover_doc_from_signature(node) {
             return doc;
         }
@@ -25,7 +25,7 @@ impl Checker {
     }
 
     /// 调用位的签名声明文档（Go documentationFromSignature）
-    fn hover_doc_from_signature(&mut self, node: &Arc<Node>) -> Option<String> {
+    fn hover_doc_from_signature(&mut self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("hover_doc_from_signature"); 
         let call = self.hover_call_or_new_expression(node)?;
         let sig = self.get_resolved_signature(&call)?;
         let decl = sig.declaration.as_ref()?;
@@ -48,7 +48,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         declaration: Option<&Arc<Node>>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("hover_doc_from_root_symbols"); 
         let roots = self.get_root_symbols(symbol);
         if roots.len() <= 1 {
             return None;
@@ -77,7 +77,7 @@ impl Checker {
 
     /// alias 目标声明文档（Go documentationFromAlias）
     #[allow(dead_code)]
-    fn hover_doc_from_alias(&mut self, symbol: &Arc<Symbol>) -> String {
+    fn hover_doc_from_alias(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("hover_doc_from_alias"); 
         if !symbol.flags.intersects(tsox_frontend::ast::SymbolFlags::Alias) {
             return String::new();
         }
@@ -104,7 +104,7 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    fn declaration_has_typedef_tag(&self, decl: &Arc<Node>) -> bool {
+    fn declaration_has_typedef_tag(&self, decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_has_typedef_tag"); 
         let file = match self.get_source_file_of_node(decl) {
             Some(f) => f,
             None => return false,

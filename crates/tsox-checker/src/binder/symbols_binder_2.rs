@@ -4,7 +4,7 @@ use crate::binder::symbols::*;
 
 impl Binder {
     // Go binder 各声明类别的 excludes（bindWorker 各 case 的 includes/excludes 配对）
-    fn excludes_for_declaration(node: &Arc<Node>, includes: SymbolFlags) -> SymbolFlags {
+    fn excludes_for_declaration(node: &Arc<Node>, includes: SymbolFlags) -> SymbolFlags { ::tsox_core::fntrace::enter("excludes_for_declaration"); 
         if node.kind == SyntaxKind::Parameter
             || node.kind == SyntaxKind::BindingElement && Self::is_part_of_parameter_declaration(node)
         {
@@ -76,7 +76,7 @@ impl Binder {
         &self,
         node: &Arc<Node>,
         existing: &Arc<Symbol>,
-    ) -> Option<(SymbolFlags, SymbolFlags)> {
+    ) -> Option<(SymbolFlags, SymbolFlags)> { ::tsox_core::fntrace::enter("class_member_same_static_flags"); 
         let container = self.container.as_ref()?;
         if !matches!(
             container.kind,
@@ -101,7 +101,7 @@ impl Binder {
     }
 
     // Go IsPartOfParameterDeclaration：沿父链先遇到 Parameter 即参数解构内
-    fn is_part_of_parameter_declaration(node: &Arc<Node>) -> bool {
+    fn is_part_of_parameter_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_parameter_declaration"); 
         let mut cur = node.parent();
         while let Some(p) = cur {
             match p.kind {
@@ -121,7 +121,7 @@ impl Binder {
         false
     }
 
-    fn member_includes_flags(kind: SyntaxKind) -> SymbolFlags {
+    fn member_includes_flags(kind: SyntaxKind) -> SymbolFlags { ::tsox_core::fntrace::enter("member_includes_flags"); 
         match kind {
             SyntaxKind::PropertyDeclaration
             | SyntaxKind::PropertySignature
@@ -135,7 +135,7 @@ impl Binder {
 
     // Go HasDynamicName：计算名且表达式非字符串/数值字面量（well-known
     // Symbol.x 亦算动态名，但本仓模型以 __@x 键保持合并语义，故排除）
-    fn is_dynamic_nonliteral_computed_member(node: &Arc<Node>) -> bool {
+    fn is_dynamic_nonliteral_computed_member(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_dynamic_nonliteral_computed_member"); 
         if !matches!(
             node.kind,
             SyntaxKind::PropertyDeclaration
@@ -174,7 +174,7 @@ impl Binder {
         node: &Arc<Node>,
         includes: SymbolFlags,
         _excludes: SymbolFlags,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_symbol"); 
         // Go bindPropertyOrMethodOrAccessor 的 HasDynamicName 分支：非字面量
         // 计算名成员走 bindAnonymousDeclaration（__computed 匿名符号，不入表、
         // 不合并、不冲突）

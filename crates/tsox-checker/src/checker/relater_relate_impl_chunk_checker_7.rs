@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("find_matching_discriminant_constituent"); 
         if !source
             .flags
             .intersects(TypeFlags::Object | TypeFlags::Intersection)
@@ -59,7 +59,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_best_matching_type_for_error"); 
         let ui = target.as_union_or_intersection()?;
 
         if let Some(t) = self.find_matching_discriminant_constituent(source, target) {
@@ -135,7 +135,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_related_to_each_type"); 
         if let Some(ui) = target.as_union_or_intersection() {
             self.relater_intersection_target_depth += 1;
             let result = (|| {

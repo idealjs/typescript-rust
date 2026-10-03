@@ -11,7 +11,7 @@ pub enum StringMappingKind {
     Uncapitalize,
 }
 
-pub fn string_mapping_kind(name: &str) -> Option<StringMappingKind> {
+pub fn string_mapping_kind(name: &str) -> Option<StringMappingKind> { ::tsox_core::fntrace::enter("string_mapping_kind"); 
     match name {
         "Uppercase" => Some(StringMappingKind::Uppercase),
         "Lowercase" => Some(StringMappingKind::Lowercase),
@@ -21,7 +21,7 @@ pub fn string_mapping_kind(name: &str) -> Option<StringMappingKind> {
     }
 }
 
-fn map_ascii_char(kind: StringMappingKind, c: char) -> char {
+fn map_ascii_char(kind: StringMappingKind, c: char) -> char { ::tsox_core::fntrace::enter("map_ascii_char"); 
     match kind {
         StringMappingKind::Uppercase | StringMappingKind::Capitalize => {
             c.to_ascii_uppercase()
@@ -32,11 +32,11 @@ fn map_ascii_char(kind: StringMappingKind, c: char) -> char {
     }
 }
 
-fn is_case_ignorable(c: char) -> bool {
+fn is_case_ignorable(c: char) -> bool { ::tsox_core::fntrace::enter("is_case_ignorable"); 
     !c.is_ascii() && !c.is_alphabetic() && !c.is_numeric() && !c.is_whitespace()
 }
 
-fn is_final_sigma(chars: &[char], index: usize, cased_before: bool) -> bool {
+fn is_final_sigma(chars: &[char], index: usize, cased_before: bool) -> bool { ::tsox_core::fntrace::enter("is_final_sigma"); 
     if !cased_before {
         return false;
     }
@@ -51,7 +51,7 @@ fn is_final_sigma(chars: &[char], index: usize, cased_before: bool) -> bool {
     true
 }
 
-fn map_str(kind: StringMappingKind, s: &str) -> String {
+fn map_str(kind: StringMappingKind, s: &str) -> String { ::tsox_core::fntrace::enter("map_str"); 
     if matches!(kind, StringMappingKind::Lowercase | StringMappingKind::Uncapitalize) {
         let chars: Vec<char> = s.chars().collect();
         let mut out = String::with_capacity(s.len());
@@ -95,7 +95,7 @@ fn map_str(kind: StringMappingKind, s: &str) -> String {
     out
 }
 
-fn lone_surrogate_escape_len(chars: &[char]) -> Option<usize> {
+fn lone_surrogate_escape_len(chars: &[char]) -> Option<usize> { ::tsox_core::fntrace::enter("lone_surrogate_escape_len"); 
     if chars.len() < 6 || chars[0] != '\\' || chars[1] != 'u' {
         return None;
     }
@@ -111,7 +111,7 @@ fn lone_surrogate_escape_len(chars: &[char]) -> Option<usize> {
     }
 }
 
-pub fn apply_string_mapping(kind: StringMappingKind, s: &str) -> String {
+pub fn apply_string_mapping(kind: StringMappingKind, s: &str) -> String { ::tsox_core::fntrace::enter("apply_string_mapping"); 
     match kind {
         StringMappingKind::Uppercase | StringMappingKind::Lowercase => map_str(kind, s),
         StringMappingKind::Capitalize | StringMappingKind::Uncapitalize => {
@@ -138,7 +138,7 @@ pub fn apply_string_mapping(kind: StringMappingKind, s: &str) -> String {
 }
 
 impl Checker {
-    pub fn intrinsic_marker_type(&self) -> Arc<Type> {
+    pub fn intrinsic_marker_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("intrinsic_marker_type"); 
         self.intrinsic_marker_type
             .get_or_init(|| {
                 Arc::new(Type {
@@ -155,14 +155,14 @@ impl Checker {
             .clone()
     }
 
-    pub fn is_intrinsic_marker(&self, t: &Arc<Type>) -> bool {
+    pub fn is_intrinsic_marker(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_intrinsic_marker"); 
         match self.intrinsic_marker_type.get() {
             Some(m) => Arc::ptr_eq(m, t),
             None => false,
         }
     }
 
-    pub fn builtin_iterator_return_type(&self) -> Arc<Type> {
+    pub fn builtin_iterator_return_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("builtin_iterator_return_type"); 
         if self.strict_builtin_iterator_return {
             self.undefined_type()
         } else {
@@ -175,7 +175,7 @@ impl Checker {
         kind: StringMappingKind,
         symbol: Option<Arc<tsox_frontend::ast::Symbol>>,
         t: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_string_mapping_type"); 
         if t.is_union() {
             let parts: Vec<Arc<Type>> = t
                 .types()
@@ -233,7 +233,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    fn string_mapping_cache_key(&self, kind: StringMappingKind, t: &Arc<Type>) -> u64 {
+    fn string_mapping_cache_key(&self, kind: StringMappingKind, t: &Arc<Type>) -> u64 { ::tsox_core::fntrace::enter("string_mapping_cache_key"); 
         use std::hash::{Hash, Hasher};
         let mut h = std::collections::hash_map::DefaultHasher::new();
         (kind as u8).hash(&mut h);
@@ -246,7 +246,7 @@ impl Checker {
         kind: StringMappingKind,
         texts: &[String],
         types: &[Arc<Type>],
-    ) -> (Vec<String>, Vec<Arc<Type>>) {
+    ) -> (Vec<String>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("apply_template_string_mapping"); 
         match kind {
             StringMappingKind::Uppercase | StringMappingKind::Lowercase => {
                 let new_texts = texts
@@ -280,7 +280,7 @@ impl Checker {
         &mut self,
         texts: Vec<String>,
         types: Vec<Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_template_literal_type"); 
         let all_literal = types.iter().all(|t| {
             t.flags.intersects(
                 TYPE_FLAGS_LITERAL | TypeFlags::Null | TypeFlags::Undefined,
@@ -308,7 +308,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<tsox_frontend::ast::Symbol>,
         arg_types: &[Arc<Type>],
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("intrinsic_alias_instantiation"); 
         let kind = string_mapping_kind(&symbol.name)?;
         if arg_types.len() != 1 {
             return None;

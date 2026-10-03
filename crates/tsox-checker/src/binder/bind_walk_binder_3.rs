@@ -9,7 +9,7 @@ impl Binder {
         node: &Arc<Node>,
         flags: SymbolFlags,
         _excludes: SymbolFlags,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_local_symbol"); 
         let name = self.get_declaration_name(node);
         let symbol = self.new_symbol(flags, name.clone());
         {

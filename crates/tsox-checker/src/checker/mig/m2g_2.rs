@@ -19,7 +19,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &self,
         chain: &[Arc<Symbol>],
         index: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_write_type_parameters_in_qualified_name"); 
         self.ctx
             .borrow()
             .flags
@@ -31,7 +31,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         access_expression: &Arc<Node>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("track_computed_name"); 
         let first_identifier = tsox_frontend::ast::mig::m3e_4::get_first_identifier(access_expression);
         let location = enclosing_declaration.cloned().unwrap_or(Arc::clone(access_expression));
         let name = self.ch.resolve_name(
@@ -62,7 +62,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn try_get_this_parameter_declaration(
         &mut self,
         signature: &Signature,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_this_parameter_declaration"); 
         if let Some(this_parameter) = signature.this_parameter.as_ref() {
             return Some(self.symbol_to_parameter_declaration(this_parameter, false));
         }
@@ -73,7 +73,7 @@ impl<'a> NodeBuilderImpl<'a> {
         None
     }
 
-    pub fn serialize_type_for_expression(&mut self, expr: &Arc<Node>) -> Arc<Node> {
+    pub fn serialize_type_for_expression(&mut self, expr: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("serialize_type_for_expression"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let regular = ch.get_regular_type_of_expression(expr);
         let widened = ch.get_widened_type(&regular);
@@ -85,7 +85,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn type_predicate_to_type_predicate_node_helper(
         &mut self,
         type_predicate: &TypePredicate,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_predicate_to_type_predicate_node_helper"); 
         let asserts_modifier = if type_predicate.kind == TypePredicateKind::AssertsThis
             || type_predicate.kind == TypePredicateKind::AssertsIdentifier
         {
@@ -114,7 +114,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         signature: &Signature,
         return_type: &Arc<Type>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("serialize_inferred_return_type_for_signature"); 
         let signature = Arc::new(signature.clone());
         let old_suppress = self.ctx.borrow().suppress_report_inference_fallback;
         self.ctx.borrow_mut().suppress_report_inference_fallback = true;
@@ -145,7 +145,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         signature: &Signature,
         try_reuse: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("serialize_return_type_for_signature"); 
         let signature = Arc::new(signature.clone());
         let suppress_any = self
             .ctx
@@ -245,7 +245,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         symbol: &Arc<Symbol>,
         type_id: TypeId,
-    ) -> (bool, Arc<Symbol>) {
+    ) -> (bool, Arc<Symbol>) { ::tsox_core::fntrace::enter("should_write_type_of_function_symbol"); 
         let is_static_method_symbol = symbol.flags.contains(SymbolFlags::Method)
             && symbol.declarations.iter().any(|declaration| {
                 tsox_frontend::ast::is_static(declaration)
@@ -328,7 +328,7 @@ impl<'a> NodeBuilderImpl<'a> {
         is_instance_type: SymbolFlags,
         symbol: &Arc<Symbol>,
         type_id: TypeId,
-    ) -> (bool, Arc<Symbol>) {
+    ) -> (bool, Arc<Symbol>) { ::tsox_core::fntrace::enter("should_emit_type_of_symbol"); 
         if force_expansion {
             return (false, Arc::clone(symbol));
         }
@@ -365,7 +365,7 @@ impl<'a> NodeBuilderImpl<'a> {
         self.should_write_type_of_function_symbol(symbol, type_id)
     }
 
-    pub fn type_to_type_node_or_circularity_elision(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub fn type_to_type_node_or_circularity_elision(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_to_type_node_or_circularity_elision"); 
         if t.flags.contains(TypeFlags::UNION) {
             let visited = side_with(&self.ctx.borrow(), |s| s.visited_types.has(t.id));
             if visited {
@@ -392,7 +392,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         t: &Arc<Type>,
         transform: fn(&mut Self, &Arc<Type>) -> Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_and_transform_type"); 
         let type_id = t.id;
         let is_constructor_object = t.object_flags.contains(ObjectFlags::ANONYMOUS)
             && t.symbol
@@ -510,7 +510,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         symbol: Option<&Arc<Symbol>>,
         t: &Arc<Type>,
-    ) -> Box<dyn FnOnce()> {
+    ) -> Box<dyn FnOnce()> { ::tsox_core::fntrace::enter("add_symbol_type_to_context"); 
         let id = symbol.map(get_symbol_id).unwrap_or(0) as usize;
         let old = side_with(&self.ctx.borrow_mut(), |s| {
             s.enclosing_symbol_types.insert(id, Arc::clone(t))
@@ -529,7 +529,7 @@ impl<'a> NodeBuilderImpl<'a> {
         })
     }
 
-    pub fn clone_node_builder_context(&mut self) -> Box<dyn FnOnce()> {
+    pub fn clone_node_builder_context(&mut self) -> Box<dyn FnOnce()> { ::tsox_core::fntrace::enter("clone_node_builder_context"); 
         let restore_names = side_with(&self.ctx.borrow_mut(), |s| s.type_parameter_names.enter_scope());
         let restore_names_by_text =
             side_with(&self.ctx.borrow_mut(), |s| s.type_parameter_names_by_text.enter_scope());
@@ -550,7 +550,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn enter_signature_scope(
         &mut self,
         signature: &Signature,
-    ) -> (Vec<Arc<Symbol>>, Box<dyn FnOnce()>) {
+    ) -> (Vec<Arc<Symbol>>, Box<dyn FnOnce()>) { ::tsox_core::fntrace::enter("enter_signature_scope"); 
         let signature = Arc::new(signature.clone());
         let expanded_params = self
             .ch
@@ -578,7 +578,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         parameter_symbol: &Arc<Symbol>,
         preserve_modifier_flags: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("symbol_to_parameter_declaration"); 
         let parameter_declaration = get_effective_parameter_declaration(parameter_symbol);
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let parameter_type = ch.get_type_of_symbol(parameter_symbol);
@@ -655,7 +655,7 @@ impl<'a> NodeBuilderImpl<'a> {
     }
 }
 
-pub fn get_effective_parameter_declaration(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+pub fn get_effective_parameter_declaration(symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_effective_parameter_declaration"); 
     if let Some(parameter_declaration) =
         tsox_frontend::ast::mig::m3e_4::get_declaration_of_kind(symbol, SyntaxKind::Parameter)
     {

@@ -7,7 +7,7 @@ use tsox_tsoptions::tsoptions::parse_command_line;
 use tsox_tsoptions::vfs::InMemoryFS;
 use tsox_tsoptions::vfs::OsFS;
 
-fn program_options(config: ParsedCommandLine, host: Arc<dyn CompilerHost>) -> ProgramOptions {
+fn program_options(config: ParsedCommandLine, host: Arc<dyn CompilerHost>) -> ProgramOptions { ::tsox_core::fntrace::enter("program_options"); 
     ProgramOptions {
         config,
         host,
@@ -22,7 +22,7 @@ fn program_options(config: ParsedCommandLine, host: Arc<dyn CompilerHost>) -> Pr
 }
 
 #[test]
-fn program_parses_input_files() {
+fn program_parses_input_files() { ::tsox_core::fntrace::enter("program_parses_input_files"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x = 1;");
@@ -47,7 +47,7 @@ fn program_parses_input_files() {
 }
 
 #[test]
-fn program_does_not_load_bundled_libs_without_root_files() {
+fn program_does_not_load_bundled_libs_without_root_files() { ::tsox_core::fntrace::enter("program_does_not_load_bundled_libs_without_root_files"); 
     let fs = Arc::new(BundledFS::new(Arc::new(OsFS)));
     let args: Vec<String> = vec![];
     let parsed = parse_command_line(&args, "/proj", Some(fs.as_ref()));
@@ -57,7 +57,7 @@ fn program_does_not_load_bundled_libs_without_root_files() {
 }
 
 #[test]
-fn program_loads_bundled_libs_with_root_files() {
+fn program_loads_bundled_libs_with_root_files() { ::tsox_core::fntrace::enter("program_loads_bundled_libs_with_root_files"); 
     let inner = Arc::new(InMemoryFS::new());
     inner.insert_dir("/proj");
     inner.insert_file("/proj/a.ts", "let x = 1;");
@@ -77,14 +77,14 @@ fn program_loads_bundled_libs_with_root_files() {
 }
 
 #[test]
-fn extract_reference_libs() {
+fn extract_reference_libs() { ::tsox_core::fntrace::enter("extract_reference_libs"); 
     let text = "/// <reference lib=\"es5\" />\n/// <reference lib=\"dom\" />\ninterface X {}";
     let refs = extract_reference_lib_directives(text);
     assert_eq!(refs, vec!["es5", "dom"]);
 }
 
 #[test]
-fn program_file_ordering_with_reference_paths() {
+fn program_file_ordering_with_reference_paths() { ::tsox_core::fntrace::enter("program_file_ordering_with_reference_paths"); 
     let fs = Arc::new(InMemoryFS::new());
 
     let files = [
@@ -150,7 +150,7 @@ fn program_file_ordering_with_reference_paths() {
 }
 
 #[test]
-fn program_file_ordering_imports() {
+fn program_file_ordering_imports() { ::tsox_core::fntrace::enter("program_file_ordering_imports"); 
     let fs = Arc::new(InMemoryFS::new());
 
     for dir in [
@@ -231,7 +231,7 @@ fn program_file_ordering_imports() {
 }
 
 #[test]
-fn program_file_ordering_cycles() {
+fn program_file_ordering_cycles() { ::tsox_core::fntrace::enter("program_file_ordering_cycles"); 
     let fs = Arc::new(InMemoryFS::new());
     for dir in [
         "/dev/src",
@@ -314,7 +314,7 @@ fn program_file_ordering_cycles() {
 }
 
 #[test]
-fn program_resolves_module_imports() {
+fn program_resolves_module_imports() { ::tsox_core::fntrace::enter("program_resolves_module_imports"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/src");
     fs.insert_file(
@@ -351,7 +351,7 @@ fn program_resolves_module_imports() {
 }
 
 #[test]
-fn program_resolves_transitive_module_imports() {
+fn program_resolves_transitive_module_imports() { ::tsox_core::fntrace::enter("program_resolves_transitive_module_imports"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/src");
     fs.insert_file(
@@ -386,7 +386,7 @@ fn program_resolves_transitive_module_imports() {
 }
 
 #[test]
-fn include_processor_diagnostics_with_missing_file_casing() {
+fn include_processor_diagnostics_with_missing_file_casing() { ::tsox_core::fntrace::enter("include_processor_diagnostics_with_missing_file_casing"); 
     let fs = Arc::new(InMemoryFS::with_case_sensitivity(true));
     fs.insert_dir("/src");
 
@@ -419,7 +419,7 @@ fn include_processor_diagnostics_with_missing_file_casing() {
 }
 
 #[test]
-fn extract_reference_path_directives_resolves_relative() {
+fn extract_reference_path_directives_resolves_relative() { ::tsox_core::fntrace::enter("extract_reference_path_directives_resolves_relative"); 
     let text = "/// <reference path='./b/3.ts' />\n/// <reference path='/abs/4.ts' />";
     let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
     let resolved: Vec<&str> = refs.iter().map(|r| r.resolved.as_str()).collect();
@@ -427,14 +427,14 @@ fn extract_reference_path_directives_resolves_relative() {
 }
 
 #[test]
-fn extract_reference_path_directives_single_quotes() {
+fn extract_reference_path_directives_single_quotes() { ::tsox_core::fntrace::enter("extract_reference_path_directives_single_quotes"); 
     let text = "/// <reference path='b/3.ts' />";
     let refs = extract_reference_path_directives(text, "/dev/src2/a/5.ts");
     let resolved: Vec<&str> = refs.iter().map(|r| r.resolved.as_str()).collect();
     assert_eq!(resolved, vec!["/dev/src2/a/b/3.ts"]);
 }
 
-fn parse_bundled_lib(lib_name: &str) -> Vec<tsox_frontend::parser::ParserDiagnostic> {
+fn parse_bundled_lib(lib_name: &str) -> Vec<tsox_frontend::parser::ParserDiagnostic> { ::tsox_core::fntrace::enter("parse_bundled_lib"); 
     let content = tsox_checker::bundled::lib_contents(lib_name)
         .unwrap_or_else(|| panic!("bundled lib '{lib_name}' not found"));
     let (_file, diags) = tsox_frontend::parser::Parser::parse_source_file_text_with_diagnostics(
@@ -444,7 +444,7 @@ fn parse_bundled_lib(lib_name: &str) -> Vec<tsox_frontend::parser::ParserDiagnos
     diags
 }
 
-fn assert_no_parser_errors(lib_name: &str, diags: &[tsox_frontend::parser::ParserDiagnostic]) {
+fn assert_no_parser_errors(lib_name: &str, diags: &[tsox_frontend::parser::ParserDiagnostic]) { ::tsox_core::fntrace::enter("assert_no_parser_errors"); 
     let errors: Vec<_> = diags
         .iter()
         .filter(|d| d.message.category == tsox_core::diagnostics::Category::Error)
@@ -462,37 +462,37 @@ fn assert_no_parser_errors(lib_name: &str, diags: &[tsox_frontend::parser::Parse
 }
 
 #[test]
-fn bundled_lib_es2015_iterable_parses_without_errors() {
+fn bundled_lib_es2015_iterable_parses_without_errors() { ::tsox_core::fntrace::enter("bundled_lib_es2015_iterable_parses_without_errors"); 
     let diags = parse_bundled_lib("lib.es2015.iterable.d.ts");
     assert_no_parser_errors("lib.es2015.iterable.d.ts", &diags);
 }
 
 #[test]
-fn bundled_lib_dom_parses_without_errors() {
+fn bundled_lib_dom_parses_without_errors() { ::tsox_core::fntrace::enter("bundled_lib_dom_parses_without_errors"); 
     let diags = parse_bundled_lib("lib.dom.d.ts");
     assert_no_parser_errors("lib.dom.d.ts", &diags);
 }
 
 #[test]
-fn bundled_lib_es5_parses_without_errors() {
+fn bundled_lib_es5_parses_without_errors() { ::tsox_core::fntrace::enter("bundled_lib_es5_parses_without_errors"); 
     let diags = parse_bundled_lib("lib.es5.d.ts");
     assert_no_parser_errors("lib.es5.d.ts", &diags);
 }
 
 #[test]
-fn bundled_lib_es2015_collection_parses_without_errors() {
+fn bundled_lib_es2015_collection_parses_without_errors() { ::tsox_core::fntrace::enter("bundled_lib_es2015_collection_parses_without_errors"); 
     let diags = parse_bundled_lib("lib.es2015.collection.d.ts");
     assert_no_parser_errors("lib.es2015.collection.d.ts", &diags);
 }
 
 #[test]
-fn bundled_lib_decorators_parses_without_errors() {
+fn bundled_lib_decorators_parses_without_errors() { ::tsox_core::fntrace::enter("bundled_lib_decorators_parses_without_errors"); 
     let diags = parse_bundled_lib("lib.decorators.d.ts");
     assert_no_parser_errors("lib.decorators.d.ts", &diags);
 }
 
 #[test]
-fn node_modules_js_skipped_when_allow_js_false() {
+fn node_modules_js_skipped_when_allow_js_false() { ::tsox_core::fntrace::enter("node_modules_js_skipped_when_allow_js_false"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -547,7 +547,7 @@ fn node_modules_js_skipped_when_allow_js_false() {
 }
 
 #[test]
-fn node_modules_js_loaded_when_allow_js_true() {
+fn node_modules_js_loaded_when_allow_js_true() { ::tsox_core::fntrace::enter("node_modules_js_loaded_when_allow_js_true"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");

@@ -25,11 +25,11 @@ pub enum ConstantValue {
 }
 
 impl<'a> ConstEnumInliningTransformer<'a> {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(self.emit_context)
     }
 
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         match node.kind {
             SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
                 let parse = self.emit_context.parse_node(&node);
@@ -103,7 +103,7 @@ impl<'a> ConstEnumInliningTransformer<'a> {
         }
     }
 
-    pub fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         let mut changed = false;
         tsox_frontend::ast::node_data_generated::for_each_child(&node, |child| {
             let visited = self.visit(child.clone());
@@ -120,7 +120,7 @@ impl<'a> ConstEnumInliningTransformer<'a> {
     }
 }
 
-pub fn safe_multi_line_comment(text: &str) -> String {
+pub fn safe_multi_line_comment(text: &str) -> String { ::tsox_core::fntrace::enter("safe_multi_line_comment"); 
     let mut b = String::with_capacity(text.len() + 2);
     b.push(' ');
     let mut text = text;
@@ -150,7 +150,7 @@ pub struct JSXTransformer<'a> {
     current_source_file: Option<Arc<SourceFile>>,
 }
 
-pub fn new_jsx_transformer<'a>(opts: &'a TransformOptions<'a>) -> JSXTransformer<'a> {
+pub fn new_jsx_transformer<'a>(opts: &'a TransformOptions<'a>) -> JSXTransformer<'a> { ::tsox_core::fntrace::enter("new_jsx_transformer"); 
     JSXTransformer {
         emit_context: opts.context,
         compiler_options: opts.compiler_options,
@@ -164,7 +164,7 @@ pub fn new_jsx_transformer<'a>(opts: &'a TransformOptions<'a>) -> JSXTransformer
 }
 
 impl<'a> JSXTransformer<'a> {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(self.emit_context)
     }
 
@@ -172,7 +172,7 @@ impl<'a> JSXTransformer<'a> {
         &mut self,
         mut expressions: Vec<Arc<Node>>,
         props: Vec<Arc<Node>>,
-    ) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) {
+    ) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("combine_properties_into_new_expression"); 
         if props.is_empty() {
             return (expressions, props);
         }
@@ -183,7 +183,7 @@ impl<'a> JSXTransformer<'a> {
         (expressions, Vec::new())
     }
 
-    pub fn convert_jsx_children_to_children_prop_object(&mut self, children: &[Arc<Node>]) -> Option<Arc<Node>> {
+    pub fn convert_jsx_children_to_children_prop_object(&mut self, children: &[Arc<Node>]) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("convert_jsx_children_to_children_prop_object"); 
         let prop = self.convert_jsx_children_to_children_prop_assignment(children)?;
         Some(
             self.factory()
@@ -191,7 +191,7 @@ impl<'a> JSXTransformer<'a> {
         )
     }
 
-    pub fn convert_jsx_children_to_children_prop_assignment(&mut self, children: &[Arc<Node>]) -> Option<Arc<Node>> {
+    pub fn convert_jsx_children_to_children_prop_assignment(&mut self, children: &[Arc<Node>]) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("convert_jsx_children_to_children_prop_assignment"); 
         let non_whitespace_children = get_semantic_jsx_children(children);
         if non_whitespace_children.len() == 1
             && (non_whitespace_children[0].kind != SyntaxKind::JsxExpression
@@ -240,7 +240,7 @@ impl<'a> JSXTransformer<'a> {
         )
     }
 
-    pub fn transform_jsx_child_to_expression(&mut self, child: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsx_child_to_expression(&mut self, child: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsx_child_to_expression"); 
         match child.kind {
             SyntaxKind::JsxText => {
                 let text = get_text_of_node(child);
@@ -257,7 +257,7 @@ impl<'a> JSXTransformer<'a> {
     }
 }
 
-pub fn add_line_of_jsx_text(b: &mut String, trimmed_line: &str, is_initial: bool) {
+pub fn add_line_of_jsx_text(b: &mut String, trimmed_line: &str, is_initial: bool) { ::tsox_core::fntrace::enter("add_line_of_jsx_text"); 
     let decoded = decode_entities(trimmed_line);
     if !is_initial {
         b.push(' ');

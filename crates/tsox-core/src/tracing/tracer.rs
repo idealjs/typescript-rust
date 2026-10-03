@@ -13,7 +13,7 @@ pub struct Tracer {
 }
 
 impl Tracer {
-    pub fn new() -> Self {
+    pub fn new() -> Self { crate::fntrace::enter("new"); 
         Tracer {
             inner: Mutex::new(Inner {
                 events: Vec::new(),
@@ -22,7 +22,7 @@ impl Tracer {
         }
     }
 
-    pub fn push(&self, phase: Phase, name: &str, args: Vec<(String, TraceArg)>) -> EventGuard<'_> {
+    pub fn push(&self, phase: Phase, name: &str, args: Vec<(String, TraceArg)>) -> EventGuard<'_> { crate::fntrace::enter("push"); 
         let mut inner = self.inner.lock().unwrap();
         let Inner { events, thread_ids } = &mut *inner;
         let tid = resolve_thread_id(events, thread_ids, &args);
@@ -42,13 +42,13 @@ impl Tracer {
         }
     }
 
-    pub fn take_events(&self) -> Vec<TraceEvent> {
+    pub fn take_events(&self) -> Vec<TraceEvent> { crate::fntrace::enter("take_events"); 
         std::mem::take(&mut self.inner.lock().unwrap().events)
     }
 }
 
 impl Default for Tracer {
-    fn default() -> Self {
+    fn default() -> Self { crate::fntrace::enter("default"); 
         Self::new()
     }
 }
@@ -62,7 +62,7 @@ pub struct EventGuard<'a> {
 }
 
 impl Drop for EventGuard<'_> {
-    fn drop(&mut self) {
+    fn drop(&mut self) { crate::fntrace::enter("drop"); 
         let mut inner = self.tracer.inner.lock().unwrap();
         inner.events.push(TraceEvent {
             tid: self.tid,

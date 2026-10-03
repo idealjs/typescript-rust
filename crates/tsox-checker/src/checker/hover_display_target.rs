@@ -5,7 +5,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::{Node, SyntaxKind};
 
 /// 对象字面量处于赋值表达式左侧（解构赋值目标）的位置判定（旧管线同款）
-pub(crate) fn is_assignment_target_literal(obj: &Arc<Node>) -> bool {
+pub(crate) fn is_assignment_target_literal(obj: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_assignment_target_literal"); 
     let _target = match assignment_target_expr(obj) {
         Some(t) => t,
         None => return false,
@@ -30,7 +30,7 @@ pub(crate) fn is_assignment_target_literal(obj: &Arc<Node>) -> bool {
     false
 }
 
-fn assignment_target_expr(obj: &Arc<Node>) -> Option<Arc<Node>> {
+fn assignment_target_expr(obj: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("assignment_target_expr"); 
     let mut cur = obj.parent();
     while let Some(n) = cur.clone() {
         match n.kind {

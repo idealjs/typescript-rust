@@ -7,7 +7,7 @@ impl Checker {
         &self,
         state: &InferenceState,
         target: &Arc<Type>,
-    ) -> Option<usize> {
+    ) -> Option<usize> { ::tsox_core::fntrace::enter("find_tracked_inference_index"); 
         if !target
             .flags
             .intersects(TypeFlags::TypeParameter | TypeFlags::IndexedAccess | TypeFlags::Substitution)
@@ -25,7 +25,7 @@ impl Checker {
         source: &Arc<Type>,
         targets: &[Arc<Type>],
         group_priority: InferencePriority,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_to_multiple_types_non_union"); 
         let save = state.priority;
         state.priority |= group_priority;
         let mut type_variable_count = 0usize;
@@ -54,7 +54,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         targets: &[Arc<Type>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_to_multiple_types_union"); 
         let sources: Vec<Arc<Type>> = if source.flags.contains(TypeFlags::Union) {
             source.types().unwrap_or_default().to_vec()
         } else {

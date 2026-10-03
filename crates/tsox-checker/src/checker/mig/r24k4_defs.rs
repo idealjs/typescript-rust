@@ -12,17 +12,17 @@ thread_local! {
         std::cell::RefCell::new(std::collections::HashSet::new());
 }
 
-pub fn non_existent_properties_contains(key: &(usize, usize, bool)) -> bool {
+pub fn non_existent_properties_contains(key: &(usize, usize, bool)) -> bool { ::tsox_core::fntrace::enter("non_existent_properties_contains"); 
     NON_EXISTENT_PROPERTIES.with(|s| s.borrow().contains(key))
 }
 
-pub fn non_existent_properties_insert(key: (usize, usize, bool)) {
+pub fn non_existent_properties_insert(key: (usize, usize, bool)) { ::tsox_core::fntrace::enter("non_existent_properties_insert"); 
     NON_EXISTENT_PROPERTIES.with(|s| {
         s.borrow_mut().insert(key);
     });
 }
 
-pub fn is_expression_node_r24k4(node: &Arc<Node>) -> bool {
+pub fn is_expression_node_r24k4(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_expression_node_r24k4"); 
     use SyntaxKind::*;
     matches!(
         node.kind,
@@ -68,11 +68,11 @@ pub fn is_expression_node_r24k4(node: &Arc<Node>) -> bool {
 }
 
 impl Checker {
-    pub fn subtype_relation(&self) -> Relation {
+    pub fn subtype_relation(&self) -> Relation { ::tsox_core::fntrace::enter("subtype_relation"); 
         Relation::new(RelationKind::Subtype)
     }
 
-    pub fn enum_number_index_info(&mut self) -> Arc<IndexInfo> {
+    pub fn enum_number_index_info(&mut self) -> Arc<IndexInfo> { ::tsox_core::fntrace::enter("enum_number_index_info"); 
         self.new_index_info(&self.string_type(), &self.number_type(), false, None, &[])
     }
 
@@ -84,7 +84,7 @@ impl Checker {
         error_node: Option<&Arc<Node>>,
         head_message: Option<&msg::Message>,
         diagnostic_output: Option<&mut Vec<ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_related_to_ex"); 
         self.check_type_related_to_and_optionally_elaborate(
             source, target, relation, error_node, None, head_message, diagnostic_output,
         )
@@ -98,7 +98,7 @@ impl Checker {
         meaning: SymbolFlags,
         ignore_errors: bool,
         location: Option<&Arc<Node>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_qualified_name"); 
         let namespace = self.resolve_entity_name(left, SymbolFlags::NAMESPACE, ignore_errors, false, location);
         let namespace = namespace?;
         if ast::node_is_missing(Some(right)) {
@@ -154,7 +154,7 @@ impl Checker {
         location: &Arc<Node>,
         prop_symbol: Option<&Arc<Symbol>>,
         parent_type: Option<&Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("mark_property_alias_referenced"); 
         if crate::checker::mig::m2a::is_part_of_import_equals_module_reference(location) {
             return;
         }

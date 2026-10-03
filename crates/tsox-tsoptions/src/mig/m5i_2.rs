@@ -23,19 +23,19 @@ pub struct ContentMapper {
     pub options: String,
 }
 
-pub fn command_line_compiler_options_map() -> &'static NameMap {
+pub fn command_line_compiler_options_map() -> &'static NameMap { ::tsox_core::fntrace::enter("command_line_compiler_options_map"); 
     static MAP: LazyLock<NameMap> =
         LazyLock::new(|| get_name_map_from_list(&crate::tsoptions::OPTIONS));
     &MAP
 }
 
-pub fn build_name_map() -> &'static NameMap {
+pub fn build_name_map() -> &'static NameMap { ::tsox_core::fntrace::enter("build_name_map"); 
     static MAP: LazyLock<NameMap> =
         LazyLock::new(|| get_name_map_from_list(crate::tsoptions::BUILD_OPTIONS));
     &MAP
 }
 
-pub fn parse_tristate(value: &Value) -> Tristate {
+pub fn parse_tristate(value: &Value) -> Tristate { ::tsox_core::fntrace::enter("parse_tristate"); 
     match value {
         Value::Null => Tristate::Unknown,
         Value::Bool(true) => Tristate::True,
@@ -43,7 +43,7 @@ pub fn parse_tristate(value: &Value) -> Tristate {
     }
 }
 
-pub fn parse_string_array(value: &Value) -> Vec<String> {
+pub fn parse_string_array(value: &Value) -> Vec<String> { ::tsox_core::fntrace::enter("parse_string_array"); 
     match value.as_array() {
         Some(arr) => arr
             .iter()
@@ -53,7 +53,7 @@ pub fn parse_string_array(value: &Value) -> Vec<String> {
     }
 }
 
-pub fn parse_string_map(value: &Value) -> Vec<(String, Vec<String>)> {
+pub fn parse_string_map(value: &Value) -> Vec<(String, Vec<String>)> { ::tsox_core::fntrace::enter("parse_string_map"); 
     match value.as_object() {
         Some(m) => m
             .iter()
@@ -63,11 +63,11 @@ pub fn parse_string_map(value: &Value) -> Vec<(String, Vec<String>)> {
     }
 }
 
-pub fn parse_string(value: &Value) -> String {
+pub fn parse_string(value: &Value) -> String { ::tsox_core::fntrace::enter("parse_string"); 
     value.as_str().unwrap_or("").to_string()
 }
 
-pub fn parse_number(value: &Value) -> Option<i64> {
+pub fn parse_number(value: &Value) -> Option<i64> { ::tsox_core::fntrace::enter("parse_number"); 
     if let Some(n) = value.as_i64() {
         return Some(n);
     }
@@ -84,7 +84,7 @@ pub struct ProjectReferenceParseResult {
 }
 
 impl Default for ProjectReferenceParseResult {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             reference: tsox_core::core::project_reference::ProjectReference {
                 path: String::new(),
@@ -99,7 +99,7 @@ impl Default for ProjectReferenceParseResult {
     }
 }
 
-pub fn parse_project_reference(json: &Value) -> Option<ProjectReferenceParseResult> {
+pub fn parse_project_reference(json: &Value) -> Option<ProjectReferenceParseResult> { ::tsox_core::fntrace::enter("parse_project_reference"); 
     let v = json.as_object()?;
     let mut result = ProjectReferenceParseResult::default();
     if let Some(value) = v.get("path") {
@@ -119,7 +119,7 @@ pub fn parse_project_reference(json: &Value) -> Option<ProjectReferenceParseResu
     Some(result)
 }
 
-pub fn parse_content_mapper(value: &Value) -> (Option<ContentMapper>, Vec<Diagnostic>) {
+pub fn parse_content_mapper(value: &Value) -> (Option<ContentMapper>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("parse_content_mapper"); 
     let v = match value.as_object() {
         Some(v) => v,
         None => return (None, Vec::new()),
@@ -168,7 +168,7 @@ pub fn parse_content_mapper(value: &Value) -> (Option<ContentMapper>, Vec<Diagno
     (Some(mapper), errors)
 }
 
-pub fn parse_string_array_strict(value: &Value) -> Option<Vec<String>> {
+pub fn parse_string_array_strict(value: &Value) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("parse_string_array_strict"); 
     let arr = value.as_array()?;
     let mut result = Vec::with_capacity(arr.len());
     for v in arr {
@@ -177,7 +177,7 @@ pub fn parse_string_array_strict(value: &Value) -> Option<Vec<String>> {
     Some(result)
 }
 
-pub fn parse_json_to_string_key(json: &Value) -> serde_json::Map<String, Value> {
+pub fn parse_json_to_string_key(json: &Value) -> serde_json::Map<String, Value> { ::tsox_core::fntrace::enter("parse_json_to_string_key"); 
     let mut result = serde_json::Map::new();
     if let Some(m) = json.as_object() {
         for key in ["include", "exclude", "files", "references", "contentMappers", "compilerOptions", "excludes", "typeAcquisition"] {
@@ -196,7 +196,7 @@ pub fn parse_json_to_string_key(json: &Value) -> serde_json::Map<String, Value> 
     result
 }
 
-pub fn extra_key_diagnostics(section: &str) -> Option<Message> {
+pub fn extra_key_diagnostics(section: &str) -> Option<Message> { ::tsox_core::fntrace::enter("extra_key_diagnostics"); 
     match section {
         "compilerOptions" => Some(tsox_core::diagnostics::UNKNOWN_COMPILER_OPTION_0),
         "watchOptions" => Some(tsox_core::diagnostics::UNKNOWN_WATCH_OPTION_0),
@@ -206,7 +206,7 @@ pub fn extra_key_diagnostics(section: &str) -> Option<Message> {
     }
 }
 
-pub fn extra_key_did_you_mean_diagnostics(section: &str) -> Option<Message> {
+pub fn extra_key_did_you_mean_diagnostics(section: &str) -> Option<Message> { ::tsox_core::fntrace::enter("extra_key_did_you_mean_diagnostics"); 
     match section {
         "compilerOptions" => Some(tsox_core::diagnostics::UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1),
         "watchOptions" => Some(tsox_core::diagnostics::UNKNOWN_WATCH_OPTION_0_DID_YOU_MEAN_1),
@@ -223,14 +223,14 @@ pub struct CompilerOptionsParser<'a> {
 }
 
 impl<'a> CompilerOptionsParser<'a> {
-    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> {
+    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("parse_option"); 
         parse_compiler_options_public(key, value, self.options);
         Vec::new()
     }
-    pub fn unknown_option_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_option_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_option_diagnostic"); 
         extra_key_diagnostics("compilerOptions")
     }
-    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_did_you_mean_diagnostic"); 
         extra_key_did_you_mean_diagnostics("compilerOptions")
     }
 }
@@ -240,14 +240,14 @@ pub struct WatchOptionsParser<'a> {
 }
 
 impl<'a> WatchOptionsParser<'a> {
-    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> {
+    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("parse_option"); 
         parse_watch_options(key, value, self.options);
         Vec::new()
     }
-    pub fn unknown_option_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_option_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_option_diagnostic"); 
         extra_key_diagnostics("watchOptions")
     }
-    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_did_you_mean_diagnostic"); 
         extra_key_did_you_mean_diagnostics("watchOptions")
     }
 }
@@ -257,14 +257,14 @@ pub struct TypeAcquisitionParser<'a> {
 }
 
 impl<'a> TypeAcquisitionParser<'a> {
-    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> {
+    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("parse_option"); 
         parse_type_acquisition(key, value, self.options);
         Vec::new()
     }
-    pub fn unknown_option_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_option_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_option_diagnostic"); 
         extra_key_diagnostics("typeAcquisition")
     }
-    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_did_you_mean_diagnostic"); 
         extra_key_did_you_mean_diagnostics("typeAcquisition")
     }
 }
@@ -274,26 +274,26 @@ pub struct BuildOptionsParser<'a> {
 }
 
 impl<'a> BuildOptionsParser<'a> {
-    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> {
+    pub fn parse_option(&mut self, key: &str, value: &Value) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("parse_option"); 
         parse_build_options(key, value, self.options);
         Vec::new()
     }
-    pub fn unknown_option_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_option_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_option_diagnostic"); 
         extra_key_diagnostics("buildOptions")
     }
-    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> {
+    pub fn unknown_did_you_mean_diagnostic(&self) -> Option<Message> { ::tsox_core::fntrace::enter("unknown_did_you_mean_diagnostic"); 
         extra_key_did_you_mean_diagnostics("buildOptions")
     }
 }
 
-pub fn parse_compiler_options_public(key: &str, value: &Value, all_options: &mut CompilerOptions) {
+pub fn parse_compiler_options_public(key: &str, value: &Value, all_options: &mut CompilerOptions) { ::tsox_core::fntrace::enter("parse_compiler_options_public"); 
     if value.is_null() {
         return;
     }
     parse_compiler_options_inner(key, value, all_options);
 }
 
-pub fn parse_compiler_options_inner(key: &str, value: &Value, o: &mut CompilerOptions) -> bool {
+pub fn parse_compiler_options_inner(key: &str, value: &Value, o: &mut CompilerOptions) -> bool { ::tsox_core::fntrace::enter("parse_compiler_options_inner"); 
     macro_rules! t { ($f:ident) => {{ o.$f = parse_tristate(value); }} }
     macro_rules! s { ($f:ident) => {{ o.$f = parse_string(value); }} }
     macro_rules! a { ($f:ident) => {{ o.$f = parse_string_array(value); }} }
@@ -439,14 +439,14 @@ pub fn parse_compiler_options_inner(key: &str, value: &Value, o: &mut CompilerOp
     true
 }
 
-pub fn float_or_int32_to_flag<T: From<i64>>(value: &Value) -> T {
+pub fn float_or_int32_to_flag<T: From<i64>>(value: &Value) -> T { ::tsox_core::fntrace::enter("float_or_int32_to_flag"); 
     if let Some(n) = value.as_i64() {
         return T::from(n);
     }
     T::from(value.as_f64().map(|f| f as i64).unwrap_or(0))
 }
 
-pub fn parse_watch_options(key: &str, value: &Value, o: &mut WatchOptions) {
+pub fn parse_watch_options(key: &str, value: &Value, o: &mut WatchOptions) { ::tsox_core::fntrace::enter("parse_watch_options"); 
     match key {
         "watchInterval" => o.interval = parse_number(value).map(|n| n as i32),
         "watchFile" => {
@@ -477,7 +477,7 @@ pub fn parse_watch_options(key: &str, value: &Value, o: &mut WatchOptions) {
     }
 }
 
-pub fn parse_type_acquisition(key: &str, value: &Value, o: &mut tsox_core::core::mig::m3k::TypeAcquisition) {
+pub fn parse_type_acquisition(key: &str, value: &Value, o: &mut tsox_core::core::mig::m3k::TypeAcquisition) { ::tsox_core::fntrace::enter("parse_type_acquisition"); 
     if value.is_null() {
         return;
     }
@@ -490,7 +490,7 @@ pub fn parse_type_acquisition(key: &str, value: &Value, o: &mut tsox_core::core:
     }
 }
 
-pub fn parse_build_options(key: &str, value: &Value, o: &mut BuildOptions) {
+pub fn parse_build_options(key: &str, value: &Value, o: &mut BuildOptions) { ::tsox_core::fntrace::enter("parse_build_options"); 
     if value.is_null() {
         return;
     }
@@ -513,7 +513,7 @@ pub fn merge_compiler_options_full(
     target_options: &mut CompilerOptions,
     source_options: &CompilerOptions,
     raw_source: Option<&Value>,
-) {
+) { ::tsox_core::fntrace::enter("merge_compiler_options_full"); 
     let mut explicit_null_fields: HashSet<String> = HashSet::new();
     if let Some(raw_source) = raw_source {
         if let Some(compiler_options_raw) = raw_source.get("compilerOptions") {
@@ -532,7 +532,7 @@ pub fn merge_compiler_options_full(
     }
 }
 
-pub fn zero_fields_with_json_names(o: &mut CompilerOptions, fields: &HashSet<String>) {
+pub fn zero_fields_with_json_names(o: &mut CompilerOptions, fields: &HashSet<String>) { ::tsox_core::fntrace::enter("zero_fields_with_json_names"); 
     macro_rules! z { ($f:ident, $n:expr) => { if fields.contains($n) { o.$f = Default::default(); } } }
     z!(allow_js, "allowJs"); z!(allow_importing_ts_extensions, "allowImportingTsExtensions"); z!(allow_synthetic_default_imports, "allowSyntheticDefaultImports"); z!(allow_non_ts_extensions, "allowNonTsExtensions"); z!(allow_umd_global_access, "allowUmdGlobalAccess"); z!(allow_unreachable_code, "allowUnreachableCode"); z!(allow_unused_labels, "allowUnusedLabels"); z!(allow_arbitrary_extensions, "allowArbitraryExtensions");
     z!(always_strict, "alwaysStrict"); z!(assume_changes_only_affect_direct_dependencies, "assumeChangesOnlyAffectDirectDependencies"); z!(base_url, "baseUrl"); z!(build, "build"); z!(check_js, "checkJs"); z!(custom_conditions, "customConditions"); z!(composite, "composite"); z!(declaration_dir, "declarationDir");
@@ -553,7 +553,7 @@ pub fn zero_fields_with_json_names(o: &mut CompilerOptions, fields: &HashSet<Str
     z!(quiet, "quiet"); z!(checkers, "checkers"); z!(run_external_code, "runExternalCode");
 }
 
-pub fn option_elements(option: &OptionDecl) -> Option<&'static OptionDecl> {
+pub fn option_elements(option: &OptionDecl) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("option_elements"); 
     option.elements()
 }
 
@@ -561,7 +561,7 @@ pub fn convert_to_options_with_absolute_paths(
     options_base: &mut serde_json::Map<String, Value>,
     option_map: &CommandLineOptionNameMap,
     cwd: &str,
-) {
+) { ::tsox_core::fntrace::enter("convert_to_options_with_absolute_paths"); 
     for (o, v) in options_base.iter_mut() {
         if let Some(result) = convert_option_to_absolute_path(o, v, option_map, cwd) {
             *v = result;
@@ -574,7 +574,7 @@ pub fn convert_option_to_absolute_path(
     v: &Value,
     option_map: &CommandLineOptionNameMap,
     cwd: &str,
-) -> Option<Value> {
+) -> Option<Value> { ::tsox_core::fntrace::enter("convert_option_to_absolute_path"); 
     let option = option_map.get(o)?;
     if option.kind == OptionKind::List {
         if option_elements(option).is_some_and(|elements| elements.is_file_path) {

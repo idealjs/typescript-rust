@@ -41,12 +41,12 @@ const SUPPORTED_VIRTUAL_EXTENSIONS: [&str; 9] = [
     ".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".mts", ".cts", ".json",
 ];
 
-pub fn is_supported_virtual_extension(extension: &str) -> bool {
+pub fn is_supported_virtual_extension(extension: &str) -> bool { ::tsox_core::fntrace::enter("is_supported_virtual_extension"); 
     SUPPORTED_VIRTUAL_EXTENSIONS.contains(&extension)
 }
 
 impl Mapper {
-    pub fn diagnostic_name(&self) -> String {
+    pub fn diagnostic_name(&self) -> String { ::tsox_core::fntrace::enter("diagnostic_name"); 
         if !self.manifest.name.is_empty() {
             return self.manifest.name.clone();
         }
@@ -56,14 +56,14 @@ impl Mapper {
         self.contribution_id.clone()
     }
 
-    pub fn identity(&self) -> String {
+    pub fn identity(&self) -> String { ::tsox_core::fntrace::enter("identity"); 
         if !self.contribution_id.is_empty() {
             return format!("{} ({})", self.contribution_id, self.manifest_identity());
         }
         self.manifest_identity()
     }
 
-    pub fn manifest_identity(&self) -> String {
+    pub fn manifest_identity(&self) -> String { ::tsox_core::fntrace::enter("manifest_identity"); 
         if self.manifest.name.is_empty() {
             return String::new();
         }
@@ -73,7 +73,7 @@ impl Mapper {
         format!("{}@{}", self.manifest.name, self.manifest.version)
     }
 
-    pub fn transform_identity(&self, options: &CompilerOptions) -> u128 {
+    pub fn transform_identity(&self, options: &CompilerOptions) -> u128 { ::tsox_core::fntrace::enter("transform_identity"); 
         let declared = self.marshal_declared_options(Some(options));
         let options_json = match declared {
             Ok(declared) => match marshal(&declared) {
@@ -97,7 +97,7 @@ impl Mapper {
     pub fn marshal_declared_options(
         &self,
         options: Option<&CompilerOptions>,
-    ) -> Result<OrderedMap<String, JsonValue>, serde_json::Error> {
+    ) -> Result<OrderedMap<String, JsonValue>, serde_json::Error> { ::tsox_core::fntrace::enter("marshal_declared_options"); 
         let mut out = OrderedMap::with_capacity(self.manifest.compiler_options.len());
         let options = match options {
             None => return Ok(out),
@@ -118,7 +118,7 @@ impl Mapper {
     }
 }
 
-pub fn compiler_options_json_entries(options: &CompilerOptions) -> Vec<(&'static str, JsonValue)> {
+pub fn compiler_options_json_entries(options: &CompilerOptions) -> Vec<(&'static str, JsonValue)> { ::tsox_core::fntrace::enter("compiler_options_json_entries"); 
     let mut entries = Vec::with_capacity(64);
     if !(matches!(options.allow_js, Tristate::Unknown)) {
         entries.push(("allowJs", serde_json::to_value(&options.allow_js).unwrap_or(JsonValue::Null)));
@@ -513,7 +513,7 @@ pub fn compiler_options_json_entries(options: &CompilerOptions) -> Vec<(&'static
     entries
 }
 
-pub fn compiler_options_to_json(options: &CompilerOptions) -> JsonValue {
+pub fn compiler_options_to_json(options: &CompilerOptions) -> JsonValue { ::tsox_core::fntrace::enter("compiler_options_to_json"); 
     let mut map = serde_json::Map::new();
     for (name, value) in compiler_options_json_entries(options) {
         map.insert(name.to_string(), value);
@@ -541,7 +541,7 @@ pub struct TransformError {
 pub fn new_transform_error(
     kind: TransformErrorKind,
     err: Box<dyn std::error::Error + Send + Sync>,
-) -> TransformError {
+) -> TransformError { ::tsox_core::fntrace::enter("new_transform_error"); 
     TransformError {
         kind,
         err: Some(err),
@@ -549,7 +549,7 @@ pub fn new_transform_error(
 }
 
 impl fmt::Display for TransformError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         match &self.err {
             Some(err) => write!(f, "content mapper transform failed: {}", err),
             None => write!(f, "content mapper transform failed"),
@@ -558,13 +558,13 @@ impl fmt::Display for TransformError {
 }
 
 impl std::error::Error for TransformError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { ::tsox_core::fntrace::enter("source"); 
         self.err.as_ref().map(|err| err.as_ref() as _)
     }
 }
 
 impl TransformError {
-    pub fn unwrap_err(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    pub fn unwrap_err(&self) -> Option<&(dyn std::error::Error + 'static)> { ::tsox_core::fntrace::enter("unwrap_err"); 
         self.err.as_ref().map(|err| err.as_ref() as _)
     }
 }
@@ -595,7 +595,7 @@ pub struct DiagnosticDirectiveError {
 }
 
 impl fmt::Display for DiagnosticDirectiveError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(f, "invalid content mapper diagnostic directive {}", self.index)
     }
 }
@@ -608,7 +608,7 @@ pub struct InvalidVirtualExtensionError {
 }
 
 impl fmt::Display for InvalidVirtualExtensionError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(f, "invalid virtual extension {:?}", self.extension)
     }
 }
@@ -631,7 +631,7 @@ pub struct ProjectError {
 }
 
 impl fmt::Display for ProjectError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         match self.kind {
             ProjectErrorKind::MalformedResponse => {
                 write!(f, "content mapper returned a malformed project response")
@@ -684,7 +684,7 @@ pub struct InitializeError {
 }
 
 impl fmt::Display for InitializeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         match self.kind {
             InitializeErrorKind::ProcessStart => write!(
                 f,
@@ -733,7 +733,7 @@ pub struct SupplementalFileCollisionError {
 }
 
 impl fmt::Display for SupplementalFileCollisionError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(
             f,
             "content mapper supplemental output file {:?} already exists",
@@ -766,7 +766,7 @@ pub struct Timings {
 }
 
 impl Timings {
-    pub fn since(&self, previous: &Timings) -> Timings {
+    pub fn since(&self, previous: &Timings) -> Timings { ::tsox_core::fntrace::enter("since"); 
         let mut result = Timings {
             mappers: HashMap::with_capacity(self.mappers.len()),
             request_wait: self.request_wait.saturating_sub(previous.request_wait),
@@ -794,7 +794,7 @@ impl Timings {
 pub fn operation_timing_since(
     current: OperationTiming,
     previous: OperationTiming,
-) -> OperationTiming {
+) -> OperationTiming { ::tsox_core::fntrace::enter("operation_timing_since"); 
     OperationTiming {
         count: current.count.saturating_sub(previous.count),
         duration: current.duration.saturating_sub(previous.duration),

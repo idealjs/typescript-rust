@@ -10,7 +10,7 @@ impl Checker {
         target: &Arc<Type>,
         source_is_primitive: bool,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("index_signatures_related_to"); 
         if relation == RelationKind::Identity {
             return self.index_signatures_identical_to(source, target);
         }
@@ -68,7 +68,7 @@ impl Checker {
         source: &Arc<Type>,
         target_info: &IndexInfo,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("type_related_to_index_info"); 
         let target_key = match &target_info.key_type {
             Some(k) => k,
             None => return Ternary::True,
@@ -92,7 +92,7 @@ impl Checker {
         source_info: &IndexInfo,
         target_info: &IndexInfo,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("index_info_related_to"); 
         let source_value = source_info
             .value_type
             .clone()
@@ -108,7 +108,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("index_signatures_identical_to"); 
         let source_infos = self.get_index_infos_of_type(source);
         let target_infos = self.get_index_infos_of_type(target);
         if source_infos.len() != target_infos.len() {
@@ -144,7 +144,7 @@ impl Checker {
         Ternary::True
     }
 
-    pub fn get_index_infos_of_type(&mut self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> {
+    pub fn get_index_infos_of_type(&mut self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_infos_of_type"); 
         if t.is_intersection()
             && let Some(constituents) = t.types().map(|ts| ts.to_vec())
         {
@@ -226,7 +226,7 @@ impl Checker {
         &self,
         t: &Arc<Type>,
         tuple: &crate::checker::types::TupleTypeData,
-    ) -> Option<Arc<IndexInfo>> {
+    ) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("tuple_number_index_info"); 
         let elements: Vec<Arc<Type>> = tuple
             .element_infos
             .iter()
@@ -282,7 +282,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         key_type: &Arc<Type>,
-    ) -> Option<Arc<IndexInfo>> {
+    ) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_info_of_type"); 
         for info in self.get_index_infos_of_type(t) {
             if let Some(info_key) = &info.key_type {
                 if Arc::ptr_eq(info_key, key_type) || info_key.flags == key_type.flags {
@@ -341,7 +341,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         key_type: &Arc<Type>,
-    ) -> Option<Arc<IndexInfo>> {
+    ) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_applicable_index_info"); 
         let infos = self.get_index_infos_of_type(source);
         let string_type = self.string_type();
         let mut string_index: Option<Arc<IndexInfo>> = None;
@@ -363,7 +363,7 @@ impl Checker {
         None
     }
 
-    pub fn is_generic_mapped_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_mapped_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_mapped_type"); 
         if let TypeData::Mapped(m) = &t.data {
             m.type_parameter.is_some() && m.template_type.is_some()
         } else {
@@ -371,7 +371,7 @@ impl Checker {
         }
     }
 
-    pub fn get_template_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_template_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_template_type_from_mapped_type"); 
         if let TypeData::Mapped(m) = &t.data {
             // 坏上下文（推断中空作用域）解析出的 error 不得驻留：视为未解析重试
             if let Some(tpl) = &m.template_type
@@ -455,7 +455,7 @@ impl Checker {
         None
     }
 
-    fn clear_type_node_cache_subtree(&mut self, node: &Arc<Node>) {
+    fn clear_type_node_cache_subtree(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("clear_type_node_cache_subtree"); 
         if let Some(links) = self.type_node_links.get_mut(node) {
             links.resolved_type = None;
         }

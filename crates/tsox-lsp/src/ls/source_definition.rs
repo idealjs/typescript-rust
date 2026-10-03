@@ -20,7 +20,7 @@ impl LanguageService {
         &self,
         _document_uri: &DocumentUri,
         _position: Position,
-    ) -> Vec<LocationLink> {
+    ) -> Vec<LocationLink> { ::tsox_core::fntrace::enter("provide_source_definition"); 
         Vec::new()
     }
 
@@ -28,7 +28,7 @@ impl LanguageService {
         &self,
         _program: &'a Program,
         _file_name: &str,
-    ) -> SourceDefResolver<'a> {
+    ) -> SourceDefResolver<'a> { ::tsox_core::fntrace::enter("new_source_def_resolver"); 
         SourceDefResolver {
             program: _program,
             file_name: _file_name.to_string(),
@@ -38,12 +38,12 @@ impl LanguageService {
 
 pub fn find_containing_module_specifier(
     _node: &Arc<tsox_frontend::ast::Node>,
-) -> Option<Arc<tsox_frontend::ast::Node>> {
+) -> Option<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("find_containing_module_specifier"); 
     None
 }
 
 pub fn get_source_definition_entry_declarations(
     _source_file: &Arc<SourceFile>,
-) -> Vec<Arc<tsox_frontend::ast::Node>> {
+) -> Vec<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("get_source_definition_entry_declarations"); 
     Vec::new()
 }

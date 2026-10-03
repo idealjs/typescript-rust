@@ -25,7 +25,7 @@ pub struct SymbolAccessibilityDiagnostic {
 pub fn wrap_simple_diagnostic_selector(
     node: &Arc<Node>,
     selector: DiagnosticSelector,
-) -> GetSymbolAccessibilityDiagnostic {
+) -> GetSymbolAccessibilityDiagnostic { ::tsox_core::fntrace::enter("wrap_simple_diagnostic_selector"); 
     let node = Arc::clone(node);
     Box::new(move |symbol_accessibility_result| {
         let diagnostic_message = selector(&node, symbol_accessibility_result)?;
@@ -40,7 +40,7 @@ pub fn wrap_simple_diagnostic_selector(
 pub fn wrap_named_diagnostic_selector(
     node: &Arc<Node>,
     selector: DiagnosticSelector,
-) -> GetSymbolAccessibilityDiagnostic {
+) -> GetSymbolAccessibilityDiagnostic { ::tsox_core::fntrace::enter("wrap_named_diagnostic_selector"); 
     let node = Arc::clone(node);
     Box::new(move |symbol_accessibility_result| {
         let diagnostic_message = selector(&node, symbol_accessibility_result)?;
@@ -56,7 +56,7 @@ pub fn wrap_named_diagnostic_selector(
 pub fn wrap_fallback_error_diagnostic_selector(
     node: &Arc<Node>,
     selector: DiagnosticSelector,
-) -> GetSymbolAccessibilityDiagnostic {
+) -> GetSymbolAccessibilityDiagnostic { ::tsox_core::fntrace::enter("wrap_fallback_error_diagnostic_selector"); 
     let node = Arc::clone(node);
     Box::new(move |symbol_accessibility_result| {
         let diagnostic_message = selector(&node, symbol_accessibility_result)?;
@@ -74,7 +74,7 @@ pub fn select_diagnostic_based_on_module_name(
     module_not_nameable: &'static Message,
     private_module: &'static Message,
     non_module: &'static Message,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("select_diagnostic_based_on_module_name"); 
     if !symbol_accessibility_result.error_module_name.is_empty() {
         if symbol_accessibility_result.accessibility == SymbolAccessibility::CannotBeNamed {
             return Some(module_not_nameable);
@@ -88,7 +88,7 @@ pub fn select_diagnostic_based_on_module_name_no_name_check(
     symbol_accessibility_result: &SymbolAccessibilityResult,
     private_module: &'static Message,
     non_module: &'static Message,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("select_diagnostic_based_on_module_name_no_name_check"); 
     if !symbol_accessibility_result.error_module_name.is_empty() {
         return Some(private_module);
     }
@@ -97,7 +97,7 @@ pub fn select_diagnostic_based_on_module_name_no_name_check(
 
 pub fn create_get_symbol_accessibility_diagnostic_for_node_name(
     node: &Arc<Node>,
-) -> GetSymbolAccessibilityDiagnostic {
+) -> GetSymbolAccessibilityDiagnostic { ::tsox_core::fntrace::enter("create_get_symbol_accessibility_diagnostic_for_node_name"); 
     if is_set_accessor_declaration(node) || is_get_accessor_declaration(node) {
         wrap_simple_diagnostic_selector(node, get_accessor_name_visibility_diagnostic_message)
     } else if is_method_declaration(node) || is_method_signature_declaration(node) {
@@ -107,6 +107,6 @@ pub fn create_get_symbol_accessibility_diagnostic_for_node_name(
     }
 }
 
-pub fn parent_kind_is(node: &Node, kind: SyntaxKind) -> bool {
+pub fn parent_kind_is(node: &Node, kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("parent_kind_is"); 
     matches!(node.parent(), Some(p) if p.kind == kind)
 }

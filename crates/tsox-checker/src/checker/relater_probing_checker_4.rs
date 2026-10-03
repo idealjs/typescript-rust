@@ -7,7 +7,7 @@ pub(crate) struct InferSubstMemoFrame {
     results: HashMap<u32, Arc<Type>>,
 }
 
-fn infer_mapping_key(params: &[Arc<Type>], substitutions: &[Arc<Type>]) -> Vec<u32> {
+fn infer_mapping_key(params: &[Arc<Type>], substitutions: &[Arc<Type>]) -> Vec<u32> { ::tsox_core::fntrace::enter("infer_mapping_key"); 
     let mut key = Vec::with_capacity(params.len() + substitutions.len());
     key.extend(params.iter().map(|p| p.id));
     key.extend(substitutions.iter().map(|s| s.id));
@@ -17,7 +17,7 @@ fn infer_mapping_key(params: &[Arc<Type>], substitutions: &[Arc<Type>]) -> Vec<u
 impl Checker {
     /// 推断替换的参数匹配：指针恒等，或同为类型参数且符号等价
     ///（实例化语境下 shell 内的参数实例与签名参数列表非同一 Arc）
-    pub(crate) fn infer_param_matches(&self, p: &Arc<Type>, t: &Arc<Type>) -> bool {
+    pub(crate) fn infer_param_matches(&self, p: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("infer_param_matches"); 
         if Arc::ptr_eq(p, t) {
             return true;
         }
@@ -37,7 +37,7 @@ impl Checker {
         t: &Arc<Type>,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_type_parameters"); 
         if params.is_empty() || substitutions.is_empty() {
             return Arc::clone(t);
         }
@@ -95,7 +95,7 @@ impl Checker {
         target: &Arc<Type>,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("attach_substituted_alias"); 
         let Some(alias) = source.alias.as_ref() else {
             return;
         };
@@ -120,7 +120,7 @@ impl Checker {
         t: &Arc<Type>,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_type_parameters_inner"); 
 
         for (i, p) in params.iter().enumerate() {
             if if self.erase_signature_strict {
@@ -253,7 +253,7 @@ impl Checker {
         tl: &TemplateLiteralTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_template_literal"); 
         let new_types: Vec<Arc<Type>> = tl
             .types
             .iter()

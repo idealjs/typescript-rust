@@ -18,7 +18,7 @@ use tsox_frontend::scanner::TOKEN_FLAGS_NONE;
 use crate::mig::m4j::r36k3_defs::R36K3NodeFactoryExt;
 use crate::printer::NodeFactory;
 
-pub fn find_super_statement_index_path(statements: &[Arc<Node>], start: usize) -> Vec<usize> {
+pub fn find_super_statement_index_path(statements: &[Arc<Node>], start: usize) -> Vec<usize> { ::tsox_core::fntrace::enter("find_super_statement_index_path"); 
     let mut indices =
         find_super_statement_index_path_worker(statements, start, Vec::new()).unwrap_or_default();
     indices.reverse();
@@ -29,7 +29,7 @@ pub fn find_super_statement_index_path_worker(
     statements: &[Arc<Node>],
     start: usize,
     indices: Vec<usize>,
-) -> Option<Vec<usize>> {
+) -> Option<Vec<usize>> { ::tsox_core::fntrace::enter("find_super_statement_index_path_worker"); 
     let mut indices = indices;
     for i in start..statements.len() {
         let statement = &statements[i];
@@ -56,7 +56,7 @@ pub fn find_super_statement_index_path_worker(
     None
 }
 
-pub fn get_super_call_from_statement(statement: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_super_call_from_statement(statement: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_super_call_from_statement"); 
     if !is_expression_statement(statement) {
         return None;
     }
@@ -67,7 +67,7 @@ pub fn get_super_call_from_statement(statement: &Arc<Node>) -> Option<Arc<Node>>
     None
 }
 
-pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange {
+pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("move_range_past_modifiers"); 
     if is_property_declaration(node) || is_method_declaration(node) {
         return TextRange::new(node.name().unwrap().pos(), node.end());
     }
@@ -85,7 +85,7 @@ pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange {
     move_range_past_decorators(node)
 }
 
-pub fn move_range_past_decorators(node: &Arc<Node>) -> TextRange {
+pub fn move_range_past_decorators(node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("move_range_past_decorators"); 
     let mut last_decorator: Option<Arc<Node>> = None;
     if can_have_modifiers(node) {
         let nodes = node.modifier_nodes();
@@ -102,7 +102,7 @@ pub fn move_range_past_decorators(node: &Arc<Node>) -> TextRange {
     node.loc
 }
 
-pub fn get_non_assignment_operator_for_compound_assignment(kind: SyntaxKind) -> SyntaxKind {
+pub fn get_non_assignment_operator_for_compound_assignment(kind: SyntaxKind) -> SyntaxKind { ::tsox_core::fntrace::enter("get_non_assignment_operator_for_compound_assignment"); 
     match kind {
         SyntaxKind::PlusEqualsToken => SyntaxKind::PlusToken,
         SyntaxKind::MinusEqualsToken => SyntaxKind::MinusToken,
@@ -125,7 +125,7 @@ pub fn get_non_assignment_operator_for_compound_assignment(kind: SyntaxKind) -> 
     }
 }
 
-pub fn constant_expression(value: &ConstantValue, factory: &NodeFactory) -> Option<Arc<Node>> {
+pub fn constant_expression(value: &ConstantValue, factory: &NodeFactory) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("constant_expression"); 
     match value {
         ConstantValue::String(s) => Some(factory.new_string_literal(s, TOKEN_FLAGS_NONE)),
         ConstantValue::Number(n) => {

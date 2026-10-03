@@ -16,7 +16,7 @@ pub struct StdioConn {
 }
 
 impl Clone for StdioConn {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         StdioConn {
             stdin: std::io::stdin(),
             stdout: std::io::stdout(),
@@ -29,37 +29,37 @@ pub trait ReadWriteCloser: Read + Write {
 }
 
 impl Read for StdioConn {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("read"); 
         self.stdin.read(buf)
     }
 }
 
 impl Write for StdioConn {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.stdout.write(buf)
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         self.stdout.flush()
     }
 }
 
 impl ReadWriteCloser for StdioConn {
-    fn close(&mut self) -> Result<(), String> {
+    fn close(&mut self) -> Result<(), String> { ::tsox_core::fntrace::enter("close"); 
         let _ = self.stdin.read_to_string(&mut String::new());
         Ok(())
     }
 }
 
 impl ReadWriteCloser for std::os::unix::net::UnixStream {
-    fn close(&mut self) -> Result<(), String> {
+    fn close(&mut self) -> Result<(), String> { ::tsox_core::fntrace::enter("close"); 
         std::os::unix::net::UnixStream::shutdown(self, std::net::Shutdown::Both)
             .map_err(|e| e.to_string())
     }
 }
 
 impl std::io::Read for Conn {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("read"); 
         match self {
             Conn::Stdio(c) => c.read(buf),
             Conn::Unix(s) => s.read(buf),
@@ -68,14 +68,14 @@ impl std::io::Read for Conn {
 }
 
 impl std::io::Write for Conn {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         match self {
             Conn::Stdio(c) => c.write(buf),
             Conn::Unix(s) => s.write(buf),
         }
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         match self {
             Conn::Stdio(c) => c.flush(),
             Conn::Unix(s) => s.flush(),
@@ -84,7 +84,7 @@ impl std::io::Write for Conn {
 }
 
 impl tsox_compile::mig::m3l_cm_2::ReadWriteCloser for Conn {
-    fn close(&mut self) -> std::io::Result<()> {
+    fn close(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("close"); 
         match self {
             Conn::Stdio(c) => ReadWriteCloser::close(c).map_err(std::io::Error::other),
             Conn::Unix(s) => std::os::unix::net::UnixStream::shutdown(s, std::net::Shutdown::Both),
@@ -97,7 +97,7 @@ pub struct PipeTransport {
     path: String,
 }
 
-pub fn new_pipe_transport(path: &str) -> Result<PipeTransport, String> {
+pub fn new_pipe_transport(path: &str) -> Result<PipeTransport, String> { ::tsox_core::fntrace::enter("new_pipe_transport"); 
     Ok(PipeTransport {
         listener: new_pipe_listener(path)?,
         path: path.to_string(),
@@ -105,27 +105,27 @@ pub fn new_pipe_transport(path: &str) -> Result<PipeTransport, String> {
 }
 
 impl PipeTransport {
-    pub fn accept(&self) -> Result<Conn, String> {
+    pub fn accept(&self) -> Result<Conn, String> { ::tsox_core::fntrace::enter("accept"); 
         let (stream, _) = self.listener.accept().map_err(|e| e.to_string())?;
         Ok(Conn::Unix(stream))
     }
 
-    pub fn close(&self) -> Result<(), String> {
+    pub fn close(&self) -> Result<(), String> { ::tsox_core::fntrace::enter("close"); 
         let _ = std::fs::remove_file(&self.path);
         Ok(())
     }
 
-    pub fn path(&self) -> &str {
+    pub fn path(&self) -> &str { ::tsox_core::fntrace::enter("path"); 
         &self.path
     }
 }
 
-pub fn new_pipe_listener(path: &str) -> Result<std::os::unix::net::UnixListener, String> {
+pub fn new_pipe_listener(path: &str) -> Result<std::os::unix::net::UnixListener, String> { ::tsox_core::fntrace::enter("new_pipe_listener"); 
     let _ = std::fs::remove_file(path);
     std::os::unix::net::UnixListener::bind(path).map_err(|e| e.to_string())
 }
 
-pub fn generate_pipe_path(name: &str) -> String {
+pub fn generate_pipe_path(name: &str) -> String { ::tsox_core::fntrace::enter("generate_pipe_path"); 
     std::env::temp_dir().join(name).to_string_lossy().to_string()
 }
 
@@ -133,12 +133,12 @@ pub struct StdioTransport {
     used: bool,
 }
 
-pub fn new_stdio_transport() -> StdioTransport {
+pub fn new_stdio_transport() -> StdioTransport { ::tsox_core::fntrace::enter("new_stdio_transport"); 
     StdioTransport { used: false }
 }
 
 impl StdioTransport {
-    pub fn accept(&mut self) -> Result<Conn, String> {
+    pub fn accept(&mut self) -> Result<Conn, String> { ::tsox_core::fntrace::enter("accept"); 
         if self.used {
             return Err("EOF".to_string());
         }
@@ -149,7 +149,7 @@ impl StdioTransport {
         }))
     }
 
-    pub fn close(&self) -> Result<(), String> {
+    pub fn close(&self) -> Result<(), String> { ::tsox_core::fntrace::enter("close"); 
         Ok(())
     }
 }

@@ -21,7 +21,7 @@ thread_local! {
     static FACTORY_EMIT_CONTEXT: OnceCell<&'static EmitContext> = const { OnceCell::new() };
 }
 
-fn factory_emit_context() -> &'static EmitContext {
+fn factory_emit_context() -> &'static EmitContext { ::tsox_core::fntrace::enter("factory_emit_context"); 
     FACTORY_EMIT_CONTEXT.with(|cell| {
         *cell.get_or_init(|| Box::leak(Box::new(EmitContext::default())))
     })
@@ -32,7 +32,7 @@ pub struct R39K10Visitor {
 }
 
 impl Default for R39K10Visitor {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             inner: tsox_frontend::ast::mig::m3c::NodeVisitor {
                 factory: tsox_frontend::ast::mig::m3c::NodeFactory {
@@ -46,22 +46,22 @@ impl Default for R39K10Visitor {
 }
 
 impl R39K10Visitor {
-    pub fn visit_node(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_node(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_node"); 
         Arc::clone(node)
     }
 
-    pub fn visit_node_opt(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn visit_node_opt(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node_opt"); 
         node.cloned()
     }
 
     pub fn visit_modifiers(
         &mut self,
         modifiers: Option<&Arc<ModifierList>>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         modifiers.cloned()
     }
 
-    pub fn visit_nodes(&mut self, nodes: Option<&NodeList>) -> NodeList {
+    pub fn visit_nodes(&mut self, nodes: Option<&NodeList>) -> NodeList { ::tsox_core::fntrace::enter("visit_nodes"); 
         match nodes {
             Some(list) => {
                 let mut new_list = NodeList::new(list.nodes.clone());
@@ -72,7 +72,7 @@ impl R39K10Visitor {
         }
     }
 
-    pub fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         m3c::visit_each_child(node, &mut self.inner)
     }
 }
@@ -85,19 +85,19 @@ pub trait R39K10LegacyDecoratorsExt {
 }
 
 impl R39K10LegacyDecoratorsExt for LegacyDecoratorsTransformer {
-    fn emit_context(&self) -> &'static mut EmitContext {
+    fn emit_context(&self) -> &'static mut EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         Box::leak(Box::new(EmitContext::default()))
     }
 
-    fn factory(&self) -> NodeFactory<'static> {
+    fn factory(&self) -> NodeFactory<'static> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(factory_emit_context())
     }
 
-    fn visitor(&mut self) -> R39K10Visitor {
+    fn visitor(&mut self) -> R39K10Visitor { ::tsox_core::fntrace::enter("visitor"); 
         R39K10Visitor::default()
     }
 
-    fn finish_class_element(&mut self, updated: &Arc<Node>, original: &Arc<Node>) -> Arc<Node> {
+    fn finish_class_element(&mut self, updated: &Arc<Node>, original: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("finish_class_element"); 
         if !Arc::ptr_eq(updated, original) {
             self.emit_context_mut().set_comment_range(updated, original.loc);
             let source_map_range = move_range_past_modifiers(original);
@@ -111,7 +111,7 @@ impl R39K10LegacyDecoratorsExt for LegacyDecoratorsTransformer {
 pub fn r39k10_elide_modifiers(
     f: &NodeFactory,
     modifiers: Option<&Arc<ModifierList>>,
-) -> Option<Arc<ModifierList>> {
+) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("r39k10_elide_modifiers"); 
     let modifiers = modifiers?;
     if modifiers.list.nodes.is_empty() {
         return Some(Arc::clone(modifiers));
@@ -144,7 +144,7 @@ impl R39K10NodeFactoryExt for NodeFactory<'_> {
         &self,
         decorators: Option<Arc<ModifierList>>,
         body: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_static_block_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ClassStaticBlockDeclaration,
             NodeData::ClassStaticBlockDeclaration(ndg::ClassStaticBlockDeclarationData {
@@ -161,7 +161,7 @@ impl R39K10NodeFactoryExt for NodeFactory<'_> {
         question_dot_token: Option<&Arc<Node>>,
         name: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_access_expression"); 
         let mut updated = Node::new(
             SyntaxKind::PropertyAccessExpression,
             NodeData::PropertyAccessExpression(ndg::PropertyAccessExpressionData {
@@ -184,7 +184,7 @@ pub trait R39K10NodeExt {
 }
 
 impl R39K10NodeExt for Node {
-    fn parameters(&self) -> Option<&Arc<NodeList>> {
+    fn parameters(&self) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("parameters"); 
         match &self.data {
             NodeData::ConstructorDeclaration(d) => Some(&d.parameters),
             NodeData::MethodDeclaration(d) => Some(&d.parameters),
@@ -196,7 +196,7 @@ impl R39K10NodeExt for Node {
         }
     }
 
-    fn body(&self) -> Option<&Arc<Node>> {
+    fn body(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("body"); 
         match &self.data {
             NodeData::ConstructorDeclaration(d) => d.body.as_ref(),
             NodeData::MethodDeclaration(d) => d.body.as_ref(),
@@ -208,14 +208,14 @@ impl R39K10NodeExt for Node {
         }
     }
 
-    fn dot_dot_dot_token(&self) -> Option<&Arc<Node>> {
+    fn dot_dot_dot_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("dot_dot_dot_token"); 
         match &self.data {
             NodeData::ParameterDeclaration(d) => d.dot_dot_dot_token.as_ref(),
             _ => None,
         }
     }
 
-    fn initializer(&self) -> Option<&Arc<Node>> {
+    fn initializer(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("initializer"); 
         match &self.data {
             NodeData::ParameterDeclaration(d) => d.initializer.as_ref(),
             NodeData::PropertyDeclaration(d) => d.initializer.as_ref(),

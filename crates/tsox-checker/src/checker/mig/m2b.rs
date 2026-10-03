@@ -17,7 +17,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::{Node, Symbol, SymbolFlags, SyntaxKind};
 
 impl Checker {
-    pub fn mark_type_node_as_referenced(&mut self, node: Option<&Arc<Node>>) {
+    pub fn mark_type_node_as_referenced(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("mark_type_node_as_referenced"); 
         if let Some(node) = node {
             if let Some(name) = get_type_reference_name_arc(node) {
                 self.mark_entity_name_or_entity_expression_as_reference(&name, false);
@@ -25,7 +25,7 @@ impl Checker {
         }
     }
 
-    pub fn may_resolve_type_alias(&mut self, node: &Arc<Node>) -> bool {
+    pub fn may_resolve_type_alias(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("may_resolve_type_alias"); 
         match node.kind {
             SyntaxKind::TypeReference => self
                 .resolve_type_reference_name(node, SymbolFlags::TYPE, false)
@@ -80,7 +80,7 @@ impl Checker {
         relation: &Relation,
         report_errors: bool,
         diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("maybe_add_missing_await_info"); 
         if let (Some(error_node), true, Some(diagnostic_output)) =
             (error_node, report_errors, diagnostic_output)
         {
@@ -102,7 +102,7 @@ impl Checker {
         }
     }
 
-    pub fn maybe_mapped_type(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+    pub fn maybe_mapped_type(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("maybe_mapped_type"); 
         let mut node = Arc::clone(node);
         loop {
             let parent = match node.parent() {
@@ -136,7 +136,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         kind: TypeFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("maybe_type_of_kind_considering_base_constraint"); 
         if self.maybe_type_of_kind(t, kind) {
             return true;
         }
@@ -144,7 +144,7 @@ impl Checker {
         self.maybe_type_of_kind(&base_constraint, kind)
     }
 
-    pub fn merge_pattern_ambient_modules(&mut self) {
+    pub fn merge_pattern_ambient_modules(&mut self) { ::tsox_core::fntrace::enter("merge_pattern_ambient_modules"); 
         let modules = r22k6_defs::take_pattern_ambient_modules();
         let mut groups_by_pattern: HashMap<String, Vec<usize>> = HashMap::new();
         let mut grouped: Vec<PatternAmbientModule> =
@@ -194,7 +194,7 @@ impl Checker {
         node: &Arc<Node>,
         identifier: Option<&Arc<Node>>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("need_collision_check_for_identifier"); 
         if let Some(identifier) = identifier {
             if identifier.text() != name {
                 return false;
@@ -240,7 +240,7 @@ impl Checker {
         call_signatures: Vec<Arc<Signature>>,
         construct_signatures: Vec<Arc<Signature>>,
         index_infos: Vec<Arc<IndexInfo>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_anonymous_type"); 
         let t = self.new_object_type(ObjectFlags::Anonymous, Some(Arc::clone(symbol)));
         self.set_structured_type_members(
             &t,
@@ -256,7 +256,7 @@ impl Checker {
         &mut self,
         this_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_accessor_decorator_context_type"); 
         let global = self.get_global_class_accessor_decorator_context_type();
         self.try_create_type_reference(&global, &[this_type.clone(), value_type.clone()])
     }
@@ -265,7 +265,7 @@ impl Checker {
         &mut self,
         this_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_accessor_decorator_result_type"); 
         let global = self.get_global_class_accessor_decorator_result_type();
         self.try_create_type_reference(&global, &[this_type.clone(), value_type.clone()])
     }
@@ -274,7 +274,7 @@ impl Checker {
         &mut self,
         this_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_accessor_decorator_target_type"); 
         let global = self.get_global_class_accessor_decorator_target_type();
         self.try_create_type_reference(&global, &[this_type.clone(), value_type.clone()])
     }
@@ -282,7 +282,7 @@ impl Checker {
     pub fn new_class_decorator_context_type(
         &mut self,
         class_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_decorator_context_type"); 
         let global = self.get_global_class_decorator_context_type();
         self.try_create_type_reference(&global, &[class_type.clone()])
     }
@@ -291,7 +291,7 @@ impl Checker {
         &mut self,
         this_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_field_decorator_context_type"); 
         let global = self.get_global_class_field_decorator_context_type();
         self.try_create_type_reference(&global, &[this_type.clone(), value_type.clone()])
     }
@@ -300,7 +300,7 @@ impl Checker {
         &mut self,
         this_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_field_decorator_initializer_mutator_type"); 
         let this_param = self.new_parameter("this", this_type);
         let value_param = self.new_parameter("value", value_type);
         self.new_function_type(&[], None, &[this_param, value_param], value_type)
@@ -310,7 +310,7 @@ impl Checker {
         &mut self,
         class_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_getter_decorator_context_type"); 
         let global = self.get_global_class_getter_decorator_context_type();
         self.try_create_type_reference(&global, &[class_type.clone(), value_type.clone()])
     }
@@ -320,7 +320,7 @@ impl Checker {
         node: &Arc<Node>,
         this_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_member_decorator_context_type_for_node"); 
         let is_static = tsox_frontend::ast::has_static_modifier(node);
         let is_private = node.name().is_some_and(|n| tsox_frontend::ast::is_private_identifier(&n));
         let name_node = node.name().unwrap();
@@ -352,7 +352,7 @@ impl Checker {
         &mut self,
         class_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_method_decorator_context_type"); 
         let global = self.get_global_class_method_decorator_context_type();
         self.try_create_type_reference(&global, &[class_type.clone(), value_type.clone()])
     }
@@ -361,7 +361,7 @@ impl Checker {
         &mut self,
         class_type: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_class_setter_decorator_context_type"); 
         let global = self.get_global_class_setter_decorator_context_type();
         self.try_create_type_reference(&global, &[class_type.clone(), value_type.clone()])
     }
@@ -371,7 +371,7 @@ impl Checker {
         root: ConditionalRoot,
         mapper: &Arc<TypeMapper>,
         combined_mapper: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_conditional_type"); 
         let mut data = empty_conditional_type_data();
         data.check_type = Some(self.instantiate_type(&root.check_type.clone().unwrap(), Some(mapper)));
         data.extends_type =
@@ -391,7 +391,7 @@ impl Checker {
         target_type: &Arc<Type>,
         context_type: &Arc<Type>,
         non_optional_return_type: &Arc<Type>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("new_es_decorator_call_signature"); 
         let target_param = self.new_parameter("target", target_type);
         let context_param = self.new_parameter("context", context_type);
         let void_type = self.void_type();
@@ -399,7 +399,7 @@ impl Checker {
         self.new_call_signature(None, None, vec![target_param, context_param], Some(return_type))
     }
 
-    pub fn new_getter_function_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn new_getter_function_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("new_getter_function_type"); 
         self.new_function_type(&[], None, &[], t)
     }
 
@@ -410,7 +410,7 @@ impl Checker {
         is_readonly: bool,
         declaration: Option<&Arc<Node>>,
         components: &[Arc<Node>],
-    ) -> Arc<IndexInfo> {
+    ) -> Arc<IndexInfo> { ::tsox_core::fntrace::enter("new_index_info"); 
         Arc::new(IndexInfo {
             key_type: Some(Arc::clone(key_type)),
             value_type: Some(Arc::clone(value_type)),
@@ -421,7 +421,7 @@ impl Checker {
         })
     }
 
-    pub fn new_index_type(&mut self, target: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> {
+    pub fn new_index_type(&mut self, target: &Arc<Type>, index_flags: IndexFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("new_index_type"); 
         let mut data = empty_index_type_data();
         data.target = Some(Arc::clone(target));
         data.index_flags = index_flags;
@@ -433,7 +433,7 @@ impl Checker {
         object_type: &Arc<Type>,
         index_type: &Arc<Type>,
         access_flags: AccessFlags,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_indexed_access_type"); 
         let mut data = empty_indexed_access_type_data();
         data.object_type = Some(Arc::clone(object_type));
         data.index_type = Some(Arc::clone(index_type));
@@ -449,7 +449,7 @@ impl Checker {
         &mut self,
         object_flags: ObjectFlags,
         types: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_intersection_type"); 
         let mut data = IntersectionTypeData::default();
         data.union_or_intersection.types = types.to_vec();
         self.new_type(
@@ -459,7 +459,7 @@ impl Checker {
         )
     }
 
-    pub fn new_intrinsic_type(&mut self, flags: TypeFlags, intrinsic_name: &str) -> Arc<Type> {
+    pub fn new_intrinsic_type(&mut self, flags: TypeFlags, intrinsic_name: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("new_intrinsic_type"); 
         self.new_intrinsic_type_ex(flags, intrinsic_name, ObjectFlags::empty())
     }
 
@@ -468,7 +468,7 @@ impl Checker {
         flags: TypeFlags,
         intrinsic_name: &str,
         object_flags: ObjectFlags,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_intrinsic_type_ex"); 
         let mut data = empty_intrinsic_type_data();
         data.intrinsic_name = intrinsic_name.to_string();
         self.new_type(flags, object_flags, TypeData::Intrinsic(data))
@@ -479,7 +479,7 @@ impl Checker {
         flags: TypeFlags,
         value: LiteralValue,
         regular_type: Option<&Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_literal_type"); 
         let data = empty_literal_type_data(value);
         let mut t = self.new_type(flags, ObjectFlags::empty(), TypeData::Literal(data));
         let regular = match regular_type {
@@ -498,7 +498,7 @@ impl Checker {
         &mut self,
         object_flags: ObjectFlags,
         symbol: Option<Arc<Symbol>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_object_type"); 
         let data = if object_flags.intersects(ObjectFlags::CLASS_OR_INTERFACE) {
             TypeData::Interface(InterfaceTypeData::default())
         } else if object_flags.intersects(ObjectFlags::Tuple) {
@@ -527,7 +527,7 @@ impl Checker {
         t
     }
 
-    pub fn new_parameter(&mut self, name: &str, t: &Arc<Type>) -> Arc<Symbol> {
+    pub fn new_parameter(&mut self, name: &str, t: &Arc<Type>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("new_parameter"); 
         let symbol = self.new_symbol(SymbolFlags::FunctionScopedVariable, name);
         if let Some(links) = self.value_symbol_links.get_mut(&symbol) {
             links.resolved_type = Some(Arc::clone(t));
@@ -535,7 +535,7 @@ impl Checker {
         symbol
     }
 
-    pub fn new_property(&mut self, name: &str, t: &Arc<Type>) -> Arc<Symbol> {
+    pub fn new_property(&mut self, name: &str, t: &Arc<Type>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("new_property"); 
         let symbol = self.new_symbol(SymbolFlags::Property, name);
         if let Some(links) = self.value_symbol_links.get_mut(&symbol) {
             links.resolved_type = Some(Arc::clone(t));
@@ -543,7 +543,7 @@ impl Checker {
         symbol
     }
 
-    pub fn new_setter_function_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn new_setter_function_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("new_setter_function_type"); 
         let value_param = self.new_parameter("value", t);
         let void_type = self.void_type();
         self.new_function_type(&[], None, &[value_param], &void_type)
@@ -559,7 +559,7 @@ impl Checker {
         resolved_return_type: &Arc<Type>,
         resolved_type_predicate: Option<TypePredicate>,
         min_argument_count: usize,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("new_signature"); 
         self.signature_count += 1;
         Arc::new(Signature {
             id: self.signature_count,
@@ -583,7 +583,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         target: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_string_mapping_type"); 
         let mut data = empty_string_mapping_type_data();
         data.target = Some(Arc::clone(target));
         let mut t = self.new_type(
@@ -601,7 +601,7 @@ impl Checker {
         &mut self,
         base_type: &Arc<Type>,
         constraint: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_substitution_type"); 
         let mut data = empty_substitution_type_data();
         data.base_type = Some(Arc::clone(base_type));
         data.constraint = Some(Arc::clone(constraint));
@@ -612,7 +612,7 @@ impl Checker {
         )
     }
 
-    pub fn new_symbol(&mut self, flags: SymbolFlags, name: &str) -> Arc<Symbol> {
+    pub fn new_symbol(&mut self, flags: SymbolFlags, name: &str) -> Arc<Symbol> { ::tsox_core::fntrace::enter("new_symbol"); 
         self.symbol_count += 1;
         Arc::new(Symbol::new(
             flags | SymbolFlags::Transient,
@@ -625,7 +625,7 @@ impl Checker {
         flags: SymbolFlags,
         name: &str,
         check_flags: CheckFlags,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("new_symbol_ex"); 
         let mut result = self.new_symbol(flags, name);
         if let Some(result_mut) = Arc::get_mut(&mut result) {
             result_mut.check_flags = check_flags;

@@ -7,7 +7,7 @@ use tsox_frontend::ast::Node;
 
 use crate::ls::lsutil_user_preferences::OrganizeImportsTypeOrder;
 
-pub fn filter_import_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn filter_import_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("filter_import_declarations"); 
     statements
         .iter()
         .filter(|stmt| stmt.kind == tsox_frontend::ast::SyntaxKind::ImportDeclaration)
@@ -15,7 +15,7 @@ pub fn filter_import_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> {
         .collect()
 }
 
-pub fn get_external_module_name(specifier: Option<&Arc<Node>>) -> String {
+pub fn get_external_module_name(specifier: Option<&Arc<Node>>) -> String { ::tsox_core::fntrace::enter("get_external_module_name"); 
     let _ = specifier;
     String::new()
 }
@@ -24,7 +24,7 @@ pub fn compare_module_specifiers(
     m1: Option<&Arc<Node>>,
     m2: Option<&Arc<Node>>,
     comparer: &StringComparer,
-) -> i32 {
+) -> i32 { ::tsox_core::fntrace::enter("compare_module_specifiers"); 
     let name1 = get_external_module_name(m1);
     let name2 = get_external_module_name(m2);
     let ord = compare_booleans(name1.is_empty(), name2.is_empty());
@@ -45,7 +45,7 @@ pub fn compare_imports_or_require_statements(
     s1: &Arc<Node>,
     s2: &Arc<Node>,
     comparer: &StringComparer,
-) -> i32 {
+) -> i32 { ::tsox_core::fntrace::enter("compare_imports_or_require_statements"); 
     let ord = compare_module_specifiers(None, None, comparer);
     if ord != 0 {
         return ord;
@@ -53,7 +53,7 @@ pub fn compare_imports_or_require_statements(
     compare_import_kind(s1, s2)
 }
 
-fn compare_import_kind(s1: &Arc<Node>, s2: &Arc<Node>) -> i32 {
+fn compare_import_kind(s1: &Arc<Node>, s2: &Arc<Node>) -> i32 { ::tsox_core::fntrace::enter("compare_import_kind"); 
     cmp_compare_i32(get_import_kind_order(s1), get_import_kind_order(s2))
 }
 
@@ -71,7 +71,7 @@ const IMPORT_KIND_ORDER_IMPORT_EQUALS: i32 = 5;
 const IMPORT_KIND_ORDER_REQUIRE: i32 = 6;
 const IMPORT_KIND_ORDER_UNKNOWN: i32 = 7;
 
-fn get_import_kind_order(s1: &Arc<Node>) -> i32 {
+fn get_import_kind_order(s1: &Arc<Node>) -> i32 { ::tsox_core::fntrace::enter("get_import_kind_order"); 
     match s1.kind {
         tsox_frontend::ast::SyntaxKind::ImportDeclaration => IMPORT_KIND_ORDER_NAMED,
         tsox_frontend::ast::SyntaxKind::ImportEqualsDeclaration => IMPORT_KIND_ORDER_IMPORT_EQUALS,
@@ -85,7 +85,7 @@ pub(super) fn compare_import_or_export_specifiers(
     _s2: &Arc<Node>,
     comparer: &StringComparer,
     type_order: OrganizeImportsTypeOrder,
-) -> i32 {
+) -> i32 { ::tsox_core::fntrace::enter("compare_import_or_export_specifiers"); 
     let s1_name = String::new();
     let s2_name = String::new();
     let s1_type_only = false;
@@ -114,7 +114,7 @@ pub fn get_import_specifier_insertion_index(
     _sorted_imports: &[Arc<Node>],
     _new_import: &Arc<Node>,
     _comparer: &StatementComparer,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_import_specifier_insertion_index"); 
     0
 }
 
@@ -122,7 +122,7 @@ pub fn get_import_declaration_insert_index(
     _sorted_imports: &[Arc<Node>],
     _new_import: &Arc<Node>,
     _comparer: &dyn Fn(&Arc<Node>, &Arc<Node>) -> i32,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_import_declaration_insert_index"); 
     0
 }
 
@@ -134,7 +134,7 @@ pub struct CaseSensitivityDetectionResult {
 pub fn detect_module_specifier_case_by_sort(
     import_decls_by_group: &[Vec<Arc<Node>>],
     comparers_to_test: &[StringComparer],
-) -> (Option<StringComparer>, bool) {
+) -> (Option<StringComparer>, bool) { ::tsox_core::fntrace::enter("detect_module_specifier_case_by_sort"); 
     let module_specifiers_by_group: Vec<Vec<String>> = import_decls_by_group
         .iter()
         .map(|import_group| import_group.iter().map(|_decl| String::new()).collect())
@@ -146,7 +146,7 @@ pub fn detect_module_specifier_case_by_sort(
 pub fn detect_case_sensitivity_by_sort(
     original_groups: &[Vec<String>],
     comparers_to_test: &[StringComparer],
-) -> CaseSensitivityDetectionResult {
+) -> CaseSensitivityDetectionResult { ::tsox_core::fntrace::enter("detect_case_sensitivity_by_sort"); 
     let mut best_index: Option<usize> = None;
     let mut best_diff = i32::MAX;
 
@@ -178,7 +178,7 @@ pub fn detect_case_sensitivity_by_sort(
     }
 }
 
-pub fn measure_sortedness(arr: &[String], comparer: &StringComparer) -> i32 {
+pub fn measure_sortedness(arr: &[String], comparer: &StringComparer) -> i32 { ::tsox_core::fntrace::enter("measure_sortedness"); 
     let mut count = 0i32;
     for j in 0..arr.len().saturating_sub(1) {
         if comparer(&arr[j], &arr[j + 1]) > 0 {

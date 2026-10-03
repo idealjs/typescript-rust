@@ -4,7 +4,7 @@ use crate::checker::checker_contextual::*;
 use crate::checker::types::{SignatureKind, Type, TypeData, TypeFlags};
 use tsox_frontend::ast::NodeData;
 
-fn is_logical_or_coalescing(node: &Arc<Node>) -> bool {
+fn is_logical_or_coalescing(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_logical_or_coalescing"); 
     matches!(
         &node.data,
         NodeData::BinaryExpression(b)
@@ -23,7 +23,7 @@ impl Checker {
         cond_expr: &Arc<Node>,
         cond_type: &Arc<Type>,
         body: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_testing_known_truthy_callable_or_awaitable"); 
         if !self.strict_null_checks {
             return;
         }
@@ -36,7 +36,7 @@ impl Checker {
         cond_expr: &Arc<Node>,
         cond_type: &Arc<Type>,
         body: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_truthy_callable_chain"); 
         let mut cur = Self::skip_parentheses(cond_expr);
         self.check_testing_known_truthy_type(&cur, cond_type, body);
         while let NodeData::BinaryExpression(b) = &cur.data {
@@ -55,7 +55,7 @@ impl Checker {
         cond_expr: &Arc<Node>,
         cond_type: &Arc<Type>,
         body: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_testing_known_truthy_type"); 
         let mut location = Arc::clone(cond_expr);
         if is_logical_or_coalescing(&location)
             && let NodeData::BinaryExpression(b) = &location.data
@@ -143,7 +143,7 @@ impl Checker {
         }
     }
 
-    fn type_has_truthy_fact(&mut self, t: &Arc<Type>) -> bool {
+    fn type_has_truthy_fact(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_has_truthy_fact"); 
         if t.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &t.data {
                 return u
@@ -159,7 +159,7 @@ impl Checker {
         )
     }
 
-    fn truthy_symbol_at_location(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn truthy_symbol_at_location(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("truthy_symbol_at_location"); 
         let is_property_name = node.parent().as_ref().is_some_and(|p| {
             matches!(&p.data, NodeData::PropertyAccessExpression(pa) if Arc::ptr_eq(&pa.name, node))
         });
@@ -172,7 +172,7 @@ impl Checker {
         self.program.symbol_map().symbol_of(node).map(Arc::clone)
     }
 
-    fn collect_identifiers(node: &Arc<Node>, out: &mut Vec<(Arc<Node>, Arc<Node>)>) {
+    fn collect_identifiers(node: &Arc<Node>, out: &mut Vec<(Arc<Node>, Arc<Node>)>) { ::tsox_core::fntrace::enter("collect_identifiers"); 
         if node.kind == SyntaxKind::Identifier {
             let parent = node.parent().unwrap_or_else(|| Arc::clone(node));
             out.push((Arc::clone(node), parent));
@@ -183,7 +183,7 @@ impl Checker {
         });
     }
 
-    fn symbol_used_in_binary_chain(&mut self, node: &Arc<Node>, tested: &Arc<Symbol>) -> bool {
+    fn symbol_used_in_binary_chain(&mut self, node: &Arc<Node>, tested: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_used_in_binary_chain"); 
         let mut node = Arc::clone(node);
         loop {
             let NodeData::BinaryExpression(b) = &node.data else {
@@ -215,7 +215,7 @@ impl Checker {
         body: &Arc<Node>,
         tested_node: &Arc<Node>,
         tested: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("symbol_used_in_condition_body"); 
         let simple_identifier_test = expr.kind == SyntaxKind::Identifier || {
             tested_node.kind == SyntaxKind::Identifier
                 && tested_node

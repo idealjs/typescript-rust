@@ -8,7 +8,7 @@ pub(crate) fn get_this_container(
     node: &Arc<Node>,
     include_arrow_functions: bool,
     include_class_computed_property_name: bool,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_this_container"); 
     let mut current = Arc::clone(node);
     loop {
         let Some(next) = current.parent() else {
@@ -77,7 +77,7 @@ pub(crate) fn get_this_container(
     }
 }
 
-fn is_class_element_kind(kind: SyntaxKind) -> bool {
+fn is_class_element_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_class_element_kind"); 
     matches!(
         kind,
         SyntaxKind::PropertyDeclaration
@@ -88,7 +88,7 @@ fn is_class_element_kind(kind: SyntaxKind) -> bool {
 }
 
 /// Go Checker.GetThisParameter：首个 this 参数
-pub(crate) fn get_this_parameter(container: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_this_parameter(container: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_this_parameter"); 
     let parameters = match &container.data {
         NodeData::FunctionExpression(d) => &d.parameters,
         NodeData::FunctionDeclaration(d) => &d.parameters,
@@ -107,7 +107,7 @@ pub(crate) fn get_this_parameter(container: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 /// Go Checker.isInParameterInitializerBeforeContainingFunction
-pub(crate) fn is_in_parameter_initializer_before_containing_function(node: &Arc<Node>) -> bool {
+pub(crate) fn is_in_parameter_initializer_before_containing_function(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_parameter_initializer_before_containing_function"); 
     let mut in_binding_initializer = false;
     let mut current = Arc::clone(node);
     while let Some(parent) = current.parent()
@@ -129,7 +129,7 @@ pub(crate) fn is_in_parameter_initializer_before_containing_function(node: &Arc<
     false
 }
 
-fn parameter_has_initializer_child(parameter: &Arc<Node>, node: &Arc<Node>) -> bool {
+fn parameter_has_initializer_child(parameter: &Arc<Node>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("parameter_has_initializer_child"); 
     match &parameter.data {
         NodeData::ParameterDeclaration(d) => d
             .initializer
@@ -139,7 +139,7 @@ fn parameter_has_initializer_child(parameter: &Arc<Node>, node: &Arc<Node>) -> b
     }
 }
 
-fn binding_element_has_initializer_child(element: &Arc<Node>, node: &Arc<Node>) -> bool {
+fn binding_element_has_initializer_child(element: &Arc<Node>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("binding_element_has_initializer_child"); 
     match &element.data {
         NodeData::BindingElement(d) => d
             .initializer
@@ -149,7 +149,7 @@ fn binding_element_has_initializer_child(element: &Arc<Node>, node: &Arc<Node>) 
     }
 }
 
-fn parameter_named_this(param: &Arc<Node>) -> bool {
+fn parameter_named_this(param: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("parameter_named_this"); 
     match &param.data {
         NodeData::ParameterDeclaration(d) => d.name.kind == SyntaxKind::ThisKeyword,
         _ => false,

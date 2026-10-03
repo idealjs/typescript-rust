@@ -8,7 +8,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("format_quick_info_for_symbol"); 
         let flags = symbol.flags;
 
         if flags.intersects(SymbolFlags::Function) {
@@ -58,7 +58,7 @@ impl Checker {
 
     /// JS 函数参数符号的文档：所在函数 JSDoc 的同名 @param tag 注释
     /// （Go getDocumentationForSymbol 对 parameter 走 JSDocParameterTag）
-    pub(crate) fn jsdoc_param_tag_documentation(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+    pub(crate) fn jsdoc_param_tag_documentation(&mut self, symbol: &Arc<Symbol>) -> Option<String> { ::tsox_core::fntrace::enter("jsdoc_param_tag_documentation"); 
         let decl = symbol
             .value_declaration
             .as_ref()
@@ -97,7 +97,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         is_method: bool,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("format_function_quick_info"); 
         let prefix = if is_method { "" } else { "function " };
         let name = self.symbol_to_string_ex(
             symbol,
@@ -122,7 +122,7 @@ impl Checker {
         format!("{}{}: {}", prefix, name, self.type_to_string(&t))
     }
 
-    pub(crate) fn format_class_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn format_class_quick_info(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("format_class_quick_info"); 
         let name = self.symbol_to_string_ex(
             symbol,
             SymbolFormatFlags::WriteTypeParametersOrArguments,
@@ -131,7 +131,7 @@ impl Checker {
         format!("class {}", name)
     }
 
-    pub(crate) fn format_interface_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn format_interface_quick_info(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("format_interface_quick_info"); 
         let name = self.symbol_to_string_ex(
             symbol,
             SymbolFormatFlags::WriteTypeParametersOrArguments,
@@ -140,11 +140,11 @@ impl Checker {
         format!("interface {}", name)
     }
 
-    pub(crate) fn format_enum_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn format_enum_quick_info(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("format_enum_quick_info"); 
         format!("enum {}", symbol.name)
     }
 
-    pub(crate) fn format_type_alias_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn format_type_alias_quick_info(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("format_type_alias_quick_info"); 
         let name = self.symbol_to_string_ex(
             symbol,
             SymbolFormatFlags::WriteTypeParametersOrArguments,
@@ -159,7 +159,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn format_type_parameter_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn format_type_parameter_quick_info(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("format_type_parameter_quick_info"); 
         let constraint = self.get_constraint_of_type_parameter_symbol(symbol);
         match constraint {
             Some(c) => format!("{} extends {}", symbol.name, self.type_to_string(&c)),
@@ -167,7 +167,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn format_enum_member_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn format_enum_member_quick_info(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("format_enum_member_quick_info"); 
         let t = self.get_type_of_symbol(symbol);
         format!("{}.{}", "<enum>", self.type_to_string(&t))
     }
@@ -176,13 +176,13 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         _node: &Arc<Node>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("format_variable_quick_info"); 
         let prefix = self.variable_decl_prefix(symbol);
         let t = self.get_type_of_symbol(symbol);
         format!("{}{}: {}", prefix, symbol.name, self.type_to_string(&t))
     }
 
-    pub(crate) fn variable_decl_prefix(&self, symbol: &Arc<Symbol>) -> &'static str {
+    pub(crate) fn variable_decl_prefix(&self, symbol: &Arc<Symbol>) -> &'static str { ::tsox_core::fntrace::enter("variable_decl_prefix"); 
         for decl in &symbol.declarations {
             if let Some(parent) = decl.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
@@ -242,11 +242,11 @@ impl Checker {
         }
     }
 
-    pub(crate) fn format_alias_quick_info(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub(crate) fn format_alias_quick_info(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("format_alias_quick_info"); 
         format!("import {}", symbol.name)
     }
 
-    pub(crate) fn format_signature_parameters(&mut self, sig: &Signature) -> String {
+    pub(crate) fn format_signature_parameters(&mut self, sig: &Signature) -> String { ::tsox_core::fntrace::enter("format_signature_parameters"); 
         let parts: Vec<String> = sig
             .parameters
             .iter()
@@ -265,7 +265,7 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn symbol_is_const(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn symbol_is_const(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_const"); 
         for decl in &symbol.declarations {
             if let Some(parent) = decl.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList
@@ -281,7 +281,7 @@ impl Checker {
     pub(crate) fn try_get_type_alias_declared_type(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("try_get_type_alias_declared_type"); 
         if let Some(links) = self.type_alias_links.get(symbol) {
             if let Some(t) = &links.declared_type {
                 // 环窗口期的 error 驻留视为未解析，触发窗口外重算
@@ -307,7 +307,7 @@ impl Checker {
     pub(crate) fn get_constraint_of_type_parameter_symbol(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_of_type_parameter_symbol"); 
         let t = self.get_type_of_symbol(symbol);
         if t.flags.contains(TypeFlags::TypeParameter) {
             return self.get_constraint_of_type_parameter(&t);
@@ -315,7 +315,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn node_has_type(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn node_has_type(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_has_type"); 
         matches!(
             node.kind,
             SyntaxKind::NumericLiteral
@@ -343,7 +343,7 @@ impl Checker {
 pub(crate) const MAX_SERIALIZATION_LEVEL: i32 = 2;
 
 /// JSDoc tag comment 的 NodeList → 纯文本
-fn jsdoc_comment_text(comment: &Option<Arc<tsox_frontend::ast::NodeList>>) -> String {
+fn jsdoc_comment_text(comment: &Option<Arc<tsox_frontend::ast::NodeList>>) -> String { ::tsox_core::fntrace::enter("jsdoc_comment_text"); 
     let Some(list) = comment else {
         return String::new();
     };

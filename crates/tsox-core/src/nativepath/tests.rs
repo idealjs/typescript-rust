@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 
-fn test_is_symlink_or_reparse_point() {
+fn test_is_symlink_or_reparse_point() { crate::fntrace::enter("test_is_symlink_or_reparse_point"); 
     use std::fs;
     use std::io::Write;
 
@@ -59,7 +59,7 @@ fn test_is_symlink_or_reparse_point() {
 
 #[test]
 
-fn test_is_symlink_or_reparse_point_long_path() {
+fn test_is_symlink_or_reparse_point_long_path() { crate::fntrace::enter("test_is_symlink_or_reparse_point_long_path"); 
     use std::fs;
     use std::io::Write;
 
@@ -89,7 +89,7 @@ fn test_is_symlink_or_reparse_point_long_path() {
 
 #[test]
 
-fn test_is_symlink_or_reparse_point_nested_in_symlink() {
+fn test_is_symlink_or_reparse_point_nested_in_symlink() { crate::fntrace::enter("test_is_symlink_or_reparse_point_nested_in_symlink"); 
     use std::fs;
     use std::io::Write;
 
@@ -128,7 +128,7 @@ fn test_is_symlink_or_reparse_point_nested_in_symlink() {
 
 #[test]
 
-fn test_is_symlink_or_reparse_point_relative_path() {
+fn test_is_symlink_or_reparse_point_relative_path() { crate::fntrace::enter("test_is_symlink_or_reparse_point_relative_path"); 
     use std::fs;
     use std::io::Write;
 

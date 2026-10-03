@@ -23,20 +23,20 @@ use crate::mig::m4h_4::r36k9_defs::cloned_node_list;
 use crate::mig::r33k6_shim::Visitor;
 use crate::printer::generated_identifier_flags::EmitContext;
 
-pub fn clone_emit_context(context: &Arc<EmitContext>) -> EmitContext {
+pub fn clone_emit_context(context: &Arc<EmitContext>) -> EmitContext { ::tsox_core::fntrace::enter("clone_emit_context"); 
     let mut cloned = EmitContext::new();
     cloned.next_id = AtomicU32::new(context.next_id.load(std::sync::atomic::Ordering::Relaxed));
     cloned
 }
 
 impl Visitor {
-    pub fn visit_nodes(&mut self, nodes: impl IntoIterator<Item = Arc<Node>>) -> Vec<Arc<Node>> {
+    pub fn visit_nodes(&mut self, nodes: impl IntoIterator<Item = Arc<Node>>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("visit_nodes"); 
         nodes.into_iter().collect()
     }
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_import_default_helper(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_import_default_helper(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_default_helper"); 
         self.new_call_expression(
             &self.new_unscoped_helper_name("__importDefault"),
             None,
@@ -51,7 +51,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         modifiers: Option<Arc<tsox_frontend::ast::node::ModifierList>>,
         declaration_list: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_variable_statement"); 
         let mut updated = Node::new(
             SyntaxKind::VariableStatement,
             NodeData::VariableStatement(VariableStatementData {
@@ -69,7 +69,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         declarations: &NodeList,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_variable_declaration_list"); 
         let mut updated = Node::new(
             SyntaxKind::VariableDeclarationList,
             NodeData::VariableDeclarationList(VariableDeclarationListData {
@@ -88,7 +88,7 @@ impl<'a> NodeFactory<'a> {
         initializer: Option<Arc<Node>>,
         expression: Option<Arc<Node>>,
         statement: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_for_in_or_of_statement"); 
         let for_stmt = match &node.data {
             NodeData::ForInOrOfStatement(d) => d,
             _ => panic!("update_for_in_or_of_statement on wrong kind"),
@@ -109,7 +109,7 @@ impl<'a> NodeFactory<'a> {
 }
 
 impl<'a> CommonJSModuleTransformer<'a> {
-    pub(crate) fn create_require_call(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn create_require_call(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_require_call"); 
         let source_file = self.current_source_file.clone();
         let module_name = get_external_module_name_literal(
             &self.factory(),
@@ -133,7 +133,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         &mut self,
         node: &Arc<Node>,
         inner_expr: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_helper_expression_for_import"); 
         let _ = node;
         inner_expr
     }
@@ -142,12 +142,12 @@ impl<'a> CommonJSModuleTransformer<'a> {
         &mut self,
         node: &Arc<Node>,
         inner_expr: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_helper_expression_for_export"); 
         let _ = node;
         inner_expr
     }
 
-    pub(crate) fn visit_expression_identifier(&mut self, name: Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn visit_expression_identifier(&mut self, name: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_expression_identifier"); 
         if is_local_name(&self.emit_context, &name) {
             return Some(name);
         }

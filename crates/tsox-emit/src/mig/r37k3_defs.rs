@@ -13,7 +13,7 @@ pub fn update_source_file_node(
     node: &Arc<Node>,
     statements: Arc<NodeList>,
     end_of_file_token: Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_source_file_node"); 
     match &node.data {
         NodeData::SourceFile(d) => {
             let mut updated = Node::new(
@@ -38,7 +38,7 @@ pub struct CjsNodeVisitor<'a> {
 }
 
 impl<'a> CjsNodeVisitor<'a> {
-    pub fn visit_node(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn visit_node(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node"); 
         let node = node?;
         match self.kind {
             CjsVisitorKind::TopLevel => self.tx.visit(node),
@@ -48,7 +48,7 @@ impl<'a> CjsNodeVisitor<'a> {
         }
     }
 
-    pub fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> (Vec<Arc<Node>>, bool) {
+    pub fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("visit_slice"); 
         let mut changed = false;
         let mut result = Vec::with_capacity(nodes.len());
         for node in nodes {
@@ -63,7 +63,7 @@ impl<'a> CjsNodeVisitor<'a> {
         (result, changed)
     }
 
-    pub fn visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_each_child"); 
         if node.kind == SyntaxKind::SourceFile {
             let data = node.as_source_file();
             let (statements, statements_changed) = self.visit_slice(&data.statements.nodes);

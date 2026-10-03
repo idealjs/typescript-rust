@@ -10,7 +10,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         base: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("attach_expando_to_function_expression_type"); 
         let mut result = base;
         if let Some(own) = self.program.symbol_map().symbol_of(node).map(Arc::clone) {
             result = self.attach_function_expando_type(&own, result);
@@ -27,7 +27,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn is_empty_literal_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_empty_literal_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_empty_literal_type"); 
         match t.intrinsic_name().as_deref() {
             Some("never") => self.strict_null_checks,
             Some("undefined") => !self.strict_null_checks,
@@ -38,7 +38,7 @@ impl Checker {
     pub(crate) fn expando_parent_has_type_annotation(
         &self,
         host: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("expando_parent_has_type_annotation"); 
         let Some(vd) = host.value_declaration.as_ref() else {
             return false;
         };
@@ -60,7 +60,7 @@ impl Checker {
         }
     }
 
-    fn declaration_container_has_type_annotation(&self, node: &Arc<Node>) -> bool {
+    fn declaration_container_has_type_annotation(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_container_has_type_annotation"); 
         node.parent()
             .and_then(|p| self.program.symbol_map().symbol_of(&p))
             .and_then(|s| s.value_declaration.clone())
@@ -71,7 +71,7 @@ impl Checker {
             .is_some()
     }
 
-    pub(crate) fn report_expando_implicit_any_array(&mut self, node: &Arc<Node>, member: &str) {
+    pub(crate) fn report_expando_implicit_any_array(&mut self, node: &Arc<Node>, member: &str) { ::tsox_core::fntrace::enter("report_expando_implicit_any_array"); 
         if !self.no_implicit_any {
             return;
         }

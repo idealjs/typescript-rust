@@ -16,7 +16,7 @@ pub enum FindAncestorResult {
     Quit,
 }
 
-pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult {
+pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult { ::tsox_core::fntrace::enter("to_find_ancestor_result"); 
     if b {
         FindAncestorResult::True
     } else {
@@ -27,7 +27,7 @@ pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult {
 pub fn find_ancestor_or_quit(
     node: Option<&Arc<Node>>,
     callback: impl Fn(&Arc<Node>) -> FindAncestorResult,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_or_quit"); 
     let mut node = node.cloned();
     while let Some(current) = node {
         match callback(&current) {
@@ -43,7 +43,7 @@ pub fn find_ancestor_or_quit(
 pub fn find_many_ancestors(
     node: Option<&Arc<Node>>,
     callbacks: &[&dyn Fn(&Arc<Node>) -> bool],
-) -> Vec<Option<Arc<Node>>> {
+) -> Vec<Option<Arc<Node>>> { ::tsox_core::fntrace::enter("find_many_ancestors"); 
     let mut ancestors: Vec<Option<Arc<Node>>> = vec![None; callbacks.len()];
     let mut found = 0;
     let mut node = node.cloned();
@@ -63,26 +63,26 @@ pub fn find_many_ancestors(
     ancestors
 }
 
-pub fn get_members(symbol: &Symbol) -> &SymbolTable {
+pub fn get_members(symbol: &Symbol) -> &SymbolTable { ::tsox_core::fntrace::enter("get_members"); 
     get_symbol_table(&symbol.members)
 }
 
-pub fn get_exports(symbol: &Symbol) -> &SymbolTable {
+pub fn get_exports(symbol: &Symbol) -> &SymbolTable { ::tsox_core::fntrace::enter("get_exports"); 
     get_symbol_table(&symbol.exports)
 }
 
 pub fn get_locals<'a>(
     container: &Arc<Node>,
     symbols: &'a crate::ast::symbol_map::NodeSymbolMap,
-) -> Option<&'a SymbolTable> {
+) -> Option<&'a SymbolTable> { ::tsox_core::fntrace::enter("get_locals"); 
     symbols.locals_of(container)
 }
 
-fn get_symbol_table(table: &SymbolTable) -> &SymbolTable {
+fn get_symbol_table(table: &SymbolTable) -> &SymbolTable { ::tsox_core::fntrace::enter("get_symbol_table"); 
     table
 }
 
-pub fn find_last_visible_node(nodes: &[Arc<Node>]) -> Option<Arc<Node>> {
+pub fn find_last_visible_node(nodes: &[Arc<Node>]) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_last_visible_node"); 
     let mut from_end = 1;
     while from_end <= nodes.len()
         && nodes[nodes.len() - from_end]
@@ -98,7 +98,7 @@ pub fn find_last_visible_node(nodes: &[Arc<Node>]) -> Option<Arc<Node>> {
     }
 }
 
-pub fn can_have_illegal_decorators(node: &Arc<Node>) -> bool {
+pub fn can_have_illegal_decorators(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("can_have_illegal_decorators"); 
     matches!(
         node.kind,
         SyntaxKind::PropertyAssignment
@@ -122,7 +122,7 @@ pub fn can_have_illegal_decorators(node: &Arc<Node>) -> bool {
     )
 }
 
-pub fn can_have_illegal_modifiers(node: &Arc<Node>) -> bool {
+pub fn can_have_illegal_modifiers(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("can_have_illegal_modifiers"); 
     matches!(
         node.kind,
         SyntaxKind::ClassStaticBlockDeclaration
@@ -136,8 +136,8 @@ pub fn can_have_illegal_modifiers(node: &Arc<Node>) -> bool {
 pub fn for_each_return_statement(
     body: &Arc<Node>,
     mut visitor: impl FnMut(&Arc<Node>) -> bool,
-) -> bool {
-    fn traverse(node: &Arc<Node>, visitor: &mut impl FnMut(&Arc<Node>) -> bool) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("for_each_return_statement"); 
+    fn traverse(node: &Arc<Node>, visitor: &mut impl FnMut(&Arc<Node>) -> bool) -> bool { ::tsox_core::fntrace::enter("traverse"); 
         match node.kind {
             SyntaxKind::ReturnStatement => visitor(node),
             SyntaxKind::CaseBlock
@@ -165,7 +165,7 @@ pub fn for_each_return_statement(
     traverse(body, &mut visitor)
 }
 
-pub fn get_jsdoc_deprecated_tag(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_jsdoc_deprecated_tag(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_deprecated_tag"); 
     if !node
         .flags
         .contains(crate::ast::node_flags::NodeFlags::HasJSDoc)
@@ -178,7 +178,7 @@ pub fn get_jsdoc_deprecated_tag(node: &Arc<Node>) -> Option<Arc<Node>> {
 pub fn get_jsdoc_deprecated_tag_with_file(
     node: &Arc<Node>,
     file: &SourceFile,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_deprecated_tag_with_file"); 
     for jsdoc in node.jsdoc(file) {
         if let NodeData::JSDoc(d) = &jsdoc.data {
             if let Some(tags) = &d.tags {
@@ -193,7 +193,7 @@ pub fn get_jsdoc_deprecated_tag_with_file(
     None
 }
 
-pub fn get_element_or_property_access_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_element_or_property_access_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_element_or_property_access_name"); 
     match node.kind {
         SyntaxKind::PropertyAccessExpression => {
             let name = node.name().expect("PropertyAccessExpression has name");
@@ -220,7 +220,7 @@ pub fn get_element_or_property_access_name(node: &Arc<Node>) -> Option<Arc<Node>
     }
 }
 
-pub fn get_initializer_of_binary_expression(expr: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_initializer_of_binary_expression(expr: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_initializer_of_binary_expression"); 
     let mut expr = expr.clone();
     loop {
         let right = match &expr.data {
@@ -246,7 +246,7 @@ pub enum JsDeclarationKind {
     ObjectDefinePropertyExports,
 }
 
-pub fn get_assignment_declaration_kind(node: &Arc<Node>) -> JsDeclarationKind {
+pub fn get_assignment_declaration_kind(node: &Arc<Node>) -> JsDeclarationKind { ::tsox_core::fntrace::enter("get_assignment_declaration_kind"); 
     match &node.data {
         NodeData::BinaryExpression(bin) => {
             if bin.operator_token.kind == SyntaxKind::EqualsToken
@@ -307,7 +307,7 @@ pub fn get_assignment_declaration_kind(node: &Arc<Node>) -> JsDeclarationKind {
     JsDeclarationKind::None
 }
 
-pub fn get_heritage_clause_element_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_heritage_clause_element_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_heritage_clause_element_name"); 
     if node.kind == SyntaxKind::TypeReference {
         match &node.data {
             NodeData::TypeReferenceNode(d) => Some(d.type_name.clone()),
@@ -318,7 +318,7 @@ pub fn get_heritage_clause_element_name(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn get_immediately_invoked_function_expression(fn_node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_immediately_invoked_function_expression(fn_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_immediately_invoked_function_expression"); 
     if crate::ast::utilities_functions::is_function_expression_or_arrow_function(fn_node) {
         let mut prev = fn_node.clone();
         let mut parent = fn_node.parent();
@@ -340,12 +340,12 @@ pub fn get_immediately_invoked_function_expression(fn_node: &Arc<Node>) -> Optio
     None
 }
 
-pub fn expression_is_alias(node: &Arc<Node>) -> bool {
+pub fn expression_is_alias(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("expression_is_alias"); 
     crate::ast::utilities_predicates::is_entity_name_expression(node)
         || node.kind == SyntaxKind::ClassExpression
 }
 
-pub fn get_import_attributes(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_import_attributes(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_import_attributes"); 
     match &node.data {
         NodeData::ImportDeclaration(d) => d.attributes.clone(),
         NodeData::ExportDeclaration(d) => d.attributes.clone(),
@@ -358,7 +358,7 @@ pub fn get_this_container(
     node: &Arc<Node>,
     include_arrow_functions: bool,
     include_class_computed_property_name: bool,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_this_container"); 
     let mut node = node.clone();
     loop {
         let mut current = node
@@ -427,7 +427,7 @@ pub fn get_this_container(
     }
 }
 
-pub fn get_new_target_container(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_new_target_container(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_new_target_container"); 
     let container = get_this_container(node, false, false);
     match container.kind {
         SyntaxKind::Constructor
@@ -437,7 +437,7 @@ pub fn get_new_target_container(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn get_enclosing_block_scope_container(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_enclosing_block_scope_container(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_enclosing_block_scope_container"); 
     let parent = node.parent()?;
     crate::ast::utilities_navigation::find_ancestor(&parent, |current| {
         current
@@ -456,16 +456,16 @@ impl SemanticMeaning {
     pub const NAMESPACE: SemanticMeaning = SemanticMeaning(1 << 2);
     pub const ALL: SemanticMeaning = SemanticMeaning((1 << 0) | (1 << 1) | (1 << 2));
 
-    pub fn contains(self, other: SemanticMeaning) -> bool {
+    pub fn contains(self, other: SemanticMeaning) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 
-    pub fn union(self, other: SemanticMeaning) -> SemanticMeaning {
+    pub fn union(self, other: SemanticMeaning) -> SemanticMeaning { ::tsox_core::fntrace::enter("union"); 
         SemanticMeaning(self.0 | other.0)
     }
 }
 
-pub fn get_meaning_from_declaration(node: &Arc<Node>) -> SemanticMeaning {
+pub fn get_meaning_from_declaration(node: &Arc<Node>) -> SemanticMeaning { ::tsox_core::fntrace::enter("get_meaning_from_declaration"); 
     match node.kind {
         SyntaxKind::VariableDeclaration => SemanticMeaning::VALUE,
         SyntaxKind::Parameter
@@ -516,7 +516,7 @@ pub fn get_meaning_from_declaration(node: &Arc<Node>) -> SemanticMeaning {
     }
 }
 
-pub fn get_declaration_of_kind(symbol: &Symbol, kind: SyntaxKind) -> Option<Arc<Node>> {
+pub fn get_declaration_of_kind(symbol: &Symbol, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaration_of_kind"); 
     symbol
         .declarations
         .iter()
@@ -524,7 +524,7 @@ pub fn get_declaration_of_kind(symbol: &Symbol, kind: SyntaxKind) -> Option<Arc<
         .cloned()
 }
 
-pub fn find_constructor_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn find_constructor_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_constructor_declaration"); 
     let members = match &node.data {
         NodeData::ClassDeclaration(d) => &d.members,
         NodeData::ClassExpression(d) => &d.members,
@@ -544,7 +544,7 @@ pub fn find_constructor_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub fn get_first_identifier(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_first_identifier(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_first_identifier"); 
     match node.kind {
         SyntaxKind::Identifier => node.clone(),
         SyntaxKind::QualifiedName => match &node.data {
@@ -559,7 +559,7 @@ pub fn get_first_identifier(node: &Arc<Node>) -> Arc<Node> {
     }
 }
 
-pub fn get_namespace_declaration_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_namespace_declaration_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_namespace_declaration_node"); 
     match node.kind {
         SyntaxKind::ImportDeclaration | SyntaxKind::JSImportDeclaration => {
             let import_clause = match &node.data {

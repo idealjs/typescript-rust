@@ -26,7 +26,7 @@ const JSX_ELEMENT_OR_FRAGMENT_CHILDREN: ListFormat =
 const JSX_ELEMENT_ATTRIBUTES: ListFormat =
     ListFormat(crate::mig::m4q::r33k12_defs::LF_JSX_ELEMENT_ATTRIBUTES);
 
-fn greatest_node_end(end: usize, nodes: &[Option<&Arc<Node>>]) -> usize {
+fn greatest_node_end(end: usize, nodes: &[Option<&Arc<Node>>]) -> usize { ::tsox_core::fntrace::enter("greatest_node_end"); 
     let mut end = end;
     for node in nodes.iter().rev() {
         if let Some(node_end) = node.map(|n| n.end()) {
@@ -39,7 +39,7 @@ fn greatest_node_end(end: usize, nodes: &[Option<&Arc<Node>>]) -> usize {
 }
 
 impl Printer {
-    pub fn emit_jsx_element(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_element"); 
         let state = self.enter_node(node);
         self.emit_jsx_opening_element(node.opening_element());
         self.emit_list(
@@ -52,7 +52,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_self_closing_element(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_self_closing_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_self_closing_element"); 
         let state = self.enter_node(node);
         self.write_punctuation("<");
         self.emit_jsx_tag_name(node.tag_name());
@@ -63,7 +63,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_fragment(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_fragment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_fragment"); 
         let state = self.enter_node(node);
         self.emit_jsx_opening_fragment(node.opening_fragment());
         self.emit_list(
@@ -76,7 +76,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_opening_element(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_opening_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_opening_element"); 
         let state = self.enter_node(node);
         self.write_punctuation("<");
         let attributes = node.attributes();
@@ -93,7 +93,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_closing_element(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_closing_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_closing_element"); 
         let state = self.enter_node(node);
         self.write_punctuation("</");
         self.emit_jsx_tag_name(node.tag_name());
@@ -101,27 +101,27 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_opening_fragment(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_opening_fragment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_opening_fragment"); 
         let state = self.enter_node(node);
         self.write_punctuation("<");
         self.write_punctuation(">");
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_closing_fragment(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_closing_fragment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_closing_fragment"); 
         let state = self.enter_node(node);
         self.write_punctuation("</");
         self.write_punctuation(">");
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_text(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_text(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_text"); 
         let state = self.enter_node(node);
         self.write_literal(node.text());
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_attributes(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_attributes(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_attributes"); 
         let state = self.enter_node(node);
         self.emit_list(
             Self::emit_jsx_attribute_like,
@@ -132,7 +132,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_attribute(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_attribute(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_attribute"); 
         let state = self.enter_node(node);
         self.emit_jsx_attribute_name(node.name().unwrap());
         if let Some(initializer) = node.jsx_attribute_initializer() {
@@ -142,7 +142,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_spread_attribute(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_spread_attribute(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_spread_attribute"); 
         let state = self.enter_node(node);
         self.write_punctuation("{...");
         self.emit_expression(node.expression().unwrap(), OPERATOR_PRECEDENCE_LOWEST);
@@ -150,7 +150,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_attribute_like(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_attribute_like(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_attribute_like"); 
         match node.kind {
             SyntaxKind::JsxAttribute => self.emit_jsx_attribute(node),
             SyntaxKind::JsxSpreadAttribute => self.emit_jsx_spread_attribute(node),
@@ -158,7 +158,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_jsx_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_expression"); 
         let state = self.enter_node(node);
         let expression = node.expression();
         if expression.is_some()
@@ -192,7 +192,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_namespaced_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_namespaced_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_namespaced_name"); 
         let state = self.enter_node(node);
         self.emit_identifier_name(node.namespace());
         self.write_punctuation(":");
@@ -200,7 +200,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_jsx_child(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_child(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_child"); 
         match node.kind {
             SyntaxKind::JsxText => self.emit_jsx_text(node),
             SyntaxKind::JsxExpression => self.emit_jsx_expression(node),
@@ -211,7 +211,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_jsx_tag_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_tag_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_tag_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_reference(node),
             SyntaxKind::ThisKeyword => self.emit_keyword_expression(node),
@@ -221,7 +221,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_jsx_attribute_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_attribute_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_attribute_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node),
             SyntaxKind::JsxNamespacedName => self.emit_jsx_namespaced_name(node),
@@ -229,7 +229,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_jsx_attribute_value(&mut self, node: &Arc<Node>) {
+    pub fn emit_jsx_attribute_value(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_jsx_attribute_value"); 
         match node.kind {
             SyntaxKind::StringLiteral => self.emit_string_literal(node),
             SyntaxKind::JsxExpression => self.emit_jsx_expression(node),
@@ -240,7 +240,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_external_module_reference(&mut self, node: &Arc<Node>) {
+    pub fn emit_external_module_reference(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_external_module_reference"); 
         let state = self.enter_node(node);
         self.write_keyword("require");
         self.write_punctuation("(");
@@ -249,7 +249,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_attribute_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_attribute_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_attribute_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node),
             SyntaxKind::StringLiteral => self.emit_string_literal(node),

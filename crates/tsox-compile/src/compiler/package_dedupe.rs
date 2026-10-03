@@ -7,7 +7,7 @@ pub(crate) fn prewalk_package_first_paths(
     host: &dyn CompilerHost,
     files: &[Arc<SourceFile>],
     first_paths: &mut HashMap<tsox_tsoptions::module::PackageId, String>,
-) {
+) { ::tsox_core::fntrace::enter("prewalk_package_first_paths"); 
     let mut visited: std::collections::HashSet<String> =
         files.iter().map(|f| f.file_name.clone()).collect();
     for file in files {
@@ -21,7 +21,7 @@ fn walk_imports(
     file: &Arc<SourceFile>,
     visited: &mut std::collections::HashSet<String>,
     first_paths: &mut HashMap<tsox_tsoptions::module::PackageId, String>,
-) {
+) { ::tsox_core::fntrace::enter("walk_imports"); 
     for import_node in &file.imports {
         let module_spec = import_node.text();
         if module_spec.is_empty() {

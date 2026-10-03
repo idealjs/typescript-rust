@@ -10,7 +10,7 @@ pub fn get_position(
     node: &Arc<Node>,
     source_file: &SourceFile,
     allow_position_in_leading_trivia: bool,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_position"); 
     if allow_position_in_leading_trivia {
         return node.pos();
     }
@@ -20,7 +20,7 @@ pub fn get_position(
 pub fn get_node_visitor(
     visit_node: Option<fn(&Arc<Node>, &NodeVisitor) -> Arc<Node>>,
     visit_nodes: Option<fn(&NodeList, &NodeVisitor) -> NodeList>,
-) -> NodeVisitor {
+) -> NodeVisitor { ::tsox_core::fntrace::enter("get_node_visitor"); 
     let wrapped_visit_node: Option<fn(&Arc<Node>, &NodeVisitor) -> Arc<Node>> =
         visit_node.map(|visit_node| {
             move |n: &Arc<Node>, v: &NodeVisitor| -> Arc<Node> {

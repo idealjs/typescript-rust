@@ -4,7 +4,7 @@ use crate::core::tristate::Tristate;
 use crate::tspath;
 
 impl CompilerOptions {
-    pub fn get_emit_script_target(&self) -> ScriptTarget {
+    pub fn get_emit_script_target(&self) -> ScriptTarget { crate::fntrace::enter("get_emit_script_target"); 
         if self.target != ScriptTarget::None {
             self.target
         } else {
@@ -12,7 +12,7 @@ impl CompilerOptions {
         }
     }
 
-    pub fn get_emit_module_kind(&self) -> ModuleKind {
+    pub fn get_emit_module_kind(&self) -> ModuleKind { crate::fntrace::enter("get_emit_module_kind"); 
         if self.module != ModuleKind::None {
             return self.module;
         }
@@ -30,7 +30,7 @@ impl CompilerOptions {
         }
     }
 
-    pub fn get_module_resolution_kind(&self) -> ModuleResolutionKind {
+    pub fn get_module_resolution_kind(&self) -> ModuleResolutionKind { crate::fntrace::enter("get_module_resolution_kind"); 
         match self.module_resolution {
             ModuleResolutionKind::Unknown
             | ModuleResolutionKind::Classic
@@ -47,7 +47,7 @@ impl CompilerOptions {
         }
     }
 
-    pub fn get_emit_module_detection_kind(&self) -> ModuleDetectionKind {
+    pub fn get_emit_module_detection_kind(&self) -> ModuleDetectionKind { crate::fntrace::enter("get_emit_module_detection_kind"); 
         if self.module_detection != ModuleDetectionKind::None {
             return self.module_detection;
         }
@@ -59,24 +59,24 @@ impl CompilerOptions {
         }
     }
 
-    pub fn get_resolve_package_json_exports(&self) -> bool {
+    pub fn get_resolve_package_json_exports(&self) -> bool { crate::fntrace::enter("get_resolve_package_json_exports"); 
         self.resolve_package_json_exports.is_true_or_unknown()
     }
 
-    pub fn get_resolve_package_json_imports(&self) -> bool {
+    pub fn get_resolve_package_json_imports(&self) -> bool { crate::fntrace::enter("get_resolve_package_json_imports"); 
         self.resolve_package_json_imports.is_true_or_unknown()
     }
 
-    pub fn get_allow_importing_ts_extensions(&self) -> bool {
+    pub fn get_allow_importing_ts_extensions(&self) -> bool { crate::fntrace::enter("get_allow_importing_ts_extensions"); 
         self.allow_importing_ts_extensions.is_true()
             || self.rewrite_relative_import_extensions.is_true()
     }
 
-    pub fn allow_importing_ts_extensions_from(&self, file_name: &str) -> bool {
+    pub fn allow_importing_ts_extensions_from(&self, file_name: &str) -> bool { crate::fntrace::enter("allow_importing_ts_extensions_from"); 
         self.get_allow_importing_ts_extensions() || tspath::is_declaration_file_name(file_name)
     }
 
-    pub fn get_resolve_json_module(&self) -> bool {
+    pub fn get_resolve_json_module(&self) -> bool { crate::fntrace::enter("get_resolve_json_module"); 
         if self.resolve_json_module != Tristate::Unknown {
             return self.resolve_json_module == Tristate::True;
         }
@@ -86,11 +86,11 @@ impl CompilerOptions {
         }
     }
 
-    pub fn should_preserve_const_enums(&self) -> bool {
+    pub fn should_preserve_const_enums(&self) -> bool { crate::fntrace::enter("should_preserve_const_enums"); 
         self.preserve_const_enums == Tristate::True || self.get_isolated_modules()
     }
 
-    pub fn get_allow_js(&self) -> bool {
+    pub fn get_allow_js(&self) -> bool { crate::fntrace::enter("get_allow_js"); 
         if self.allow_js != Tristate::Unknown {
             self.allow_js == Tristate::True
         } else {
@@ -98,14 +98,14 @@ impl CompilerOptions {
         }
     }
 
-    pub fn get_jsx_transform_enabled(&self) -> bool {
+    pub fn get_jsx_transform_enabled(&self) -> bool { crate::fntrace::enter("get_jsx_transform_enabled"); 
         matches!(
             self.jsx,
             JsxEmit::React | JsxEmit::ReactJSX | JsxEmit::ReactJSXDev
         )
     }
 
-    pub fn get_strict_option_value(&self, value: Tristate) -> bool {
+    pub fn get_strict_option_value(&self, value: Tristate) -> bool { crate::fntrace::enter("get_strict_option_value"); 
         if value != Tristate::Unknown {
             return value == Tristate::True;
         }
@@ -113,20 +113,20 @@ impl CompilerOptions {
         self.strict != Tristate::False
     }
 
-    pub fn get_isolated_modules(&self) -> bool {
+    pub fn get_isolated_modules(&self) -> bool { crate::fntrace::enter("get_isolated_modules"); 
         self.isolated_modules == Tristate::True || self.verbatim_module_syntax == Tristate::True
     }
 
-    pub fn is_incremental(&self) -> bool {
+    pub fn is_incremental(&self) -> bool { crate::fntrace::enter("is_incremental"); 
         self.incremental.is_true() || self.composite.is_true()
     }
 
-    pub fn get_emit_standard_class_fields(&self) -> bool {
+    pub fn get_emit_standard_class_fields(&self) -> bool { crate::fntrace::enter("get_emit_standard_class_fields"); 
         self.use_define_for_class_fields != Tristate::False
             && self.get_emit_script_target() >= ScriptTarget::ES2022
     }
 
-    pub fn get_use_define_for_class_fields(&self) -> bool {
+    pub fn get_use_define_for_class_fields(&self) -> bool { crate::fntrace::enter("get_use_define_for_class_fields"); 
         if self.use_define_for_class_fields == Tristate::Unknown {
             self.get_emit_script_target() >= ScriptTarget::ES2022
         } else {
@@ -134,22 +134,22 @@ impl CompilerOptions {
         }
     }
 
-    pub fn get_emit_declarations(&self) -> bool {
+    pub fn get_emit_declarations(&self) -> bool { crate::fntrace::enter("get_emit_declarations"); 
         self.declaration.is_true() || self.composite.is_true()
     }
 
-    pub fn get_are_declaration_maps_enabled(&self) -> bool {
+    pub fn get_are_declaration_maps_enabled(&self) -> bool { crate::fntrace::enter("get_are_declaration_maps_enabled"); 
         self.declaration_map == Tristate::True && self.get_emit_declarations()
     }
 
-    pub fn has_json_module_emit_enabled(&self) -> bool {
+    pub fn has_json_module_emit_enabled(&self) -> bool { crate::fntrace::enter("has_json_module_emit_enabled"); 
         !matches!(
             self.get_emit_module_kind(),
             ModuleKind::System | ModuleKind::UMD
         )
     }
 
-    pub fn uses_wildcard_types(&self) -> bool {
+    pub fn uses_wildcard_types(&self) -> bool { crate::fntrace::enter("uses_wildcard_types"); 
         self.types.iter().any(|t| t == "*")
     }
 }

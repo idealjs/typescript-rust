@@ -25,7 +25,7 @@ thread_local! {
 pub fn type_stack_with<R>(
     ctx: &NodeBuilderContext,
     f: impl FnOnce(&mut Vec<Option<Arc<Type>>>) -> R,
-) -> R {
+) -> R { ::tsox_core::fntrace::enter("type_stack_with"); 
     TYPE_STACK.with(|m| {
         f(m.borrow_mut()
             .entry(crate::checker::mig::m2g::r22k9_defs::ctx_side_key(ctx))
@@ -36,7 +36,7 @@ pub fn type_stack_with<R>(
 pub fn remapped_symbol_references_with<R>(
     ctx: &NodeBuilderContext,
     f: impl FnOnce(&mut HashMap<u64, Arc<Symbol>>) -> R,
-) -> R {
+) -> R { ::tsox_core::fntrace::enter("remapped_symbol_references_with"); 
     REMAPPED_SYMBOL_REFERENCES.with(|m| {
         f(m.borrow_mut()
             .entry(crate::checker::mig::m2g::r22k9_defs::ctx_side_key(ctx))
@@ -47,7 +47,7 @@ pub fn remapped_symbol_references_with<R>(
 pub fn type_parameter_symbol_list_with<R>(
     ctx: &NodeBuilderContext,
     f: impl FnOnce(&mut HashSet<u64>) -> R,
-) -> R {
+) -> R { ::tsox_core::fntrace::enter("type_parameter_symbol_list_with"); 
     TYPE_PARAMETER_SYMBOL_LIST.with(|m| {
         f(m.borrow_mut()
             .entry(crate::checker::mig::m2g::r22k9_defs::ctx_side_key(ctx))
@@ -55,7 +55,7 @@ pub fn type_parameter_symbol_list_with<R>(
     })
 }
 
-pub fn get_type_argument_list_of(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+pub fn get_type_argument_list_of(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("get_type_argument_list_of"); 
     match &node.data {
         NodeData::TypeReferenceNode(tr) => tr.type_arguments.clone(),
         NodeData::ImportTypeNode(it) => it.type_arguments.clone(),
@@ -67,12 +67,12 @@ pub fn get_type_argument_list_of(node: &Arc<Node>) -> Option<Arc<NodeList>> {
 pub fn has_non_global_augmentation_external_module_symbol(
     _ch: &Checker,
     declaration: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_non_global_augmentation_external_module_symbol"); 
     tsox_frontend::ast::is_module_with_string_literal_name(declaration)
         || Checker::is_external_or_common_js_module(declaration)
 }
 
-pub fn escape_internal_symbol_name(name: &str) -> String {
+pub fn escape_internal_symbol_name(name: &str) -> String { ::tsox_core::fntrace::enter("escape_internal_symbol_name"); 
     match name.strip_prefix('\u{FE}') {
         Some(rest) => format!("__{}", rest),
         None => name.to_string(),
@@ -99,7 +99,7 @@ pub trait R24K13NodeBuilderExt {
 }
 
 impl R24K13NodeBuilderExt for NodeBuilderImpl<'_> {
-    fn create_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn create_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_access_expression"); 
         if let NodeData::QualifiedName(entity) = &node.data {
             let left = self.create_access_expression(&entity.left);
             let right = self.deep_clone_node(&entity.right);
@@ -122,7 +122,7 @@ impl R24K13NodeBuilderExt for NodeBuilderImpl<'_> {
         &mut self,
         expr: Arc<Node>,
         type_arguments: Option<&Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_expression_with_type_arguments"); 
         match type_arguments {
             Some(ta) if !ta.nodes.is_empty() => {
                 Arc::new(Node::new(
@@ -143,7 +143,7 @@ impl R24K13NodeBuilderExt for NodeBuilderImpl<'_> {
         &mut self,
         chain: &[Arc<Symbol>],
         index: usize,
-    ) -> Option<Arc<NodeList>> {
+    ) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("lookup_expression_chain_type_argument_nodes"); 
         let symbol_id = tsox_frontend::ast::get_symbol_id(&chain[index]);
         let listed = {
             let ctx = self.ctx.borrow();
@@ -179,7 +179,7 @@ impl R24K13NodeBuilderExt for NodeBuilderImpl<'_> {
         &mut self,
         chain: &[Arc<Symbol>],
         index: usize,
-    ) -> Option<Arc<NodeList>> {
+    ) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("lookup_type_parameter_nodes"); 
         let symbol_id = tsox_frontend::ast::get_symbol_id(&chain[index]);
         let listed = {
             let ctx = self.ctx.borrow();
@@ -212,11 +212,11 @@ impl R24K13NodeBuilderExt for NodeBuilderImpl<'_> {
     }
 }
 
-fn r24k13_type_parameter_symbol_list_has(ctx: &NodeBuilderContext, symbol_id: u64) -> bool {
+fn r24k13_type_parameter_symbol_list_has(ctx: &NodeBuilderContext, symbol_id: u64) -> bool { ::tsox_core::fntrace::enter("r24k13_type_parameter_symbol_list_has"); 
     type_parameter_symbol_list_with(ctx, |set| set.contains(&symbol_id))
 }
 
-fn r24k13_type_parameter_symbol_list_add(ctx: &NodeBuilderContext, symbol_id: u64) {
+fn r24k13_type_parameter_symbol_list_add(ctx: &NodeBuilderContext, symbol_id: u64) { ::tsox_core::fntrace::enter("r24k13_type_parameter_symbol_list_add"); 
     type_parameter_symbol_list_with(ctx, |set| {
         set.insert(symbol_id);
     });
@@ -225,7 +225,7 @@ fn r24k13_type_parameter_symbol_list_add(ctx: &NodeBuilderContext, symbol_id: u6
 pub fn r24k13_find_ancestor_same(
     a: &Option<Arc<Node>>,
     b: &Option<Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("r24k13_find_ancestor_same"); 
     match (a, b) {
         (Some(x), Some(y)) => Arc::ptr_eq(x, y),
         (None, None) => true,

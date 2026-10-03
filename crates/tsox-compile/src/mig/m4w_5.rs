@@ -19,7 +19,7 @@ impl ModeAwareCacheKey {
     pub fn new(
         name: String,
         mode: tsox_core::core::compiler_options_kinds::ResolutionMode,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { name, mode }
     }
 }
@@ -43,7 +43,7 @@ pub struct LazyValue<T> {
 }
 
 impl<T> Default for LazyValue<T> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             value: std::sync::OnceLock::default(),
         }
@@ -51,41 +51,41 @@ impl<T> Default for LazyValue<T> {
 }
 
 impl<T> LazyValue<T> {
-    pub fn get_value(&self, compute: impl FnOnce() -> T) -> &T {
+    pub fn get_value(&self, compute: impl FnOnce() -> T) -> &T { ::tsox_core::fntrace::enter("get_value"); 
         self.value.get_or_init(compute)
     }
 }
 
 impl super::m4v::SourceFileMayBeEmittedHost for crate::compiler::Program {
-    fn options(&self) -> &tsox_core::core::compiler_options::CompilerOptions {
+    fn options(&self) -> &tsox_core::core::compiler_options::CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         crate::compiler::Program::options(self)
     }
     fn get_project_reference_from_source(
         &self,
         path: &str,
-    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> {
+    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_source"); 
         crate::compiler::Program::get_project_reference_from_source(self, path)
     }
-    fn is_source_file_from_external_library(&self, file: &Arc<SourceFile>) -> bool {
+    fn is_source_file_from_external_library(&self, file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_source_file_from_external_library"); 
         crate::compiler::Program::is_source_file_from_external_library(self, file)
     }
-    fn is_source_file_from_project_reference(&self, file: &Arc<SourceFile>) -> bool {
+    fn is_source_file_from_project_reference(&self, file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_source_file_from_project_reference"); 
         let path = m3b_2::path(file);
         crate::compiler::Program::is_source_from_project_reference(self, &path)
     }
-    fn get_current_directory(&self) -> String {
+    fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         crate::compiler::Program::get_current_directory(self).to_string()
     }
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         crate::compiler::Program::use_case_sensitive_file_names(self)
     }
-    fn source_files(&self) -> Vec<Arc<SourceFile>> {
+    fn source_files(&self) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_files"); 
         crate::compiler::Program::source_files(self).to_vec()
     }
 }
 
 impl Program {
-    pub fn explain_files(&self, w: &mut dyn std::io::Write, locale: tsox_core::locale::Locale) {
+    pub fn explain_files(&self, w: &mut dyn std::io::Write, locale: tsox_core::locale::Locale) { ::tsox_core::fntrace::enter("explain_files"); 
         let to_relative_file_name = |file_name: &str| -> String {
             m3i::get_relative_path_from_directory(
                 self.get_current_directory(),
@@ -149,7 +149,7 @@ impl Program {
     pub fn get_lib_file_from_reference(
         &self,
         r: &tsox_frontend::ast::node_source_file::FileReference,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_lib_file_from_reference"); 
         let path = tsox_tsoptions::mig::m5h_2::get_lib_file_name(&r.file_name)?;
         self.files_by_path.get(path.as_str()).cloned()
     }
@@ -158,7 +158,7 @@ impl Program {
         &self,
         type_ref: &tsox_frontend::ast::node_source_file::FileReference,
         source_file: &Arc<SourceFile>,
-    ) -> Option<tsox_tsoptions::module::ResolvedTypeReferenceDirective> {
+    ) -> Option<tsox_tsoptions::module::ResolvedTypeReferenceDirective> { ::tsox_core::fntrace::enter("get_resolved_type_reference_directive_from_type_reference_directive"); 
         let file_path = m3b_2::path(source_file);
         if let Some(resolutions) = self.type_resolutions_in_file.get(file_path.as_str()) {
             let key = ModeAwareCacheKey {
@@ -175,11 +175,11 @@ impl Program {
     pub fn get_resolved_type_reference_directives(
         &self,
     ) -> &HashMap<String, ModeAwareCache<tsox_tsoptions::module::ResolvedTypeReferenceDirective>>
-    {
+    { ::tsox_core::fntrace::enter("get_resolved_type_reference_directives"); 
         &self.type_resolutions_in_file
     }
 
-    pub fn is_source_file_from_external_library(&self, file: &Arc<SourceFile>) -> bool {
+    pub fn is_source_file_from_external_library(&self, file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_source_file_from_external_library"); 
         self.source_files_found_searching_node_modules
             .contains(m3b_2::path(file).as_str())
     }
@@ -187,7 +187,7 @@ impl Program {
     pub fn get_jsx_runtime_import_specifier(
         &self,
         path: &str,
-    ) -> (String, Option<Arc<tsox_frontend::ast::Node>>) {
+    ) -> (String, Option<Arc<tsox_frontend::ast::Node>>) { ::tsox_core::fntrace::enter("get_jsx_runtime_import_specifier"); 
         if let Some(result) = self.jsx_runtime_import_specifiers.get(path) {
             return (result.module_reference.clone(), result.specifier.clone());
         }
@@ -197,7 +197,7 @@ impl Program {
     pub fn get_import_helpers_import_specifier(
         &self,
         path: &str,
-    ) -> Option<Arc<tsox_frontend::ast::Node>> {
+    ) -> Option<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("get_import_helpers_import_specifier"); 
         self.import_helpers_import_specifiers.get(path).cloned()
     }
 
@@ -205,23 +205,23 @@ impl Program {
         &self,
         source_file: &Arc<SourceFile>,
         force_dts_emit: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("source_file_may_be_emitted"); 
         source_file_may_be_emitted(source_file, self, force_dts_emit, false)
     }
 
-    pub fn resolved_package_names(&self) -> &HashSet<String> {
+    pub fn resolved_package_names(&self) -> &HashSet<String> { ::tsox_core::fntrace::enter("resolved_package_names"); 
         &self.collect_package_names().resolved
     }
 
-    pub fn unresolved_package_names(&self) -> &HashSet<String> {
+    pub fn unresolved_package_names(&self) -> &HashSet<String> { ::tsox_core::fntrace::enter("unresolved_package_names"); 
         &self.collect_package_names().unresolved
     }
 
-    pub fn deep_import_package_names(&self) -> &HashSet<String> {
+    pub fn deep_import_package_names(&self) -> &HashSet<String> { ::tsox_core::fntrace::enter("deep_import_package_names"); 
         &self.collect_package_names().deep_import_packages
     }
 
-    pub fn collect_package_names(&self) -> &PackageNamesInfo {
+    pub fn collect_package_names(&self) -> &PackageNamesInfo { ::tsox_core::fntrace::enter("collect_package_names"); 
         self.package_names.get_value(|| {
             let mut package_names = PackageNamesInfo::default();
             for file in &self.source_files {
@@ -326,12 +326,12 @@ impl Program {
         })
     }
 
-    pub fn is_lib_file(&self, source_file: &Arc<SourceFile>) -> bool {
+    pub fn is_lib_file(&self, source_file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_lib_file"); 
         self.lib_files
             .contains_key(m3b_2::path(source_file).as_str())
     }
 
-    pub fn has_ts_file(&self) -> bool {
+    pub fn has_ts_file(&self) -> bool { ::tsox_core::fntrace::enter("has_ts_file"); 
         *self.has_ts_file_once.get_value(|| {
             self.source_files
                 .iter()

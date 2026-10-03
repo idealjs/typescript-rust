@@ -7,7 +7,7 @@ use crate::parser::reparser_type_literal::reparse_jsdoc_type_literal;
 use crate::parser::reparser_type_parameters::gather_type_parameters;
 use std::sync::Arc;
 
-pub fn reparse_tags(parent: &Arc<Node>, js_docs: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn reparse_tags(parent: &Arc<Node>, js_docs: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("reparse_tags"); 
     let mut reparse_list: Vec<Arc<Node>> = Vec::new();
 
     for (i, js_doc) in js_docs.iter().enumerate() {
@@ -32,7 +32,7 @@ pub fn reparse_tags(parent: &Arc<Node>, js_docs: &[Arc<Node>]) -> Vec<Arc<Node>>
     reparse_list
 }
 
-fn reparse_unhosted(tag: &Arc<Node>, parent: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
+fn reparse_unhosted(tag: &Arc<Node>, parent: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("reparse_unhosted"); 
     match tag.kind {
         SyntaxKind::JSDocTypedefTag => reparse_typedef_tag(tag, js_doc),
         SyntaxKind::JSDocCallbackTag => reparse_callback_tag(tag, js_doc),
@@ -44,7 +44,7 @@ fn reparse_unhosted(tag: &Arc<Node>, parent: &Arc<Node>, js_doc: &Arc<Node>) -> 
 
 use crate::parser::reparser_type_literal::property_tags_to_signatures;
 
-fn js_doc_property_tags_after(js_doc: &Arc<Node>, typedef_tag: &Arc<Node>) -> Vec<Arc<Node>> {
+fn js_doc_property_tags_after(js_doc: &Arc<Node>, typedef_tag: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("js_doc_property_tags_after"); 
     let tags = match &js_doc.data {
         NodeData::JSDoc(d) => d.tags.as_ref(),
         _ => None,
@@ -75,7 +75,7 @@ fn js_doc_property_tags_after(js_doc: &Arc<Node>, typedef_tag: &Arc<Node>) -> Ve
     result
 }
 
-fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
+fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("reparse_typedef_tag"); 
     let (type_expression, full_name) = match &tag.data {
         NodeData::JSDocTypedefTag(d) => {
             let name = d.name.as_ref()?;
@@ -155,7 +155,7 @@ fn reparse_typedef_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>>
     Some(result)
 }
 
-fn reparse_callback_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> {
+fn reparse_callback_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("reparse_callback_tag"); 
     let (type_expression, full_name) = match &tag.data {
         NodeData::JSDocCallbackTag(d) => {
             let name = d.name.as_ref()?;
@@ -192,7 +192,7 @@ fn reparse_callback_tag(tag: &Arc<Node>, js_doc: &Arc<Node>) -> Option<Arc<Node>
     Some(result)
 }
 
-fn reparse_import_tag(tag: &Arc<Node>) -> Option<Arc<Node>> {
+fn reparse_import_tag(tag: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("reparse_import_tag"); 
     let (import_clause, module_specifier, attributes) = match &tag.data {
         NodeData::JSDocImportTag(d) => {
             let clause = d.import_clause.as_ref()?;
@@ -238,7 +238,7 @@ fn reparse_overload_tag(
     tag: &Arc<Node>,
     parent: &Arc<Node>,
     js_doc: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("reparse_overload_tag"); 
     let is_valid_parent = matches!(
         parent.kind,
         SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration | SyntaxKind::Constructor

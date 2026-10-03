@@ -3,7 +3,7 @@
 use crate::checker::grammarchecks::*;
 
 impl Checker {
-    pub fn check_grammar_modifiers(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_modifiers(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_modifiers"); 
         let modifiers = match node.modifiers() {
             Some(ml) => Arc::clone(ml),
             None => return false,

@@ -12,7 +12,7 @@ pub struct Version {
 }
 
 impl Version {
-    pub fn new(major: u32, minor: u32, patch: u32) -> Self {
+    pub fn new(major: u32, minor: u32, patch: u32) -> Self { crate::fntrace::enter("new"); 
         Version {
             major,
             minor,
@@ -22,19 +22,19 @@ impl Version {
         }
     }
 
-    pub(crate) fn increment_major(&self) -> Version {
+    pub(crate) fn increment_major(&self) -> Version { crate::fntrace::enter("increment_major"); 
         Version::new(self.major + 1, 0, 0)
     }
 
-    pub(crate) fn increment_minor(&self) -> Version {
+    pub(crate) fn increment_minor(&self) -> Version { crate::fntrace::enter("increment_minor"); 
         Version::new(self.major, self.minor + 1, 0)
     }
 
-    pub(crate) fn increment_patch(&self) -> Version {
+    pub(crate) fn increment_patch(&self) -> Version { crate::fntrace::enter("increment_patch"); 
         Version::new(self.major, self.minor, self.patch + 1)
     }
 
-    pub fn compare(&self, other: &Version) -> Ordering {
+    pub fn compare(&self, other: &Version) -> Ordering { crate::fntrace::enter("compare"); 
         match self.major.cmp(&other.major) {
             Ordering::Equal => {}
             r => return r,
@@ -52,7 +52,7 @@ impl Version {
 }
 
 impl fmt::Display for Version {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         write!(f, "{}.{}.{}", self.major, self.minor, self.patch)?;
         if !self.prerelease.is_empty() {
             write!(f, "-{}", self.prerelease.join("."))?;
@@ -65,18 +65,18 @@ impl fmt::Display for Version {
 }
 
 impl PartialOrd for Version {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { crate::fntrace::enter("partial_cmp"); 
         Some(self.compare(other))
     }
 }
 
 impl Ord for Version {
-    fn cmp(&self, other: &Self) -> Ordering {
+    fn cmp(&self, other: &Self) -> Ordering { crate::fntrace::enter("cmp"); 
         self.compare(other)
     }
 }
 
-pub(crate) fn compare_prerelease(left: &[String], right: &[String]) -> Ordering {
+pub(crate) fn compare_prerelease(left: &[String], right: &[String]) -> Ordering { crate::fntrace::enter("compare_prerelease"); 
     if left.is_empty() && right.is_empty() {
         return Ordering::Equal;
     }
@@ -95,7 +95,7 @@ pub(crate) fn compare_prerelease(left: &[String], right: &[String]) -> Ordering 
     left.len().cmp(&right.len())
 }
 
-pub(crate) fn compare_prerelease_identifier(left: &str, right: &str) -> Ordering {
+pub(crate) fn compare_prerelease_identifier(left: &str, right: &str) -> Ordering { crate::fntrace::enter("compare_prerelease_identifier"); 
     let string_cmp = left.cmp(right);
     if string_cmp == Ordering::Equal {
         return Ordering::Equal;
@@ -124,7 +124,7 @@ pub(crate) fn compare_prerelease_identifier(left: &str, right: &str) -> Ordering
     string_cmp
 }
 
-pub(crate) fn is_numeric_identifier(s: &str) -> bool {
+pub(crate) fn is_numeric_identifier(s: &str) -> bool { crate::fntrace::enter("is_numeric_identifier"); 
     !s.is_empty() && s.chars().all(|c| c.is_ascii_digit()) && (s == "0" || !s.starts_with('0'))
 }
 
@@ -134,22 +134,22 @@ pub struct SemverParseError {
 }
 
 impl fmt::Display for SemverParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         write!(f, "Could not parse version string from {:?}", self.input)
     }
 }
 
 impl std::error::Error for SemverParseError {}
 
-pub fn try_parse_version(text: &str) -> Result<Version, SemverParseError> {
+pub fn try_parse_version(text: &str) -> Result<Version, SemverParseError> { crate::fntrace::enter("try_parse_version"); 
     parse_version(text)
 }
 
-pub fn must_parse(text: &str) -> Version {
+pub fn must_parse(text: &str) -> Version { crate::fntrace::enter("must_parse"); 
     try_parse_version(text).unwrap_or_else(|e| panic!("{}", e))
 }
 
-pub(crate) fn parse_version(text: &str) -> Result<Version, SemverParseError> {
+pub(crate) fn parse_version(text: &str) -> Result<Version, SemverParseError> { crate::fntrace::enter("parse_version"); 
     let input: &str = text;
 
     let (major_str, rest) = match input.find(|c: char| !c.is_ascii_digit()) {
@@ -257,7 +257,7 @@ pub(crate) fn parse_version(text: &str) -> Result<Version, SemverParseError> {
     })
 }
 
-pub(crate) fn is_valid_numeric_component(s: &str) -> bool {
+pub(crate) fn is_valid_numeric_component(s: &str) -> bool { crate::fntrace::enter("is_valid_numeric_component"); 
     if s.is_empty() {
         return false;
     }
@@ -270,7 +270,7 @@ pub(crate) fn is_valid_numeric_component(s: &str) -> bool {
     s.chars().all(|c| c.is_ascii_digit())
 }
 
-pub(crate) fn is_valid_prerelease(s: &str) -> bool {
+pub(crate) fn is_valid_prerelease(s: &str) -> bool { crate::fntrace::enter("is_valid_prerelease"); 
     if s.is_empty() {
         return false;
     }
@@ -281,7 +281,7 @@ pub(crate) fn is_valid_prerelease(s: &str) -> bool {
     })
 }
 
-pub(crate) fn is_valid_build(s: &str) -> bool {
+pub(crate) fn is_valid_build(s: &str) -> bool { crate::fntrace::enter("is_valid_build"); 
     if s.is_empty() {
         return false;
     }

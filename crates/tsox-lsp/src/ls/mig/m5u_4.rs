@@ -12,7 +12,7 @@ impl LanguageService {
     pub fn get_prepared_auto_import_view(
         &self,
         from_file: &Arc<SourceFile>,
-    ) -> Result<crate::ls::autoimport_view::View, NeedsAutoImports> {
+    ) -> Result<crate::ls::autoimport_view::View, NeedsAutoImports> { ::tsox_core::fntrace::enter("get_prepared_auto_import_view"); 
         let registry = host_registry_placeholder(&self.host.auto_import_registry(), self.user_preferences());
         let mut registry_file = Arc::clone(from_file);
         if let Some(canonical) = canonical_source_file(from_file) {
@@ -39,7 +39,7 @@ impl LanguageService {
     pub fn get_current_auto_import_view(
         &self,
         from_file: &Arc<SourceFile>,
-    ) -> crate::ls::autoimport_view::View {
+    ) -> crate::ls::autoimport_view::View { ::tsox_core::fntrace::enter("get_current_auto_import_view"); 
         crate::ls::autoimport_view::View::new(
             host_registry_placeholder(
                 &self.host.auto_import_registry(),
@@ -59,7 +59,7 @@ impl LanguageService {
 fn host_registry_placeholder(
     registry: &crate::ls::host::AutoImportRegistry,
     preferences: &crate::ls::lsutil_user_preferences::UserPreferences,
-) -> Arc<crate::ls::autoimport_registry_registry_impl::Registry> {
+) -> Arc<crate::ls::autoimport_registry_registry_impl::Registry> { ::tsox_core::fntrace::enter("host_registry_placeholder"); 
     let _ = registry;
     Arc::new(crate::ls::autoimport_registry_registry_impl::Registry::new(
         Box::new(|name: &str| tsox_core::tspath::to_path(name, "", true)),
@@ -67,7 +67,7 @@ fn host_registry_placeholder(
     ))
 }
 
-fn canonical_source_file(_file: &Arc<SourceFile>) -> Option<Arc<SourceFile>> {
+fn canonical_source_file(_file: &Arc<SourceFile>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("canonical_source_file"); 
     None
 }
 

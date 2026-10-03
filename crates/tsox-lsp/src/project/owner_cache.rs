@@ -14,20 +14,20 @@ pub struct OwnerCache<K: Eq + Hash + Clone, V: Clone> {
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         OwnerCache {
             entries: Mutex::new(HashMap::new()),
         }
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.entries.lock().unwrap().len()
     }
 
     pub fn load_and_acquire<F>(&self, identity: K, owner: u64, parse: F) -> V
     where
         F: FnOnce(&K) -> V,
-    {
+    { ::tsox_core::fntrace::enter("load_and_acquire"); 
         let mut entries = self.entries.lock().unwrap();
         let entry = entries.entry(identity.clone()).or_insert_with(|| {
             let value = parse(&identity);
@@ -40,7 +40,7 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         entry.value.clone()
     }
 
-    pub fn acquire(&self, identity: K, owner: u64, value: V) {
+    pub fn acquire(&self, identity: K, owner: u64, value: V) { ::tsox_core::fntrace::enter("acquire"); 
         let mut entries = self.entries.lock().unwrap();
         let entry = entries.entry(identity).or_insert_with(|| OwnerCacheEntry {
             value: value.clone(),
@@ -49,7 +49,7 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         entry.owners.insert(owner);
     }
 
-    pub fn add_owner(&self, identity: &K, owner: u64) {
+    pub fn add_owner(&self, identity: &K, owner: u64) { ::tsox_core::fntrace::enter("add_owner"); 
         let mut entries = self.entries.lock().unwrap();
         match entries.get_mut(identity) {
             None => panic!("OwnerCache.add_owner: entry not found"),
@@ -62,11 +62,11 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
         }
     }
 
-    pub fn has(&self, identity: &K) -> bool {
+    pub fn has(&self, identity: &K) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.entries.lock().unwrap().contains_key(identity)
     }
 
-    pub fn release(&self, identity: &K, owner: u64) {
+    pub fn release(&self, identity: &K, owner: u64) { ::tsox_core::fntrace::enter("release"); 
         let mut entries = self.entries.lock().unwrap();
         if let Some(entry) = entries.get_mut(identity) {
             entry.owners.remove(&owner);
@@ -78,7 +78,7 @@ impl<K: Eq + Hash + Clone, V: Clone> OwnerCache<K, V> {
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> Default for OwnerCache<K, V> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }

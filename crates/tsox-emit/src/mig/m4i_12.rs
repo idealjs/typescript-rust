@@ -15,7 +15,7 @@ use crate::mig::m4m::r36k5_defs::NodeDataExt;
 pub mod r36k17_defs;
 pub use r36k17_defs::*;
 
-pub fn debug_fail(reason: &str) {
+pub fn debug_fail(reason: &str) { ::tsox_core::fntrace::enter("debug_fail"); 
     let reason = if reason.is_empty() {
         "Debug failure.".to_string()
     } else {
@@ -35,15 +35,15 @@ pub struct SuperAccessState {
 }
 
 impl SuperAccessState {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub fn init_super_access_visitor(&mut self, emit_context: &EmitContext, _factory: NodeFactory<'_>) {
+    pub fn init_super_access_visitor(&mut self, emit_context: &EmitContext, _factory: NodeFactory<'_>) { ::tsox_core::fntrace::enter("init_super_access_visitor"); 
         self.super_access_visitor = emit_context.new_node_visitor(Self::visit_super_access_node);
     }
 
-    fn visit_super_access_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_super_access_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_super_access_node"); 
         match node.kind {
             SyntaxKind::CallExpression => {
                 if is_super_property(&node.as_call_expression().expression) {
@@ -82,14 +82,14 @@ impl SuperAccessState {
         }
     }
 
-    pub fn substitute_super_accesses_in_body(&mut self, body: &Arc<Node>) -> Arc<Node> {
+    pub fn substitute_super_accesses_in_body(&mut self, body: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("substitute_super_accesses_in_body"); 
         self.super_access_visitor.visit_node(body)
     }
 
     fn substitute_call_expression_with_super_access(
         &mut self,
         call_node: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("substitute_call_expression_with_super_access"); 
         let call = call_node.as_call_expression();
         let expression = &call.expression;
         let target: Arc<Node>;
@@ -138,7 +138,7 @@ impl SuperAccessState {
     fn create_super_element_access_in_async_method(
         &mut self,
         argument_expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_super_element_access_in_async_method"); 
         let super_index_call = self.factory().new_call_expression(
             &self.super_index_binding,
             None,
@@ -157,7 +157,7 @@ impl SuperAccessState {
         super_index_call
     }
 
-    pub fn create_super_access_variable_statement(&mut self) -> Arc<Node> {
+    pub fn create_super_access_variable_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_super_access_variable_statement"); 
         let f = self.factory();
         let mut accessors: Vec<Arc<Node>> = Vec::new();
 
@@ -232,7 +232,7 @@ impl SuperAccessState {
         f.new_variable_statement(None, &decl_list)
     }
 
-    pub fn track_super_access(&mut self, node: &Arc<Node>) {
+    pub fn track_super_access(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("track_super_access"); 
         if self.captured_super_properties.is_none() {
             return;
         }
@@ -286,7 +286,7 @@ pub fn create_accessor_property_backing_field(
     node: &Arc<Node>,
     modifiers: Option<Arc<tsox_frontend::ast::ModifierList>>,
     initializer: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_accessor_property_backing_field"); 
     let data = node.as_property_declaration();
     let generated_name = f.new_generated_private_name_for_node_ex(
         &data.name,
@@ -312,7 +312,7 @@ pub struct ConstEnumInliningTransformer<'a> {
     pub(crate) emit_resolver: &'a EmitResolver,
 }
 
-pub fn new_const_enum_inlining_transformer<'a>(opts: &'a TransformOptions<'a>) -> ConstEnumInliningTransformer<'a> {
+pub fn new_const_enum_inlining_transformer<'a>(opts: &'a TransformOptions<'a>) -> ConstEnumInliningTransformer<'a> { ::tsox_core::fntrace::enter("new_const_enum_inlining_transformer"); 
     let compiler_options = opts.compiler_options;
     if compiler_options.get_isolated_modules() {
         debug_fail("const enums are not inlined under isolated modules");

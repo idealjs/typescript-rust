@@ -5,7 +5,7 @@ use super::*;
 pub(crate) fn parse_comparator(
     op: &str,
     result: &PartialVersion,
-) -> Option<Vec<VersionComparator>> {
+) -> Option<Vec<VersionComparator>> { crate::fntrace::enter("parse_comparator"); 
     let operator_str = op;
 
     if is_wildcard(&result.major_str) {
@@ -141,6 +141,6 @@ pub(crate) fn parse_comparator(
     Some(comparators)
 }
 
-pub(crate) fn is_wildcard(text: &str) -> bool {
+pub(crate) fn is_wildcard(text: &str) -> bool { crate::fntrace::enter("is_wildcard"); 
     text == "*" || text == "x" || text == "X"
 }

@@ -3,7 +3,7 @@
 use crate::parser::statements::*;
 
 impl Parser {
-    pub(crate) fn parse_with_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_with_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_with_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::WithKeyword);
         self.expect(SyntaxKind::OpenParenToken);
@@ -21,7 +21,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_if_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_if_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_if_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::IfKeyword);
         self.expect(SyntaxKind::OpenParenToken);
@@ -47,7 +47,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_do_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_do_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_do_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::DoKeyword);
         let statement = self.parse_statement();
@@ -67,7 +67,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_while_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_while_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_while_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::WhileKeyword);
         self.expect(SyntaxKind::OpenParenToken);
@@ -85,7 +85,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_for_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_for_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_for_statement"); 
         let pos = self.token_pos();
         let context_flags = self.context_flags_now();
         self.expect(SyntaxKind::ForKeyword);
@@ -181,7 +181,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_break_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_break_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_break_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::BreakKeyword);
         let label = self.parse_identifier_if_not_semicolon();
@@ -194,7 +194,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_continue_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_continue_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_continue_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::ContinueKeyword);
         let label = self.parse_identifier_if_not_semicolon();
@@ -207,7 +207,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_identifier_if_not_semicolon(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn parse_identifier_if_not_semicolon(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_identifier_if_not_semicolon"); 
         if !self.can_parse_semicolon() {
             Some(self.parse_identifier())
         } else {
@@ -215,7 +215,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_return_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_return_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_return_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::ReturnKeyword);
         let expression = if !self.can_parse_semicolon() {
@@ -232,7 +232,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_switch_statement(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_switch_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_switch_statement"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::SwitchKeyword);
         self.expect(SyntaxKind::OpenParenToken);
@@ -250,7 +250,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_case_block(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_case_block(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_case_block"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let clauses = self.parse_list(
@@ -268,7 +268,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_case_or_default_clause(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_case_or_default_clause(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_case_or_default_clause"); 
         if self.token == SyntaxKind::CaseKeyword {
             let pos = self.token_pos();
             self.next_token();

@@ -10,7 +10,7 @@ const SPACE_VALUE: u8 = 1 << 1;
 const SPACE_NAMESPACE: u8 = 1 << 2;
 
 impl Checker {
-    pub(crate) fn check_exports_on_merged_declarations(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_exports_on_merged_declarations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_exports_on_merged_declarations"); 
         let Some(symbol) = self.program.symbol_map().symbol_of(node).cloned() else {
             return;
         };
@@ -81,7 +81,7 @@ impl Checker {
         &self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("merged_declaration_view"); 
         let mut decls: Vec<Arc<Node>> = Vec::new();
         let mut push_symbol = |s: &Arc<Symbol>, decls: &mut Vec<Arc<Node>>| {
             for d in s.declarations.iter() {
@@ -121,7 +121,7 @@ impl Checker {
         decls
     }
 
-    fn declaration_spaces(&mut self, node: &Arc<Node>) -> u8 {
+    fn declaration_spaces(&mut self, node: &Arc<Node>) -> u8 { ::tsox_core::fntrace::enter("declaration_spaces"); 
         match node.kind {
             SyntaxKind::InterfaceDeclaration
             | SyntaxKind::TypeAliasDeclaration
@@ -169,7 +169,7 @@ impl Checker {
 
     // Go getDeclarationSpaces 别名穿透：resolveAlias 目标声明的空间并集；
     // 自解析（非别名/回到自身）或超长链回退 VALUE 位，防环
-    fn alias_declaration_spaces(&mut self, node: &Arc<Node>, depth: u8) -> u8 {
+    fn alias_declaration_spaces(&mut self, node: &Arc<Node>, depth: u8) -> u8 { ::tsox_core::fntrace::enter("alias_declaration_spaces"); 
         if depth > 8 {
             return SPACE_VALUE;
         }
@@ -199,7 +199,7 @@ impl Checker {
             })
     }
 
-    pub(crate) fn effective_export_default_flags(&mut self, node: &Arc<Node>) -> (bool, bool) {
+    pub(crate) fn effective_export_default_flags(&mut self, node: &Arc<Node>) -> (bool, bool) { ::tsox_core::fntrace::enter("effective_export_default_flags"); 
         let mut flags = self.get_combined_modifier_flags(node);
         if !node
             .parent()
@@ -225,7 +225,7 @@ impl Checker {
         )
     }
 
-    fn enclosing_export_context_container(node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn enclosing_export_context_container(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("enclosing_export_context_container"); 
         let mut cur = node.parent();
         while let Some(p) = cur {
             if matches!(
@@ -239,7 +239,7 @@ impl Checker {
         None
     }
 
-    fn in_global_scope_augmentation(node: &Arc<Node>) -> bool {
+    fn in_global_scope_augmentation(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("in_global_scope_augmentation"); 
         node.parent()
             .is_some_and(|p| p.kind == SyntaxKind::ModuleBlock)
             && node

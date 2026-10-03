@@ -12,7 +12,7 @@ pub(crate) fn build_project(
     seen_projects: &mut HashSet<String>,
     building: &mut HashSet<String>,
     cycle_stack: &mut Vec<String>,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("build_project"); 
     let config_file_name = match resolve_project_config(sys, project) {
         Ok(config) => config,
         Err(diag) => {
@@ -161,7 +161,7 @@ pub(crate) fn build_project(
 pub(crate) fn resolve_project_config(
     sys: &dyn System,
     project: &str,
-) -> Result<String, Diagnostic> {
+) -> Result<String, Diagnostic> { ::tsox_core::fntrace::enter("resolve_project_config"); 
     if sys.fs().directory_exists(project) {
         let config = tsox_core::tspath::combine_paths(project, &["tsconfig.json"]);
         if !sys.fs().file_exists(&config) {
@@ -181,7 +181,7 @@ pub(crate) fn resolve_project_config(
     }
 }
 
-pub(crate) fn resolve_project_references(config: &ParsedCommandLine) -> Vec<String> {
+pub(crate) fn resolve_project_references(config: &ParsedCommandLine) -> Vec<String> { ::tsox_core::fntrace::enter("resolve_project_references"); 
     let config_dir = tsox_core::tspath::get_directory_path(&config.config_file_name);
     config
         .references
@@ -195,7 +195,7 @@ pub(crate) fn resolve_project_references(config: &ParsedCommandLine) -> Vec<Stri
 pub(crate) fn resolve_config_file_name_of_project_reference(
     config_dir: &str,
     path: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("resolve_config_file_name_of_project_reference"); 
     let resolved = tsox_core::tspath::get_normalized_absolute_path(path, config_dir);
     if tsox_core::tspath::file_extension_is(&resolved, ".json") {
         resolved

@@ -3,7 +3,7 @@
 use crate::checker::checker_classes::*;
 
 impl Checker {
-    pub(crate) fn check_type_predicate(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_type_predicate(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_predicate"); 
         let NodeData::TypePredicateNode(data) = &node.data else {
             return;
         };
@@ -50,7 +50,7 @@ impl Checker {
         }
     }
 
-    fn type_predicate_parent(node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn type_predicate_parent(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_predicate_parent"); 
         let parent = node.parent()?;
         if !matches!(
             parent.kind,
@@ -71,12 +71,12 @@ impl Checker {
         }
     }
 
-    fn type_predicate_parameter_is_this(name: &Arc<Node>) -> bool {
+    fn type_predicate_parameter_is_this(name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_predicate_parameter_is_this"); 
         matches!(name.kind, SyntaxKind::ThisKeyword | SyntaxKind::ThisType)
             || (name.kind == SyntaxKind::Identifier && name.text() == "this")
     }
 
-    fn predicate_parent_parameters(parent: &Arc<Node>) -> &NodeList {
+    fn predicate_parent_parameters(parent: &Arc<Node>) -> &NodeList { ::tsox_core::fntrace::enter("predicate_parent_parameters"); 
         match &parent.data {
             NodeData::FunctionDeclaration(d) => &d.parameters,
             NodeData::FunctionExpression(d) => &d.parameters,
@@ -94,7 +94,7 @@ impl Checker {
         pattern: &Arc<Node>,
         predicate_node: &Arc<Node>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("binding_pattern_declares_name"); 
         let NodeData::BindingPattern(data) = &pattern.data else {
             return false;
         };

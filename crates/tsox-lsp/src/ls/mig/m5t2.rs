@@ -23,7 +23,7 @@ pub struct FoldingRangeKey {
     pub collapsed_text: Option<String>,
 }
 
-pub fn key_for_folding_range(folding_range: &FoldingRange) -> FoldingRangeKey {
+pub fn key_for_folding_range(folding_range: &FoldingRange) -> FoldingRangeKey { ::tsox_core::fntrace::enter("key_for_folding_range"); 
     FoldingRangeKey {
         start_line: folding_range.start_line,
         start_character: folding_range.start_character,
@@ -35,7 +35,7 @@ pub fn key_for_folding_range(folding_range: &FoldingRange) -> FoldingRangeKey {
 }
 
 impl LanguageService {
-    pub fn adjust_folding_end(&self, ranges: Vec<FoldingRange>, source_file: &Arc<SourceFile>) -> Vec<FoldingRange> {
+    pub fn adjust_folding_end(&self, ranges: Vec<FoldingRange>, source_file: &Arc<SourceFile>) -> Vec<FoldingRange> { ::tsox_core::fntrace::enter("adjust_folding_end"); 
         let source_text = &source_file.text;
         let script = FoldingSourceFileScript(Arc::clone(source_file));
         let mut result = Vec::with_capacity(ranges.len());
@@ -68,16 +68,16 @@ impl LanguageService {
 struct FoldingSourceFileScript(Arc<SourceFile>);
 
 impl crate::ls::lsconv_converters::Script for FoldingSourceFileScript {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.0.file_name
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.0.text
     }
 }
 
-pub fn supports_collapsed_text(capabilities: &ClientCapabilities) -> bool {
+pub fn supports_collapsed_text(capabilities: &ClientCapabilities) -> bool { ::tsox_core::fntrace::enter("supports_collapsed_text"); 
     capabilities.text_document.folding_range.collapsed_text
 }
 
@@ -86,7 +86,7 @@ pub fn create_folding_range(
     text_range: &Range,
     folding_range_kind: &str,
     collapsed_text: &str,
-) -> FoldingRange {
+) -> FoldingRange { ::tsox_core::fntrace::enter("create_folding_range"); 
     let kind = if folding_range_kind.is_empty() {
         None
     } else {
@@ -112,7 +112,7 @@ pub fn create_folding_range_from_bounds(
     end: usize,
     folding_range_kind: &str,
     source_file: &Arc<SourceFile>,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("create_folding_range_from_bounds"); 
     let (text_range, fidelity) = l.m5x_create_lsp_range_from_bounds(pos, end, source_file);
     if fidelity == SpanFidelity::None_ as u32 {
         return None;
@@ -125,7 +125,7 @@ pub fn visit_node(
     depth_remaining: u32,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Vec<FoldingRange> {
+) -> Vec<FoldingRange> { ::tsox_core::fntrace::enter("visit_node"); 
     if n.flags.contains(ast::NodeFlags::Reparsed) || depth_remaining == 0 {
         return Vec::new();
     }
@@ -208,7 +208,7 @@ pub fn visit_node(
     folding_range
 }
 
-fn node_members_list(n: &Node) -> Option<&Arc<ast::NodeList>> {
+fn node_members_list(n: &Node) -> Option<&Arc<ast::NodeList>> { ::tsox_core::fntrace::enter("node_members_list"); 
     match &n.data {
         ast::NodeData::ClassDeclaration(d) => Some(&d.members),
         ast::NodeData::ClassExpression(d) => Some(&d.members),
@@ -221,7 +221,7 @@ pub fn add_outlining_for_leading_comments_for_node(
     n: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Vec<FoldingRange> {
+) -> Vec<FoldingRange> { ::tsox_core::fntrace::enter("add_outlining_for_leading_comments_for_node"); 
     if ast::is_jsx_text(n) {
         return Vec::new();
     }
@@ -232,7 +232,7 @@ pub fn add_outlining_for_leading_comments_for_pos(
     pos: usize,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Vec<FoldingRange> {
+) -> Vec<FoldingRange> { ::tsox_core::fntrace::enter("add_outlining_for_leading_comments_for_pos"); 
     let mut folding_range: Vec<FoldingRange> = Vec::with_capacity(40);
     let mut first_single_line_comment_start: i64 = -1;
     let mut last_single_line_comment_end: i64 = -1;
@@ -310,7 +310,7 @@ fn combine_and_add_multiple_single_line_comments(
     kind: &str,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("combine_and_add_multiple_single_line_comments"); 
     if single_line_comment_count > 1 {
         return create_folding_range_from_bounds(
             l,
@@ -327,7 +327,7 @@ pub fn get_outlining_span_for_node(
     n: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("get_outlining_span_for_node"); 
     match n.kind {
         SyntaxKind::Block => {
             let parent = n.parent()?;
@@ -422,7 +422,7 @@ fn standalone_block_folding_range(
     n: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("standalone_block_folding_range"); 
     let (text_range, fidelity) =
         l.create_lsp_range_from_node_for_feature(n, source_file, super::m5s::SpanFeature::Definition as u32);
     if fidelity == SpanFidelity::None_ as u32 {
@@ -435,7 +435,7 @@ pub fn span_for_import_export_elements(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_import_export_elements"); 
     let elements = match &node.data {
         ast::NodeData::NamedImports(d) => &d.elements,
         ast::NodeData::NamedExports(d) => &d.elements,
@@ -457,7 +457,7 @@ pub fn span_for_parenthesized_expression(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_parenthesized_expression"); 
     let start = astnav::get_start_of_node(node, source_file, false);
     if positions_are_on_same_line(start, node.end(), source_file) {
         return None;
@@ -469,7 +469,7 @@ pub fn span_for_call_expression(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_call_expression"); 
     if node.arguments().map_or(true, |arguments| arguments.nodes.is_empty()) {
         return None;
     }
@@ -485,7 +485,7 @@ pub fn span_for_arrow_function(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_arrow_function"); 
     let body = node.body()?;
     if ast::is_block(&body) || ast::is_parenthesized_expression(&body) || positions_are_on_same_line(body.pos(), body.end(), source_file) {
         return None;
@@ -497,7 +497,7 @@ pub fn span_for_template_literal(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_template_literal"); 
     if node.kind == SyntaxKind::NoSubstitutionTemplateLiteral && node.text().is_empty() {
         return None;
     }
@@ -514,7 +514,7 @@ pub fn span_for_jsx_element(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_jsx_element"); 
     if node.kind == SyntaxKind::JsxElement {
         let ast::NodeData::JsxElement(d) = &node.data else {
             return None;
@@ -552,7 +552,7 @@ pub fn span_for_jsx_attributes(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_jsx_attributes"); 
     let attributes = match &node.data {
         ast::NodeData::JsxSelfClosingElement(d) => &d.attributes,
         ast::NodeData::JsxOpeningElement(d) => &d.attributes,
@@ -577,7 +577,7 @@ pub fn span_for_node_array(
     statements: &ast::NodeList,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_node_array"); 
     if !statements.nodes.is_empty() {
         return create_folding_range_from_bounds(l, statements.pos(), statements.end(), "", source_file);
     }
@@ -590,7 +590,7 @@ pub fn span_for_node(
     use_full_start: bool,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("span_for_node"); 
     let close_brace = if open != SyntaxKind::OpenBraceToken {
         SyntaxKind::CloseBracketToken
     } else {
@@ -607,7 +607,7 @@ pub fn range_between_tokens(
     source_file: &Arc<SourceFile>,
     use_full_start: bool,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("range_between_tokens"); 
     let bounds = if use_full_start {
         (open_token.pos(), close_token.end())
     } else {
@@ -624,7 +624,7 @@ pub fn function_span(
     body: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     l: &LanguageService,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("function_span"); 
     let open_token = try_get_function_open_token(node, body, source_file)?;
     let close_token = astnav::find_child_of_kind(body, SyntaxKind::CloseBraceToken)?;
     range_between_tokens(&open_token, &close_token, source_file, true, l)
@@ -634,7 +634,7 @@ pub fn try_get_function_open_token(
     node: &Arc<Node>,
     body: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_function_open_token"); 
     if let Some(parameters) = node.parameters() {
         if is_node_array_multi_line(parameters, source_file) {
             if let Some(open_paren_token) = astnav::find_child_of_kind(node, SyntaxKind::OpenParenToken) {
@@ -645,13 +645,13 @@ pub fn try_get_function_open_token(
     astnav::find_child_of_kind(body, SyntaxKind::OpenBraceToken)
 }
 
-pub fn is_node_array_multi_line(list: &ast::NodeList, source_file: &Arc<SourceFile>) -> bool {
+pub fn is_node_array_multi_line(list: &ast::NodeList, source_file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_node_array_multi_line"); 
     if list.nodes.is_empty() {
         return false;
     }
     !positions_are_on_same_line(list.nodes[0].pos(), list.nodes[list.nodes.len() - 1].end(), source_file)
 }
 
-pub fn positions_are_on_same_line(pos1: usize, pos2: usize, source_file: &Arc<SourceFile>) -> bool {
+pub fn positions_are_on_same_line(pos1: usize, pos2: usize, source_file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("positions_are_on_same_line"); 
     tsox_frontend::format::mig::m4t_3::positions_are_on_same_line(pos1 as i64, pos2 as i64, source_file)
 }

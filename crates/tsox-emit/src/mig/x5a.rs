@@ -13,7 +13,7 @@ use tsox_frontend::ast::mig::m3g_2::is_parameter_property_declaration;
 use crate::mig::m4q::r33k12_defs::{EmitFlags, NodeFactory};
 
 impl RuntimeSyntaxTransformer {
-    pub(crate) fn get_namespace_container_name(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn get_namespace_container_name(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_namespace_container_name"); 
         let factory = self.factory();
         factory.generated_name_node(&factory.new_generated_name_for_node(node))
     }
@@ -22,7 +22,7 @@ impl RuntimeSyntaxTransformer {
         &self,
         ns: Arc<Node>,
         name: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_namespace_qualified_property"); 
         self.factory().get_namespace_member_name(
             &ns,
             &name,
@@ -37,7 +37,7 @@ impl RuntimeSyntaxTransformer {
         &mut self,
         ns: Arc<Node>,
         expression: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_namespace_qualified_element"); 
         let qualified_name = self.emit_context().factory().new_element_access_expression(
             &ns,
             None,
@@ -52,7 +52,7 @@ impl RuntimeSyntaxTransformer {
     pub(crate) fn get_parameter_properties(
         &self,
         constructor: Option<&Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_parameter_properties"); 
         let mut parameter_properties = Vec::new();
         if let Some(constructor) = constructor {
             for parameter in tsox_frontend::ast::mig::m3b::parameters(constructor) {

@@ -2,7 +2,7 @@ use super::*;
 use crate::parser::Parser;
 
 #[test]
-fn get_token_at_position_jsdoc_type_assertion() {
+fn get_token_at_position_jsdoc_type_assertion() { ::tsox_core::fntrace::enter("get_token_at_position_jsdoc_type_assertion"); 
     let file_text = "function foo(x) {\n    const s = /**@type {string}*/(x)\n}";
 
     let position: usize = 52;
@@ -18,7 +18,7 @@ fn get_token_at_position_jsdoc_type_assertion() {
 }
 
 #[test]
-fn get_token_at_position_jsdoc_type_assertion_with_comment() {
+fn get_token_at_position_jsdoc_type_assertion_with_comment() { ::tsox_core::fntrace::enter("get_token_at_position_jsdoc_type_assertion_with_comment"); 
     let file_text = "function foo(x) {\n    const s = /**@type {string}*/(x)  // comment\n}";
     let x_pos: usize = 52;
     let file = Parser::parse_source_file_text("/test.js", file_text.to_string());
@@ -27,7 +27,7 @@ fn get_token_at_position_jsdoc_type_assertion_with_comment() {
 }
 
 #[test]
-fn get_token_at_position_pointer_equality() {
+fn get_token_at_position_pointer_equality() { ::tsox_core::fntrace::enter("get_token_at_position_pointer_equality"); 
     let file_text = "\n\t\t\tfunction foo() {\n\t\t\t\treturn 0;\n\t\t\t}";
     let file = Parser::parse_source_file_text("/file.ts", file_text.to_string());
     let t1 = get_token_at_position(&file.node, 0);
@@ -40,7 +40,7 @@ fn get_token_at_position_pointer_equality() {
 }
 
 #[test]
-fn get_token_at_position_baseline() {
+fn get_token_at_position_baseline() { ::tsox_core::fntrace::enter("get_token_at_position_baseline"); 
     let file_text = "a.b";
     let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
 
@@ -54,7 +54,7 @@ fn get_token_at_position_baseline() {
 }
 
 #[test]
-fn get_touching_property_name_baseline() {
+fn get_touching_property_name_baseline() { ::tsox_core::fntrace::enter("get_touching_property_name_baseline"); 
     let file_text = "foo.bar";
     let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
 
@@ -68,7 +68,7 @@ fn get_touching_property_name_baseline() {
 }
 
 #[test]
-fn find_preceding_token_baseline() {
+fn find_preceding_token_baseline() { ::tsox_core::fntrace::enter("find_preceding_token_baseline"); 
     let file_text = "a - b";
     let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
 
@@ -77,7 +77,7 @@ fn find_preceding_token_baseline() {
 }
 
 #[test]
-fn find_next_token_baseline() {
+fn find_next_token_baseline() { ::tsox_core::fntrace::enter("find_next_token_baseline"); 
     let file_text = "a + b";
     let file = Parser::parse_source_file_text("/f.ts", file_text.to_string());
 
@@ -86,7 +86,7 @@ fn find_next_token_baseline() {
 }
 
 #[test]
-fn find_preceding_token_after_comma_in_parameter_list() {
+fn find_preceding_token_after_comma_in_parameter_list() { ::tsox_core::fntrace::enter("find_preceding_token_after_comma_in_parameter_list"); 
     let file_content = "takesCb((n, s, ))";
     let position: usize = 15;
     let file = Parser::parse_source_file_text("/file.ts", file_content.to_string());
@@ -100,7 +100,7 @@ fn find_preceding_token_after_comma_in_parameter_list() {
 }
 
 #[test]
-fn find_preceding_token_after_dot_in_jsdoc() {
+fn find_preceding_token_after_dot_in_jsdoc() { ::tsox_core::fntrace::enter("find_preceding_token_after_dot_in_jsdoc"); 
     let file_content = "a + b";
     let file = Parser::parse_source_file_text("/file.ts", file_content.to_string());
 

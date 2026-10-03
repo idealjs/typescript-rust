@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut CompilerOptions) {
+pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut CompilerOptions) { ::tsox_core::fntrace::enter("apply_options"); 
     for (name, value) in options {
         match name.as_str() {
             "target" => {
@@ -188,7 +188,7 @@ pub(crate) fn apply_options(options: &HashMap<String, OptValue>, out: &mut Compi
     }
 }
 
-pub(crate) fn apply_build_options(options: &HashMap<String, OptValue>, out: &mut BuildOptions) {
+pub(crate) fn apply_build_options(options: &HashMap<String, OptValue>, out: &mut BuildOptions) { ::tsox_core::fntrace::enter("apply_build_options"); 
     for (name, value) in options {
         match name.as_str() {
             "clean" => {
@@ -226,7 +226,7 @@ pub(crate) fn apply_build_options(options: &HashMap<String, OptValue>, out: &mut
     }
 }
 
-pub(crate) fn apply_watch_options(options: &HashMap<String, OptValue>, out: &mut WatchOptions) {
+pub(crate) fn apply_watch_options(options: &HashMap<String, OptValue>, out: &mut WatchOptions) { ::tsox_core::fntrace::enter("apply_watch_options"); 
     for (name, value) in options {
         match name.as_str() {
             "watchInterval" => {
@@ -280,7 +280,7 @@ pub(crate) fn apply_watch_options(options: &HashMap<String, OptValue>, out: &mut
     }
 }
 
-pub(crate) fn parse_script_target(s: &str) -> ScriptTarget {
+pub(crate) fn parse_script_target(s: &str) -> ScriptTarget { ::tsox_core::fntrace::enter("parse_script_target"); 
     let s = s.to_lowercase();
     let s = s.replace('-', "");
     match s.as_str() {
@@ -303,7 +303,7 @@ pub(crate) fn parse_script_target(s: &str) -> ScriptTarget {
     }
 }
 
-pub(crate) fn parse_module_kind(s: &str) -> ModuleKind {
+pub(crate) fn parse_module_kind(s: &str) -> ModuleKind { ::tsox_core::fntrace::enter("parse_module_kind"); 
     match s.to_lowercase().as_str() {
         "commonjs" => ModuleKind::CommonJS,
         "amd" => ModuleKind::AMD,

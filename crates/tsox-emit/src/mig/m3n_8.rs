@@ -31,7 +31,7 @@ use tsox_frontend::scanner::{
 use tsox_core::diagnostics::Message;
 
 impl DeclarationTransformer {
-    pub fn should_strip_internal(&self, node: Option<&Arc<Node>>) -> bool {
+    pub fn should_strip_internal(&self, node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("should_strip_internal"); 
         match node {
             Some(node) => {
                 self.state.strip_internal
@@ -45,7 +45,7 @@ impl DeclarationTransformer {
         &self,
         node: &Arc<Node>,
         source_file: Option<&SourceFile>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_internal_declaration"); 
         let Some(source_file) = source_file else {
             return false;
         };
@@ -116,7 +116,7 @@ impl DeclarationTransformer {
         &'a self,
         node: &'a Arc<Node>,
         source_file: &'a SourceFile,
-    ) -> Vec<CommentRange> {
+    ) -> Vec<CommentRange> { ::tsox_core::fntrace::enter("get_leading_comment_ranges_of_node"); 
         if node.kind == SyntaxKind::JsxText {
             return Vec::new();
         }
@@ -127,18 +127,18 @@ impl DeclarationTransformer {
         &mut self,
         parent: &Arc<Node>,
         input: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("rewrite_module_specifier"); 
         let input = input?;
         self.result_has_external_module_indicator = self.result_has_external_module_indicator
             || (parent.kind != SyntaxKind::ModuleDeclaration && parent.kind != SyntaxKind::ImportType);
         Some(Arc::clone(input))
     }
 
-    pub fn preserve_js_doc(&self, updated: &Arc<Node>, original: &Arc<Node>) {
+    pub fn preserve_js_doc(&self, updated: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("preserve_js_doc"); 
         self.emit_context().assign_comment_range(updated, original);
     }
 
-    pub fn preserve_partial_js_doc(&mut self, updated: &Arc<Node>, original: &Arc<Node>) {
+    pub fn preserve_partial_js_doc(&mut self, updated: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("preserve_partial_js_doc"); 
         if !original.flags.contains(NodeFlags::Reparsed) {
             return;
         }
@@ -161,7 +161,7 @@ impl DeclarationTransformer {
         );
     }
 
-    pub fn remove_all_comments(&self, node: &Arc<Node>) {
+    pub fn remove_all_comments(&self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("remove_all_comments"); 
         self.emit_context().add_emit_flags(node, EmitFlags::NO_COMMENTS);
     }
 
@@ -169,14 +169,14 @@ impl DeclarationTransformer {
         &mut self,
         entity_name: &Arc<Node>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_entity_name_visibility"); 
         let visibility_result = self
             .resolver
             .is_entity_name_visible(entity_name, enclosing_declaration);
         self.tracker.handle_symbol_accessibility_error(visibility_result);
     }
 
-    pub fn check_name(&mut self, node: &Arc<Node>) {
+    pub fn check_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_name"); 
         let old_diag = self.state.get_symbol_accessibility_diagnostic.take();
         if !self.suppress_new_diagnostic_contexts {
             self.state.get_symbol_accessibility_diagnostic =
@@ -192,7 +192,7 @@ impl DeclarationTransformer {
         self.state.error_name_node = None;
     }
 
-    pub fn ensure_modifiers(&self, node: &Arc<Node>) -> Option<Arc<ModifierList>> {
+    pub fn ensure_modifiers(&self, node: &Arc<Node>) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("ensure_modifiers"); 
         let current_flags = self
             .emit_context()
             .parse_node(node)
@@ -220,7 +220,7 @@ impl DeclarationTransformer {
         Some(self.factory().new_modifier_list(result))
     }
 
-    pub fn transform_variable_statement(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_variable_statement(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_variable_statement"); 
         let declaration_list = input.as_variable_statement().declaration_list.clone();
         let declarations = &declaration_list.as_variable_declaration_list().declarations.nodes;
         let mut visible = false;
@@ -297,7 +297,7 @@ impl DeclarationTransformer {
         Some(res)
     }
 
-    pub fn ensure_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags {
+    pub fn ensure_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("ensure_modifier_flags"); 
         let mut mask = ModifierFlags::all()
             - ModifierFlags::Public
             - ModifierFlags::Async
@@ -319,14 +319,14 @@ impl DeclarationTransformer {
 
 }
 
-pub fn jsdoc_comment_text(jsdoc: &Arc<Node>) -> String {
+pub fn jsdoc_comment_text(jsdoc: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("jsdoc_comment_text"); 
     match &jsdoc.data {
         NodeData::JSDoc(data) => get_text_of_jsdoc_comment(Some(data.comment.as_ref())),
         _ => String::new(),
     }
 }
 
-pub fn has_any_binding_initializers(binding_pattern: &Arc<Node>) -> bool {
+pub fn has_any_binding_initializers(binding_pattern: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_any_binding_initializers"); 
     let elements = match &binding_pattern.data {
         NodeData::BindingPattern(data) => &data.elements.nodes,
         _ => return false,

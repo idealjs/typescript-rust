@@ -12,7 +12,7 @@ impl Checker {
         last_override: &Option<Arc<Node>>,
         last_async: &Option<Arc<Node>>,
         last_declare: &Option<Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_modifier_tail_positions"); 
         if node.kind == SyntaxKind::Constructor {
             if flags.contains(ModifierFlags::Static) {
                 if let Some(last_static) = &last_static {

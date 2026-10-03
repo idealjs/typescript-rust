@@ -20,12 +20,12 @@ pub struct RecoveryBoundary {
 }
 
 impl RecoveryBoundary {
-    pub fn mark_error(&mut self, report: Box<dyn FnOnce()>) {
+    pub fn mark_error(&mut self, report: Box<dyn FnOnce()>) { ::tsox_core::fntrace::enter("mark_error"); 
         self.had_error = true;
         self.deferred_reports.push(report);
     }
 
-    pub fn start_recovery_scope(&self) -> OriginalRecoveryScopeState {
+    pub fn start_recovery_scope(&self) -> OriginalRecoveryScopeState { ::tsox_core::fntrace::enter("start_recovery_scope"); 
         let tracked_symbols_top = self.ctx.borrow().tracked_symbols.len();
         let unreported_errors_top = self.deferred_reports.len();
         OriginalRecoveryScopeState {
@@ -35,7 +35,7 @@ impl RecoveryBoundary {
         }
     }
 
-    pub fn end_recovery_scope(&mut self, state: OriginalRecoveryScopeState) {
+    pub fn end_recovery_scope(&mut self, state: OriginalRecoveryScopeState) { ::tsox_core::fntrace::enter("end_recovery_scope"); 
         self.had_error = state.had_error;
         let mut ctx = self.ctx.borrow_mut();
         ctx.tracked_symbols.truncate(state.tracked_symbols_top);
@@ -56,7 +56,7 @@ pub struct WrappingTracker {
 }
 
 impl WrappingTracker {
-    pub fn new(inner: Box<dyn SymbolTracker>, bound: Rc<RefCell<RecoveryBoundary>>) -> Self {
+    pub fn new(inner: Box<dyn SymbolTracker>, bound: Rc<RefCell<RecoveryBoundary>>) -> Self { ::tsox_core::fntrace::enter("new"); 
         WrappingTracker {
             wrapped: Rc::new(RefCell::new(inner)),
             bound,
@@ -70,7 +70,7 @@ impl SymbolTracker for WrappingTracker {
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("track_symbol"); 
         self.bound
             .borrow_mut()
             .tracked_symbols
@@ -82,14 +82,14 @@ impl SymbolTracker for WrappingTracker {
         false
     }
 
-    fn report_inaccessible_this_error(&mut self) {
+    fn report_inaccessible_this_error(&mut self) { ::tsox_core::fntrace::enter("report_inaccessible_this_error"); 
         let wrapped = Rc::clone(&self.wrapped);
         self.bound.borrow_mut().mark_error(Box::new(move || {
             wrapped.borrow_mut().report_inaccessible_this_error();
         }));
     }
 
-    fn report_private_in_base_of_class_expression(&mut self, property_name: &str) {
+    fn report_private_in_base_of_class_expression(&mut self, property_name: &str) { ::tsox_core::fntrace::enter("report_private_in_base_of_class_expression"); 
         let pn = property_name.to_string();
         let wrapped = Rc::clone(&self.wrapped);
         self.bound.borrow_mut().mark_error(Box::new(move || {
@@ -99,7 +99,7 @@ impl SymbolTracker for WrappingTracker {
         }));
     }
 
-    fn report_inaccessible_unique_symbol_error(&mut self) {
+    fn report_inaccessible_unique_symbol_error(&mut self) { ::tsox_core::fntrace::enter("report_inaccessible_unique_symbol_error"); 
         let wrapped = Rc::clone(&self.wrapped);
         self.bound.borrow_mut().mark_error(Box::new(move || {
             wrapped
@@ -108,14 +108,14 @@ impl SymbolTracker for WrappingTracker {
         }));
     }
 
-    fn report_cyclic_structure_error(&mut self) {
+    fn report_cyclic_structure_error(&mut self) { ::tsox_core::fntrace::enter("report_cyclic_structure_error"); 
         let wrapped = Rc::clone(&self.wrapped);
         self.bound.borrow_mut().mark_error(Box::new(move || {
             wrapped.borrow_mut().report_cyclic_structure_error();
         }));
     }
 
-    fn report_likely_unsafe_import_required_error(&mut self, specifier: &str, symbol_name: &str) {
+    fn report_likely_unsafe_import_required_error(&mut self, specifier: &str, symbol_name: &str) { ::tsox_core::fntrace::enter("report_likely_unsafe_import_required_error"); 
         let sp = specifier.to_string();
         let sn = symbol_name.to_string();
         let wrapped = Rc::clone(&self.wrapped);
@@ -126,7 +126,7 @@ impl SymbolTracker for WrappingTracker {
         }));
     }
 
-    fn report_truncation_error(&mut self) {
+    fn report_truncation_error(&mut self) { ::tsox_core::fntrace::enter("report_truncation_error"); 
         self.wrapped.borrow_mut().report_truncation_error();
     }
 
@@ -135,7 +135,7 @@ impl SymbolTracker for WrappingTracker {
         containing_file: Option<&Arc<SourceFile>>,
         parent_symbol: &Arc<Symbol>,
         augmenting_symbol: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_nonlocal_augmentation"); 
         self.wrapped.borrow_mut().report_nonlocal_augmentation(
             containing_file,
             parent_symbol,
@@ -143,7 +143,7 @@ impl SymbolTracker for WrappingTracker {
         );
     }
 
-    fn report_non_serializable_property(&mut self, property_name: &str) {
+    fn report_non_serializable_property(&mut self, property_name: &str) { ::tsox_core::fntrace::enter("report_non_serializable_property"); 
         let pn = property_name.to_string();
         let wrapped = Rc::clone(&self.wrapped);
         self.bound.borrow_mut().mark_error(Box::new(move || {
@@ -151,23 +151,23 @@ impl SymbolTracker for WrappingTracker {
         }));
     }
 
-    fn report_inference_fallback(&mut self, node: &Arc<Node>) {
+    fn report_inference_fallback(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("report_inference_fallback"); 
         self.wrapped.borrow_mut().report_inference_fallback(node);
     }
 
-    fn push_error_fallback_node(&mut self, node: &Arc<Node>) {
+    fn push_error_fallback_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_error_fallback_node"); 
         self.wrapped.borrow_mut().push_error_fallback_node(node);
     }
 
-    fn pop_error_fallback_node(&mut self) {
+    fn pop_error_fallback_node(&mut self) { ::tsox_core::fntrace::enter("pop_error_fallback_node"); 
         self.wrapped.borrow_mut().pop_error_fallback_node();
     }
 
-    fn as_any(&self) -> &dyn std::any::Any {
+    fn as_any(&self) -> &dyn std::any::Any { ::tsox_core::fntrace::enter("as_any"); 
         self
     }
 
-    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any { ::tsox_core::fntrace::enter("as_any_mut"); 
         self
     }
 }

@@ -8,7 +8,7 @@ impl Checker {
         expr: &Arc<Node>,
         target: &Arc<Type>,
         missing_anchor: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_contextual_elements"); 
         if target.flags.contains(TypeFlags::Any) {
             return;
         }
@@ -238,7 +238,7 @@ impl Checker {
         &self,
         declared: Arc<Type>,
         is_async: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("unwrap_async_return_type"); 
         if !is_async {
             return declared;
         }
@@ -259,7 +259,7 @@ impl Checker {
         declared
     }
 
-    pub fn get_awaited_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_awaited_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_awaited_type"); 
         self.get_awaited_type_with_depth(t, 0)
     }
 
@@ -267,7 +267,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         depth: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_awaited_type_with_depth"); 
         if depth > 50 {
             return None;
         }
@@ -297,7 +297,7 @@ impl Checker {
         Some(Arc::clone(t))
     }
 
-    pub(crate) fn get_promised_type_of_promise(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn get_promised_type_of_promise(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_promised_type_of_promise"); 
         if t.symbol.as_ref().is_some_and(|s| s.name == "Promise") {
             if let Some(obj) = t.as_object() {
                 if let Some(first) = obj.type_arguments.first() {
@@ -343,7 +343,7 @@ impl Checker {
         Some(self.get_union_type(value_types))
     }
 
-    fn call_signatures_through_unions(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> {
+    fn call_signatures_through_unions(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("call_signatures_through_unions"); 
         if t.is_union()
             && let Some(types) = t.types()
         {
@@ -356,7 +356,7 @@ impl Checker {
         self.get_signatures_of_type(t, SignatureKind::Call)
     }
 
-    pub(crate) fn declared_annotation_type_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn declared_annotation_type_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("declared_annotation_type_of"); 
         if node.kind != SyntaxKind::Identifier {
             return None;
         }

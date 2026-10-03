@@ -16,7 +16,7 @@ pub const CALLBACK_GET_ACCESSIBLE_ENTRIES: &str = "getAccessibleEntries";
 pub const CALLBACK_REALPATH: &str = "realpath";
 pub const CALLBACK_WRITE_FILE: &str = "writeFile";
 
-pub fn is_callback_name(name: &str) -> bool {
+pub fn is_callback_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_callback_name"); 
     matches!(
         name,
         CALLBACK_READ_FILE
@@ -35,7 +35,7 @@ pub struct IpcConn {
 }
 
 impl IpcConn {
-    pub fn new(reader: Box<dyn Read + Send>, writer: Box<dyn Write + Send>) -> IpcConn {
+    pub fn new(reader: Box<dyn Read + Send>, writer: Box<dyn Write + Send>) -> IpcConn { ::tsox_core::fntrace::enter("new"); 
         IpcConn {
             call_lock: Mutex::new(()),
             reader: Mutex::new(Reader::new(reader)),
@@ -43,7 +43,7 @@ impl IpcConn {
         }
     }
 
-    pub fn call(&self, method: &str, params: &serde_json::Value) -> Result<Vec<u8>, String> {
+    pub fn call(&self, method: &str, params: &serde_json::Value) -> Result<Vec<u8>, String> { ::tsox_core::fntrace::enter("call"); 
         let _serialized = self.call_lock.lock().unwrap();
         let id = Id::new_string(method);
         let request = Message {
@@ -88,15 +88,15 @@ pub struct CallbackFS {
 }
 
 impl CallbackFS {
-    pub fn set_connection(&self, conn: Arc<IpcConn>) {
+    pub fn set_connection(&self, conn: Arc<IpcConn>) { ::tsox_core::fntrace::enter("set_connection"); 
         *self.conn.lock().unwrap() = Some(conn);
     }
 
-    pub fn is_enabled(&self, name: &str) -> bool {
+    pub fn is_enabled(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("is_enabled"); 
         self.enabled_callbacks.contains(name)
     }
 
-    pub fn call(&self, name: &str, arg: &serde_json::Value) -> Result<Vec<u8>, String> {
+    pub fn call(&self, name: &str, arg: &serde_json::Value) -> Result<Vec<u8>, String> { ::tsox_core::fntrace::enter("call"); 
         let guard = self.conn.lock().unwrap();
         let Some(conn) = guard.as_ref() else {
             return Err(format!("CallbackFS: {} called before connection set", name));
@@ -105,7 +105,7 @@ impl CallbackFS {
     }
 }
 
-pub fn new_callback_fs(base: Arc<dyn FS>, callbacks: &[String]) -> Arc<CallbackFS> {
+pub fn new_callback_fs(base: Arc<dyn FS>, callbacks: &[String]) -> Arc<CallbackFS> { ::tsox_core::fntrace::enter("new_callback_fs"); 
     let mut enabled = HashSet::with_capacity(callbacks.len());
     for cb in callbacks {
         if !is_callback_name(cb) {
@@ -121,11 +121,11 @@ pub fn new_callback_fs(base: Arc<dyn FS>, callbacks: &[String]) -> Arc<CallbackF
 }
 
 impl FS for CallbackFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.base.use_case_sensitive_file_names()
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         if self.is_enabled(CALLBACK_READ_FILE) {
             let result = self.call(CALLBACK_READ_FILE, &serde_json::Value::String(path.to_string()));
             match result {
@@ -144,7 +144,7 @@ impl FS for CallbackFS {
         self.base.read_file(path)
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         if self.is_enabled(CALLBACK_FILE_EXISTS) {
             let result = self.call(CALLBACK_FILE_EXISTS, &serde_json::Value::String(path.to_string()));
             match result {
@@ -158,7 +158,7 @@ impl FS for CallbackFS {
         self.base.file_exists(path)
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         if self.is_enabled(CALLBACK_DIRECTORY_EXISTS) {
             let result = self.call(CALLBACK_DIRECTORY_EXISTS, &serde_json::Value::String(path.to_string()));
             match result {
@@ -172,7 +172,7 @@ impl FS for CallbackFS {
         self.base.directory_exists(path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         if self.is_enabled(CALLBACK_GET_ACCESSIBLE_ENTRIES) {
             let result = self.call(CALLBACK_GET_ACCESSIBLE_ENTRIES, &serde_json::Value::String(path.to_string()));
             match result {
@@ -192,7 +192,7 @@ impl FS for CallbackFS {
         self.base.get_accessible_entries(path)
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         if self.is_enabled(CALLBACK_REALPATH) {
             let result = self.call(CALLBACK_REALPATH, &serde_json::Value::String(path.to_string()));
             match result {
@@ -207,7 +207,7 @@ impl FS for CallbackFS {
         self.base.realpath(path)
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         if self.is_enabled(CALLBACK_WRITE_FILE) {
             let payload = serde_json::json!({ "path": path, "data": data });
             return self
@@ -218,19 +218,19 @@ impl FS for CallbackFS {
         self.base.write_file(path, data)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         self.base.append_file(path, data)
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         self.base.remove(path)
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         self.base.stat(path)
     }
 
-    fn walk_dir(&self, root: &str, walk_fn: &mut dyn FnMut(&str, &FileInfo)) -> std::io::Result<()> {
+    fn walk_dir(&self, root: &str, walk_fn: &mut dyn FnMut(&str, &FileInfo)) -> std::io::Result<()> { ::tsox_core::fntrace::enter("walk_dir"); 
         self.base.walk_dir(root, walk_fn)
     }
 }
@@ -245,7 +245,7 @@ struct RawEntries {
     symlinks: Vec<String>,
 }
 
-pub fn callback_fs_chtimes(_fs: &CallbackFS, path: &str, a_time: SystemTime, m_time: SystemTime) -> std::io::Result<()> {
+pub fn callback_fs_chtimes(_fs: &CallbackFS, path: &str, a_time: SystemTime, m_time: SystemTime) -> std::io::Result<()> { ::tsox_core::fntrace::enter("callback_fs_chtimes"); 
     let _ = (path, a_time, m_time);
     Ok(())
 }

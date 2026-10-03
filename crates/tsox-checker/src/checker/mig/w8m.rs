@@ -11,7 +11,7 @@ impl super::super::checker_checker::Checker {
         t: &Arc<Type>,
         m1: Option<&Arc<TypeMapper>>,
         m2: &Arc<TypeMapper>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("map_type_with_composite_mapper"); 
         let m1 = match m1 {
             None => return m2.map(t),
             Some(m1) => m1,

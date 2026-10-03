@@ -22,7 +22,7 @@ impl OptionalChainTransformer {
         node: Arc<Node>,
         capture_this_arg: bool,
         is_delete: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_optional_expression"); 
         let r = flatten_chain(&node);
         let expression = r.expression;
         let chain = r.chain;
@@ -166,11 +166,11 @@ pub struct FlattenResult {
     pub chain: Vec<Arc<Node>>,
 }
 
-pub fn is_non_null_chain(node: &Arc<Node>) -> bool {
+pub fn is_non_null_chain(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_non_null_chain"); 
     is_non_null_expression(node) && node.flags.intersects(NodeFlags::OptionalChain)
 }
 
-pub fn flatten_chain(chain: &Arc<Node>) -> FlattenResult {
+pub fn flatten_chain(chain: &Arc<Node>) -> FlattenResult { ::tsox_core::fntrace::enter("flatten_chain"); 
     debug_assert!(!is_non_null_chain(chain));
     let mut links = vec![chain.clone()];
     let mut current = chain.clone();
@@ -185,6 +185,6 @@ pub fn flatten_chain(chain: &Arc<Node>) -> FlattenResult {
     }
 }
 
-pub fn is_call_chain(node: &Arc<Node>) -> bool {
+pub fn is_call_chain(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_call_chain"); 
     is_call_expression(node) && node.flags.intersects(NodeFlags::OptionalChain)
 }

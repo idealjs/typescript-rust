@@ -9,7 +9,7 @@ use crate::mig::m4q::r33k12_defs::{
 };
 
 impl RuntimeSyntaxTransformer {
-    pub fn is_first_declaration_in_scope(&self, node: &Arc<Node>) -> bool {
+    pub fn is_first_declaration_in_scope(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_first_declaration_in_scope"); 
         if let Some(name) = node.name() {
             if is_identifier(&name) {
                 let text = name.text();
@@ -23,7 +23,7 @@ impl RuntimeSyntaxTransformer {
         false
     }
 
-    pub fn is_export_of_namespace(&self, node: &Node) -> bool {
+    pub fn is_export_of_namespace(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("is_export_of_namespace"); 
         self.current_namespace.is_some()
             && !self
                 .current_scope
@@ -36,26 +36,26 @@ impl RuntimeSyntaxTransformer {
     }
 }
 
-pub fn is_static_property_declaration_or_class_static_block(node: &Node) -> bool {
+pub fn is_static_property_declaration_or_class_static_block(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_static_property_declaration_or_class_static_block"); 
     is_class_static_block_declaration(node)
         || (is_property_declaration(node) && has_static_modifier(node))
 }
 
-pub fn is_non_static_method_or_accessor_with_private_name(member: &Node) -> bool {
+pub fn is_non_static_method_or_accessor_with_private_name(member: &Node) -> bool { ::tsox_core::fntrace::enter("is_non_static_method_or_accessor_with_private_name"); 
     !is_static(member)
         && (is_method_or_accessor(member) || is_auto_accessor_property_declaration(member))
         && member.name().is_some_and(|n| is_private_identifier(&n))
 }
 
-pub fn is_not_declare_modifier(mod_: &Node) -> bool {
+pub fn is_not_declare_modifier(mod_: &Node) -> bool { ::tsox_core::fntrace::enter("is_not_declare_modifier"); 
     mod_.kind != SyntaxKind::DeclareKeyword
 }
 
-pub fn is_not_export_or_default_or_decorator(node: &Node) -> bool {
+pub fn is_not_export_or_default_or_decorator(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_not_export_or_default_or_decorator"); 
     !(is_decorator(node) || node.kind == SyntaxKind::ExportKeyword || node.kind == SyntaxKind::DefaultKeyword)
 }
 
-pub fn is_parent_for_idd_diagnostic(node: &Node) -> FindAncestorResult {
+pub fn is_parent_for_idd_diagnostic(node: &Node) -> FindAncestorResult { ::tsox_core::fntrace::enter("is_parent_for_idd_diagnostic"); 
     if is_export_assignment(node) {
         return FindAncestorResult::True;
     }

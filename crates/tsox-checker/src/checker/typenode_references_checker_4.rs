@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         type_args: Option<Vec<Arc<Type>>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_interface_type_ex"); 
         let merged_symbol = self.get_merged_symbol(symbol);
         let symbol: &Arc<Symbol> = &merged_symbol;
         let has_type_args = type_args.is_some();

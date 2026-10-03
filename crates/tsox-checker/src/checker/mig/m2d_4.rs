@@ -13,7 +13,7 @@ use tsox_frontend::ast::{
 };
 
 impl Checker {
-    pub fn is_false_expression(&mut self, expr: &Arc<Node>) -> bool {
+    pub fn is_false_expression(&mut self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_false_expression"); 
         let node = skip_parentheses(expr);
         if node.kind == SyntaxKind::FalseKeyword {
             return true;
@@ -32,7 +32,7 @@ impl Checker {
         false
     }
 
-    pub fn is_symbol_assigned_definitely(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_symbol_assigned_definitely(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_symbol_assigned_definitely"); 
         self.ensure_assignments_marked(symbol);
         self.marked_assignment_symbol_links
             .get(symbol)
@@ -40,7 +40,7 @@ impl Checker {
             .unwrap_or(false)
     }
 
-    pub fn is_symbol_assigned(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_symbol_assigned(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_symbol_assigned"); 
         self.ensure_assignments_marked(symbol);
         self.marked_assignment_symbol_links
             .get(symbol)
@@ -48,7 +48,7 @@ impl Checker {
             .unwrap_or(false)
     }
 
-    pub fn get_resolved_symbol_on_demand(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_resolved_symbol_on_demand(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_resolved_symbol_on_demand"); 
         if let Some(cached) = self.get_resolved_symbol_or_nil(node) {
             return Some(cached);
         }
@@ -74,7 +74,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         location: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_past_last_assignment"); 
         self.ensure_assignments_marked(symbol);
         let last_assignment_pos = self
             .marked_assignment_symbol_links
@@ -85,7 +85,7 @@ impl Checker {
             || location.is_some_and(|location| (last_assignment_pos as i64) < location.pos() as i64)
     }
 
-    pub fn ensure_assignments_marked(&mut self, symbol: &Arc<Symbol>) {
+    pub fn ensure_assignments_marked(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("ensure_assignments_marked"); 
         let Some(value_declaration) = symbol.value_declaration.clone() else {
             return;
         };
@@ -108,7 +108,7 @@ impl Checker {
         }
     }
 
-    pub fn has_parent_with_assignments_marked(&self, node: &Arc<Node>) -> bool {
+    pub fn has_parent_with_assignments_marked(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_parent_with_assignments_marked"); 
         let mut current = node.parent();
         while let Some(current_node) = current {
             if is_function_or_source_file(&current_node)
@@ -125,7 +125,7 @@ impl Checker {
         false
     }
 
-    pub fn extend_assignment_position(&self, node: &Arc<Node>, declaration: &Arc<Node>) -> i32 {
+    pub fn extend_assignment_position(&self, node: &Arc<Node>, declaration: &Arc<Node>) -> i32 { ::tsox_core::fntrace::enter("extend_assignment_position"); 
         let mut pos = node.pos();
         let mut current = Some(Arc::clone(node));
         while let Some(node) = current {
@@ -153,13 +153,13 @@ impl Checker {
         pos as i32
     }
 
-    pub fn get_assigned_type_of_spread_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_assigned_type_of_spread_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_assigned_type_of_spread_expression"); 
         let parent = node.parent().expect("spread expression has parent");
         let assigned = self.get_assigned_type(&parent);
         self.get_type_of_destructured_spread_expression(&assigned)
     }
 
-    pub fn mark_node_assignments(&mut self, node: &Arc<Node>) -> bool {
+    pub fn mark_node_assignments(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("mark_node_assignments"); 
         match node.kind {
             SyntaxKind::Identifier => {
                 let assignment_kind = get_assignment_target_kind(node);

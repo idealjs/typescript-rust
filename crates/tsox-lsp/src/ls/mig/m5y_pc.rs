@@ -103,72 +103,72 @@ pub struct PseudoType {
     pub data: PseudoTypeData,
 }
 
-pub fn new_pseudo_type(kind: PseudoTypeKind, data: PseudoTypeData) -> PseudoType {
+pub fn new_pseudo_type(kind: PseudoTypeKind, data: PseudoTypeData) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type"); 
     PseudoType { kind, data }
 }
 
 impl PseudoType {
-    pub fn as_pseudo_type(&self) -> &PseudoType {
+    pub fn as_pseudo_type(&self) -> &PseudoType { ::tsox_core::fntrace::enter("as_pseudo_type"); 
         self
     }
 
-    pub fn as_pseudo_type_direct(&self) -> Option<&PseudoTypeDirect> {
+    pub fn as_pseudo_type_direct(&self) -> Option<&PseudoTypeDirect> { ::tsox_core::fntrace::enter("as_pseudo_type_direct"); 
         match &self.data {
             PseudoTypeData::Direct(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_inferred(&self) -> Option<&PseudoTypeInferred> {
+    pub fn as_pseudo_type_inferred(&self) -> Option<&PseudoTypeInferred> { ::tsox_core::fntrace::enter("as_pseudo_type_inferred"); 
         match &self.data {
             PseudoTypeData::Inferred(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_no_result(&self) -> Option<&PseudoTypeNoResult> {
+    pub fn as_pseudo_type_no_result(&self) -> Option<&PseudoTypeNoResult> { ::tsox_core::fntrace::enter("as_pseudo_type_no_result"); 
         match &self.data {
             PseudoTypeData::NoResult(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_maybe_const_location(&self) -> Option<&PseudoTypeMaybeConstLocation> {
+    pub fn as_pseudo_type_maybe_const_location(&self) -> Option<&PseudoTypeMaybeConstLocation> { ::tsox_core::fntrace::enter("as_pseudo_type_maybe_const_location"); 
         match &self.data {
             PseudoTypeData::MaybeConstLocation(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_union(&self) -> Option<&PseudoTypeUnion> {
+    pub fn as_pseudo_type_union(&self) -> Option<&PseudoTypeUnion> { ::tsox_core::fntrace::enter("as_pseudo_type_union"); 
         match &self.data {
             PseudoTypeData::Union(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_single_call_signature(&self) -> Option<&PseudoTypeSingleCallSignature> {
+    pub fn as_pseudo_type_single_call_signature(&self) -> Option<&PseudoTypeSingleCallSignature> { ::tsox_core::fntrace::enter("as_pseudo_type_single_call_signature"); 
         match &self.data {
             PseudoTypeData::SingleCallSignature(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_tuple(&self) -> Option<&PseudoTypeTuple> {
+    pub fn as_pseudo_type_tuple(&self) -> Option<&PseudoTypeTuple> { ::tsox_core::fntrace::enter("as_pseudo_type_tuple"); 
         match &self.data {
             PseudoTypeData::Tuple(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_object_literal(&self) -> Option<&PseudoTypeObjectLiteral> {
+    pub fn as_pseudo_type_object_literal(&self) -> Option<&PseudoTypeObjectLiteral> { ::tsox_core::fntrace::enter("as_pseudo_type_object_literal"); 
         match &self.data {
             PseudoTypeData::ObjectLiteral(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_type_literal(&self) -> Option<&PseudoTypeLiteral> {
+    pub fn as_pseudo_type_literal(&self) -> Option<&PseudoTypeLiteral> { ::tsox_core::fntrace::enter("as_pseudo_type_literal"); 
         match &self.data {
             PseudoTypeData::Literal(d) => Some(d),
             _ => None,
@@ -176,50 +176,50 @@ impl PseudoType {
     }
 }
 
-pub fn pseudo_type_undefined() -> PseudoType {
+pub fn pseudo_type_undefined() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_undefined"); 
     new_pseudo_type(PseudoTypeKind::Undefined, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_null() -> PseudoType {
+pub fn pseudo_type_null() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_null"); 
     new_pseudo_type(PseudoTypeKind::Null, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_any() -> PseudoType {
+pub fn pseudo_type_any() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_any"); 
     new_pseudo_type(PseudoTypeKind::Any, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_string() -> PseudoType {
+pub fn pseudo_type_string() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_string"); 
     new_pseudo_type(PseudoTypeKind::String, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_number() -> PseudoType {
+pub fn pseudo_type_number() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_number"); 
     new_pseudo_type(PseudoTypeKind::Number, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_big_int() -> PseudoType {
+pub fn pseudo_type_big_int() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_big_int"); 
     new_pseudo_type(PseudoTypeKind::BigInt, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_boolean() -> PseudoType {
+pub fn pseudo_type_boolean() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_boolean"); 
     new_pseudo_type(PseudoTypeKind::Boolean, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_false() -> PseudoType {
+pub fn pseudo_type_false() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_false"); 
     new_pseudo_type(PseudoTypeKind::False, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn pseudo_type_true() -> PseudoType {
+pub fn pseudo_type_true() -> PseudoType { ::tsox_core::fntrace::enter("pseudo_type_true"); 
     new_pseudo_type(PseudoTypeKind::True, PseudoTypeData::Base(PseudoTypeBase))
 }
 
-pub fn new_pseudo_type_direct(type_node: Arc<Node>) -> PseudoType {
+pub fn new_pseudo_type_direct(type_node: Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_direct"); 
     new_pseudo_type(
         PseudoTypeKind::Direct,
         PseudoTypeData::Direct(PseudoTypeDirect { type_node }),
     )
 }
 
-pub fn new_pseudo_type_inferred(expr: Arc<Node>, is_signature_return: bool) -> PseudoType {
+pub fn new_pseudo_type_inferred(expr: Arc<Node>, is_signature_return: bool) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_inferred"); 
     new_pseudo_type(
         PseudoTypeKind::Inferred,
         PseudoTypeData::Inferred(PseudoTypeInferred {
@@ -234,7 +234,7 @@ pub fn new_pseudo_type_inferred_with_errors(
     expr: Arc<Node>,
     is_signature_return: bool,
     error_nodes: Vec<Arc<Node>>,
-) -> PseudoType {
+) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_inferred_with_errors"); 
     new_pseudo_type(
         PseudoTypeKind::Inferred,
         PseudoTypeData::Inferred(PseudoTypeInferred {
@@ -245,7 +245,7 @@ pub fn new_pseudo_type_inferred_with_errors(
     )
 }
 
-pub fn new_pseudo_type_no_result(decl: Arc<Node>) -> PseudoType {
+pub fn new_pseudo_type_no_result(decl: Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_no_result"); 
     new_pseudo_type(
         PseudoTypeKind::NoResult,
         PseudoTypeData::NoResult(PseudoTypeNoResult { declaration: decl }),
@@ -256,7 +256,7 @@ pub fn new_pseudo_type_maybe_const_location(
     loc: Arc<Node>,
     const_type: Option<PseudoType>,
     regular_type: Option<PseudoType>,
-) -> PseudoType {
+) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_maybe_const_location"); 
     new_pseudo_type(
         PseudoTypeKind::MaybeConstLocation,
         PseudoTypeData::MaybeConstLocation(PseudoTypeMaybeConstLocation {
@@ -267,7 +267,7 @@ pub fn new_pseudo_type_maybe_const_location(
     )
 }
 
-pub fn new_pseudo_type_union(types: Vec<PseudoType>) -> PseudoType {
+pub fn new_pseudo_type_union(types: Vec<PseudoType>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_union"); 
     new_pseudo_type(PseudoTypeKind::Union, PseudoTypeData::Union(PseudoTypeUnion { types }))
 }
 
@@ -276,7 +276,7 @@ pub fn new_pseudo_type_single_call_signature(
     parameters: Vec<PseudoParameter>,
     type_parameters: Vec<Arc<Node>>,
     return_type: Option<PseudoType>,
-) -> PseudoType {
+) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_single_call_signature"); 
     new_pseudo_type(
         PseudoTypeKind::SingleCallSignature,
         PseudoTypeData::SingleCallSignature(PseudoTypeSingleCallSignature {
@@ -288,32 +288,32 @@ pub fn new_pseudo_type_single_call_signature(
     )
 }
 
-pub fn new_pseudo_type_tuple(elements: Vec<PseudoType>) -> PseudoType {
+pub fn new_pseudo_type_tuple(elements: Vec<PseudoType>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_tuple"); 
     new_pseudo_type(PseudoTypeKind::Tuple, PseudoTypeData::Tuple(PseudoTypeTuple { elements }))
 }
 
-pub fn new_pseudo_type_object_literal(elements: Vec<PseudoObjectElement>) -> PseudoType {
+pub fn new_pseudo_type_object_literal(elements: Vec<PseudoObjectElement>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_object_literal"); 
     new_pseudo_type(
         PseudoTypeKind::ObjectLiteral,
         PseudoTypeData::ObjectLiteral(PseudoTypeObjectLiteral { elements }),
     )
 }
 
-pub fn new_pseudo_type_string_literal(node: Arc<Node>) -> PseudoType {
+pub fn new_pseudo_type_string_literal(node: Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_string_literal"); 
     new_pseudo_type(
         PseudoTypeKind::StringLiteral,
         PseudoTypeData::Literal(PseudoTypeLiteral { node }),
     )
 }
 
-pub fn new_pseudo_type_numeric_literal(node: Arc<Node>) -> PseudoType {
+pub fn new_pseudo_type_numeric_literal(node: Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_numeric_literal"); 
     new_pseudo_type(
         PseudoTypeKind::NumericLiteral,
         PseudoTypeData::Literal(PseudoTypeLiteral { node }),
     )
 }
 
-pub fn new_pseudo_type_big_int_literal(node: Arc<Node>) -> PseudoType {
+pub fn new_pseudo_type_big_int_literal(node: Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("new_pseudo_type_big_int_literal"); 
     new_pseudo_type(
         PseudoTypeKind::BigIntLiteral,
         PseudoTypeData::Literal(PseudoTypeLiteral { node }),
@@ -333,7 +333,7 @@ pub fn new_pseudo_parameter(
     name: Arc<Node>,
     is_optional: bool,
     type_: PseudoType,
-) -> PseudoParameter {
+) -> PseudoParameter { ::tsox_core::fntrace::enter("new_pseudo_parameter"); 
     PseudoParameter {
         rest: is_rest,
         name,
@@ -397,7 +397,7 @@ pub fn new_pseudo_object_element(
     name: Arc<Node>,
     optional: bool,
     data: PseudoObjectElementData,
-) -> PseudoObjectElement {
+) -> PseudoObjectElement { ::tsox_core::fntrace::enter("new_pseudo_object_element"); 
     PseudoObjectElement {
         name,
         optional,
@@ -407,11 +407,11 @@ pub fn new_pseudo_object_element(
 }
 
 impl PseudoObjectElement {
-    pub fn as_pseudo_object_element(&self) -> &PseudoObjectElement {
+    pub fn as_pseudo_object_element(&self) -> &PseudoObjectElement { ::tsox_core::fntrace::enter("as_pseudo_object_element"); 
         self
     }
 
-    pub fn signature(&self) -> Option<&Arc<Node>> {
+    pub fn signature(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("signature"); 
         match &self.data {
             PseudoObjectElementData::Method(d) => Some(&d.signature),
             PseudoObjectElementData::SetAccessor(d) => Some(&d.signature),
@@ -420,28 +420,28 @@ impl PseudoObjectElement {
         }
     }
 
-    pub fn as_pseudo_object_method(&self) -> Option<&PseudoObjectMethod> {
+    pub fn as_pseudo_object_method(&self) -> Option<&PseudoObjectMethod> { ::tsox_core::fntrace::enter("as_pseudo_object_method"); 
         match &self.data {
             PseudoObjectElementData::Method(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_property_assignment(&self) -> Option<&PseudoPropertyAssignment> {
+    pub fn as_pseudo_property_assignment(&self) -> Option<&PseudoPropertyAssignment> { ::tsox_core::fntrace::enter("as_pseudo_property_assignment"); 
         match &self.data {
             PseudoObjectElementData::PropertyAssignment(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_set_accessor(&self) -> Option<&PseudoSetAccessor> {
+    pub fn as_pseudo_set_accessor(&self) -> Option<&PseudoSetAccessor> { ::tsox_core::fntrace::enter("as_pseudo_set_accessor"); 
         match &self.data {
             PseudoObjectElementData::SetAccessor(d) => Some(d),
             _ => None,
         }
     }
 
-    pub fn as_pseudo_get_accessor(&self) -> Option<&PseudoGetAccessor> {
+    pub fn as_pseudo_get_accessor(&self) -> Option<&PseudoGetAccessor> { ::tsox_core::fntrace::enter("as_pseudo_get_accessor"); 
         match &self.data {
             PseudoObjectElementData::GetAccessor(d) => Some(d),
             _ => None,
@@ -456,7 +456,7 @@ pub fn new_pseudo_object_method(
     type_parameters: Vec<Arc<Node>>,
     parameters: Vec<PseudoParameter>,
     return_type: Option<PseudoType>,
-) -> PseudoObjectElement {
+) -> PseudoObjectElement { ::tsox_core::fntrace::enter("new_pseudo_object_method"); 
     new_pseudo_object_element(
         PseudoObjectElementKind::Method,
         name,
@@ -475,7 +475,7 @@ pub fn new_pseudo_property_assignment(
     name: Arc<Node>,
     optional: bool,
     type_: PseudoType,
-) -> PseudoObjectElement {
+) -> PseudoObjectElement { ::tsox_core::fntrace::enter("new_pseudo_property_assignment"); 
     new_pseudo_object_element(
         PseudoObjectElementKind::PropertyAssignment,
         name,
@@ -489,7 +489,7 @@ pub fn new_pseudo_set_accessor(
     name: Arc<Node>,
     optional: bool,
     parameter: PseudoParameter,
-) -> PseudoObjectElement {
+) -> PseudoObjectElement { ::tsox_core::fntrace::enter("new_pseudo_set_accessor"); 
     new_pseudo_object_element(
         PseudoObjectElementKind::SetAccessor,
         name,
@@ -503,7 +503,7 @@ pub fn new_pseudo_get_accessor(
     name: Arc<Node>,
     optional: bool,
     type_: PseudoType,
-) -> PseudoObjectElement {
+) -> PseudoObjectElement { ::tsox_core::fntrace::enter("new_pseudo_get_accessor"); 
     new_pseudo_object_element(
         PseudoObjectElementKind::GetAccessor,
         name,

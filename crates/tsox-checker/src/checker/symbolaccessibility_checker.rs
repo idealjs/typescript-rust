@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         type_symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_symbol_accessible"); 
         let access = self.is_symbol_accessible_worker(
             type_symbol,
             enclosing_declaration,
@@ -22,7 +22,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_value_symbol_accessible"); 
         let access = self.is_symbol_accessible_worker(
             symbol,
             enclosing_declaration,
@@ -38,7 +38,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
         flags: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_symbol_accessible_by_flags"); 
         let access =
             self.is_symbol_accessible_worker(symbol, enclosing_declaration, flags, false, false);
         access.accessibility == SymbolAccessibility::Accessible
@@ -52,7 +52,7 @@ impl Checker {
         meaning: SymbolFlags,
         should_compute_aliases_to_make_visible: bool,
         allow_modules: bool,
-    ) -> Option<SymbolAccessibilityResult> {
+    ) -> Option<SymbolAccessibilityResult> { ::tsox_core::fntrace::enter("is_any_symbol_accessible"); 
         if symbols.is_empty() {
             return None;
         }
@@ -148,7 +148,7 @@ impl Checker {
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
         should_compute_aliases_to_make_visible: bool,
-    ) -> SymbolAccessibilityResult {
+    ) -> SymbolAccessibilityResult { ::tsox_core::fntrace::enter("is_symbol_accessible"); 
         self.is_symbol_accessible_worker(
             symbol,
             enclosing_declaration,
@@ -165,7 +165,7 @@ impl Checker {
         meaning: SymbolFlags,
         should_compute_aliases_to_make_visible: bool,
         allow_modules: bool,
-    ) -> SymbolAccessibilityResult {
+    ) -> SymbolAccessibilityResult { ::tsox_core::fntrace::enter("is_symbol_accessible_worker"); 
         if let (Some(_), Some(_)) = (Some(symbol), enclosing_declaration) {
             let symbols = vec![Arc::clone(symbol)];
             if let Some(result) = self.is_any_symbol_accessible(

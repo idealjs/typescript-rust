@@ -3,7 +3,7 @@
 use crate::parser::impl_chunk::*;
 
 impl Parser {
-    pub fn new(source_text: impl Into<String>) -> Self {
+    pub fn new(source_text: impl Into<String>) -> Self { ::tsox_core::fntrace::enter("new"); 
         let text = source_text.into();
         let mut scanner = Scanner::new(text);
         let token = scanner.scan();
@@ -29,18 +29,18 @@ impl Parser {
     pub(crate) fn new_with_language_variant(
         source_text: impl Into<String>,
         language_variant: LanguageVariant,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new_with_language_variant"); 
         let mut parser = Self::new(source_text);
         parser.language_variant = language_variant;
         parser.scanner.set_language_variant(language_variant);
         parser
     }
 
-    pub(crate) fn set_javascript_file(&mut self, javascript_file: bool) {
+    pub(crate) fn set_javascript_file(&mut self, javascript_file: bool) { ::tsox_core::fntrace::enter("set_javascript_file"); 
         self.javascript_file = javascript_file;
     }
 
-    pub(crate) fn allow_in<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T {
+    pub(crate) fn allow_in<T>(&mut self, f: impl FnOnce(&mut Self) -> T) -> T { ::tsox_core::fntrace::enter("allow_in"); 
         let outer = self.disallow_in_context;
         self.disallow_in_context = false;
         let result = f(self);
@@ -48,20 +48,20 @@ impl Parser {
         result
     }
 
-    pub fn parse_source_file(file_name: impl Into<String>) -> SourceFile {
+    pub fn parse_source_file(file_name: impl Into<String>) -> SourceFile { ::tsox_core::fntrace::enter("parse_source_file"); 
         let file_name = file_name.into();
         let text = std::fs::read_to_string(&file_name).unwrap_or_default();
         Self::parse_source_file_text(&file_name, text)
     }
 
-    pub fn parse_source_file_text(file_name: &str, text: String) -> SourceFile {
+    pub fn parse_source_file_text(file_name: &str, text: String) -> SourceFile { ::tsox_core::fntrace::enter("parse_source_file_text"); 
         Self::parse_source_file_text_with_diagnostics(file_name, text).0
     }
 
     pub fn parse_source_file_text_with_diagnostics(
         file_name: &str,
         text: String,
-    ) -> (SourceFile, Vec<ParserDiagnostic>) {
+    ) -> (SourceFile, Vec<ParserDiagnostic>) { ::tsox_core::fntrace::enter("parse_source_file_text_with_diagnostics"); 
         let line_map = LineMap::from_text(&text);
         let script_kind = script_kind_from_file_name(file_name);
         let language_variant = match script_kind {
@@ -157,7 +157,7 @@ impl Parser {
         (file, parser.diagnostics)
     }
 
-    pub(crate) fn apply_jsdoc_reparser(file: &mut SourceFile) {
+    pub(crate) fn apply_jsdoc_reparser(file: &mut SourceFile) { ::tsox_core::fntrace::enter("apply_jsdoc_reparser"); 
         let statements = match &file.node.data {
             NodeData::SourceFile(d) => &d.statements.nodes,
             _ => return,
@@ -211,7 +211,7 @@ impl Parser {
         file.node = new_node;
     }
 
-    pub(crate) fn next_token(&mut self) -> SyntaxKind {
+    pub(crate) fn next_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("next_token"); 
         if is_keyword_kind(self.token)
             && token_flags_intersects(
                 self.scanner.token_flags(),
@@ -228,13 +228,13 @@ impl Parser {
         self.token
     }
 
-    pub(crate) fn drain_scanner_errors(&mut self) {
+    pub(crate) fn drain_scanner_errors(&mut self) { ::tsox_core::fntrace::enter("drain_scanner_errors"); 
         for err in self.scanner.take_errors() {
             self.push_scanner_error(err);
         }
     }
 
-    pub(crate) fn push_scanner_error(&mut self, err: crate::scanner::ScannerError) {
+    pub(crate) fn push_scanner_error(&mut self, err: crate::scanner::ScannerError) { ::tsox_core::fntrace::enter("push_scanner_error"); 
         let message = match err.kind {
             crate::scanner::DiagnosticKind::InvalidCharacter => tsox_core::diagnostics::INVALID_CHARACTER,
             crate::scanner::DiagnosticKind::FileAppearsToBeBinary => {
@@ -345,64 +345,64 @@ impl Parser {
         );
     }
 
-    pub(crate) fn look_ahead_token(&self) -> SyntaxKind {
+    pub(crate) fn look_ahead_token(&self) -> SyntaxKind { ::tsox_core::fntrace::enter("look_ahead_token"); 
         let mut scanner = self.scanner.clone();
         scanner.scan()
     }
 
-    pub(crate) fn look_ahead_2_tokens(&self) -> SyntaxKind {
+    pub(crate) fn look_ahead_2_tokens(&self) -> SyntaxKind { ::tsox_core::fntrace::enter("look_ahead_2_tokens"); 
         let mut scanner = self.scanner.clone();
         scanner.scan();
         scanner.scan()
     }
 
-    pub(crate) fn look_ahead_3_tokens(&self) -> SyntaxKind {
+    pub(crate) fn look_ahead_3_tokens(&self) -> SyntaxKind { ::tsox_core::fntrace::enter("look_ahead_3_tokens"); 
         let mut scanner = self.scanner.clone();
         scanner.scan();
         scanner.scan();
         scanner.scan()
     }
 
-    pub(crate) fn next_template_token(&mut self) -> SyntaxKind {
+    pub(crate) fn next_template_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("next_template_token"); 
         self.next_template_token_ex(false)
     }
 
-    pub(crate) fn next_template_token_ex(&mut self, is_tagged: bool) -> SyntaxKind {
+    pub(crate) fn next_template_token_ex(&mut self, is_tagged: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("next_template_token_ex"); 
         self.token = self.scanner.scan_template_continuation_ex(!is_tagged);
         self.drain_scanner_errors();
         self.token
     }
 
-    pub(crate) fn token_pos(&self) -> usize {
+    pub(crate) fn token_pos(&self) -> usize { ::tsox_core::fntrace::enter("token_pos"); 
         self.scanner.token_pos()
     }
 
     /// Go Parser.nodePos：节点 end 取当前 token 的 fullStart（即刚消费完的
     /// 语法 token 的真实结尾），不得吞下一 token 的前导 trivia
-    pub(crate) fn node_pos(&self) -> usize {
+    pub(crate) fn node_pos(&self) -> usize { ::tsox_core::fntrace::enter("node_pos"); 
         self.scanner.full_start_pos()
     }
 
-    pub(crate) fn token_end(&self) -> usize {
+    pub(crate) fn token_end(&self) -> usize { ::tsox_core::fntrace::enter("token_end"); 
         self.scanner.token_end()
     }
 
-    pub(crate) fn has_preceding_line_break(&self) -> bool {
+    pub(crate) fn has_preceding_line_break(&self) -> bool { ::tsox_core::fntrace::enter("has_preceding_line_break"); 
         self.scanner.has_preceding_line_break()
     }
 
-    pub(crate) fn re_scan_greater_than(&mut self) {
+    pub(crate) fn re_scan_greater_than(&mut self) { ::tsox_core::fntrace::enter("re_scan_greater_than"); 
         self.token = self.scanner.re_scan_greater_than();
         self.drain_scanner_errors();
     }
 
-    pub(crate) fn re_scan_slash_token(&mut self) -> SyntaxKind {
+    pub(crate) fn re_scan_slash_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_slash_token"); 
         self.token = self.scanner.re_scan_slash_token();
         self.drain_scanner_errors();
         self.token
     }
 
-    pub(crate) fn scan_jsx_text(&mut self) -> SyntaxKind {
+    pub(crate) fn scan_jsx_text(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_jsx_text"); 
         self.token = self.scanner.scan_jsx_token();
         self.drain_scanner_errors();
         self.token

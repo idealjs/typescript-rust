@@ -12,11 +12,11 @@ pub struct InMemoryFS {
 }
 
 impl InMemoryFS {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self::with_case_sensitivity(true)
     }
 
-    pub fn with_case_sensitivity(case_sensitive: bool) -> Self {
+    pub fn with_case_sensitivity(case_sensitive: bool) -> Self { ::tsox_core::fntrace::enter("with_case_sensitivity"); 
         InMemoryFS {
             case_sensitive,
             files: RwLock::new(HashMap::new()),
@@ -25,7 +25,7 @@ impl InMemoryFS {
         }
     }
 
-    pub fn insert_file(&self, path: &str, content: &str) {
+    pub fn insert_file(&self, path: &str, content: &str) { ::tsox_core::fntrace::enter("insert_file"); 
         let mut files = self.files.write().unwrap();
         let key = if self.case_sensitive {
             path.to_string()
@@ -40,7 +40,7 @@ impl InMemoryFS {
         files.insert(key, content.to_string());
     }
 
-    pub fn insert_dir(&self, path: &str) {
+    pub fn insert_dir(&self, path: &str) { ::tsox_core::fntrace::enter("insert_dir"); 
         let mut dirs = self.dirs.write().unwrap();
 
         let mut current = path.to_string();
@@ -64,7 +64,7 @@ impl InMemoryFS {
         }
     }
 
-    pub(super) fn lookup_file_key(&self, path: &str) -> Option<String> {
+    pub(super) fn lookup_file_key(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("lookup_file_key"); 
         let files = self.files.read().unwrap();
         if files.contains_key(path) {
             return Some(path.to_string());
@@ -79,7 +79,7 @@ impl InMemoryFS {
             .cloned()
     }
 
-    pub(super) fn lookup_dir_key(&self, path: &str) -> Option<String> {
+    pub(super) fn lookup_dir_key(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("lookup_dir_key"); 
         let dirs = self.dirs.read().unwrap();
         if dirs.contains(path) {
             return Some(path.to_string());
@@ -110,7 +110,7 @@ impl InMemoryFS {
         None
     }
 
-    pub fn create_symlink(&self, link: &str, target: &str) {
+    pub fn create_symlink(&self, link: &str, target: &str) { ::tsox_core::fntrace::enter("create_symlink"); 
         let mut symlinks = self.symlinks.write().unwrap();
         let key = if self.case_sensitive {
             link.to_string()
@@ -125,11 +125,11 @@ impl InMemoryFS {
         symlinks.insert(key, target.to_string());
     }
 
-    pub fn read_symlink(&self, path: &str) -> Option<String> {
+    pub fn read_symlink(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_symlink"); 
         self.lookup_symlink_key(path)
     }
 
-    pub(super) fn lookup_symlink_key(&self, link: &str) -> Option<String> {
+    pub(super) fn lookup_symlink_key(&self, link: &str) -> Option<String> { ::tsox_core::fntrace::enter("lookup_symlink_key"); 
         let symlinks = self.symlinks.read().unwrap();
         if let Some(t) = symlinks.get(link) {
             return Some(t.clone());
@@ -144,7 +144,7 @@ impl InMemoryFS {
             .map(|(_, v)| v.clone())
     }
 
-    pub(super) fn lookup_symlink_stored_key(&self, link: &str) -> Option<String> {
+    pub(super) fn lookup_symlink_stored_key(&self, link: &str) -> Option<String> { ::tsox_core::fntrace::enter("lookup_symlink_stored_key"); 
         let symlinks = self.symlinks.read().unwrap();
         if symlinks.contains_key(link) {
             return Some(link.to_string());
@@ -159,7 +159,7 @@ impl InMemoryFS {
             .map(|(k, _)| k.clone())
     }
 
-    pub(super) fn is_file_path(&self, path: &str) -> bool {
+    pub(super) fn is_file_path(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("is_file_path"); 
         let files = self.files.read().unwrap();
         if files.contains_key(path) {
             return true;
@@ -171,7 +171,7 @@ impl InMemoryFS {
         files.keys().any(|k| k.to_ascii_lowercase() == target)
     }
 
-    pub(super) fn resolve_symlinks(&self, path: &str) -> String {
+    pub(super) fn resolve_symlinks(&self, path: &str) -> String { ::tsox_core::fntrace::enter("resolve_symlinks"); 
         if path.is_empty() {
             return String::new();
         }
@@ -228,7 +228,7 @@ impl InMemoryFS {
         &self,
         symlinks: &'a HashMap<String, String>,
         path: &str,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("symlink_target"); 
         if let Some(t) = symlinks.get(path) {
             return Some(t.clone());
         }
@@ -244,12 +244,12 @@ impl InMemoryFS {
 }
 
 impl Default for InMemoryFS {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
-pub(super) fn parent_dir(path: &str) -> Option<String> {
+pub(super) fn parent_dir(path: &str) -> Option<String> { ::tsox_core::fntrace::enter("parent_dir"); 
     let trimmed = path.trim_end_matches('/');
     match trimmed.rfind('/') {
         Some(0) => Some(String::from("/")),
@@ -258,12 +258,12 @@ pub(super) fn parent_dir(path: &str) -> Option<String> {
     }
 }
 
-pub(super) fn is_absolute_path(path: &str) -> bool {
+pub(super) fn is_absolute_path(path: &str) -> bool { ::tsox_core::fntrace::enter("is_absolute_path"); 
     path.starts_with('/')
         || (path.len() >= 3 && path.as_bytes()[1] == b':' && path.as_bytes()[2] == b'/')
 }
 
-pub(super) fn decode_with_bom(content: &str) -> String {
+pub(super) fn decode_with_bom(content: &str) -> String { ::tsox_core::fntrace::enter("decode_with_bom"); 
     content
         .strip_prefix('\u{FEFF}')
         .map(|s| s.to_string())
@@ -274,7 +274,7 @@ pub(super) fn strip_path_prefix<'a>(
     haystack: &'a str,
     prefix: &str,
     case_sensitive: bool,
-) -> Option<&'a str> {
+) -> Option<&'a str> { ::tsox_core::fntrace::enter("strip_path_prefix"); 
     if case_sensitive {
         haystack.strip_prefix(prefix)
     } else {

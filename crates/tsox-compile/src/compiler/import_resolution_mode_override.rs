@@ -4,7 +4,7 @@ use super::*;
 
 pub(crate) fn import_resolution_mode_override(
     import_node: &Arc<tsox_frontend::ast::Node>,
-) -> tsox_core::core::compiler_options::ModuleKind {
+) -> tsox_core::core::compiler_options::ModuleKind { ::tsox_core::fntrace::enter("import_resolution_mode_override"); 
     use tsox_core::core::compiler_options::ModuleKind;
     let Some(decl) = import_node.parent() else {
         return ModuleKind::None;
@@ -47,11 +47,11 @@ pub(crate) fn import_resolution_mode_override(
     }
 }
 
-pub fn is_external_library_file(file_name: &str) -> bool {
+pub fn is_external_library_file(file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_external_library_file"); 
     file_name.contains("/node_modules/") || file_name.contains("\\node_modules\\")
 }
 
-pub(crate) fn is_plain_js_file(file: &SourceFile, check_js: Tristate) -> bool {
+pub(crate) fn is_plain_js_file(file: &SourceFile, check_js: Tristate) -> bool { ::tsox_core::fntrace::enter("is_plain_js_file"); 
     matches!(file.script_kind, ScriptKind::Js | ScriptKind::Jsx) && check_js.is_unknown()
 }
 
@@ -64,7 +64,7 @@ pub(crate) const PLAIN_JS_ERROR_CODES: &[i32] = &[
     1044, 1090, 1031, 1042, 1029, 1156, 1155, 1172, 2480, 1341, 1368, 1308, 2852, 1111, 2839,
 ];
 
-pub(crate) fn should_skip_js_file(file_name: &str, allow_js: bool) -> bool {
+pub(crate) fn should_skip_js_file(file_name: &str, allow_js: bool) -> bool { ::tsox_core::fntrace::enter("should_skip_js_file"); 
     if allow_js || !is_external_library_file(file_name) {
         return false;
     }
@@ -83,7 +83,7 @@ pub(crate) fn read_and_parse(
         Vec<tsox_frontend::parser::ParserDiagnostic>,
     ),
     String,
-> {
+> { ::tsox_core::fntrace::enter("read_and_parse"); 
     let text = host
         .fs()
         .read_file(file_name)
@@ -97,7 +97,7 @@ pub(crate) fn cached_parse(
 ) -> (
     Arc<SourceFile>,
     Vec<tsox_frontend::parser::ParserDiagnostic>,
-) {
+) { ::tsox_core::fntrace::enter("cached_parse"); 
     // 只缓存 bundled lib 文件：内容稳定、被每个 Program 重复解析，
     // 收益集中于此。用户/测试文件一律不缓存，否则每个唯一文件名都会
     // 永久钉住一棵 AST（fourslash 每用例默认文件名唯一，全量跑即缓慢
@@ -150,7 +150,7 @@ pub(crate) fn read_and_parse_text(
         Vec<tsox_frontend::parser::ParserDiagnostic>,
     ),
     String,
-> {
+> { ::tsox_core::fntrace::enter("read_and_parse_text"); 
     let (file, diags) = cached_parse(file_name, &text);
     Ok((file, diags))
 }
@@ -162,7 +162,7 @@ pub(crate) fn load_source_file(
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     diagnostics: &mut Vec<Arc<Diagnostic>>,
     allow_js: bool,
-) -> Option<Arc<SourceFile>> {
+) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("load_source_file"); 
     let normalized = tsox_core::tspath::normalize_path(file_name);
     if let Some(existing) = by_name.get(&normalized) {
         return Some(Arc::clone(existing));
@@ -199,7 +199,7 @@ pub(crate) fn load_source_file_with_references(
     by_name: &mut HashMap<String, Arc<SourceFile>>,
     diagnostics: &mut Vec<Arc<Diagnostic>>,
     allow_js: bool,
-) {
+) { ::tsox_core::fntrace::enter("load_source_file_with_references"); 
     let normalized = tsox_core::tspath::normalize_path(file_name);
     if by_name.contains_key(&normalized) {
         return;

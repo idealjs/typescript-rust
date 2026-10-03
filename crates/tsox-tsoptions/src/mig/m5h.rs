@@ -81,7 +81,7 @@ const COMMON_OPTIONS_WITH_BUILD: &[&str] = &[
     "runExternalCode",
 ];
 
-pub fn build_name_map() -> NameMap {
+pub fn build_name_map() -> NameMap { ::tsox_core::fntrace::enter("build_name_map"); 
     let mut decls: Vec<OptionDecl> = OPTIONS
         .iter()
         .filter(|o| COMMON_OPTIONS_WITH_BUILD.contains(&o.name))
@@ -91,11 +91,11 @@ pub fn build_name_map() -> NameMap {
     get_name_map_from_list(&decls)
 }
 
-pub fn watch_name_map() -> NameMap {
+pub fn watch_name_map() -> NameMap { ::tsox_core::fntrace::enter("watch_name_map"); 
     get_name_map_from_list(OPTIONS_FOR_WATCH)
 }
 
-pub fn watch_options_did_you_mean_diagnostics() -> ParseCommandLineWorkerDiagnostics {
+pub fn watch_options_did_you_mean_diagnostics() -> ParseCommandLineWorkerDiagnostics { ::tsox_core::fntrace::enter("watch_options_did_you_mean_diagnostics"); 
     ParseCommandLineWorkerDiagnostics {
         did_you_mean: DidYouMeanOptionsDiagnostics {
             alternate_mode: None,
@@ -110,7 +110,7 @@ pub fn watch_options_did_you_mean_diagnostics() -> ParseCommandLineWorkerDiagnos
 
 pub fn get_parse_command_line_worker_diagnostics(
     decls: Vec<OptionDecl>,
-) -> ParseCommandLineWorkerDiagnostics {
+) -> ParseCommandLineWorkerDiagnostics { ::tsox_core::fntrace::enter("get_parse_command_line_worker_diagnostics"); 
     ParseCommandLineWorkerDiagnostics {
         did_you_mean: DidYouMeanOptionsDiagnostics {
             alternate_mode: Some(AlternateModeDiagnostics {
@@ -138,25 +138,25 @@ pub struct CommandLineParser {
 }
 
 impl CommandLineParser {
-    pub fn alternate_mode(&self) -> Option<&AlternateModeDiagnostics> {
+    pub fn alternate_mode(&self) -> Option<&AlternateModeDiagnostics> { ::tsox_core::fntrace::enter("alternate_mode"); 
         self.worker_diagnostics.did_you_mean.alternate_mode.as_ref()
     }
 
-    pub fn options_declarations(&self) -> &[OptionDecl] {
+    pub fn options_declarations(&self) -> &[OptionDecl] { ::tsox_core::fntrace::enter("options_declarations"); 
         &self.worker_diagnostics.did_you_mean.option_declarations
     }
 
-    pub fn unknown_option_diagnostic(&self) -> Message {
+    pub fn unknown_option_diagnostic(&self) -> Message { ::tsox_core::fntrace::enter("unknown_option_diagnostic"); 
         self.worker_diagnostics.did_you_mean.unknown_option_diagnostic
     }
 
-    pub fn unknown_did_you_mean_diagnostic(&self) -> Message {
+    pub fn unknown_did_you_mean_diagnostic(&self) -> Message { ::tsox_core::fntrace::enter("unknown_did_you_mean_diagnostic"); 
         self.worker_diagnostics
             .did_you_mean
             .unknown_did_you_mean_diagnostic
     }
 
-    pub fn parse_strings(&mut self, args: &[String]) {
+    pub fn parse_strings(&mut self, args: &[String]) { ::tsox_core::fntrace::enter("parse_strings"); 
         let mut i = 0;
         while i < args.len() {
             let s = &args[i];
@@ -205,7 +205,7 @@ impl CommandLineParser {
         mut i: usize,
         opt: &OptionDecl,
         diag: Message,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("parse_option_value"); 
         if opt.is_tsconfig_only && i <= args.len() {
             let opt_value = if i < args.len() {
                 args[i].clone()
@@ -338,7 +338,7 @@ impl CommandLineParser {
     }
 }
 
-fn json_to_opt_value(value: Option<&JsonValue>) -> OptValue {
+fn json_to_opt_value(value: Option<&JsonValue>) -> OptValue { ::tsox_core::fntrace::enter("json_to_opt_value"); 
     match value {
         Some(JsonValue::Bool(b)) => OptValue::Bool(*b),
         Some(JsonValue::Number(n)) => OptValue::Num(n.as_i64().unwrap_or(0)),
@@ -353,7 +353,7 @@ fn json_to_opt_value(value: Option<&JsonValue>) -> OptValue {
     }
 }
 
-fn opt_value_to_json(value: &OptValue) -> JsonValue {
+fn opt_value_to_json(value: &OptValue) -> JsonValue { ::tsox_core::fntrace::enter("opt_value_to_json"); 
     match value {
         OptValue::Bool(b) => JsonValue::Bool(*b),
         OptValue::Num(n) => JsonValue::Number((*n).into()),
@@ -365,7 +365,7 @@ fn opt_value_to_json(value: &OptValue) -> JsonValue {
     }
 }
 
-pub fn get_input_option_name(input: &str) -> String {
+pub fn get_input_option_name(input: &str) -> String { ::tsox_core::fntrace::enter("get_input_option_name"); 
     let mut s = input;
     if let Some(rest) = s.strip_prefix('-') {
         s = rest;
@@ -380,7 +380,7 @@ pub fn try_read_file(
     file_name: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
     errors: &mut Vec<Diagnostic>,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("try_read_file"); 
     match read_file(file_name) {
         Some(text) => text,
         None => {
@@ -394,7 +394,7 @@ pub fn try_read_file(
 }
 
 impl CommandLineParser {
-    pub fn parse_response_file(&mut self, file_name: &str) {
+    pub fn parse_response_file(&mut self, file_name: &str) { ::tsox_core::fntrace::enter("parse_response_file"); 
         let file_name =
             tsox_core::tspath::get_normalized_absolute_path(file_name, &self.current_directory);
         let path = tsox_core::tspath::to_path(
@@ -459,7 +459,7 @@ pub fn convert_json_option_of_enum_type(
     value: &str,
     value_expression: Option<&Node>,
     source_file: Option<&SourceFile>,
-) -> (Option<OptValue>, Vec<Diagnostic>) {
+) -> (Option<OptValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_json_option_of_enum_type"); 
     if value.is_empty() {
         return (None, Vec::new());
     }
@@ -492,7 +492,7 @@ pub fn convert_json_option_of_enum_type(
 pub fn parse_list_type_option(
     opt: &OptionDecl,
     value: &str,
-) -> (Vec<OptValue>, Vec<Diagnostic>) {
+) -> (Vec<OptValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("parse_list_type_option"); 
     let value = value.trim();
     let mut errors: Vec<Diagnostic> = Vec::new();
     if value.starts_with('-') {

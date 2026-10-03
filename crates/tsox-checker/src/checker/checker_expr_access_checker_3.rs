@@ -7,7 +7,7 @@ impl Checker {
         &self,
         text: &str,
         location: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup_private_identifier_declaration"); 
         let symbol_map = self.program.symbol_map();
         let mut current = Some(Arc::clone(location));
         while let Some(n) = current {
@@ -29,7 +29,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn is_ancestor_class_of(&self, node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
+    pub(crate) fn is_ancestor_class_of(&self, node: &Arc<Node>, ancestor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_ancestor_class_of"); 
         let mut current = Some(Arc::clone(node));
         while let Some(n) = current {
             if Arc::ptr_eq(&n, ancestor) {
@@ -46,7 +46,7 @@ impl Checker {
         name: &Arc<Node>,
         name_text: &str,
         obj_type: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_private_identifier_access"); 
         let assignment_kind = crate::checker::utilities::get_assignment_target_kind(node);
         let lexical = self.lookup_private_identifier_declaration(name_text, name);
 
@@ -154,13 +154,13 @@ impl Checker {
         false
     }
 
-    pub(crate) fn is_within_declaring_class(&self, class_node: &Arc<Node>) -> bool {
+    pub(crate) fn is_within_declaring_class(&self, class_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_within_declaring_class"); 
         self.enclosing_class_stack
             .iter()
             .any(|c| Arc::ptr_eq(c, class_node))
     }
 
-    pub(crate) fn super_in_computed_name_of_innermost_class(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn super_in_computed_name_of_innermost_class(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("super_in_computed_name_of_innermost_class"); 
         let Some(innermost) = self.enclosing_class_stack.last() else {
             return false;
         };
@@ -184,7 +184,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn function_body_definitely_returns(&self, body: &Arc<Node>) -> bool {
+    pub(crate) fn function_body_definitely_returns(&self, body: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("function_body_definitely_returns"); 
         if body.kind != SyntaxKind::Block {
             return false;
         }
@@ -196,7 +196,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn statement_always_returns(&self, stmt: &Arc<Node>) -> bool {
+    pub(crate) fn statement_always_returns(&self, stmt: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("statement_always_returns"); 
         match stmt.kind {
             SyntaxKind::ReturnStatement | SyntaxKind::ThrowStatement => true,
             SyntaxKind::Block => {

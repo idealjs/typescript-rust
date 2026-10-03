@@ -5,7 +5,7 @@ use tsox_frontend::ast::{Node, Symbol};
 use crate::checker::checker::*;
 
 impl Checker {
-    pub(crate) fn circular_constraint_type(&self) -> Arc<crate::checker::types::Type> {
+    pub(crate) fn circular_constraint_type(&self) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("circular_constraint_type"); 
         self.circular_constraint_type
             .get_or_init(|| {
                 Arc::new(crate::checker::types::Type {
@@ -20,7 +20,7 @@ impl Checker {
             .clone()
     }
 
-    pub(crate) fn cycle_crosses_rt_infer_boundary(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn cycle_crosses_rt_infer_boundary(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("cycle_crosses_rt_infer_boundary"); 
         let target = Arc::as_ptr(symbol) as *const Symbol;
         let Some(idx) = self
             .type_resolution_stack
@@ -32,7 +32,7 @@ impl Checker {
         self.rt_infer_boundary_marks.iter().any(|&m| m > idx)
     }
 
-    pub(crate) fn report_circularity_error(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn report_circularity_error(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("report_circularity_error"); 
         if self.cycle_crosses_rt_infer_boundary(symbol) {
             return self.get_any_type();
         }

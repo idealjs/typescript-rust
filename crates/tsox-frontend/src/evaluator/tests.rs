@@ -2,7 +2,7 @@ use super::*;
 use crate::ast::*;
 use crate::parser::Parser;
 
-fn eval_expr(source: &str) -> EvalResult {
+fn eval_expr(source: &str) -> EvalResult { ::tsox_core::fntrace::enter("eval_expr"); 
     let file = Parser::parse_source_file_text("test.ts", source.to_string());
     let stmts = match &file.node.data {
         NodeData::SourceFile(d) => &d.statements,
@@ -17,7 +17,7 @@ fn eval_expr(source: &str) -> EvalResult {
 }
 
 #[test]
-fn eval_numeric_literal() {
+fn eval_numeric_literal() { ::tsox_core::fntrace::enter("eval_numeric_literal"); 
     let result = eval_expr("42;");
     match result.value {
         Some(EvalValue::Number(n)) => assert_eq!(n.0, 42.0),
@@ -26,7 +26,7 @@ fn eval_numeric_literal() {
 }
 
 #[test]
-fn eval_string_literal() {
+fn eval_string_literal() { ::tsox_core::fntrace::enter("eval_string_literal"); 
     let result = eval_expr("\"hello\";");
     match result.value {
         Some(EvalValue::String(s)) => assert_eq!(s, "hello"),
@@ -35,7 +35,7 @@ fn eval_string_literal() {
 }
 
 #[test]
-fn eval_binary_add() {
+fn eval_binary_add() { ::tsox_core::fntrace::enter("eval_binary_add"); 
     let result = eval_expr("1 + 2;");
     match result.value {
         Some(EvalValue::Number(n)) => assert_eq!(n.0, 3.0),
@@ -44,7 +44,7 @@ fn eval_binary_add() {
 }
 
 #[test]
-fn eval_binary_multiply() {
+fn eval_binary_multiply() { ::tsox_core::fntrace::enter("eval_binary_multiply"); 
     let result = eval_expr("3 * 4;");
     match result.value {
         Some(EvalValue::Number(n)) => assert_eq!(n.0, 12.0),
@@ -53,7 +53,7 @@ fn eval_binary_multiply() {
 }
 
 #[test]
-fn eval_unary_minus() {
+fn eval_unary_minus() { ::tsox_core::fntrace::enter("eval_unary_minus"); 
     let result = eval_expr("-5;");
     match result.value {
         Some(EvalValue::Number(n)) => assert_eq!(n.0, -5.0),
@@ -62,7 +62,7 @@ fn eval_unary_minus() {
 }
 
 #[test]
-fn eval_string_concat() {
+fn eval_string_concat() { ::tsox_core::fntrace::enter("eval_string_concat"); 
     let result = eval_expr("\"a\" + \"b\";");
     match result.value {
         Some(EvalValue::String(s)) => assert_eq!(s, "ab"),

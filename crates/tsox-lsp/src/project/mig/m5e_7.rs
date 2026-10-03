@@ -21,26 +21,26 @@ pub struct RealpathAliasSet {
 }
 
 impl RealpathAliasSet {
-    pub fn add(&self, path: Path) {
+    pub fn add(&self, path: Path) { ::tsox_core::fntrace::enter("add"); 
         self.paths.lock().unwrap().insert(path);
     }
 
-    pub fn locked_paths(&self) -> HashSet<Path> {
+    pub fn locked_paths(&self) -> HashSet<Path> { ::tsox_core::fntrace::enter("locked_paths"); 
         self.paths.lock().unwrap().clone()
     }
 
-    pub fn clone_set(&self) -> RealpathAliasSet {
+    pub fn clone_set(&self) -> RealpathAliasSet { ::tsox_core::fntrace::enter("clone_set"); 
         RealpathAliasSet {
             paths: Mutex::new(self.paths.lock().unwrap().clone()),
         }
     }
 }
 
-pub fn is_relevant_extension(ext: &str) -> bool {
+pub fn is_relevant_extension(ext: &str) -> bool { ::tsox_core::fntrace::enter("is_relevant_extension"); 
     matches!(ext, ".js" | ".jsx" | ".mjs" | ".cjs" | ".ts" | ".tsx" | ".mts" | ".cts" | ".json")
 }
 
-pub fn is_node_modules_path(path: &Path) -> bool {
+pub fn is_node_modules_path(path: &Path) -> bool { ::tsox_core::fntrace::enter("is_node_modules_path"); 
     let s = path.as_str();
     s.ends_with("/node_modules") || s.contains("/node_modules/")
 }
@@ -49,7 +49,7 @@ pub fn read_directory_into_entries(
     directories: &HashMap<Path, String>,
     is_file: &dyn Fn(&Path) -> bool,
     entries: &mut tsox_tsoptions::vfs::Entries,
-) {
+) { ::tsox_core::fntrace::enter("read_directory_into_entries"); 
     for (child_path, child_name) in directories {
         if is_file(child_path) {
             entries.files.push(child_name.clone());
@@ -73,7 +73,7 @@ pub struct SnapshotFSBuilder {
     pub pending_realpath_paths: Mutex<HashMap<Path, Path>>,
 }
 
-fn reloaded_disk_file(entry: &DiskFile, content: &str) -> DiskFile {
+fn reloaded_disk_file(entry: &DiskFile, content: &str) -> DiskFile { ::tsox_core::fntrace::enter("reloaded_disk_file"); 
     let mut file = DiskFile::new(entry.file_name().to_string(), content.to_string());
     file.realpath_path = entry.realpath_path.clone();
     file
@@ -88,7 +88,7 @@ pub fn new_snapshot_fs_builder(
     node_modules_realpath_aliases: &HashMap<Path, Arc<RealpathAliasSet>>,
     _position_encoding: lsproto::PositionEncodingKind,
     to_path: Arc<dyn Fn(&str) -> Path + Send + Sync>,
-) -> SnapshotFSBuilder {
+) -> SnapshotFSBuilder { ::tsox_core::fntrace::enter("new_snapshot_fs_builder"); 
     let mut overlay_directories: HashMap<Path, HashMap<Path, String>> = HashMap::new();
     for (path, overlay) in overlays {
         let mut child_path = path.clone();
@@ -124,7 +124,7 @@ pub fn new_snapshot_fs_builder(
 }
 
 impl SnapshotFSBuilder {
-    pub fn finalize(&mut self) -> SnapshotFS {
+    pub fn finalize(&mut self) -> SnapshotFS { ::tsox_core::fntrace::enter("finalize"); 
         self.apply_pending_realpath_paths();
         let deleted: Vec<Path> = self.deleted_disk_files.lock().unwrap().drain().collect();
         let deleted_with_realpath: Vec<(Path, Path)> = deleted
@@ -203,20 +203,20 @@ impl SnapshotFSBuilder {
         }
     }
 
-    fn to_path_ref(&self) -> Arc<dyn Fn(&str) -> Path + Send + Sync> {
+    fn to_path_ref(&self) -> Arc<dyn Fn(&str) -> Path + Send + Sync> { ::tsox_core::fntrace::enter("to_path_ref"); 
         Arc::clone(&self.to_path)
     }
 
-    pub fn is_open_file(&self, path: &Path) -> bool {
+    pub fn is_open_file(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("is_open_file"); 
         self.overlays.contains_key(path)
     }
 
-    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         let path = (self.to_path)(file_name);
         self.get_file_by_path(file_name, &path)
     }
 
-    pub fn file_exists(&self, file_name: &str, path: &Path) -> bool {
+    pub fn file_exists(&self, file_name: &str, path: &Path) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         if self.overlays.contains_key(path) {
             return true;
         }
@@ -226,14 +226,14 @@ impl SnapshotFSBuilder {
         self.fs.file_exists(file_name)
     }
 
-    pub fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file_by_path"); 
         if let Some(file) = self.overlays.get(path) {
             return Some(Arc::clone(file) as Arc<dyn FileHandle>);
         }
         self.get_disk_file(file_name, path, false)
     }
 
-    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         let mut entries = self.fs.get_accessible_entries(path);
         let p = (self.to_path)(path);
         let Some(overlay_directories) = self.overlay_directories.get(&p) else {
@@ -252,7 +252,7 @@ impl SnapshotFSBuilder {
         file_name: &str,
         path: &Path,
         force_reload: bool,
-    ) -> Option<Arc<dyn FileHandle>> {
+    ) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_disk_file"); 
         let entry = self.disk_files.get(path).cloned().unwrap_or_else(|| {
             let mut file = DiskFile::new(file_name.to_string(), String::new());
             file.needs_reload = true;
@@ -267,7 +267,7 @@ impl SnapshotFSBuilder {
         self.reload_entry_if_needed(path, &entry)
     }
 
-    fn apply_pending_realpath_paths(&mut self) {
+    fn apply_pending_realpath_paths(&mut self) { ::tsox_core::fntrace::enter("apply_pending_realpath_paths"); 
         let pending: Vec<(Path, Path)> = self
             .pending_realpath_paths
             .lock()
@@ -291,7 +291,7 @@ impl SnapshotFSBuilder {
         symlink_path: &Path,
         disk_file_entry: &Arc<DiskFile>,
         symlink_file_name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("record_realpath_alias"); 
         let realpath = self.fs.realpath(symlink_file_name);
         let realpath_path = (self.to_path)(&realpath);
         if realpath_path != *symlink_path {
@@ -308,7 +308,7 @@ impl SnapshotFSBuilder {
         }
     }
 
-    pub fn reload_entry(&self, path: &Path, entry: &Arc<DiskFile>) -> Option<Arc<dyn FileHandle>> {
+    pub fn reload_entry(&self, path: &Path, entry: &Arc<DiskFile>) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("reload_entry"); 
         let file_name = entry.file_name().to_string();
         match self.fs.read_file(&file_name) {
             Some(content) => Some(Arc::new(reloaded_disk_file(entry, &content)) as Arc<dyn FileHandle>),
@@ -323,14 +323,14 @@ impl SnapshotFSBuilder {
         &self,
         path: &Path,
         entry: &Arc<DiskFile>,
-    ) -> Option<Arc<dyn FileHandle>> {
+    ) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("reload_entry_if_needed"); 
         if entry.matches_disk_text() {
             return Some(Arc::clone(entry) as Arc<dyn FileHandle>);
         }
         self.reload_entry(path, entry)
     }
 
-    pub fn watch_changes_overlap_cache(&self, change: &FileChangeSummary) -> bool {
+    pub fn watch_changes_overlap_cache(&self, change: &FileChangeSummary) -> bool { ::tsox_core::fntrace::enter("watch_changes_overlap_cache"); 
         for uri in change.changed.iter().chain(change.deleted.iter()) {
             let path = (self.to_path)(&uri.file_name());
             if self.disk_files.contains_key(&path) || self.node_modules_realpath_aliases.lock().unwrap().contains_key(&path) {
@@ -340,7 +340,7 @@ impl SnapshotFSBuilder {
         false
     }
 
-    pub fn invalidate_cache(&mut self) {
+    pub fn invalidate_cache(&mut self) { ::tsox_core::fntrace::enter("invalidate_cache"); 
         let paths: Vec<Path> = self.disk_files.keys().cloned().collect();
         for path in paths {
             if let Some(file) = self.disk_files.get(&path) {
@@ -351,7 +351,7 @@ impl SnapshotFSBuilder {
         }
     }
 
-    pub fn invalidate_node_modules_cache(&mut self) {
+    pub fn invalidate_node_modules_cache(&mut self) { ::tsox_core::fntrace::enter("invalidate_node_modules_cache"); 
         let paths: Vec<Path> = self
             .disk_files
             .keys()
@@ -367,7 +367,7 @@ impl SnapshotFSBuilder {
         }
     }
 
-    pub fn mark_dirty_files(&mut self, mut change: FileChangeSummary) -> FileChangeSummary {
+    pub fn mark_dirty_files(&mut self, mut change: FileChangeSummary) -> FileChangeSummary { ::tsox_core::fntrace::enter("mark_dirty_files"); 
         self.apply_pending_realpath_paths();
         if !change.changed.is_empty() {
             let mut filtered_changed = HashSet::new();
@@ -400,7 +400,7 @@ impl SnapshotFSBuilder {
         &mut self,
         path: &Path,
         entry: &Arc<DiskFile>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("reload_entry_if_content_changed"); 
         match self.fs.read_file(&entry.file_name().to_string()) {
             None => {
                 self.disk_files.remove(path);
@@ -424,7 +424,7 @@ impl SnapshotFSBuilder {
         uri: &lsproto::DocumentUri,
         content_mapper_extensions: &[String],
         content_mapper_watched_files: &HashSet<Path>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_relevant_file_name"); 
         let file_name = uri.file_name();
         if content_mapper_watched_files.contains(&(self.to_path)(&file_name)) {
             return true;
@@ -454,7 +454,7 @@ impl SnapshotFSBuilder {
         mut change: FileChangeSummary,
         content_mapper_extensions: &[String],
         content_mapper_watched_files: &HashSet<Path>,
-    ) -> FileChangeSummary {
+    ) -> FileChangeSummary { ::tsox_core::fntrace::enter("expand_and_filter_watch_events"); 
         if !change.deleted.is_empty() {
             let mut filtered_deleted = HashSet::new();
             for uri in change.deleted.iter() {
@@ -481,7 +481,7 @@ impl SnapshotFSBuilder {
         change
     }
 
-    pub fn collect_files_recursive(&self, dir_path: &Path, files: &mut HashSet<lsproto::DocumentUri>) {
+    pub fn collect_files_recursive(&self, dir_path: &Path, files: &mut HashSet<lsproto::DocumentUri>) { ::tsox_core::fntrace::enter("collect_files_recursive"); 
         let Some(dir_entry) = self.disk_directories.get(dir_path) else {
             return;
         };
@@ -495,7 +495,7 @@ impl SnapshotFSBuilder {
         }
     }
 
-    pub fn convert_open_and_close_to_changes(&mut self, mut change: FileChangeSummary) -> FileChangeSummary {
+    pub fn convert_open_and_close_to_changes(&mut self, mut change: FileChangeSummary) -> FileChangeSummary { ::tsox_core::fntrace::enter("convert_open_and_close_to_changes"); 
         if !change.opened.0.is_empty() && !tsox_core::tspath::is_dynamic_file_name(&change.opened.file_name()) {
             let path = (self.to_path)(&change.opened.file_name());
             match self.disk_files.get(&path) {
@@ -531,13 +531,13 @@ impl SnapshotFSBuilder {
         change
     }
 
-    pub fn clean_disk_files_not_seen_by(&mut self, collection: &ProjectCollection) {
+    pub fn clean_disk_files_not_seen_by(&mut self, collection: &ProjectCollection) { ::tsox_core::fntrace::enter("clean_disk_files_not_seen_by"); 
         let _ = collection;
     }
 }
 
 impl SnapshotFSBuilder {
-    pub fn expand_realpath_aliases(&self, mut change: FileChangeSummary) -> FileChangeSummary {
+    pub fn expand_realpath_aliases(&self, mut change: FileChangeSummary) -> FileChangeSummary { ::tsox_core::fntrace::enter("expand_realpath_aliases"); 
         if self.node_modules_realpath_aliases.lock().unwrap().is_empty() {
             return change;
         }
@@ -575,7 +575,7 @@ impl SnapshotFSBuilder {
 }
 
 impl SnapshotFS {
-    pub fn is_file(&self, path: &Path) -> bool {
+    pub fn is_file(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("is_file"); 
         self.disk_files.contains_key(path) || self.overlays.contains_key(path)
     }
 }
@@ -592,7 +592,7 @@ pub fn new_source_fs(
     tracking: bool,
     source: Arc<dyn FileSource>,
     to_path: Arc<dyn Fn(&str) -> Path + Send + Sync>,
-) -> SourceFS {
+) -> SourceFS { ::tsox_core::fntrace::enter("new_source_fs"); 
     SourceFS {
         tracking,
         to_path,
@@ -603,22 +603,22 @@ pub fn new_source_fs(
 }
 
 impl SourceFS {
-    pub fn disable_tracking(&mut self) {
+    pub fn disable_tracking(&mut self) { ::tsox_core::fntrace::enter("disable_tracking"); 
         self.tracking = false;
     }
 
-    pub fn track(&self, file_name: &str) {
+    pub fn track(&self, file_name: &str) { ::tsox_core::fntrace::enter("track"); 
         if !self.tracking {
             return;
         }
         self.seen_files.lock().unwrap().insert((self.to_path)(file_name));
     }
 
-    pub fn seen_file(&self, path: &Path) -> bool {
+    pub fn seen_file(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("seen_file"); 
         self.seen_files.lock().unwrap().contains(path)
     }
 
-    pub fn seen_file_or_missing_parent_directory(&self, path: &Path) -> bool {
+    pub fn seen_file_or_missing_parent_directory(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("seen_file_or_missing_parent_directory"); 
         if self.seen_files.lock().unwrap().contains(path) {
             return true;
         }
@@ -639,17 +639,17 @@ impl SourceFS {
         false
     }
 
-    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         self.track(file_name);
         self.source.get_file(file_name)
     }
 
-    pub fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file_by_path"); 
         self.track(file_name);
         self.source.get_file_by_path(file_name, path)
     }
 
-    pub fn directory_exists(&self, path: &str) -> bool {
+    pub fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         let exists = self.source.fs().directory_exists(path);
         if !exists && self.tracking {
             self.missing_directories.lock().unwrap().insert((self.to_path)(path));
@@ -657,28 +657,28 @@ impl SourceFS {
         exists
     }
 
-    pub fn file_exists(&self, path: &str) -> bool {
+    pub fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.track(path);
         self.source.file_exists(path, &(self.to_path)(path))
     }
 
-    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.source.get_accessible_entries(path)
     }
 
-    pub fn read_file(&self, path: &str) -> Option<String> {
+    pub fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.get_file(path).map(|fh| fh.content().to_string())
     }
 
-    pub fn realpath(&self, path: &str) -> String {
+    pub fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         self.source.fs().realpath(path)
     }
 
-    pub fn stat(&self, path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> {
+    pub fn stat(&self, path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         self.source.fs().stat(path)
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.source.fs().use_case_sensitive_file_names()
     }
 
@@ -686,23 +686,23 @@ impl SourceFS {
         &self,
         root: &str,
         walk_fn: &mut dyn FnMut(&str, &tsox_tsoptions::vfs::FileInfo),
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("walk_dir"); 
         self.source.fs().walk_dir(root, walk_fn)
     }
 
-    pub fn write_file(&self, _path: &str, _data: &str) -> Result<(), String> {
+    pub fn write_file(&self, _path: &str, _data: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("write_file"); 
         panic!("unimplemented")
     }
 
-    pub fn append_file(&self, _path: &str, _data: &str) -> Result<(), String> {
+    pub fn append_file(&self, _path: &str, _data: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("append_file"); 
         panic!("unimplemented")
     }
 
-    pub fn remove(&self, _path: &str) -> Result<(), String> {
+    pub fn remove(&self, _path: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("remove"); 
         panic!("unimplemented")
     }
 
-    pub fn chtimes(&self, _path: &str, _atime: std::time::SystemTime, _mtime: std::time::SystemTime) -> Result<(), String> {
+    pub fn chtimes(&self, _path: &str, _atime: std::time::SystemTime, _mtime: std::time::SystemTime) -> Result<(), String> { ::tsox_core::fntrace::enter("chtimes"); 
         panic!("unimplemented")
     }
 }
@@ -714,7 +714,7 @@ pub fn new_watched_files_for_paths(
     workspace_directory: &str,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> WatchedFiles<Vec<String>> {
+) -> WatchedFiles<Vec<String>> { ::tsox_core::fntrace::enter("new_watched_files_for_paths"); 
     let workspace_directory = workspace_directory.to_string();
     let current_directory = current_directory.to_string();
     WatchedFiles::new(name, watch_kind, has_relative_pattern_capability, move |files: &Vec<String>| {
@@ -739,7 +739,7 @@ pub fn create_resolution_lookup_glob_mapper(
     lib_directory: &str,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> impl Fn(&SyncSet<Path>) -> PatternsAndIgnored + Send + Sync {
+) -> impl Fn(&SyncSet<Path>) -> PatternsAndIgnored + Send + Sync { ::tsox_core::fntrace::enter("create_resolution_lookup_glob_mapper"); 
     let workspace_directory_path = tsox_core::tspath::to_path(workspace_directory, current_directory, use_case_sensitive_file_names);
     let current_directory_path = tsox_core::tspath::to_path(current_directory, current_directory, use_case_sensitive_file_names);
     let lib_directory_path = tsox_core::tspath::to_path(lib_directory, current_directory, use_case_sensitive_file_names);
@@ -820,7 +820,7 @@ pub fn get_typings_locations_globs(
     workspace_directory: &str,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> PatternsAndIgnored {
+) -> PatternsAndIgnored { ::tsox_core::fntrace::enter("get_typings_locations_globs"); 
     let mut include_typings_location = false;
     let mut include_workspace = false;
     let mut external_directories: HashMap<Path, String> = HashMap::new();
@@ -866,7 +866,7 @@ pub fn get_typings_locations_globs(
     }
 }
 
-pub fn get_path_components_for_watching(path: &str, current_directory: &str) -> Vec<String> {
+pub fn get_path_components_for_watching(path: &str, current_directory: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_path_components_for_watching"); 
     let components = tsox_core::tspath::get_path_components(path, current_directory);
     let root_length = perceived_os_root_length_for_watching(&components);
     if root_length <= 1 {
@@ -879,7 +879,7 @@ pub fn get_path_components_for_watching(path: &str, current_directory: &str) -> 
     result
 }
 
-pub fn perceived_os_root_length_for_watching(path_components: &[String]) -> usize {
+pub fn perceived_os_root_length_for_watching(path_components: &[String]) -> usize { ::tsox_core::fntrace::enter("perceived_os_root_length_for_watching"); 
     let length = path_components.len();
     if length <= 1 {
         return length;
@@ -907,7 +907,7 @@ pub fn new_recursive_directory_watcher(
     directory: &str,
     kind: lsproto::WatchKind,
     use_relative_pattern: bool,
-) -> lsproto::FileSystemWatcher {
+) -> lsproto::FileSystemWatcher { ::tsox_core::fntrace::enter("new_recursive_directory_watcher"); 
     if use_relative_pattern {
         let base_uri = lsproto::DocumentUri(lsconv::file_name_to_document_uri(directory));
         return lsproto::FileSystemWatcher {

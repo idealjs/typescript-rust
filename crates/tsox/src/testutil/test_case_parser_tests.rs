@@ -1,7 +1,7 @@
 use crate::testutil::test_case_parser::*;
 
 #[test]
-fn parse_single_file() {
+fn parse_single_file() { ::tsox_core::fntrace::enter("parse_single_file"); 
     let content = "const x: number = 42;\n";
     let result = parse_test_files(content, "test.ts");
     assert_eq!(result.units.len(), 1);
@@ -10,7 +10,7 @@ fn parse_single_file() {
 }
 
 #[test]
-fn parse_multi_file() {
+fn parse_multi_file() { ::tsox_core::fntrace::enter("parse_multi_file"); 
     let content = "\
 // @filename: a.ts
 export const x = 1;
@@ -25,7 +25,7 @@ import { x } from './a';
 }
 
 #[test]
-fn parse_compiler_settings() {
+fn parse_compiler_settings() { ::tsox_core::fntrace::enter("parse_compiler_settings"); 
     let content = "\
 // @strict: true
 // @target: esnext
@@ -37,7 +37,7 @@ const x = 1;
 }
 
 #[test]
-fn parse_tsconfig_file() {
+fn parse_tsconfig_file() { ::tsox_core::fntrace::enter("parse_tsconfig_file"); 
     let content = "\
 // @filename: tsconfig.json
 { \"compilerOptions\": { \"strict\": true } }
@@ -52,7 +52,7 @@ const x = 1;
 }
 
 #[test]
-fn parse_current_directory() {
+fn parse_current_directory() { ::tsox_core::fntrace::enter("parse_current_directory"); 
     let content = "\
 // @currentDirectory: /project/src
 const x = 1;

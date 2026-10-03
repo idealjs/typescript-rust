@@ -10,7 +10,7 @@ pub(crate) fn parse_option_value(
     options: &mut HashMap<String, OptValue>,
     errors: &mut Vec<Diagnostic>,
     watch: bool,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("parse_option_value"); 
     let type_name = |kind: OptionKind| -> &'static str {
         match kind {
             OptionKind::Boolean => "boolean",
@@ -230,7 +230,7 @@ pub(crate) fn parse_option_value(
 pub(crate) fn split_response_file(
     content: &str,
     file_name: &str,
-) -> (Vec<String>, Vec<Diagnostic>) {
+) -> (Vec<String>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("split_response_file"); 
     let mut args = Vec::new();
     let mut errors: Vec<Diagnostic> = Vec::new();
     let chars: Vec<char> = content.chars().collect();

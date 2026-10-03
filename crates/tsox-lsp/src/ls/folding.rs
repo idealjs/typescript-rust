@@ -19,7 +19,7 @@ pub struct RegionDelimiterResult {
 }
 
 impl LanguageService {
-    pub fn provide_folding_range(&self, document_uri: &DocumentUri) -> Vec<FoldingRange> {
+    pub fn provide_folding_range(&self, document_uri: &DocumentUri) -> Vec<FoldingRange> { ::tsox_core::fntrace::enter("provide_folding_range"); 
         let (_program, source_file) = self.get_program_and_file(document_uri);
         let mut res = add_node_outlining_spans(&source_file);
         res.extend(add_region_outlining_spans(&source_file));
@@ -34,7 +34,7 @@ impl LanguageService {
     }
 }
 
-fn add_node_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> {
+fn add_node_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> { ::tsox_core::fntrace::enter("add_node_outlining_spans"); 
     let line_map = &source_file.line_map;
     let mut ranges = Vec::new();
 
@@ -46,7 +46,7 @@ fn add_node_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> 
     ranges
 }
 
-fn add_region_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> {
+fn add_region_outlining_spans(source_file: &Arc<SourceFile>) -> Vec<FoldingRange> { ::tsox_core::fntrace::enter("add_region_outlining_spans"); 
     let text = &source_file.text;
     let line_map = &source_file.line_map;
     let mut regions: Vec<FoldingRange> = Vec::new();
@@ -90,7 +90,7 @@ fn visit_node_for_folding(
     line_map: &LineMap,
     ranges: &mut Vec<FoldingRange>,
     depth_remaining: usize,
-) {
+) { ::tsox_core::fntrace::enter("visit_node_for_folding"); 
     if depth_remaining == 0 {
         return;
     }
@@ -103,7 +103,7 @@ fn visit_node_for_folding(
     });
 }
 
-fn get_outlining_span_for_node(node: &Arc<Node>, line_map: &LineMap) -> Option<FoldingRange> {
+fn get_outlining_span_for_node(node: &Arc<Node>, line_map: &LineMap) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("get_outlining_span_for_node"); 
     let pos = node.pos();
     let end = node.end();
     if positions_are_on_same_line(pos, end, line_map) {
@@ -146,7 +146,7 @@ fn create_folding_range_from_bounds(
     end: usize,
     kind: &str,
     line_map: &LineMap,
-) -> Option<FoldingRange> {
+) -> Option<FoldingRange> { ::tsox_core::fntrace::enter("create_folding_range_from_bounds"); 
     let (start_line, start_char) = offset_to_line_col(line_map, start);
     let (end_line, end_char) = offset_to_line_col(line_map, end);
     if start_line == end_line {
@@ -166,36 +166,36 @@ fn create_folding_range_from_bounds(
     })
 }
 
-fn positions_are_on_same_line(pos1: usize, pos2: usize, line_map: &LineMap) -> bool {
+fn positions_are_on_same_line(pos1: usize, pos2: usize, line_map: &LineMap) -> bool { ::tsox_core::fntrace::enter("positions_are_on_same_line"); 
     line_of_offset(line_map, pos1) == line_of_offset(line_map, pos2)
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),
     }
 }
 
-fn offset_to_line_col(line_map: &LineMap, offset: usize) -> (u32, u32) {
+fn offset_to_line_col(line_map: &LineMap, offset: usize) -> (u32, u32) { ::tsox_core::fntrace::enter("offset_to_line_col"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     (line as u32, offset.saturating_sub(line_start) as u32)
 }
 
 #[doc(hidden)]
-pub fn offset_to_line_col_pub(line_map: &LineMap, offset: usize) -> (u32, u32) {
+pub fn offset_to_line_col_pub(line_map: &LineMap, offset: usize) -> (u32, u32) { ::tsox_core::fntrace::enter("offset_to_line_col_pub"); 
     offset_to_line_col(line_map, offset)
 }
 
-fn get_line_end(text: &str, line_start: usize) -> usize {
+fn get_line_end(text: &str, line_start: usize) -> usize { ::tsox_core::fntrace::enter("get_line_end"); 
     match text[line_start..].find('\n') {
         Some(idx) => line_start + idx,
         None => text.len(),
     }
 }
 
-pub fn parse_region_delimiter(line_text: &str) -> Option<RegionDelimiterResult> {
+pub fn parse_region_delimiter(line_text: &str) -> Option<RegionDelimiterResult> { ::tsox_core::fntrace::enter("parse_region_delimiter"); 
     let line_text = line_text.trim_start();
     let line_text = line_text.strip_prefix("//")?;
     let line_text = line_text.trim();

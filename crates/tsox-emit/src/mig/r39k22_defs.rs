@@ -77,14 +77,14 @@ pub trait R39k22NodeExt {
 }
 
 impl R39k22NodeExt for Node {
-    fn heritage_token22(&self) -> SyntaxKind {
+    fn heritage_token22(&self) -> SyntaxKind { ::tsox_core::fntrace::enter("heritage_token22"); 
         match &self.data {
             NodeData::HeritageClause(d) => d.token,
             _ => panic!("HeritageClause expected, got {:?}", self.kind),
         }
     }
 
-    fn heritage_types22(&self) -> &Arc<NodeList> {
+    fn heritage_types22(&self) -> &Arc<NodeList> { ::tsox_core::fntrace::enter("heritage_types22"); 
         match &self.data {
             NodeData::HeritageClause(d) => &d.types,
             _ => panic!("HeritageClause expected, got {:?}", self.kind),
@@ -93,15 +93,15 @@ impl R39k22NodeExt for Node {
 }
 
 impl Printer {
-    pub(crate) fn write(&mut self, text: &str) {
+    pub(crate) fn write(&mut self, text: &str) { ::tsox_core::fntrace::enter("write"); 
         self.writer.write(text);
     }
 
-    pub(crate) fn write_comment(&mut self, text: &str) {
+    pub(crate) fn write_comment(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_comment"); 
         self.writer.write_comment(text);
     }
 
-    pub(crate) fn write_literal(&mut self, text: &str) {
+    pub(crate) fn write_literal(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_literal"); 
         self.writer.write_literal(text);
     }
 
@@ -109,14 +109,14 @@ impl Printer {
         &mut self,
         text: &str,
         symbol: Option<&Arc<tsox_frontend::ast::Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("write_symbol"); 
         match symbol {
             Some(symbol) => self.writer.write_symbol(text, symbol),
             None => self.write(text),
         }
     }
 
-    pub(crate) fn write_lines(&mut self, text: &str) {
+    pub(crate) fn write_lines(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_lines"); 
         let lines = split_lines(text);
         let indentation = guess_indentation(&lines);
         for line in &lines {
@@ -132,7 +132,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn write_line_repeat(&mut self, count: i64) {
+    pub(crate) fn write_line_repeat(&mut self, count: i64) { ::tsox_core::fntrace::enter("write_line_repeat"); 
         for _ in 0..count {
             self.write_line();
         }
@@ -142,7 +142,7 @@ impl Printer {
         &mut self,
         line_count: i64,
         write_space_if_not_indenting: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("write_lines_and_indent"); 
         if line_count > 0 {
             self.increase_indent();
             self.write_line_repeat(line_count);
@@ -156,7 +156,7 @@ impl Printer {
         parent_node: &Arc<Node>,
         prev_child_node: &Arc<Node>,
         next_child_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("write_line_or_space"); 
         if self.should_emit_on_single_line(parent_node) {
             self.write_space();
         } else if self.options.preserve_source_newlines {
@@ -171,7 +171,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn write_delimiter(&mut self, format: ListFormat) {
+    pub(crate) fn write_delimiter(&mut self, format: ListFormat) { ::tsox_core::fntrace::enter("write_delimiter"); 
         match format & ListFormat::DELIMITERS_MASK {
             f if f.0 == ListFormat::NONE.0 => {}
             f if f.intersects(ListFormat::COMMA_DELIMITED) => self.write_punctuation(","),
@@ -197,7 +197,7 @@ impl Printer {
         parent: &Arc<Node>,
         node1: &Arc<Node>,
         node2: &Arc<Node>,
-    ) -> i64 {
+    ) -> i64 { ::tsox_core::fntrace::enter("get_lines_between_nodes"); 
         if self.should_elide_indentation22(parent) {
             return 0;
         }
@@ -220,33 +220,33 @@ impl Printer {
         }
     }
 
-    pub(crate) fn should_elide_indentation22(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn should_elide_indentation22(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_elide_indentation22"); 
         self.emit_context
             .emit_flags(node)
             .intersects(EmitFlags::NO_INDENTATION)
     }
 
-    pub(crate) fn should_emit_on_multiple_lines(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn should_emit_on_multiple_lines(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_on_multiple_lines"); 
         self.emit_context
             .emit_flags(node)
             .intersects(EmitFlags::MULTI_LINE)
     }
 
-    pub(crate) fn should_emit_leading_comments(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn should_emit_leading_comments(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_leading_comments"); 
         !self
             .emit_context
             .emit_flags(node)
             .intersects(EmitFlags::NO_LEADING_COMMENTS)
     }
 
-    pub(crate) fn should_emit_trailing_comments(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn should_emit_trailing_comments(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_trailing_comments"); 
         !self
             .emit_context
             .emit_flags(node)
             .intersects(EmitFlags::NO_TRAILING_COMMENTS)
     }
 
-    pub(crate) fn should_write_comment(&self, comment: &CommentRange) -> bool {
+    pub(crate) fn should_write_comment(&self, comment: &CommentRange) -> bool { ::tsox_core::fntrace::enter("should_write_comment"); 
         if !self.options.only_print_jsdoc_style {
             return true;
         }
@@ -257,7 +257,7 @@ impl Printer {
             || source_file.text[comment.pos..comment.end].starts_with("/*!")
     }
 
-    pub(crate) fn is_triple_slash_comment(&self, comment: &CommentRange) -> bool {
+    pub(crate) fn is_triple_slash_comment(&self, comment: &CommentRange) -> bool { ::tsox_core::fntrace::enter("is_triple_slash_comment"); 
         let Some(source_file) = self.current_source_file.as_ref() else {
             return false;
         };
@@ -271,7 +271,7 @@ impl Printer {
         &self,
         comment: &CommentRange,
         triple_slash: Tristate,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_emit_comment_if_triple_slash"); 
         match triple_slash {
             Tristate::True => self.is_triple_slash_comment(comment),
             Tristate::False => !self.is_triple_slash_comment(comment),
@@ -279,7 +279,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn has_comments_at_position(&mut self, pos: usize) -> bool {
+    pub(crate) fn has_comments_at_position(&mut self, pos: usize) -> bool { ::tsox_core::fntrace::enter("has_comments_at_position"); 
         let Some(source_file) = self.current_source_file.as_ref() else {
             return false;
         };
@@ -292,7 +292,7 @@ impl Printer {
         &self,
         pos: usize,
         comment_pos: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_emit_new_line_before_leading_comment_of_position"); 
         let Some(source_file) = self.current_source_file.as_ref() else {
             return false;
         };
@@ -300,7 +300,7 @@ impl Printer {
             && !positions_are_on_same_line(pos as i64, comment_pos as i64, source_file)
     }
 
-    pub(crate) fn emit_comment(&mut self, comment: &CommentRange) {
+    pub(crate) fn emit_comment(&mut self, comment: &CommentRange) { ::tsox_core::fntrace::enter("emit_comment"); 
         let Some(source_file) = self.current_source_file.clone() else {
             return;
         };
@@ -312,7 +312,7 @@ impl Printer {
         &mut self,
         comments: &[CommentRange],
         separator: CommentSeparator,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("emit_comments"); 
         if comments.is_empty() {
             return false;
         }
@@ -345,7 +345,7 @@ impl Printer {
         pos: usize,
         prefix_space: bool,
         force_no_newline: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_trailing_comments_of_position"); 
         if self.comments_disabled || self.current_source_file.is_none() {
             return;
         }
@@ -368,7 +368,7 @@ impl Printer {
         self.emit_comments(&comments, CommentSeparator::None);
     }
 
-    pub(crate) fn should_emit_detached_comments(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn should_emit_detached_comments(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_detached_comments"); 
         if node.kind != SyntaxKind::SourceFile {
             return true;
         }
@@ -384,7 +384,7 @@ impl Printer {
     pub(crate) fn emit_detached_comments(
         &mut self,
         text_range: TextRange,
-    ) -> Option<DetachedCommentsInfo> {
+    ) -> Option<DetachedCommentsInfo> { ::tsox_core::fntrace::enter("emit_detached_comments"); 
         let source_file = self.current_source_file.clone()?;
         let text = source_file.text.clone();
 
@@ -445,7 +445,7 @@ impl Printer {
         None
     }
 
-    pub(crate) fn write_synthesized_comment(&mut self, comment: &SynthesizedComment) {
+    pub(crate) fn write_synthesized_comment(&mut self, comment: &SynthesizedComment) { ::tsox_core::fntrace::enter("write_synthesized_comment"); 
         let text = format_synthesized_comment(comment);
         self.write_comment(&text);
     }
@@ -454,7 +454,7 @@ impl Printer {
         &self,
         _parent_node: &Arc<Node>,
         children: &Arc<NodeList>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_trailing_comma"); 
         if !children.has_trailing_comma() {
             return false;
         }
@@ -468,7 +468,7 @@ impl Printer {
         &self,
         node: &Arc<Node>,
         list: &Arc<NodeList>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_allow_trailing_comma"); 
         if self.current_source_file.is_none()
             || self.current_source_file.as_deref().unwrap().script_kind == ScriptKind::Json
         {
@@ -482,7 +482,7 @@ impl Printer {
         previous_node: &Arc<Node>,
         next_node: &Arc<Node>,
         format: ListFormat,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_separating_line_terminator_count"); 
         if format.intersects(ListFormat::PRESERVE_LINES) || self.options.preserve_source_newlines {
             if format.intersects(ListFormat::PRESERVE_LINES)
                 && self.current_source_file.is_some()
@@ -514,7 +514,7 @@ impl Printer {
         last_child: Option<&Arc<Node>>,
         format: ListFormat,
         children_text_range: TextRange,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_closing_line_terminator_count"); 
         if format.intersects(ListFormat::PRESERVE_LINES) || self.options.preserve_source_newlines {
             if format.intersects(ListFormat::PRESERVE_LINES)
                 && self.current_source_file.is_some()
@@ -545,7 +545,7 @@ impl Printer {
         &mut self,
         node: &Arc<Node>,
         parent: &Arc<Node>,
-    ) -> i64 {
+    ) -> i64 { ::tsox_core::fntrace::enter("write_line_separators_and_indent_before"); 
         if self.options.preserve_source_newlines {
             let leading_newlines =
                 self.get_leading_line_terminator_count(parent, Some(node), ListFormat::NONE);
@@ -557,7 +557,7 @@ impl Printer {
         0
     }
 
-    pub(crate) fn write_line_separators_after(&mut self, node: &Arc<Node>, parent: &Arc<Node>) {
+    pub(crate) fn write_line_separators_after(&mut self, node: &Arc<Node>, parent: &Arc<Node>) { ::tsox_core::fntrace::enter("write_line_separators_after"); 
         if self.options.preserve_source_newlines {
             let trailing_newlines = self.get_closing_line_terminator_count(
                 parent,
@@ -576,7 +576,7 @@ impl Printer {
         node: &Arc<Node>,
         _source_file: Option<&Arc<Node>>,
         mut flags: GetLiteralTextFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_literal_text_of_node"); 
         if self
             .emit_context
             .emit_flags(node)
@@ -587,7 +587,7 @@ impl Printer {
         get_literal_text(node, self.current_source_file.as_ref(), flags)
     }
 
-    pub(crate) fn get_text_of_node(&mut self, node: &Arc<Node>, include_trivia: bool) -> String {
+    pub(crate) fn get_text_of_node(&mut self, node: &Arc<Node>, include_trivia: bool) -> String { ::tsox_core::fntrace::enter("get_text_of_node"); 
         let can_use_source_file =
             self.current_source_file.is_some() && !node_is_synthesized(node);
         match node.kind {
@@ -611,9 +611,9 @@ impl Printer {
         get_source_text_of_node_from_source_file(source_file, node, include_trivia)
     }
 
-    pub(crate) fn generate_name(&mut self, _name: &Arc<Node>) {}
+    pub(crate) fn generate_name(&mut self, _name: &Arc<Node>) { ::tsox_core::fntrace::enter("generate_name"); }
 
-    pub(crate) fn emit_type_reference(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_type_reference(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_type_reference"); 
         let state = self.enter_node(node);
         let (type_name, type_arguments) = match &node.data {
             NodeData::TypeReferenceNode(d) => (&d.type_name, d.type_arguments.as_ref()),
@@ -624,7 +624,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_property_name(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_property_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_property_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node),
             SyntaxKind::PrivateIdentifier => self.emit_private_identifier(node),
@@ -647,11 +647,11 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_array_literal_expression_element(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_array_literal_expression_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_array_literal_expression_element"); 
         self.emit_expression(node, OperatorPrecedence::Spread);
     }
 
-    pub(crate) fn emit_array_literal_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_array_literal_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_array_literal_expression"); 
         let state = self.enter_node(node);
         let (elements, multi_line) = match &node.data {
             NodeData::ArrayLiteralExpression(d) => (d.elements.clone(), d.multi_line),
@@ -671,7 +671,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_object_literal_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_object_literal_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_object_literal_expression"); 
         let state = self.enter_node(node);
         let (properties, multi_line) = match &node.data {
             NodeData::ObjectLiteralExpression(d) => (d.properties.clone(), d.multi_line),
@@ -694,7 +694,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_object_literal_element22(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_object_literal_element22(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_object_literal_element22"); 
         match node.kind {
             SyntaxKind::PropertyAssignment => {
                 let (name, initializer) = match &node.data {
@@ -731,7 +731,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn may_need_dot_dot_for_property_access(&mut self, expression: &Arc<Node>) -> bool {
+    pub(crate) fn may_need_dot_dot_for_property_access(&mut self, expression: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("may_need_dot_dot_for_property_access"); 
         let expression = skip_partially_emitted_expressions(expression);
         if let NodeData::NumericLiteral(d) = &expression.data {
             let text = self.get_literal_text_of_node(
@@ -747,7 +747,7 @@ impl Printer {
         false
     }
 
-    pub(crate) fn emit_property_access_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_property_access_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_property_access_expression"); 
         let state = self.enter_node(node);
         let data = match &node.data {
             NodeData::PropertyAccessExpression(d) => PropertyAccessExpressionData {
@@ -805,7 +805,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_member_name22(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_member_name22(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_member_name22"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node),
             SyntaxKind::PrivateIdentifier => self.emit_private_identifier(node),
@@ -813,7 +813,7 @@ impl Printer {
         }
     }
 
-    fn is_new_expression_without_arguments(node: &Arc<Node>) -> bool {
+    fn is_new_expression_without_arguments(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_new_expression_without_arguments"); 
         node.kind == SyntaxKind::NewExpression
             && match &node.data {
                 NodeData::NewExpression(d) => d
@@ -825,7 +825,7 @@ impl Printer {
             }
     }
 
-    pub(crate) fn emit_callee(&mut self, callee: &Arc<Node>, parent_node: &Arc<Node>) {
+    pub(crate) fn emit_callee(&mut self, callee: &Arc<Node>, parent_node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_callee"); 
         if self
             .emit_context
             .emit_flags(parent_node)
@@ -851,7 +851,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_call_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_call_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_call_expression"); 
         let state = self.enter_node(node);
         let (expression, question_dot_token, type_arguments, arguments) = match &node.data {
             NodeData::CallExpression(d) => (
@@ -869,7 +869,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_new_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_new_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_new_expression"); 
         let state = self.enter_node(node);
         let (expression, type_arguments, arguments) = match &node.data {
             NodeData::NewExpression(d) => (
@@ -897,7 +897,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_tagged_template_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_tagged_template_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_tagged_template_expression"); 
         let state = self.enter_node(node);
         let (tag, type_arguments, template) = match &node.data {
             NodeData::TaggedTemplateExpression(d) => {
@@ -918,7 +918,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_type_assertion_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_type_assertion_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_type_assertion_expression"); 
         let state = self.enter_node(node);
         let (type_node, expression) = match &node.data {
             NodeData::TypeAssertion(d) => (d.type_node.clone(), d.expression.clone()),
@@ -931,7 +931,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_parenthesized_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_parenthesized_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_parenthesized_expression"); 
         let state = self.enter_node(node);
         let expression = match &node.data {
             NodeData::ParenthesizedExpression(d) => d.expression.clone(),
@@ -957,7 +957,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_conditional_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_conditional_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_conditional_expression"); 
         let state = self.enter_node(node);
         let (condition, question_token, when_true, colon_token, when_false) = match &node.data {
             NodeData::ConditionalExpression(d) => (
@@ -997,7 +997,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_template_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_template_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_template_expression"); 
         let state = self.enter_node(node);
         let (head, template_spans) = match &node.data {
             NodeData::TemplateExpression(d) => (d.head.clone(), d.template_spans.clone()),
@@ -1013,13 +1013,13 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_template_head22(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_template_head22(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_template_head22"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GET_LITERAL_TEXT_FLAGS_NONE);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_template_span_node22(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_template_span_node22(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_template_span_node22"); 
         let state = self.enter_node(node);
         let (expression, literal) = match &node.data {
             NodeData::TemplateSpan(d) => (d.expression.clone(), d.literal.clone()),
@@ -1037,7 +1037,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_partially_emitted_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_partially_emitted_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_partially_emitted_expression"); 
         let mut stack: Vec<(Arc<Node>, crate::mig::m4p_3::PrinterState)> = Vec::new();
         let mut node = node.clone();
         loop {
@@ -1078,7 +1078,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_variable_declaration_list(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_variable_declaration_list(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_variable_declaration_list"); 
         let state = self.enter_node(node);
         let declarations = match &node.data {
             NodeData::VariableDeclarationList(d) => d.declarations.clone(),
@@ -1107,7 +1107,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_variable_declaration_node22(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_variable_declaration_node22(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_variable_declaration_node22"); 
         let state = self.enter_node(node);
         let (name, exclamation_token, type_node, initializer) = match &node.data {
             NodeData::VariableDeclaration(d) => (
@@ -1128,7 +1128,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_binding_name22(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_binding_name22(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_binding_name22"); 
         match node.kind {
             SyntaxKind::Identifier => {
                 let state = self.enter_node(node);
@@ -1156,7 +1156,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_binding_element_node22(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_binding_element_node22(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_binding_element_node22"); 
         let state = self.enter_node(node);
         let (dot_dot_dot_token, property_name, name, initializer) = match &node.data {
             NodeData::BindingElement(d) => (
@@ -1182,7 +1182,7 @@ impl Printer {
     }
 }
 
-fn should_allow_trailing_comma_worker22(node: &Arc<Node>, list: &Arc<NodeList>) -> bool {
+fn should_allow_trailing_comma_worker22(node: &Arc<Node>, list: &Arc<NodeList>) -> bool { ::tsox_core::fntrace::enter("should_allow_trailing_comma_worker22"); 
     use SyntaxKind as K;
     match node.kind {
         K::ObjectLiteralExpression => true,

@@ -35,7 +35,7 @@ impl LanguageService {
         program: Arc<tsox_compile::compiler::Program>,
         host: Box<dyn Host>,
         active_file: &str,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         let converters = host.converters();
         let active_config = host.get_preferences(active_file);
         LanguageService {
@@ -48,19 +48,19 @@ impl LanguageService {
         }
     }
 
-    pub fn to_path(&self, file_name: &str) -> tsox_core::tspath::Path {
+    pub fn to_path(&self, file_name: &str) -> tsox_core::tspath::Path { ::tsox_core::fntrace::enter("to_path"); 
         tsox_core::tspath::to_path(file_name, "", self.use_case_sensitive_file_names())
     }
 
-    pub fn get_program(&self) -> Arc<tsox_compile::compiler::Program> {
+    pub fn get_program(&self) -> Arc<tsox_compile::compiler::Program> { ::tsox_core::fntrace::enter("get_program"); 
         Arc::clone(&self.program)
     }
 
-    pub fn user_preferences(&self) -> &UserPreferences {
+    pub fn user_preferences(&self) -> &UserPreferences { ::tsox_core::fntrace::enter("user_preferences"); 
         &self.active_config
     }
 
-    pub fn format_options(&self) -> &FormatCodeSettings {
+    pub fn format_options(&self) -> &FormatCodeSettings { ::tsox_core::fntrace::enter("format_options"); 
         &self.active_config.format_code_settings
     }
 
@@ -70,7 +70,7 @@ impl LanguageService {
     ) -> (
         Arc<tsox_compile::compiler::Program>,
         Option<Arc<SourceFile>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("try_get_program_and_file"); 
         let program = self.get_program();
         let file = program.get_source_file(file_name);
         (program, file)
@@ -79,7 +79,7 @@ impl LanguageService {
     pub fn get_program_and_file(
         &self,
         document_uri: &DocumentUri,
-    ) -> (Arc<tsox_compile::compiler::Program>, Arc<SourceFile>) {
+    ) -> (Arc<tsox_compile::compiler::Program>, Arc<SourceFile>) { ::tsox_core::fntrace::enter("get_program_and_file"); 
         let file_name = document_uri.file_name();
         let (program, file) = self.try_get_program_and_file(&file_name);
         let file = file.unwrap_or_else(|| panic!("file not found: {file_name}"));
@@ -89,23 +89,23 @@ impl LanguageService {
     pub fn get_document_position_mapper(
         &self,
         _file_name: &str,
-    ) -> Option<&DocumentPositionMapper> {
+    ) -> Option<&DocumentPositionMapper> { ::tsox_core::fntrace::enter("get_document_position_mapper"); 
         None
     }
 
-    pub fn read_file(&self, file_name: &str) -> Option<String> {
+    pub fn read_file(&self, file_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.host.read_file(file_name)
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.host.use_case_sensitive_file_names()
     }
 
-    pub fn get_ecma_line_info(&self, file_name: &str) -> Option<EcmaLineInfo> {
+    pub fn get_ecma_line_info(&self, file_name: &str) -> Option<EcmaLineInfo> { ::tsox_core::fntrace::enter("get_ecma_line_info"); 
         self.host.get_ecma_line_info(file_name)
     }
 
-    pub fn get_auto_import_registry(&self) -> AutoImportRegistry {
+    pub fn get_auto_import_registry(&self) -> AutoImportRegistry { ::tsox_core::fntrace::enter("get_auto_import_registry"); 
         self.host.auto_import_registry()
     }
 
@@ -114,7 +114,7 @@ impl LanguageService {
         pos: usize,
         end: usize,
         script: &dyn crate::ls::lsconv_converters::Script,
-    ) -> crate::lsp::lsproto_lsp::Range {
+    ) -> crate::lsp::lsproto_lsp::Range { ::tsox_core::fntrace::enter("create_lsp_range_from_bounds"); 
         self.converters.to_lsp_range(script, pos, end)
     }
 
@@ -123,11 +123,11 @@ impl LanguageService {
         script: &dyn crate::ls::lsconv_converters::Script,
         pos: usize,
         end: usize,
-    ) -> Location {
+    ) -> Location { ::tsox_core::fntrace::enter("create_lsp_location_from_bounds"); 
         self.converters.to_lsp_location(script, pos, end)
     }
 
-    pub fn directory_exists(&self, path: &str) -> bool {
+    pub fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.host.directory_exists(path)
     }
 
@@ -136,12 +136,12 @@ impl LanguageService {
         path: &str,
         extensions: &[String],
         includes: &[String],
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("read_directory"); 
         self.host
             .read_directory("", path, extensions, &[], includes, -1)
     }
 
-    pub fn get_directories(&self, path: &str) -> Vec<String> {
+    pub fn get_directories(&self, path: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_directories"); 
         self.host.get_directories(path)
     }
 }
@@ -152,10 +152,10 @@ pub struct ScriptInfo {
 }
 
 impl crate::ls::lsconv_converters::Script for ScriptInfo {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 }

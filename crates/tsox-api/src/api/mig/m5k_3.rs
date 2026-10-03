@@ -19,13 +19,13 @@ pub struct DocumentIdentifier {
 }
 
 impl std::fmt::Display for DocumentIdentifier {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(f, "{}", self.to_string_value())
     }
 }
 
 impl DocumentIdentifier {
-    pub fn unmarshal_json_from(value: &JsonValue) -> Result<DocumentIdentifier, String> {
+    pub fn unmarshal_json_from(value: &JsonValue) -> Result<DocumentIdentifier, String> { ::tsox_core::fntrace::enter("unmarshal_json_from"); 
         match value {
             JsonValue::String(s) => Ok(DocumentIdentifier {
                 file_name: s.clone(),
@@ -51,7 +51,7 @@ impl DocumentIdentifier {
         }
     }
 
-    pub fn to_file_name(&self) -> String {
+    pub fn to_file_name(&self) -> String { ::tsox_core::fntrace::enter("to_file_name"); 
         if !self.uri.is_empty() {
             return tsox_lsp::mig::m5m::document_uri_file_name(
                 &tsox_lsp::lsp::lsproto::DocumentUri(self.uri.clone()),
@@ -60,7 +60,7 @@ impl DocumentIdentifier {
         self.file_name.clone()
     }
 
-    pub fn to_uri(&self, cwd: &str) -> String {
+    pub fn to_uri(&self, cwd: &str) -> String { ::tsox_core::fntrace::enter("to_uri"); 
         if !self.uri.is_empty() {
             return self.uri.clone();
         }
@@ -68,7 +68,7 @@ impl DocumentIdentifier {
         tsox_lsp::ls::lsconv_converters::file_name_to_document_uri(&absolute)
     }
 
-    pub fn to_absolute_file_name(&self, cwd: &str) -> String {
+    pub fn to_absolute_file_name(&self, cwd: &str) -> String { ::tsox_core::fntrace::enter("to_absolute_file_name"); 
         if !self.uri.is_empty() {
             return tsox_lsp::mig::m5m::document_uri_file_name(
                 &tsox_lsp::lsp::lsproto::DocumentUri(self.uri.clone()),
@@ -77,7 +77,7 @@ impl DocumentIdentifier {
         tsox_core::tspath::get_normalized_absolute_path(&self.file_name, cwd)
     }
 
-    pub fn to_string_value(&self) -> String {
+    pub fn to_string_value(&self) -> String { ::tsox_core::fntrace::enter("to_string_value"); 
         if !self.uri.is_empty() {
             return self.uri.clone();
         }
@@ -85,29 +85,29 @@ impl DocumentIdentifier {
     }
 }
 
-pub fn project_handle(p: &tsox_lsp::project::project::Project) -> ProjectId {
+pub fn project_handle(p: &tsox_lsp::project::project::Project) -> ProjectId { ::tsox_core::fntrace::enter("project_handle"); 
     p.id().0.clone()
 }
 
-pub fn symbol_handle(symbol: &Arc<tsox_frontend::ast::Symbol>) -> SymbolId {
+pub fn symbol_handle(symbol: &Arc<tsox_frontend::ast::Symbol>) -> SymbolId { ::tsox_core::fntrace::enter("symbol_handle"); 
     tsox_frontend::ast::mig::m3f::get_symbol_id(symbol) as u32
 }
 
-pub fn type_handle(t: &tsox_checker::checker::Type) -> TypeId {
+pub fn type_handle(t: &tsox_checker::checker::Type) -> TypeId { ::tsox_core::fntrace::enter("type_handle"); 
     t.id()
 }
 
-pub fn signature_handle(sig: &tsox_checker::checker::Signature) -> SignatureId {
+pub fn signature_handle(sig: &tsox_checker::checker::Signature) -> SignatureId { ::tsox_core::fntrace::enter("signature_handle"); 
     sig.id()
 }
 
-pub fn parse_project_handle(handle: &ProjectId) -> tsox_core::tspath::Path {
+pub fn parse_project_handle(handle: &ProjectId) -> tsox_core::tspath::Path { ::tsox_core::fntrace::enter("parse_project_handle"); 
     tsox_core::tspath::Path(handle.clone())
 }
 
 pub fn new_config_file_response(
     parsed_command_line: Option<&tsox_tsoptions::tsoptions::ParsedCommandLine>,
-) -> Option<ConfigFileResponse> {
+) -> Option<ConfigFileResponse> { ::tsox_core::fntrace::enter("new_config_file_response"); 
     let parsed_command_line = parsed_command_line?;
     let mut compile_on_save = parsed_command_line.compile_on_save.clone();
     if compile_on_save.is_none() {
@@ -148,7 +148,7 @@ pub struct ConfigFileResponse {
     pub errors: Vec<DiagnosticResponse>,
 }
 
-pub fn to_protocol_json_value(value: JsonValue) -> JsonValue {
+pub fn to_protocol_json_value(value: JsonValue) -> JsonValue { ::tsox_core::fntrace::enter("to_protocol_json_value"); 
     match value {
         JsonValue::Array(items) => JsonValue::Array(
             items
@@ -168,11 +168,11 @@ pub fn to_protocol_json_value(value: JsonValue) -> JsonValue {
     }
 }
 
-fn is_watch_or_polling_enum_value(n: &serde_json::Number) -> bool {
+fn is_watch_or_polling_enum_value(n: &serde_json::Number) -> bool { ::tsox_core::fntrace::enter("is_watch_or_polling_enum_value"); 
     false
 }
 
-pub fn new_project_response(p: Option<&tsox_lsp::project::project::Project>) -> ProjectResponse {
+pub fn new_project_response(p: Option<&tsox_lsp::project::project::Project>) -> ProjectResponse { ::tsox_core::fntrace::enter("new_project_response"); 
     let p = p.expect("NewProjectResponse called with unloaded project");
     let command_line = p
         .command_line
@@ -198,21 +198,21 @@ pub struct ProjectResponse {
     pub compiler_options: tsox_core::core::compiler_options::CompilerOptions,
 }
 
-pub fn symbol_handles(symbols: &[Arc<tsox_frontend::ast::Symbol>]) -> Option<Vec<SymbolId>> {
+pub fn symbol_handles(symbols: &[Arc<tsox_frontend::ast::Symbol>]) -> Option<Vec<SymbolId>> { ::tsox_core::fntrace::enter("symbol_handles"); 
     if symbols.is_empty() {
         return None;
     }
     Some(symbols.iter().map(symbol_handle).collect())
 }
 
-pub fn type_handles(types: &[tsox_checker::checker::Type]) -> Option<Vec<TypeId>> {
+pub fn type_handles(types: &[tsox_checker::checker::Type]) -> Option<Vec<TypeId>> { ::tsox_core::fntrace::enter("type_handles"); 
     if types.is_empty() {
         return None;
     }
     Some(types.iter().map(type_handle).collect())
 }
 
-pub fn literal_value_to_json(value: LiteralValue) -> JsonValue {
+pub fn literal_value_to_json(value: LiteralValue) -> JsonValue { ::tsox_core::fntrace::enter("literal_value_to_json"); 
     match value {
         LiteralValue::String(v) => JsonValue::String(v),
         LiteralValue::Number(v) => JsonValue::from(v),
@@ -228,7 +228,7 @@ pub enum LiteralValue {
     PseudoBigInt(tsox_core::jsnum::PseudoBigInt),
 }
 
-pub fn json_value_to_any(value: &JsonValue) -> JsonValue {
+pub fn json_value_to_any(value: &JsonValue) -> JsonValue { ::tsox_core::fntrace::enter("json_value_to_any"); 
     match value {
         JsonValue::Null => JsonValue::Null,
         JsonValue::String(s) => JsonValue::String(s.clone()),
@@ -245,20 +245,20 @@ pub fn json_value_to_any(value: &JsonValue) -> JsonValue {
     }
 }
 
-pub fn unmarshal_payload(method: &str, payload: &JsonValue) -> Result<JsonValue, String> {
+pub fn unmarshal_payload(method: &str, payload: &JsonValue) -> Result<JsonValue, String> { ::tsox_core::fntrace::enter("unmarshal_payload"); 
     let unmarshaler = unmarshalers(method)
         .ok_or_else(|| format!("unknown API method {:?}", method))?;
     unmarshaler(payload)
 }
 
-fn unmarshalers(method: &str) -> Option<fn(&JsonValue) -> Result<JsonValue, String>> {
+fn unmarshalers(method: &str) -> Option<fn(&JsonValue) -> Result<JsonValue, String>> { ::tsox_core::fntrace::enter("unmarshalers"); 
     let _ = method;
     None
 }
 
 pub fn unmarshaller_for<T: serde::de::DeserializeOwned + serde::Serialize>(
     data: &JsonValue,
-) -> Result<JsonValue, String> {
+) -> Result<JsonValue, String> { ::tsox_core::fntrace::enter("unmarshaller_for"); 
     serde_json::from_value::<T>(data.clone())
         .map(|v| serde_json::to_value(v).unwrap_or(JsonValue::Null))
         .map_err(|e| {
@@ -270,6 +270,6 @@ pub fn unmarshaller_for<T: serde::de::DeserializeOwned + serde::Serialize>(
         })
 }
 
-pub fn no_params(_data: &JsonValue) -> Result<JsonValue, String> {
+pub fn no_params(_data: &JsonValue) -> Result<JsonValue, String> { ::tsox_core::fntrace::enter("no_params"); 
     Ok(JsonValue::Null)
 }

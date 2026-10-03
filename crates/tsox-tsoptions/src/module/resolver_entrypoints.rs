@@ -14,7 +14,7 @@ impl Resolver {
         package_json: &InfoCacheEntry,
         package_name: &str,
         enable_directory_search: bool,
-    ) -> Option<Vec<Arc<ResolvedEntrypoint>>> {
+    ) -> Option<Vec<Arc<ResolvedEntrypoint>>> { ::tsox_core::fntrace::enter("get_entrypoints_from_package_json_info"); 
         let extensions = Extensions::TYPESCRIPT.union(Extensions::DECLARATION);
         let features = NodeResolutionFeatures::ALL;
         let mut state = ResolutionState {
@@ -117,7 +117,7 @@ impl Resolver {
         include_conditions: Vec<String>,
         exclude_conditions: Vec<String>,
         ending: Ending,
-    ) -> ResolvedEntrypoint {
+    ) -> ResolvedEntrypoint { ::tsox_core::fntrace::enter("create_resolved_entrypoint_handling_symlink"); 
         let mut original_file_name = String::new();
         let mut resolved_file_name = file_name.to_string();
         let real_path = self.host.fs().realpath(file_name);

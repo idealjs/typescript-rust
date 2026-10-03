@@ -19,7 +19,7 @@ pub fn get_argument_index(
     arguments: &Arc<NodeList>,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_index"); 
     let tokens = super::m5w::get_token_from_node_list(
         Some(arguments),
         node.parent().as_ref(),
@@ -33,7 +33,7 @@ pub fn get_argument_count(
     arguments: &Arc<NodeList>,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_count"); 
     let tokens = super::m5w::get_token_from_node_list(
         Some(arguments),
         node.parent().as_ref(),
@@ -46,7 +46,7 @@ pub fn get_argument_index_or_count(
     arguments: &[Arc<Node>],
     node: Option<&Arc<Node>>,
     c: &mut Checker,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_index_or_count"); 
     let mut argument_index = 0usize;
     let mut skip_comma = false;
     for arg in arguments {
@@ -90,7 +90,7 @@ pub fn get_argument_or_parameter_list_info(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> Option<M5wArgumentOrParameterListInfo> {
+) -> Option<M5wArgumentOrParameterListInfo> { ::tsox_core::fntrace::enter("get_argument_or_parameter_list_info"); 
     let info = get_argument_or_parameter_list_and_index(node, source_file, c)?;
     let list = info.list.clone();
     let argument_index = info.argument_index;
@@ -108,7 +108,7 @@ pub fn get_applicable_span_for_arguments(
     argument_list: Option<&Arc<NodeList>>,
     node: Option<&Arc<Node>>,
     source_file: &Arc<SourceFile>,
-) -> TextRange {
+) -> TextRange { ::tsox_core::fntrace::enter("get_applicable_span_for_arguments"); 
     if argument_list.is_none() {
         if let Some(node) = node {
             let span_start = node.end();
@@ -126,7 +126,7 @@ pub fn get_applicable_span_for_arguments(
     TextRange::new(applicable_span_start, applicable_span_end)
 }
 
-pub fn ensure_minimum_span_size(start: usize, end: usize) -> usize {
+pub fn ensure_minimum_span_size(start: usize, end: usize) -> usize { ::tsox_core::fntrace::enter("ensure_minimum_span_size"); 
     if end <= start {
         return start + 1;
     }
@@ -137,7 +137,7 @@ pub fn get_argument_or_parameter_list_and_index(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> Option<M5wArgumentOrParameterListAndIndex> {
+) -> Option<M5wArgumentOrParameterListAndIndex> { ::tsox_core::fntrace::enter("get_argument_or_parameter_list_and_index"); 
     if node.kind == SyntaxKind::LessThanToken || node.kind == SyntaxKind::OpenParenToken {
         let parent = node.parent()?;
         let list = get_child_list_that_starts_with_opener_token(&parent, node)?;
@@ -157,7 +157,7 @@ pub fn get_argument_or_parameter_list_and_index(
 pub fn get_child_list_that_starts_with_opener_token(
     parent: &Arc<Node>,
     opener_token: &Arc<Node>,
-) -> Option<Arc<NodeList>> {
+) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("get_child_list_that_starts_with_opener_token"); 
     match &parent.data {
         NodeData::CallExpression(d) => {
             if opener_token.kind == SyntaxKind::LessThanToken {
@@ -180,7 +180,7 @@ pub fn get_child_list_that_starts_with_opener_token(
 pub fn find_containing_list(
     node: &Arc<Node>,
     _file: &Arc<SourceFile>,
-) -> Option<Arc<NodeList>> {
+) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("find_containing_list"); 
     let parent = node.parent()?;
     let list_contains_node = |list: &Option<Arc<NodeList>>| -> Option<Arc<NodeList>> {
         let list = list.as_ref()?;
@@ -199,7 +199,7 @@ pub fn find_containing_list(
     }
 }
 
-pub fn get_adjusted_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_adjusted_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_adjusted_node"); 
     match node.kind {
         SyntaxKind::OpenParenToken | SyntaxKind::CommaToken => Some(node.clone()),
         _ => {
@@ -219,7 +219,7 @@ pub fn try_get_parameter_info(
     starting_token: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> Option<M5wArgumentListInfo> {
+) -> Option<M5wArgumentListInfo> { ::tsox_core::fntrace::enter("try_get_parameter_info"); 
     let node = get_adjusted_node(starting_token)?;
     let info = get_contextual_signature_location_info(&node, source_file, c)?;
 
@@ -249,7 +249,7 @@ pub fn try_get_parameter_info(
     })
 }
 
-pub fn choose_better_symbol(s: &Arc<Symbol>) -> Arc<Symbol> {
+pub fn choose_better_symbol(s: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("choose_better_symbol"); 
     if s.name == ast::INTERNAL_SYMBOL_NAME_TYPE {
         for d in &s.declarations {
             if ast::is_function_type_node(d) {
@@ -271,7 +271,7 @@ pub fn get_contextual_signature_location_info(
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> Option<M5wContextualSignatureLocationInfo> {
+) -> Option<M5wContextualSignatureLocationInfo> { ::tsox_core::fntrace::enter("get_contextual_signature_location_info"); 
     let parent = node.parent()?;
     match parent.kind {
         SyntaxKind::ParenthesizedExpression
@@ -314,7 +314,7 @@ pub fn get_contextual_signature_location_info(
     }
 }
 
-pub fn count_binary_expression_parameters(b: &Arc<Node>) -> usize {
+pub fn count_binary_expression_parameters(b: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("count_binary_expression_parameters"); 
     if let NodeData::BinaryExpression(d) = &b.data {
         if let NodeData::BinaryExpression(_) = &d.left.data {
             return count_binary_expression_parameters(&d.left) + 1;
@@ -327,7 +327,7 @@ pub fn is_inside_template_literal(
     node: &Arc<Node>,
     position: usize,
     source_file: &Arc<SourceFile>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_inside_template_literal"); 
     tsox_frontend::ast::mig::m3g_2::is_template_literal_kind(node.kind)
         && (tsox_frontend::scanner::mig::x5a::get_token_pos_of_node(node, source_file, false)
             < position
@@ -335,7 +335,7 @@ pub fn is_inside_template_literal(
             || (is_unterminated_literal(node) && position == node.end()))
 }
 
-pub fn is_unterminated_literal(node: &Arc<Node>) -> bool {
+pub fn is_unterminated_literal(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_unterminated_literal"); 
     let text = ast::node_text(node);
     match text.chars().last() {
         Some(last) => {
@@ -356,7 +356,7 @@ pub fn get_immediately_containing_argument_info(
     position: usize,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> Option<M5wArgumentListInfo> {
+) -> Option<M5wArgumentListInfo> { ::tsox_core::fntrace::enter("get_immediately_containing_argument_info"); 
     let parent = node.parent()?;
     if tsox_frontend::ast::mig::m3f_4::is_call_or_new_expression(&parent) {
         let info = get_argument_or_parameter_list_info(node, source_file, c)?;
@@ -465,11 +465,11 @@ pub fn get_immediately_containing_argument_info(
     None
 }
 
-pub fn node_as_identifier(node: &Arc<Node>) -> Arc<Node> {
+pub fn node_as_identifier(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("node_as_identifier"); 
     Arc::clone(node)
 }
 
-pub fn jsx_opening_element_attributes(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn jsx_opening_element_attributes(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("jsx_opening_element_attributes"); 
     match &node.data {
         NodeData::JsxOpeningElement(d) => Some(d.attributes.clone()),
         NodeData::JsxSelfClosingElement(d) => Some(d.attributes.clone()),
@@ -477,21 +477,21 @@ pub fn jsx_opening_element_attributes(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn template_expression_template_spans(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+pub fn template_expression_template_spans(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("template_expression_template_spans"); 
     match &node.data {
         NodeData::TemplateExpression(d) => Some(d.template_spans.clone()),
         _ => None,
     }
 }
 
-pub fn template_span_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn template_span_literal(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("template_span_literal"); 
     match &node.data {
         NodeData::TemplateSpan(d) => Some(d.literal.clone()),
         _ => None,
     }
 }
 
-pub fn tagged_template_expression_template(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn tagged_template_expression_template(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("tagged_template_expression_template"); 
     match &node.data {
         NodeData::TaggedTemplateExpression(d) => Some(d.template.clone()),
         _ => None,
@@ -503,7 +503,7 @@ pub fn get_argument_index_for_template_piece(
     node: &Arc<Node>,
     position: usize,
     source_file: &Arc<SourceFile>,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_index_for_template_piece"); 
     if tsox_frontend::ast::mig::m3g_2::is_template_literal_token(node) {
         if is_inside_template_literal(node, position, source_file) {
             return 0;
@@ -517,7 +517,7 @@ pub fn get_argument_list_info_for_template(
     tag_expression: &Arc<Node>,
     argument_index: usize,
     source_file: &Arc<SourceFile>,
-) -> Option<M5wArgumentListInfo> {
+) -> Option<M5wArgumentListInfo> { ::tsox_core::fntrace::enter("get_argument_list_info_for_template"); 
     let template = tagged_template_expression_template(tag_expression)?;
     let argument_count = if ast::is_no_substitution_template_literal(&template) {
         1
@@ -541,7 +541,7 @@ pub fn get_argument_list_info_for_template(
 pub fn get_applicable_range_for_tagged_template(
     tagged_template: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> TextRange {
+) -> TextRange { ::tsox_core::fntrace::enter("get_applicable_range_for_tagged_template"); 
     let template = tagged_template_expression_template(tagged_template).unwrap();
     let applicable_span_start =
         tsox_frontend::scanner::mig::x5a::get_token_pos_of_node(&template, source_file, false);

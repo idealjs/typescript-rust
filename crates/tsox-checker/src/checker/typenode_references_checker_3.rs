@@ -3,7 +3,7 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn resolve_alias_body(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn resolve_alias_body(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_alias_body"); 
         for decl in &symbol.declarations {
             if let NodeData::TypeAliasDeclaration(data) = &decl.data {
                 // body 按别名声明的词法作用域解析（Go 节点级查找）；
@@ -38,7 +38,7 @@ impl Checker {
     pub(crate) fn collect_alias_type_params_and_body(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> (Vec<Arc<Symbol>>, Arc<Node>) {
+    ) -> (Vec<Arc<Symbol>>, Arc<Node>) { ::tsox_core::fntrace::enter("collect_alias_type_params_and_body"); 
         let mut tp_symbols = Vec::new();
         let mut type_node = None;
         for decl in &symbol.declarations {
@@ -64,7 +64,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_interface_type"); 
         let arg_types = type_arguments.map(|nodes| {
             nodes
                 .iter()
@@ -79,7 +79,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         tp_symbols: &[Arc<Symbol>],
         provided: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("alias_missing_default_type_arguments"); 
         if provided.len() >= tp_symbols.len() {
             return Vec::new();
         }
@@ -129,7 +129,7 @@ impl Checker {
         &mut self,
         base_tps: &[Arc<Symbol>],
         provided: &[Arc<Node>],
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("instantiate_heritage_type_arguments"); 
         if provided.len() > base_tps.len() {
             return None;
         }

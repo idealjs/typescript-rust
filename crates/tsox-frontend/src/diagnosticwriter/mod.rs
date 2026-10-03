@@ -6,7 +6,7 @@ pub(crate) use crate::ast::{LineMap, SourceFile, utf16_len};
 pub(crate) use tsox_core::diagnostics::Category;
 pub(crate) use tsox_core::locale::Locale;
 
-pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usize, usize) {
+pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usize, usize) { ::tsox_core::fntrace::enter("line_and_character"); 
     let starts = &line_map.line_starts;
     if starts.is_empty() {
         return (0, 0);
@@ -38,7 +38,7 @@ pub fn line_and_character(line_map: &LineMap, text: &str, offset: usize) -> (usi
     (line, col)
 }
 
-pub fn format_diagnostic_compact(diag: &Diagnostic, locale: Option<&Locale>) -> String {
+pub fn format_diagnostic_compact(diag: &Diagnostic, locale: Option<&Locale>) -> String { ::tsox_core::fntrace::enter("format_diagnostic_compact"); 
     let mut out = String::new();
     if let Some(file) = &diag.file {
         let (line, col) = line_and_character(&file.line_map, &file.text, diag.loc.pos());
@@ -49,7 +49,7 @@ pub fn format_diagnostic_compact(diag: &Diagnostic, locale: Option<&Locale>) -> 
     out
 }
 
-pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> String {
+pub fn format_diagnostic_pretty(diag: &Diagnostic, locale: Option<&Locale>) -> String { ::tsox_core::fntrace::enter("format_diagnostic_pretty"); 
     let cat_color = match diag.category {
         Category::Error => "91",
         Category::Warning => "93",
@@ -105,7 +105,7 @@ pub(crate) fn pretty_code_frame(
     len: usize,
     squiggle_color: &str,
     indent: usize,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("pretty_code_frame"); 
     let text = &file.text;
     let (line, col) = line_and_character(&file.line_map, text, pos);
     let line_start = file.line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
@@ -134,11 +134,11 @@ pub(crate) fn pretty_code_frame(
     out
 }
 
-pub fn message_text(diag: &Diagnostic, locale: Option<&Locale>) -> String {
+pub fn message_text(diag: &Diagnostic, locale: Option<&Locale>) -> String { ::tsox_core::fntrace::enter("message_text"); 
     message_text_ex(diag, locale, 0)
 }
 
-pub(crate) fn message_text_ex(diag: &Diagnostic, locale: Option<&Locale>, depth: usize) -> String {
+pub(crate) fn message_text_ex(diag: &Diagnostic, locale: Option<&Locale>, depth: usize) -> String { ::tsox_core::fntrace::enter("message_text_ex"); 
     let mut out = match &diag.message {
         Some(msg) => {
             let args: Vec<&str> = diag.message_args.iter().map(|s| s.as_str()).collect();
@@ -157,7 +157,7 @@ pub(crate) fn message_text_ex(diag: &Diagnostic, locale: Option<&Locale>, depth:
     out
 }
 
-pub(crate) fn code_snippet(file: &SourceFile, pos: usize, len: usize) -> String {
+pub(crate) fn code_snippet(file: &SourceFile, pos: usize, len: usize) -> String { ::tsox_core::fntrace::enter("code_snippet"); 
     let text = &file.text;
     let (line, col) = line_and_character(&file.line_map, text, pos);
     let line_start = file.line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
@@ -175,7 +175,7 @@ pub(crate) fn code_snippet(file: &SourceFile, pos: usize, len: usize) -> String 
     out
 }
 
-pub fn format_diagnostic(diag: &Diagnostic, pretty: bool, locale: Option<&Locale>) -> String {
+pub fn format_diagnostic(diag: &Diagnostic, pretty: bool, locale: Option<&Locale>) -> String { ::tsox_core::fntrace::enter("format_diagnostic"); 
     if pretty {
         format_diagnostic_pretty(diag, locale)
     } else {
@@ -188,7 +188,7 @@ pub fn write_diagnostics<W: Write>(
     diags: &[Diagnostic],
     pretty: bool,
     locale: Option<&Locale>,
-) -> std::io::Result<()> {
+) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_diagnostics"); 
     for diag in diags {
         writeln!(writer, "{}", format_diagnostic(diag, pretty, locale))?;
     }
@@ -200,7 +200,7 @@ pub fn report_diagnostics<W: Write>(
     diags: &[Arc<Diagnostic>],
     pretty: bool,
     locale: Option<&Locale>,
-) -> std::io::Result<usize> {
+) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("report_diagnostics"); 
     let mut error_count = 0usize;
     for diag in diags {
         if diag.category == Category::Error {

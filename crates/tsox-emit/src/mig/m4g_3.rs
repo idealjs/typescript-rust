@@ -37,7 +37,7 @@ use tsox_frontend::ast::node::ModifierList;
 use tsox_frontend::ast::utilities::is_assignment_expression;
 use tsox_frontend::ast::is_computed_property_name;
 
-fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> {
+fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> { ::tsox_core::fntrace::enter("with_loc"); 
     if let Some(n) = Arc::get_mut(&mut node) {
         n.loc = loc;
     }
@@ -50,7 +50,7 @@ fn create_accessor_property_get_redirector_m4g3(
     modifiers: Option<Arc<ModifierList>>,
     name: &Arc<Node>,
     receiver: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_accessor_property_get_redirector_m4g3"); 
     let backing_field_name = factory.generated_name_node(
         &factory.new_generated_private_name_for_node_ex(
             node_name(node).expect("property declaration requires a name"),
@@ -87,7 +87,7 @@ fn create_accessor_property_set_redirector_m4g3(
     modifiers: Option<Arc<ModifierList>>,
     name: &Arc<Node>,
     receiver: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_accessor_property_set_redirector_m4g3"); 
     let backing_field_name = factory.generated_name_node(
         &factory.new_generated_private_name_for_node_ex(
             node_name(node).expect("property declaration requires a name"),
@@ -123,7 +123,7 @@ fn create_accessor_property_set_redirector_m4g3(
     factory.new_set_accessor_declaration(modifiers, name, None, parameters, None, None, body)
 }
 
-fn find_computed_property_name_cache_assignment_m4g3(name: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_computed_property_name_cache_assignment_m4g3(name: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_computed_property_name_cache_assignment_m4g3"); 
     let mut node = Arc::clone(name.expression().expect("computed property name requires expression"));
     loop {
         node = skip_outer_expressions(&node, OuterExpressionKinds::empty());
@@ -141,7 +141,7 @@ fn find_computed_property_name_cache_assignment_m4g3(name: &Arc<Node>) -> Option
     None
 }
 
-fn binary_operator_token_kind_m4g3(node: &Node) -> SyntaxKind {
+fn binary_operator_token_kind_m4g3(node: &Node) -> SyntaxKind { ::tsox_core::fntrace::enter("binary_operator_token_kind_m4g3"); 
     match &node.data {
         NodeData::BinaryExpression(d) => d.operator_token.kind,
         _ => panic!("expected BinaryExpression"),
@@ -149,7 +149,7 @@ fn binary_operator_token_kind_m4g3(node: &Node) -> SyntaxKind {
 }
 
 impl ClassFieldsTransformer {
-    pub fn visit_method_or_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_method_or_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_method_or_accessor_declaration"); 
         debug_assert!(!has_decorators(node));
 
         if !is_private_identifier_class_element_declaration(node)
@@ -197,7 +197,7 @@ impl ClassFieldsTransformer {
         None
     }
 
-    pub fn visit_function_expression_or_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_function_expression_or_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_function_expression_or_declaration"); 
         if self.current_class_element.is_some() {
             let original = self.emit_context().most_original(node);
             if !Arc::ptr_eq(&original, node) && self.current_class_container.is_some() {
@@ -215,7 +215,7 @@ impl ClassFieldsTransformer {
         result
     }
 
-    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_property_declaration"); 
         if is_auto_accessor_property_declaration(node)
             && (self.should_transform_auto_accessors_in_current_class()
                 || has_static_modifier(node)
@@ -226,7 +226,7 @@ impl ClassFieldsTransformer {
         self.transform_field_initializer(node)
     }
 
-    pub fn transform_auto_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_auto_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_auto_accessor"); 
         let emit_context = self.emit_context();
         let comment_range = emit_context.comment_range(node);
         let source_map_range = emit_context.source_map_range(node);
@@ -336,7 +336,7 @@ impl ClassFieldsTransformer {
         ]))
     }
 
-    pub fn transform_private_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_private_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_private_field_initializer"); 
         if self.should_transform_class_element_to_weak_map(node) {
             let info = self.access_private_identifier(node_name(node).unwrap());
             let info = info.expect("Undeclared private name for property declaration.");
@@ -399,7 +399,7 @@ impl ClassFieldsTransformer {
         ))
     }
 
-    pub fn transform_public_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_public_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_public_field_initializer"); 
         if self.should_transform_initializers && !is_auto_accessor_property_declaration(node) {
             let initializer_present = node_initializer(node).is_some();
             let expr = self.get_property_name_expression_if_needed(
@@ -444,7 +444,7 @@ impl ClassFieldsTransformer {
         ))
     }
 
-    pub fn visit_property_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_property_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_access_expression"); 
         if is_private_identifier(property_access_name(node)) {
             let info = self.access_private_identifier(property_access_name(node));
             if let Some(info) = info {
@@ -491,7 +491,7 @@ impl ClassFieldsTransformer {
     pub fn visit_property_access_expression_for_substitution(
         &mut self,
         node: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_access_expression_for_substitution"); 
         let expression = property_access_expression(node);
         let visited = self.visitor().visit_node(expression);
         if !Arc::ptr_eq(&visited, expression) {
@@ -506,7 +506,7 @@ impl ClassFieldsTransformer {
         node.clone()
     }
 
-    pub fn visit_element_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_element_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_element_access_expression"); 
         if self.should_transform_super_in_static_initializers
             && self.current_class_element.is_some()
             && is_super_property(node)

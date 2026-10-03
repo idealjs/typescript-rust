@@ -4,7 +4,7 @@ pub(crate) fn get_any_extension_from_path_worker(
     path: &str,
     extensions: &[&str],
     ignore_case: bool,
-) -> String {
+) -> String { crate::fntrace::enter("get_any_extension_from_path_worker"); 
     for extension in extensions {
         let result = try_get_extension_from_path(path, extension, ignore_case);
         if !result.is_empty() {
@@ -14,7 +14,7 @@ pub(crate) fn get_any_extension_from_path_worker(
     String::new()
 }
 
-fn try_get_extension_from_path(path: &str, extension: &str, ignore_case: bool) -> String {
+fn try_get_extension_from_path(path: &str, extension: &str, ignore_case: bool) -> String { crate::fntrace::enter("try_get_extension_from_path"); 
     let extension = if extension.starts_with('.') {
         extension.to_string()
     } else {

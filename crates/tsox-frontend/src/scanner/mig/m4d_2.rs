@@ -7,7 +7,7 @@ use crate::scanner::{
 use std::sync::Arc;
 use tsox_core::core::compiler_options::ScriptTarget;
 use tsox_core::core::text::TextRange;
-pub fn get_identifier_token(s: &str) -> SyntaxKind {
+pub fn get_identifier_token(s: &str) -> SyntaxKind { ::tsox_core::fntrace::enter("get_identifier_token"); 
     let bytes = s.as_bytes();
     if s.len() >= 2
         && s.len() <= 12
@@ -23,7 +23,7 @@ pub fn get_identifier_token(s: &str) -> SyntaxKind {
     SyntaxKind::Identifier
 }
 
-pub fn is_valid_identifier(s: &str) -> bool {
+pub fn is_valid_identifier(s: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_identifier"); 
     if s.is_empty() {
         return false;
     }
@@ -37,14 +37,14 @@ pub fn is_valid_identifier(s: &str) -> bool {
     true
 }
 
-pub fn is_identifier_part_ex(ch: char, language_variant: crate::ast::LanguageVariant) -> bool {
+pub fn is_identifier_part_ex(ch: char, language_variant: crate::ast::LanguageVariant) -> bool { ::tsox_core::fntrace::enter("is_identifier_part_ex"); 
     crate::scanner::regexp_reg_exp_flag_modifiers::is_word_character(ch)
         || ch == '$'
         || ch >= '\u{80}' && crate::scanner::is_unicode_identifier_part(ch)
         || language_variant == crate::ast::LanguageVariant::Jsx && ch == '-'
 }
 
-pub fn get_viable_keyword_suggestions() -> Vec<&'static str> {
+pub fn get_viable_keyword_suggestions() -> Vec<&'static str> { ::tsox_core::fntrace::enter("get_viable_keyword_suggestions"); 
     keywords()
         .keys()
         .filter(|text| text.len() > 2)
@@ -52,7 +52,7 @@ pub fn get_viable_keyword_suggestions() -> Vec<&'static str> {
         .collect()
 }
 
-pub fn could_start_trivia(text: &str, pos: usize) -> bool {
+pub fn could_start_trivia(text: &str, pos: usize) -> bool { ::tsox_core::fntrace::enter("could_start_trivia"); 
     let ch = text.as_bytes()[pos];
     match ch {
         b'\r' | b'\n' | b'\t' | 0x0B | 0x0C | b' ' | b'/' | b'<' | b'|' | b'=' | b'>' => true,
@@ -61,7 +61,7 @@ pub fn could_start_trivia(text: &str, pos: usize) -> bool {
     }
 }
 
-pub fn get_scanner_for_source_file(source_file: &SourceFile, pos: usize) -> Scanner {
+pub fn get_scanner_for_source_file(source_file: &SourceFile, pos: usize) -> Scanner { ::tsox_core::fntrace::enter("get_scanner_for_source_file"); 
     let mut s = Scanner::new(source_file.text.clone());
     s.pos = pos;
     s.end = s.text.len();
@@ -70,12 +70,12 @@ pub fn get_scanner_for_source_file(source_file: &SourceFile, pos: usize) -> Scan
     s
 }
 
-pub fn scan_token_at_position(source_file: &SourceFile, pos: usize) -> SyntaxKind {
+pub fn scan_token_at_position(source_file: &SourceFile, pos: usize) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_token_at_position"); 
     let s = get_scanner_for_source_file(source_file, pos);
     s.token
 }
 
-pub fn get_range_of_token_at_position(source_file: &SourceFile, pos: usize) -> TextRange {
+pub fn get_range_of_token_at_position(source_file: &SourceFile, pos: usize) -> TextRange { ::tsox_core::fntrace::enter("get_range_of_token_at_position"); 
     let s = get_scanner_for_source_file(source_file, pos);
     TextRange::new(s.token_pos, s.pos)
 }
@@ -83,7 +83,7 @@ pub fn get_range_of_token_at_position(source_file: &SourceFile, pos: usize) -> T
 pub(crate) fn get_error_range_for_arrow_function(
     source_file: &SourceFile,
     node: &Arc<Node>,
-) -> TextRange {
+) -> TextRange { ::tsox_core::fntrace::enter("get_error_range_for_arrow_function"); 
     let pos = crate::scanner::skip_trivia(&source_file.text, node.pos());
     let body = match &node.data {
         crate::ast::node_data_generated::NodeData::ArrowFunction(d) => Some(&d.body),
@@ -107,7 +107,7 @@ pub(crate) fn get_error_range_for_arrow_function(
 pub(crate) fn find_originating_jsdoc_satisfies_tag(
     source_file: &SourceFile,
     node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_originating_jsdoc_satisfies_tag"); 
     let target_type: &Arc<Node> = match &node.data {
         crate::ast::node_data_generated::NodeData::SatisfiesExpression(d) => &d.type_node,
         _ => return None,
@@ -152,7 +152,7 @@ pub(crate) fn find_originating_jsdoc_satisfies_tag(
     None
 }
 
-pub fn get_error_range_for_node(source_file: &SourceFile, node: &Arc<Node>) -> TextRange {
+pub fn get_error_range_for_node(source_file: &SourceFile, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("get_error_range_for_node"); 
     let mut error_node: Option<Arc<Node>> = Some(node.clone());
     match node.kind {
         SyntaxKind::SourceFile => {
@@ -255,7 +255,7 @@ pub fn get_error_range_for_node(source_file: &SourceFile, node: &Arc<Node>) -> T
 
 fn values_of_non_binary_unicode_properties(
     property_name: &str,
-) -> Option<std::collections::HashSet<&'static str>> {
+) -> Option<std::collections::HashSet<&'static str>> { ::tsox_core::fntrace::enter("values_of_non_binary_unicode_properties"); 
     use crate::scanner::unicode_properties_general_category_values::GENERAL_CATEGORY_VALUES;
     use crate::scanner::unicode_properties_script_values_script_values::SCRIPT_VALUES;
     match property_name {
@@ -266,7 +266,7 @@ fn values_of_non_binary_unicode_properties(
 }
 
 impl<'a> crate::scanner::regexp_reg_exp_flag_modifiers::RegExpParser<'a> {
-    pub(super) fn get_spelling_suggestion_for_unicode_property_name(&self, name: &str) -> String {
+    pub(super) fn get_spelling_suggestion_for_unicode_property_name(&self, name: &str) -> String { ::tsox_core::fntrace::enter("get_spelling_suggestion_for_unicode_property_name"); 
         use crate::scanner::unicode_properties_non_binary_unicode_properties::NON_BINARY_UNICODE_PROPERTIES;
         tsox_core::core::mig::m3j_2::get_spelling_suggestion_for_strings(
             name,
@@ -279,7 +279,7 @@ impl<'a> crate::scanner::regexp_reg_exp_flag_modifiers::RegExpParser<'a> {
         &self,
         property_name: &str,
         value: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_spelling_suggestion_for_unicode_property_value"); 
         let Some(values) = values_of_non_binary_unicode_properties(property_name) else {
             return String::new();
         };
@@ -293,7 +293,7 @@ impl<'a> crate::scanner::regexp_reg_exp_flag_modifiers::RegExpParser<'a> {
     pub(super) fn get_spelling_suggestion_for_unicode_property_name_or_value(
         &self,
         name: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_spelling_suggestion_for_unicode_property_name_or_value"); 
         use crate::scanner::unicode_properties_general_category_values::GENERAL_CATEGORY_VALUES;
         use crate::scanner::unicode_properties_non_binary_unicode_properties::{
             BINARY_UNICODE_PROPERTIES, BINARY_UNICODE_PROPERTIES_OF_STRINGS,

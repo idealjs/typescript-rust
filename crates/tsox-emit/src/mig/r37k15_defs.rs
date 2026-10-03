@@ -17,17 +17,17 @@ use crate::mig::m4p::{CommentState, Printer};
 use tsox_frontend::format::mig::m4t_3::range_is_on_single_line;
 
 impl Printer {
-    pub fn push_name_generation_scope(&mut self, _node: &Arc<Node>) {}
+    pub fn push_name_generation_scope(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_name_generation_scope"); }
 
-    pub fn pop_name_generation_scope(&mut self, _node: &Arc<Node>) {}
+    pub fn pop_name_generation_scope(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("pop_name_generation_scope"); }
 
-    pub fn generate_names(&mut self, _node: &Arc<Node>) {}
+    pub fn generate_names(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("generate_names"); }
 
-    pub fn generate_all_member_names(&mut self, _nodes: &Arc<NodeList>) {}
+    pub fn generate_all_member_names(&mut self, _nodes: &Arc<NodeList>) { ::tsox_core::fntrace::enter("generate_all_member_names"); }
 
-    pub fn generate_name_if_needed(&mut self, _name: Option<&Arc<Node>>) {}
+    pub fn generate_name_if_needed(&mut self, _name: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("generate_name_if_needed"); }
 
-    pub fn emit_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_statement"); 
         match node.kind {
             SyntaxKind::EmptyStatement => self.emit_empty_statement(node, false),
             SyntaxKind::ExpressionStatement => self.emit_expression_statement(node),
@@ -49,7 +49,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_prologue_directives(&mut self, statements: &Arc<NodeList>) -> i64 {
+    pub fn emit_prologue_directives(&mut self, statements: &Arc<NodeList>) -> i64 { ::tsox_core::fntrace::enter("emit_prologue_directives"); 
         for (i, statement) in statements.nodes.iter().enumerate() {
             if is_prologue_directive(statement) {
                 self.write_line();
@@ -68,7 +68,7 @@ impl Printer {
         write_kind: WriteKind,
         context_node: &Arc<Node>,
         flags: TokenEmitFlags,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("emit_token_ex"); 
         self.emit_token(token, pos, write_kind, context_node)
     }
 
@@ -77,7 +77,7 @@ impl Printer {
         node: &Arc<Node>,
         detached_range: TextRange,
         state: Option<CommentState>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_detached_comments_after_statement_list"); 
         let Some(state) = state else { return };
         let skip_trailing_comments = self.comments_disabled
             || position_is_synthesized(detached_range.end())
@@ -92,7 +92,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_trailing_comments(&mut self, pos: usize, separator: CommentSeparator) {
+    pub fn emit_trailing_comments(&mut self, pos: usize, separator: CommentSeparator) { ::tsox_core::fntrace::enter("emit_trailing_comments"); 
         if self.comments_disabled || self.current_source_file.is_none() {
             return;
         }
@@ -106,7 +106,7 @@ impl Printer {
         parent_node: &Arc<Node>,
         first_child: Option<&Arc<Node>>,
         format: ListFormat,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_leading_line_terminator_count"); 
         if format.intersects(ListFormat::PRESERVE_LINES) || self.options.preserve_source_newlines {
             if format.intersects(ListFormat::PREFER_NEW_LINE) {
                 return 1;
@@ -153,7 +153,7 @@ impl Printer {
         0
     }
 
-    pub fn should_emit_on_new_line(&self, node: &Arc<Node>, format: ListFormat) -> bool {
+    pub fn should_emit_on_new_line(&self, node: &Arc<Node>, format: ListFormat) -> bool { ::tsox_core::fntrace::enter("should_emit_on_new_line"); 
         if self
             .emit_context
             .emit_flags(node)
@@ -164,7 +164,7 @@ impl Printer {
         format.intersects(ListFormat::PREFER_NEW_LINE)
     }
 
-    pub fn should_emit_block_function_body_on_single_line(&self, body: &Arc<Node>) -> bool {
+    pub fn should_emit_block_function_body_on_single_line(&self, body: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_block_function_body_on_single_line"); 
         if self.should_emit_on_single_line(body) {
             return true;
         }
@@ -187,11 +187,11 @@ impl Printer {
         &mut self,
         parent_node: &Arc<Node>,
         parameters: &Arc<NodeList>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_parameters_for_index_signature"); 
         self.emit_parameters(parent_node, parameters);
     }
 
-    pub fn emit_accessor_declaration(&mut self, token: SyntaxKind, node: &Arc<Node>) {
+    pub fn emit_accessor_declaration(&mut self, token: SyntaxKind, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_accessor_declaration"); 
         let state = self.enter_node(node);
         let pos = greatest_modifier_end(node.pos(), node.modifiers());
         self.emit_token(token, pos, WriteKind::Keyword, node);
@@ -209,7 +209,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    fn emit_accessor_name(&mut self, name: &Arc<Node>) {
+    fn emit_accessor_name(&mut self, name: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_accessor_name"); 
         match name.kind {
             SyntaxKind::PrivateIdentifier => self.emit_private_identifier(name),
             SyntaxKind::ComputedPropertyName => {
@@ -226,7 +226,7 @@ impl Printer {
     }
 }
 
-fn is_prologue_directive(statement: &Arc<Node>) -> bool {
+fn is_prologue_directive(statement: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_prologue_directive"); 
     if statement.kind != SyntaxKind::ExpressionStatement {
         return false;
     }
@@ -241,7 +241,7 @@ pub trait R37k15PlaceholderExt {
 }
 
 impl R37k15PlaceholderExt for Transformer {
-    fn placeholder() -> Self {
+    fn placeholder() -> Self { ::tsox_core::fntrace::enter("placeholder"); 
         Transformer::new(r37k15_noop_visit, None)
     }
 }
@@ -249,12 +249,12 @@ impl R37k15PlaceholderExt for Transformer {
 fn r37k15_noop_visit(
     _tx: &mut Transformer,
     node: Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("r37k15_noop_visit"); 
     Some(node)
 }
 
 impl R37k15PlaceholderExt for NodeVisitor {
-    fn placeholder() -> Self {
+    fn placeholder() -> Self { ::tsox_core::fntrace::enter("placeholder"); 
         NodeVisitor::default()
     }
 }
@@ -264,7 +264,7 @@ pub trait R37k15NodeVisitorExt {
 }
 
 impl R37k15NodeVisitorExt for NodeVisitor {
-    fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         Arc::clone(node)
     }
 }
@@ -276,7 +276,7 @@ pub trait R37k15PropertyAccessExt {
 impl R37k15PropertyAccessExt for Node {
     fn as_property_access_expression(
         &self,
-    ) -> &tsox_frontend::ast::node_data_generated::PropertyAccessExpressionData {
+    ) -> &tsox_frontend::ast::node_data_generated::PropertyAccessExpressionData { ::tsox_core::fntrace::enter("as_property_access_expression"); 
         match &self.data {
             NodeData::PropertyAccessExpression(d) => d,
             _ => panic!("as_property_access_expression() on {:?}", self.kind),
@@ -285,7 +285,7 @@ impl R37k15PropertyAccessExt for Node {
 }
 
 impl crate::mig::m4h_5::EsDecoratorTransformer {
-    pub fn discarded_value_visit(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn discarded_value_visit(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("discarded_value_visit"); 
         if node.kind == SyntaxKind::Decorator {
             return Arc::new(Node::new(
                 SyntaxKind::Unknown,
@@ -297,7 +297,7 @@ impl crate::mig::m4h_5::EsDecoratorTransformer {
         self.outer_this_visitor.visit_each_child(node)
     }
 
-    pub fn visit_binary_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> {
+    pub fn visit_binary_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_binary_expression"); 
         self.outer_this_visitor.visit_each_child(node)
     }
 
@@ -305,17 +305,17 @@ impl crate::mig::m4h_5::EsDecoratorTransformer {
         &mut self,
         node: &Arc<Node>,
         discarded: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_pre_or_postfix_unary_expression"); 
         self.outer_this_visitor.visit_each_child(node)
     }
 }
 
 impl crate::mig::m4i_6::OptionalChainTransformer {
-    pub fn visit_node(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_node(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_node"); 
         Arc::clone(node)
     }
 
-    pub fn visit_nodes(&mut self, list: Option<&NodeList>) -> NodeList {
+    pub fn visit_nodes(&mut self, list: Option<&NodeList>) -> NodeList { ::tsox_core::fntrace::enter("visit_nodes"); 
         match list {
             Some(list) => {
                 let mut new_list = NodeList::new(list.nodes.clone());
@@ -327,7 +327,7 @@ impl crate::mig::m4i_6::OptionalChainTransformer {
     }
 }
 
-fn greatest_modifier_end(pos: usize, modifiers: Option<&Arc<tsox_frontend::ast::ModifierList>>) -> usize {
+fn greatest_modifier_end(pos: usize, modifiers: Option<&Arc<tsox_frontend::ast::ModifierList>>) -> usize { ::tsox_core::fntrace::enter("greatest_modifier_end"); 
     match modifiers {
         Some(list) => list
             .nodes

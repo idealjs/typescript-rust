@@ -49,7 +49,7 @@ pub trait IpcConn: Send + Sync {
 
 pub fn marshal_params<T: serde::Serialize>(
     params: &T,
-) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("marshal_params"); 
     Ok(serde_json::to_value(params)?)
 }
 
@@ -89,7 +89,7 @@ pub struct MapperConnEntry {
 }
 
 impl Default for MapperConnEntry {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         MapperConnEntry {
             conn: Mutex::new(None),
             closer: Mutex::new(None),
@@ -101,7 +101,7 @@ impl Default for MapperConnEntry {
     }
 }
 
-pub fn new_host(spawner: Arc<dyn Spawner>, diagnostic_locale: Locale) -> Arc<HostImpl> {
+pub fn new_host(spawner: Arc<dyn Spawner>, diagnostic_locale: Locale) -> Arc<HostImpl> { ::tsox_core::fntrace::enter("new_host"); 
     new_host_with_options(spawner, diagnostic_locale, HostOptions::default())
 }
 
@@ -109,7 +109,7 @@ pub fn new_host_with_options(
     spawner: Arc<dyn Spawner>,
     diagnostic_locale: Locale,
     options: HostOptions,
-) -> Arc<HostImpl> {
+) -> Arc<HostImpl> { ::tsox_core::fntrace::enter("new_host_with_options"); 
     let logger = options.logger;
     let timing = Arc::new(TimingCollector::new());
     let timing_for_dial = timing.clone();
@@ -213,7 +213,7 @@ pub fn new_with_dial(
     diagnostic_locale: Locale,
     timing: Arc<TimingCollector>,
     dial: DialFunc,
-) -> Arc<HostImpl> {
+) -> Arc<HostImpl> { ::tsox_core::fntrace::enter("new_with_dial"); 
     Arc::new(HostImpl {
         cancel: AtomicU64::new(0),
         dial,
@@ -229,11 +229,11 @@ pub fn new_with_dial(
 }
 
 impl HostImpl {
-    pub fn timings(&self) -> Timings {
+    pub fn timings(&self) -> Timings { ::tsox_core::fntrace::enter("timings"); 
         self.timing.snapshot()
     }
 
-    pub fn set_locale(&self, diagnostic_locale: Locale) {
+    pub fn set_locale(&self, diagnostic_locale: Locale) { ::tsox_core::fntrace::enter("set_locale"); 
         let mut lifecycle = self.lifecycle_mu.write().unwrap();
         if lifecycle.to_string() == diagnostic_locale.to_string() {
             return;
@@ -268,7 +268,7 @@ impl HostImpl {
         }
     }
 
-    pub fn project(self: &Arc<Self>, spec: &ProjectSpec) -> Option<Arc<ProjectLease>> {
+    pub fn project(self: &Arc<Self>, spec: &ProjectSpec) -> Option<Arc<ProjectLease>> { ::tsox_core::fntrace::enter("project"); 
         let _lifecycle = self.lifecycle_mu.read().unwrap();
         let key = project_spec_key(spec);
         let mut state = self.mu.lock().unwrap();
@@ -320,7 +320,7 @@ impl HostImpl {
         &self,
         state: &mut HostState,
         entry: &Arc<ProjectEntry>,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("open_project_locked"); 
         if entry.opened {
             return Ok(());
         }
@@ -432,7 +432,7 @@ impl HostImpl {
         mapper: &Mapper,
         conn: &dyn IpcConn,
         project_handle: &str,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("close_project"); 
         let mapper_timing = self.timing.mapper(&mapper.identity());
         let start = mapper_timing.start_request();
         let result = conn.call(
@@ -446,7 +446,7 @@ impl HostImpl {
         result.map(|_| ())
     }
 
-    pub fn acquire(self: &Arc<Self>, mappers: &[Arc<Mapper>]) -> Box<dyn FnOnce()> {
+    pub fn acquire(self: &Arc<Self>, mappers: &[Arc<Mapper>]) -> Box<dyn FnOnce()> { ::tsox_core::fntrace::enter("acquire"); 
         let mut seen = std::collections::HashSet::with_capacity(mappers.len());
         let mut identities = Vec::with_capacity(mappers.len());
         {
@@ -473,7 +473,7 @@ impl HostImpl {
         self: &Arc<Self>,
         mapper: &Mapper,
         request: &Request,
-    ) -> Result<TransformOutcome, TransformError> {
+    ) -> Result<TransformOutcome, TransformError> { ::tsox_core::fntrace::enter("transform"); 
         let project = self
             .project(&ProjectSpec {
                 mappers: vec![Arc::new(mapper.clone())],
@@ -492,7 +492,7 @@ impl HostImpl {
         mapper: &Mapper,
         request: &Request,
         project_handle: &str,
-    ) -> Result<TransformOutcome, TransformError> {
+    ) -> Result<TransformOutcome, TransformError> { ::tsox_core::fntrace::enter("transform_locked"); 
         if project_handle.is_empty() {
             return Err(new_transform_error(
                 TransformErrorKind::Request,
@@ -531,7 +531,7 @@ impl HostImpl {
             .map_err(|err| new_transform_error(TransformErrorKind::Response, err))
     }
 
-    pub fn close(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    pub fn close(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("close"); 
         let mut _lifecycle = self.lifecycle_mu.write().unwrap();
         self.cancel.fetch_add(1, Ordering::SeqCst);
         let mut closers: Vec<Arc<dyn Closer>> = Vec::new();
@@ -571,7 +571,7 @@ impl HostImpl {
         &self,
         state: &HostState,
         mapper: &Mapper,
-    ) -> Result<(Option<Box<dyn IpcConn>>, PositionEncoding, String), Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<(Option<Box<dyn IpcConn>>, PositionEncoding, String), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("conn_for"); 
         self.conn_for_locked(state, mapper).map(|(conn, encoding, source)| {
             (Some(conn), encoding, source)
         })
@@ -581,7 +581,7 @@ impl HostImpl {
         &self,
         state: &HostState,
         mapper: &Mapper,
-    ) -> Result<(Box<dyn IpcConn>, PositionEncoding, String), Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<(Box<dyn IpcConn>, PositionEncoding, String), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("conn_for_locked"); 
         let conns = match &state.conns {
             None => {
                 return Err(Box::new(std::io::Error::new(
@@ -647,7 +647,7 @@ impl HostImpl {
         }
     }
 
-    pub fn release(&self, identities: &[String]) {
+    pub fn release(&self, identities: &[String]) { ::tsox_core::fntrace::enter("release"); 
         let mut closers: Vec<Arc<dyn Closer>> = Vec::new();
         {
             let mut state = self.mu.lock().unwrap();
@@ -680,12 +680,12 @@ pub struct ProjectLease {
     pub refs: AtomicU64,
 }
 
-pub fn retain_locked(lease: &Arc<ProjectLease>) -> Arc<ProjectLease> {
+pub fn retain_locked(lease: &Arc<ProjectLease>) -> Arc<ProjectLease> { ::tsox_core::fntrace::enter("retain_locked"); 
     lease.refs.fetch_add(1, Ordering::SeqCst);
     lease.clone()
 }
 
-pub fn project_refresh(lease: &Arc<ProjectLease>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub fn project_refresh(lease: &Arc<ProjectLease>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("project_refresh"); 
     let _lifecycle = lease.host.lifecycle_mu.read().unwrap();
     let mut state = lease.host.mu.lock().unwrap();
     if state.projects.is_none() {
@@ -715,7 +715,7 @@ pub fn project_refresh(lease: &Arc<ProjectLease>) -> Result<(), Box<dyn std::err
 
 pub fn project_identities(
     lease: &Arc<ProjectLease>,
-) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("project_identities"); 
     let _lifecycle = lease.host.lifecycle_mu.read().unwrap();
     let mut state = lease.host.mu.lock().unwrap();
     if state.projects.is_none() {
@@ -760,7 +760,7 @@ pub fn project_identities(
 pub fn project_identity(
     lease: &Arc<ProjectLease>,
     mapper: &Mapper,
-) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<String, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("project_identity"); 
     let _lifecycle = lease.host.lifecycle_mu.read().unwrap();
     let mut state = lease.host.mu.lock().unwrap();
     if state.projects.is_none() {
@@ -795,7 +795,7 @@ pub fn project_identity(
 
 pub fn project_watched_files(
     lease: &Arc<ProjectLease>,
-) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("project_watched_files"); 
     let _lifecycle = lease.host.lifecycle_mu.read().unwrap();
     let mut state = lease.host.mu.lock().unwrap();
     if state.projects.is_none() {
@@ -817,7 +817,7 @@ pub fn project_watched_files(
     Ok(files)
 }
 
-pub fn project_diagnostics(lease: &Arc<ProjectLease>) -> Vec<OptionDiagnostic> {
+pub fn project_diagnostics(lease: &Arc<ProjectLease>) -> Vec<OptionDiagnostic> { ::tsox_core::fntrace::enter("project_diagnostics"); 
     let _lifecycle = lease.host.lifecycle_mu.read().unwrap();
     let state = lease.host.mu.lock().unwrap();
     if state.projects.is_none() {
@@ -845,7 +845,7 @@ pub fn project_transform(
     lease: &Arc<ProjectLease>,
     mapper: &Mapper,
     request: &Request,
-) -> Result<TransformOutcome, TransformError> {
+) -> Result<TransformOutcome, TransformError> { ::tsox_core::fntrace::enter("project_transform"); 
     let _lifecycle = lease.host.lifecycle_mu.read().unwrap();
     let mut state = lease.host.mu.lock().unwrap();
     let key = lease
@@ -877,7 +877,7 @@ pub fn project_transform(
         .transform_locked(state_snapshot, mapper, request, &handle)
 }
 
-pub fn project_release(lease: &Arc<ProjectLease>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub fn project_release(lease: &Arc<ProjectLease>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("project_release"); 
     let _lifecycle = lease.host.lifecycle_mu.read().unwrap();
     let mut released_identities: Vec<String> = Vec::new();
     let mut result: Result<(), Box<dyn std::error::Error + Send + Sync>> = Ok(());
@@ -918,7 +918,7 @@ pub fn project_release(lease: &Arc<ProjectLease>) -> Result<(), Box<dyn std::err
     result
 }
 
-pub fn project_spec_key(spec: &ProjectSpec) -> String {
+pub fn project_spec_key(spec: &ProjectSpec) -> String { ::tsox_core::fntrace::enter("project_spec_key"); 
     let mut key = String::new();
     key.push_str(&spec.config_file_name);
     key.push('\0');
@@ -937,7 +937,7 @@ pub fn combined_identity(
     mapper: &Mapper,
     config_identity: &str,
     compiler_options: Option<&CompilerOptions>,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("combined_identity"); 
     let transform_identity = mapper
         .transform_identity(compiler_options.unwrap_or(&CompilerOptions::default()))
         .to_le_bytes();
@@ -959,14 +959,14 @@ pub fn combined_identity(
     format!("{}:{}", identity, hex_encode(&hash))
 }
 
-pub fn hex_encode(bytes: &[u8]) -> String {
+pub fn hex_encode(bytes: &[u8]) -> String { ::tsox_core::fntrace::enter("hex_encode"); 
     bytes.iter().map(|byte| format!("{:02x}", byte)).collect()
 }
 
 pub fn handshake(
     conn: &dyn IpcConn,
     diagnostic_locale: &Locale,
-) -> Result<(PositionEncoding, String), Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<(PositionEncoding, String), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("handshake"); 
     let raw = conn.call(
         METHOD_INITIALIZE,
         &marshal_params(&InitializeParams {
@@ -1027,7 +1027,7 @@ pub fn decode_transform_result(
     original_text: &str,
     position_encoding: &PositionEncoding,
     diagnostic_source: &str,
-) -> Result<TransformOutcome, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<TransformOutcome, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("decode_transform_result"); 
     let res: TransformResult = serde_json::from_value(raw.clone())?;
     let (mapped, original_positions) =
         decode_mapped_output(&res.mapped_output, original_text, position_encoding, diagnostic_source)?;
@@ -1089,7 +1089,7 @@ pub fn decode_mapped_output(
     original_text: &str,
     position_encoding: &PositionEncoding,
     diagnostic_source: &str,
-) -> Result<(MappedResult, PositionNormalizer), Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<(MappedResult, PositionNormalizer), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("decode_mapped_output"); 
     if !is_supported_virtual_extension(&output.extension) {
         return Err(Box::new(InvalidVirtualExtensionError {
             extension: output.extension.clone(),
@@ -1126,7 +1126,7 @@ pub fn normalize_diagnostic_directives(
     virtual_positions: &PositionNormalizer,
     original_positions: &PositionNormalizer,
     diagnostic_source: &str,
-) -> Result<Vec<MappedDiagnosticDirective>, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<Vec<MappedDiagnosticDirective>, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("normalize_diagnostic_directives"); 
     let diagnostic_directives = match diagnostic_directives {
         None => return Ok(Vec::new()),
         Some(directives) => directives,
@@ -1235,7 +1235,7 @@ pub fn normalize_mappings(
     mappings: spanmap::Segments,
     virtual_positions: &PositionNormalizer,
     original_positions: &PositionNormalizer,
-) -> Result<spanmap::SpanMap, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<spanmap::SpanMap, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("normalize_mappings"); 
     let mut segments: Vec<spanmap::Segment> = mappings.into();
     for (i, segment) in segments.iter_mut().enumerate() {
         segment.virtual_start = virtual_positions
@@ -1264,7 +1264,7 @@ pub struct PositionNormalizer {
 pub fn new_position_normalizer(
     text: &str,
     encoding: &PositionEncoding,
-) -> Result<PositionNormalizer, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<PositionNormalizer, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("new_position_normalizer"); 
     let mut normalizer = PositionNormalizer {
         text: text.to_string(),
         encoding: encoding.clone(),
@@ -1292,12 +1292,12 @@ impl PositionNormalizer {
     pub fn normalize_text_pos(
         &self,
         position: tsox_core::core::text::TextPos,
-    ) -> Result<tsox_core::core::text::TextPos, String> {
+    ) -> Result<tsox_core::core::text::TextPos, String> { ::tsox_core::fntrace::enter("normalize_text_pos"); 
         let normalized = self.normalize(position)?;
         Ok(normalized as tsox_core::core::text::TextPos)
     }
 
-    pub fn normalize(&self, position: i32) -> Result<usize, String> {
+    pub fn normalize(&self, position: i32) -> Result<usize, String> { ::tsox_core::fntrace::enter("normalize"); 
         let position = position as i64;
         if position < 0 {
             return Err(format!("position {} is negative", position));
@@ -1349,7 +1349,7 @@ impl RequestHandler for RejectHandler {
         &self,
         method: &str,
         _params: &JsonValue,
-    ) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("handle_request"); 
         Err(Box::new(std::io::Error::other(format!(
             "content mapper sent an unexpected request: {}",
             method
@@ -1360,23 +1360,23 @@ impl RequestHandler for RejectHandler {
         &self,
         _method: &str,
         _params: &JsonValue,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("handle_notification"); 
         Ok(())
     }
 }
 
-pub fn conn_duplicate_handle(conn: &dyn IpcConn) -> Box<dyn IpcConn> {
+pub fn conn_duplicate_handle(conn: &dyn IpcConn) -> Box<dyn IpcConn> { ::tsox_core::fntrace::enter("conn_duplicate_handle"); 
     conn.duplicate_handle()
 }
 
-pub fn closer_into_arc(closer: Box<dyn Closer>) -> Arc<dyn Closer> {
+pub fn closer_into_arc(closer: Box<dyn Closer>) -> Arc<dyn Closer> { ::tsox_core::fntrace::enter("closer_into_arc"); 
     Arc::from(closer)
 }
 
 pub struct ProcessCloser(pub Arc<CloseOnceReadWriteCloser>);
 
 impl Closer for ProcessCloser {
-    fn close(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    fn close(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("close"); 
         self.0
             .close()
             .map_err(|err| Box::new(err) as Box<dyn std::error::Error + Send + Sync>)
@@ -1388,7 +1388,7 @@ pub struct JsonRpcProtocol {
     read_buf: Mutex<Vec<u8>>,
 }
 
-pub fn new_jsonrpc_protocol(rwc: Arc<CloseOnceReadWriteCloser>) -> Box<dyn IpcProtocol> {
+pub fn new_jsonrpc_protocol(rwc: Arc<CloseOnceReadWriteCloser>) -> Box<dyn IpcProtocol> { ::tsox_core::fntrace::enter("new_jsonrpc_protocol"); 
     Box::new(JsonRpcProtocol {
         rwc,
         read_buf: Mutex::new(Vec::new()),
@@ -1398,7 +1398,7 @@ pub fn new_jsonrpc_protocol(rwc: Arc<CloseOnceReadWriteCloser>) -> Box<dyn IpcPr
 const MAX_MESSAGE_SIZE: usize = 64 * 1024 * 1024;
 
 impl JsonRpcProtocol {
-    fn fill_until(&self, buf: &mut Vec<u8>, delimiter: &[u8]) -> std::io::Result<()> {
+    fn fill_until(&self, buf: &mut Vec<u8>, delimiter: &[u8]) -> std::io::Result<()> { ::tsox_core::fntrace::enter("fill_until"); 
         let mut chunk = [0u8; 4096];
         loop {
             if find_subslice(buf, delimiter).is_some() {
@@ -1418,7 +1418,7 @@ impl JsonRpcProtocol {
         }
     }
 
-    fn read_exact_from_buf(&self, buf: &mut Vec<u8>, count: usize) -> std::io::Result<()> {
+    fn read_exact_from_buf(&self, buf: &mut Vec<u8>, count: usize) -> std::io::Result<()> { ::tsox_core::fntrace::enter("read_exact_from_buf"); 
         let mut chunk = [0u8; 4096];
         while buf.len() < count {
             let read = self.rwc.lock_inner().read(&mut chunk)?;
@@ -1433,18 +1433,18 @@ impl JsonRpcProtocol {
         Ok(())
     }
 
-    fn write_all_raw(&self, data: &[u8]) -> std::io::Result<()> {
+    fn write_all_raw(&self, data: &[u8]) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_all_raw"); 
         self.rwc.lock_inner().write_all(data)
     }
 }
 
-fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> {
+fn find_subslice(haystack: &[u8], needle: &[u8]) -> Option<usize> { ::tsox_core::fntrace::enter("find_subslice"); 
     haystack
         .windows(needle.len())
         .position(|window| window == needle)
 }
 
-fn read_payload(protocol: &JsonRpcProtocol) -> std::io::Result<Vec<u8>> {
+fn read_payload(protocol: &JsonRpcProtocol) -> std::io::Result<Vec<u8>> { ::tsox_core::fntrace::enter("read_payload"); 
     let mut buf = protocol.read_buf.lock().unwrap();
     protocol.fill_until(&mut buf, b"\r\n\r\n")?;
     let header_end = find_subslice(&buf, b"\r\n\r\n").unwrap() + 4;
@@ -1469,14 +1469,14 @@ fn read_payload(protocol: &JsonRpcProtocol) -> std::io::Result<Vec<u8>> {
     Ok(std::mem::take(&mut buf))
 }
 
-fn write_payload(protocol: &JsonRpcProtocol, data: &[u8]) -> std::io::Result<()> {
+fn write_payload(protocol: &JsonRpcProtocol, data: &[u8]) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_payload"); 
     let mut frame = format!("Content-Length: {}\r\n\r\n", data.len()).into_bytes();
     frame.extend_from_slice(data);
     protocol.write_all_raw(&frame)
 }
 
 impl IpcProtocol for JsonRpcProtocol {
-    fn read_message(&self) -> std::io::Result<IpcMessage> {
+    fn read_message(&self) -> std::io::Result<IpcMessage> { ::tsox_core::fntrace::enter("read_message"); 
         let data = read_payload(self)?;
         serde_json::from_slice(&data)
             .map_err(|err| std::io::Error::other(format!("jsonrpc: invalid message: {}", err)))
@@ -1487,7 +1487,7 @@ impl IpcProtocol for JsonRpcProtocol {
         id: Option<&JsonRpcId>,
         method: &str,
         params: &JsonValue,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_request"); 
         let message = serde_json::to_vec(&JsonRpcRequestMessage {
             id: id.cloned(),
             method: method.to_string(),
@@ -1497,7 +1497,7 @@ impl IpcProtocol for JsonRpcProtocol {
         write_payload(self, &message)
     }
 
-    fn write_notification(&self, method: &str, params: &JsonValue) -> std::io::Result<()> {
+    fn write_notification(&self, method: &str, params: &JsonValue) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_notification"); 
         let message = serde_json::to_vec(&JsonRpcRequestMessage {
             id: None,
             method: method.to_string(),
@@ -1507,7 +1507,7 @@ impl IpcProtocol for JsonRpcProtocol {
         write_payload(self, &message)
     }
 
-    fn write_response(&self, id: &JsonRpcId, result: &JsonValue) -> std::io::Result<()> {
+    fn write_response(&self, id: &JsonRpcId, result: &JsonValue) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_response"); 
         let result = if result.is_null() {
             JsonValue::Null
         } else {
@@ -1522,7 +1522,7 @@ impl IpcProtocol for JsonRpcProtocol {
         write_payload(self, &message)
     }
 
-    fn write_error(&self, id: &JsonRpcId, response_error: &JsonRpcResponseError) -> std::io::Result<()> {
+    fn write_error(&self, id: &JsonRpcId, response_error: &JsonRpcResponseError) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_error"); 
         let message = serde_json::to_vec(&JsonRpcResponseMessage {
             id: Some(id.clone()),
             result: JsonValue::Null,
@@ -1550,7 +1550,7 @@ pub fn new_async_conn_with_protocol(
     rwc: Arc<CloseOnceReadWriteCloser>,
     protocol: Box<dyn IpcProtocol>,
     handler: impl RequestHandler + Send + Sync + 'static,
-) -> AsyncConn {
+) -> AsyncConn { ::tsox_core::fntrace::enter("new_async_conn_with_protocol"); 
     AsyncConn {
         shared: Arc::new(AsyncConnShared {
             rwc,
@@ -1564,7 +1564,7 @@ pub fn new_async_conn_with_protocol(
 }
 
 impl AsyncConn {
-    pub fn run_detached(&self) {
+    pub fn run_detached(&self) { ::tsox_core::fntrace::enter("run_detached"); 
         let shared = self.shared.clone();
         std::thread::Builder::new()
             .name("content-mapper-ipc".to_string())
@@ -1578,7 +1578,7 @@ impl AsyncConn {
 
     fn run_shared(
         shared: &Arc<AsyncConnShared>,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("run_shared"); 
         loop {
             let message = shared.protocol.read_message()?;
             if message.id.is_some() && message.method.is_empty() {
@@ -1596,7 +1596,7 @@ impl AsyncConn {
 }
 
 impl AsyncConnShared {
-    fn close_pending_calls(&self, run_err: Option<Box<dyn std::error::Error + Send + Sync>>) {
+    fn close_pending_calls(&self, run_err: Option<Box<dyn std::error::Error + Send + Sync>>) { ::tsox_core::fntrace::enter("close_pending_calls"); 
         let mut pending = self.pending.lock().unwrap();
         let mut terminal = self.terminal.lock().unwrap();
         if terminal.is_none() {
@@ -1608,7 +1608,7 @@ impl AsyncConnShared {
         pending.clear();
     }
 
-    fn handle_response(&self, message: IpcMessage) {
+    fn handle_response(&self, message: IpcMessage) { ::tsox_core::fntrace::enter("handle_response"); 
         let sender = match message.id.as_ref() {
             Some(id) => self.pending.lock().unwrap().remove(id),
             None => None,
@@ -1618,7 +1618,7 @@ impl AsyncConnShared {
         }
     }
 
-    fn handle_request(&self, message: IpcMessage) {
+    fn handle_request(&self, message: IpcMessage) { ::tsox_core::fntrace::enter("handle_request"); 
         let id = match message.id.as_ref() {
             None => return,
             Some(id) => id.clone(),
@@ -1644,7 +1644,7 @@ impl AsyncConnShared {
         &self,
         method: &str,
         params: &JsonValue,
-    ) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("call_raw"); 
         let id = JsonRpcId::String(format!("api{}", self.seq.fetch_add(1, Ordering::SeqCst) + 1));
         let (sender, receiver) = std::sync::mpsc::channel::<IpcMessage>();
         {
@@ -1682,15 +1682,15 @@ impl IpcConn for AsyncConn {
         &self,
         method: &str,
         params: &JsonValue,
-    ) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<JsonValue, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("call"); 
         self.shared.call_raw(method, params)
     }
 
-    fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("run"); 
         AsyncConn::run_shared(&self.shared)
     }
 
-    fn duplicate_handle(&self) -> Box<dyn IpcConn> {
+    fn duplicate_handle(&self) -> Box<dyn IpcConn> { ::tsox_core::fntrace::enter("duplicate_handle"); 
         Box::new(AsyncConn {
             shared: self.shared.clone(),
         })

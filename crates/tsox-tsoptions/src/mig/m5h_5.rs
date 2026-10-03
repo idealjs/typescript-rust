@@ -16,7 +16,7 @@ pub fn create_diagnostic_for_node_in_source_file(
     node: &Node,
     message: Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_for_node_in_source_file"); 
     let _ = (source_file, node);
     new_compiler_diagnostic(message, args)
 }
@@ -26,7 +26,7 @@ pub fn create_diagnostic_for_node_in_source_file_or_compiler_diagnostic(
     node: Option<&Node>,
     message: Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_for_node_in_source_file_or_compiler_diagnostic"); 
     if let (Some(source_file), Some(node)) = (source_file, node) {
         return create_diagnostic_for_node_in_source_file(source_file, node, message, args);
     }
@@ -40,7 +40,7 @@ impl CommandLineParser {
         unknown_option_error_text: &str,
         node: Option<&Node>,
         source_file: Option<&SourceFile>,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("create_unknown_option_error"); 
         let options_name_map = get_name_map_from_list(self.options_declarations());
         create_unknown_option_error(
             unknown_option,
@@ -64,7 +64,7 @@ pub fn create_unknown_option_error(
     alternate_mode: Option<&AlternateModeDiagnostics>,
     unknown_did_you_mean_diagnostic: Option<Message>,
     options_name_map: Option<&NameMap>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_unknown_option_error"); 
     if let Some(alternate_mode) = alternate_mode {
         if let Some(other_option) = alternate_mode
             .options_name_map
@@ -109,7 +109,7 @@ pub fn create_unknown_option_error(
     )
 }
 
-pub fn extra_key_diagnostics(s: &str) -> Option<Message> {
+pub fn extra_key_diagnostics(s: &str) -> Option<Message> { ::tsox_core::fntrace::enter("extra_key_diagnostics"); 
     match s {
         "compilerOptions" => Some(diagnostics::UNKNOWN_COMPILER_OPTION_0),
         "watchOptions" => Some(diagnostics::UNKNOWN_WATCH_OPTION_0),
@@ -119,7 +119,7 @@ pub fn extra_key_diagnostics(s: &str) -> Option<Message> {
     }
 }
 
-pub fn extra_key_did_you_mean_diagnostics(s: &str) -> Option<Message> {
+pub fn extra_key_did_you_mean_diagnostics(s: &str) -> Option<Message> { ::tsox_core::fntrace::enter("extra_key_did_you_mean_diagnostics"); 
     match s {
         "compilerOptions" => Some(diagnostics::UNKNOWN_COMPILER_OPTION_0_DID_YOU_MEAN_1),
         "watchOptions" => Some(diagnostics::UNKNOWN_WATCH_OPTION_0_DID_YOU_MEAN_1),

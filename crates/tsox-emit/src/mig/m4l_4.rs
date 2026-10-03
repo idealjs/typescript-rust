@@ -27,7 +27,7 @@ impl LegacyDecoratorsTransformer {
         &mut self,
         node: &Arc<Node>,
         name: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_class_declaration_with_class_decorators"); 
         let is_export = node.has_syntactic_modifier(ModifierFlags::Export);
         let is_default = node.has_syntactic_modifier(ModifierFlags::Default);
         let mut modifiers: Option<Arc<ModifierList>> = None;
@@ -184,7 +184,7 @@ impl LegacyDecoratorsTransformer {
         &mut self,
         node: &Arc<Node>,
         mut name: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_class_declaration_without_class_decorators"); 
         let modifiers = self.visitor().visit_modifiers(&node.modifiers().cloned());
         let heritage_clauses = self.visitor().visit_nodes(node.heritage_clauses());
         let initial_members = self
@@ -217,7 +217,7 @@ impl LegacyDecoratorsTransformer {
         Some(self.factory().new_syntax_list(statements))
     }
 
-    pub fn transform_decorators(&mut self, decorators: &[Arc<Node>]) -> Vec<Arc<Node>> {
+    pub fn transform_decorators(&mut self, decorators: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_decorators"); 
         let mut results = Vec::new();
         for d in decorators {
             results.push(self.visitor().visit_node(d.expression().unwrap()));

@@ -4,7 +4,7 @@ use crate::ast::node_node::Node;
 use std::sync::Arc;
 
 fn bind_diagnostics_store(
-) -> &'static std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Diagnostic>>>> {
+) -> &'static std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Diagnostic>>>> { ::tsox_core::fntrace::enter("bind_diagnostics_store"); 
     static STORE: std::sync::OnceLock<
         std::sync::RwLock<std::collections::HashMap<u64, Vec<Arc<Diagnostic>>>>,
     > = std::sync::OnceLock::new();
@@ -62,11 +62,11 @@ pub struct FileReference {
 }
 
 impl SourceFile {
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> u64 { ::tsox_core::fntrace::enter("id"); 
         self.node.id()
     }
 
-    pub fn bind_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+    pub fn bind_diagnostics(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("bind_diagnostics"); 
         bind_diagnostics_store()
             .read()
             .unwrap()
@@ -75,30 +75,30 @@ impl SourceFile {
             .unwrap_or_default()
     }
 
-    pub fn set_bind_diagnostics(&self, diags: Vec<Arc<Diagnostic>>) {
+    pub fn set_bind_diagnostics(&self, diags: Vec<Arc<Diagnostic>>) { ::tsox_core::fntrace::enter("set_bind_diagnostics"); 
         bind_diagnostics_store()
             .write()
             .unwrap()
             .insert(self.id(), diags);
     }
 
-    pub fn supplemental_source_files(&self) -> Vec<std::sync::Arc<SourceFile>> {
+    pub fn supplemental_source_files(&self) -> Vec<std::sync::Arc<SourceFile>> { ::tsox_core::fntrace::enter("supplemental_source_files"); 
         self.supplemental_source_files.clone()
     }
 
-    pub fn set_jsdoc_cache(&self, cache: std::collections::HashMap<u64, Vec<Arc<Node>>>) {
+    pub fn set_jsdoc_cache(&self, cache: std::collections::HashMap<u64, Vec<Arc<Node>>>) { ::tsox_core::fntrace::enter("set_jsdoc_cache"); 
         *self.jsdoc_cache.write().unwrap() = cache;
     }
 
-    pub fn set_has_lazy_jsdoc(&mut self, lazy: bool) {
+    pub fn set_has_lazy_jsdoc(&mut self, lazy: bool) { ::tsox_core::fntrace::enter("set_has_lazy_jsdoc"); 
         self.has_lazy_jsdoc = lazy;
     }
 
-    pub fn has_lazy_jsdoc(&self) -> bool {
+    pub fn has_lazy_jsdoc(&self) -> bool { ::tsox_core::fntrace::enter("has_lazy_jsdoc"); 
         self.has_lazy_jsdoc
     }
 
-    pub fn resolve_jsdoc(&self, node: &Node) -> Vec<Arc<Node>> {
+    pub fn resolve_jsdoc(&self, node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("resolve_jsdoc"); 
         let node_id = node.id();
 
         {
@@ -117,7 +117,7 @@ impl SourceFile {
         jsdocs
     }
 
-    pub fn eager_jsdoc(&self, node: &Node) -> Vec<Arc<Node>> {
+    pub fn eager_jsdoc(&self, node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("eager_jsdoc"); 
         let cache = self.jsdoc_cache.read().unwrap();
         cache.get(&node.id()).cloned().unwrap_or_default()
     }

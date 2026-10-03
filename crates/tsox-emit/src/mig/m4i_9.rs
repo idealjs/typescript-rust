@@ -22,7 +22,7 @@ use tsox_core::core::mig::m3j::first_or_nil;
 use super::m4h_2::{is_named_evaluation, transform_named_evaluation};
 use crate::mig::m4e::r39k01_defs::R39K01DataExt;
 impl UsingDeclarationTransformer {
-    pub(crate) fn visit_for_of_statement(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_for_of_statement(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_for_of_statement"); 
         let data = node.as_for_in_or_of_statement();
         let initializer = data.initializer.clone();
         if is_using_variable_declaration_list(&initializer) {
@@ -100,7 +100,7 @@ impl UsingDeclarationTransformer {
         statements_in: &[Arc<Node>],
         env_binding: &Arc<Node>,
         mut top_level_statements: Option<&mut Vec<Arc<Node>>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_using_declarations"); 
         let mut statements: Vec<Arc<Node>> = Vec::new();
 
         for statement in statements_in {
@@ -178,7 +178,7 @@ impl UsingDeclarationTransformer {
         statements: &mut Vec<Arc<Node>>,
         top_level_statements: &mut Option<&mut Vec<Arc<Node>>>,
         node: Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hoist_or_append"); 
         let hoisted = match self.hoist(node, top_level_statements) {
             Some(n) => n,
             None => return,
@@ -192,7 +192,7 @@ impl UsingDeclarationTransformer {
         &mut self,
         node: Arc<Node>,
         top_level_statements: &mut Option<&mut Vec<Arc<Node>>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("hoist"); 
         let top_level = match top_level_statements {
             None => return Some(node),
             Some(tl) => tl,
@@ -215,7 +215,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    pub(crate) fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         let mut changed = false;
         tsox_frontend::ast::node_data_generated::for_each_child(&node, |child| {
             let visited = self.visit(child.clone());
@@ -237,13 +237,13 @@ impl UsingDeclarationTransformer {
         &mut self,
         node: Arc<Node>,
         top_level_statements: &mut Vec<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hoist_import_or_export_or_hoisted_declaration"); 
         top_level_statements.push(node);
     }
 
 }
 impl UsingDeclarationTransformer {
-    pub(crate) fn hoist_export_assignment(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn hoist_export_assignment(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("hoist_export_assignment"); 
         if node.as_export_assignment().is_export_equals {
             self.hoist_export_equals(node)
         } else {
@@ -253,7 +253,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    pub(crate) fn hoist_export_default(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn hoist_export_default(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("hoist_export_default"); 
         let data = node.as_export_assignment();
         if self.default_export_binding.is_some() {
             return node.clone();
@@ -292,7 +292,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    pub(crate) fn hoist_export_equals(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn hoist_export_equals(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("hoist_export_equals"); 
         let data = node.as_export_assignment();
         if self.export_equals_binding.is_some() {
             return node.clone();

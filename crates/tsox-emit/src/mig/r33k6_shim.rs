@@ -10,11 +10,11 @@ pub trait HasFileName {
 }
 
 impl HasFileName for tsox_frontend::ast::mig::m3g_3::HasFileNameImpl {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         self.file_name()
     }
 
-    fn path(&self) -> &TsPath {
+    fn path(&self) -> &TsPath { ::tsox_core::fntrace::enter("path"); 
         self.path()
     }
 }
@@ -25,7 +25,7 @@ pub struct ResolveModuleNameResolutionHost;
 
 pub struct Visitor;
 
-pub fn get_output_extension(file_name: &str, jsx: JsxEmit) -> String {
+pub fn get_output_extension(file_name: &str, jsx: JsxEmit) -> String { ::tsox_core::fntrace::enter("get_output_extension"); 
     if tspath::file_extension_is(file_name, tspath::EXTENSION_JSON) {
         return tspath::EXTENSION_JSON.to_string();
     }

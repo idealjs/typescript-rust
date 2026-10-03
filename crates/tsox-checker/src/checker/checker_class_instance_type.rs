@@ -3,7 +3,7 @@
 use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
-    pub fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn build_class_instance_type_with_base(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_class_instance_type_with_base"); 
         // Go getDeclaredTypeOfClassOrInterface：类型先驻留后解析成员；成员解析中
         // 重入的 this 表达式拿到在造类型（已解析的成员可见，Go UnresolvedMembers）
         let node_id = node.id();
@@ -144,7 +144,7 @@ impl Checker {
         own_type
     }
 
-    fn merge_base_into_shell(&mut self, own_type: &Arc<Type>, base: &Arc<Type>) {
+    fn merge_base_into_shell(&mut self, own_type: &Arc<Type>, base: &Arc<Type>) { ::tsox_core::fntrace::enter("merge_base_into_shell"); 
         // 就地合并：成员填期的早前引用（自引用返回型等）持有的是壳本身，
         // 合并结果必须写回同一 Arc，否则早前引用永远看不到基类成员
         let merged = self.merge_instance_types(own_type, base);
@@ -164,7 +164,7 @@ impl Checker {
         }
     }
 
-    fn base_merge_ready(&self, base: &Arc<Type>) -> bool {
+    fn base_merge_ready(&self, base: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("base_merge_ready"); 
         let Some(sym) = base.symbol.as_ref() else {
             return true;
         };
@@ -180,7 +180,7 @@ impl Checker {
             && !self.pending_base_merges.iter().any(|(d, _)| *d == id)
     }
 
-    fn drain_pending_base_merges(&mut self) {
+    fn drain_pending_base_merges(&mut self) { ::tsox_core::fntrace::enter("drain_pending_base_merges"); 
         loop {
             let Some(idx) = self
                 .pending_base_merges
@@ -197,7 +197,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn single_base_for_non_augmenting_subtype(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn single_base_for_non_augmenting_subtype(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("single_base_for_non_augmenting_subtype"); 
         let mut cur = Arc::clone(t);
         for _ in 0..32 {
             if let TypeData::Object(o) = &cur.data
@@ -272,7 +272,7 @@ impl Checker {
         sink: MemberSink,
         members: &Arc<NodeList>,
         own_symbol: Option<&Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("fill_members_into"); 
         let mut index_decls: Vec<Arc<Node>> = Vec::new();
         let mut deferred_accessors: Vec<Arc<Node>> = Vec::new();
         for member in members.iter() {

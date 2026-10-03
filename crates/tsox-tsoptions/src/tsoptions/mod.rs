@@ -84,7 +84,7 @@ pub(crate) mod tests;
 pub fn implied_node_format_of_file(
     file_name: &str,
     read_file: &dyn Fn(&str) -> Option<String>,
-) -> tsox_core::core::compiler_options::ModuleKind {
+) -> tsox_core::core::compiler_options::ModuleKind { ::tsox_core::fntrace::enter("implied_node_format_of_file"); 
     use tsox_core::core::compiler_options::ModuleKind;
     let lower = file_name.to_ascii_lowercase();
     if lower.ends_with(".mts") || lower.ends_with(".mjs") || lower.ends_with(".mjsx") {

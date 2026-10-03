@@ -78,7 +78,7 @@ pub struct NodeModulesBucketTask {
 }
 
 impl BucketBuildPreferences {
-    pub fn clone_bucket_build_preferences(&self) -> BucketBuildPreferences {
+    pub fn clone_bucket_build_preferences(&self) -> BucketBuildPreferences { ::tsox_core::fntrace::enter("clone_bucket_build_preferences"); 
         BucketBuildPreferences {
             file_exclude_patterns: self.file_exclude_patterns.clone(),
             auto_import_entrypoint_directory_search: self.auto_import_entrypoint_directory_search,
@@ -87,7 +87,7 @@ impl BucketBuildPreferences {
 }
 
 impl BucketState {
-    pub fn clone_state(&self) -> BucketState {
+    pub fn clone_state(&self) -> BucketState { ::tsox_core::fntrace::enter("clone_state"); 
         BucketState {
             dirty_file: self.dirty_file.clone(),
             multiple_files_dirty: self.multiple_files_dirty,
@@ -98,7 +98,7 @@ impl BucketState {
         }
     }
 
-    pub fn dirty_file(&self) -> Path {
+    pub fn dirty_file(&self) -> Path { ::tsox_core::fntrace::enter("dirty_file"); 
         if self.multiple_files_dirty {
             Path(String::new())
         } else {
@@ -108,7 +108,7 @@ impl BucketState {
 }
 
 impl RegistryBucket {
-    pub fn clone_bucket(&self) -> RegistryBucket {
+    pub fn clone_bucket(&self) -> RegistryBucket { ::tsox_core::fntrace::enter("clone_bucket"); 
         RegistryBucket {
             state: self.state.clone_state(),
             paths: self.paths.clone(),
@@ -122,7 +122,7 @@ impl RegistryBucket {
 }
 
 impl Directory {
-    pub fn clone_directory(&self) -> Directory {
+    pub fn clone_directory(&self) -> Directory { ::tsox_core::fntrace::enter("clone_directory"); 
         Directory {
             name: self.name.clone(),
             package_json: self.package_json.clone(),

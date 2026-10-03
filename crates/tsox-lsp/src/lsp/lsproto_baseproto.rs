@@ -5,7 +5,7 @@ pub struct BaseReader<R: std::io::Read> {
 }
 
 impl<R: std::io::Read> BaseReader<R> {
-    pub fn new(r: R) -> Self {
+    pub fn new(r: R) -> Self { ::tsox_core::fntrace::enter("new"); 
         BaseReader {
             inner: baseproto::Reader::new(r),
         }
@@ -17,7 +17,7 @@ pub struct BaseWriter<W: std::io::Write> {
 }
 
 impl<W: std::io::Write> BaseWriter<W> {
-    pub fn new(w: W) -> Self {
+    pub fn new(w: W) -> Self { ::tsox_core::fntrace::enter("new"); 
         BaseWriter {
             inner: baseproto::Writer::new(w),
         }

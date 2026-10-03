@@ -4,7 +4,7 @@ use crate::checker::typenode_references::*;
 use crate::checker::mig::m1b::parse_pseudo_big_int;
 
 impl Checker {
-    pub(crate) fn get_type_from_this_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_this_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_this_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -36,7 +36,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn container_instance_type_of(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn container_instance_type_of(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("container_instance_type_of"); 
         // 从 container 自身查起：调用方传入的即是类/接口容器（顶层类的
         // parent 是 SourceFile，跳过自身会一直走到 any）
         let mut cur: Option<Arc<Node>> = Some(Arc::clone(node));
@@ -56,7 +56,7 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn polymorphic_this_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn polymorphic_this_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("polymorphic_this_of"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
@@ -93,7 +93,7 @@ impl Checker {
     pub(crate) fn object_literal_method_contextual_this(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("object_literal_method_contextual_this"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
@@ -152,7 +152,7 @@ impl Checker {
         &mut self,
         container: &Arc<Node>,
         instance: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_this_type"); 
         let key = container.id();
         if let Some(t) = self.this_type_cache.get(&key) {
             return Arc::clone(t);
@@ -174,7 +174,7 @@ impl Checker {
         t
     }
 
-    fn interface_declaration_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    fn interface_declaration_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("interface_declaration_type"); 
         if let Some(sym) = self.program.symbol_map().symbol_of(node).cloned() {
             if let Some(t) = self.type_alias_links.get(&sym).and_then(|l| l.declared_type.clone())
             {
@@ -187,7 +187,7 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn explicit_this_parameter_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn explicit_this_parameter_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("explicit_this_parameter_type"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             let params = match &n.data {
@@ -211,7 +211,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn get_type_from_literal_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_literal_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_literal_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -227,7 +227,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn literal_type_from_literal_node(&mut self, literal: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn literal_type_from_literal_node(&mut self, literal: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("literal_type_from_literal_node"); 
         match literal.kind {
             SyntaxKind::StringLiteral => self.get_string_literal_type(literal.text()),
             SyntaxKind::NumericLiteral => {
@@ -280,7 +280,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_type_from_type_reference(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_type_reference(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_reference"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }

@@ -3,7 +3,7 @@
 use crate::checker::flow_union_ops::*;
 
 impl Checker {
-    pub(crate) fn constituent_is_definitely_falsy(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn constituent_is_definitely_falsy(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("constituent_is_definitely_falsy"); 
         if t.flags.intersects(
             TypeFlags::Undefined
                 | TypeFlags::Null
@@ -31,15 +31,15 @@ impl Checker {
         false
     }
 
-    pub(crate) fn flow_constituents_public(&self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+    pub(crate) fn flow_constituents_public(&self, t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("flow_constituents_public"); 
         self.constituent_types(t)
     }
 
-    pub(crate) fn flow_constituent_definitely_falsy(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn flow_constituent_definitely_falsy(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("flow_constituent_definitely_falsy"); 
         self.constituent_is_definitely_falsy(t)
     }
 
-    pub(crate) fn extract_definitely_falsy_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn extract_definitely_falsy_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("extract_definitely_falsy_constituents"); 
         let falsy: Vec<Arc<Type>> = self
             .constituent_types(t)
             .into_iter()
@@ -48,7 +48,7 @@ impl Checker {
         self.rebuild_union_or_never(t, falsy)
     }
 
-    pub(crate) fn remove_definitely_falsy_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn remove_definitely_falsy_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_definitely_falsy_constituents"); 
         let kept: Vec<Arc<Type>> = self
             .constituent_types(t)
             .into_iter()
@@ -60,7 +60,7 @@ impl Checker {
         self.rebuild_union_or_never(t, kept)
     }
 
-    pub(crate) fn flow_union_of(&self, types: &[Arc<Type>]) -> Arc<Type> {
+    pub(crate) fn flow_union_of(&self, types: &[Arc<Type>]) -> Arc<Type> { ::tsox_core::fntrace::enter("flow_union_of"); 
         let mut all: Vec<Arc<Type>> = Vec::new();
         for t in types {
             for c in self.constituent_types(t) {
@@ -95,7 +95,7 @@ impl Checker {
         &self,
         type_: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_type_from_union"); 
         let constituents = self.constituent_types(type_);
         let remaining: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -124,7 +124,7 @@ impl Checker {
         ))
     }
 
-    pub fn remove_flags_from_union(&self, type_: &Arc<Type>, flags: TypeFlags) -> Arc<Type> {
+    pub fn remove_flags_from_union(&self, type_: &Arc<Type>, flags: TypeFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_flags_from_union"); 
         let constituents = self.constituent_types(type_);
         let remaining: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -152,7 +152,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn filter_type_by_flags(&self, type_: &Arc<Type>, flags: TypeFlags) -> Arc<Type> {
+    pub(crate) fn filter_type_by_flags(&self, type_: &Arc<Type>, flags: TypeFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_type_by_flags"); 
         let constituents = self.constituent_types(type_);
         let matching: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -180,7 +180,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn filter_type_by_object(&self, type_: &Arc<Type>, is_loose: bool) -> Arc<Type> {
+    pub(crate) fn filter_type_by_object(&self, type_: &Arc<Type>, is_loose: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_type_by_object"); 
         let constituents = self.constituent_types(type_);
         let mut matching: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -216,7 +216,7 @@ impl Checker {
         &self,
         type_: &Arc<Type>,
         keep_callable: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_type_by_callable"); 
         let constituents = self.constituent_types(type_);
         let filtered: Vec<Arc<Type>> = constituents
             .into_iter()
@@ -253,7 +253,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn remove_object_from_union(&self, type_: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn remove_object_from_union(&self, type_: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_object_from_union"); 
         let constituents = self.constituent_types(type_);
         let remaining: Vec<Arc<Type>> = constituents
             .into_iter()

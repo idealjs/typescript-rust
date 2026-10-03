@@ -47,28 +47,28 @@ pub enum SnippetKind {
 }
 
 impl EmitContext {
-    pub fn get_synthetic_leading_comments(&self, node: &Arc<Node>) -> Vec<SynthesizedComment> {
+    pub fn get_synthetic_leading_comments(&self, node: &Arc<Node>) -> Vec<SynthesizedComment> { ::tsox_core::fntrace::enter("get_synthetic_leading_comments"); 
         self.emit_nodes_try_get(node)
             .map(|emit_node| emit_node.leading_comments.clone())
             .unwrap_or_default()
     }
 
-    pub fn get_synthetic_trailing_comments(&self, node: &Arc<Node>) -> Vec<SynthesizedComment> {
+    pub fn get_synthetic_trailing_comments(&self, node: &Arc<Node>) -> Vec<SynthesizedComment> { ::tsox_core::fntrace::enter("get_synthetic_trailing_comments"); 
         self.emit_nodes_try_get(node)
             .map(|emit_node| emit_node.trailing_comments.clone())
             .unwrap_or_default()
     }
 
-    pub fn get_type_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_type_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_node"); 
         self.emit_nodes_try_get(node)
             .and_then(|emit_node| emit_node.type_node.clone())
     }
 
-    pub fn has_auto_generate_info(&self, node: &Arc<Node>) -> bool {
+    pub fn has_auto_generate_info(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_auto_generate_info"); 
         self.get_auto_generate_info(node).is_some()
     }
 
-    pub fn has_recorded_external_helpers(&self, node: &Arc<Node>) -> bool {
+    pub fn has_recorded_external_helpers(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_recorded_external_helpers"); 
         if let Some(parse_node) = self.parse_node(node) {
             if let Some(emit_node) = self.emit_nodes_try_get(&parse_node) {
                 return emit_node.external_helpers_module_name.is_some()
@@ -80,7 +80,7 @@ impl EmitContext {
         false
     }
 
-    pub fn is_call_to_helper(&self, first_segment: &Arc<Node>, helper_name: &str) -> bool {
+    pub fn is_call_to_helper(&self, first_segment: &Arc<Node>, helper_name: &str) -> bool { ::tsox_core::fntrace::enter("is_call_to_helper"); 
         is_call_expression(first_segment)
             && first_segment.expression().is_some_and(|expression| {
                 is_identifier(expression)
@@ -96,7 +96,7 @@ impl EmitContext {
         source_file: &Arc<Node>,
         name: &str,
         has_global_name: Option<&dyn Fn(&str) -> bool>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_file_level_unique_name"); 
         if let Some(has_global_name) = has_global_name {
             if has_global_name(name) {
                 return false;
@@ -111,7 +111,7 @@ impl EmitContext {
         &mut self,
         statements: Vec<Arc<Node>>,
         declarations: Vec<Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("merge_environment"); 
         let (result, _) = self.merge_environment_inner(&statements, &declarations);
         result
     }
@@ -120,7 +120,7 @@ impl EmitContext {
         &mut self,
         statements: &Arc<tsox_frontend::ast::NodeList>,
         declarations: Vec<Arc<Node>>,
-    ) -> Arc<tsox_frontend::ast::NodeList> {
+    ) -> Arc<tsox_frontend::ast::NodeList> { ::tsox_core::fntrace::enter("merge_environment_list"); 
         let (result, changed) = self.merge_environment_inner(&statements.nodes, &declarations);
         if changed {
             let mut list = tsox_frontend::ast::NodeList::new(result);
@@ -130,7 +130,7 @@ impl EmitContext {
         Arc::clone(statements)
     }
 
-    pub fn most_original(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn most_original(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("most_original"); 
         let mut node = Arc::clone(node);
         while let Some(original) = self.original(&node) {
             node = original;
@@ -143,7 +143,7 @@ impl EmitContext {
         source: &Arc<Node>,
         target: &Arc<Node>,
         predicate: impl Fn(&EmitHelper) -> bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("move_emit_helpers"); 
         let source_helpers = match self.emit_nodes_try_get(source) {
             Some(source_emit_node) => source_emit_node.helpers.clone(),
             None => return,
@@ -173,19 +173,19 @@ impl EmitContext {
         }
     }
 
-    pub fn new_emit_context() -> Box<EmitContext> {
+    pub fn new_emit_context() -> Box<EmitContext> { ::tsox_core::fntrace::enter("new_emit_context"); 
         Box::new(EmitContext::default())
     }
 
     pub fn new_node_visitor<T>(
         &self,
         visit: impl Fn(&mut T, Arc<Node>) -> Option<Arc<Node>>,
-    ) -> NodeVisitor {
+    ) -> NodeVisitor { ::tsox_core::fntrace::enter("new_node_visitor"); 
         let _ = visit;
         NodeVisitor::default()
     }
 
-    pub fn new_not_emitted_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn new_not_emitted_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_not_emitted_statement"); 
         let mut statement = self.factory().new_not_emitted_statement();
         statement.set_loc(node.loc);
         self.set_original(&statement, node);
@@ -193,12 +193,12 @@ impl EmitContext {
         statement
     }
 
-    pub fn original(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn original(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("original"); 
         let _ = node;
         None
     }
 
-    pub fn parse_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn parse_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_node"); 
         let node = self.most_original(node);
         if is_parse_tree_node(&node) {
             Some(node)
@@ -207,13 +207,13 @@ impl EmitContext {
         }
     }
 
-    pub fn read_emit_helpers(&mut self) -> Vec<Arc<EmitHelper>> {
+    pub fn read_emit_helpers(&mut self) -> Vec<Arc<EmitHelper>> { ::tsox_core::fntrace::enter("read_emit_helpers"); 
         Vec::new()
     }
 
-    pub fn request_emit_helper(&mut self, helper: &'static Arc<EmitHelper>) {
+    pub fn request_emit_helper(&mut self, helper: &'static Arc<EmitHelper>) { ::tsox_core::fntrace::enter("request_emit_helper"); 
         let _ = helper;
     }
 
-    pub fn reset(&mut self) {}
+    pub fn reset(&mut self) { ::tsox_core::fntrace::enter("reset"); }
 }

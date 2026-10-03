@@ -14,21 +14,21 @@ pub(crate) struct RelaterErrorState {
 }
 
 impl Checker {
-    pub(crate) fn get_error_state(&self) -> RelaterErrorState {
+    pub(crate) fn get_error_state(&self) -> RelaterErrorState { ::tsox_core::fntrace::enter("get_error_state"); 
         RelaterErrorState {
             error_chain: self.relater_error_chain.clone(),
         }
     }
 
-    pub(crate) fn restore_error_state(&mut self, e: RelaterErrorState) {
+    pub(crate) fn restore_error_state(&mut self, e: RelaterErrorState) { ::tsox_core::fntrace::enter("restore_error_state"); 
         self.relater_error_chain = e.error_chain;
     }
 
-    pub(crate) fn clear_error_chain(&mut self) {
+    pub(crate) fn clear_error_chain(&mut self) { ::tsox_core::fntrace::enter("clear_error_chain"); 
         self.relater_error_chain = Vec::new();
     }
 
-    pub(crate) fn get_chain_message(&self, index: usize) -> Option<Message> {
+    pub(crate) fn get_chain_message(&self, index: usize) -> Option<Message> { ::tsox_core::fntrace::enter("get_chain_message"); 
         self.relater_error_chain
             .iter()
             .rev()
@@ -36,7 +36,7 @@ impl Checker {
             .map(|e| e.message)
     }
 
-    pub(crate) fn chain_args_match(&self, args: &[String]) -> bool {
+    pub(crate) fn chain_args_match(&self, args: &[String]) -> bool { ::tsox_core::fntrace::enter("chain_args_match"); 
         match self.relater_error_chain.last() {
             Some(entry) => {
                 for (i, a) in args.iter().enumerate() {
@@ -62,26 +62,26 @@ thread_local! {
     static CURRENT_RELATION: RefCell<RelationKind> = RefCell::new(RelationKind::Assignable);
 }
 
-pub(crate) fn pending_related_push(related: ChainRelated) {
+pub(crate) fn pending_related_push(related: ChainRelated) { ::tsox_core::fntrace::enter("pending_related_push"); 
     PENDING_RELATED.with(|p| p.borrow_mut().push(related));
 }
 
-pub(crate) fn pending_related_take_all() -> Vec<ChainRelated> {
+pub(crate) fn pending_related_take_all() -> Vec<ChainRelated> { ::tsox_core::fntrace::enter("pending_related_take_all"); 
     PENDING_RELATED.with(|p| std::mem::take(&mut *p.borrow_mut()))
 }
 
-pub(crate) fn current_relation_kind() -> RelationKind {
+pub(crate) fn current_relation_kind() -> RelationKind { ::tsox_core::fntrace::enter("current_relation_kind"); 
     CURRENT_RELATION.with(|r| *r.borrow())
 }
 
-pub(crate) fn set_current_relation_kind(kind: RelationKind) {
+pub(crate) fn set_current_relation_kind(kind: RelationKind) { ::tsox_core::fntrace::enter("set_current_relation_kind"); 
     CURRENT_RELATION.with(|r| {
         *r.borrow_mut() = kind;
     });
 }
 
 impl Checker {
-    pub(crate) fn global_string_type(&mut self) -> Arc<crate::checker::types::Type> {
+    pub(crate) fn global_string_type(&mut self) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("global_string_type"); 
         if let Some(t) = self.global_string_type.get() {
             return Arc::clone(t);
         }
@@ -90,7 +90,7 @@ impl Checker {
         t
     }
 
-    pub(crate) fn global_number_type(&mut self) -> Arc<crate::checker::types::Type> {
+    pub(crate) fn global_number_type(&mut self) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("global_number_type"); 
         if let Some(t) = self.global_number_type.get() {
             return Arc::clone(t);
         }
@@ -99,7 +99,7 @@ impl Checker {
         t
     }
 
-    pub(crate) fn global_boolean_type(&mut self) -> Arc<crate::checker::types::Type> {
+    pub(crate) fn global_boolean_type(&mut self) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("global_boolean_type"); 
         if let Some(t) = self.global_boolean_type.get() {
             return Arc::clone(t);
         }
@@ -108,7 +108,7 @@ impl Checker {
         t
     }
 
-    pub(crate) fn get_global_es_symbol_type(&mut self) -> Arc<crate::checker::types::Type> {
+    pub(crate) fn get_global_es_symbol_type(&mut self) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("get_global_es_symbol_type"); 
         if let Some(t) = self.es_symbol_type.get() {
             return Arc::clone(t);
         }
@@ -117,7 +117,7 @@ impl Checker {
         t
     }
 
-    pub(crate) fn get_global_big_int_type(&mut self) -> Arc<crate::checker::types::Type> {
+    pub(crate) fn get_global_big_int_type(&mut self) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("get_global_big_int_type"); 
         if let Some(t) = self.global_bigint_type.get() {
             return Arc::clone(t);
         }
@@ -127,59 +127,59 @@ impl Checker {
     }
 }
 
-pub(crate) fn maybe_keys_len() -> usize {
+pub(crate) fn maybe_keys_len() -> usize { ::tsox_core::fntrace::enter("maybe_keys_len"); 
     MAYBE_KEYS.with(|k| k.borrow().len())
 }
 
-pub(crate) fn maybe_keys_get(index: usize) -> Option<CacheHashKey> {
+pub(crate) fn maybe_keys_get(index: usize) -> Option<CacheHashKey> { ::tsox_core::fntrace::enter("maybe_keys_get"); 
     MAYBE_KEYS.with(|k| k.borrow().get(index).copied())
 }
 
-pub(crate) fn maybe_keys_truncate(maybe_start: usize) {
+pub(crate) fn maybe_keys_truncate(maybe_start: usize) { ::tsox_core::fntrace::enter("maybe_keys_truncate"); 
     MAYBE_KEYS.with(|k| k.borrow_mut().truncate(maybe_start));
 }
 
-pub(crate) fn maybe_keys_set_remove(key: &CacheHashKey) {
+pub(crate) fn maybe_keys_set_remove(key: &CacheHashKey) { ::tsox_core::fntrace::enter("maybe_keys_set_remove"); 
     MAYBE_KEYS_SET.with(|s| {
         s.borrow_mut().remove(key);
     });
 }
 
-pub(crate) fn maybe_result_mark_succeeded(key: CacheHashKey, extra: RelationComparisonResult) {
+pub(crate) fn maybe_result_mark_succeeded(key: CacheHashKey, extra: RelationComparisonResult) { ::tsox_core::fntrace::enter("maybe_result_mark_succeeded"); 
     MAYBE_RESULTS.with(|m| {
         m.borrow_mut().insert(key, RelationComparisonResult::Succeeded | extra);
     });
 }
 
-pub(crate) fn maybe_keys_set_clear() {
+pub(crate) fn maybe_keys_set_clear() { ::tsox_core::fntrace::enter("maybe_keys_set_clear"); 
     MAYBE_KEYS_SET.with(|s| s.borrow_mut().clear());
 }
 
-pub(crate) fn skip_direct_inference_nodes_insert(key: usize) {
+pub(crate) fn skip_direct_inference_nodes_insert(key: usize) { ::tsox_core::fntrace::enter("skip_direct_inference_nodes_insert"); 
     SKIP_DIRECT_INFERENCE_NODES.with(|s| {
         s.borrow_mut().insert(key);
     });
 }
 
-pub(crate) fn skip_direct_inference_nodes_clear() {
+pub(crate) fn skip_direct_inference_nodes_clear() { ::tsox_core::fntrace::enter("skip_direct_inference_nodes_clear"); 
     SKIP_DIRECT_INFERENCE_NODES.with(|s| s.borrow_mut().clear());
 }
 
-pub(crate) fn skip_direct_inference_nodes_has(key: usize) -> bool {
+pub(crate) fn skip_direct_inference_nodes_has(key: usize) -> bool { ::tsox_core::fntrace::enter("skip_direct_inference_nodes_has"); 
     SKIP_DIRECT_INFERENCE_NODES.with(|s| s.borrow().contains(&key))
 }
 
-pub(crate) fn inference_partially_blocked_get() -> bool {
+pub(crate) fn inference_partially_blocked_get() -> bool { ::tsox_core::fntrace::enter("inference_partially_blocked_get"); 
     INFERENCE_PARTIALLY_BLOCKED.with(|b| *b.borrow())
 }
 
-pub(crate) fn inference_partially_blocked_set(value: bool) {
+pub(crate) fn inference_partially_blocked_set(value: bool) { ::tsox_core::fntrace::enter("inference_partially_blocked_set"); 
     INFERENCE_PARTIALLY_BLOCKED.with(|b| {
         *b.borrow_mut() = value;
     });
 }
 
-pub fn is_call_like_expression(node: &Arc<Node>) -> bool {
+pub fn is_call_like_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_call_like_expression"); 
     matches!(
         node.kind,
         SyntaxKind::JsxOpeningElement
@@ -192,12 +192,12 @@ pub fn is_call_like_expression(node: &Arc<Node>) -> bool {
     )
 }
 
-pub fn is_call_like_or_function_like_expression(node: &Arc<Node>) -> bool {
+pub fn is_call_like_or_function_like_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_call_like_or_function_like_expression"); 
     is_call_like_expression(node)
         || tsox_frontend::ast::is_function_expression_or_arrow_function(node)
 }
 
-pub fn get_class_like_declaration_of_symbol(symbol: &tsox_frontend::ast::Symbol) -> Option<Arc<Node>> {
+pub fn get_class_like_declaration_of_symbol(symbol: &tsox_frontend::ast::Symbol) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_class_like_declaration_of_symbol"); 
     symbol
         .declarations
         .iter()
@@ -210,7 +210,7 @@ pub fn get_class_like_declaration_of_symbol(symbol: &tsox_frontend::ast::Symbol)
         .cloned()
 }
 
-pub fn find_constructor_declaration(class_decl: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn find_constructor_declaration(class_decl: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_constructor_declaration"); 
     let members = match &class_decl.data {
         tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.members,
         tsox_frontend::ast::NodeData::ClassExpression(d) => &d.members,

@@ -13,7 +13,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         expression: Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_expression_with_type_arguments"); 
         tsox_frontend::format::mig::m4o::new_node_factory(Default::default())
             .update_expression_with_type_arguments(node, &expression, type_arguments)
     }

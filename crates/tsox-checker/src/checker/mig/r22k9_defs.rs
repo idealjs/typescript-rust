@@ -37,13 +37,13 @@ pub struct SerializedTypeEntry {
 pub struct VisitedTypeSet22(pub HashSet<u32>);
 
 impl VisitedTypeSet22 {
-    pub fn has(&self, id: u32) -> bool {
+    pub fn has(&self, id: u32) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.0.contains(&id)
     }
-    pub fn add(&mut self, id: u32) {
+    pub fn add(&mut self, id: u32) { ::tsox_core::fntrace::enter("add"); 
         self.0.insert(id);
     }
-    pub fn delete(&mut self, id: u32) {
+    pub fn delete(&mut self, id: u32) { ::tsox_core::fntrace::enter("delete"); 
         self.0.remove(&id);
     }
 }
@@ -54,7 +54,7 @@ pub struct ScopeStack22 {
 }
 
 impl ScopeStack22 {
-    pub fn enter_scope(&mut self) -> Box<dyn FnOnce(&mut NodeBuilderContext)> {
+    pub fn enter_scope(&mut self) -> Box<dyn FnOnce(&mut NodeBuilderContext)> { ::tsox_core::fntrace::enter("enter_scope"); 
         self.stack.push(1);
         let depth = self.stack.len();
         Box::new(move |ctx: &mut NodeBuilderContext| {
@@ -82,25 +82,25 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-pub fn ctx_side_key(ctx: &NodeBuilderContext) -> usize {
+pub fn ctx_side_key(ctx: &NodeBuilderContext) -> usize { ::tsox_core::fntrace::enter("ctx_side_key"); 
     ctx as *const NodeBuilderContext as usize
 }
 
 pub fn side_with<R>(
     ctx: &NodeBuilderContext,
     f: impl FnOnce(&mut NodeBuilderCtxSideState22) -> R,
-) -> R {
+) -> R { ::tsox_core::fntrace::enter("side_with"); 
     SIDE_STATE.with(|m| f(m.borrow_mut().entry(ctx_side_key(ctx)).or_default()))
 }
 
-pub fn links_has(node: &Arc<Node>) -> bool {
+pub fn links_has(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("links_has"); 
     NODE_SERIALIZED_TYPES.with(|m| m.borrow().contains_key(&(Arc::as_ptr(node) as usize)))
 }
 
 pub fn links_with<R>(
     node: &Arc<Node>,
     f: impl FnOnce(&mut HashMap<CompositeTypeCacheIdentity, SerializedTypeEntry>) -> R,
-) -> R {
+) -> R { ::tsox_core::fntrace::enter("links_with"); 
     NODE_SERIALIZED_TYPES.with(|m| f(m.borrow_mut().entry(Arc::as_ptr(node) as usize).or_default()))
 }
 
@@ -119,7 +119,7 @@ impl NodeBuilderCtxTrackExt22 for NodeBuilderContext {
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("track_symbol"); 
         match self.tracker.as_mut() {
             Some(tracker) => tracker.track_symbol(symbol, enclosing_declaration, meaning),
             None => false,
@@ -137,7 +137,7 @@ pub trait PseudoCheckerExt22 {
 }
 
 impl PseudoCheckerExt22 for PseudoCheckerStub {
-    fn get_return_type_of_signature(&self, _declaration: &Arc<Node>) -> Option<Arc<Type>> {
+    fn get_return_type_of_signature(&self, _declaration: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_of_signature"); 
         None
     }
 }
@@ -178,7 +178,7 @@ impl<'a> NodeBuilderPseudoExt22 for NodeBuilderImpl<'a> {
         t: &Arc<Type>,
         _assume_pseudo_valid: bool,
         _report_fallback: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("pseudo_type_equivalent_to_type"); 
         matches!(pseudo, Some(p) if Arc::ptr_eq(p, t))
     }
 
@@ -186,7 +186,7 @@ impl<'a> NodeBuilderPseudoExt22 for NodeBuilderImpl<'a> {
         &mut self,
         pseudo: Option<&Arc<Type>>,
         _predicate: &TypePredicate,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("pseudo_return_type_matches_predicate"); 
         pseudo.is_some()
     }
 
@@ -194,7 +194,7 @@ impl<'a> NodeBuilderPseudoExt22 for NodeBuilderImpl<'a> {
         &mut self,
         pseudo: Option<&Arc<Type>>,
         fallback: &Arc<Type>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("pseudo_type_to_node_with_checker_fallback"); 
         match pseudo {
             Some(p) => self.type_to_type_node_ex(p),
             None => self.type_to_type_node_ex(fallback),
@@ -207,18 +207,18 @@ impl<'a> NodeBuilderPseudoExt22 for NodeBuilderImpl<'a> {
         t: &Arc<Type>,
         _symbol: Option<&Arc<Symbol>>,
         _preserve_modifier_flags: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("serialize_type_for_declaration"); 
         self.type_to_type_node_ex(t)
     }
 
-    fn type_to_type_node_ex(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    fn type_to_type_node_ex(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_to_type_node_ex"); 
         match self.type_to_type_node(t) {
             Some(n) => n,
             None => NodeFactoryStub.new_keyword_type_node(SyntaxKind::UnknownKeyword),
         }
     }
 
-    fn deep_clone_node(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn deep_clone_node(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("deep_clone_node"); 
         Arc::clone(node)
     }
 }

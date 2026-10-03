@@ -32,16 +32,16 @@ mod pseudo_node_ext {
     }
 
     impl<'a> FunctionLikeData<'a> {
-        pub fn type_parameters(&self) -> Option<&'a Arc<NodeList>> {
+        pub fn type_parameters(&self) -> Option<&'a Arc<NodeList>> { ::tsox_core::fntrace::enter("type_parameters"); 
             self.type_parameters
         }
-        pub fn parameters(&self) -> Option<&'a Arc<NodeList>> {
+        pub fn parameters(&self) -> Option<&'a Arc<NodeList>> { ::tsox_core::fntrace::enter("parameters"); 
             self.parameters
         }
-        pub fn type_node(&self) -> Option<&'a Arc<Node>> {
+        pub fn type_node(&self) -> Option<&'a Arc<Node>> { ::tsox_core::fntrace::enter("type_node"); 
             self.type_node
         }
-        pub fn full_signature(&self) -> Option<&'a Arc<Node>> {
+        pub fn full_signature(&self) -> Option<&'a Arc<Node>> { ::tsox_core::fntrace::enter("full_signature"); 
             self.full_signature
         }
     }
@@ -74,7 +74,7 @@ mod pseudo_node_ext {
     }
 
     impl PseudoNodeExt for Arc<Node> {
-        fn function_like_data(&self) -> Option<FunctionLikeData<'_>> {
+        fn function_like_data(&self) -> Option<FunctionLikeData<'_>> { ::tsox_core::fntrace::enter("function_like_data"); 
             let f = match &self.data {
                 NodeData::FunctionDeclaration(d) => FunctionLikeData {
                     type_parameters: d.type_parameters.as_ref(),
@@ -165,11 +165,11 @@ mod pseudo_node_ext {
             Some(f)
         }
 
-        fn parameters(&self) -> Option<&Arc<NodeList>> {
+        fn parameters(&self) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("parameters"); 
             self.function_like_data()?.parameters
         }
 
-        fn body(&self) -> Option<&Arc<Node>> {
+        fn body(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("body"); 
             match &self.data {
                 NodeData::FunctionDeclaration(d) => d.body.as_ref(),
                 NodeData::MethodDeclaration(d) => d.body.as_ref(),
@@ -182,11 +182,11 @@ mod pseudo_node_ext {
             }
         }
 
-        fn initializer(&self) -> Option<&Arc<Node>> {
+        fn initializer(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("initializer"); 
             tsox_frontend::ast::mig::m3b::initializer(self)
         }
 
-        fn label(&self) -> Option<&Arc<Node>> {
+        fn label(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("label"); 
             match &self.data {
                 NodeData::LabeledStatement(d) => Some(&d.label),
                 NodeData::BreakStatement(d) => d.label.as_ref(),
@@ -195,130 +195,130 @@ mod pseudo_node_ext {
             }
         }
 
-        fn symbol(&self) -> Option<Arc<Symbol>> {
+        fn symbol(&self) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("symbol"); 
             tsox_checker::checker::mig::m1a::r19k2_defs::symbol_of_node(self)
         }
 
-        fn as_object_literal_expression(&self) -> Option<&ObjectLiteralExpressionData> {
+        fn as_object_literal_expression(&self) -> Option<&ObjectLiteralExpressionData> { ::tsox_core::fntrace::enter("as_object_literal_expression"); 
             match &self.data {
                 NodeData::ObjectLiteralExpression(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_array_literal_expression(&self) -> Option<&ArrayLiteralExpressionData> {
+        fn as_array_literal_expression(&self) -> Option<&ArrayLiteralExpressionData> { ::tsox_core::fntrace::enter("as_array_literal_expression"); 
             match &self.data {
                 NodeData::ArrayLiteralExpression(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_parameter_declaration(&self) -> Option<&ParameterDeclarationData> {
+        fn as_parameter_declaration(&self) -> Option<&ParameterDeclarationData> { ::tsox_core::fntrace::enter("as_parameter_declaration"); 
             match &self.data {
                 NodeData::ParameterDeclaration(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_get_accessor_declaration(&self) -> Option<&GetAccessorDeclarationData> {
+        fn as_get_accessor_declaration(&self) -> Option<&GetAccessorDeclarationData> { ::tsox_core::fntrace::enter("as_get_accessor_declaration"); 
             match &self.data {
                 NodeData::GetAccessorDeclaration(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_set_accessor_declaration(&self) -> Option<&SetAccessorDeclarationData> {
+        fn as_set_accessor_declaration(&self) -> Option<&SetAccessorDeclarationData> { ::tsox_core::fntrace::enter("as_set_accessor_declaration"); 
             match &self.data {
                 NodeData::SetAccessorDeclaration(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_method_declaration(&self) -> Option<&MethodDeclarationData> {
+        fn as_method_declaration(&self) -> Option<&MethodDeclarationData> { ::tsox_core::fntrace::enter("as_method_declaration"); 
             match &self.data {
                 NodeData::MethodDeclaration(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_property_declaration(&self) -> Option<&PropertyDeclarationData> {
+        fn as_property_declaration(&self) -> Option<&PropertyDeclarationData> { ::tsox_core::fntrace::enter("as_property_declaration"); 
             match &self.data {
                 NodeData::PropertyDeclaration(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_property_assignment(&self) -> Option<&PropertyAssignmentData> {
+        fn as_property_assignment(&self) -> Option<&PropertyAssignmentData> { ::tsox_core::fntrace::enter("as_property_assignment"); 
             match &self.data {
                 NodeData::PropertyAssignment(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_variable_declaration(&self) -> Option<&VariableDeclarationData> {
+        fn as_variable_declaration(&self) -> Option<&VariableDeclarationData> { ::tsox_core::fntrace::enter("as_variable_declaration"); 
             match &self.data {
                 NodeData::VariableDeclaration(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_return_statement(&self) -> Option<&ReturnStatementData> {
+        fn as_return_statement(&self) -> Option<&ReturnStatementData> { ::tsox_core::fntrace::enter("as_return_statement"); 
             match &self.data {
                 NodeData::ReturnStatement(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_parenthesized_expression(&self) -> Option<&ParenthesizedExpressionData> {
+        fn as_parenthesized_expression(&self) -> Option<&ParenthesizedExpressionData> { ::tsox_core::fntrace::enter("as_parenthesized_expression"); 
             match &self.data {
                 NodeData::ParenthesizedExpression(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_parenthesized_type_node(&self) -> Option<&ParenthesizedTypeNodeData> {
+        fn as_parenthesized_type_node(&self) -> Option<&ParenthesizedTypeNodeData> { ::tsox_core::fntrace::enter("as_parenthesized_type_node"); 
             match &self.data {
                 NodeData::ParenthesizedTypeNode(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_intersection_type_node(&self) -> Option<&IntersectionTypeNodeData> {
+        fn as_intersection_type_node(&self) -> Option<&IntersectionTypeNodeData> { ::tsox_core::fntrace::enter("as_intersection_type_node"); 
             match &self.data {
                 NodeData::IntersectionTypeNode(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_union_type_node(&self) -> Option<&UnionTypeNodeData> {
+        fn as_union_type_node(&self) -> Option<&UnionTypeNodeData> { ::tsox_core::fntrace::enter("as_union_type_node"); 
             match &self.data {
                 NodeData::UnionTypeNode(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_type_assertion_expression(&self) -> Option<&TypeAssertionData> {
+        fn as_type_assertion_expression(&self) -> Option<&TypeAssertionData> { ::tsox_core::fntrace::enter("as_type_assertion_expression"); 
             match &self.data {
                 NodeData::TypeAssertion(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_as_expression(&self) -> Option<&AsExpressionData> {
+        fn as_as_expression(&self) -> Option<&AsExpressionData> { ::tsox_core::fntrace::enter("as_as_expression"); 
             match &self.data {
                 NodeData::AsExpression(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_prefix_unary_expression(&self) -> Option<&PrefixUnaryExpressionData> {
+        fn as_prefix_unary_expression(&self) -> Option<&PrefixUnaryExpressionData> { ::tsox_core::fntrace::enter("as_prefix_unary_expression"); 
             match &self.data {
                 NodeData::PrefixUnaryExpression(d) => Some(d),
                 _ => None,
             }
         }
 
-        fn as_identifier(&self) -> Option<&IdentifierData> {
+        fn as_identifier(&self) -> Option<&IdentifierData> { ::tsox_core::fntrace::enter("as_identifier"); 
             match &self.data {
                 NodeData::Identifier(d) => Some(d),
                 _ => None,
@@ -335,7 +335,7 @@ pub struct PseudoChecker {
 }
 
 impl PseudoChecker {
-    pub fn can_get_type_from_object_literal(&self, node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+    pub fn can_get_type_from_object_literal(&self, node: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("can_get_type_from_object_literal"); 
         let properties = node
             .as_object_literal_expression()
             .map(|d| d.properties.clone());
@@ -377,7 +377,7 @@ impl PseudoChecker {
         Some(error_nodes)
     }
 
-    pub fn can_get_type_from_array_literal(&self, node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+    pub fn can_get_type_from_array_literal(&self, node: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("can_get_type_from_array_literal"); 
         if !is_in_const_context(node) {
             return Some(vec![Arc::clone(node)]);
         }
@@ -395,7 +395,7 @@ impl PseudoChecker {
         None
     }
 
-    pub fn clone_type_parameters(&self, nodes: Option<&Arc<NodeList>>) -> Option<Vec<Arc<Node>>> {
+    pub fn clone_type_parameters(&self, nodes: Option<&Arc<NodeList>>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("clone_type_parameters"); 
         let nodes = nodes?;
         if nodes.nodes.is_empty() {
             return None;
@@ -403,7 +403,7 @@ impl PseudoChecker {
         Some(nodes.nodes.clone())
     }
 
-    pub fn clone_parameters(&self, nodes: Option<&Arc<NodeList>>) -> Option<Vec<PseudoParameter>> {
+    pub fn clone_parameters(&self, nodes: Option<&Arc<NodeList>>) -> Option<Vec<PseudoParameter>> { ::tsox_core::fntrace::enter("clone_parameters"); 
         let nodes = nodes?;
         if nodes.nodes.is_empty() {
             return None;
@@ -437,7 +437,7 @@ impl PseudoChecker {
         Some(result)
     }
 
-    pub fn create_return_from_signature(&self, fn_node: &Arc<Node>) -> PseudoType {
+    pub fn create_return_from_signature(&self, fn_node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("create_return_from_signature"); 
         if ast::is_function_like(fn_node) {
             if let Some(d) = fn_node.function_like_data() {
                 if let Some(r) = &d.type_node() {
@@ -455,7 +455,7 @@ impl PseudoChecker {
         &self,
         accessor: &Arc<Node>,
         name: &Arc<Node>,
-    ) -> Option<PseudoObjectElement> {
+    ) -> Option<PseudoObjectElement> { ::tsox_core::fntrace::enter("get_accessor_member"); 
         let declarations = accessor
             .symbol()
             .map(|s| s.declarations.clone())
@@ -521,7 +521,7 @@ impl PseudoChecker {
         &self,
         node: &Arc<Node>,
         accessors: &AllAccessorDeclarations,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_annotation_from_all_accessor_declarations"); 
         let mut accessor_type = self.get_type_annotation_from_accessor(node);
         if accessor_type.is_none() {
             if let Some(first) = accessors.first_accessor.as_ref() {
@@ -540,7 +540,7 @@ impl PseudoChecker {
         accessor_type
     }
 
-    pub fn get_type_annotation_from_accessor(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_type_annotation_from_accessor(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_annotation_from_accessor"); 
         if node.kind == SyntaxKind::GetAccessor {
             return node
                 .as_get_accessor_declaration()
@@ -564,7 +564,7 @@ impl PseudoChecker {
         None
     }
 
-    pub fn type_from_accessor(&self, accessor: &Arc<Node>) -> PseudoType {
+    pub fn type_from_accessor(&self, accessor: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_accessor"); 
         let declarations = accessor
             .symbol()
             .map(|s| s.declarations.clone())
@@ -599,7 +599,7 @@ impl PseudoChecker {
         new_pseudo_type_no_result(Arc::clone(accessor))
     }
 
-    pub fn type_from_array_literal(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_array_literal(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_array_literal"); 
         if let Some(error_nodes) = self.can_get_type_from_array_literal(node) {
             if !error_nodes.is_empty() {
                 return new_pseudo_type_inferred_with_errors(Arc::clone(node), false, error_nodes);
@@ -620,14 +620,14 @@ impl PseudoChecker {
         new_pseudo_type_tuple(results)
     }
 
-    pub fn type_from_expando_property(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_expando_property(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_expando_property"); 
         if let Some(declared_type) = node.type_node() {
             return new_pseudo_type_direct(Arc::clone(declared_type));
         }
         new_pseudo_type_no_result(Arc::clone(node))
     }
 
-    pub fn type_from_expression(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_expression(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_expression"); 
         match node.kind {
             SyntaxKind::OmittedExpression => pseudo_type_undefined(),
             SyntaxKind::ParenthesizedExpression => {
@@ -713,7 +713,7 @@ impl PseudoChecker {
         }
     }
 
-    pub fn type_from_function_like_expression(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_function_like_expression(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_function_like_expression"); 
         if let Some(d) = node.function_like_data() {
             if let Some(full_signature) = d.full_signature() {
                 return new_pseudo_type_direct(Arc::clone(full_signature));
@@ -734,7 +734,7 @@ impl PseudoChecker {
         )
     }
 
-    pub fn type_from_object_literal(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_object_literal(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_object_literal"); 
         if let Some(error_nodes) = self.can_get_type_from_object_literal(node) {
             if !error_nodes.is_empty() {
                 return new_pseudo_type_inferred_with_errors(Arc::clone(node), false, error_nodes);
@@ -815,7 +815,7 @@ impl PseudoChecker {
         new_pseudo_type_object_literal(results)
     }
 
-    pub fn type_from_parameter(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_parameter(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_parameter"); 
         let Some(parent) = node.parent() else {
             return new_pseudo_type_no_result(Arc::clone(node));
         };
@@ -846,7 +846,7 @@ impl PseudoChecker {
         node: &Arc<Node>,
         self_idx: usize,
         last_required: usize,
-    ) -> PseudoType {
+    ) -> PseudoType { ::tsox_core::fntrace::enter("type_from_parameter_worker"); 
         let Some(parent) = node.parent() else {
             return new_pseudo_type_no_result(Arc::clone(node));
         };
@@ -892,7 +892,7 @@ impl PseudoChecker {
         new_pseudo_type_no_result(Arc::clone(node))
     }
 
-    pub fn type_from_primitive_literal_prefix(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_primitive_literal_prefix(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_primitive_literal_prefix"); 
         let data = node.as_prefix_unary_expression();
         let operator = data.map(|d| d.operator);
         let operand = data
@@ -919,7 +919,7 @@ impl PseudoChecker {
         new_pseudo_type_no_result(Arc::clone(node))
     }
 
-    pub fn type_from_property(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_property(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_property"); 
         if let Some(t) = node.type_node() {
             return new_pseudo_type_direct(Arc::clone(t));
         }
@@ -969,7 +969,7 @@ impl PseudoChecker {
         new_pseudo_type_no_result(Arc::clone(node))
     }
 
-    pub fn type_from_property_assignment(&self, node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_property_assignment(&self, node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_property_assignment"); 
         if let Some(annotation) = node.type_node() {
             return new_pseudo_type_direct(Arc::clone(annotation));
         }
@@ -990,7 +990,7 @@ impl PseudoChecker {
         new_pseudo_type_no_result(Arc::clone(node))
     }
 
-    pub fn type_from_single_return_expression(&self, fn_node: &Arc<Node>) -> PseudoType {
+    pub fn type_from_single_return_expression(&self, fn_node: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_single_return_expression"); 
         let mut candidate_expr: Option<Arc<Node>> = None;
         let body = fn_node.body();
         if let Some(body) = &body {
@@ -1047,14 +1047,14 @@ impl PseudoChecker {
         &self,
         expression: &Arc<Node>,
         type_node: &Arc<Node>,
-    ) -> PseudoType {
+    ) -> PseudoType { ::tsox_core::fntrace::enter("type_from_type_assertion"); 
         if is_const_type_reference(type_node.as_ref()) {
             return self.type_from_expression(expression);
         }
         new_pseudo_type_direct(Arc::clone(type_node))
     }
 
-    pub fn type_from_variable(&self, declaration: &Arc<Node>) -> PseudoType {
+    pub fn type_from_variable(&self, declaration: &Arc<Node>) -> PseudoType { ::tsox_core::fntrace::enter("type_from_variable"); 
         let data = declaration.as_variable_declaration();
         if let Some(t) = data.and_then(|d| d.type_node.clone()) {
             return new_pseudo_type_direct(t);
@@ -1089,7 +1089,7 @@ impl PseudoChecker {
     }
 }
 
-pub fn is_const_context_propagating_kind(kind: SyntaxKind) -> bool {
+pub fn is_const_context_propagating_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_const_context_propagating_kind"); 
     matches!(
         kind,
         SyntaxKind::ArrayLiteralExpression
@@ -1103,7 +1103,7 @@ pub fn is_const_context_propagating_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn is_contextually_typed(node: &Arc<Node>) -> bool {
+pub fn is_contextually_typed(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_contextually_typed"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -1125,13 +1125,13 @@ pub fn is_contextually_typed(node: &Arc<Node>) -> bool {
     .is_some()
 }
 
-pub fn is_optional_initialized_or_rest_parameter(node: &Arc<Node>) -> bool {
+pub fn is_optional_initialized_or_rest_parameter(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_optional_initialized_or_rest_parameter"); 
     node.as_parameter_declaration()
         .map(|d| d.dot_dot_dot_token.is_some() || d.initializer.is_some() || d.question_token.is_some())
         .unwrap_or(false)
 }
 
-pub fn is_undefined_pseudo_type(t: &PseudoType) -> bool {
+pub fn is_undefined_pseudo_type(t: &PseudoType) -> bool { ::tsox_core::fntrace::enter("is_undefined_pseudo_type"); 
     if t.kind == PseudoTypeKind::Undefined {
         return true;
     }
@@ -1145,7 +1145,7 @@ pub fn is_undefined_pseudo_type(t: &PseudoType) -> bool {
     false
 }
 
-pub fn is_value_signature_declaration(node: &Node) -> bool {
+pub fn is_value_signature_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_value_signature_declaration"); 
     ast::is_function_expression(node)
         || ast::is_arrow_function(node)
         || ast::is_method_declaration(node)
@@ -1154,7 +1154,7 @@ pub fn is_value_signature_declaration(node: &Node) -> bool {
         || ast::is_constructor_declaration(node)
 }
 
-pub fn last_required_param_index(params: &[Arc<Node>]) -> usize {
+pub fn last_required_param_index(params: &[Arc<Node>]) -> usize { ::tsox_core::fntrace::enter("last_required_param_index"); 
     for i in (0..params.len()).rev() {
         if !is_optional_initialized_or_rest_parameter(&params[i]) {
             return i + 1;
@@ -1163,7 +1163,7 @@ pub fn last_required_param_index(params: &[Arc<Node>]) -> usize {
     0
 }
 
-pub fn type_node_could_refer_to_undefined(node: &Arc<Node>) -> bool {
+pub fn type_node_could_refer_to_undefined(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_node_could_refer_to_undefined"); 
     let mut node = Arc::clone(node);
     while node.kind == SyntaxKind::ParenthesizedType {
         let next = node

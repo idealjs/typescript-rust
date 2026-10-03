@@ -15,21 +15,21 @@ pub struct FallbackWatcher {
 }
 
 impl FallbackWatcher {
-    pub fn new(primary: Arc<dyn Watcher>, secondary: Arc<dyn Watcher>) -> FallbackWatcher {
+    pub fn new(primary: Arc<dyn Watcher>, secondary: Arc<dyn Watcher>) -> FallbackWatcher { crate::fntrace::enter("new"); 
         FallbackWatcher { primary, secondary }
     }
 }
 
 impl Watcher for FallbackWatcher {
-    fn name(&self) -> &str {
+    fn name(&self) -> &str { crate::fntrace::enter("name"); 
         self.primary.name()
     }
 
-    fn available(&self) -> bool {
+    fn available(&self) -> bool { crate::fntrace::enter("available"); 
         self.primary.available()
     }
 
-    fn has_fast_recursive_backend(&self) -> bool {
+    fn has_fast_recursive_backend(&self) -> bool { crate::fntrace::enter("has_fast_recursive_backend"); 
         self.primary.has_fast_recursive_backend()
     }
 
@@ -38,7 +38,7 @@ impl Watcher for FallbackWatcher {
         dir: &str,
         callback: WatchCallback,
         options: &[WatchOption],
-    ) -> Result<Arc<dyn Watch>, FswatchError> {
+    ) -> Result<Arc<dyn Watch>, FswatchError> { crate::fntrace::enter("watch_directory"); 
         let requests = [WatchDirectoryRequest {
             dir: dir.to_string(),
             callback: Some(callback),
@@ -51,7 +51,7 @@ impl Watcher for FallbackWatcher {
     fn watch_directories(
         &self,
         requests: &[WatchDirectoryRequest],
-    ) -> Result<Vec<Arc<dyn Watch>>, FswatchError> {
+    ) -> Result<Vec<Arc<dyn Watch>>, FswatchError> { crate::fntrace::enter("watch_directories"); 
         match self.primary.watch_directories(requests) {
             Ok(watches) => Ok(watches),
             Err(err) if is_fswatch_err(&err, ERR_FILESYSTEM_UNSUPPORTED) => {
@@ -94,7 +94,7 @@ impl Watcher for FallbackWatcher {
         &self,
         path: &str,
         callback: WatchCallback,
-    ) -> Result<Arc<dyn Watch>, FswatchError> {
+    ) -> Result<Arc<dyn Watch>, FswatchError> { crate::fntrace::enter("watch_file"); 
         match self.primary.watch_file(path, Arc::clone(&callback)) {
             Ok(w) => Ok(w),
             Err(err) if is_fswatch_err(&err, ERR_FILESYSTEM_UNSUPPORTED) => {
@@ -118,26 +118,26 @@ static FANOTIFY_WATCHER: LazyLock<Arc<WatcherImpl>> =
 static FANOTIFY_FALLBACK_WATCHER: LazyLock<Arc<FallbackWatcher>> =
     LazyLock::new(|| Arc::new(FallbackWatcher::new(fanotify(), inotify())));
 
-pub fn inotify() -> Arc<dyn Watcher> {
+pub fn inotify() -> Arc<dyn Watcher> { crate::fntrace::enter("inotify"); 
     Arc::clone(&*INOTIFY_WATCHER) as Arc<dyn Watcher>
 }
 
-pub fn fsevents() -> Arc<dyn Watcher> {
+pub fn fsevents() -> Arc<dyn Watcher> { crate::fntrace::enter("fsevents"); 
     Arc::clone(&*FSEVENTS_WATCHER) as Arc<dyn Watcher>
 }
 
-pub fn kqueue() -> Arc<dyn Watcher> {
+pub fn kqueue() -> Arc<dyn Watcher> { crate::fntrace::enter("kqueue"); 
     Arc::clone(&*KQUEUE_WATCHER) as Arc<dyn Watcher>
 }
 
-pub fn windows() -> Arc<dyn Watcher> {
+pub fn windows() -> Arc<dyn Watcher> { crate::fntrace::enter("windows"); 
     Arc::clone(&*WINDOWS_WATCHER) as Arc<dyn Watcher>
 }
 
-pub fn fanotify() -> Arc<dyn Watcher> {
+pub fn fanotify() -> Arc<dyn Watcher> { crate::fntrace::enter("fanotify"); 
     Arc::clone(&*FANOTIFY_FALLBACK_WATCHER) as Arc<dyn Watcher>
 }
 
-pub fn all_watchers() -> Vec<Arc<dyn Watcher>> {
+pub fn all_watchers() -> Vec<Arc<dyn Watcher>> { crate::fntrace::enter("all_watchers"); 
     vec![inotify(), fsevents(), kqueue(), windows(), fanotify()]
 }

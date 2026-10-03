@@ -19,15 +19,15 @@ pub use r21k9_defs::{
 };
 use r22k9_defs::*;
 
-pub fn starts_with_single_or_double_quote(s: &str) -> bool {
+pub fn starts_with_single_or_double_quote(s: &str) -> bool { ::tsox_core::fntrace::enter("starts_with_single_or_double_quote"); 
     s.starts_with('\'') || s.starts_with('"')
 }
 
-pub fn starts_with_square_bracket(s: &str) -> bool {
+pub fn starts_with_square_bracket(s: &str) -> bool { ::tsox_core::fntrace::enter("starts_with_square_bracket"); 
     s.starts_with('[')
 }
 
-pub fn types_are_same_reference(a: &Arc<Type>, b: &Arc<Type>) -> bool {
+pub fn types_are_same_reference(a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("types_are_same_reference"); 
     Arc::ptr_eq(a, b)
         || a
             .symbol
@@ -41,7 +41,7 @@ pub fn types_are_same_reference(a: &Arc<Type>, b: &Arc<Type>) -> bool {
 }
 
 impl<'a> NodeBuilderImpl<'a> {
-    pub fn set_comment_range(&mut self, node: &Arc<Node>, range: Option<&Arc<Node>>) {
+    pub fn set_comment_range(&mut self, node: &Arc<Node>, range: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("set_comment_range"); 
         if let Some(range) = range {
             let enclosing = self.ctx.borrow().enclosing_file.clone();
             if let Some(enclosing_file) = enclosing {
@@ -56,7 +56,7 @@ impl<'a> NodeBuilderImpl<'a> {
         }
     }
 
-    pub fn should_expand_type(&mut self, t: &Arc<Type>, is_alias: bool) -> bool {
+    pub fn should_expand_type(&mut self, t: &Arc<Type>, is_alias: bool) -> bool { ::tsox_core::fntrace::enter("should_expand_type"); 
         {
             let mut ctx = self.ctx.borrow_mut();
             if ctx.max_expansion_depth < 0 {
@@ -82,7 +82,7 @@ impl<'a> NodeBuilderImpl<'a> {
         annotated_declaration: Option<&Arc<Node>>,
         t: &Arc<Type>,
         type_from_type_node: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_node_is_equivalent_to_type"); 
         if Arc::ptr_eq(type_from_type_node, t) {
             return true;
         }
@@ -103,7 +103,7 @@ impl<'a> NodeBuilderImpl<'a> {
         t: &Arc<Type>,
         host: Option<&Arc<Node>>,
         annotation_type: Option<&Arc<Type>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_reuse_existing_non_parameter_type_node"); 
         let host = host
             .cloned()
             .or_else(|| self.ctx.borrow().enclosing_declaration.clone());
@@ -123,7 +123,7 @@ impl<'a> NodeBuilderImpl<'a> {
         None
     }
 
-    pub fn symbol_to_node(&mut self, symbol: &Arc<Symbol>, meaning: SymbolFlags) -> Arc<Node> {
+    pub fn symbol_to_node(&mut self, symbol: &Arc<Symbol>, meaning: SymbolFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("symbol_to_node"); 
         let write_computed = self
             .ctx
             .borrow()
@@ -163,7 +163,7 @@ impl<'a> NodeBuilderImpl<'a> {
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
         expects_identifier: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("symbol_to_name"); 
         let chain = self.lookup_symbol_chain(symbol, meaning, false);
         let allow_qualified = {
             let ctx = self.ctx.borrow();
@@ -181,7 +181,7 @@ impl<'a> NodeBuilderImpl<'a> {
         self.create_entity_name_from_symbol_chain(&chain, index)
     }
 
-    pub fn symbol_to_entity_name_node(&mut self, symbol: &Arc<Symbol>) -> Arc<Node> {
+    pub fn symbol_to_entity_name_node(&mut self, symbol: &Arc<Symbol>) -> Arc<Node> { ::tsox_core::fntrace::enter("symbol_to_entity_name_node"); 
         let identifier = self.new_identifier(&symbol.name.clone(), Some(symbol));
         if let Some(parent) = symbol.parent() {
             let left = self.symbol_to_entity_name_node(&parent);
@@ -190,13 +190,13 @@ impl<'a> NodeBuilderImpl<'a> {
         identifier
     }
 
-    pub fn symbol_to_expression(&mut self, symbol: &Arc<Symbol>, meaning: SymbolFlags) -> Arc<Node> {
+    pub fn symbol_to_expression(&mut self, symbol: &Arc<Symbol>, meaning: SymbolFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("symbol_to_expression"); 
         let chain = self.lookup_symbol_chain(symbol, meaning, false);
         let index = chain.len().saturating_sub(1);
         self.create_expression_from_symbol_chain(&chain, index)
     }
 
-    pub fn sort_by_best_name(&self, a: &SortedSymbolNamePair, b: &SortedSymbolNamePair) -> i32 {
+    pub fn sort_by_best_name(&self, a: &SortedSymbolNamePair, b: &SortedSymbolNamePair) -> i32 { ::tsox_core::fntrace::enter("sort_by_best_name"); 
         let specifier_a = a.name.as_str();
         let specifier_b = b.name.as_str();
         if !specifier_a.is_empty() && !specifier_b.is_empty() {
@@ -216,7 +216,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         type_parameter: &Arc<Type>,
         constraint_node: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_parameter_to_declaration_with_constraint"); 
         let restore_flags = self.save_restore_flags();
         self.ctx
             .borrow_mut()
@@ -250,7 +250,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         name: &str,
         type_parameter: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_parameter_shadows_other_type_parameter_in_scope"); 
         let enclosing = self.ctx.borrow().enclosing_declaration.clone();
         let result = match enclosing.as_ref() {
             Some(location) => self.ch.resolve_name(name, location, SymbolFlags::TYPE, false),
@@ -271,7 +271,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn type_predicate_to_type_predicate_node(
         &mut self,
         predicate: &TypePredicate,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_predicate_to_type_predicate_node"); 
         let asserts_modifier = if predicate.kind == TypePredicateKind::AssertsIdentifier
             || predicate.kind == TypePredicateKind::AssertsThis
         {
@@ -297,7 +297,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         t: Option<&Arc<Type>>,
         type_node: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_to_type_node_helper_with_possible_reusable_type_node"); 
         let Some(t) = t else {
             return self.f.new_keyword_type_node(SyntaxKind::AnyKeyword);
         };
@@ -315,7 +315,7 @@ impl<'a> NodeBuilderImpl<'a> {
         self.type_to_type_node_ex(t)
     }
 
-    pub fn type_parameter_to_declaration(&mut self, parameter: &Arc<Type>) -> Arc<Node> {
+    pub fn type_parameter_to_declaration(&mut self, parameter: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_parameter_to_declaration"); 
         let constraint = self.ch.get_constraint_of_type_parameter(parameter);
         let constraint_node = constraint.as_ref().map(|constraint| {
             let reusable = self.ch.get_constraint_declaration(parameter);
@@ -330,14 +330,14 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn symbol_to_type_parameter_declarations(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Vec<Arc<Node>>> {
+    ) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("symbol_to_type_parameter_declarations"); 
         self.type_parameters_to_type_parameter_declarations(symbol)
     }
 
     pub fn type_parameters_to_type_parameter_declarations(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Vec<Arc<Node>>> {
+    ) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("type_parameters_to_type_parameter_declarations"); 
         let target_symbol = self.ch.get_target_symbol(symbol);
         if target_symbol
             .flags
@@ -365,7 +365,7 @@ impl<'a> NodeBuilderImpl<'a> {
     }
 }
 
-pub fn try_get_module_specifier_from_declaration_worker(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn try_get_module_specifier_from_declaration_worker(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_module_specifier_from_declaration_worker"); 
     match node.kind {
         SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement => {
             let module_call = tsox_frontend::ast::find_ancestor(

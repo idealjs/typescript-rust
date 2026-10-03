@@ -2,23 +2,23 @@
 
 use super::*;
 
-pub(crate) fn is_jsx_line_break(c: char) -> bool {
+pub(crate) fn is_jsx_line_break(c: char) -> bool { ::tsox_core::fntrace::enter("is_jsx_line_break"); 
     matches!(c, '\n' | '\r' | '\u{2028}' | '\u{2029}')
 }
 
-pub(crate) fn is_jsx_whitespace_like(c: char) -> bool {
+pub(crate) fn is_jsx_whitespace_like(c: char) -> bool { ::tsox_core::fntrace::enter("is_jsx_whitespace_like"); 
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
 }
 
-pub(crate) fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool {
+pub(crate) fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_identifier_or_keyword_token"); 
     token == SyntaxKind::Identifier || is_keyword(token)
 }
 
-pub(crate) fn is_keyword(token: SyntaxKind) -> bool {
+pub(crate) fn is_keyword(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword"); 
     crate::ast::node_data_generated::is_keyword_kind(token)
 }
 
-pub(crate) fn is_whitespace(c: char) -> bool {
+pub(crate) fn is_whitespace(c: char) -> bool { ::tsox_core::fntrace::enter("is_whitespace"); 
     matches!(
         c,
         ' ' | '\t'
@@ -48,7 +48,7 @@ pub(crate) fn is_whitespace(c: char) -> bool {
     )
 }
 
-pub(crate) fn is_line_break(c: char) -> bool {
+pub(crate) fn is_line_break(c: char) -> bool { ::tsox_core::fntrace::enter("is_line_break"); 
     c == '\n' || c == '\r'
 }
 
@@ -61,7 +61,7 @@ pub(crate) const REG_EXP_FLAG_Y: u16 = 1 << 5;
 pub(crate) const REG_EXP_FLAG_D: u16 = 1 << 6;
 pub(crate) const REG_EXP_FLAG_V: u16 = 1 << 7;
 
-pub(crate) fn reg_exp_flag_bit(c: char) -> Option<u16> {
+pub(crate) fn reg_exp_flag_bit(c: char) -> Option<u16> { ::tsox_core::fntrace::enter("reg_exp_flag_bit"); 
     match c {
         'g' => Some(REG_EXP_FLAG_G),
         'i' => Some(REG_EXP_FLAG_I),
@@ -75,41 +75,41 @@ pub(crate) fn reg_exp_flag_bit(c: char) -> Option<u16> {
     }
 }
 
-pub(crate) fn is_digit(c: char) -> bool {
+pub(crate) fn is_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_digit"); 
     c.is_ascii_digit()
 }
 
-pub(crate) fn is_hex_digit(c: char) -> bool {
+pub(crate) fn is_hex_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_hex_digit"); 
     c.is_ascii_hexdigit()
 }
 
-pub(crate) fn is_octal_digit(c: char) -> bool {
+pub(crate) fn is_octal_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_octal_digit"); 
     ('0'..='7').contains(&c)
 }
 
-pub(crate) fn is_identifier_start(c: char) -> bool {
+pub(crate) fn is_identifier_start(c: char) -> bool { ::tsox_core::fntrace::enter("is_identifier_start"); 
     c.is_ascii_alphabetic()
         || c == '_'
         || c == '$'
         || (!c.is_ascii() && is_unicode_identifier_start(c))
 }
 
-pub fn is_identifier_part(c: char) -> bool {
+pub fn is_identifier_part(c: char) -> bool { ::tsox_core::fntrace::enter("is_identifier_part"); 
     c.is_ascii_alphanumeric()
         || c == '_'
         || c == '$'
         || (!c.is_ascii() && is_unicode_identifier_part(c))
 }
 
-pub(crate) fn is_unicode_identifier_start(c: char) -> bool {
+pub(crate) fn is_unicode_identifier_start(c: char) -> bool { ::tsox_core::fntrace::enter("is_unicode_identifier_start"); 
     unicode_ident::is_xid_start(c)
 }
 
-pub(crate) fn is_unicode_identifier_part(c: char) -> bool {
+pub(crate) fn is_unicode_identifier_part(c: char) -> bool { ::tsox_core::fntrace::enter("is_unicode_identifier_part"); 
     unicode_ident::is_xid_continue(c) || c == '\u{200C}' || c == '\u{200D}'
 }
 
-fn push_unicode_escape(result: &mut String, hex: &str) {
+fn push_unicode_escape(result: &mut String, hex: &str) { ::tsox_core::fntrace::enter("push_unicode_escape"); 
     let Ok(n) = u32::from_str_radix(hex, 16) else {
         return;
     };
@@ -127,7 +127,7 @@ fn push_unicode_escape(result: &mut String, hex: &str) {
     }
 }
 
-fn combine_trailing_high_surrogate(result: &mut String, low: u32) -> bool {
+fn combine_trailing_high_surrogate(result: &mut String, low: u32) -> bool { ::tsox_core::fntrace::enter("combine_trailing_high_surrogate"); 
     let bytes = result.as_bytes();
     if bytes.len() < 6 {
         return false;
@@ -154,7 +154,7 @@ fn combine_trailing_high_surrogate(result: &mut String, low: u32) -> bool {
     true
 }
 
-pub(crate) fn unescape_string(s: &str) -> String {    let mut result = String::with_capacity(s.len());
+pub(crate) fn unescape_string(s: &str) -> String { ::tsox_core::fntrace::enter("unescape_string");     let mut result = String::with_capacity(s.len());
     let mut chars = s.chars().peekable();
     while let Some(c) = chars.next() {
         if c == '\\' {
@@ -214,20 +214,20 @@ pub struct CommentRange {
     pub has_trailing_new_line: bool,
 }
 
-pub(crate) fn decode_char(text: &str, pos: usize) -> (char, usize) {
+pub(crate) fn decode_char(text: &str, pos: usize) -> (char, usize) { ::tsox_core::fntrace::enter("decode_char"); 
     let c = text[pos..].chars().next().unwrap();
     (c, c.len_utf8())
 }
 
-pub(crate) fn is_whitespace_like(c: char) -> bool {
+pub(crate) fn is_whitespace_like(c: char) -> bool { ::tsox_core::fntrace::enter("is_whitespace_like"); 
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
 }
 
-pub(crate) fn is_whitespace_single_line(c: char) -> bool {
+pub(crate) fn is_whitespace_single_line(c: char) -> bool { ::tsox_core::fntrace::enter("is_whitespace_single_line"); 
     matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}')
 }
 
-pub(crate) fn has_jsdoc_tag(text: &str, names: &[&str]) -> bool {
+pub(crate) fn has_jsdoc_tag(text: &str, names: &[&str]) -> bool { ::tsox_core::fntrace::enter("has_jsdoc_tag"); 
     for &name in names {
         if !text.starts_with(name) {
             continue;
@@ -243,7 +243,7 @@ pub(crate) fn has_jsdoc_tag(text: &str, names: &[&str]) -> bool {
     false
 }
 
-pub(crate) fn scan_jsdoc_comment_for_tags(comment_text: &str) -> TokenFlags {
+pub(crate) fn scan_jsdoc_comment_for_tags(comment_text: &str) -> TokenFlags { ::tsox_core::fntrace::enter("scan_jsdoc_comment_for_tags"); 
     let mut flags = TOKEN_FLAGS_NONE;
     let mut rest = comment_text;
     loop {
@@ -272,7 +272,7 @@ pub(crate) fn scan_jsdoc_comment_for_tags(comment_text: &str) -> TokenFlags {
     }
 }
 
-pub(crate) fn is_shebang_trivia(text: &str, pos: usize) -> bool {
+pub(crate) fn is_shebang_trivia(text: &str, pos: usize) -> bool { ::tsox_core::fntrace::enter("is_shebang_trivia"); 
     if text.len() < 2 {
         return false;
     }
@@ -283,7 +283,7 @@ pub(crate) fn is_shebang_trivia(text: &str, pos: usize) -> bool {
     text.as_bytes()[0] == b'#' && text.as_bytes()[1] == b'!'
 }
 
-pub(crate) fn scan_shebang_trivia(text: &str, pos: usize) -> usize {
+pub(crate) fn scan_shebang_trivia(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("scan_shebang_trivia"); 
     let text_len = text.len();
     let mut pos = pos + 2;
     while pos < text_len {
@@ -296,7 +296,7 @@ pub(crate) fn scan_shebang_trivia(text: &str, pos: usize) -> usize {
     pos
 }
 
-pub fn get_shebang(text: &str) -> &str {
+pub fn get_shebang(text: &str) -> &str { ::tsox_core::fntrace::enter("get_shebang"); 
     if !is_shebang_trivia(text, 0) {
         return "";
     }

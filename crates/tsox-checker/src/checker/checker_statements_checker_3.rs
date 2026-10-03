@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub(crate) fn check_variable_declaration_list(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_variable_declaration_list(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_variable_declaration_list"); 
         // Go checkGrammarVariableDeclarationList 前段：using/await using 的
         // for-in / ambient / case-clause 位置限制
         let block_scope_flags = self.get_combined_node_flags(node) & NodeFlags::BlockScoped;
@@ -161,7 +161,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn in_strict_context(&self) -> bool {
+    pub(crate) fn in_strict_context(&self) -> bool { ::tsox_core::fntrace::enter("in_strict_context"); 
         if self.program.options().always_strict.is_true() {
             return true;
         }
@@ -177,7 +177,7 @@ impl Checker {
         name_node: &Arc<Node>,
         prop_text: &str,
         this_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_abstract_property_access_in_ctor"); 
         let Some(member_symbol) = self.get_property_of_type(this_type, prop_text) else {
             return;
         };
@@ -203,7 +203,7 @@ impl Checker {
         ));
     }
 
-    pub(crate) fn access_in_property_initializer(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn access_in_property_initializer(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("access_in_property_initializer"); 
         let mut cur = node.parent();
         while let Some(a) = cur {
             match a.kind {
@@ -229,7 +229,7 @@ impl Checker {
         &mut self,
         pattern: &Arc<Node>,
         this_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_this_destructuring_abstract_properties"); 
         let tsox_frontend::ast::NodeData::BindingPattern(data) = &pattern.data else {
             return;
         };

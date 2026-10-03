@@ -1,6 +1,6 @@
 use super::number::Number;
 
-fn is_number_rune(r: char) -> bool {
+fn is_number_rune(r: char) -> bool { crate::fntrace::enter("is_number_rune"); 
     if r.is_ascii_digit() {
         return true;
     }
@@ -14,7 +14,7 @@ fn is_number_rune(r: char) -> bool {
 }
 
 impl Number {
-    pub fn from_string(s: &str) -> Number {
+    pub fn from_string(s: &str) -> Number { crate::fntrace::enter("from_string"); 
         let s = s.trim_matches(|c: char| {
             matches!(
                 c,

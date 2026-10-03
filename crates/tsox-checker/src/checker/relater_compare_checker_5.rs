@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         _predicate: &TypePredicate,
         _mapper: &Arc<TypeMapper>,
-    ) -> Option<Box<TypePredicate>> {
+    ) -> Option<Box<TypePredicate>> { ::tsox_core::fntrace::enter("instantiate_type_predicate"); 
         None
     }
 
@@ -17,7 +17,7 @@ impl Checker {
         parameter_name: String,
         parameter_index: i32,
         t: Arc<Type>,
-    ) -> Box<TypePredicate> {
+    ) -> Box<TypePredicate> { ::tsox_core::fntrace::enter("new_type_predicate"); 
         Box::new(TypePredicate {
             kind,
             parameter_name,
@@ -26,7 +26,7 @@ impl Checker {
         })
     }
 
-    pub fn is_resolving_return_type_of_signature(&mut self, _signature: &Arc<Signature>) -> bool {
+    pub fn is_resolving_return_type_of_signature(&mut self, _signature: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("is_resolving_return_type_of_signature"); 
         false
     }
 
@@ -35,7 +35,7 @@ impl Checker {
         source: &Arc<Signature>,
         target: &Arc<Signature>,
         partial_match: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_matching_signature"); 
         self.compare_signatures_identical(source, target, partial_match, false, false)
             != Ternary::False
     }
@@ -45,7 +45,7 @@ impl Checker {
         source: &TypePredicate,
         target: &TypePredicate,
         _compare_types: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_type_predicates_identical"); 
         if source.kind != target.kind {
             return Ternary::False;
         }
@@ -59,7 +59,7 @@ impl Checker {
         &mut self,
         _types: &[Arc<Type>],
         _target_is_union: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_effective_constraint_of_intersection"); 
         None
     }
 
@@ -67,7 +67,7 @@ impl Checker {
         &mut self,
         _source: &Arc<Type>,
         _target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_member_of_string_mapping"); 
         false
     }
 
@@ -75,7 +75,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> (Arc<Type>, Arc<Type>) {
+    ) -> (Arc<Type>, Arc<Type>) { ::tsox_core::fntrace::enter("apply_target_string_mapping_to_source"); 
         (Arc::clone(source), Arc::clone(target))
     }
 
@@ -83,7 +83,7 @@ impl Checker {
         &mut self,
         _types: &[Arc<Type>],
         _name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_in_types"); 
         None
     }
 
@@ -91,15 +91,15 @@ impl Checker {
         &mut self,
         _t: &Arc<Type>,
         _name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_in_type"); 
         None
     }
 
-    pub fn is_type_subset_of_union(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_subset_of_union(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_subset_of_union"); 
         self.is_type_subset_of(source, target)
     }
 
-    pub fn is_type_derived_from(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_type_derived_from(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_derived_from"); 
         if source.flags.contains(TypeFlags::Union) {
             return source
                 .types()
@@ -161,7 +161,7 @@ impl Checker {
     // Go hasBaseType：名义基类型链。本仓类/接口实例型是携带声明符号的
     // Anonymous 结构型（无 Class/Reference 位），恒等按符号 Arc 判等，
     // 基链沿声明 heritage 递归
-    pub(crate) fn has_base_type(&mut self, t: &Arc<Type>, check_base: &Arc<Type>) -> bool {
+    pub(crate) fn has_base_type(&mut self, t: &Arc<Type>, check_base: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_base_type"); 
         if Arc::ptr_eq(t, check_base) || t.id == check_base.id {
             return true;
         }
@@ -228,7 +228,7 @@ impl Checker {
         false
     }
 
-    fn is_function_object_type(&mut self, t: &Arc<Type>) -> bool {
+    fn is_function_object_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_function_object_type"); 
         if let Some(sym) = self.get_global_type_by_name("Function")
             && let Some(target) = sym.target().cloned()
         {
@@ -237,7 +237,7 @@ impl Checker {
         false
     }
 
-    pub fn is_distribution_dependent(&mut self, _root: &ConditionalRoot) -> bool {
+    pub fn is_distribution_dependent(&mut self, _root: &ConditionalRoot) -> bool { ::tsox_core::fntrace::enter("is_distribution_dependent"); 
         false
     }
 }

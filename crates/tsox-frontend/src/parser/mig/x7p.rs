@@ -15,7 +15,7 @@ thread_local! {
         const { std::cell::RefCell::new(Vec::new()) };
 }
 
-pub(crate) fn take_js_diagnostics() -> Vec<Diagnostic> {
+pub(crate) fn take_js_diagnostics() -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("take_js_diagnostics"); 
     JS_DIAGNOSTICS.with(|c| std::mem::take(&mut *c.borrow_mut()))
 }
 
@@ -25,7 +25,7 @@ impl Parser {
         loc: TextRange,
         message: Message,
         message_args: &[&str],
-    ) {
+    ) { ::tsox_core::fntrace::enter("js_error_at_range"); 
         let source_text = self.scanner.text.clone();
         let start = skip_trivia(&source_text, loc.pos());
         JS_DIAGNOSTICS.with(|c| {
@@ -39,7 +39,7 @@ impl Parser {
     }
 }
 
-fn skip_trivia(text: &str, pos: usize) -> usize {
+fn skip_trivia(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_trivia"); 
     let mut pos = pos.min(text.len());
     while let Some(ch) = text[pos..].chars().next() {
         if !ch.is_whitespace() {

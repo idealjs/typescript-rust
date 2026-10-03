@@ -3,7 +3,7 @@
 use crate::checker::inference::*;
 
 impl Checker {
-    pub fn get_inferred_types(&mut self, context: &InferenceContext) -> Vec<Arc<Type>> {
+    pub fn get_inferred_types(&mut self, context: &InferenceContext) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_inferred_types"); 
         let count = context.inferences.len();
         let mut result = Vec::with_capacity(count);
         for i in 0..count {
@@ -12,7 +12,7 @@ impl Checker {
         result
     }
 
-    pub fn get_inferred_type(&mut self, context: &InferenceContext, index: usize) -> Arc<Type> {
+    pub fn get_inferred_type(&mut self, context: &InferenceContext, index: usize) -> Arc<Type> { ::tsox_core::fntrace::enter("get_inferred_type"); 
         let inference = &context.inferences[index];
         if let Some(ref inferred) = inference.inferred_type {
             return Arc::clone(inferred);
@@ -180,7 +180,7 @@ impl Checker {
         context: &InferenceContext,
         index: usize,
         constraint: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_inference_constraint"); 
         let mut params: Vec<Arc<Type>> = Vec::new();
         let mut indices: Vec<usize> = Vec::new();
         for (i, inf) in context.inferences.iter().enumerate() {

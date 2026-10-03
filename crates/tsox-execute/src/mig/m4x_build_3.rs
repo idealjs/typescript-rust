@@ -33,7 +33,7 @@ fn queue_create_build_task(
     old_tasks: Option<Arc<SharedTaskMap>>,
     config: String,
     wg: SendWg,
-) {
+) { ::tsox_core::fntrace::enter("queue_create_build_task"); 
     let orchestrator = unsafe { &mut *orchestrator.0 };
     orchestrator.create_build_task(old_tasks.as_ref(), &config, &wg.0);
 }
@@ -61,11 +61,11 @@ pub struct Options {
 }
 
 impl Orchestrator {
-    fn placeholder() -> Self {
+    fn placeholder() -> Self { ::tsox_core::fntrace::enter("placeholder"); 
         unreachable!("placeholder instance replaced by new_orchestrator")
     }
 
-    pub fn relative_file_name(&self, file_name: &str) -> String {
+    pub fn relative_file_name(&self, file_name: &str) -> String { ::tsox_core::fntrace::enter("relative_file_name"); 
         let current_directory = self.compare_paths_options.current_directory.clone();
         tsox_core::tspath::mig::m3i::get_relative_path_from_directory(
             &current_directory,
@@ -74,7 +74,7 @@ impl Orchestrator {
         )
     }
 
-    pub fn to_path(&self, file_name: &str) -> Path {
+    pub fn to_path(&self, file_name: &str) -> Path { ::tsox_core::fntrace::enter("to_path"); 
         tsox_core::tspath::to_path(
             file_name,
             &self.compare_paths_options.current_directory,
@@ -82,11 +82,11 @@ impl Orchestrator {
         )
     }
 
-    pub fn order_list(&self) -> Vec<String> {
+    pub fn order_list(&self) -> Vec<String> { ::tsox_core::fntrace::enter("order_list"); 
         self.order.clone()
     }
 
-    pub fn upstream(&self, config_name: &str) -> Vec<String> {
+    pub fn upstream(&self, config_name: &str) -> Vec<String> { ::tsox_core::fntrace::enter("upstream"); 
         let path = self.to_path(config_name);
         let task = self.get_task(&path);
         let task = task.lock().unwrap();
@@ -96,7 +96,7 @@ impl Orchestrator {
             .collect()
     }
 
-    pub fn downstream(&self, config_name: &str) -> Vec<String> {
+    pub fn downstream(&self, config_name: &str) -> Vec<String> { ::tsox_core::fntrace::enter("downstream"); 
         let path = self.to_path(config_name);
         let task = self.get_task(&path);
         let task = task.lock().unwrap();
@@ -106,21 +106,21 @@ impl Orchestrator {
             .collect()
     }
 
-    pub fn get_task(&self, path: &Path) -> Arc<Mutex<BuildTask>> {
+    pub fn get_task(&self, path: &Path) -> Arc<Mutex<BuildTask>> { ::tsox_core::fntrace::enter("get_task"); 
         match self.tasks.load(path) {
             Some(task) => task,
             None => panic!("No build task found for {}", path.0),
         }
     }
 
-    pub fn generate_graph_reusing_old_tasks(&mut self) {
+    pub fn generate_graph_reusing_old_tasks(&mut self) { ::tsox_core::fntrace::enter("generate_graph_reusing_old_tasks"); 
         let tasks = std::mem::replace(&mut self.tasks, SyncMap::new());
         self.order.clear();
         self.errors.clear();
         self.generate_graph(Some(tasks));
     }
 
-    pub fn generate_graph(&mut self, old_tasks: Option<SyncMap<Path, Arc<Mutex<BuildTask>>>>) {
+    pub fn generate_graph(&mut self, old_tasks: Option<SyncMap<Path, Arc<Mutex<BuildTask>>>>) { ::tsox_core::fntrace::enter("generate_graph"); 
         let projects = self.opts.command.resolved_project_paths();
         let wg: Arc<dyn WorkGroup> = Arc::from(tsox_core::core::work_group::new_work_group(
             self.opts.command.compiler_options.single_threaded == Tristate::True,
@@ -162,7 +162,7 @@ impl Orchestrator {
         old_tasks: Option<&Arc<SharedTaskMap>>,
         configs: &[String],
         wg: &Arc<dyn WorkGroup>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("create_build_tasks"); 
         for config in configs {
             let orchestrator = SendPtr(self as *mut Orchestrator);
             let old_tasks = old_tasks.cloned();
@@ -180,7 +180,7 @@ impl Orchestrator {
         old_tasks: Option<&Arc<SharedTaskMap>>,
         config: &str,
         wg: &Arc<dyn WorkGroup>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("create_build_task"); 
         let path = self.to_path(config);
         let mut reused: Option<Arc<Mutex<BuildTask>>> = None;
         let mut build_info: Option<BuildInfoEntry> = None;
@@ -248,7 +248,7 @@ impl Orchestrator {
         completed: &mut Set<Path>,
         analyzing: &mut Set<Path>,
         circularity_stack: &mut Vec<String>,
-    ) -> Option<Arc<Mutex<BuildTask>>> {
+    ) -> Option<Arc<Mutex<BuildTask>>> { ::tsox_core::fntrace::enter("setup_build_task"); 
         let path = self.to_path(config_name);
         let task = self.get_task(&path);
         if !completed.has(&path) {
@@ -317,7 +317,7 @@ impl Orchestrator {
     pub fn start(
         &mut self,
         ctx: crate::mig::m5b_4::Context,
-    ) -> crate::execute::CommandLineResult {
+    ) -> crate::execute::CommandLineResult { ::tsox_core::fntrace::enter("start"); 
         self.content_mapper_host = crate::mig::m5a::new_content_mapper_host_concrete(
             self.opts.sys.as_ref(),
             &self.opts.command.compiler_options,
@@ -344,7 +344,7 @@ impl Orchestrator {
         result
     }
 
-    pub fn watch(&mut self, ctx: crate::mig::m5b_4::Context) {
+    pub fn watch(&mut self, ctx: crate::mig::m5b_4::Context) { ::tsox_core::fntrace::enter("watch"); 
         self.wm.lock();
 
         if self.opts.testing.is_none() {
@@ -372,7 +372,7 @@ impl Orchestrator {
         }
     }
 
-    pub fn update_watch(&mut self) {
+    pub fn update_watch(&mut self) { ::tsox_core::fntrace::enter("update_watch"); 
         let old_cache = self.host.m_times.clone();
         self.host.m_times.clear();
         let paths = self.tasks.keys();
@@ -383,7 +383,7 @@ impl Orchestrator {
         }
     }
 
-    pub fn do_cycle(&mut self) {
+    pub fn do_cycle(&mut self) { ::tsox_core::fntrace::enter("do_cycle"); 
         self.wm.lock();
 
         let (changed_paths, overflow) = self.wm.drain_events();
@@ -447,7 +447,7 @@ impl Orchestrator {
         self.wm.unlock();
     }
 
-    pub fn build_or_clean(&mut self) -> crate::execute::CommandLineResult {
+    pub fn build_or_clean(&mut self) -> crate::execute::CommandLineResult { ::tsox_core::fntrace::enter("build_or_clean"); 
         if self.opts.command.build_options.clean != Tristate::True
             && self.opts.command.build_options.verbose == Tristate::True
         {
@@ -492,12 +492,12 @@ impl Orchestrator {
         build_result.result
     }
 
-    pub fn reset_caches(&mut self) {
+    pub fn reset_caches(&mut self) { ::tsox_core::fntrace::enter("reset_caches"); 
         self.host.source_files.clear();
         self.host.config_times.clear();
     }
 
-    pub fn resolve_build_info_file_name(&self, file_name: &str, build_info_dir: &str) -> String {
+    pub fn resolve_build_info_file_name(&self, file_name: &str, build_info_dir: &str) -> String { ::tsox_core::fntrace::enter("resolve_build_info_file_name"); 
         if crate::mig::m4y_2::is_build_info_file_name_default_library(file_name) {
             return tspath::combine_paths(&self.host.default_library_path(), &[file_name]);
         }
@@ -509,7 +509,7 @@ impl Orchestrator {
         changed_paths: &HashMap<String, tsox_core::fswatch::mig::m5f_2::EventKind>,
         needs_config_update: &AtomicBool,
         needs_update: &AtomicBool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_tasks_for_event_changes"); 
         let mut normalized_paths: HashMap<Path, tsox_core::fswatch::mig::m5f_2::EventKind> =
             HashMap::with_capacity(changed_paths.len());
         for (event_path, kind) in changed_paths {
@@ -697,7 +697,7 @@ impl Orchestrator {
         &self,
         package_json: &str,
         changed_paths: &HashMap<Path, tsox_core::fswatch::mig::m5f_2::EventKind>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("package_json_lookup_changed"); 
         let package_json_path = self.to_path(package_json);
         if changed_paths.contains_key(&package_json_path) {
             return true;
@@ -712,7 +712,7 @@ impl Orchestrator {
         false
     }
 
-    pub fn compute_desired_watches(&mut self) -> HashMap<String, bool> {
+    pub fn compute_desired_watches(&mut self) -> HashMap<String, bool> { ::tsox_core::fntrace::enter("compute_desired_watches"); 
         let mut desired_dirs = crate::mig::m5b_4::DirWatchSet::new(self.compare_paths_options.clone());
 
         for index in 0..self.order.len() {
@@ -828,7 +828,7 @@ impl Orchestrator {
         task: Arc<Mutex<BuildTask>>,
         path: &Path,
         build_result: &mut OrchestratorResultStruct,
-    ) {
+    ) { ::tsox_core::fntrace::enter("build_or_clean_project"); 
         let buffer = Arc::new(Mutex::new(Vec::new()));
         let status_reporter = self.create_builder_status_reporter(buffer.clone());
         let diagnostic_reporter = self.create_diagnostic_reporter(buffer.clone());
@@ -861,7 +861,7 @@ impl Orchestrator {
     fn create_builder_status_reporter(
         &self,
         buffer: Arc<Mutex<Vec<u8>>>,
-    ) -> crate::mig::m5a_4::DiagnosticReporter {
+    ) -> crate::mig::m5a_4::DiagnosticReporter { ::tsox_core::fntrace::enter("create_builder_status_reporter"); 
         crate::mig::m5a_4::create_builder_status_reporter(
             self.opts.sys.as_ref(),
             Box::new(SharedBufferWriter { buffer }),
@@ -874,7 +874,7 @@ impl Orchestrator {
     fn create_diagnostic_reporter(
         &self,
         buffer: Arc<Mutex<Vec<u8>>>,
-    ) -> crate::mig::m5a_4::DiagnosticReporter {
+    ) -> crate::mig::m5a_4::DiagnosticReporter { ::tsox_core::fntrace::enter("create_diagnostic_reporter"); 
         crate::mig::m5a_4::create_diagnostic_reporter(
             self.opts.sys.as_ref(),
             Box::new(SharedBufferWriter { buffer }),
@@ -887,7 +887,7 @@ impl Orchestrator {
         &mut self,
         desired_dirs: &mut crate::mig::m5b_4::DirWatchSet,
         package_json: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_package_json_watch_dirs"); 
         let dir = tsox_core::tspath::get_directory_path(package_json);
         let mut dirs = vec![dir.clone()];
         let mut found_node_modules = false;
@@ -918,7 +918,7 @@ impl Orchestrator {
         }
     }
 
-    fn add_watch_dir(&self, desired_dirs: &mut crate::mig::m5b_4::DirWatchSet, dir: &str) {
+    fn add_watch_dir(&self, desired_dirs: &mut crate::mig::m5b_4::DirWatchSet, dir: &str) { ::tsox_core::fntrace::enter("add_watch_dir"); 
         if !desired_dirs.covered(dir) && crate::mig::m5b_4::can_watch_directory(dir) {
             desired_dirs.set(dir, false);
         }
@@ -930,11 +930,11 @@ pub struct SharedBufferWriter {
 }
 
 impl std::io::Write for SharedBufferWriter {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.buffer.lock().unwrap().extend_from_slice(buf);
         Ok(buf.len())
     }
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         Ok(())
     }
 }
@@ -942,16 +942,16 @@ impl std::io::Write for SharedBufferWriter {
 pub struct SysWriterHandle(std::sync::Mutex<Box<dyn std::io::Write + Send>>);
 
 impl std::io::Write for SysWriterHandle {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.0.lock().unwrap().write(buf)
     }
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         self.0.lock().unwrap().flush()
     }
 }
 
 impl OrchestratorResultStruct {
-    pub fn report(&mut self, o: &mut Orchestrator) {
+    pub fn report(&mut self, o: &mut Orchestrator) { ::tsox_core::fntrace::enter("report"); 
         if o.opts.command.compiler_options.watch == Tristate::True {
             let message = if self.errors.len() == 1 {
                 dg::FOUND_1_ERROR_WATCHING_FOR_FILE_CHANGES
@@ -996,7 +996,7 @@ impl OrchestratorResultStruct {
     }
 }
 
-pub fn new_orchestrator(opts: Options) -> Orchestrator {
+pub fn new_orchestrator(opts: Options) -> Orchestrator { ::tsox_core::fntrace::enter("new_orchestrator"); 
     let wm = crate::mig::m5b_4::WatchManager::new(
         opts.sys.writer(),
         Arc::new({

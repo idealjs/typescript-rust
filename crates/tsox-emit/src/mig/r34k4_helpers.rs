@@ -2,7 +2,7 @@ use std::sync::{Arc, OnceLock};
 
 use tsox_frontend::format::mig::m4o_2::{EmitHelper, Priority};
 
-pub fn decorate_helper() -> &'static Arc<EmitHelper> {
+pub fn decorate_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("decorate_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:decorate".to_owned(),
@@ -20,7 +20,7 @@ pub fn decorate_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn add_disposable_resource_helper() -> &'static Arc<EmitHelper> {
+pub fn add_disposable_resource_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("add_disposable_resource_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:addDisposableResource".to_owned(),
@@ -54,7 +54,7 @@ pub fn add_disposable_resource_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn dispose_resources_helper() -> &'static Arc<EmitHelper> {
+pub fn dispose_resources_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("dispose_resources_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:disposeResources".to_owned(),
@@ -96,7 +96,7 @@ pub fn dispose_resources_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn class_private_field_get_helper() -> &'static Arc<EmitHelper> {
+pub fn class_private_field_get_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("class_private_field_get_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:classPrivateFieldGet".to_owned(),
@@ -113,7 +113,7 @@ pub fn class_private_field_get_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn class_private_field_set_helper() -> &'static Arc<EmitHelper> {
+pub fn class_private_field_set_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("class_private_field_set_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:classPrivateFieldSet".to_owned(),
@@ -131,7 +131,7 @@ pub fn class_private_field_set_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn class_private_field_in_helper() -> &'static Arc<EmitHelper> {
+pub fn class_private_field_in_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("class_private_field_in_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:classPrivateFieldIn".to_owned(),
@@ -147,7 +147,7 @@ pub fn class_private_field_in_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn await_helper() -> &'static Arc<EmitHelper> {
+pub fn await_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("await_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:await".to_owned(),
@@ -160,7 +160,7 @@ pub fn await_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn async_generator_helper() -> &'static Arc<EmitHelper> {
+pub fn async_generator_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("async_generator_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:asyncGenerator".to_owned(),
@@ -184,7 +184,7 @@ pub fn async_generator_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn async_delegator_helper() -> &'static Arc<EmitHelper> {
+pub fn async_delegator_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("async_delegator_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:asyncDelegator".to_owned(),
@@ -201,7 +201,7 @@ pub fn async_delegator_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn async_values_helper() -> &'static Arc<EmitHelper> {
+pub fn async_values_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("async_values_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:asyncValues".to_owned(),
@@ -220,7 +220,7 @@ pub fn async_values_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn awaiter_helper() -> &'static Arc<EmitHelper> {
+pub fn awaiter_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("awaiter_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:awaiter".to_owned(),
@@ -241,7 +241,7 @@ pub fn awaiter_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn es_decorate_helper() -> &'static Arc<EmitHelper> {
+pub fn es_decorate_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("es_decorate_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:esDecorate".to_owned(),
@@ -280,7 +280,7 @@ pub fn es_decorate_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn export_star_helper() -> &'static Arc<EmitHelper> {
+pub fn export_star_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("export_star_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:export-star".to_owned(),
@@ -295,7 +295,7 @@ pub fn export_star_helper() -> &'static Arc<EmitHelper> {
     }))
 }
 
-pub fn create_binding_helper() -> &'static Arc<EmitHelper> {
+pub fn create_binding_helper() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("create_binding_helper"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| Arc::new(EmitHelper {
         name: "typescript:commonjscreatebinding".to_owned(),

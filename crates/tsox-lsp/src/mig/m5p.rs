@@ -64,7 +64,7 @@ pub const FEATURE_CALL_HIERARCHY: u32 = 1 << 9;
 fn get_conditions(
     options: &tsox_core::core::compiler_options::CompilerOptions,
     resolution_mode: tsox_core::core::compiler_options_kinds::ModuleKind,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_conditions"); 
     let mut conditions = Vec::new();
     if resolution_mode == tsox_core::core::compiler_options_kinds::ModuleKind::ESNext {
         conditions.push("import".to_string());
@@ -83,7 +83,7 @@ fn get_conditions(
     conditions
 }
 
-fn get_assigned_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_assigned_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_assigned_name"); 
     use tsox_frontend::ast::node_data_generated::NodeData;
     let parent = node.parent()?;
     match parent.kind {
@@ -130,7 +130,7 @@ pub fn new_view(
     project_key: tsox_core::tspath::Path,
     program: Arc<Program>,
     preferences: tsox_tsoptions::modulespecifiers::UserPreferences,
-) -> crate::ls::autoimport_view::View {
+) -> crate::ls::autoimport_view::View { ::tsox_core::fntrace::enter("new_view"); 
     let conditions = tsox_core::collections::set::Set::from_items(get_conditions(
         program.options(),
         program.get_default_resolution_mode_for_file(&importing_file),
@@ -153,11 +153,11 @@ pub fn new_view(
     }
 }
 
-fn node_or_none(node: &Option<Arc<Node>>) -> Option<&Arc<Node>> {
+fn node_or_none(node: &Option<Arc<Node>>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node_or_none"); 
     node.as_ref()
 }
 
-fn is_named_expression(node: &Arc<Node>) -> bool {
+fn is_named_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_named_expression"); 
     if !ast::is_function_expression(node) && !ast::is_class_expression(node) {
         return false;
     }
@@ -165,11 +165,11 @@ fn is_named_expression(node: &Arc<Node>) -> bool {
     name.map(|n| ast::is_identifier(n)).unwrap_or(false)
 }
 
-fn is_variable_like(node: &Arc<Node>) -> bool {
+fn is_variable_like(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_like"); 
     ast::is_property_declaration(node) || ast::is_variable_declaration(node)
 }
 
-pub fn is_assigned_expression(node: &Option<Arc<Node>>) -> bool {
+pub fn is_assigned_expression(node: &Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_assigned_expression"); 
     let Some(node) = node else { return false };
     if !(ast::is_function_expression(node) || ast::is_arrow_function(node) || ast::is_class_expression(node)) {
         return false;
@@ -192,7 +192,7 @@ pub fn is_assigned_expression(node: &Option<Arc<Node>>) -> bool {
         || ast::is_property_declaration(&parent)
 }
 
-pub fn is_possible_call_hierarchy_declaration(node: &Option<Arc<Node>>) -> bool {
+pub fn is_possible_call_hierarchy_declaration(node: &Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_possible_call_hierarchy_declaration"); 
     let Some(node) = node else { return false };
     ast::is_source_file(node)
         || ast::is_module_declaration(node)
@@ -207,7 +207,7 @@ pub fn is_possible_call_hierarchy_declaration(node: &Option<Arc<Node>>) -> bool 
         || ast::is_set_accessor_declaration(node)
 }
 
-pub fn is_valid_call_hierarchy_declaration(node: &Option<Arc<Node>>) -> bool {
+pub fn is_valid_call_hierarchy_declaration(node: &Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_valid_call_hierarchy_declaration"); 
     let Some(node) = node else { return false };
     if ast::is_source_file(node) {
         return true;
@@ -226,7 +226,7 @@ pub fn is_valid_call_hierarchy_declaration(node: &Option<Arc<Node>>) -> bool {
         || is_assigned_expression(&Some(node.clone()))
 }
 
-pub fn get_call_hierarchy_declaration_reference_node(node: &Option<Arc<Node>>) -> Option<Arc<Node>> {
+pub fn get_call_hierarchy_declaration_reference_node(node: &Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_call_hierarchy_declaration_reference_node"); 
     let node = node.as_ref()?;
     if ast::is_source_file(node) {
         return Some(node.clone());
@@ -247,7 +247,7 @@ pub fn get_call_hierarchy_declaration_reference_node(node: &Option<Arc<Node>>) -
     None
 }
 
-pub fn get_symbol_of_call_hierarchy_declaration(c: &Checker, node: &Arc<Node>) -> Option<Arc<ast::Symbol>> {
+pub fn get_symbol_of_call_hierarchy_declaration(c: &Checker, node: &Arc<Node>) -> Option<Arc<ast::Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_call_hierarchy_declaration"); 
     if ast::is_class_static_block_declaration(node) {
         return None;
     }
@@ -255,7 +255,7 @@ pub fn get_symbol_of_call_hierarchy_declaration(c: &Checker, node: &Arc<Node>) -
     c.get_symbol_at_location(&location)
 }
 
-pub fn get_call_hierarchy_item_name(program: &Program, node: &Arc<Node>) -> (String, usize, usize) {
+pub fn get_call_hierarchy_item_name(program: &Program, node: &Arc<Node>) -> (String, usize, usize) { ::tsox_core::fntrace::enter("get_call_hierarchy_item_name"); 
     if ast::is_source_file(node) {
         let file_name = crate::ls::mig::m5u::node_as_source_file(node)
             .map(|f| f.file_name.clone())
@@ -312,7 +312,7 @@ pub fn get_call_hierarchy_item_name(program: &Program, node: &Arc<Node>) -> (Str
     (text, name_pos, decl_name.as_ref().unwrap().end())
 }
 
-pub fn get_text_of_call_hierarchy_name(program: &Program, source_node: &Arc<Node>, name: &Arc<Node>, print_node: &Arc<Node>) -> String {
+pub fn get_text_of_call_hierarchy_name(program: &Program, source_node: &Arc<Node>, name: &Arc<Node>, print_node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_text_of_call_hierarchy_name"); 
     if ast::is_identifier(name) || ast::is_string_or_numeric_literal_like(name) {
         return name.text().to_string();
     }
@@ -367,7 +367,7 @@ pub fn get_text_of_call_hierarchy_name(program: &Program, source_node: &Arc<Node
     text_writer.string()
 }
 
-pub fn get_call_hierarchy_item_container_name(program: &Program, node: &Arc<Node>) -> String {
+pub fn get_call_hierarchy_item_container_name(program: &Program, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_call_hierarchy_item_container_name"); 
     if is_assigned_expression(&Some(node.clone())) {
         let parent = node.parent().unwrap();
         let grand = parent.parent().unwrap();
@@ -427,7 +427,7 @@ pub fn get_call_hierarchy_item_container_name(program: &Program, node: &Arc<Node
     String::new()
 }
 
-pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange {
+pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("move_range_past_modifiers"); 
     if let Some(modifiers) = node.modifiers() {
         let nodes = &modifiers.list.nodes;
         if !nodes.is_empty() {
@@ -438,7 +438,7 @@ pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange {
     TextRange::new(node.pos(), node.end())
 }
 
-pub fn find_implementation(c: &Checker, node: &Option<Arc<Node>>) -> Option<Arc<Node>> {
+pub fn find_implementation(c: &Checker, node: &Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_implementation"); 
     let node = node.as_ref()?;
     if !ast::is_function_like_declaration(node) {
         return Some(node.clone());
@@ -463,7 +463,7 @@ pub fn find_implementation(c: &Checker, node: &Option<Arc<Node>>) -> Option<Arc<
     Some(node.clone())
 }
 
-pub fn find_all_initial_declarations(c: &Checker, node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+pub fn find_all_initial_declarations(c: &Checker, node: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("find_all_initial_declarations"); 
     if ast::is_class_static_block_declaration(node) {
         return None;
     }
@@ -510,7 +510,7 @@ pub fn find_all_initial_declarations(c: &Checker, node: &Arc<Node>) -> Option<Ve
     Some(result)
 }
 
-pub fn find_implementation_or_all_initial_declarations(c: &Checker, node: &Arc<Node>) -> CallHierarchyDeclarationResult {
+pub fn find_implementation_or_all_initial_declarations(c: &Checker, node: &Arc<Node>) -> CallHierarchyDeclarationResult { ::tsox_core::fntrace::enter("find_implementation_or_all_initial_declarations"); 
     if ast::is_class_static_block_declaration(node) {
         return CallHierarchyDeclarationResult::Node(node.clone());
     }
@@ -529,7 +529,7 @@ pub fn find_implementation_or_all_initial_declarations(c: &Checker, node: &Arc<N
     CallHierarchyDeclarationResult::Node(node.clone())
 }
 
-pub fn resolve_call_hierarchy_declaration(program: &Program, location: &Arc<Node>) -> Option<CallHierarchyDeclarationResult> {
+pub fn resolve_call_hierarchy_declaration(program: &Program, location: &Arc<Node>) -> Option<CallHierarchyDeclarationResult> { ::tsox_core::fntrace::enter("resolve_call_hierarchy_declaration"); 
     let c = program.get_type_checker();
 
     let mut following_symbol = false;
@@ -610,7 +610,7 @@ pub fn resolve_call_hierarchy_declaration(program: &Program, location: &Arc<Node
 }
 
 impl LanguageService {
-    pub fn mig_create_call_hierarchy_item(&self, program: &Program, node: &Arc<Node>) -> Option<lsproto_lsp::CallHierarchyItem> {
+    pub fn mig_create_call_hierarchy_item(&self, program: &Program, node: &Arc<Node>) -> Option<lsproto_lsp::CallHierarchyItem> { ::tsox_core::fntrace::enter("mig_create_call_hierarchy_item"); 
         let source_file = ast::get_source_file_of_node(node).unwrap();
         let file = crate::ls::mig::m5u::node_as_source_file(&source_file)
             .unwrap_or_else(|| panic!("call hierarchy item: source file node without backing file"));
@@ -668,7 +668,7 @@ impl LanguageService {
         &self,
         program: &Program,
         entries: &[CallSite],
-    ) -> Option<lsproto_lsp::CallHierarchyIncomingCall> {
+    ) -> Option<lsproto_lsp::CallHierarchyIncomingCall> { ::tsox_core::fntrace::enter("mig_convert_call_site_group_to_incoming_call"); 
         let mut from_ranges: Vec<lsproto_lsp::Range> = Vec::with_capacity(entries.len());
         for entry in entries {
             let script = crate::mig::m5u_conv::SourceFileScriptView { file: Arc::clone(&entry.source_file) };
@@ -690,7 +690,7 @@ impl LanguageService {
         program: &Program,
         declaration: &Arc<Node>,
         orchestrator: &dyn crate::ls::cross_project::CrossProjectOrchestrator,
-    ) -> Result<lsproto_lsp::CallHierarchyIncomingCallsResponse, LspError> {
+    ) -> Result<lsproto_lsp::CallHierarchyIncomingCallsResponse, LspError> { ::tsox_core::fntrace::enter("mig_get_incoming_calls"); 
         if ast::is_source_file(declaration) || ast::is_module_declaration(declaration) || ast::is_class_static_block_declaration(declaration) {
             return Ok(lsproto_lsp::CallHierarchyIncomingCallsResponse::default());
         }
@@ -741,7 +741,7 @@ impl LanguageService {
         params: &IncomingEntry,
         data: &SymbolAndEntriesData,
         options: &SymbolEntryTransformOptions,
-    ) -> Result<lsproto_lsp::CallHierarchyIncomingCallsResponse, LspError> {
+    ) -> Result<lsproto_lsp::CallHierarchyIncomingCallsResponse, LspError> { ::tsox_core::fntrace::enter("mig_symbol_and_entries_to_incoming_calls"); 
         let program = self.get_program();
         let mut ref_entries: Vec<&ReferenceEntry> = Vec::new();
         for symbol_and_entry in &data.symbols_and_entries {
@@ -782,7 +782,7 @@ impl LanguageService {
         &self,
         program: &Program,
         entries: &[CallSite],
-    ) -> Option<lsproto_lsp::CallHierarchyOutgoingCall> {
+    ) -> Option<lsproto_lsp::CallHierarchyOutgoingCall> { ::tsox_core::fntrace::enter("mig_convert_call_site_group_to_outgoing_call"); 
         let mut from_ranges: Vec<lsproto_lsp::Range> = Vec::with_capacity(entries.len());
         for entry in entries {
             let script = crate::mig::m5u_conv::SourceFileScriptView { file: Arc::clone(&entry.source_file) };
@@ -799,7 +799,7 @@ impl LanguageService {
         Some(lsproto_lsp::CallHierarchyOutgoingCall { to: to.into(), from_ranges })
     }
 
-    pub fn mig_get_outgoing_calls(&self, program: &Arc<Program>, declaration: &Arc<Node>) -> Option<Vec<lsproto_lsp::CallHierarchyOutgoingCall>> {
+    pub fn mig_get_outgoing_calls(&self, program: &Arc<Program>, declaration: &Arc<Node>) -> Option<Vec<lsproto_lsp::CallHierarchyOutgoingCall>> { ::tsox_core::fntrace::enter("mig_get_outgoing_calls"); 
         if (ast::get_combined_node_flags(declaration) & ast::NodeFlags::Ambient) != ast::NodeFlags::empty()
             || ast::is_method_signature_declaration(declaration)
         {
@@ -843,7 +843,7 @@ impl LanguageService {
         &self,
         document_uri: &lsproto::DocumentUri,
         position: &lsproto::Position,
-    ) -> Result<lsproto_lsp::CallHierarchyPrepareResponse, LspError> {
+    ) -> Result<lsproto_lsp::CallHierarchyPrepareResponse, LspError> { ::tsox_core::fntrace::enter("mig_provide_prepare_call_hierarchy"); 
         let (program, file) = self.get_program_and_file(document_uri);
         let declarations = self.mig_call_hierarchy_declarations(&file, position, &program, false);
         let mut items: Vec<lsproto_lsp::CallHierarchyItem> = Vec::new();
@@ -872,7 +872,7 @@ impl LanguageService {
         position: &lsproto::Position,
         program: &Program,
         allow_source_file: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("mig_call_hierarchy_declarations"); 
         let positions = self.converters.from_lsp_position_for_source_file_m5u(file, position.clone(), FEATURE_CALL_HIERARCHY);
         let mut declarations: Vec<Arc<Node>> = Vec::new();
         let mut seen: tsox_core::collections::set::Set<u64> = Default::default();
@@ -912,7 +912,7 @@ impl LanguageService {
     }
 }
 
-pub fn convert_entry_to_call_site(entry: &ReferenceEntry) -> Option<CallSite> {
+pub fn convert_entry_to_call_site(entry: &ReferenceEntry) -> Option<CallSite> { ::tsox_core::fntrace::enter("convert_entry_to_call_site"); 
     if entry.kind != EntryKind::Node {
         return None;
     }
@@ -943,12 +943,12 @@ pub fn convert_entry_to_call_site(entry: &ReferenceEntry) -> Option<CallSite> {
     })
 }
 
-pub fn get_call_site_group_key(site: &CallSite) -> u64 {
+pub fn get_call_site_group_key(site: &CallSite) -> u64 { ::tsox_core::fntrace::enter("get_call_site_group_key"); 
     tsox_frontend::ast::mig::m3f::get_node_id(&site.declaration)
 }
 
 impl CallSiteCollector {
-    pub fn mig_record_call_site(&mut self, node: &Arc<Node>) {
+    pub fn mig_record_call_site(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("mig_record_call_site"); 
         let target: Option<Arc<Node>> = if ast::is_tagged_template_expression(node) {
             Some(Arc::clone(&node.as_tagged_template_expression().tag))
         } else if ast::is_jsx_opening_element(node) {
@@ -993,7 +993,7 @@ impl CallSiteCollector {
         }
     }
 
-    pub fn mig_collect(&mut self, node: &Option<Arc<Node>>) {
+    pub fn mig_collect(&mut self, node: &Option<Arc<Node>>) { ::tsox_core::fntrace::enter("mig_collect"); 
         let Some(node) = node else { return };
 
         if (node.flags & ast::NodeFlags::Ambient) != ast::NodeFlags::empty() {
@@ -1082,7 +1082,7 @@ impl CallSiteCollector {
     }
 }
 
-pub fn collect_call_sites(program: &Arc<Program>, c: &Checker, node: &Arc<Node>) -> Vec<CallSite> {
+pub fn collect_call_sites(program: &Arc<Program>, c: &Checker, node: &Arc<Node>) -> Vec<CallSite> { ::tsox_core::fntrace::enter("collect_call_sites"); 
     let mut collector = CallSiteCollector { program: program.clone(), call_sites: Vec::new() };
 
     match node.kind {
@@ -1156,7 +1156,7 @@ pub fn collect_call_sites(program: &Arc<Program>, c: &Checker, node: &Arc<Node>)
     collector.call_sites
 }
 
-pub fn lsp_range_contains(outer: &lsproto_lsp::Range, inner: &lsproto_lsp::Range) -> bool {
+pub fn lsp_range_contains(outer: &lsproto_lsp::Range, inner: &lsproto_lsp::Range) -> bool { ::tsox_core::fntrace::enter("lsp_range_contains"); 
     use crate::lsp::lsproto_util::compare_positions;
     compare_positions(&outer.start, &inner.start) != std::cmp::Ordering::Greater
         && compare_positions(&outer.end, &inner.end) != std::cmp::Ordering::Less
@@ -1164,7 +1164,7 @@ pub fn lsp_range_contains(outer: &lsproto_lsp::Range, inner: &lsproto_lsp::Range
 
 pub fn combine_incoming_calls(
     results: &[lsproto_lsp::CallHierarchyIncomingCallsResponse],
-) -> lsproto_lsp::CallHierarchyIncomingCallsResponse {
+) -> lsproto_lsp::CallHierarchyIncomingCallsResponse { ::tsox_core::fntrace::enter("combine_incoming_calls"); 
     let mut combined: Vec<lsproto_lsp::CallHierarchyIncomingCall> = Vec::new();
     let mut seen_calls: std::collections::HashSet<(String, u32, u32)> = Default::default();
     for resp in results {
@@ -1187,14 +1187,14 @@ pub fn combine_incoming_calls(
 }
 
 impl LanguageService {
-    pub fn clone_handle(&self) -> LanguageService {
+    pub fn clone_handle(&self) -> LanguageService { ::tsox_core::fntrace::enter("clone_handle"); 
         unimplemented!(
             "LanguageService clone_handle: Go 在此共享指针, Rust 侧 host 为 Box<dyn Host> 无法克隆, 需 Host::clone_box 支持 (见 progress_notes_r60k15.md 交接)"
         )
     }
 }
 
-fn find_ancestor_valid_call_hierarchy_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_ancestor_valid_call_hierarchy_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_valid_call_hierarchy_declaration"); 
     let mut current = Some(Arc::clone(node));
     while let Some(n) = current {
         if is_valid_call_hierarchy_declaration(&Some(Arc::clone(&n))) {
@@ -1212,21 +1212,21 @@ trait M5pNodeExt {
 }
 
 impl M5pNodeExt for Node {
-    fn as_tagged_template_expression(&self) -> &ast::node_data_generated::TaggedTemplateExpressionData {
+    fn as_tagged_template_expression(&self) -> &ast::node_data_generated::TaggedTemplateExpressionData { ::tsox_core::fntrace::enter("as_tagged_template_expression"); 
         match &self.data {
             ast::node_data_generated::NodeData::TaggedTemplateExpression(d) => d,
             _ => panic!("as_tagged_template_expression on non-TaggedTemplateExpression node"),
         }
     }
 
-    fn as_class_static_block_declaration(&self) -> &ast::node_data_generated::ClassStaticBlockDeclarationData {
+    fn as_class_static_block_declaration(&self) -> &ast::node_data_generated::ClassStaticBlockDeclarationData { ::tsox_core::fntrace::enter("as_class_static_block_declaration"); 
         match &self.data {
             ast::node_data_generated::NodeData::ClassStaticBlockDeclaration(d) => d,
             _ => panic!("as_class_static_block_declaration on non-ClassStaticBlockDeclaration node"),
         }
     }
 
-    fn attributes(&self) -> &Arc<Node> {
+    fn attributes(&self) -> &Arc<Node> { ::tsox_core::fntrace::enter("attributes"); 
         match &self.data {
             ast::node_data_generated::NodeData::JsxOpeningElement(d) => &d.attributes,
             ast::node_data_generated::NodeData::JsxSelfClosingElement(d) => &d.attributes,

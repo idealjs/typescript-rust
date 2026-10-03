@@ -10,14 +10,14 @@ use tsox_frontend::ast::node_node_list::ModifierList;
 use tsox_frontend::ast::{self, Node, NodeData, SourceFile, Symbol, SyntaxKind};
 use tsox_frontend::ast::mig::m3b_2::NodeFactory;
 
-fn m5q3_m5u_converters() -> crate::mig::m5u_conv::M5uConverters {
+fn m5q3_m5u_converters() -> crate::mig::m5u_conv::M5uConverters { ::tsox_core::fntrace::enter("m5q3_m5u_converters"); 
     crate::mig::m5u_conv::new_converters(
         crate::ls::lsconv_converters::PositionEncodingKind::Utf16,
         Box::new(crate::ls::lsconv_linemap::compute_lsp_line_starts),
     )
 }
 
-fn new_block_m5q3(factory: &NodeFactory, statements: Vec<Arc<Node>>, multi_line: bool) -> Arc<Node> {
+fn new_block_m5q3(factory: &NodeFactory, statements: Vec<Arc<Node>>, multi_line: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("new_block_m5q3"); 
     let _ = factory;
     Arc::new(Node::new(
         SyntaxKind::Block,
@@ -30,7 +30,7 @@ fn new_block_m5q3(factory: &NodeFactory, statements: Vec<Arc<Node>>, multi_line:
 
 /// Go completions.go jsDocTagNameCompletionItems/jsDocTagCompletionItems 的
 /// 条目形状（Label/Kind=Keyword/SortText=SortTextLocationPriority）
-fn jsdoc_tag_items_m5q3(prefixed: bool) -> Vec<lsproto::CompletionItem> {
+fn jsdoc_tag_items_m5q3(prefixed: bool) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("jsdoc_tag_items_m5q3"); 
     crate::ls::completions_jsdoc::JSDOC_TAG_NAMES
         .iter()
         .map(|tag_name| {
@@ -75,7 +75,7 @@ pub(crate) mod lsproto {
     }
 
     impl CompletionItemKind {
-        pub fn empty_value() -> Self {
+        pub fn empty_value() -> Self { ::tsox_core::fntrace::enter("empty_value"); 
             CompletionItemKind::Empty
         }
     }
@@ -111,29 +111,29 @@ pub(crate) mod lsproto {
 pub const SORT_TEXT_LOCATION_PRIORITY: &str = "\u{0}0";
 pub const SORT_TEXT_GLOBALS_OR_KEYWORDS: &str = "\u{0}9";
 
-pub fn deprecate_sort_text(original: &str) -> String {
+pub fn deprecate_sort_text(original: &str) -> String { ::tsox_core::fntrace::enter("deprecate_sort_text"); 
     format!("z{}", original)
 }
 
 pub fn object_literal_property_sort_text(
     preset_sort_text: &str,
     symbol_display_name: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("object_literal_property_sort_text"); 
     format!("{}\u{0}{}\u{0}", preset_sort_text, symbol_display_name)
 }
 
-pub fn sort_below(original: &str) -> String {
+pub fn sort_below(original: &str) -> String { ::tsox_core::fntrace::enter("sort_below"); 
     format!("{}1", original)
 }
 
-pub fn get_default_commit_characters(is_new_identifier_location: bool) -> Vec<String> {
+pub fn get_default_commit_characters(is_new_identifier_location: bool) -> Vec<String> { ::tsox_core::fntrace::enter("get_default_commit_characters"); 
     if is_new_identifier_location {
         return Vec::new();
     }
     all_commit_characters().to_vec()
 }
 
-pub fn all_commit_characters() -> &'static [String] {
+pub fn all_commit_characters() -> &'static [String] { ::tsox_core::fntrace::enter("all_commit_characters"); 
     static CHARS: std::sync::OnceLock<Vec<String>> = std::sync::OnceLock::new();
     CHARS.get_or_init(|| {
         ['.', ',', ';']
@@ -147,7 +147,7 @@ pub fn completion_name_for_literal(
     file: &Arc<SourceFile>,
     preferences: &UserPreferences,
     literal: &LiteralValue,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("completion_name_for_literal"); 
     match literal {
         LiteralValue::String(s) => quote(file, preferences, s),
         LiteralValue::Number(n) => tsox_core::core::mig::m3j::stringify_json(n, "", "").unwrap_or_default(),
@@ -165,7 +165,7 @@ pub fn create_completion_item_for_literal(
     file: &Arc<SourceFile>,
     preferences: &UserPreferences,
     literal: &LiteralValue,
-) -> lsproto::CompletionItem {
+) -> lsproto::CompletionItem { ::tsox_core::fntrace::enter("create_completion_item_for_literal"); 
     let mut item = lsproto::CompletionItem::default();
     item.label = completion_name_for_literal(file, preferences, literal);
     item.kind = Some(lsproto::CompletionItemKind::empty_value());
@@ -178,7 +178,7 @@ pub fn create_modifier_list(
     factory: &NodeFactory,
     flags: ast::ModifierFlags,
     decorators: &[Arc<Node>],
-) -> Option<Arc<ModifierList>> {
+) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("create_modifier_list"); 
     let mut nodes: Vec<Arc<Node>> = Vec::new();
     for decorator in decorators {
         nodes.push(ast::deep_clone_node(decorator));
@@ -196,7 +196,7 @@ pub fn create_modifier_list(
 pub fn create_snippet_tab_stop_body(
     factory: &NodeFactory,
     emit_context: &mut tsox_emit::printer::EmitContext,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_snippet_tab_stop_body"); 
     use tsox_emit::printer::mig::m4m_2::{SnippetElement, SNIPPET_KIND_TAB_STOP};
     let empty_statement = Arc::new(Node::new(SyntaxKind::EmptyStatement, NodeData::EmptyStatement));
     emit_context.set_snippet_element(
@@ -209,7 +209,7 @@ pub fn create_snippet_tab_stop_body(
     Some(new_block_m5q3(factory, vec![empty_statement], true))
 }
 
-pub fn get_dot_accessor(file: &Arc<SourceFile>, position: usize) -> String {
+pub fn get_dot_accessor(file: &Arc<SourceFile>, position: usize) -> String { ::tsox_core::fntrace::enter("get_dot_accessor"); 
     let text = &file.text;
     let before = &text[..position.min(text.len())];
     if before.ends_with("?.") {
@@ -221,7 +221,7 @@ pub fn get_dot_accessor(file: &Arc<SourceFile>, position: usize) -> String {
     String::new()
 }
 
-pub fn bool_to_ptr(v: bool) -> Option<bool> {
+pub fn bool_to_ptr(v: bool) -> Option<bool> { ::tsox_core::fntrace::enter("bool_to_ptr"); 
     if v {
         Some(true)
     } else {
@@ -229,7 +229,7 @@ pub fn bool_to_ptr(v: bool) -> Option<bool> {
     }
 }
 
-pub fn binary_expression_may_be_open_tag(binary_expression: &Node) -> bool {
+pub fn binary_expression_may_be_open_tag(binary_expression: &Node) -> bool { ::tsox_core::fntrace::enter("binary_expression_may_be_open_tag"); 
     match &binary_expression.data {
         NodeData::BinaryExpression(d) => ast::node_is_missing(Some(&d.left)),
         _ => true,
@@ -240,7 +240,7 @@ pub fn get_first_symbol_in_chain(
     symbol: &Arc<Symbol>,
     enclosing_declaration: &Arc<Node>,
     type_checker: &mut Checker,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_first_symbol_in_chain"); 
     let chain = type_checker.get_accessible_symbol_chain_public(
         symbol,
         Some(enclosing_declaration),
@@ -257,7 +257,7 @@ pub fn get_first_symbol_in_chain(
     get_first_symbol_in_chain(&parent, enclosing_declaration, type_checker)
 }
 
-pub fn is_module_symbol(symbol: &Symbol) -> bool {
+pub fn is_module_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_module_symbol"); 
     symbol.flags.intersects(ast::SymbolFlags::MODULE)
 }
 
@@ -266,7 +266,7 @@ pub fn get_contextual_type_for_conditional_expression(
     position: i32,
     file: &Arc<SourceFile>,
     type_checker: &mut Checker,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_conditional_expression"); 
     if let Some(arg_info) = get_argument_info_for_completions(conditional_expr, position, file, type_checker) {
         return type_checker.get_contextual_type_for_argument_at_index(
             &arg_info.invocation,
@@ -292,7 +292,7 @@ pub fn get_argument_info_for_completions(
     position: i32,
     file: &Arc<SourceFile>,
     type_checker: &mut Checker,
-) -> Option<ArgumentInfoForCompletions> {
+) -> Option<ArgumentInfoForCompletions> { ::tsox_core::fntrace::enter("get_argument_info_for_completions"); 
     let info = crate::ls::mig::m5w_2::get_immediately_containing_argument_info(
         node,
         position.max(0) as usize,
@@ -312,7 +312,7 @@ pub fn get_argument_info_for_completions(
 pub fn get_closest_symbol_declaration(
     context_token: Option<&Arc<Node>>,
     location: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_closest_symbol_declaration"); 
     let context_token = context_token?;
     tsox_frontend::ast::mig::m3e_4::find_ancestor_or_quit(Some(context_token), &|node: &Arc<Node>| {
         use tsox_frontend::ast::mig::m3e_4::FindAncestorResult;
@@ -328,7 +328,7 @@ pub fn get_closest_symbol_declaration(
     })
 }
 
-pub fn is_arrow_function_body(node: &Arc<Node>) -> bool {
+pub fn is_arrow_function_body(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_arrow_function_body"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -344,7 +344,7 @@ pub fn create_range_from_string_literal_like_content(
     file: &Arc<SourceFile>,
     node: &Arc<Node>,
     position: i32,
-) -> Option<lsproto::Range> {
+) -> Option<lsproto::Range> { ::tsox_core::fntrace::enter("create_range_from_string_literal_like_content"); 
     let position = position.max(0) as usize;
     let mut replacement_end = node.end().saturating_sub(1);
     let node_start = tsox_frontend::astnav::get_start_of_node(node, file, false);
@@ -369,14 +369,14 @@ pub fn are_intersected_types_avoiding_string_reduction(
     type_checker: &Checker,
     t1: &Arc<Type>,
     t2: &Arc<Type>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("are_intersected_types_avoiding_string_reduction"); 
     t1.is_string() && type_checker.is_empty_anonymous_object_type(t2)
 }
 
 pub fn is_string_and_empty_anonymous_object_intersection(
     type_checker: &Checker,
     t: &Arc<Type>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_string_and_empty_anonymous_object_intersection"); 
     if !t.is_intersection() {
         return false;
     }
@@ -386,11 +386,11 @@ pub fn is_string_and_empty_anonymous_object_intersection(
             || are_intersected_types_avoiding_string_reduction(type_checker, &types[1], &types[0]))
 }
 
-pub fn escape_snippet_text(text: &str) -> String {
+pub fn escape_snippet_text(text: &str) -> String { ::tsox_core::fntrace::enter("escape_snippet_text"); 
     text.replace('$', "\\$")
 }
 
-pub fn get_completions_symbol_kind(kind: crate::ls::lsutil_symbol_display::ScriptElementKind) -> lsproto::CompletionItemKind {
+pub fn get_completions_symbol_kind(kind: crate::ls::lsutil_symbol_display::ScriptElementKind) -> lsproto::CompletionItemKind { ::tsox_core::fntrace::enter("get_completions_symbol_kind"); 
     use crate::ls::lsutil_symbol_display::ScriptElementKind as K;
     match kind {
         K::PrimitiveType | K::Keyword => lsproto::CompletionItemKind::Keyword,
@@ -415,7 +415,7 @@ pub fn get_completions_symbol_kind(kind: crate::ls::lsutil_symbol_display::Scrip
     }
 }
 
-pub fn clone_items(items: &[lsproto::CompletionItem]) -> Vec<lsproto::CompletionItem> {
+pub fn clone_items(items: &[lsproto::CompletionItem]) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("clone_items"); 
     items.to_vec()
 }
 
@@ -423,7 +423,7 @@ pub fn get_apparent_properties(
     t: &Arc<Type>,
     node: &Arc<Node>,
     type_checker: &mut Checker,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_apparent_properties"); 
     if !t.is_union() {
         return type_checker.get_apparent_properties(t);
     }
@@ -446,7 +446,7 @@ pub fn get_apparent_properties(
     type_checker.get_all_possible_properties_of_types(&member_types)
 }
 
-pub fn contains_non_public_properties(props: &[Arc<Symbol>]) -> bool {
+pub fn contains_non_public_properties(props: &[Arc<Symbol>]) -> bool { ::tsox_core::fntrace::enter("contains_non_public_properties"); 
     props.iter().any(|p| {
         tsox_checker::checker::get_declaration_modifier_flags_from_symbol(p)
             .intersects(ast::ModifierFlags::NonPublicAccessibilityModifier)
@@ -456,14 +456,14 @@ pub fn contains_non_public_properties(props: &[Arc<Symbol>]) -> bool {
 fn completion_item_capability_pointer(
     ctx: &lsproto::Context,
     leaf: &str,
-) -> Option<bool> {
+) -> Option<bool> { ::tsox_core::fntrace::enter("completion_item_capability_pointer"); 
     lsproto::get_client_capabilities(ctx)
         .raw
         .pointer(&format!("/textDocument/completion/completionItem/{leaf}"))
         .and_then(|v| v.as_bool())
 }
 
-fn completion_list_item_defaults(ctx: &lsproto::Context) -> Vec<String> {
+fn completion_list_item_defaults(ctx: &lsproto::Context) -> Vec<String> { ::tsox_core::fntrace::enter("completion_list_item_defaults"); 
     lsproto::get_client_capabilities(ctx)
         .raw
         .pointer("/textDocument/completion/completionList/itemDefaults")
@@ -477,31 +477,31 @@ fn completion_list_item_defaults(ctx: &lsproto::Context) -> Vec<String> {
         .unwrap_or_default()
 }
 
-pub fn client_supports_item_label_details(ctx: &lsproto::Context) -> bool {
+pub fn client_supports_item_label_details(ctx: &lsproto::Context) -> bool { ::tsox_core::fntrace::enter("client_supports_item_label_details"); 
     completion_item_capability_pointer(ctx, "labelDetailsSupport").unwrap_or(false)
 }
 
-pub fn client_supports_item_snippet(ctx: &lsproto::Context) -> bool {
+pub fn client_supports_item_snippet(ctx: &lsproto::Context) -> bool { ::tsox_core::fntrace::enter("client_supports_item_snippet"); 
     completion_item_capability_pointer(ctx, "snippetSupport").unwrap_or(false)
 }
 
-pub fn client_supports_item_commit_characters(ctx: &lsproto::Context) -> bool {
+pub fn client_supports_item_commit_characters(ctx: &lsproto::Context) -> bool { ::tsox_core::fntrace::enter("client_supports_item_commit_characters"); 
     completion_item_capability_pointer(ctx, "commitCharactersSupport").unwrap_or(false)
 }
 
-pub fn client_supports_item_insert_replace(ctx: &lsproto::Context) -> bool {
+pub fn client_supports_item_insert_replace(ctx: &lsproto::Context) -> bool { ::tsox_core::fntrace::enter("client_supports_item_insert_replace"); 
     completion_item_capability_pointer(ctx, "insertReplaceSupport").unwrap_or(false)
 }
 
-pub fn client_supports_default_commit_characters(ctx: &lsproto::Context) -> bool {
+pub fn client_supports_default_commit_characters(ctx: &lsproto::Context) -> bool { ::tsox_core::fntrace::enter("client_supports_default_commit_characters"); 
     completion_list_item_defaults(ctx).iter().any(|d| d == "commitCharacters")
 }
 
-pub fn client_supports_default_edit_range(ctx: &lsproto::Context) -> bool {
+pub fn client_supports_default_edit_range(ctx: &lsproto::Context) -> bool { ::tsox_core::fntrace::enter("client_supports_default_edit_range"); 
     completion_list_item_defaults(ctx).iter().any(|d| d == "editRange")
 }
 
-pub fn get_completion_documentation_format(ctx: &lsproto::Context) -> lsproto::MarkupKind {
+pub fn get_completion_documentation_format(ctx: &lsproto::Context) -> lsproto::MarkupKind { ::tsox_core::fntrace::enter("get_completion_documentation_format"); 
     let formats: Vec<lsproto::MarkupKind> = lsproto::get_client_capabilities(ctx)
         .raw
         .pointer("/textDocument/completion/completionItem/documentationFormat")
@@ -524,7 +524,7 @@ pub fn create_simple_details<'a>(
     item: &'a mut lsproto::CompletionItem,
     name: &str,
     doc_format: lsproto::MarkupKind,
-) -> &'a mut lsproto::CompletionItem {
+) -> &'a mut lsproto::CompletionItem { ::tsox_core::fntrace::enter("create_simple_details"); 
     create_completion_details(item, name, "", doc_format)
 }
 
@@ -533,7 +533,7 @@ pub fn create_completion_details<'a>(
     detail: &str,
     documentation: &str,
     doc_format: lsproto::MarkupKind,
-) -> &'a mut lsproto::CompletionItem {
+) -> &'a mut lsproto::CompletionItem { ::tsox_core::fntrace::enter("create_completion_details"); 
     if item.detail.is_none() && !detail.is_empty() {
         item.detail = Some(detail.to_string());
     }
@@ -555,7 +555,7 @@ impl crate::ls::language_service::LanguageService {
         location: &Arc<Node>,
         position: i32,
         doc_format: lsproto::MarkupKind,
-    ) -> &'a mut lsproto::CompletionItem {
+    ) -> &'a mut lsproto::CompletionItem { ::tsox_core::fntrace::enter("create_completion_details_for_symbol"); 
         let (quick_info, documentation, _, _) = self.get_quick_info_and_documentation_for_symbol(
             checker,
             Some(symbol),
@@ -571,7 +571,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         item: &lsproto::CompletionItem,
         data: &lsproto::CompletionItemData,
-    ) -> Result<lsproto::CompletionItem, String> {
+    ) -> Result<lsproto::CompletionItem, String> { ::tsox_core::fntrace::enter("resolve_completion_item"); 
         let (program, file) = self.try_get_program_and_file(&data.file_name);
         let file = match file {
             Some(file) => file,
@@ -601,7 +601,7 @@ impl crate::ls::language_service::LanguageService {
         _file: &Arc<SourceFile>,
         item: &lsproto::CompletionItem,
         _data: &lsproto::CompletionItemData,
-    ) -> lsproto::CompletionItem {
+    ) -> lsproto::CompletionItem { ::tsox_core::fntrace::enter("get_completion_item_details"); 
         item.clone()
     }
 }
@@ -616,7 +616,7 @@ pub const SOURCE_OBJECT_LITERAL_MEMBER_WITH_COMMA: &str = "ObjectLiteralMemberWi
 pub fn could_be_type_only_import_specifier(
     import_specifier: &Arc<Node>,
     context_token: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("could_be_type_only_import_specifier"); 
     ast::is_import_specifier(import_specifier)
         && (tsox_frontend::ast::mig::m3b::is_type_only(import_specifier)
             || context_token.is_some()
@@ -626,14 +626,14 @@ pub fn could_be_type_only_import_specifier(
                 && is_type_keyword_token_or_identifier(context_token.unwrap()))
 }
 
-pub fn is_type_keyword_token_or_identifier(node: &Arc<Node>) -> bool {
+pub fn is_type_keyword_token_or_identifier(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_keyword_token_or_identifier"); 
     matches!(
         node.kind,
         SyntaxKind::TypeKeyword | SyntaxKind::Identifier
     )
 }
 
-pub fn can_complete_from_named_bindings(named_bindings: &Arc<Node>) -> bool {
+pub fn can_complete_from_named_bindings(named_bindings: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("can_complete_from_named_bindings"); 
     let Some(import_declaration) = named_bindings.parent().and_then(|clause| clause.parent()) else {
         return false;
     };
@@ -661,14 +661,14 @@ pub fn can_complete_from_named_bindings(named_bindings: &Arc<Node>) -> bool {
     true
 }
 
-pub fn is_module_specifier_missing_or_empty(specifier: Option<&Arc<Node>>) -> bool {
+pub fn is_module_specifier_missing_or_empty(specifier: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_module_specifier_missing_or_empty"); 
     match specifier {
         None => true,
         Some(specifier) => ast::is_string_literal(specifier) && specifier.text().is_empty(),
     }
 }
 
-pub fn get_potentially_invalid_import_specifier(named_bindings: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_potentially_invalid_import_specifier(named_bindings: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_potentially_invalid_import_specifier"); 
     let elements = tsox_frontend::ast::mig::m3b::elements(named_bindings);
     elements
         .first()
@@ -680,7 +680,7 @@ pub fn get_potentially_invalid_import_specifier(named_bindings: &Arc<Node>) -> O
         })
 }
 
-fn node_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn node_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_module_specifier"); 
     match &node.data {
         tsox_frontend::ast::node_data_generated::NodeData::ImportDeclaration(d) => {
             Some(d.module_specifier.clone())
@@ -692,17 +692,17 @@ fn node_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn get_jsdoc_tag_name_completions() -> Vec<lsproto::CompletionItem> {
+pub fn get_jsdoc_tag_name_completions() -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_jsdoc_tag_name_completions"); 
     jsdoc_tag_items_m5q3(false)
 }
 
-pub fn get_jsdoc_tag_completions() -> Vec<lsproto::CompletionItem> {
+pub fn get_jsdoc_tag_completions() -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_jsdoc_tag_completions"); 
     jsdoc_tag_items_m5q3(true)
 }
 
 pub fn get_jsdoc_parameter_name_completions(
     tag: &Arc<Node>,
-) -> Vec<lsproto::CompletionItem> {
+) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_jsdoc_parameter_name_completions"); 
     let Some(name) = tag.name() else {
         return Vec::new();
     };
@@ -758,7 +758,7 @@ pub fn entity_name_to_expression(
     target: tsox_core::core::compiler_options_kinds::ScriptTarget,
     quote_preference: QuotePreference,
     factory: &NodeFactory,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("entity_name_to_expression"); 
     if ast::is_identifier(entity_name) {
         return entity_name.clone();
     }
@@ -779,7 +779,7 @@ fn new_property_access_expression_m5q3(
     expression: Arc<Node>,
     question_dot_token: Option<Arc<Node>>,
     name: Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_access_expression_m5q3"); 
     let _ = factory;
     Arc::new(Node::new(
         SyntaxKind::PropertyAccessExpression,
@@ -799,11 +799,11 @@ pub struct SnippetPrinter {
 }
 
 impl SnippetPrinter {
-    pub fn print_node(&mut self, node: &Arc<Node>) -> String {
+    pub fn print_node(&mut self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("print_node"); 
         escape_snippet_text(&self.print_unescaped_node(node))
     }
 
-    pub fn print_unescaped_node(&mut self, node: &Arc<Node>) -> String {
+    pub fn print_unescaped_node(&mut self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("print_unescaped_node"); 
         self.printer.emit(node, None)
     }
 }
@@ -811,7 +811,7 @@ impl SnippetPrinter {
 pub fn create_snippet_printer(
     options: tsox_frontend::format::mig::m4o_2::PrinterOptions,
     emit_context: Option<tsox_frontend::format::mig::m4o_2::EmitContext>,
-) -> SnippetPrinter {
+) -> SnippetPrinter { ::tsox_core::fntrace::enter("create_snippet_printer"); 
     let emit_context = emit_context.unwrap_or_default();
     let printer = tsox_frontend::format::mig::m4o_2::new_printer(
         options,
@@ -836,7 +836,7 @@ pub fn create_snippet_printer(
 pub fn source_file_for_supplemental_file_index(
     file: &Arc<SourceFile>,
     index: Option<i32>,
-) -> Option<Arc<SourceFile>> {
+) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_for_supplemental_file_index"); 
     match index {
         Some(index) => file
             .supplemental_source_files
@@ -846,7 +846,7 @@ pub fn source_file_for_supplemental_file_index(
     }
 }
 
-pub fn quote(file: &Arc<SourceFile>, preferences: &UserPreferences, text: &str) -> String {
+pub fn quote(file: &Arc<SourceFile>, preferences: &UserPreferences, text: &str) -> String { ::tsox_core::fntrace::enter("quote"); 
     let quote_preference =
         crate::ls::lsutil_utilities::get_quote_preference(file, preferences);
     let quoted = tsox_core::core::mig::m3j::stringify_json(&text, "", "").unwrap_or_default();
@@ -858,7 +858,7 @@ pub fn quote(file: &Arc<SourceFile>, preferences: &UserPreferences, text: &str) 
     }
 }
 
-fn quote_replacer(text: &str) -> String {
+fn quote_replacer(text: &str) -> String { ::tsox_core::fntrace::enter("quote_replacer"); 
     let mut out = String::with_capacity(text.len());
     for c in text.chars() {
         match c {

@@ -4,7 +4,7 @@ use crate::ls::lsutil_user_preferences_raw_fields::apply_raw_field;
 
 use serde_json::{Map, Value};
 
-fn get_nested_value<'a>(config: &'a Map<String, Value>, path: &str) -> Option<&'a Value> {
+fn get_nested_value<'a>(config: &'a Map<String, Value>, path: &str) -> Option<&'a Value> { ::tsox_core::fntrace::enter("get_nested_value"); 
     let mut parts = path.split('.');
     let first = parts.next()?;
     let mut current: &Value = config.get(first)?;
@@ -17,7 +17,7 @@ fn get_nested_value<'a>(config: &'a Map<String, Value>, path: &str) -> Option<&'
     Some(current)
 }
 
-pub(super) fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>) {
+pub(super) fn apply_config_fields(prefs: &mut UserPreferences, config: &Map<String, Value>) { ::tsox_core::fntrace::enter("apply_config_fields"); 
     let mappings: &[(&str, &str)] = &[
         ("preferences.quoteStyle", "quotePreference"),
         ("suggest.autoImports", "includeCompletionsForModuleExports"),

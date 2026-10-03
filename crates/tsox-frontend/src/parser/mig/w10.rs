@@ -18,18 +18,18 @@ use tsox_core::diagnostics::{self, Message};
 // processPragmasIntoFields → 未移植交接：Rust SourceFile 无 pragmas/check_js_directive/referenced_files 等字段，需先扩 SourceFile（见 progress_notes）
 
 impl Parser {
-    pub(crate) fn parse_type_annotation(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn parse_type_annotation(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_type_annotation"); 
         if self.parse_optional(SyntaxKind::ColonToken) {
             return Some(self.parse_type());
         }
         None
     }
 
-    pub(crate) fn parse_type_of_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_of_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_of_expression"); 
         self.parse_unary_expression()
     }
 
-    pub(crate) fn parse_type_parameter_of_infer_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_parameter_of_infer_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_parameter_of_infer_type"); 
         let pos = self.node_pos();
         let name = self.parse_identifier();
         let constraint = self.try_parse_constraint_of_infer_type();
@@ -47,28 +47,28 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_unary_expression_or_higher(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_unary_expression_or_higher(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_unary_expression_or_higher"); 
         self.parse_unary_expression()
     }
 
-    pub(crate) fn parse_update_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_update_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_update_expression"); 
         self.parse_unary_expression()
     }
 
-    pub(crate) fn parse_simple_unary_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_simple_unary_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_simple_unary_expression"); 
         self.parse_unary_expression()
     }
 
-    pub(crate) fn parse_left_hand_side_expression_or_higher(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_left_hand_side_expression_or_higher(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_left_hand_side_expression_or_higher"); 
         self.parse_left_hand_side_expression()
     }
 
-    pub(crate) fn re_scan_greater_than_token(&mut self) -> SyntaxKind {
+    pub(crate) fn re_scan_greater_than_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_greater_than_token"); 
         self.token = self.scanner.re_scan_greater_than();
         self.token
     }
 
-    pub(crate) fn scan_class_member_start(&mut self) -> bool {
+    pub(crate) fn scan_class_member_start(&mut self) -> bool { ::tsox_core::fntrace::enter("scan_class_member_start"); 
         let mut id_token = SyntaxKind::Unknown;
         if self.token == SyntaxKind::AtToken {
             return true;
@@ -110,7 +110,7 @@ impl Parser {
         false
     }
 
-    pub(crate) fn scan_type_member_start(&mut self) -> bool {
+    pub(crate) fn scan_type_member_start(&mut self) -> bool { ::tsox_core::fntrace::enter("scan_type_member_start"); 
         if self.token == SyntaxKind::OpenParenToken
             || self.token == SyntaxKind::LessThanToken
             || self.token == SyntaxKind::GetKeyword

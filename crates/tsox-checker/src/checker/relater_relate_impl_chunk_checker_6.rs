@@ -8,7 +8,7 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
         visited: &mut Vec<usize>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("lookup_property_on_single_type"); 
         let ptr = Arc::as_ptr(t) as usize;
         if visited.contains(&ptr) {
             return None;
@@ -57,7 +57,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("each_type_related_to_some_type"); 
         if source.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
             && let Some(si) = source.as_union_or_intersection()
         {
@@ -76,7 +76,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("some_type_related_to_type"); 
         if let Some(ui) = source.as_union_or_intersection() {
             let save_len = self.relater_error_chain.len();
             let mut best: Option<Vec<RelaterChainEntry>> = None;
@@ -104,7 +104,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("each_type_related_to_type"); 
         if let Some(ui) = source.as_union_or_intersection() {
             let save_len = self.relater_error_chain.len();
             let mut any_failed = false;
@@ -155,7 +155,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_related_to_some_type"); 
         let source = self.get_regular_type_of_object_literal(source);
         if let Some(ui) = target.as_union_or_intersection() {
             let save_len = self.relater_error_chain.len();

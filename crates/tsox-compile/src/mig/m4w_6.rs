@@ -7,7 +7,7 @@ use tsox_core::diagnostics::messages_generated as messages;
 use tsox_core::tspath;
 
 impl ProcessingDiagnostic {
-    pub fn to_diagnostic(&self, program: &Program) -> Option<Arc<tsox_frontend::ast::diagnostic::Diagnostic>> {
+    pub fn to_diagnostic(&self, program: &Program) -> Option<Arc<tsox_frontend::ast::diagnostic::Diagnostic>> { ::tsox_core::fntrace::enter("to_diagnostic"); 
         match self.kind {
             ProcessingDiagnosticKind::UnknownReference => {
                 self.create_unknown_reference_diagnostic(program).map(Arc::new)
@@ -21,7 +21,7 @@ impl ProcessingDiagnostic {
     fn create_unknown_reference_diagnostic(
         &self,
         program: &Program,
-    ) -> Option<tsox_frontend::ast::diagnostic::Diagnostic> {
+    ) -> Option<tsox_frontend::ast::diagnostic::Diagnostic> { ::tsox_core::fntrace::enter("create_unknown_reference_diagnostic"); 
         let r = self.as_file_include_reason();
         let loc = r.get_referenced_location(program);
         let file_name = loc.ref_.as_ref().unwrap().file_name.clone();

@@ -6,7 +6,7 @@ impl Parser {
     pub(crate) fn parse_declaration_with_modifiers(
         &mut self,
         mut modifiers: Vec<(SyntaxKind, usize, usize)>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_declaration_with_modifiers"); 
         let mut decorators: Vec<Arc<Node>> = Vec::new();
         loop {
             if self.token == SyntaxKind::AtToken {
@@ -125,14 +125,14 @@ impl Parser {
         result
     }
 
-    pub(crate) fn parse_function_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_function_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_declaration"); 
         self.parse_function_declaration_with_modifiers(None)
     }
 
     pub(crate) fn parse_function_declaration_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_declaration_with_modifiers"); 
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
@@ -178,7 +178,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_function_block(&mut self, is_generator: bool, is_async: bool) -> Arc<Node> {
+    pub(crate) fn parse_function_block(&mut self, is_generator: bool, is_async: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_block"); 
         self.parse_function_block_ex(is_generator, is_async, false)
     }
 
@@ -187,7 +187,7 @@ impl Parser {
         is_generator: bool,
         is_async: bool,
         ignore_missing_open_brace: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_block_ex"); 
         let saved_yield = self.yield_context;
         let saved_await = self.await_context;
         self.yield_context = is_generator;
@@ -198,14 +198,14 @@ impl Parser {
         block
     }
 
-    pub(crate) fn parse_class_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_class_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_declaration"); 
         self.parse_class_declaration_with_modifiers(None)
     }
 
     pub(crate) fn parse_class_declaration_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_declaration_with_modifiers"); 
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = if self.is_binding_identifier() {
@@ -230,14 +230,14 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_interface_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_interface_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_interface_declaration"); 
         self.parse_interface_declaration_with_modifiers(None)
     }
 
     pub(crate) fn parse_interface_declaration_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_interface_declaration_with_modifiers"); 
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = self.parse_identifier();
@@ -260,14 +260,14 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_type_alias_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_alias_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_alias_declaration"); 
         self.parse_type_alias_declaration_with_modifiers(None)
     }
 
     pub(crate) fn parse_type_alias_declaration_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_alias_declaration_with_modifiers"); 
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         if self.has_preceding_line_break() {
@@ -294,14 +294,14 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_enum_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_enum_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_enum_declaration"); 
         self.parse_enum_declaration_with_modifiers(None)
     }
 
     pub(crate) fn parse_enum_declaration_with_modifiers(
         &mut self,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_enum_declaration_with_modifiers"); 
         let pos = Self::declaration_start(&modifiers, self.token_pos());
         self.next_token();
         let name = self.parse_identifier();
@@ -321,7 +321,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_namespace_declaration(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_namespace_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_namespace_declaration"); 
         self.parse_namespace_declaration_with_modifiers(None)
     }
 }

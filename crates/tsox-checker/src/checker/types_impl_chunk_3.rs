@@ -3,7 +3,7 @@
 use crate::checker::types::*;
 
 impl Type {
-    pub fn new(flags: TypeFlags, data: TypeData) -> Self {
+    pub fn new(flags: TypeFlags, data: TypeData) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             flags,
             object_flags: ObjectFlags::empty(),
@@ -14,55 +14,55 @@ impl Type {
         }
     }
 
-    pub fn is_union(&self) -> bool {
+    pub fn is_union(&self) -> bool { ::tsox_core::fntrace::enter("is_union"); 
         self.flags.contains(TypeFlags::Union)
     }
 
-    pub fn is_intersection(&self) -> bool {
+    pub fn is_intersection(&self) -> bool { ::tsox_core::fntrace::enter("is_intersection"); 
         self.flags.contains(TypeFlags::Intersection)
     }
 
-    pub fn is_string(&self) -> bool {
+    pub fn is_string(&self) -> bool { ::tsox_core::fntrace::enter("is_string"); 
         self.flags.contains(TypeFlags::String)
     }
 
-    pub fn is_string_literal(&self) -> bool {
+    pub fn is_string_literal(&self) -> bool { ::tsox_core::fntrace::enter("is_string_literal"); 
         self.flags.contains(TypeFlags::StringLiteral)
     }
 
-    pub fn is_number_literal(&self) -> bool {
+    pub fn is_number_literal(&self) -> bool { ::tsox_core::fntrace::enter("is_number_literal"); 
         self.flags.contains(TypeFlags::NumberLiteral)
     }
 
-    pub fn is_big_int_literal(&self) -> bool {
+    pub fn is_big_int_literal(&self) -> bool { ::tsox_core::fntrace::enter("is_big_int_literal"); 
         self.flags.contains(TypeFlags::BigIntLiteral)
     }
 
-    pub fn is_enum_literal(&self) -> bool {
+    pub fn is_enum_literal(&self) -> bool { ::tsox_core::fntrace::enter("is_enum_literal"); 
         self.flags.contains(TypeFlags::EnumLiteral)
     }
 
-    pub fn is_boolean_like(&self) -> bool {
+    pub fn is_boolean_like(&self) -> bool { ::tsox_core::fntrace::enter("is_boolean_like"); 
         self.flags.intersects(TYPE_FLAGS_BOOLEAN_LIKE)
     }
 
-    pub fn is_string_like(&self) -> bool {
+    pub fn is_string_like(&self) -> bool { ::tsox_core::fntrace::enter("is_string_like"); 
         self.flags.intersects(TYPE_FLAGS_STRING_LIKE)
     }
 
-    pub fn is_class(&self) -> bool {
+    pub fn is_class(&self) -> bool { ::tsox_core::fntrace::enter("is_class"); 
         self.object_flags.contains(ObjectFlags::Class)
     }
 
-    pub fn is_type_parameter(&self) -> bool {
+    pub fn is_type_parameter(&self) -> bool { ::tsox_core::fntrace::enter("is_type_parameter"); 
         self.flags.contains(TypeFlags::TypeParameter)
     }
 
-    pub fn is_index(&self) -> bool {
+    pub fn is_index(&self) -> bool { ::tsox_core::fntrace::enter("is_index"); 
         self.flags.contains(TypeFlags::Index)
     }
 
-    pub fn distributed(&self) -> Vec<Arc<Type>> {
+    pub fn distributed(&self) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("distributed"); 
         if self.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &self.data {
                 return u.union_or_intersection.types.clone();
@@ -75,7 +75,7 @@ impl Type {
         Vec::new()
     }
 
-    pub fn target(&self) -> Option<&Arc<Type>> {
+    pub fn target(&self) -> Option<&Arc<Type>> { ::tsox_core::fntrace::enter("target"); 
         match &self.data {
             TypeData::Object(o) => o.target.as_ref(),
             TypeData::Interface(i) => i.object.target.as_ref(),
@@ -91,7 +91,7 @@ impl Type {
         }
     }
 
-    pub fn mapper(&self) -> Option<&Arc<TypeMapper>> {
+    pub fn mapper(&self) -> Option<&Arc<TypeMapper>> { ::tsox_core::fntrace::enter("mapper"); 
         match &self.data {
             TypeData::Object(o) => o.mapper.as_ref(),
             TypeData::Interface(i) => i.object.mapper.as_ref(),
@@ -106,7 +106,7 @@ impl Type {
         }
     }
 
-    pub fn types(&self) -> Option<&[Arc<Type>]> {
+    pub fn types(&self) -> Option<&[Arc<Type>]> { ::tsox_core::fntrace::enter("types"); 
         match &self.data {
             TypeData::Union(u) => Some(&u.union_or_intersection.types),
             TypeData::Intersection(i) => Some(&i.union_or_intersection.types),
@@ -115,7 +115,7 @@ impl Type {
         }
     }
 
-    pub fn as_structured(&self) -> Option<&StructuredTypeData> {
+    pub fn as_structured(&self) -> Option<&StructuredTypeData> { ::tsox_core::fntrace::enter("as_structured"); 
         match &self.data {
             TypeData::Object(o) => Some(&o.structured),
             TypeData::Interface(i) => Some(&i.object.structured),
@@ -130,7 +130,7 @@ impl Type {
         }
     }
 
-    pub fn as_object(&self) -> Option<&ObjectTypeData> {
+    pub fn as_object(&self) -> Option<&ObjectTypeData> { ::tsox_core::fntrace::enter("as_object"); 
         match &self.data {
             TypeData::Object(o) => Some(o),
             TypeData::Interface(i) => Some(&i.object),
@@ -143,7 +143,7 @@ impl Type {
         }
     }
 
-    pub fn as_interface(&self) -> Option<&InterfaceTypeData> {
+    pub fn as_interface(&self) -> Option<&InterfaceTypeData> { ::tsox_core::fntrace::enter("as_interface"); 
         match &self.data {
             TypeData::Interface(i) => Some(i),
             TypeData::Tuple(t) => Some(&t.interface_data),
@@ -151,7 +151,7 @@ impl Type {
         }
     }
 
-    pub fn as_union_or_intersection(&self) -> Option<&UnionOrIntersectionTypeData> {
+    pub fn as_union_or_intersection(&self) -> Option<&UnionOrIntersectionTypeData> { ::tsox_core::fntrace::enter("as_union_or_intersection"); 
         match &self.data {
             TypeData::Union(u) => Some(&u.union_or_intersection),
             TypeData::Intersection(i) => Some(&i.union_or_intersection),
@@ -159,7 +159,7 @@ impl Type {
         }
     }
 
-    pub fn intrinsic_name(&self) -> Option<&str> {
+    pub fn intrinsic_name(&self) -> Option<&str> { ::tsox_core::fntrace::enter("intrinsic_name"); 
         if let TypeData::Intrinsic(i) = &self.data {
             Some(&i.intrinsic_name)
         } else {
@@ -167,7 +167,7 @@ impl Type {
         }
     }
 
-    pub fn literal_value(&self) -> Option<&LiteralValue> {
+    pub fn literal_value(&self) -> Option<&LiteralValue> { ::tsox_core::fntrace::enter("literal_value"); 
         if let TypeData::Literal(l) = &self.data {
             Some(&l.value)
         } else {
@@ -196,7 +196,7 @@ pub struct Signature {
 }
 
 impl Signature {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             id: 0,
             flags: SignatureFlags::None,
@@ -215,17 +215,17 @@ impl Signature {
         }
     }
 
-    pub fn has_rest_parameter(&self) -> bool {
+    pub fn has_rest_parameter(&self) -> bool { ::tsox_core::fntrace::enter("has_rest_parameter"); 
         self.flags.contains(SignatureFlags::HasRestParameter)
     }
 
-    pub fn min_argument_count(&self) -> usize {
+    pub fn min_argument_count(&self) -> usize { ::tsox_core::fntrace::enter("min_argument_count"); 
         self.min_argument_count as usize
     }
 }
 
 impl Default for Signature {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }

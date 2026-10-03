@@ -3,7 +3,7 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn get_type_parameter_from_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn get_type_parameter_from_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_parameter_from_symbol"); 
         if let Some(links) = self.type_alias_links.get(symbol) {
             if let Some(ref t) = links.declared_type {
                 return Arc::clone(t);
@@ -99,7 +99,7 @@ impl Checker {
         &self,
         start_key: usize,
         constraint: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("constraint_chain_is_circular"); 
         let mut visited: std::collections::HashSet<usize> = std::collections::HashSet::new();
         let mut current = constraint;
         for _ in 0..50 {

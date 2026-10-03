@@ -37,7 +37,7 @@ pub struct ModuleCompletionNameAndKindSet {
 }
 
 impl ModuleCompletionNameAndKindSet {
-    pub fn add(&mut self, entry: ModuleCompletionNameAndKind) {
+    pub fn add(&mut self, entry: ModuleCompletionNameAndKind) { ::tsox_core::fntrace::enter("add"); 
         match self.names.get(&entry.name) {
             Some(existing) if existing.kind >= entry.kind => {}
             _ => {
@@ -80,7 +80,7 @@ impl LanguageService {
         file: Option<&Arc<SourceFile>>,
         mode: ResolutionMode,
         checker: Option<&mut Checker>,
-    ) -> ExtensionOptions {
+    ) -> ExtensionOptions { ::tsox_core::fntrace::enter("m5w2_get_extension_options"); 
         let content_mapper_extensions = self
             .get_program()
             .command_line()
@@ -106,7 +106,7 @@ impl LanguageService {
         fragment_directory: &str,
         extension_options: &ExtensionOptions,
         result: &mut ModuleCompletionNameAndKindSet,
-    ) {
+    ) { ::tsox_core::fntrace::enter("m5w2_get_completion_entries_from_typings"); 
         let options = program.options();
         let mut seen: HashMap<String, bool> = HashMap::new();
 
@@ -153,7 +153,7 @@ impl LanguageService {
         program: &Arc<Program>,
         seen: &mut HashMap<String, bool>,
         result: &mut ModuleCompletionNameAndKindSet,
-    ) {
+    ) { ::tsox_core::fntrace::enter("m5w2_get_completion_entries_from_typings_directories"); 
         if !self.directory_exists(directory) {
             return;
         }
@@ -194,7 +194,7 @@ impl LanguageService {
         }
     }
 
-    pub fn m5w2_enumerate_node_modules_visible_to_script(&self, script_path: &str) -> Vec<String> {
+    pub fn m5w2_enumerate_node_modules_visible_to_script(&self, script_path: &str) -> Vec<String> { ::tsox_core::fntrace::enter("m5w2_enumerate_node_modules_visible_to_script"); 
         let mut result = Vec::new();
         let program = self.get_program();
         let global_cache_location = program.get_global_typings_cache_location();
@@ -232,7 +232,7 @@ impl LanguageService {
         program: &Arc<Program>,
         script_path: &str,
         extension_options: &ExtensionOptions,
-    ) -> Vec<ModuleCompletionNameAndKind> {
+    ) -> Vec<ModuleCompletionNameAndKind> { ::tsox_core::fntrace::enter("m5w2_get_completion_entries_for_relative_modules"); 
         let options = program.options();
         if !options.root_dirs.is_empty() {
             self.m5w2_get_completion_entries_for_directory_fragment_with_root_dirs(
@@ -266,7 +266,7 @@ impl LanguageService {
         program: &Arc<Program>,
         exclude: &str,
         extension_options: &ExtensionOptions,
-    ) -> Vec<ModuleCompletionNameAndKind> {
+    ) -> Vec<ModuleCompletionNameAndKind> { ::tsox_core::fntrace::enter("m5w2_get_completion_entries_for_directory_fragment_with_root_dirs"); 
         let options = program.options();
         let base_path = if !options.project.is_empty() {
             options.project.clone()
@@ -304,7 +304,7 @@ impl LanguageService {
         module_specifier_is_relative: bool,
         exclude: &str,
         result: &'a mut ModuleCompletionNameAndKindSet,
-    ) -> &'a mut ModuleCompletionNameAndKindSet {
+    ) -> &'a mut ModuleCompletionNameAndKindSet { ::tsox_core::fntrace::enter("m5w2_get_completion_entries_for_directory_fragment"); 
         let mut fragment = tsp::normalize_slashes(fragment);
 
         if !tsp::has_trailing_directory_separator(&fragment) {
@@ -411,7 +411,7 @@ impl LanguageService {
         base_directory: &str,
         extension_options: &ExtensionOptions,
         paths: &tsox_core::collections::ordered_map::OrderedMap<String, Vec<String>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("m5w2_add_completion_entries_from_paths"); 
         let get_patterns_for_keys = |key: &str| paths.get(&key.to_string()).cloned();
         let compare_paths = |a: &str, b: &str| -> std::cmp::Ordering {
             let pattern_a = tsox_core::core::core::try_parse_pattern(a);
@@ -527,7 +527,7 @@ impl LanguageService {
         is_imports: bool,
         extension_options: &ExtensionOptions,
         program: &Arc<Program>,
-    ) -> Vec<ModuleCompletionNameAndKind> {
+    ) -> Vec<ModuleCompletionNameAndKind> { ::tsox_core::fntrace::enter("m5w2_get_completions_for_path_mapping"); 
         let mut fragment_directory = get_fragment_directory(fragment);
         if !fragment_directory.is_empty() {
             fragment_directory = tsp::ensure_trailing_directory_separator(&fragment_directory);
@@ -636,7 +636,7 @@ impl LanguageService {
         is_imports: bool,
         extension_options: &ExtensionOptions,
         program: &Arc<Program>,
-    ) -> Vec<ModuleCompletionNameAndKind> {
+    ) -> Vec<ModuleCompletionNameAndKind> { ::tsox_core::fntrace::enter("m5w2_get_modules_for_paths_pattern"); 
         let parsed = tsox_core::core::core::try_parse_pattern(pattern);
         if !parsed.is_valid() || parsed.star_index == -1 {
             return Vec::new();
@@ -888,7 +888,7 @@ impl LanguageService {
         node: &Arc<Node>,
         program: &Arc<Program>,
         checker: &mut Checker,
-    ) -> Option<crate::ls::mig::m5w2_2::StringLiteralCompletions> {
+    ) -> Option<crate::ls::mig::m5w2_2::StringLiteralCompletions> { ::tsox_core::fntrace::enter("m5w2_get_string_literal_completions_from_module_names"); 
         let text_start = tsox_frontend::astnav::get_start_of_node(node, file, false) + 1;
         let replacement_span = self.path_completion_replacement_span(
             file,
@@ -916,7 +916,7 @@ impl LanguageService {
         node: &Arc<Node>,
         program: &Arc<Program>,
         checker: &mut Checker,
-    ) -> Vec<ModuleCompletionNameAndKind> {
+    ) -> Vec<ModuleCompletionNameAndKind> { ::tsox_core::fntrace::enter("m5w2_get_string_literal_completions_from_module_names_worker"); 
         let literal_value = tsp::normalize_slashes(&node.text());
         let mode = if tsox_frontend::ast::is_string_literal_like(node) {
             program.get_mode_for_usage_location(file, node)
@@ -969,7 +969,7 @@ impl LanguageService {
         program: &Arc<Program>,
         type_checker: &mut Checker,
         extension_options: &ExtensionOptions,
-    ) -> Vec<ModuleCompletionNameAndKind> {
+    ) -> Vec<ModuleCompletionNameAndKind> { ::tsox_core::fntrace::enter("m5w2_get_completion_entries_for_non_relative_modules"); 
         let compiler_options = program.options();
         let paths = compiler_options.paths.as_ref();
 
@@ -1198,7 +1198,7 @@ impl LanguageService {
 pub fn get_pattern_from_first_matching_condition(
     target: &JsonValue,
     conditions: &[String],
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_pattern_from_first_matching_condition"); 
     if target.value_type == JsonValueType::String {
         return target.as_string().to_string();
     }
@@ -1217,7 +1217,7 @@ pub fn get_pattern_from_first_matching_condition(
     String::new()
 }
 
-pub fn is_in_reference_comment(file: &Arc<SourceFile>, position: usize) -> bool {
+pub fn is_in_reference_comment(file: &Arc<SourceFile>, position: usize) -> bool { ::tsox_core::fntrace::enter("is_in_reference_comment"); 
     let token = tsox_frontend::astnav::get_token_at_position(&file.node, position);
     let Some(comment_range) = crate::ls::utilities::is_in_comment(file, position, token.as_ref())
     else {
@@ -1227,11 +1227,11 @@ pub fn is_in_reference_comment(file: &Arc<SourceFile>, position: usize) -> bool 
     has_triple_slash_prefix(comment_text)
 }
 
-pub fn has_triple_slash_prefix(comment_text: &str) -> bool {
+pub fn has_triple_slash_prefix(comment_text: &str) -> bool { ::tsox_core::fntrace::enter("has_triple_slash_prefix"); 
     comment_text.starts_with("///") && comment_text[3..].trim_start().starts_with('<')
 }
 
-pub fn get_file_extension(file_name: &str) -> String {
+pub fn get_file_extension(file_name: &str) -> String { ::tsox_core::fntrace::enter("get_file_extension"); 
     let extension = tsp::try_get_extension_from_path(file_name).to_string();
     if extension.is_empty() {
         return tsp::get_any_extension_from_path(file_name, &[], false);
@@ -1239,18 +1239,18 @@ pub fn get_file_extension(file_name: &str) -> String {
     extension
 }
 
-pub fn contains_slash(fragment: &str) -> bool {
+pub fn contains_slash(fragment: &str) -> bool { ::tsox_core::fntrace::enter("contains_slash"); 
     fragment.contains(tsp::DIRECTORY_SEPARATOR)
 }
 
-pub fn without_start_and_end(s: &str, start: &str, end: &str) -> Option<String> {
+pub fn without_start_and_end(s: &str, start: &str, end: &str) -> Option<String> { ::tsox_core::fntrace::enter("without_start_and_end"); 
     if s.starts_with(start) && s.ends_with(end) && s.len() >= start.len() + end.len() {
         return Some(s[start.len()..s.len() - end.len()].to_string());
     }
     None
 }
 
-pub fn remove_leading_directory_separator(path: &str) -> String {
+pub fn remove_leading_directory_separator(path: &str) -> String { ::tsox_core::fntrace::enter("remove_leading_directory_separator"); 
     path.strip_prefix(tsp::DIRECTORY_SEPARATOR)
         .unwrap_or(path)
         .to_string()
@@ -1261,7 +1261,7 @@ pub fn get_possible_original_input_path_without_changing_ext(
     ignore_case: bool,
     output_dir: &str,
     get_common_source_directory: impl Fn() -> String,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_possible_original_input_path_without_changing_ext"); 
     if !output_dir.is_empty() {
         return tsp::resolve_path(
             &get_common_source_directory(),
@@ -1283,7 +1283,7 @@ pub fn get_filename_with_extension_option(
     program: &Arc<Program>,
     extension_options: &ExtensionOptions,
     is_exports_or_imports_wildcard: bool,
-) -> (String, String) {
+) -> (String, String) { ::tsox_core::fntrace::enter("get_filename_with_extension_option"); 
     use tsox_tsoptions::modulespecifiers::ModuleSpecifierEnding;
 
     let non_js =
@@ -1374,15 +1374,15 @@ struct ProgramModuleSpecifierHost<'a>(&'a Program);
 impl tsox_tsoptions::modulespecifiers::ModuleSpecifierGenerationHost
     for ProgramModuleSpecifierHost<'_>
 {
-    fn get_current_directory(&self) -> String {
+    fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.0.get_current_directory().to_string()
     }
 
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.0.use_case_sensitive_file_names()
     }
 
-    fn common_source_directory(&self) -> String {
+    fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         tsox_compile::mig::m4v::get_common_source_directory(
             self.0.options(),
             || {
@@ -1397,7 +1397,7 @@ impl tsox_tsoptions::modulespecifiers::ModuleSpecifierGenerationHost
         )
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.0.file_exists(path)
     }
 }
@@ -1406,7 +1406,7 @@ pub fn get_supported_extensions_for_module_resolution(
     options: &tsox_core::core::compiler_options::CompilerOptions,
     extra_extensions: &[String],
     checker: Option<&mut Checker>,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_supported_extensions_for_module_resolution"); 
     let mut extensions: Vec<String> = Vec::new();
     if let Some(checker) = checker {
         for module in checker.get_ambient_modules() {
@@ -1438,7 +1438,7 @@ pub fn get_supported_extensions_for_module_resolution(
 pub fn get_conditions(
     options: &tsox_core::core::compiler_options::CompilerOptions,
     mut resolution_mode: ResolutionMode,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_conditions"); 
     let module_resolution = options.get_module_resolution_kind();
     if resolution_mode == ResolutionMode::None
         && module_resolution == ModuleResolutionKind::Bundler
@@ -1461,18 +1461,18 @@ pub fn get_conditions(
     conditions
 }
 
-pub fn module_resolution_uses_node_modules(module_resolution: ModuleResolutionKind) -> bool {
+pub fn module_resolution_uses_node_modules(module_resolution: ModuleResolutionKind) -> bool { ::tsox_core::fntrace::enter("module_resolution_uses_node_modules"); 
     matches!(
         module_resolution,
         ModuleResolutionKind::Node16 | ModuleResolutionKind::NodeNext
     ) || module_resolution == ModuleResolutionKind::Bundler
 }
 
-pub fn is_path_relative_to_script(path: &str) -> bool {
+pub fn is_path_relative_to_script(path: &str) -> bool { ::tsox_core::fntrace::enter("is_path_relative_to_script"); 
     path.starts_with("./") || path.starts_with("../")
 }
 
-pub fn get_fragment_directory(fragment: &str) -> String {
+pub fn get_fragment_directory(fragment: &str) -> String { ::tsox_core::fntrace::enter("get_fragment_directory"); 
     if !contains_slash(fragment) {
         return String::new();
     }
@@ -1486,7 +1486,7 @@ pub fn get_ambient_module_completions(
     fragment: &str,
     fragment_directory: &str,
     type_checker: &mut Checker,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_ambient_module_completions"); 
     let ambient_modules = type_checker.get_ambient_modules();
     let mut non_relative_module_names: Vec<String> = Vec::new();
     for sym in &ambient_modules {
@@ -1509,7 +1509,7 @@ pub fn get_ambient_module_completions(
     non_relative_module_names
 }
 
-pub fn get_ambient_module_name(symbol: &Arc<Symbol>) -> String {
+pub fn get_ambient_module_name(symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("get_ambient_module_name"); 
     let declaration = tsox_frontend::ast::mig::m3f::get_non_augmentation_declaration(symbol);
     if let Some(declaration) = declaration {
         if tsox_frontend::ast::is_module_with_string_literal_name(&declaration) {
@@ -1522,7 +1522,7 @@ pub fn get_ambient_module_name(symbol: &Arc<Symbol>) -> String {
     strip_quotes(&symbol.name).to_string()
 }
 
-fn strip_quotes(name: &str) -> &str {
+fn strip_quotes(name: &str) -> &str { ::tsox_core::fntrace::enter("strip_quotes"); 
     let bytes = name.as_bytes();
     if bytes.len() >= 2
         && bytes[0] == bytes[bytes.len() - 1]
@@ -1537,7 +1537,7 @@ pub fn try_remove_directory_prefix(
     path: &str,
     prefix: &str,
     use_case_sensitive_file_names: bool,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("try_remove_directory_prefix"); 
     let (without_prefix, ok) =
         tsp::mig::m3j::trim_file_path_prefix(path, prefix, use_case_sensitive_file_names);
     if !ok {
@@ -1551,7 +1551,7 @@ pub fn try_remove_directory_prefix(
     Some(without_prefix)
 }
 
-pub fn contains_path(parent: &str, child: &str, options: &tsp::ComparePathsOptions) -> bool {
+pub fn contains_path(parent: &str, child: &str, options: &tsp::ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("contains_path"); 
     let parent = tsp::combine_paths(&options.current_directory, &[parent]);
     let child = tsp::combine_paths(&options.current_directory, &[child]);
     if parent.is_empty() || child.is_empty() {
@@ -1579,7 +1579,7 @@ pub fn get_base_directories_from_root_dirs(
     base_path: &str,
     script_directory: &str,
     ignore_case: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_base_directories_from_root_dirs"); 
     let mut normalized_root_dirs: Vec<String> = Vec::with_capacity(root_dirs.len());
     for root_directory in root_dirs {
         let normalized_path = if tsp::is_rooted_disk_path(root_directory) {
@@ -1619,7 +1619,7 @@ pub fn get_base_directories_from_root_dirs(
     deduplicate_strings(directories)
 }
 
-pub fn deduplicate_strings(slice: Vec<String>) -> Vec<String> {
+pub fn deduplicate_strings(slice: Vec<String>) -> Vec<String> { ::tsox_core::fntrace::enter("deduplicate_strings"); 
     if slice.len() <= 1 {
         return slice;
     }
@@ -1635,7 +1635,7 @@ pub fn deduplicate_strings(slice: Vec<String>) -> Vec<String> {
 
 pub fn deduplicate_module_completions(
     completions: Vec<ModuleCompletionNameAndKind>,
-) -> Vec<ModuleCompletionNameAndKind> {
+) -> Vec<ModuleCompletionNameAndKind> { ::tsox_core::fntrace::enter("deduplicate_module_completions"); 
     if completions.len() <= 1 {
         return completions;
     }
@@ -1650,7 +1650,7 @@ pub fn deduplicate_module_completions(
     result
 }
 
-pub fn modulet_to_script_element_kind(kind: ModuleCompletionKind) -> ScriptElementKind {
+pub fn modulet_to_script_element_kind(kind: ModuleCompletionKind) -> ScriptElementKind { ::tsox_core::fntrace::enter("modulet_to_script_element_kind"); 
     match kind {
         ModuleCompletionKind::Directory => ScriptElementKind::Directory,
         ModuleCompletionKind::File => ScriptElementKind::ScriptElement,
@@ -1658,11 +1658,11 @@ pub fn modulet_to_script_element_kind(kind: ModuleCompletionKind) -> ScriptEleme
     }
 }
 
-pub fn is_any_directory_separator(r: char) -> bool {
+pub fn is_any_directory_separator(r: char) -> bool { ::tsox_core::fntrace::enter("is_any_directory_separator"); 
     r == '/' || r == '\\'
 }
 
-pub fn get_directory_fragment_range(text: &str, text_start: usize) -> Option<TextRange> {
+pub fn get_directory_fragment_range(text: &str, text_start: usize) -> Option<TextRange> { ::tsox_core::fntrace::enter("get_directory_fragment_range"); 
     let index = text.rfind(is_any_directory_separator);
     let offset = match index {
         Some(i) => i + 1,
@@ -1678,7 +1678,7 @@ pub fn get_directory_fragment_range(text: &str, text_start: usize) -> Option<Tex
     ))
 }
 
-pub fn kind_modifiers_from_extension(extension: &str) -> ScriptElementKindModifier {
+pub fn kind_modifiers_from_extension(extension: &str) -> ScriptElementKindModifier { ::tsox_core::fntrace::enter("kind_modifiers_from_extension"); 
     match extension {
         tsp::EXTENSION_DTS => ScriptElementKindModifier::DTS,
         tsp::EXTENSION_JS => ScriptElementKindModifier::JS,
@@ -1699,7 +1699,7 @@ pub fn kind_modifiers_from_extension(extension: &str) -> ScriptElementKindModifi
 
 pub fn m5w2_to_path_completions(
     names: Vec<ModuleCompletionNameAndKind>,
-) -> Vec<PathCompletion> {
+) -> Vec<PathCompletion> { ::tsox_core::fntrace::enter("m5w2_to_path_completions"); 
     names
         .into_iter()
         .map(|name_and_kind| PathCompletion {
@@ -1713,7 +1713,7 @@ pub fn m5w2_to_path_completions(
 
 fn get_types_versions_paths(
     types_versions: &tsox_tsoptions::packagejson::JsonValue,
-) -> Option<tsox_core::collections::ordered_map::OrderedMap<String, Vec<String>>> {
+) -> Option<tsox_core::collections::ordered_map::OrderedMap<String, Vec<String>>> { ::tsox_core::fntrace::enter("get_types_versions_paths"); 
     use tsox_tsoptions::packagejson::JsonValueType;
 
     if types_versions.value_type != JsonValueType::Object {

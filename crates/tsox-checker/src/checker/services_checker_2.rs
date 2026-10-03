@@ -7,18 +7,18 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         argument_count: i32,
-    ) -> (Option<Arc<Signature>>, Vec<Arc<Signature>>) {
+    ) -> (Option<Arc<Signature>>, Vec<Arc<Signature>>) { ::tsox_core::fntrace::enter("get_resolved_signature_for_signature_help"); 
         self.get_resolved_signature_worker(node, CheckMode::IsForSignatureHelp, argument_count)
     }
 
-    pub fn skip_alias(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn skip_alias(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("skip_alias"); 
         if symbol.flags.contains(SymbolFlags::Alias) {
             return self.get_aliased_symbol(symbol);
         }
         Arc::clone(symbol)
     }
 
-    pub fn get_aliased_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn get_aliased_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_aliased_symbol"); 
         if let Some(links) = self.alias_symbol_links.get(symbol) {
             if let Some(ref target) = links.alias_target {
                 return Arc::clone(target);
@@ -30,7 +30,7 @@ impl Checker {
         Arc::clone(symbol)
     }
 
-    pub fn get_root_symbols(&self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    pub fn get_root_symbols(&self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_root_symbols"); 
         let roots = self.get_immediate_root_symbols(symbol);
         if roots.is_empty() {
             return vec![Arc::clone(symbol)];
@@ -42,7 +42,7 @@ impl Checker {
         result
     }
 
-    pub fn get_immediate_root_symbols(&self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    pub fn get_immediate_root_symbols(&self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_immediate_root_symbols"); 
         if symbol.check_flags.intersects(CheckFlags::SYNTHETIC) {
             if let Some(links) = self.value_symbol_links.get(symbol) {
                 if let Some(ref containing) = links.containing_type {
@@ -83,7 +83,7 @@ impl Checker {
         Vec::new()
     }
 
-    pub fn try_get_target(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn try_get_target(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_get_target"); 
         let mut target = None;
         let mut next = Arc::clone(symbol);
         loop {
@@ -105,7 +105,7 @@ impl Checker {
         target
     }
 
-    pub fn get_mapped_type_symbol_of_property(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn get_mapped_type_symbol_of_property(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_mapped_type_symbol_of_property"); 
         if let Some(value_links) = self.value_symbol_links.get(symbol) {
             if let Some(ref containing) = value_links.containing_type {
                 return containing.symbol.clone();
@@ -114,7 +114,7 @@ impl Checker {
         None
     }
 
-    pub fn get_export_symbol_of_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn get_export_symbol_of_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_export_symbol_of_symbol"); 
         let source = if let Some(ref export) = symbol.export_symbol {
             Arc::clone(export)
         } else {
@@ -127,7 +127,7 @@ impl Checker {
     pub fn get_export_specifier_local_target_symbol(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_export_specifier_local_target_symbol"); 
         match node.kind {
             SyntaxKind::ExportSpecifier => None,
             SyntaxKind::Identifier => None,
@@ -142,7 +142,7 @@ impl Checker {
     pub fn get_shorthand_assignment_value_symbol(
         &mut self,
         location: Option<&Arc<Node>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_shorthand_assignment_value_symbol"); 
         if let Some(loc) = location {
             if loc.kind == SyntaxKind::ShorthandPropertyAssignment {
                 if let Some(name) = loc.name() {
@@ -157,7 +157,7 @@ impl Checker {
         &self,
         parameter: &Arc<Node>,
         parameter_name: &str,
-    ) -> Option<(Arc<Symbol>, Arc<Symbol>)> {
+    ) -> Option<(Arc<Symbol>, Arc<Symbol>)> { ::tsox_core::fntrace::enter("get_symbols_of_parameter_property_declaration"); 
         let constructor_declaration = parameter.parent().as_ref()?;
         let class_declaration = constructor_declaration.parent().as_ref()?;
 
@@ -172,7 +172,7 @@ impl Checker {
         identifier: &Arc<Node>,
         jsx_elements_present: bool,
         jsx_mode_needs_explicit_import: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_declaration_used"); 
         if jsx_elements_present && jsx_mode_needs_explicit_import {
             let identifier_text = identifier.text();
 
@@ -195,7 +195,7 @@ impl Checker {
         source_file: &Arc<SourceFile>,
         definition: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_symbol_referenced_in_file"); 
         let identifier_text = definition.text();
         for token in get_possible_symbol_reference_nodes(source_file, identifier_text, None) {
             if token.kind != SyntaxKind::Identifier {
@@ -231,7 +231,7 @@ impl Checker {
         &mut self,
         source_file: &Arc<SourceFile>,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_references_to_symbol_in_file"); 
         let identifier_text = &symbol.name;
         let mut result = Vec::new();
         for token in get_possible_symbol_reference_nodes(source_file, identifier_text, None) {
@@ -263,7 +263,7 @@ impl Checker {
         result
     }
 
-    pub fn get_type_argument_constraint(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub fn get_type_argument_constraint(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_argument_constraint"); 
         super::services_type_argument_constraints::type_argument_constraint(self, node)
     }
 

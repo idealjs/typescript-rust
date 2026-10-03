@@ -1,7 +1,7 @@
 use std::io;
 
 #[cfg(unix)]
-pub fn ignoring_eintr<T, F: FnMut() -> io::Result<T>>(mut f: F) -> io::Result<T> {
+pub fn ignoring_eintr<T, F: FnMut() -> io::Result<T>>(mut f: F) -> io::Result<T> { crate::fntrace::enter("ignoring_eintr"); 
     loop {
         match f() {
             Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
@@ -11,7 +11,7 @@ pub fn ignoring_eintr<T, F: FnMut() -> io::Result<T>>(mut f: F) -> io::Result<T>
 }
 
 #[cfg(target_os = "linux")]
-pub fn realpath(path: &str) -> io::Result<String> {
+pub fn realpath(path: &str) -> io::Result<String> { crate::fntrace::enter("realpath"); 
     use std::os::fd::AsRawFd;
 
     if !has_proc_self_fd() {
@@ -25,22 +25,22 @@ pub fn realpath(path: &str) -> io::Result<String> {
     drop(file);
     return Ok(resolved.into_os_string().into_string().unwrap_or_default());
 
-    fn has_proc_self_fd() -> bool {
+    fn has_proc_self_fd() -> bool { crate::fntrace::enter("has_proc_self_fd"); 
         !std::fs::metadata("/proc/self/fd/").is_err()
     }
 
-    fn eval_symlinks(path: &str) -> io::Result<String> {
+    fn eval_symlinks(path: &str) -> io::Result<String> { crate::fntrace::enter("eval_symlinks"); 
         std::fs::canonicalize(path).map(|p| p.into_os_string().into_string().unwrap_or_default())
     }
 }
 
 #[cfg(all(unix, not(target_os = "linux")))]
-pub fn realpath(path: &str) -> io::Result<String> {
+pub fn realpath(path: &str) -> io::Result<String> { crate::fntrace::enter("realpath"); 
     std::fs::canonicalize(path).map(|p| p.into_os_string().into_string().unwrap_or_default())
 }
 
 #[cfg(windows)]
-pub fn realpath(path: &str) -> io::Result<String> {
+pub fn realpath(path: &str) -> io::Result<String> { crate::fntrace::enter("realpath"); 
     use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::Storage::FileSystem::{
         CreateFileW, FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ,
@@ -86,7 +86,7 @@ pub fn realpath(path: &str) -> io::Result<String> {
 }
 
 #[cfg(windows)]
-fn open_metadata(path: &str) -> io::Result<*mut core::ffi::c_void> {
+fn open_metadata(path: &str) -> io::Result<*mut core::ffi::c_void> { crate::fntrace::enter("open_metadata"); 
     use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::Storage::FileSystem::{
         CreateFileW, FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ,

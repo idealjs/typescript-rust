@@ -16,17 +16,17 @@ struct SendCheckerSlot(Arc<Mutex<Option<Box<Checker>>>>);
 unsafe impl Send for SendCheckerSlot {}
 
 impl Clone for SendCheckerSlot {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         Self(Arc::clone(&self.0))
     }
 }
 
 impl SendCheckerSlot {
-    fn lock(&self) -> MutexGuard<'_, Option<Box<Checker>>> {
+    fn lock(&self) -> MutexGuard<'_, Option<Box<Checker>>> { ::tsox_core::fntrace::enter("lock"); 
         self.0.lock().unwrap()
     }
 
-    fn take_checker(&self) -> Box<Checker> {
+    fn take_checker(&self) -> Box<Checker> { ::tsox_core::fntrace::enter("take_checker"); 
         self.lock().take().expect("checker construction failed")
     }
 }
@@ -36,21 +36,21 @@ unsafe impl Send for SendChecker {}
 unsafe impl Sync for SendChecker {}
 
 impl Clone for SendChecker {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         Self(Arc::clone(&self.0))
     }
 }
 
 impl SendChecker {
-    fn new(checker: Box<Checker>) -> Self {
+    fn new(checker: Box<Checker>) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self(Arc::new(Mutex::new(*checker)))
     }
 
-    fn lock(&self) -> MutexGuard<'_, Checker> {
+    fn lock(&self) -> MutexGuard<'_, Checker> { ::tsox_core::fntrace::enter("lock"); 
         self.0.lock().unwrap()
     }
 
-    fn clone_inner(&self) -> Arc<Mutex<Checker>> {
+    fn clone_inner(&self) -> Arc<Mutex<Checker>> { ::tsox_core::fntrace::enter("clone_inner"); 
         Arc::clone(&self.0)
     }
 }
@@ -83,14 +83,14 @@ pub struct CheckerPoolImpl {
 unsafe impl Send for CheckerPoolImpl {}
 unsafe impl Sync for CheckerPoolImpl {}
 
-pub fn new_checker_pool(program: Arc<Program>) -> CheckerPoolImpl {
+pub fn new_checker_pool(program: Arc<Program>) -> CheckerPoolImpl { ::tsox_core::fntrace::enter("new_checker_pool"); 
     new_checker_pool_with_tracing(program, None)
 }
 
 pub fn new_checker_pool_with_tracing(
     program: Arc<Program>,
     tracing: Option<Arc<tsox_core::tracing::mig::x11a::Tracing<'static>>>,
-) -> CheckerPoolImpl {
+) -> CheckerPoolImpl { ::tsox_core::fntrace::enter("new_checker_pool_with_tracing"); 
     let mut checker_count = 4usize;
     if program.single_threaded() {
         checker_count = 1;
@@ -111,7 +111,7 @@ pub fn new_checker_pool_with_tracing(
     }
 }
 
-fn file_node_count(file: &SourceFile) -> usize {
+fn file_node_count(file: &SourceFile) -> usize { ::tsox_core::fntrace::enter("file_node_count"); 
     use tsox_frontend::ast::node_data_generated::for_each_child;
     let mut count = 0usize;
     let mut stack = vec![Arc::clone(&file.node)];
@@ -126,7 +126,7 @@ fn file_node_count(file: &SourceFile) -> usize {
 }
 
 impl CheckerPoolImpl {
-    fn association_of(&self, state: &CheckerPoolState, file: &Arc<SourceFile>) -> usize {
+    fn association_of(&self, state: &CheckerPoolState, file: &Arc<SourceFile>) -> usize { ::tsox_core::fntrace::enter("association_of"); 
         state
             .file_associations
             .get(&file.file_name)
@@ -134,7 +134,7 @@ impl CheckerPoolImpl {
             .expect("checker association missing for file")
     }
 
-    pub fn get_checker(&self, file: Option<&Arc<SourceFile>>) -> MutexGuard<'_, Checker> {
+    pub fn get_checker(&self, file: Option<&Arc<SourceFile>>) -> MutexGuard<'_, Checker> { ::tsox_core::fntrace::enter("get_checker"); 
         if let Some(file) = file {
             return self.get_checker_for_file_exclusive(file);
         }
@@ -145,24 +145,24 @@ impl CheckerPoolImpl {
     pub fn get_checker_for_file_non_exclusive(
         &self,
         file: &Arc<SourceFile>,
-    ) -> Arc<Mutex<Checker>> {
+    ) -> Arc<Mutex<Checker>> { ::tsox_core::fntrace::enter("get_checker_for_file_non_exclusive"); 
         let state = self.state.get_or_init(|| self.build_checkers());
         let idx = self.association_of(state, file);
         state.checkers[idx].clone_inner()
     }
 
-    fn get_checker_for_file_exclusive(&self, file: &Arc<SourceFile>) -> MutexGuard<'_, Checker> {
+    fn get_checker_for_file_exclusive(&self, file: &Arc<SourceFile>) -> MutexGuard<'_, Checker> { ::tsox_core::fntrace::enter("get_checker_for_file_exclusive"); 
         let state = self.state.get_or_init(|| self.build_checkers());
         let idx = self.association_of(state, file);
         state.checkers[idx].lock()
     }
 
-    pub fn get_checker_non_exclusive(&self) -> Arc<Mutex<Checker>> {
+    pub fn get_checker_non_exclusive(&self) -> Arc<Mutex<Checker>> { ::tsox_core::fntrace::enter("get_checker_non_exclusive"); 
         let state = self.state.get_or_init(|| self.build_checkers());
         state.checkers[0].clone_inner()
     }
 
-    fn build_checkers(&self) -> CheckerPoolState {
+    fn build_checkers(&self) -> CheckerPoolState { ::tsox_core::fntrace::enter("build_checkers"); 
         let program = self.program.upgrade().expect("checker pool outlived program");
         let single_threaded = program.single_threaded();
         let checker_count = self.checker_count;
@@ -243,7 +243,7 @@ impl CheckerPoolImpl {
         }
     }
 
-    fn get_import_adjacency(&self) -> Vec<Vec<usize>> {
+    fn get_import_adjacency(&self) -> Vec<Vec<usize>> { ::tsox_core::fntrace::enter("get_import_adjacency"); 
         let program = self
             .program
             .upgrade()
@@ -283,7 +283,7 @@ impl CheckerPoolImpl {
         adjacent_files
     }
 
-    pub fn for_each_checker_parallel(&self, cb: &mut (dyn FnMut(usize, &mut Checker) + Send)) {
+    pub fn for_each_checker_parallel(&self, cb: &mut (dyn FnMut(usize, &mut Checker) + Send)) { ::tsox_core::fntrace::enter("for_each_checker_parallel"); 
         let state = self.state.get_or_init(|| self.build_checkers());
         let checkers = &state.checkers;
         let program = self
@@ -311,7 +311,7 @@ impl CheckerPoolImpl {
         });
     }
 
-    pub fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+    pub fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_global_diagnostics"); 
         let checker_count = self.checker_count;
         let global_diagnostics: Mutex<Vec<Vec<Arc<Diagnostic>>>> =
             Mutex::new((0..checker_count).map(|_| Vec::new()).collect());
@@ -333,7 +333,7 @@ impl CheckerPoolImpl {
         files: &[Arc<SourceFile>],
         single_threaded: bool,
         cb: &mut (dyn FnMut(&mut Checker, usize, &Arc<SourceFile>) + Send),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_checker_group_do"); 
         let state = self.state.get_or_init(|| self.build_checkers());
         let checkers = &state.checkers;
         let associations = &state.file_associations;
@@ -371,15 +371,15 @@ impl CheckerPoolImpl {
 }
 
 impl CheckerPool for CheckerPoolImpl {
-    fn get_checker(&self, file: Option<&Arc<SourceFile>>) -> MutexGuard<'_, Checker> {
+    fn get_checker(&self, file: Option<&Arc<SourceFile>>) -> MutexGuard<'_, Checker> { ::tsox_core::fntrace::enter("get_checker"); 
         CheckerPoolImpl::get_checker(self, file)
     }
 
-    fn get_checker_non_exclusive(&self) -> Arc<Mutex<Checker>> {
+    fn get_checker_non_exclusive(&self) -> Arc<Mutex<Checker>> { ::tsox_core::fntrace::enter("get_checker_non_exclusive"); 
         CheckerPoolImpl::get_checker_non_exclusive(self)
     }
 
-    fn for_each_checker_parallel(&self, cb: &mut (dyn FnMut(usize, &mut Checker) + Send)) {
+    fn for_each_checker_parallel(&self, cb: &mut (dyn FnMut(usize, &mut Checker) + Send)) { ::tsox_core::fntrace::enter("for_each_checker_parallel"); 
         CheckerPoolImpl::for_each_checker_parallel(self, cb)
     }
 
@@ -388,13 +388,13 @@ impl CheckerPool for CheckerPoolImpl {
         files: &[Arc<SourceFile>],
         single_threaded: bool,
         cb: &mut (dyn FnMut(&mut Checker, usize, &Arc<SourceFile>) + Send),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_checker_group_do"); 
         CheckerPoolImpl::for_each_checker_group_do(self, files, single_threaded, cb)
     }
 
-    fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+    fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_global_diagnostics"); 
         CheckerPoolImpl::get_global_diagnostics(self)
     }
 }
 
-pub fn noop() {}
+pub fn noop() { ::tsox_core::fntrace::enter("noop"); }

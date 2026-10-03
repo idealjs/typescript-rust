@@ -3,7 +3,7 @@
 use crate::module::resolver::*;
 
 impl<'a> ResolutionState<'a> {
-    pub(crate) fn try_file(&self, file_name: &str) -> Option<String> {
+    pub(crate) fn try_file(&self, file_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("try_file"); 
         if self.compiler_options.module_suffixes.is_empty() {
             if self.fs.file_exists(file_name) {
                 return Some(file_name.to_string());
@@ -21,7 +21,7 @@ impl<'a> ResolutionState<'a> {
         None
     }
 
-    pub(crate) fn get_paths_base_path(&self) -> String {
+    pub(crate) fn get_paths_base_path(&self) -> String { ::tsox_core::fntrace::enter("get_paths_base_path"); 
         if !self.compiler_options.paths_base_path.is_empty() {
             return self.compiler_options.paths_base_path.clone();
         }
@@ -36,7 +36,7 @@ impl<'a> ResolutionState<'a> {
 
     pub(crate) fn try_load_module_using_optional_resolution_settings(
         &mut self,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_load_module_using_optional_resolution_settings"); 
         if let Some(r) = self.try_load_module_using_paths_if_eligible() {
             return Some(r);
         }
@@ -60,7 +60,7 @@ impl<'a> ResolutionState<'a> {
         self.try_load_module_using_root_dirs()
     }
 
-    pub(crate) fn try_load_module_using_paths_if_eligible(&mut self) -> Option<Resolved> {
+    pub(crate) fn try_load_module_using_paths_if_eligible(&mut self) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_load_module_using_paths_if_eligible"); 
         let paths = match &self.compiler_options.paths {
             Some(p) if !p.is_empty() && !tsox_core::tspath::path_is_relative(&self.name) => p,
             _ => return CONTINUE_SEARCHING,
@@ -84,7 +84,7 @@ impl<'a> ResolutionState<'a> {
         containing_directory: &str,
         paths: &std::collections::HashMap<String, Vec<String>>,
         parsed_patterns: &ParsedPatterns,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_load_module_using_paths"); 
         if let Some(matched_pattern) = match_pattern_or_exact(parsed_patterns, module_name) {
             let matched_star = matched_pattern.matched_text(module_name);
             if let Some(substitutions) = paths.get(&matched_pattern.text) {
@@ -122,7 +122,7 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    pub(crate) fn try_load_module_using_root_dirs(&mut self) -> Option<Resolved> {
+    pub(crate) fn try_load_module_using_root_dirs(&mut self) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_load_module_using_root_dirs"); 
         if self.compiler_options.root_dirs.is_empty() {
             return CONTINUE_SEARCHING;
         }
@@ -173,7 +173,7 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    pub(crate) fn resolve_node_like(&mut self) -> ResolvedModule {
+    pub(crate) fn resolve_node_like(&mut self) -> ResolvedModule { ::tsox_core::fntrace::enter("resolve_node_like"); 
         let result = self.resolve_node_like_worker();
         if result.is_none() {
             if !tsox_core::tspath::is_external_module_name_relative(&self.name)
@@ -195,7 +195,7 @@ impl<'a> ResolutionState<'a> {
         self.create_resolved_module_handling_symlink(result)
     }
 
-    pub(crate) fn resolve_node_like_worker(&mut self) -> Option<Resolved> {
+    pub(crate) fn resolve_node_like_worker(&mut self) -> Option<Resolved> { ::tsox_core::fntrace::enter("resolve_node_like_worker"); 
         if let Some(resolved) = self.try_load_module_using_optional_resolution_settings() {
             return Some(resolved);
         }
@@ -240,7 +240,7 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    pub(crate) fn resolve_from_type_root(&mut self) -> Option<Resolved> {
+    pub(crate) fn resolve_from_type_root(&mut self) -> Option<Resolved> { ::tsox_core::fntrace::enter("resolve_from_type_root"); 
         let (type_roots, _) =
             get_effective_type_roots(self.compiler_options, self.current_directory);
         for type_root in &type_roots {
@@ -267,7 +267,7 @@ impl<'a> ResolutionState<'a> {
         type_roots: &[String],
         from_config: bool,
         from_inferred_types_containing_file: bool,
-    ) -> ResolvedTypeReferenceDirective {
+    ) -> ResolvedTypeReferenceDirective { ::tsox_core::fntrace::enter("resolve_type_reference_directive"); 
         if !type_roots.is_empty() {
             for type_root in type_roots {
                 if !self.fs.directory_exists(type_root) {

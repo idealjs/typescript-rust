@@ -37,14 +37,14 @@ pub struct WatchRegistry {
 }
 
 impl WatchRegistry {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         WatchRegistry {
             entries: Mutex::new(HashMap::new()),
             pending: Mutex::new(HashSet::new()),
         }
     }
 
-    pub fn acquire(&self, watcher: &lsproto::FileSystemWatcher, id: WatcherID) -> bool {
+    pub fn acquire(&self, watcher: &lsproto::FileSystemWatcher, id: WatcherID) -> bool { ::tsox_core::fntrace::enter("acquire"); 
         let key = to_file_system_watcher_key(watcher);
         let mut entries = self.entries.lock().unwrap();
         let value = entries
@@ -57,7 +57,7 @@ impl WatchRegistry {
         value.count == 1
     }
 
-    pub fn release(&self, watcher: &lsproto::FileSystemWatcher) -> (WatcherID, bool) {
+    pub fn release(&self, watcher: &lsproto::FileSystemWatcher) -> (WatcherID, bool) { ::tsox_core::fntrace::enter("release"); 
         let key = to_file_system_watcher_key(watcher);
         let mut entries = self.entries.lock().unwrap();
         match entries.get_mut(&key) {
@@ -75,26 +75,26 @@ impl WatchRegistry {
         }
     }
 
-    pub fn mark_pending(&self, id: &WatcherID) {
+    pub fn mark_pending(&self, id: &WatcherID) { ::tsox_core::fntrace::enter("mark_pending"); 
         self.pending.lock().unwrap().insert(id.clone());
     }
 
-    pub fn clear_pending(&self, id: &WatcherID) {
+    pub fn clear_pending(&self, id: &WatcherID) { ::tsox_core::fntrace::enter("clear_pending"); 
         self.pending.lock().unwrap().remove(id);
     }
 
-    pub fn is_pending(&self, id: &WatcherID) -> bool {
+    pub fn is_pending(&self, id: &WatcherID) -> bool { ::tsox_core::fntrace::enter("is_pending"); 
         self.pending.lock().unwrap().contains(id)
     }
 }
 
 impl Default for WatchRegistry {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
-fn to_file_system_watcher_key(w: &lsproto::FileSystemWatcher) -> FileSystemWatcherKey {
+fn to_file_system_watcher_key(w: &lsproto::FileSystemWatcher) -> FileSystemWatcherKey { ::tsox_core::fntrace::enter("to_file_system_watcher_key"); 
     let kind = w.kind.unwrap_or(
         lsproto::WATCH_KIND_CREATE | lsproto::WATCH_KIND_CHANGE | lsproto::WATCH_KIND_DELETE,
     );
@@ -102,7 +102,7 @@ fn to_file_system_watcher_key(w: &lsproto::FileSystemWatcher) -> FileSystemWatch
     FileSystemWatcherKey { pattern, kind }
 }
 
-pub fn file_system_watcher_glob_string(w: &lsproto::FileSystemWatcher) -> String {
+pub fn file_system_watcher_glob_string(w: &lsproto::FileSystemWatcher) -> String { ::tsox_core::fntrace::enter("file_system_watcher_glob_string"); 
     if let Some(pattern) = &w.glob_pattern.pattern {
         return pattern.clone();
     }
@@ -151,7 +151,7 @@ impl<T: Clone + Send + Sync + Default> WatchedFiles<T> {
     ) -> Self
     where
         F: Fn(&T) -> PatternsAndIgnored + Send + Sync + 'static,
-    {
+    { ::tsox_core::fntrace::enter("new"); 
         let id = WATCHER_ID.fetch_add(1, Ordering::SeqCst);
         WatchedFiles {
             name: name.to_string(),
@@ -169,7 +169,7 @@ impl<T: Clone + Send + Sync + Default> WatchedFiles<T> {
         }
     }
 
-    pub fn watchers(&self) -> Watchers {
+    pub fn watchers(&self) -> Watchers { ::tsox_core::fntrace::enter("watchers"); 
         let inner = self.inner.read().unwrap();
         Watchers {
             watcher_id: format!("{} watcher {}", self.name, inner.current_id),
@@ -179,19 +179,19 @@ impl<T: Clone + Send + Sync + Default> WatchedFiles<T> {
         }
     }
 
-    pub fn id(&self) -> WatcherID {
+    pub fn id(&self) -> WatcherID { ::tsox_core::fntrace::enter("id"); 
         self.watchers().watcher_id
     }
 
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &str { ::tsox_core::fntrace::enter("name"); 
         &self.name
     }
 
-    pub fn watch_kind(&self) -> lsproto::WatchKind {
+    pub fn watch_kind(&self) -> lsproto::WatchKind { ::tsox_core::fntrace::enter("watch_kind"); 
         self.watch_kind
     }
 
-    pub fn clone_with_input(&self, input: T) -> WatchedFiles<T> {
+    pub fn clone_with_input(&self, input: T) -> WatchedFiles<T> { ::tsox_core::fntrace::enter("clone_with_input"); 
         let inner = self.inner.read().unwrap();
         WatchedFiles {
             name: self.name.clone(),
@@ -210,12 +210,12 @@ impl<T: Clone + Send + Sync + Default> WatchedFiles<T> {
     }
 }
 
-pub fn get_recursive_glob_pattern(directory: &str) -> String {
+pub fn get_recursive_glob_pattern(directory: &str) -> String { ::tsox_core::fntrace::enter("get_recursive_glob_pattern"); 
     let dir = tsox_core::tspath::remove_trailing_directory_separator(directory);
     format!("{}/**/*", dir)
 }
 
-pub fn recursive_directory_glob_pattern(directory: &str, use_relative_pattern: bool) -> String {
+pub fn recursive_directory_glob_pattern(directory: &str, use_relative_pattern: bool) -> String { ::tsox_core::fntrace::enter("recursive_directory_glob_pattern"); 
     if use_relative_pattern {
         format!("file://{directory}/**/*")
     } else {

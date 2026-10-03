@@ -21,7 +21,7 @@ use crate::printer::mig::m4m_2::SynthesizedComment;
 use super::m4p::{CommentState, EmitFn, FileReference, Printer};
 
 impl Printer {
-    pub fn emit_directive(&mut self, kind: &str, refs: &[FileReference]) {
+    pub fn emit_directive(&mut self, kind: &str, refs: &[FileReference]) { ::tsox_core::fntrace::enter("emit_directive"); 
         for r in refs {
             let mut resolution_mode = String::new();
             if r.resolution_mode != ResolutionMode::None {
@@ -45,7 +45,7 @@ impl Printer {
         parent_node: &Arc<Node>,
         children: &Arc<NodeList>,
         mut format: ListFormat,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_list"); 
         if self.should_emit_on_multiple_lines(parent_node) {
             format = format | ListFormat::PREFER_NEW_LINE | ListFormat::INDENTED;
         }
@@ -60,7 +60,7 @@ impl Printer {
         mut format: ListFormat,
         mut start: i64,
         mut count: i64,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_list_range"); 
         let is_nil = children.is_none();
         let mut length = 0;
         if !is_nil {
@@ -133,7 +133,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_detached_comments_and_update_comments_info(&mut self, text_range: TextRange) {
+    pub fn emit_detached_comments_and_update_comments_info(&mut self, text_range: TextRange) { ::tsox_core::fntrace::enter("emit_detached_comments_and_update_comments_info"); 
         if self.current_source_file.is_none() {
             return;
         }
@@ -146,7 +146,7 @@ impl Printer {
         &mut self,
         node: &Arc<Node>,
         detached_range: TextRange,
-    ) -> Option<CommentState> {
+    ) -> Option<CommentState> { ::tsox_core::fntrace::enter("emit_detached_comments_before_statement_list"); 
         if !self.should_emit_detached_comments(node) {
             return None;
         }
@@ -176,7 +176,7 @@ impl Printer {
         node: &Arc<Node>,
         emit_flags: EmitFlags,
         comment_range: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_leading_comments_of_node"); 
         let pos = comment_range.pos();
         let end = comment_range.end();
         if (!position_is_synthesized(pos) || !position_is_synthesized(end)) && pos != end {
@@ -201,7 +201,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_leading_synthetic_comments_of_node(&mut self, node: &Arc<Node>, emit_flags: EmitFlags) {
+    pub fn emit_leading_synthetic_comments_of_node(&mut self, node: &Arc<Node>, emit_flags: EmitFlags) { ::tsox_core::fntrace::enter("emit_leading_synthetic_comments_of_node"); 
         if emit_flags.intersects(EmitFlags::NO_LEADING_COMMENTS) {
             return;
         }
@@ -211,7 +211,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_leading_synthesized_comment(&mut self, comment: &SynthesizedComment) {
+    pub fn emit_leading_synthesized_comment(&mut self, comment: &SynthesizedComment) { ::tsox_core::fntrace::enter("emit_leading_synthesized_comment"); 
         if comment.has_leading_new_line || comment.kind == SyntaxKind::SingleLineCommentTrivia {
             self.writer.write_line();
         }
@@ -223,7 +223,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_leading_comments(&mut self, mut pos: usize, elided: bool) -> bool {
+    pub fn emit_leading_comments(&mut self, mut pos: usize, elided: bool) -> bool { ::tsox_core::fntrace::enter("emit_leading_comments"); 
         if self.comments_disabled
             || self.current_source_file.is_none()
             || position_is_synthesized(pos)
@@ -267,7 +267,7 @@ impl Printer {
         self.emit_comments(&comments, CommentSeparator::After)
     }
 
-    pub fn emit_leading_comments_of_position(&mut self, pos: usize) {
+    pub fn emit_leading_comments_of_position(&mut self, pos: usize) { ::tsox_core::fntrace::enter("emit_leading_comments_of_position"); 
         if self.comments_disabled || pos == usize::MAX {
             return;
         }

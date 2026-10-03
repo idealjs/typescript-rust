@@ -8,7 +8,7 @@ use crate::checker::types::*;
 use std::sync::Arc;
 use tsox_frontend::ast::{Diagnostic, Node, NodeData, Symbol, SymbolFlags};
 
-pub(crate) fn semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub(crate) fn semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("semantic_jsx_children"); 
     children
         .iter()
         .filter(|c| match &c.data {
@@ -21,7 +21,7 @@ pub(crate) fn semantic_jsx_children(children: &[Arc<Node>]) -> Vec<Arc<Node>> {
 }
 
 impl Checker {
-    pub(crate) fn check_jsx_element_props(&mut self, opening: &Arc<Node>) {
+    pub(crate) fn check_jsx_element_props(&mut self, opening: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_element_props"); 
         let attributes = match &opening.data {
             NodeData::JsxOpeningElement(d) => Some(Arc::clone(&d.attributes)),
             NodeData::JsxSelfClosingElement(d) => Some(Arc::clone(&d.attributes)),
@@ -75,7 +75,7 @@ impl Checker {
         );
     }
 
-    fn jsx_component_first_param(&mut self, tag_name: &Arc<Node>) -> Option<Arc<Type>> {
+    fn jsx_component_first_param(&mut self, tag_name: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("jsx_component_first_param"); 
         self.check_expression(tag_name);
         let tag_type = self.get_type_of_node(tag_name);
         if tag_type.flags.contains(TypeFlags::Any) {
@@ -101,7 +101,7 @@ impl Checker {
         )
     }
 
-    fn intersect_intrinsic_attributes(&mut self, props: Arc<Type>) -> Arc<Type> {
+    fn intersect_intrinsic_attributes(&mut self, props: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("intersect_intrinsic_attributes"); 
         if props.flags.contains(TypeFlags::Any) || self.is_error_type(&props) {
             return props;
         }
@@ -117,7 +117,7 @@ impl Checker {
         self.get_intersection_type(vec![intrinsic, props])
     }
 
-    fn intrinsic_props_type(&mut self, tag_name: &Arc<Node>) -> Option<Arc<Type>> {
+    fn intrinsic_props_type(&mut self, tag_name: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("intrinsic_props_type"); 
         let intrinsic_elements = self.get_jsx_intrinsic_elements()?;
         let tag_text = tag_name.text().to_string();
         if let Some(member) = intrinsic_elements
@@ -145,7 +145,7 @@ impl Checker {
         opening: &Arc<Node>,
         tag_name: &Arc<Node>,
         attrs_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("component_props_type"); 
         self.check_expression(tag_name);
         let tag_type = self.get_type_of_node(tag_name);
         if tag_type.flags.contains(TypeFlags::Any) {
@@ -176,7 +176,7 @@ impl Checker {
         &mut self,
         opening: &Arc<Node>,
         props: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("apply_jsx_managed_attributes"); 
         let Some(ns) = self.get_jsx_namespace() else {
             return Arc::clone(props);
         };
@@ -191,7 +191,7 @@ impl Checker {
         opening: &Arc<Node>,
         sig: &Arc<crate::checker::types::Signature>,
         attrs_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("class_props_type"); 
         let ns = self.get_jsx_namespace()?;
         let forced = self.get_name_from_jsx_element_attributes_container(
             crate::checker::jsx_impl_chunk::JsxNames::ELEMENT_ATTRIBUTES_PROPERTY_NAME_CONTAINER,
@@ -265,7 +265,7 @@ impl Checker {
         &mut self,
         opening: &Arc<Node>,
         attrs_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("jsx_fragment_props_type"); 
         let frag_type = self.get_jsx_fragment_type_for_props(opening)?;
         let apparent = self.get_apparent_type(&frag_type);
         let sigs = self.get_signatures_of_type(&apparent, crate::checker::types::SignatureKind::Call);
@@ -281,7 +281,7 @@ impl Checker {
         sig: &Arc<crate::checker::types::Signature>,
         props: Arc<Type>,
         attrs_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_jsx_props_from_attributes"); 
         if sig.type_parameters.is_empty() || !self.could_contain_type_variables(&props) {
             return props;
         }
@@ -335,7 +335,7 @@ impl Checker {
         self.substitute_infer_type_parameters(&props, &sig.type_parameters, &inferred)
     }
 
-    fn get_jsx_fragment_type_for_props(&mut self, opening: &Arc<Node>) -> Option<Arc<Type>> {
+    fn get_jsx_fragment_type_for_props(&mut self, opening: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_jsx_fragment_type_for_props"); 
         use tsox_core::core::compiler_options::JsxEmit;
         let _ = opening;
         let namespace = self.jsx_mark_namespace(true);

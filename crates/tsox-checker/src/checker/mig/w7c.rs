@@ -17,11 +17,11 @@ use tsox_frontend::scanner::TOKEN_FLAGS_SINGLE_QUOTE;
 
 pub(crate) type Relater = Checker;
 
-pub fn is_infinity_or_nan_string(name: &str) -> bool {
+pub fn is_infinity_or_nan_string(name: &str) -> bool { ::tsox_core::fntrace::enter("is_infinity_or_nan_string"); 
     name == "Infinity" || name == "-Infinity" || name == "NaN"
 }
 
-pub fn is_structural_pseudo_type(t: Option<&PseudoType>) -> bool {
+pub fn is_structural_pseudo_type(t: Option<&PseudoType>) -> bool { ::tsox_core::fntrace::enter("is_structural_pseudo_type"); 
     let Some(t) = t else {
         return false;
     };
@@ -37,7 +37,7 @@ pub fn is_structural_pseudo_type(t: Option<&PseudoType>) -> bool {
 }
 
 impl<'a> NodeBuilderImpl<'a> {
-    pub fn is_mapped_type_homomorphic(&mut self, mapped: &Arc<Type>) -> bool {
+    pub fn is_mapped_type_homomorphic(&mut self, mapped: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_mapped_type_homomorphic"); 
         let ch_ptr = self.ch as *const Checker as *mut Checker;
         unsafe { (*ch_ptr).get_homomorphic_type_variable(mapped) }.is_some()
     }
@@ -45,7 +45,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn is_homomorphic_mapped_type_with_non_homomorphic_instantiation(
         &mut self,
         mapped: &MappedType,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_homomorphic_mapped_type_with_non_homomorphic_instantiation"); 
         mapped.target.is_some()
             && !self.is_mapped_type_homomorphic(&mapped.ty)
             && self
@@ -53,7 +53,7 @@ impl<'a> NodeBuilderImpl<'a> {
                 .is_some_and(|t| self.is_mapped_type_homomorphic(&t))
     }
 
-    pub fn is_string_named(&mut self, d: &Arc<Node>) -> bool {
+    pub fn is_string_named(&mut self, d: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_string_named"); 
         let Some(name) = get_name_of_declaration(d) else {
             return false;
         };
@@ -75,7 +75,7 @@ impl<'a> NodeBuilderImpl<'a> {
         is_string_literal(&name)
     }
 
-    pub fn is_single_quoted_string_named(&mut self, d: &Arc<Node>) -> bool {
+    pub fn is_single_quoted_string_named(&mut self, d: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_single_quoted_string_named"); 
         get_name_of_declaration(d).is_some_and(|name| {
             match &name.data {
                 NodeData::StringLiteral(d) => {
@@ -88,21 +88,21 @@ impl<'a> NodeBuilderImpl<'a> {
 }
 
 impl<'a> NodeBuilderImpl<'a> {
-    fn ch_check_expression_type(&mut self, expr: &Arc<Node>) -> Arc<Type> {
+    fn ch_check_expression_type(&mut self, expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("ch_check_expression_type"); 
         let ch_ptr = self.ch as *const Checker as *mut Checker;
         unsafe { (*ch_ptr).get_type_of_expression(expr) }
     }
 }
 
 impl TracedTypeAdapter {
-    pub fn is_tuple(&self) -> bool {
+    pub fn is_tuple(&self) -> bool { ::tsox_core::fntrace::enter("is_tuple"); 
         let t = unsafe { &*self.t };
         t.object_flags.intersects(ObjectFlags::Tuple)
     }
 }
 
 impl Checker {
-    pub fn is_matching_constructor_reference(&self, f: &FlowState, expr: &Node) -> bool {
+    pub fn is_matching_constructor_reference(&self, f: &FlowState, expr: &Node) -> bool { ::tsox_core::fntrace::enter("is_matching_constructor_reference"); 
         let name = if is_property_access_expression(expr) {
             Some(expr.as_property_access_expression().name.clone())
         } else if is_element_access_expression(expr)
@@ -136,7 +136,7 @@ impl Checker {
         f: &mut FlowState,
         flow: Option<Arc<FlowNode>>,
         no_cache_check: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_post_super_flow_node_worker"); 
         let mut flow = flow;
         let mut no_cache_check = no_cache_check;
         loop {
@@ -205,7 +205,7 @@ impl Checker {
 }
 
 impl Relater {
-    fn is_related_to_ex_via_core(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary {
+    fn is_related_to_ex_via_core(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary { ::tsox_core::fntrace::enter("is_related_to_ex_via_core"); 
         if self.is_type_related_to(
             source,
             target,
@@ -217,7 +217,7 @@ impl Relater {
         }
     }
 
-    pub fn is_related_to_simple(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary {
+    pub fn is_related_to_simple(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary { ::tsox_core::fntrace::enter("is_related_to_simple"); 
         self.is_related_to_ex_via_core(source, target)
     }
 
@@ -226,7 +226,7 @@ impl Relater {
         source: &Arc<Type>,
         target: &Arc<Type>,
         report_errors: bool,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("is_related_to_worker"); 
         let _ = report_errors;
         self.is_related_to_ex_via_core(source, target)
     }
@@ -237,7 +237,7 @@ impl Relater {
         target: &Arc<Type>,
         recursion_flags: RecursionFlags,
         report_errors: bool,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("is_related_to"); 
         let _ = recursion_flags;
         self.is_related_to_ex_via_core(source, target)
     }

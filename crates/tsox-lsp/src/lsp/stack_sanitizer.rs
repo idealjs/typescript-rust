@@ -5,18 +5,18 @@ use std::sync::OnceLock;
 
 static GENERIC_SECRET_REGEX: OnceLock<Regex> = OnceLock::new();
 
-fn generic_secret_regex() -> &'static Regex {
+fn generic_secret_regex() -> &'static Regex { ::tsox_core::fntrace::enter("generic_secret_regex"); 
     GENERIC_SECRET_REGEX
         .get_or_init(|| Regex::new(r"(?i)(key|token|signature|sig|pwd)([(\[.|])").unwrap())
 }
 
-pub fn defeat_generic_secret_regex(s: &str) -> String {
+pub fn defeat_generic_secret_regex(s: &str) -> String { ::tsox_core::fntrace::enter("defeat_generic_secret_regex"); 
     generic_secret_regex()
         .replace_all(s, "${1}X_X${2}")
         .to_string()
 }
 
-pub fn sanitize_stack_trace(stack: &str) -> String {
+pub fn sanitize_stack_trace(stack: &str) -> String { ::tsox_core::fntrace::enter("sanitize_stack_trace"); 
     let start_marker = "runtime/debug.Stack()";
     let start_index = match stack.find(start_marker) {
         Some(idx) => idx,
@@ -48,7 +48,7 @@ pub fn sanitize_stack_trace(stack: &str) -> String {
     defeat_generic_secret_regex(&result)
 }
 
-fn write_sanitized_module_or_path(line: &str, result: &mut String) {
+fn write_sanitized_module_or_path(line: &str, result: &mut String) { ::tsox_core::fntrace::enter("write_sanitized_module_or_path"); 
     let line = line.trim();
 
     let line = if let Some(idx) = line.find(" +0x") {

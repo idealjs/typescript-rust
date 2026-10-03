@@ -24,7 +24,7 @@ use crate::checker::utilities_is_private_within_ambient::{
 use tsox_frontend::ast::{self, Node, Symbol, SyntaxKind};
 
 impl Checker {
-    pub fn get_return_type_from_body(&mut self, function: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn get_return_type_from_body(&mut self, function: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("get_return_type_from_body"); 
         let Some(body) = function.body() else {
             return self.error_type();
         };
@@ -174,7 +174,7 @@ impl Checker {
 }
 
 impl Checker {
-    pub fn get_symbol_of_name_or_property_access_expression(&mut self, name: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_of_name_or_property_access_expression(&mut self, name: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_name_or_property_access_expression"); 
         if is_declaration_name(name) {
             return name.parent().and_then(|p| self.get_symbol_of_node(&p));
         }

@@ -18,7 +18,7 @@ pub trait R39K11FunctionDeclCastExt {
 }
 
 impl R39K11FunctionDeclCastExt for Node {
-    fn as_function_declaration(&self) -> &ndg::FunctionDeclarationData {
+    fn as_function_declaration(&self) -> &ndg::FunctionDeclarationData { ::tsox_core::fntrace::enter("as_function_declaration"); 
         match &self.data {
             NodeData::FunctionDeclaration(d) => d,
             _ => panic!("AsFunctionDeclaration on wrong node kind"),
@@ -29,11 +29,11 @@ impl R39K11FunctionDeclCastExt for Node {
 pub trait R39K11SimpleTxExt {
     fn r39k11_visit(&mut self, node: Arc<Node>) -> Arc<Node>;
 
-    fn visit_node(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_node(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_node"); 
         self.r39k11_visit(node)
     }
 
-    fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         let mut changed = false;
         tsox_frontend::ast::node_data_generated::for_each_child(&node, |child| {
             let visited = self.r39k11_visit(child.clone());
@@ -51,19 +51,19 @@ pub trait R39K11SimpleTxExt {
 }
 
 impl R39K11SimpleTxExt for NullishCoalescingTransformer {
-    fn r39k11_visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn r39k11_visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("r39k11_visit"); 
         NullishCoalescingTransformer::visit(self, node)
     }
 }
 
 impl R39K11SimpleTxExt for OptionalCatchTransformer {
-    fn r39k11_visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn r39k11_visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("r39k11_visit"); 
         OptionalCatchTransformer::visit(self, node)
     }
 }
 
 impl R39K11SimpleTxExt for TaggedTemplateTransformer {
-    fn r39k11_visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn r39k11_visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("r39k11_visit"); 
         TaggedTemplateTransformer::visit(self, node)
     }
 }
@@ -73,7 +73,7 @@ pub trait R39K11ObjectRestExt {
 }
 
 impl R39K11ObjectRestExt for ObjectRestSpreadTransformer {
-    fn visit_nodes(&mut self, nodes: Option<&Arc<NodeList>>) -> Option<Arc<NodeList>> {
+    fn visit_nodes(&mut self, nodes: Option<&Arc<NodeList>>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("visit_nodes"); 
         nodes.map(|list| {
             let visited: Vec<Arc<Node>> =
                 list.nodes.iter().map(|n| self.visit(n.clone())).collect();
@@ -83,7 +83,7 @@ impl R39K11ObjectRestExt for ObjectRestSpreadTransformer {
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_template_object_helper(&self, cooked: &Arc<Node>, raw: &Arc<Node>) -> Arc<Node> {
+    pub fn new_template_object_helper(&self, cooked: &Arc<Node>, raw: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_object_helper"); 
         self.new_call_expression(
             &self.new_identifier("__makeTemplateObject"),
             None,
@@ -93,7 +93,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_logical_or_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    pub fn new_logical_or_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_logical_or_expression"); 
         self.new_binary_expression(
             None,
             left,

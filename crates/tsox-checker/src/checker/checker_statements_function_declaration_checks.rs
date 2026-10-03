@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub fn check_function_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_function_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_function_declaration"); 
         self.check_grammar_modifiers(node);
 
         if let tsox_frontend::ast::NodeData::FunctionDeclaration(data) = &node.data {

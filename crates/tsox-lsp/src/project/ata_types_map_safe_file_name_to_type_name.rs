@@ -15,6 +15,6 @@ static FULL_MAP: LazyLock<&'static [(&'static str, &'static str)]> = LazyLock::n
     Box::leak(v.into_boxed_slice())
 });
 
-pub fn safe_file_name_to_type_name() -> &'static [(&'static str, &'static str)] {
+pub fn safe_file_name_to_type_name() -> &'static [(&'static str, &'static str)] { ::tsox_core::fntrace::enter("safe_file_name_to_type_name"); 
     &FULL_MAP
 }

@@ -15,7 +15,7 @@ pub(crate) enum FlowRef {
 }
 
 impl FlowRef {
-    pub(crate) fn anchor_node(&self) -> Option<Arc<Node>> {
+    pub(crate) fn anchor_node(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("anchor_node"); 
         match self {
             FlowRef::Node(n) => Some(Arc::clone(n)),
             FlowRef::Symbol(s) => s.declarations.first().map(Arc::clone),

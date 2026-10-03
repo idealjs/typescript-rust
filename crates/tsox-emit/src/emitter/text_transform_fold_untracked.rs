@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-pub(crate) fn fold_expression_newlines(text: &str) -> String {
+pub(crate) fn fold_expression_newlines(text: &str) -> String { ::tsox_core::fntrace::enter("fold_expression_newlines"); 
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
     let mut out: Vec<char> = Vec::with_capacity(n);
@@ -248,7 +248,7 @@ pub(crate) fn fold_expression_newlines(text: &str) -> String {
 }
 
 #[allow(dead_code)]
-pub(crate) fn drop_trailing_comma(out: &mut Vec<char>) {
+pub(crate) fn drop_trailing_comma(out: &mut Vec<char>) { ::tsox_core::fntrace::enter("drop_trailing_comma"); 
     while let Some(&ch) = out.last() {
         if ch == ' ' || ch == '\t' {
             out.pop();

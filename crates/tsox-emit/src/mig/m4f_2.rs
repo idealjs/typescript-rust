@@ -36,7 +36,7 @@ use crate::mig::m4n::r37k19_defs::R37K19ArcNodeExt;
 use self::r38k5_defs::R38K5NodeVisitorExt;
 
 impl AsyncTransformer {
-    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_constructor_declaration"); 
         let saved_lexical_arguments = std::mem::take(&mut self.lexical_arguments);
         let updated = match &node.data {
             NodeData::ConstructorDeclaration(d) => {
@@ -66,7 +66,7 @@ impl AsyncTransformer {
         Some(updated)
     }
 
-    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_method_declaration"); 
         let saved_lexical_arguments = std::mem::take(&mut self.lexical_arguments);
         let function_flags = get_function_flags(Some(node));
 
@@ -121,7 +121,7 @@ impl AsyncTransformer {
         Some(updated)
     }
 
-    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_get_accessor_declaration"); 
         let saved_lexical_arguments = std::mem::take(&mut self.lexical_arguments);
         let updated = match &node.data {
             NodeData::GetAccessorDeclaration(d) => {
@@ -152,7 +152,7 @@ impl AsyncTransformer {
         Some(updated)
     }
 
-    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_set_accessor_declaration"); 
         let saved_lexical_arguments = std::mem::take(&mut self.lexical_arguments);
         let updated = match &node.data {
             NodeData::SetAccessorDeclaration(d) => {
@@ -183,7 +183,7 @@ impl AsyncTransformer {
         Some(updated)
     }
 
-    pub fn visit_function_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_function_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_function_declaration"); 
         let saved_lexical_arguments = std::mem::take(&mut self.lexical_arguments);
         let function_flags = get_function_flags(Some(node));
 
@@ -238,7 +238,7 @@ impl AsyncTransformer {
         Some(updated)
     }
 
-    pub fn visit_function_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_function_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_function_expression"); 
         let saved_lexical_arguments = std::mem::take(&mut self.lexical_arguments);
         let function_flags = get_function_flags(Some(node));
 
@@ -293,7 +293,7 @@ impl AsyncTransformer {
         Some(updated)
     }
 
-    pub fn visit_arrow_function(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_arrow_function(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_arrow_function"); 
         let no_lexical_arguments = self
             .emit_context_mut()
             .emit_flags(node)
@@ -360,7 +360,7 @@ impl AsyncTransformer {
         &mut self,
         node: &Arc<Node>,
         has_receiver: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_variable_declaration_list_with_colliding_names"); 
         self.hoist_variable_declaration_list(node);
 
         let declarations = match &node.data {
@@ -397,7 +397,7 @@ impl AsyncTransformer {
         self.factory().inline_expressions(expressions)
     }
 
-    pub fn transform_initialized_variable(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn transform_initialized_variable(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_initialized_variable"); 
         let (name, initializer, loc) = match &node.data {
             NodeData::VariableDeclaration(d) => (
                 Arc::clone(&d.name),
@@ -420,7 +420,7 @@ impl AsyncTransformer {
         visitor.visit_node(&converted)
     }
 
-    pub fn transform_method_body(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_method_body(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_method_body"); 
         let saved = save_super_access_state(&mut self.super_access);
         reset_super_access_state(self, true);
 
@@ -480,7 +480,7 @@ impl AsyncTransformer {
     pub fn transform_async_function_parameter_list(
         &mut self,
         node: &Arc<Node>,
-    ) -> Arc<NodeList> {
+    ) -> Arc<NodeList> { ::tsox_core::fntrace::enter("transform_async_function_parameter_list"); 
         if is_simple_parameter_list(parameters(node)) {
             let mut visitor = self.visitor();
             return match parameter_list(node) {
@@ -553,7 +553,7 @@ impl AsyncTransformer {
         &mut self,
         node: &Arc<Node>,
         outer_parameters: &Arc<NodeList>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_async_function_body"); 
         let is_arrow = node.kind == SyntaxKind::ArrowFunction;
         let saved = save_super_access_state(&mut self.super_access);
         if !is_arrow {
@@ -744,7 +744,7 @@ impl AsyncTransformer {
     pub fn transform_async_function_body_worker(
         &mut self,
         body: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_async_function_body_worker"); 
         if is_block(body) {
             let multi_line = match &body.data {
                 NodeData::Block(d) => d.multi_line,
@@ -774,7 +774,7 @@ impl AsyncTransformer {
         block
     }
 
-    pub fn hoist_variable_declaration_list(&mut self, node: &Arc<Node>) {
+    pub fn hoist_variable_declaration_list(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("hoist_variable_declaration_list"); 
         if let NodeData::VariableDeclarationList(d) = &node.data {
             for decl in &d.declarations.nodes {
                 self.hoist_variable(decl);
@@ -782,7 +782,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn hoist_variable(&mut self, node: &Arc<Node>) {
+    pub fn hoist_variable(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("hoist_variable"); 
         let name = match node.name() {
             None => return,
             Some(name) => name,
@@ -800,7 +800,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn get_original_if_function_like(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_original_if_function_like(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_original_if_function_like"); 
         let original = self.emit_context().most_original(node);
         if is_function_like_declaration(&original) {
             original
@@ -809,7 +809,7 @@ impl AsyncTransformer {
         }
     }
 
-    pub fn create_capture_arguments_statement(&mut self) -> Arc<Node> {
+    pub fn create_capture_arguments_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_capture_arguments_statement"); 
         let binding = self.lexical_arguments.binding.clone().unwrap();
         let initializer = self.factory().new_identifier("arguments");
         let variable = self
@@ -825,7 +825,7 @@ impl AsyncTransformer {
         statement
     }
 
-    pub fn create_super_access_variable_statement(&mut self) -> Arc<Node> {
+    pub fn create_super_access_variable_statement(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_super_access_variable_statement"); 
         let f = self.factory();
         let mut accessors: Vec<Arc<Node>> = Vec::new();
 
@@ -931,7 +931,7 @@ impl AsyncTransformer {
         f.new_variable_statement(None, &decl_list)
     }
 
-    pub fn substitute_super_accesses_in_body(&mut self, body: Arc<Node>) -> Arc<Node> {
+    pub fn substitute_super_accesses_in_body(&mut self, body: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("substitute_super_accesses_in_body"); 
         self.super_access_visitor
             .as_mut()
             .map(|v| v.visit_node(&body))

@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub(crate) fn declaration_is_ambient(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn declaration_is_ambient(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_is_ambient"); 
         if self.ambient_context_depth > 0 {
             return true;
         }
@@ -38,7 +38,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         loc: tsox_core::core::text::TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("erasable_syntax_error"); 
         if !self.compiler_options.erasable_syntax_only.is_true()
             || tsox_frontend::ast::is_in_js_file(node)
         {
@@ -53,7 +53,7 @@ impl Checker {
         ));
     }
 
-    pub(crate) fn check_cjs_reserved_top_level_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) {
+    pub(crate) fn check_cjs_reserved_top_level_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) { ::tsox_core::fntrace::enter("check_cjs_reserved_top_level_name"); 
         use tsox_core::core::compiler_options::ModuleKind;
         if !matches!(name.kind, SyntaxKind::Identifier) {
             return;
@@ -176,7 +176,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_for_initializer(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_for_initializer(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_for_initializer"); 
         match node.kind {
             SyntaxKind::VariableDeclarationList => {
                 self.check_variable_declaration_list(node);
@@ -185,7 +185,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_binding_pattern_computed_names(&mut self, name: &Arc<Node>) {
+    pub(crate) fn check_binding_pattern_computed_names(&mut self, name: &Arc<Node>) { ::tsox_core::fntrace::enter("check_binding_pattern_computed_names"); 
         if !matches!(
             name.kind,
             SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern

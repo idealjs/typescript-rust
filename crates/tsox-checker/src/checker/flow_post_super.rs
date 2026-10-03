@@ -13,7 +13,7 @@ impl Checker {
         node: &Arc<Node>,
         container: &Arc<Node>,
         message: Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_this_before_super"); 
         let Some(class_decl) = container.parent() else {
             return;
         };
@@ -37,7 +37,7 @@ impl Checker {
     }
 
     // Go isPostSuperFlowNodeWorker
-    pub(crate) fn is_post_super_flow_node(&self, flow: &Arc<FlowNode>) -> bool {
+    pub(crate) fn is_post_super_flow_node(&self, flow: &Arc<FlowNode>) -> bool { ::tsox_core::fntrace::enter("is_post_super_flow_node"); 
         self.is_post_super_worker(flow, &mut Vec::new(), 0)
     }
 
@@ -46,7 +46,7 @@ impl Checker {
         flow: &Arc<FlowNode>,
         reduce_labels: &mut Vec<(Arc<FlowNode>, Vec<Arc<FlowNode>>)>,
         depth: u32,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_post_super_worker"); 
         if depth > FLOW_POST_SUPER_MAX_DEPTH {
             return true;
         }

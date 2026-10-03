@@ -8,7 +8,7 @@ enum Provider {
 }
 
 impl Checker {
-    pub(crate) fn check_export_star_ambiguity(&mut self, file: &Arc<Node>) {
+    pub(crate) fn check_export_star_ambiguity(&mut self, file: &Arc<Node>) { ::tsox_core::fntrace::enter("check_export_star_ambiguity"); 
         let tsox_frontend::ast::NodeData::SourceFile(sf) = &file.data else {
             return;
         };

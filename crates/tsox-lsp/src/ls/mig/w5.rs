@@ -24,7 +24,7 @@ impl crate::ls::language_service::LanguageService {
         file: &Arc<SourceFile>,
         position: usize,
         optional_replacement_span: Option<lsproto::Range>,
-    ) -> Option<lsproto::CompletionList> {
+    ) -> Option<lsproto::CompletionList> { ::tsox_core::fntrace::enter("get_label_completions_at_position"); 
         let mut items = self.get_label_statement_completions(node, file, position);
         if items.is_empty() {
             return None;
@@ -49,7 +49,7 @@ impl crate::ls::language_service::LanguageService {
         node: &Arc<Node>,
         file: &Arc<SourceFile>,
         position: usize,
-    ) -> Vec<lsproto::CompletionItem> {
+    ) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_label_statement_completions"); 
         let mut uniques: HashSet<String> = HashSet::new();
         let mut items = Vec::new();
         let mut current = Some(node.clone());

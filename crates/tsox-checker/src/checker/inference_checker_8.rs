@@ -9,14 +9,14 @@ pub(crate) enum MatchingKind {
     CloselyMatched,
 }
 
-fn symbols_match(a: &Option<Arc<Symbol>>, b: &Option<Arc<Symbol>>) -> bool {
+fn symbols_match(a: &Option<Arc<Symbol>>, b: &Option<Arc<Symbol>>) -> bool { ::tsox_core::fntrace::enter("symbols_match"); 
     match (a, b) {
         (Some(x), Some(y)) => Arc::ptr_eq(x, y),
         _ => false,
     }
 }
 
-fn push_if_unique_arc(list: &mut Vec<Arc<Type>>, t: &Arc<Type>) {
+fn push_if_unique_arc(list: &mut Vec<Arc<Type>>, t: &Arc<Type>) { ::tsox_core::fntrace::enter("push_if_unique_arc"); 
     if !list.iter().any(|x| Arc::ptr_eq(x, t)) {
         list.push(Arc::clone(t));
     }
@@ -28,7 +28,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_object_types"); 
         // Go inferFromObjectTypes：目标是 { [P in keyof T]: X } / { [P in K]: X }
         // 时走映射型推理（命中则短路普通成员推断）
         if let TypeData::Mapped(m) = &target.data
@@ -99,14 +99,14 @@ impl Checker {
         source_types: &[Arc<Type>],
         target_types: &[Arc<Type>],
         _variances: &[VarianceFlags],
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_type_arguments"); 
         let count = source_types.len().min(target_types.len());
         for i in 0..count {
             self.infer_from_types(state, &source_types[i], &target_types[i]);
         }
     }
 
-    fn tuple_structure_matching(s: &Arc<Type>, t: &Arc<Type>) -> bool {
+    fn tuple_structure_matching(s: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("tuple_structure_matching"); 
         let (TypeData::Tuple(sd), TypeData::Tuple(td)) = (&s.data, &t.data) else {
             return false;
         };
@@ -122,7 +122,7 @@ impl Checker {
             })
     }
 
-    pub(crate) fn end_fixed_element_count(t: &Arc<Type>) -> usize {
+    pub(crate) fn end_fixed_element_count(t: &Arc<Type>) -> usize { ::tsox_core::fntrace::enter("end_fixed_element_count"); 
         match &t.data {
             TypeData::Tuple(tuple) => {
                 let infos = &tuple.element_infos;
@@ -142,7 +142,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_tuple_elements"); 
         let source_is_tuple = crate::checker::utilities::is_tuple_type(source);
         let source_args = if source_is_tuple {
             Self::tuple_type_arguments(source)
@@ -279,7 +279,7 @@ impl Checker {
         target_flags: &[crate::checker::types::ElementFlags],
         start_length: usize,
         end_length: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_rest_element_to_target"); 
         for i in start_length..target_args.len().saturating_sub(end_length) {
             let t = if target_flags
                 .get(i)
@@ -298,7 +298,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_properties"); 
         let target_props = self.get_properties_of_type(target);
         for target_prop in &target_props {
             let Some(source_prop) = self.get_property_of_type(source, &target_prop.name) else {
@@ -318,7 +318,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_signatures"); 
         let source_sigs = self.get_signatures_of_type(source, SignatureKind::Call);
         let target_sigs = self.get_signatures_of_type(target, SignatureKind::Call);
         if source_sigs.len() == 1 && target_sigs.len() == 1 {
@@ -340,7 +340,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Signature>,
         target: &Arc<Signature>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_signature"); 
         // Go inferFromSignature：方法/构造签名的参数位置是双变的，进入后保持
         let save_biv = state.bivariant;
         let target_is_method = target.declaration.as_ref().is_some_and(|d| {
@@ -426,7 +426,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_index_types"); 
         let mut priority = InferencePriority::None;
         if source.object_flags.intersects(ObjectFlags::Mapped)
             && target.object_flags.intersects(ObjectFlags::Mapped)
@@ -486,7 +486,7 @@ impl Checker {
         sources: &[Arc<Type>],
         targets: &[Arc<Type>],
         kind: MatchingKind,
-    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
+    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("infer_from_matching_types"); 
         let mut matched_sources: Vec<Arc<Type>> = Vec::new();
         let mut matched_targets: Vec<Arc<Type>> = Vec::new();
         for t in targets {
@@ -523,7 +523,7 @@ impl Checker {
         (sources, targets)
     }
 
-    fn matches_by_kind(&mut self, s: &Arc<Type>, t: &Arc<Type>, kind: MatchingKind) -> bool {
+    fn matches_by_kind(&mut self, s: &Arc<Type>, t: &Arc<Type>, kind: MatchingKind) -> bool { ::tsox_core::fntrace::enter("matches_by_kind"); 
         match kind {
             MatchingKind::Identical => self.is_type_identical_to(s, t),
             MatchingKind::OrBaseIdentical => self.is_type_or_base_identical_to(s, t),
@@ -531,13 +531,13 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_type_or_base_identical_to(&mut self, s: &Arc<Type>, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_type_or_base_identical_to(&mut self, s: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_or_base_identical_to"); 
         self.is_type_identical_to(s, t)
             || (t.flags.contains(TypeFlags::String) && s.flags.contains(TypeFlags::StringLiteral))
             || (t.flags.contains(TypeFlags::Number) && s.flags.contains(TypeFlags::NumberLiteral))
     }
 
-    pub(crate) fn is_type_closely_matched_by(&self, s: &Arc<Type>, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_type_closely_matched_by(&self, s: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_closely_matched_by"); 
         let same_object_instantiation = s.flags.contains(TypeFlags::Object)
             && t.flags.contains(TypeFlags::Object)
             && symbols_match(&s.symbol, &t.symbol);
@@ -554,7 +554,7 @@ impl Checker {
         &self,
         t1: &Arc<Type>,
         t2: &Arc<Type>,
-    ) -> std::cmp::Ordering {
+    ) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_types_and_depth"); 
         let d1 = self.get_type_depth(t1, 3);
         let d2 = self.get_type_depth(t2, 3);
         if d1 != d2 {
@@ -563,7 +563,7 @@ impl Checker {
         crate::checker::utilities::compare_types(t1, t2)
     }
 
-    pub(crate) fn get_type_depth(&self, t: &Arc<Type>, max_depth: i32) -> i32 {
+    pub(crate) fn get_type_depth(&self, t: &Arc<Type>, max_depth: i32) -> i32 { ::tsox_core::fntrace::enter("get_type_depth"); 
         if max_depth != 0 {
             if let Some(alias) = &t.alias
                 && !alias.type_arguments.is_empty()
@@ -585,7 +585,7 @@ impl Checker {
         0
     }
 
-    fn get_type_list_depth(&self, types: &[Arc<Type>], max_depth: i32) -> i32 {
+    fn get_type_list_depth(&self, types: &[Arc<Type>], max_depth: i32) -> i32 { ::tsox_core::fntrace::enter("get_type_list_depth"); 
         let mut depth = 0;
         for t in types {
             let type_depth = self.get_type_depth(t, max_depth);
@@ -601,7 +601,7 @@ impl Checker {
         state: &mut InferenceState,
         sources: &[Arc<Type>],
         targets: &[Arc<Type>],
-    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
+    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("infer_matching_types_identical"); 
         self.infer_from_matching_types(state, sources, targets, MatchingKind::Identical)
     }
 
@@ -611,7 +611,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         new_priority: InferencePriority,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_with_priority"); 
         if new_priority == InferencePriority::None {
             self.infer_from_types(state, source, target);
             return;
@@ -622,7 +622,7 @@ impl Checker {
         state.priority = save;
     }
 
-    pub(crate) fn could_contain_type_variables(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn could_contain_type_variables(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("could_contain_type_variables"); 
         if let Some(&cached) = self.could_contain_type_variables_cache.get(&t.id) {
             return cached;
         }
@@ -631,7 +631,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn could_contain_type_variables_worker(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn could_contain_type_variables_worker(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("could_contain_type_variables_worker"); 
         if !t
             .flags
             .intersects(crate::checker::types::TYPE_FLAGS_STRUCTURED_OR_INSTANTIABLE)
@@ -681,7 +681,7 @@ impl Checker {
                     .is_some_and(|ts| ts.iter().any(|m| self.could_contain_type_variables(m))))
     }
 
-    fn is_non_generic_top_level_type(&self, t: &Arc<Type>) -> bool {
+    fn is_non_generic_top_level_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_non_generic_top_level_type"); 
         let Some(alias) = t.alias.as_ref() else {
             return false;
         };
@@ -701,7 +701,7 @@ impl Checker {
                 .is_some_and(|p| p.kind == SyntaxKind::SourceFile)
         })
     }
-    pub(crate) fn is_no_infer_type(&self, t: &Type) -> bool {
+    pub(crate) fn is_no_infer_type(&self, t: &Type) -> bool { ::tsox_core::fntrace::enter("is_no_infer_type"); 
         // Go isNoInferType：内置 NoInfer 表示为 unknown 约束的 Substitution
         if t.flags.contains(TypeFlags::Substitution)
             && let TypeData::Substitution(sub) = &t.data
@@ -738,7 +738,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn is_no_infer_target_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_no_infer_target_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_no_infer_target_type"); 
         if t.flags.intersects(TypeFlags::Union | TypeFlags::Intersection)
             && let Some(types) = t.types()
         {
@@ -761,7 +761,7 @@ impl Checker {
             && !self.is_pattern_literal_type(t)
     }
 
-    pub(crate) fn is_from_inference_blocked_source(&self, _source: &Type) -> bool {
+    pub(crate) fn is_from_inference_blocked_source(&self, _source: &Type) -> bool { ::tsox_core::fntrace::enter("is_from_inference_blocked_source"); 
         false
     }
 
@@ -771,7 +771,7 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         ctx_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_context_sensitive_arg"); 
         // Go getContextualSignature：联合上下文逐成分取调用签名（跳过
         // undefined 等无签名成分），单一命中即用
         let ctx_sig = if let Some(members) = ctx_type.types().filter(|_| ctx_type.is_union()) {
@@ -867,7 +867,7 @@ impl Checker {
         self.create_function_or_constructor_type(vec![sig], false)
     }
 
-    pub(crate) fn clear_node_type_cache_under(&mut self, node: &Arc<tsox_frontend::ast::Node>) {
+    pub(crate) fn clear_node_type_cache_under(&mut self, node: &Arc<tsox_frontend::ast::Node>) { ::tsox_core::fntrace::enter("clear_node_type_cache_under"); 
         self.type_node_links.data.remove(&node.id());
         tsox_frontend::ast::node_data_generated::for_each_child(node, |c| {
             self.clear_node_type_cache_under(c);
@@ -881,7 +881,7 @@ impl Checker {
         signature: &Arc<Signature>,
         args: &[Arc<tsox_frontend::ast::Node>],
         context: &mut InferenceContext,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("infer_type_arguments"); 
         self.inference_loop_depth += 1;
         let pending_base = self.pending_annotated_param_inferences.len();
         let result = self.infer_type_arguments_inner(node, signature, args, context);
@@ -896,7 +896,7 @@ impl Checker {
         signature: &Arc<Signature>,
         args: &[Arc<tsox_frontend::ast::Node>],
         context: &mut InferenceContext,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("infer_type_arguments_inner"); 
         let before_return_inference: Vec<bool> = context
             .inferences
             .iter()
@@ -1181,7 +1181,7 @@ impl Checker {
 
 impl Checker {
     /// 推断缺省回退（unknown）视为未推断，二阶段候选可补充
-    fn is_uninferred_type(&self, t: &Arc<Type>) -> bool {
+    fn is_uninferred_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_uninferred_type"); 
         t.flags.contains(TypeFlags::Unknown)
     }
 }
@@ -1189,7 +1189,7 @@ impl Checker {
 impl Checker {
     /// Go getRestTypeAtPosition 的目标 rest 对位：pos 超出固定参数时，
     /// rest 数组按元素展开（泛型 T 保持延迟 T[number]，具体类型则解析）
-    pub(crate) fn source_rest_type_at(&mut self, sig: &Arc<Signature>, pos: usize) -> Arc<Type> {
+    pub(crate) fn source_rest_type_at(&mut self, sig: &Arc<Signature>, pos: usize) -> Arc<Type> { ::tsox_core::fntrace::enter("source_rest_type_at"); 
         let parameter_count = self.get_parameter_count(sig);
         if let Some(rest) = self.get_effective_rest_type(sig) {
             if pos >= parameter_count.saturating_sub(1) {
@@ -1264,7 +1264,7 @@ impl Checker {
         own: &[Arc<Type>],
         out: &mut Vec<Arc<Type>>,
         depth: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_outer_type_params"); 
         if depth > 6 {
             return;
         }

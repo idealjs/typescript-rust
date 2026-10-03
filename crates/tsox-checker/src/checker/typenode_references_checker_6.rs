@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         derived: &Arc<Type>,
         base: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("merge_interface_type_with_base"); 
         if base.flags.contains(TypeFlags::Any) {
             return Arc::clone(derived);
         }
@@ -69,7 +69,7 @@ impl Checker {
         merged
     }
 
-    pub(crate) fn resolve_enum_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn resolve_enum_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_enum_type"); 
         if let Some(cached) = self
             .type_alias_links
             .get(symbol)
@@ -85,7 +85,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_of_prototype_property(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn get_type_of_prototype_property(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_prototype_property"); 
         let Some(parent) = symbol.parent().clone() else {
             return self.get_any_type();
         };
@@ -133,7 +133,7 @@ impl Checker {
         &self,
         base: &Arc<Type>,
         args: Vec<Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("rebuild_with_type_arguments"); 
         if args.is_empty() {
             return Arc::clone(base);
         }

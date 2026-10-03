@@ -18,7 +18,7 @@ pub enum Kind {
 }
 
 impl std::fmt::Display for Kind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         match self {
             Kind::Inferred => write!(f, "Inferred"),
             Kind::Configured => write!(f, "Configured"),
@@ -65,7 +65,7 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn new(config_file_name: String, kind: Kind, current_directory: String) -> Self {
+    pub fn new(config_file_name: String, kind: Kind, current_directory: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         Project {
             kind,
             current_directory,
@@ -89,11 +89,11 @@ impl Project {
         }
     }
 
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &str { ::tsox_core::fntrace::enter("name"); 
         &self.config_file_name
     }
 
-    pub fn display_name(&self, cwd: &str) -> String {
+    pub fn display_name(&self, cwd: &str) -> String { ::tsox_core::fntrace::enter("display_name"); 
         if self.kind == Kind::Inferred {
             return tsox_core::tspath::get_base_file_name(&self.current_directory);
         }
@@ -102,29 +102,29 @@ impl Project {
         self.config_file_name.clone()
     }
 
-    pub fn id(&self) -> &Path {
+    pub fn id(&self) -> &Path { ::tsox_core::fntrace::enter("id"); 
         &self.config_file_path
     }
 
-    pub fn config_file_name_str(&self) -> &str {
+    pub fn config_file_name_str(&self) -> &str { ::tsox_core::fntrace::enter("config_file_name_str"); 
         if self.kind != Kind::Configured {
             panic!("ConfigFileName called on non-configured project");
         }
         &self.config_file_name
     }
 
-    pub fn config_file_path(&self) -> &Path {
+    pub fn config_file_path(&self) -> &Path { ::tsox_core::fntrace::enter("config_file_path"); 
         if self.kind != Kind::Configured {
             panic!("ConfigFilePath called on non-configured project");
         }
         &self.config_file_path
     }
 
-    pub fn get_program(&self) -> Option<&Arc<Program>> {
+    pub fn get_program(&self) -> Option<&Arc<Program>> { ::tsox_core::fntrace::enter("get_program"); 
         self.program.as_ref()
     }
 
-    pub fn clone_shallow(&self) -> Project {
+    pub fn clone_shallow(&self) -> Project { ::tsox_core::fntrace::enter("clone_shallow"); 
         Project {
             kind: self.kind,
             current_directory: self.current_directory.clone(),
@@ -144,7 +144,7 @@ impl Project {
         }
     }
 
-    pub fn set_command_line(&mut self, command_line: ParsedCommandLine) {
+    pub fn set_command_line(&mut self, command_line: ParsedCommandLine) { ::tsox_core::fntrace::enter("set_command_line"); 
         self.command_line = Some(command_line);
         *self.command_line_with_typings_files.lock().unwrap() = None;
 
@@ -154,7 +154,7 @@ impl Project {
         self.dirty_file_path = Path::default();
     }
 
-    pub fn create_program(&mut self) -> CreateProgramResult {
+    pub fn create_program(&mut self) -> CreateProgramResult { ::tsox_core::fntrace::enter("create_program"); 
         todo!("Project::create_program requires full compiler integration")
     }
 }

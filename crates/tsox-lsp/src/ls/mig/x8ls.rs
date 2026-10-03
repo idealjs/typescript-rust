@@ -7,7 +7,7 @@ use tsox_frontend::scanner;
 use tsox_checker::checker::Checker;
 use tsox_core::core;
 
-pub fn leading_indentation(text: &str) -> &str {
+pub fn leading_indentation(text: &str) -> &str { ::tsox_core::fntrace::enter("leading_indentation"); 
     let mut end = 0;
     let bytes = text.as_bytes();
     while end < bytes.len() && (bytes[end] == b' ' || bytes[end] == b'\t') {
@@ -16,7 +16,7 @@ pub fn leading_indentation(text: &str) -> &str {
     &text[..end]
 }
 
-pub fn line_has_only_jsdoc_asterisk(line: &str) -> bool {
+pub fn line_has_only_jsdoc_asterisk(line: &str) -> bool { ::tsox_core::fntrace::enter("line_has_only_jsdoc_asterisk"); 
     let line = line.trim_start_matches([' ', '\t']);
     if let Some(rest) = line.strip_prefix('*') {
         rest.chars().all(|c| c == ' ' || c == '\t')
@@ -25,13 +25,13 @@ pub fn line_has_only_jsdoc_asterisk(line: &str) -> bool {
     }
 }
 
-pub fn lsp_range_contains(outer: &crate::lsp::lsproto_lsp_basic::Range, inner: &crate::lsp::lsproto_lsp_basic::Range) -> bool {
+pub fn lsp_range_contains(outer: &crate::lsp::lsproto_lsp_basic::Range, inner: &crate::lsp::lsproto_lsp_basic::Range) -> bool { ::tsox_core::fntrace::enter("lsp_range_contains"); 
     use std::cmp::Ordering;
     crate::lsp::lsproto_util::compare_positions(&outer.start, &inner.start) != Ordering::Greater
         && crate::lsp::lsproto_util::compare_positions(&inner.end, &outer.end) != Ordering::Greater
 }
 
-pub fn modifier_like_kind(node: Option<&Arc<Node>>) -> SyntaxKind {
+pub fn modifier_like_kind(node: Option<&Arc<Node>>) -> SyntaxKind { ::tsox_core::fntrace::enter("modifier_like_kind"); 
     let Some(node) = node else {
         return SyntaxKind::Unknown;
     };
@@ -47,7 +47,7 @@ pub fn modifier_like_kind(node: Option<&Arc<Node>>) -> SyntaxKind {
     SyntaxKind::Unknown
 }
 
-pub fn move_range_past_modifiers(node: &Node) -> tsox_core::core::text::TextRange {
+pub fn move_range_past_modifiers(node: &Node) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("move_range_past_modifiers"); 
     if let Some(modifiers) = node.modifiers() {
         if !modifiers.nodes.is_empty() {
             let last_mod = modifiers.nodes.last().unwrap();
@@ -57,7 +57,7 @@ pub fn move_range_past_modifiers(node: &Node) -> tsox_core::core::text::TextRang
     tsox_core::core::text::TextRange::new(node.pos(), node.end())
 }
 
-pub fn needs_jsx_namespace_fix(jsx_namespace: &str, symbol_token: &Arc<Node>, ch: &Checker) -> bool {
+pub fn needs_jsx_namespace_fix(jsx_namespace: &str, symbol_token: &Arc<Node>, ch: &Checker) -> bool { ::tsox_core::fntrace::enter("needs_jsx_namespace_fix"); 
     if tsox_frontend::scanner::mig::m3i::is_intrinsic_jsx_name(symbol_token.text()) {
         return true;
     }

@@ -7,7 +7,7 @@ use crate::checker::checker::*;
 impl Checker {
     // Go checkElementAccessExpression isForInVariableForNumericPropertyNames：
     // for-in 变量在数字名对象上作索引按 number 解析
-    pub(crate) fn effective_index_arg_type(&mut self, arg_expr: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn effective_index_arg_type(&mut self, arg_expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("effective_index_arg_type"); 
         let arg_type = self.get_type_of_node(arg_expr);
         if arg_type.flags.contains(TypeFlags::String)
             && self.for_in_variable_of_numeric_names_object(arg_expr)
@@ -17,7 +17,7 @@ impl Checker {
         arg_type
     }
 
-    fn for_in_variable_of_numeric_names_object(&mut self, arg_expr: &Arc<Node>) -> bool {
+    fn for_in_variable_of_numeric_names_object(&mut self, arg_expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("for_in_variable_of_numeric_names_object"); 
         if arg_expr.kind != SyntaxKind::Identifier {
             return false;
         }
@@ -53,7 +53,7 @@ impl Checker {
         obj_type: &Arc<Type>,
         arg_expr: &Arc<Node>,
         arg_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_element_access_implicit_any"); 
         if !self.no_implicit_any
             || obj_type
                 .flags
@@ -185,13 +185,13 @@ impl Checker {
         loc: tsox_core::core::text::TextRange,
         message: tsox_core::diagnostics::Message,
         args: Vec<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_index_diagnostic"); 
         self.diagnostics
             .add(Diagnostic::new(self.current_file.clone(), loc, message, args));
     }
 
     // Go getReducedApparentType 的原始类型近似：primitive 取对应全局接口声明型
-    pub(crate) fn primitive_apparent_object_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn primitive_apparent_object_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("primitive_apparent_object_type"); 
         let Some(interface_name) = self.primitive_interface_name(t) else {
             return t.clone();
         };
@@ -204,7 +204,7 @@ impl Checker {
             .unwrap_or_else(|| self.resolve_interface_type(&sym, None))
     }
 
-    pub(crate) fn primitive_interface_index_value(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn primitive_interface_index_value(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("primitive_interface_index_value"); 
         let apparent = self.primitive_apparent_object_type(t);
         let structured = apparent.as_structured()?;
         structured
@@ -214,7 +214,7 @@ impl Checker {
     }
 
     // Go getSuggestionForNonexistentProperty
-    fn suggest_property_spelling(&self, name: &str, t: &Arc<Type>) -> Option<String> {
+    fn suggest_property_spelling(&self, name: &str, t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("suggest_property_spelling"); 
         let st = t.as_structured()?;
         let rune_len = name.chars().count();
         let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);
@@ -265,7 +265,7 @@ impl Checker {
         apparent: &Arc<Type>,
         node: &Arc<Node>,
         keyed: &Arc<Type>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("suggest_index_signature_call"); 
         if !keyed.flags.intersects(
             TypeFlags::String
                 | TypeFlags::StringLiteral
@@ -305,7 +305,7 @@ impl Checker {
     }
 
     // Go tryGetPropertyAccessOrIdentifierToString
-    fn try_reference_to_string(&self, e: &Arc<Node>) -> String {
+    fn try_reference_to_string(&self, e: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("try_reference_to_string"); 
         match e.kind {
             SyntaxKind::Identifier => e.text().to_string(),
             SyntaxKind::PropertyAccessExpression => {
@@ -343,7 +343,7 @@ impl Checker {
         &mut self,
         arg_type: &Arc<Type>,
         object_display: &str,
-    ) -> Option<Diagnostic> {
+    ) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("index_diagnostic_chain"); 
         let literal_value = |t: &Arc<Type>| -> Option<String> {
             if let crate::checker::types::TypeData::Literal(l) = &t.data {
                 return Some(match &l.value {
@@ -384,7 +384,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn type_has_number_index(&self, obj_type: &Arc<Type>) -> bool {
+    pub(crate) fn type_has_number_index(&self, obj_type: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_has_number_index"); 
         self.is_array_type(obj_type)
             || obj_type.as_structured().is_some_and(|s| {
                 s.index_infos.iter().any(|info| {
@@ -399,7 +399,7 @@ impl Checker {
                 .is_some_and(|s| s.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM))
     }
 
-    pub(crate) fn literal_element_access_name(&self, arg: &Arc<Node>) -> Option<String> {
+    pub(crate) fn literal_element_access_name(&self, arg: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("literal_element_access_name"); 
         match &arg.data {
             tsox_frontend::ast::NodeData::StringLiteral(data) => Some(data.text.clone()),
             tsox_frontend::ast::NodeData::NumericLiteral(data) => Some(data.text.clone()),

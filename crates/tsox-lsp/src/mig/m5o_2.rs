@@ -25,7 +25,7 @@ impl RegistryBuilder {
         checker: Arc<tsox_checker::checker::Checker>,
         module_resolver: Option<Arc<Resolver>>,
         realpath: Option<Box<dyn Fn(&str) -> String + Send + Sync>>,
-    ) -> ExportExtractor {
+    ) -> ExportExtractor { ::tsox_core::fntrace::enter("new_export_extractor"); 
         let to_path: Option<Box<dyn Fn(&str) -> Path + Send + Sync>> = self.to_path.clone().map(|f| {
             Box::new(move |file_name: &str| f(file_name)) as Box<dyn Fn(&str) -> Path + Send + Sync>
         });
@@ -44,7 +44,7 @@ impl RegistryBuilder {
 pub fn is_non_pattern_ambient_module_declaration(
     _file: &SourceFile,
     _decl: &Arc<tsox_frontend::ast::Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_non_pattern_ambient_module_declaration"); 
     todo!("SourceFile.pattern_ambient_modules 与 Node.symbol 通道未移植（Go: 遍历 file.PatternAmbientModules 比对 module.Symbol == decl.Symbol）")
 }
 
@@ -54,7 +54,7 @@ impl SymbolExtractor {
         symbol: &Arc<tsox_frontend::ast::Symbol>,
         syntax: ExportSyntax,
         checker_lease: &mut CheckerLease,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("try_resolve_symbol"); 
         if !tsox_frontend::ast::mig::m3g_2::is_non_local_alias(
             Some(symbol.as_ref()),
             tsox_frontend::ast::SymbolFlags::None,
@@ -146,7 +146,7 @@ impl SymbolExtractor {
         &self,
         location: &Arc<tsox_frontend::ast::Node>,
         name: &str,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("resolve_local_name"); 
         let mut resolver = tsox_checker::binder::nameresolver::NameResolver::new();
         resolver.compiler_options = Some(Arc::new(
             tsox_core::core::compiler_options::empty_compiler_options(),
@@ -166,7 +166,7 @@ fn take_assignment_location(
     decl: &tsox_frontend::ast::Node,
     loc: &mut Option<Arc<tsox_frontend::ast::Node>>,
     name: &mut String,
-) {
+) { ::tsox_core::fntrace::enter("take_assignment_location"); 
     if let Some(expr) = decl.expression() {
         if expr.kind == tsox_frontend::ast::SyntaxKind::Identifier {
             *loc = Some(expr.clone());
@@ -181,7 +181,7 @@ pub fn extract_first_export(
     module_id: ModuleID,
     module_file_name: &str,
     file: &SourceFile,
-) -> Option<Export> {
+) -> Option<Export> { ::tsox_core::fntrace::enter("extract_first_export"); 
     let mut exports: Vec<Export> = Vec::new();
     let mut extractor = SymbolExtractor {
         package_name: String::new(),
@@ -209,7 +209,7 @@ pub fn try_get_module_export(
     module_id: ModuleID,
     module_file_name: &str,
     file: &SourceFile,
-) -> Option<Export> {
+) -> Option<Export> { ::tsox_core::fntrace::enter("try_get_module_export"); 
     let exported = ch.try_get_member_in_module_exports_and_properties(export_name, module_symbol)?;
     let merged = ch.get_merged_symbol(&ch.skip_alias(&exported));
     if merged.name == target.name && merged.declarations.len() == target.declarations.len() {
@@ -224,34 +224,34 @@ struct GetModuleResolverFs {
 }
 
 impl tsox_tsoptions::vfs::FS for GetModuleResolverFs {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.host.fs().use_case_sensitive_file_names()
     }
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.host.fs().file_exists(path)
     }
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.host.fs().read_file(path)
     }
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         self.host.fs().write_file(path, data)
     }
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         self.host.fs().append_file(path, data)
     }
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         self.host.fs().remove(path)
     }
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.host.fs().directory_exists(path)
     }
-    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.host.fs().get_accessible_entries(path)
     }
-    fn stat(&self, path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> {
+    fn stat(&self, path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         self.host.fs().stat(path)
     }
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         (self.realpath)(path)
     }
 }
@@ -262,10 +262,10 @@ struct GetModuleResolverHost {
 }
 
 impl tsox_tsoptions::module::ResolutionHost for GetModuleResolverHost {
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         &self.fs
     }
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }
@@ -274,7 +274,7 @@ pub fn get_module_resolver(
     host: Arc<dyn RegistryCloneHost>,
     realpath: impl Fn(&str) -> String + Send + Sync + 'static,
     opts: crate::ls::autoimport::ResolverOptions,
-) -> Arc<Resolver> {
+) -> Arc<Resolver> { ::tsox_core::fntrace::enter("get_module_resolver"); 
     let rh = GetModuleResolverHost {
         fs: GetModuleResolverFs {
             host: host.clone(),
@@ -297,7 +297,7 @@ pub fn new_resolver_with_options(
     typings_location: &str,
     project_name: &str,
     _opts: crate::ls::autoimport::ResolverOptions,
-) -> Arc<Resolver> {
+) -> Arc<Resolver> { ::tsox_core::fntrace::enter("new_resolver_with_options"); 
     Arc::new(Resolver::new(
         host,
         compiler_options,

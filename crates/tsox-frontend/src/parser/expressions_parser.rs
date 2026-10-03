@@ -3,7 +3,7 @@
 use crate::parser::expressions::*;
 
 impl Parser {
-    pub(crate) fn is_import_meta(&self) -> bool {
+    pub(crate) fn is_import_meta(&self) -> bool { ::tsox_core::fntrace::enter("is_import_meta"); 
         if self.token != SyntaxKind::ImportKeyword {
             return false;
         }
@@ -11,7 +11,7 @@ impl Parser {
         scanner.scan() == SyntaxKind::DotToken && !scanner.has_preceding_line_break()
     }
 
-    pub(crate) fn parse_import_meta(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_import_meta(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_meta"); 
         let pos = self.token_pos();
         self.next_token();
         self.next_token();
@@ -27,7 +27,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn is_async_function_expression(&self) -> bool {
+    pub(crate) fn is_async_function_expression(&self) -> bool { ::tsox_core::fntrace::enter("is_async_function_expression"); 
         if self.token != SyntaxKind::AsyncKeyword {
             return false;
         }
@@ -35,7 +35,7 @@ impl Parser {
         scanner.scan() == SyntaxKind::FunctionKeyword && !scanner.has_preceding_line_break()
     }
 
-    pub(crate) fn parse_async_function_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_async_function_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_async_function_expression"); 
         let async_modifier = self.create_token_node();
         self.next_token();
         let pos = async_modifier.pos();
@@ -70,7 +70,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_function_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_function_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_expression"); 
         let pos = self.token_pos();
         self.next_token();
         let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
@@ -106,7 +106,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_class_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_class_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_expression"); 
         let pos = self.token_pos();
         self.next_token();
 
@@ -136,7 +136,7 @@ impl Parser {
         ))
     }
 
-    pub fn parse_expression(&mut self) -> Arc<Node> {
+    pub fn parse_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_expression"); 
         let expr = self.parse_assignment_expression();
 
         if self.token == SyntaxKind::CommaToken {
@@ -171,7 +171,7 @@ impl Parser {
         expr
     }
 
-    pub(crate) fn parse_assignment_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_assignment_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_assignment_expression"); 
         if self.is_yield_expression() {
             return self.parse_yield_expression();
         }

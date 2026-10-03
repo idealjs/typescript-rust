@@ -13,27 +13,27 @@ use crate::checker::mig::m1d_2::get_base_type_node_of_class;
 use crate::checker::mig::w9a::new_type_mapper;
 
 impl Checker {
-    pub fn empty_string_type(&mut self) -> Arc<Type> {
+    pub fn empty_string_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("empty_string_type"); 
         self.get_string_literal_type("")
     }
 
-    pub fn zero_type(&mut self) -> Arc<Type> {
+    pub fn zero_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("zero_type"); 
         self.get_number_literal_type(Number::from(0))
     }
 
-    pub fn zero_big_int_type(&mut self) -> Arc<Type> {
+    pub fn zero_big_int_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("zero_big_int_type"); 
         self.get_big_int_literal_type(PseudoBigInt::new("0", false))
     }
 
-    pub fn empty_fresh_jsx_object_type(&mut self) -> Arc<Type> {
+    pub fn empty_fresh_jsx_object_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("empty_fresh_jsx_object_type"); 
         self.new_object_type(ObjectFlags::Anonymous, None)
     }
 
-    pub fn get_global_template_strings_array_type(&mut self) -> Arc<Type> {
+    pub fn get_global_template_strings_array_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_global_template_strings_array_type"); 
         self.get_global_type("TemplateStringsArray", 0, true)
     }
 
-    pub fn get_builtin_iterator_return_type(&mut self) -> Arc<Type> {
+    pub fn get_builtin_iterator_return_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_builtin_iterator_return_type"); 
         if self.strict_builtin_iterator_return {
             self.undefined_type()
         } else {
@@ -41,11 +41,11 @@ impl Checker {
         }
     }
 
-    pub fn is_nullable_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_nullable_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_nullable_type"); 
         self.has_type_facts(t, TypeFacts::IS_UNDEFINED_OR_NULL)
     }
 
-    pub fn is_possibly_discriminant_value(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_possibly_discriminant_value(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_possibly_discriminant_value"); 
         match node.kind {
             SyntaxKind::StringLiteral
             | SyntaxKind::NumericLiteral
@@ -77,7 +77,7 @@ impl Checker {
         this_parameter: Option<&Arc<Symbol>>,
         parameters: Vec<Arc<Symbol>>,
         return_type: Option<Arc<Type>>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("new_call_signature"); 
         let return_type = return_type.unwrap_or_else(|| self.unknown_type());
         self.new_signature(
             SignatureFlags::None,
@@ -91,12 +91,12 @@ impl Checker {
         )
     }
 
-    pub fn empty_type_literal_type(&mut self) -> Arc<Type> {
+    pub fn empty_type_literal_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("empty_type_literal_type"); 
         let symbol = self.new_symbol(SymbolFlags::TypeLiteral, "__type");
         self.new_anonymous_type(&symbol, SymbolTable::default(), vec![], vec![], vec![])
     }
 
-    pub fn get_single_base_for_non_augmenting_subtype(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_single_base_for_non_augmenting_subtype(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_single_base_for_non_augmenting_subtype"); 
         let target = t.target().cloned()?;
         if !t.object_flags.intersects(ObjectFlags::Reference)
             || !target.object_flags.intersects(ObjectFlags::CLASS_OR_INTERFACE)
@@ -148,7 +148,7 @@ impl Checker {
         method_name: &str,
         error_node: Option<&Arc<Node>>,
         diagnostic_output: &mut Vec<Diagnostic>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_method"); 
         let method = self.get_property_of_type(t, method_name);
         if method.is_none() && method_name != "next" {
             return IterationTypes::default();
@@ -251,7 +251,7 @@ impl Checker {
     pub fn get_iteration_types_of_iterator_result_r20k3(
         &mut self,
         t: &Arc<Type>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_iterator_result_r20k3"); 
         if is_type_any(t) {
             return IterationTypes {
                 yield_type: Some(self.any_type()),
@@ -262,7 +262,7 @@ impl Checker {
         IterationTypes::default()
     }
 
-    pub fn combine_iteration_types_r20k3(&mut self, parts: Vec<IterationTypes>) -> IterationTypes {
+    pub fn combine_iteration_types_r20k3(&mut self, parts: Vec<IterationTypes>) -> IterationTypes { ::tsox_core::fntrace::enter("combine_iteration_types_r20k3"); 
         let union_of = |parts: &[IterationTypes],
                         pick: &dyn Fn(&IterationTypes) -> Option<&Arc<Type>>|
          -> Option<Vec<Arc<Type>>> {

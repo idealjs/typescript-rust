@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn parse_module_resolution(s: &str) -> ModuleResolutionKind {
+pub(crate) fn parse_module_resolution(s: &str) -> ModuleResolutionKind { ::tsox_core::fntrace::enter("parse_module_resolution"); 
     match s.to_lowercase().as_str() {
         "classic" => ModuleResolutionKind::Classic,
         "node" | "node10" => ModuleResolutionKind::Node10,
@@ -13,7 +13,7 @@ pub(crate) fn parse_module_resolution(s: &str) -> ModuleResolutionKind {
     }
 }
 
-pub(crate) fn parse_jsx_emit(s: &str) -> JsxEmit {
+pub(crate) fn parse_jsx_emit(s: &str) -> JsxEmit { ::tsox_core::fntrace::enter("parse_jsx_emit"); 
     match s.to_lowercase().as_str() {
         "preserve" => JsxEmit::Preserve,
         "react" => JsxEmit::React,
@@ -24,7 +24,7 @@ pub(crate) fn parse_jsx_emit(s: &str) -> JsxEmit {
     }
 }
 
-pub fn script_target_name(t: ScriptTarget) -> Option<&'static str> {
+pub fn script_target_name(t: ScriptTarget) -> Option<&'static str> { ::tsox_core::fntrace::enter("script_target_name"); 
     match t {
         ScriptTarget::ES5 => Some("es5"),
         ScriptTarget::ES2015 => Some("es2015"),
@@ -44,7 +44,7 @@ pub fn script_target_name(t: ScriptTarget) -> Option<&'static str> {
     }
 }
 
-pub fn module_kind_name(m: ModuleKind) -> Option<&'static str> {
+pub fn module_kind_name(m: ModuleKind) -> Option<&'static str> { ::tsox_core::fntrace::enter("module_kind_name"); 
     match m {
         ModuleKind::CommonJS => Some("commonjs"),
         ModuleKind::AMD => Some("amd"),
@@ -63,7 +63,7 @@ pub fn module_kind_name(m: ModuleKind) -> Option<&'static str> {
     }
 }
 
-pub fn module_resolution_name(r: ModuleResolutionKind) -> Option<&'static str> {
+pub fn module_resolution_name(r: ModuleResolutionKind) -> Option<&'static str> { ::tsox_core::fntrace::enter("module_resolution_name"); 
     match r {
         ModuleResolutionKind::Classic => Some("classic"),
         ModuleResolutionKind::Node10 => Some("node10"),
@@ -74,7 +74,7 @@ pub fn module_resolution_name(r: ModuleResolutionKind) -> Option<&'static str> {
     }
 }
 
-pub fn jsx_emit_name(j: JsxEmit) -> Option<&'static str> {
+pub fn jsx_emit_name(j: JsxEmit) -> Option<&'static str> { ::tsox_core::fntrace::enter("jsx_emit_name"); 
     match j {
         JsxEmit::Preserve => Some("preserve"),
         JsxEmit::React => Some("react"),
@@ -85,7 +85,7 @@ pub fn jsx_emit_name(j: JsxEmit) -> Option<&'static str> {
     }
 }
 
-pub fn module_detection_name(d: ModuleDetectionKind) -> Option<&'static str> {
+pub fn module_detection_name(d: ModuleDetectionKind) -> Option<&'static str> { ::tsox_core::fntrace::enter("module_detection_name"); 
     match d {
         ModuleDetectionKind::Auto => Some("auto"),
         ModuleDetectionKind::Force => Some("force"),
@@ -94,7 +94,7 @@ pub fn module_detection_name(d: ModuleDetectionKind) -> Option<&'static str> {
     }
 }
 
-pub fn new_line_name(n: NewLineKind) -> Option<&'static str> {
+pub fn new_line_name(n: NewLineKind) -> Option<&'static str> { ::tsox_core::fntrace::enter("new_line_name"); 
     match n {
         NewLineKind::CRLF => Some("crlf"),
         NewLineKind::LF => Some("lf"),
@@ -107,7 +107,7 @@ pub fn get_parsed_command_line_of_config_file(
     base_options: &CompilerOptions,
     current_dir: &str,
     fs: &dyn FS,
-) -> ParsedCommandLine {
+) -> ParsedCommandLine { ::tsox_core::fntrace::enter("get_parsed_command_line_of_config_file"); 
     let mut cache = ExtendedConfigCache::new();
     get_parsed_command_line_of_config_file_with_stack(
         config_file_name,

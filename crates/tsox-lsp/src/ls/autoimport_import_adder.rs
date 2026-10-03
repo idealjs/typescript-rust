@@ -39,7 +39,7 @@ pub struct ImportsCollection {
     pub use_require: bool,
 }
 
-pub fn new_imports_key(module_specifier: &str, top_level_type_only: bool) -> String {
+pub fn new_imports_key(module_specifier: &str, top_level_type_only: bool) -> String { ::tsox_core::fntrace::enter("new_imports_key"); 
     if top_level_type_only {
         format!("1|{}", module_specifier)
     } else {
@@ -68,7 +68,7 @@ impl ImportAdder {
         format_options: FormatCodeSettings,
         _converters: (),
         preferences: UserPreferences,
-    ) -> ImportAdder {
+    ) -> ImportAdder { ::tsox_core::fntrace::enter("new"); 
         ImportAdder {
             checker: Some(checker),
             view: Some(view),
@@ -81,7 +81,7 @@ impl ImportAdder {
         }
     }
 
-    pub fn has_fixes(&self) -> bool {
+    pub fn has_fixes(&self) -> bool { ::tsox_core::fntrace::enter("has_fixes"); 
         !self.add_to_namespace.is_empty()
             || !self.import_type.is_empty()
             || !self.add_to_existing.is_empty()
@@ -90,7 +90,7 @@ impl ImportAdder {
 }
 
 impl ImportAdderTrait for ImportAdder {
-    fn has_fixes(&self) -> bool {
+    fn has_fixes(&self) -> bool { ::tsox_core::fntrace::enter("has_fixes"); 
         ImportAdder::has_fixes(self)
     }
 
@@ -98,24 +98,24 @@ impl ImportAdderTrait for ImportAdder {
         &mut self,
         _symbol: &Symbol,
         _is_valid_type_only_use_site: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_import_from_exported_symbol"); 
         todo!("add_import_from_exported_symbol requires checker and export resolution")
     }
 
-    fn add_import_fix(&mut self, _fix: &Fix) {
+    fn add_import_fix(&mut self, _fix: &Fix) { ::tsox_core::fntrace::enter("add_import_fix"); 
         todo!("add_import_fix requires change.Tracker infrastructure")
     }
 
-    fn edits(&mut self) -> Vec<TextEdit> {
+    fn edits(&mut self) -> Vec<TextEdit> { ::tsox_core::fntrace::enter("edits"); 
         todo!("edits requires change.Tracker infrastructure")
     }
 }
 
-pub fn reduce_add_as_type_only_values(prev: AddAsTypeOnly, new: AddAsTypeOnly) -> AddAsTypeOnly {
+pub fn reduce_add_as_type_only_values(prev: AddAsTypeOnly, new: AddAsTypeOnly) -> AddAsTypeOnly { ::tsox_core::fntrace::enter("reduce_add_as_type_only_values"); 
     if new > prev { new } else { prev }
 }
 
-pub fn get_name_for_exported_symbol(_symbol: &Symbol, _prefer_capitalized: bool) -> String {
+pub fn get_name_for_exported_symbol(_symbol: &Symbol, _prefer_capitalized: bool) -> String { ::tsox_core::fntrace::enter("get_name_for_exported_symbol"); 
     todo!("get_name_for_exported_symbol requires getDefaultLikeExportNameFromDeclaration")
 }
 
@@ -124,6 +124,6 @@ pub fn type_to_auto_importable_type_node(
     _import_adder: Option<&mut dyn ImportAdderTrait>,
     _t: &tsox_checker::checker::Type,
     _context_node: &Node,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_to_auto_importable_type_node"); 
     todo!("type_to_auto_importable_type_node requires checker.TypeToTypeNode")
 }

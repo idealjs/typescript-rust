@@ -11,7 +11,7 @@ impl Checker {
         &mut self,
         containing_type: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_property_of_union_or_intersection_type"); 
         let prop = self.get_union_or_intersection_property(containing_type, name)?;
         if prop
             .check_flags
@@ -28,7 +28,7 @@ impl Checker {
         &mut self,
         containing_type: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_union_or_intersection_property"); 
         // Go 在联合/交叉型实例上挂 propertyCache（checker.go:21749-21758），
         // 合成符号单次创建指针稳定，供 == 比较复用；Rust 侧按 (type id, name)
         // 缓存持有 Arc 等价保活
@@ -46,7 +46,7 @@ impl Checker {
         &mut self,
         containing_type: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("compute_union_or_intersection_property"); 
         let types: Vec<Arc<Type>> = containing_type.types()?.to_vec();
         let is_union = containing_type.is_union();
 
@@ -297,7 +297,7 @@ impl Checker {
         Some(symbol)
     }
 
-    fn is_go_literal_type(&self, t: &Arc<Type>) -> bool {
+    fn is_go_literal_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_go_literal_type"); 
         if t.flags.contains(TypeFlags::Boolean) {
             return true;
         }
@@ -315,7 +315,7 @@ impl Checker {
         crate::checker::is_unit_type(t)
     }
 
-    pub(crate) fn is_pattern_literal_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_pattern_literal_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_pattern_literal_type"); 
         if let TypeData::TemplateLiteral(data) = &t.data {
             return data.types.iter().all(|p| self.is_pattern_literal_placeholder_type(p));
         }
@@ -328,7 +328,7 @@ impl Checker {
         false
     }
 
-    fn is_pattern_literal_placeholder_type(&self, t: &Arc<Type>) -> bool {
+    fn is_pattern_literal_placeholder_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_pattern_literal_placeholder_type"); 
         if t.flags.contains(TypeFlags::Intersection) {
             let mut seen_placeholder = false;
             for s in t.types().into_iter().flatten() {
@@ -350,7 +350,7 @@ impl Checker {
     fn parent_symbol_of_declaration_chain(
         &self,
         prop: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("parent_symbol_of_declaration_chain"); 
         let decl = prop.value_declaration.as_ref().or(prop.declarations.first())?;
         let parent_node = decl.parent()?;
         self.program
@@ -361,7 +361,7 @@ impl Checker {
 
     /// Go createUnionOrIntersectionProperty 缺火成分准入：属性命中、适用
     /// 索引签名、或无 spread 的对象字面量（补 undefined）
-    pub(crate) fn constituent_admits_property(&mut self, ct: &Arc<Type>, name: &str) -> bool {
+    pub(crate) fn constituent_admits_property(&mut self, ct: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("constituent_admits_property"); 
         let apparent = self.get_apparent_type(ct);
         if self.get_property_of_type(&apparent, name).is_some() {
             return true;
@@ -376,7 +376,7 @@ impl Checker {
             && !apparent.object_flags.contains(ObjectFlags::ContainsSpread)
     }
 
-    fn tuple_rest_or_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn tuple_rest_or_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("tuple_rest_or_undefined"); 
         if let TypeData::Tuple(tuple) = &t.data
             && let Some(info) = tuple.element_infos.get(tuple.fixed_length)
             && let Some(ty) = &info.type_
@@ -386,7 +386,7 @@ impl Checker {
         self.undefined_type()
     }
 
-    pub fn is_error_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_error_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_error_type"); 
         t.intrinsic_name() == Some("error")
     }
 }

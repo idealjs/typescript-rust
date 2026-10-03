@@ -1,7 +1,7 @@
 use crate::collections::ordered_map::*;
 
 #[test]
-fn insertion_order() {
+fn insertion_order() { crate::fntrace::enter("insertion_order"); 
     let mut m = OrderedMap::new();
     m.insert("b", 2);
     m.insert("a", 1);
@@ -11,7 +11,7 @@ fn insertion_order() {
 }
 
 #[test]
-fn update_preserves_order() {
+fn update_preserves_order() { crate::fntrace::enter("update_preserves_order"); 
     let mut m = OrderedMap::new();
     m.insert("a", 1);
     m.insert("b", 2);
@@ -22,7 +22,7 @@ fn update_preserves_order() {
 }
 
 #[test]
-fn remove_preserves_order() {
+fn remove_preserves_order() { crate::fntrace::enter("remove_preserves_order"); 
     let mut m = OrderedMap::new();
     m.insert("a", 1);
     m.insert("b", 2);
@@ -33,7 +33,7 @@ fn remove_preserves_order() {
 }
 
 #[test]
-fn diff() {
+fn diff() { crate::fntrace::enter("diff"); 
     let mut m1 = OrderedMap::new();
     m1.insert("a", 1);
     m1.insert("b", 2);
@@ -59,12 +59,12 @@ fn diff() {
     assert_eq!(modified, vec![("b".to_string(), 2, 20)]);
 }
 
-fn pad_int(n: i32) -> String {
+fn pad_int(n: i32) -> String { crate::fntrace::enter("pad_int"); 
     format!("{:>10}", n)
 }
 
 #[test]
-fn test_ordered_map() {
+fn test_ordered_map() { crate::fntrace::enter("test_ordered_map"); 
     let mut m: OrderedMap<i32, String> = OrderedMap::new();
 
     assert!(!m.has(&1));
@@ -135,7 +135,7 @@ fn test_ordered_map() {
 }
 
 #[test]
-fn test_ordered_map_clone() {
+fn test_ordered_map_clone() { crate::fntrace::enter("test_ordered_map_clone"); 
     let mut m: OrderedMap<i32, String> = OrderedMap::new();
     m.set(1, "one".to_string());
     m.set(2, "two".to_string());
@@ -163,7 +163,7 @@ fn test_ordered_map_clone() {
 }
 
 #[test]
-fn test_ordered_map_clear() {
+fn test_ordered_map_clear() { crate::fntrace::enter("test_ordered_map_clear"); 
     let mut m: OrderedMap<i32, String> = OrderedMap::new();
     m.set(1, "one".to_string());
     m.set(2, "two".to_string());
@@ -174,7 +174,7 @@ fn test_ordered_map_clear() {
 }
 
 #[test]
-fn test_ordered_map_with_size_hint() {
+fn test_ordered_map_with_size_hint() { crate::fntrace::enter("test_ordered_map_with_size_hint"); 
     const N: usize = 1024;
     let mut m = OrderedMap::with_capacity(N);
     for i in 0..N {
@@ -192,7 +192,7 @@ fn test_ordered_map_with_size_hint() {
 }
 
 #[test]
-fn test_ordered_map_unmarshal_json() {
+fn test_ordered_map_unmarshal_json() { crate::fntrace::enter("test_ordered_map_unmarshal_json"); 
     let m: OrderedMap<String, serde_json::Value> =
         serde_json::from_str(r#"{"a": 1, "b": "two", "c": { "d": 4 } }"#).unwrap();
     assert_eq!(m.len(), 3);

@@ -42,7 +42,7 @@ pub static VIRTUAL_CODE_PRODUCED_BY_THE_CONTENT_MAPPER_0_HAS_PROBLEMS_WITH_NO_CO
 pub fn aggregate_synthesized_diagnostics(
     file: &Arc<SourceFile>,
     diags: Vec<&ast::Diagnostic>,
-) -> ast::Diagnostic {
+) -> ast::Diagnostic { ::tsox_core::fntrace::enter("aggregate_synthesized_diagnostics"); 
     let mut aggregate = ast::Diagnostic::new(
         Some(file.clone()),
         TextRange::new(0, 0),
@@ -57,7 +57,7 @@ pub fn aggregate_synthesized_diagnostics(
     aggregate
 }
 
-pub fn is_synthesized_content_mapped_diagnostic(diag: &ast::Diagnostic) -> bool {
+pub fn is_synthesized_content_mapped_diagnostic(diag: &ast::Diagnostic) -> bool { ::tsox_core::fntrace::enter("is_synthesized_content_mapped_diagnostic"); 
     let Some(file) = diag.file.clone() else {
         return false;
     };
@@ -70,7 +70,7 @@ pub fn is_synthesized_content_mapped_diagnostic(diag: &ast::Diagnostic) -> bool 
     }
 }
 
-pub fn worst_category(diags: &[ast::Diagnostic]) -> diagnostics::Category {
+pub fn worst_category(diags: &[ast::Diagnostic]) -> diagnostics::Category { ::tsox_core::fntrace::enter("worst_category"); 
     let mut worst = diags[0].category;
     for diag in diags {
         match diag.category {
@@ -96,7 +96,7 @@ pub struct VSClassifiedTextRun {
 }
 
 impl DisplayPartsWriter {
-    pub fn new(vs_capability: bool) -> Self {
+    pub fn new(vs_capability: bool) -> Self { ::tsox_core::fntrace::enter("new"); 
         DisplayPartsWriter {
             builder: String::new(),
             runs: Vec::new(),
@@ -105,7 +105,7 @@ impl DisplayPartsWriter {
         }
     }
 
-    fn add_run(&mut self, classification: &str, text: &str) {
+    fn add_run(&mut self, classification: &str, text: &str) { ::tsox_core::fntrace::enter("add_run"); 
         if text.is_empty() {
             return;
         }
@@ -119,53 +119,53 @@ impl DisplayPartsWriter {
         self.builder.push_str(text);
     }
 
-    pub fn get_runs(&self) -> &[VSClassifiedTextRun] {
+    pub fn get_runs(&self) -> &[VSClassifiedTextRun] { ::tsox_core::fntrace::enter("get_runs"); 
         &self.runs
     }
 
-    pub fn decrease_indent(&self) {}
+    pub fn decrease_indent(&self) { ::tsox_core::fntrace::enter("decrease_indent"); }
 
-    pub fn get_column(&self) -> u32 {
+    pub fn get_column(&self) -> u32 { ::tsox_core::fntrace::enter("get_column"); 
         0
     }
 
-    pub fn get_indent(&self) -> usize {
+    pub fn get_indent(&self) -> usize { ::tsox_core::fntrace::enter("get_indent"); 
         0
     }
 
-    pub fn get_line(&self) -> usize {
+    pub fn get_line(&self) -> usize { ::tsox_core::fntrace::enter("get_line"); 
         0
     }
 
-    pub fn get_text_pos(&self) -> usize {
+    pub fn get_text_pos(&self) -> usize { ::tsox_core::fntrace::enter("get_text_pos"); 
         self.builder.len()
     }
 
-    pub fn has_trailing_comment(&self) -> bool {
+    pub fn has_trailing_comment(&self) -> bool { ::tsox_core::fntrace::enter("has_trailing_comment"); 
         false
     }
 
-    pub fn increase_indent(&self) {}
+    pub fn increase_indent(&self) { ::tsox_core::fntrace::enter("increase_indent"); }
 
-    pub fn is_at_start_of_line(&self) -> bool {
+    pub fn is_at_start_of_line(&self) -> bool { ::tsox_core::fntrace::enter("is_at_start_of_line"); 
         false
     }
 
-    pub fn raw_write(&mut self, s: &str) {
+    pub fn raw_write(&mut self, s: &str) { ::tsox_core::fntrace::enter("raw_write"); 
         self.add_run("text", s);
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String { ::tsox_core::fntrace::enter("to_string"); 
         self.builder.clone()
     }
 }
 
-pub fn lsp_range_contains(outer: &Range, inner: &Range) -> bool {
+pub fn lsp_range_contains(outer: &Range, inner: &Range) -> bool { ::tsox_core::fntrace::enter("lsp_range_contains"); 
     lsproto_util::compare_positions(&outer.start, &inner.start) != std::cmp::Ordering::Greater
         && lsproto_util::compare_positions(&inner.end, &outer.end) != std::cmp::Ordering::Greater
 }
 
-pub fn create_locations_from_links(links: &[LocationLink]) -> DefinitionResponse {
+pub fn create_locations_from_links(links: &[LocationLink]) -> DefinitionResponse { ::tsox_core::fntrace::enter("create_locations_from_links"); 
     let locations = links
         .iter()
         .map(|link| Location {
@@ -185,7 +185,7 @@ pub struct FileRange {
 }
 
 impl PartialEq for FileRange {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         Arc::ptr_eq(&self.file, &other.file)
             && self.range == other.range
     }
@@ -199,7 +199,7 @@ impl LanguageService {
         declarations: Vec<Arc<Node>>,
         reference: Option<&RefInfo>,
         feature: SpanFeature,
-    ) -> DefinitionResponse {
+    ) -> DefinitionResponse { ::tsox_core::fntrace::enter("create_definition_locations"); 
         let mut locations: Vec<LocationLink> = Vec::new();
         let mut location_ranges: HashSet<FileRangeKey> = HashSet::new();
 
@@ -294,11 +294,11 @@ pub enum SpanFidelity {
 }
 
 impl SpanFidelity {
-    pub fn is_none(self) -> bool {
+    pub fn is_none(self) -> bool { ::tsox_core::fntrace::enter("is_none"); 
         self == SpanFidelity::None_
     }
 
-    pub fn is_single_segment(self) -> bool {
+    pub fn is_single_segment(self) -> bool { ::tsox_core::fntrace::enter("is_single_segment"); 
         self == SpanFidelity::Exact || self == SpanFidelity::SingleSegment
     }
 }
@@ -310,13 +310,13 @@ pub struct FileRangeKey {
 }
 
 impl PartialEq for FileRangeKey {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         Arc::ptr_eq(&self.file, &other.file) && self.range == other.range
     }
 }
 impl Eq for FileRangeKey {}
 impl std::hash::Hash for FileRangeKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { ::tsox_core::fntrace::enter("hash"); 
         (Arc::as_ptr(&self.file) as usize).hash(state);
         self.range.hash(state);
     }
@@ -329,7 +329,7 @@ impl LanguageService {
         file: &Arc<SourceFile>,
         text_pos: u32,
         client_supports_link: bool,
-    ) -> DefinitionResponse {
+    ) -> DefinitionResponse { ::tsox_core::fntrace::enter("provide_definition_at_position"); 
         let pos = text_pos as usize;
         let Some(node) = astnav::get_touching_property_name(&file.node, pos) else {
             return DefinitionResponse::default();
@@ -481,7 +481,7 @@ impl LanguageService {
         file: &Arc<SourceFile>,
         text_pos: u32,
         client_supports_link: bool,
-    ) -> DefinitionResponse {
+    ) -> DefinitionResponse { ::tsox_core::fntrace::enter("provide_type_definition_at_position"); 
         let pos = text_pos as usize;
         let Some(mut node) = astnav::get_touching_property_name(&file.node, pos) else {
             return DefinitionResponse::default();
@@ -532,7 +532,7 @@ impl LanguageService {
         file: &Arc<SourceFile>,
         text_range: TextRange,
         feature: SpanFeature,
-    ) -> DefinitionResponse {
+    ) -> DefinitionResponse { ::tsox_core::fntrace::enter("create_location_from_file_and_range"); 
         let (mut mapped_location, fidelity) =
             self.source_file_range_to_lsp_location_for_feature(file, text_range, feature);
         if fidelity.is_none() {
@@ -545,7 +545,7 @@ impl LanguageService {
     }
 }
 
-fn declaration_name_of_node(node: &Node) -> Option<Arc<Node>> {
+fn declaration_name_of_node(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaration_name_of_node"); 
     let name = match &node.data {
         ast::NodeData::VariableDeclaration(d) => Some(&d.name),
         ast::NodeData::ParameterDeclaration(d) => Some(&d.name),
@@ -577,7 +577,7 @@ fn declaration_name_of_node(node: &Node) -> Option<Arc<Node>> {
     Some(Arc::clone(name))
 }
 
-pub fn get_declaration_name_for_keyword(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_declaration_name_for_keyword(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_declaration_name_for_keyword"); 
     let kind = node.kind;
     if tsox_frontend::ast::node_data_generated::is_keyword_kind(kind) {
         if let Some(parent) = node.parent() {
@@ -602,7 +602,7 @@ pub fn get_declaration_name_for_keyword(node: &Arc<Node>) -> Arc<Node> {
 pub fn get_declarations_from_object_literal_element(
     c: &mut Checker,
     node: &Arc<Node>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_declarations_from_object_literal_element"); 
     let element = match crate::ls::mig::m5x_4::get_containing_object_literal_element_worker(node)
     {
         Some(element) => element,
@@ -659,7 +659,7 @@ pub fn get_declarations_from_object_literal_element(
     result
 }
 
-pub fn get_ancestor_call_like_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_ancestor_call_like_expression(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_ancestor_call_like_expression"); 
     let mut target = node.clone();
     loop {
         if !ast::mig::m3g_2::is_right_side_of_property_access(&target) {
@@ -677,7 +677,7 @@ pub fn get_ancestor_call_like_expression(node: &Arc<Node>) -> Option<Arc<Node>> 
     }
 }
 
-pub fn try_get_signature_declaration(type_checker: &mut Checker, node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn try_get_signature_declaration(type_checker: &mut Checker, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_signature_declaration"); 
     let call_like = get_ancestor_call_like_expression(node);
     let signature = call_like.and_then(|cl| type_checker.get_resolved_signature(&cl));
     if let Some(declaration) = signature.and_then(|sig| sig.declaration.clone()) {
@@ -688,14 +688,14 @@ pub fn try_get_signature_declaration(type_checker: &mut Checker, node: &Arc<Node
     None
 }
 
-pub fn is_jsx_constructor_like(node: &Arc<Node>) -> bool {
+pub fn is_jsx_constructor_like(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_constructor_like"); 
     ast::is_constructor_declaration(node)
         || ast::is_constructor_type_node(node)
         || ast::is_call_signature_declaration(node)
         || ast::is_construct_signature_declaration(node)
 }
 
-pub fn symbol_matches_signature(symbol: &Arc<Symbol>, called_declaration: &Arc<Node>) -> bool {
+pub fn symbol_matches_signature(symbol: &Arc<Symbol>, called_declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("symbol_matches_signature"); 
     let called_symbol =
         tsox_checker::checker::mig::m1a::r19k2_defs::symbol_of_node(called_declaration);
     if called_symbol
@@ -722,7 +722,7 @@ pub fn symbol_matches_signature(symbol: &Arc<Symbol>, called_declaration: &Arc<N
 pub fn get_symbol_for_overridden_member(
     type_checker: &mut Checker,
     node: &Arc<Node>,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_for_overridden_member"); 
     let class_element = ast::find_ancestor(node, ast::is_class_element)?;
     class_element.name()?;
     let base_declaration = ast::find_ancestor(&class_element, ast::is_class_like)?;
@@ -751,7 +751,7 @@ pub fn get_type_of_symbol_at_location(
     c: &mut Checker,
     symbol: &Arc<Symbol>,
     node: &Arc<Node>,
-) -> Arc<tsox_checker::checker::types::Type> {
+) -> Arc<tsox_checker::checker::types::Type> { ::tsox_core::fntrace::enter("get_type_of_symbol_at_location"); 
     let t = c.get_type_of_symbol_at_location(symbol, node);
     let t_symbol_same = t.symbol().is_some_and(|ts| Arc::ptr_eq(ts, symbol));
     let initializer_matches = t
@@ -777,7 +777,7 @@ pub fn get_type_of_symbol_at_location(
 
 pub fn get_declarations_from_type(
     t: &Arc<tsox_checker::checker::types::Type>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_declarations_from_type"); 
     let mut result: Vec<Arc<Node>> = Vec::new();
     for ty in t.distributed() {
         if let Some(symbol) = ty.symbol() {
@@ -791,7 +791,7 @@ pub fn get_declarations_from_type(
     result
 }
 
-fn is_property_name(node: &Node) -> bool {
+fn is_property_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_property_name"); 
     matches!(
         node.kind,
         SyntaxKind::Identifier
@@ -802,7 +802,7 @@ fn is_property_name(node: &Node) -> bool {
     )
 }
 
-pub fn get_declarations_from_location(c: &mut Checker, node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn get_declarations_from_location(c: &mut Checker, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_declarations_from_location"); 
     if let Some(parent) = node.parent() {
         if ast::is_identifier(node) && ast::is_shorthand_property_assignment(&parent) {
             let shorthand_symbol = c.get_resolved_symbol(node);

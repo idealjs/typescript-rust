@@ -8,7 +8,7 @@ impl Checker {
     /// members（类型参数）命中且解析链从 static 成员直接进入类时报 TS2302。
     /// 此处在静态成员检查期对其子树内全部类型引用统一判定，等价于解析期
     /// 逐引用命中（值位类型参数引用不存在，类型位全覆盖）
-    pub(crate) fn check_static_member_class_type_params(&mut self, member: &Arc<Node>) {
+    pub(crate) fn check_static_member_class_type_params(&mut self, member: &Arc<Node>) { ::tsox_core::fntrace::enter("check_static_member_class_type_params"); 
         if !matches!(
             member.kind,
             SyntaxKind::PropertyDeclaration
@@ -42,7 +42,7 @@ impl Checker {
 
     /// Go getSymbolFlags：沿别名链逐级 OR 标志；链断（目标未解析）时
     /// 保留已收集部分
-    pub(crate) fn symbol_flags_with_alias_chain(&mut self, symbol: &Arc<Symbol>) -> SymbolFlags {
+    pub(crate) fn symbol_flags_with_alias_chain(&mut self, symbol: &Arc<Symbol>) -> SymbolFlags { ::tsox_core::fntrace::enter("symbol_flags_with_alias_chain"); 
         self.symbol_flags_with_alias_chain_ex(symbol).0
     }
 
@@ -51,7 +51,7 @@ impl Checker {
     pub(crate) fn symbol_flags_with_alias_chain_ex(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> (SymbolFlags, bool) {
+    ) -> (SymbolFlags, bool) { ::tsox_core::fntrace::enter("symbol_flags_with_alias_chain_ex"); 
         let mut flags = symbol.flags;
         let mut cur = Arc::clone(symbol);
         let mut guard = 0;
@@ -74,7 +74,7 @@ impl Checker {
     /// Go resolveName 上溯链的静态成员违规判定：从类型名向上，中途任何
     /// 容器 locals 命中同名（如方法自有类型参数）即无违规；类/接口 members
     /// 命中时按进入类的那一跳是否为 static 成员定夺；未命中继续上溯
-    fn class_type_param_reached_from_static(&self, id: &Arc<Node>) -> bool {
+    fn class_type_param_reached_from_static(&self, id: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_type_param_reached_from_static"); 
         let name = id.text();
         let symbol_map = self.program.symbol_map();
         let mut last: Option<Arc<Node>> = None;
@@ -105,7 +105,7 @@ impl Checker {
     }
 }
 
-fn collect_type_reference_names(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) {
+fn collect_type_reference_names(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("collect_type_reference_names"); 
     if node.kind == SyntaxKind::TypeReference
         && let NodeData::TypeReferenceNode(data) = &node.data
         && data.type_name.kind == SyntaxKind::Identifier

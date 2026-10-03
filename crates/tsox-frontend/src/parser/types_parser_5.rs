@@ -3,7 +3,7 @@
 use crate::parser::types::*;
 
 impl Parser {
-    pub(crate) fn parse_postfix_type_or_higher(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_postfix_type_or_higher(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_postfix_type_or_higher"); 
         let pos = self.token_pos();
         let mut type_node = self.parse_non_array_type();
         while !self.has_preceding_line_break() {
@@ -52,7 +52,7 @@ impl Parser {
         type_node
     }
 
-    pub(crate) fn parse_jsdoc_nullable_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_nullable_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_nullable_type"); 
         let pos = self.token_pos();
         self.next_token();
         let type_node = self.parse_type_operator_or_higher();

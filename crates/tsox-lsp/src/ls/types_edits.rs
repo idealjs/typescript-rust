@@ -128,13 +128,13 @@ pub struct CommentRange {
 }
 
 impl CommentRange {
-    pub fn pos(&self) -> usize {
+    pub fn pos(&self) -> usize { ::tsox_core::fntrace::enter("pos"); 
         self.pos as usize
     }
-    pub fn end(&self) -> usize {
+    pub fn end(&self) -> usize { ::tsox_core::fntrace::enter("end"); 
         self.end as usize
     }
-    pub fn contains_exclusive(&self, pos: usize) -> bool {
+    pub fn contains_exclusive(&self, pos: usize) -> bool { ::tsox_core::fntrace::enter("contains_exclusive"); 
         (pos as i32) > self.pos && (pos as i32) < self.end
     }
 }

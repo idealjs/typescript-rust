@@ -10,7 +10,7 @@ impl Checker {
         name: &str,
         meaning: SymbolFlags,
         type_meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("ancestry_legacy_lookup"); 
 
                                 if !a_sym.flags.intersects(SymbolFlags::Class) {
                                     if let Some(sym) = a_sym.members.get(name) {

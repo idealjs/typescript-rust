@@ -23,7 +23,7 @@ impl Scanner {
     pub(crate) fn scan_template_and_set_token_value(
         &mut self,
         should_emit_invalid_escape_error: bool,
-    ) -> SyntaxKind {
+    ) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_template_and_set_token_value"); 
         let started_with_backtick = self.char() == Some('`');
         self.pos += 1;
         let mut start = self.pos;
@@ -89,7 +89,7 @@ impl Scanner {
     }
 }
 
-pub fn identifier_to_keyword_kind(node: &Arc<Node>) -> SyntaxKind {
+pub fn identifier_to_keyword_kind(node: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("identifier_to_keyword_kind"); 
     string_to_keyword(&node.text()).unwrap_or(SyntaxKind::Identifier)
 }
 
@@ -97,11 +97,11 @@ pub fn get_source_text_of_node_from_source_file(
     source_file: &SourceFile,
     node: &Arc<Node>,
     include_trivia: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_source_text_of_node_from_source_file"); 
     get_text_of_node_from_source_text(&source_file.text, node, include_trivia)
 }
 
-pub(crate) fn is_jsdoc_type_expression_or_child(node: &Arc<Node>) -> bool {
+pub(crate) fn is_jsdoc_type_expression_or_child(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_type_expression_or_child"); 
     if is_jsdoc_type_expression(node) {
         return true;
     }
@@ -118,7 +118,7 @@ pub(crate) fn is_jsdoc_type_expression_or_child(node: &Arc<Node>) -> bool {
     false
 }
 
-pub fn normalize_jsdoc_type_source_text(text: &str) -> String {
+pub fn normalize_jsdoc_type_source_text(text: &str) -> String { ::tsox_core::fntrace::enter("normalize_jsdoc_type_source_text"); 
     let line_starts = compute_ecma_line_starts(text);
     if line_starts.len() == 1 {
         return strip_leading_jsdoc_comment(text);
@@ -141,7 +141,7 @@ pub fn normalize_jsdoc_type_source_text(text: &str) -> String {
     result
 }
 
-pub(crate) fn strip_leading_jsdoc_comment(line: &str) -> String {
+pub(crate) fn strip_leading_jsdoc_comment(line: &str) -> String { ::tsox_core::fntrace::enter("strip_leading_jsdoc_comment"); 
     let line = line.trim_start_matches(|c| stringutil::is_white_space_like(c));
     let line = if !line.is_empty() && line.as_bytes()[0] == b'*' {
         &line[1..]
@@ -155,7 +155,7 @@ pub fn get_text_of_node_from_source_text(
     source_text: &str,
     node: &Arc<Node>,
     include_trivia: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_text_of_node_from_source_text"); 
     if node_is_missing(Some(node)) {
         return String::new();
     }
@@ -185,14 +185,14 @@ pub fn get_text_of_node_from_source_text(
     text
 }
 
-fn debug_fail_bad_syntax_kind(node: &Node, message: &str) -> ! {
+fn debug_fail_bad_syntax_kind(node: &Node, message: &str) -> ! { ::tsox_core::fntrace::enter("debug_fail_bad_syntax_kind"); 
     tsox_core::debug::fail(&format!(
         "{}\nNode {:?} was unexpected.",
         message, node.kind
     ))
 }
 
-pub fn get_text_of_node(node: &Arc<Node>) -> String {
+pub fn get_text_of_node(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_text_of_node"); 
     let source_file = get_source_file_of_node(node).expect("node has no source file");
     let NodeData::SourceFile(_) = &source_file.data else {
         tsox_core::debug::fail("node has no source file")
@@ -200,7 +200,7 @@ pub fn get_text_of_node(node: &Arc<Node>) -> String {
     get_text_of_node_from_source_text(node.text(), node, false)
 }
 
-pub fn get_text_of_jsdoc_comment(comment: Option<&NodeList>) -> String {
+pub fn get_text_of_jsdoc_comment(comment: Option<&NodeList>) -> String { ::tsox_core::fntrace::enter("get_text_of_jsdoc_comment"); 
     let Some(comment) = comment else {
         return String::new();
     };
@@ -217,7 +217,7 @@ pub fn get_text_of_jsdoc_comment(comment: Option<&NodeList>) -> String {
     b.trim_end().to_string()
 }
 
-pub fn declaration_name_to_string(name: Option<&Arc<Node>>) -> String {
+pub fn declaration_name_to_string(name: Option<&Arc<Node>>) -> String { ::tsox_core::fntrace::enter("declaration_name_to_string"); 
     match name {
         None => "(Missing)".to_string(),
         Some(name) if name.pos() == name.end() => "(Missing)".to_string(),
@@ -225,7 +225,7 @@ pub fn declaration_name_to_string(name: Option<&Arc<Node>>) -> String {
     }
 }
 
-pub fn is_identifier_text(name: &str, language_variant: LanguageVariant) -> bool {
+pub fn is_identifier_text(name: &str, language_variant: LanguageVariant) -> bool { ::tsox_core::fntrace::enter("is_identifier_text"); 
     let mut chars = name.chars();
     let Some(first) = chars.next() else {
         return false;
@@ -241,7 +241,7 @@ pub fn is_identifier_text(name: &str, language_variant: LanguageVariant) -> bool
     true
 }
 
-pub fn is_intrinsic_jsx_name(name: &str) -> bool {
+pub fn is_intrinsic_jsx_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_intrinsic_jsx_name"); 
     let b = name.as_bytes().first().copied().unwrap_or(0);
     !name.is_empty() && (b.is_ascii_lowercase() || name.contains('-'))
 }

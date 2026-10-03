@@ -10,14 +10,14 @@ impl Checker {
     /// 声明发射诊断（Go declaration emit 串行化检查）：
     /// 导出函数的返回型引用局部类（声明发射只能匿名化）时，
     /// 其 private/protected 成员报 TS4094
-    pub(crate) fn check_declaration_diagnostics(&mut self, statements: &[Arc<Node>]) {
+    pub(crate) fn check_declaration_diagnostics(&mut self, statements: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_declaration_diagnostics"); 
         if !self.compiler_options.declaration.is_true() {
             return;
         }
         self.check_declaration_diagnostics_in(statements);
     }
 
-    fn check_declaration_diagnostics_in(&mut self, statements: &[Arc<Node>]) {
+    fn check_declaration_diagnostics_in(&mut self, statements: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_declaration_diagnostics_in"); 
         for stmt in statements {
             match &stmt.data {
                 NodeData::FunctionDeclaration(_) => {
@@ -41,7 +41,7 @@ impl Checker {
         }
     }
 
-    fn check_exported_function_return(&mut self, decl: &Arc<Node>) {
+    fn check_exported_function_return(&mut self, decl: &Arc<Node>) { ::tsox_core::fntrace::enter("check_exported_function_return"); 
         let NodeData::FunctionDeclaration(d) = &decl.data else {
             return;
         };
@@ -102,7 +102,7 @@ impl Checker {
         }
     }
 
-    fn node_inside_function_body(node: &Arc<Node>) -> bool {
+    fn node_inside_function_body(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_inside_function_body"); 
         let mut cur = Some(Arc::clone(node));
         while let Some(n) = cur {
             match n.kind {

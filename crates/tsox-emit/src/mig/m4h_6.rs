@@ -18,7 +18,7 @@ use tsox_frontend::ast::mig::m3b::{member_list, members};
 use tsox_frontend::ast::utilities::get_heritage_clauses as heritage_clauses;
 
 impl EsDecoratorTransformer {
-    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_class_declaration"); 
         if is_decorated_class_like(node) {
             let f = self.transformer.factory();
             let mut ec = self.transformer.emit_context();
@@ -129,7 +129,7 @@ impl EsDecoratorTransformer {
         )
     }
 
-    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_class_expression"); 
         if is_decorated_class_like(node) {
             let iife = self.transform_class_like(node);
             self.transformer.emit_context().set_original(&iife, node);
@@ -161,7 +161,7 @@ impl EsDecoratorTransformer {
         )
     }
 
-    pub fn prepare_constructor(&mut self, ci: &mut ClassInfo) -> Vec<Arc<Node>> {
+    pub fn prepare_constructor(&mut self, ci: &mut ClassInfo) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("prepare_constructor"); 
         if ci.pending_instance_initializers.is_empty() {
             return Vec::new();
         }
@@ -182,7 +182,7 @@ impl EsDecoratorTransformer {
         super_path: &[usize],
         super_path_depth: usize,
         initializer_statements: &[Arc<Node>],
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_constructor_body_worker"); 
         let super_statement_index = super_path[super_path_depth];
         if super_statement_index > statement_offset {
             for s in &statements_in[statement_offset..super_statement_index] {
@@ -239,7 +239,7 @@ impl EsDecoratorTransformer {
         statements_out
     }
 
-    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_constructor_declaration"); 
         self.enter_class_element(node);
         let modifiers = self.modifier_visitor.visit_modifiers(node.modifiers());
         let (parameters_list, ctor_body) = match &node.data {
@@ -308,7 +308,7 @@ impl EsDecoratorTransformer {
     }
 }
 
-fn block_statements(block: &Arc<Node>) -> Vec<Arc<Node>> {
+fn block_statements(block: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("block_statements"); 
     match &block.data {
         NodeData::Block(d) => d.statements.nodes.clone(),
         _ => vec![],

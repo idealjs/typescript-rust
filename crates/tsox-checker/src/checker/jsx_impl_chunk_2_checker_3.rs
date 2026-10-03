@@ -6,14 +6,14 @@ impl Checker {
     pub fn get_jsx_element_properties_name(
         &self,
         _jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("get_jsx_element_properties_name"); 
         None
     }
 
     pub fn get_jsx_element_children_property_name(
         &self,
         jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("get_jsx_element_children_property_name"); 
         // Go getJsxElementChildrenPropertyName：react-jsx 模式固定 'children'
         if matches!(
             self.compiler_options.jsx,
@@ -32,7 +32,7 @@ impl Checker {
         &self,
         name_of_attrib_prop_container: &str,
         jsx_namespace: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("get_name_from_jsx_element_attributes_container"); 
         // Go getNameFromJsxElementAttributesContainer：JSX 命名空间导出的
         // 容器接口（ElementChildrenAttribute 等）的唯一成员名
         let container = jsx_namespace
@@ -52,7 +52,7 @@ impl Checker {
     pub fn get_static_type_of_referenced_jsx_constructor(
         &mut self,
         context: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_static_type_of_referenced_jsx_constructor"); 
         if context.kind == crate::checker::jsx_impl_chunk_2::SyntaxKind::JsxOpeningFragment {
             return Some(self.get_jsx_fragment_type(context));
         }
@@ -68,76 +68,76 @@ impl Checker {
         Some(tag_type)
     }
 
-    pub fn get_jsx_reference_kind(&self, _node: &Arc<Node>) -> JsxReferenceKind {
+    pub fn get_jsx_reference_kind(&self, _node: &Arc<Node>) -> JsxReferenceKind { ::tsox_core::fntrace::enter("get_jsx_reference_kind"); 
         JsxReferenceKind::Function
     }
 
     pub fn get_intrinsic_attributes_type_from_jsx_opening_like_element(
         &mut self,
         _node: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_intrinsic_attributes_type_from_jsx_opening_like_element"); 
         None
     }
 
     pub fn get_intrinsic_tag_symbol(
         &self,
         _node: &Arc<Node>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_intrinsic_tag_symbol"); 
         None
     }
 
     pub fn get_jsx_stateless_element_type_at(
         &mut self,
         _location: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_stateless_element_type_at"); 
         None
     }
 
     pub fn get_jsx_element_class_type_at(
         &mut self,
         _location: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_element_class_type_at"); 
         None
     }
 
     pub fn get_jsx_element_type_at(
         &mut self,
         _location: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_element_type_at"); 
         None
     }
 
     pub fn get_jsx_element_type_type_at(
         &mut self,
         _location: &Arc<Node>,
-    ) -> Option<Arc<crate::checker::types::Type>> {
+    ) -> Option<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("get_jsx_element_type_type_at"); 
         None
     }
 
-    pub fn get_jsx_namespace_str(&self, _location: &Arc<Node>) -> String {
+    pub fn get_jsx_namespace_str(&self, _location: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_jsx_namespace_str"); 
         "jsx".to_string()
     }
 
-    pub fn get_local_jsx_namespace(&self, _file: &Arc<tsox_frontend::ast::SourceFile>) -> String {
+    pub fn get_local_jsx_namespace(&self, _file: &Arc<tsox_frontend::ast::SourceFile>) -> String { ::tsox_core::fntrace::enter("get_local_jsx_namespace"); 
         "jsx".to_string()
     }
 
-    pub fn get_jsx_factory_entity(&self, _location: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_jsx_factory_entity(&self, _location: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsx_factory_entity"); 
         None
     }
 
-    pub fn get_jsx_fragment_factory_entity(&self, _location: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_jsx_fragment_factory_entity(&self, _location: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsx_fragment_factory_entity"); 
         None
     }
 
     pub fn get_jsx_namespace_container_for_implicit_import(
         &self,
         _location: &Arc<Node>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_namespace_container_for_implicit_import"); 
         None
     }
 
-    pub(crate) fn jsx_implicit_import_base(&self) -> Option<String> {
+    pub(crate) fn jsx_implicit_import_base(&self) -> Option<String> { ::tsox_core::fntrace::enter("jsx_implicit_import_base"); 
         use tsox_core::core::compiler_options::JsxEmit;
         let jsx_runtime_pragma = self.local_jsx_pragma_factory("jsxruntime");
         if jsx_runtime_pragma.as_deref() == Some("classic") {
@@ -163,7 +163,7 @@ impl Checker {
         )
     }
 
-    pub(crate) fn mark_jsx_alias_referenced(&mut self, opening: &Arc<Node>) {
+    pub(crate) fn mark_jsx_alias_referenced(&mut self, opening: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_jsx_alias_referenced"); 
         use tsox_core::core::compiler_options::JsxEmit;
         use tsox_frontend::ast::SymbolFlags;
         if matches!(self.compiler_options.jsx, JsxEmit::ReactJSX | JsxEmit::ReactJSXDev) {
@@ -184,7 +184,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn jsx_mark_namespace(&self, is_fragment: bool) -> String {
+    pub(crate) fn jsx_mark_namespace(&self, is_fragment: bool) -> String { ::tsox_core::fntrace::enter("jsx_mark_namespace"); 
         let pragma_first = |pragma: &str| {
             self.local_jsx_pragma_factory(pragma)
                 .and_then(|f| f.split('.').next().map(str::to_string))
@@ -226,7 +226,7 @@ impl Checker {
     pub(crate) fn jsx_factory_namespace_symbol(
         &self,
         name: &str,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("jsx_factory_namespace_symbol"); 
         use tsox_frontend::ast::SymbolFlags;
         let symbol_map = self.program.symbol_map();
         let value = |sym: &std::sync::Arc<tsox_frontend::ast::Symbol>| {
@@ -273,7 +273,7 @@ impl Checker {
     pub fn get_jsx_runtime_import_specifier(
         &self,
         _file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> (String, Option<Arc<Node>>) {
+    ) -> (String, Option<Arc<Node>>) { ::tsox_core::fntrace::enter("get_jsx_runtime_import_specifier"); 
         (String::new(), None)
     }
 }

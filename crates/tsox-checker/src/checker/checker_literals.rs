@@ -11,7 +11,7 @@ use tsox_frontend::ast::SyntaxKind;
 use crate::checker::checker::*;
 
 impl Checker {
-    pub fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_type_of_literal"); 
         if t.flags.contains(crate::checker::TypeFlags::StringLiteral)
             || t.flags.contains(crate::checker::TypeFlags::NumberLiteral)
             || t.flags.contains(crate::checker::TypeFlags::BigIntLiteral)
@@ -22,7 +22,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub(crate) fn types_are_equal(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+    pub(crate) fn types_are_equal(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("types_are_equal"); 
         if Arc::ptr_eq(a, b) {
             return true;
         }
@@ -38,7 +38,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn infer_number_literal_type(&mut self, text: &str) -> Arc<Type> {
+    pub(crate) fn infer_number_literal_type(&mut self, text: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_number_literal_type"); 
         let num = tsox_core::jsnum::Number::from_string(text);
         if num.is_nan() {
             return self.number_type();
@@ -46,14 +46,14 @@ impl Checker {
         self.get_number_literal_type(num)
     }
 
-    pub(crate) fn infer_string_literal_type(&mut self, text: &str) -> Arc<Type> {
+    pub(crate) fn infer_string_literal_type(&mut self, text: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_string_literal_type"); 
         self.get_string_literal_type(text)
     }
     pub(crate) fn find_object_literal_property_name_node(
         &self,
         init: &Arc<Node>,
         prop_name: &str,
-    ) -> Option<TextRange> {
+    ) -> Option<TextRange> { ::tsox_core::fntrace::enter("find_object_literal_property_name_node"); 
         let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &init.data else {
             return None;
         };
@@ -69,7 +69,7 @@ impl Checker {
         }
         None
     }
-    pub(crate) fn get_const_assertion_type(&mut self, expr: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_const_assertion_type(&mut self, expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_const_assertion_type"); 
         match expr.kind {
             SyntaxKind::ArrayLiteralExpression => {
                 let elements = match &expr.data {
@@ -110,7 +110,7 @@ impl Checker {
         initializer: &Arc<Node>,
         literal: &Arc<Node>,
         name: &str,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("property_assignment_type"); 
         let mut t = self.get_type_of_node(initializer);
         let contextual = self.get_contextual_type(literal, ContextFlags::empty());
         let prop_ctx = contextual
@@ -132,7 +132,7 @@ impl Checker {
         t
     }
 
-    pub(crate) fn get_type_of_object_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_object_literal(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_object_literal"); 
         let properties = match &node.data {
             tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) => &data.properties,
             _ => return self.get_any_type(),
@@ -320,7 +320,7 @@ impl Checker {
         result
     }
 
-    fn object_literal_accessor_type(&mut self, node: &Arc<Node>, name: &str) -> Arc<Type> {
+    fn object_literal_accessor_type(&mut self, node: &Arc<Node>, name: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("object_literal_accessor_type"); 
         let properties = match &node.data {
             NodeData::ObjectLiteralExpression(data) => &data.properties,
             _ => return self.get_any_type(),
@@ -367,7 +367,7 @@ impl Checker {
         &self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("get_excess_property_name"); 
         if !crate::checker::is_object_literal_type(source) {
             return None;
         }
@@ -395,7 +395,7 @@ impl Checker {
 
     // Go isTypeSubsetOf(globalObjectType, target)：Object/object 成分出现即
     // 视为全局 Object 型的容器
-    pub(crate) fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("target_admits_any_properties"); 
         if t.flags.contains(TypeFlags::NonPrimitive) {
             return true;
         }
@@ -415,7 +415,7 @@ impl Checker {
 
 
 
-    fn target_has_property(&self, t: &Arc<Type>, name: &str) -> bool {
+    fn target_has_property(&self, t: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("target_has_property"); 
         if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
             return true;
         }
@@ -455,7 +455,7 @@ impl Checker {
         }
         false
     }
-    pub(crate) fn get_constant_numeric_value(&self, node: &Arc<Node>) -> Option<f64> {
+    pub(crate) fn get_constant_numeric_value(&self, node: &Arc<Node>) -> Option<f64> { ::tsox_core::fntrace::enter("get_constant_numeric_value"); 
         match &node.data {
             tsox_frontend::ast::NodeData::NumericLiteral(data) => data.text.parse::<f64>().ok(),
             _ => None,

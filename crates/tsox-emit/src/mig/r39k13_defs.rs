@@ -14,17 +14,17 @@ use tsox_frontend::ast::visitor::NodeVisitor;
 use crate::mig::m4k_2::Transformer;
 use crate::printer::generated_identifier_flags::NodeFactory;
 
-pub(crate) fn set_loc(node: &mut Arc<Node>, loc: TextRange) {
+pub(crate) fn set_loc(node: &mut Arc<Node>, loc: TextRange) { ::tsox_core::fntrace::enter("set_loc"); 
     if let Some(n) = Arc::get_mut(node) {
         n.loc = loc;
     }
 }
 
-pub(crate) fn placeholder_transformer() -> Transformer {
+pub(crate) fn placeholder_transformer() -> Transformer { ::tsox_core::fntrace::enter("placeholder_transformer"); 
     Transformer::new(|_, node| Some(node), None)
 }
 
-pub(crate) fn type_parameter_list(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+pub(crate) fn type_parameter_list(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("type_parameter_list"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => d.type_parameters.clone(),
         NodeData::ClassExpression(d) => d.type_parameters.clone(),
@@ -45,7 +45,7 @@ impl<'a> NodeFactory<'a> {
         postfix_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_assignment_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::PropertyAssignment,
             NodeData::PropertyAssignment(ndg::PropertyAssignmentData {
@@ -72,7 +72,7 @@ impl<'a> NodeFactory<'a> {
         name: &Arc<Node>,
         equals_token: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_shorthand_property_assignment_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::ShorthandPropertyAssignment,
             NodeData::ShorthandPropertyAssignment(ndg::ShorthandPropertyAssignmentData {
@@ -96,7 +96,7 @@ impl<'a> NodeFactory<'a> {
         exclamation_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_variable_declaration_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::VariableDeclaration,
             NodeData::VariableDeclaration(ndg::VariableDeclarationData {
@@ -118,7 +118,7 @@ impl<'a> NodeFactory<'a> {
         property_name: Option<&Arc<Node>>,
         name: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_binding_element_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::BindingElement,
             NodeData::BindingElement(ndg::BindingElementData {
@@ -141,7 +141,7 @@ impl<'a> NodeFactory<'a> {
         postfix_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_declaration_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(ndg::PropertyDeclarationData {
@@ -164,7 +164,7 @@ impl<'a> NodeFactory<'a> {
         is_export_equals: bool,
         type_node: Option<&Arc<Node>>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_export_assignment_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::ExportAssignment,
             NodeData::ExportAssignment(ndg::ExportAssignmentData {
@@ -187,7 +187,7 @@ impl<'a> NodeFactory<'a> {
         try_block: &Arc<Node>,
         catch_clause: Option<&Arc<Node>>,
         finally_block: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_try_statement_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::TryStatement,
             NodeData::TryStatement(ndg::TryStatementData {
@@ -207,7 +207,7 @@ impl<'a> NodeFactory<'a> {
         left: &Arc<Node>,
         operator_token: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_binary_expression_r39k13"); 
         let mut updated = Node::new(
             SyntaxKind::BinaryExpression,
             NodeData::BinaryExpression(ndg::BinaryExpressionData {
@@ -237,7 +237,7 @@ impl R39K13NodeVisitorExt for NodeVisitor {
     fn visit_modifiers(
         &mut self,
         modifiers: &Option<Arc<ModifierList>>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         let modifiers = modifiers.as_ref()?;
         let mut changed = false;
         let mut visited_nodes: Vec<Arc<Node>> = Vec::with_capacity(modifiers.list.nodes.len());
@@ -260,7 +260,7 @@ impl R39K13NodeVisitorExt for NodeVisitor {
         }))
     }
 
-    fn visit_nodes_r39k13(&mut self, nodes: Option<&NodeList>) -> Option<NodeList> {
+    fn visit_nodes_r39k13(&mut self, nodes: Option<&NodeList>) -> Option<NodeList> { ::tsox_core::fntrace::enter("visit_nodes_r39k13"); 
         let nodes = nodes?;
         let mut changed = false;
         let mut visited_nodes: Vec<Arc<Node>> = Vec::with_capacity(nodes.nodes.len());
@@ -283,7 +283,7 @@ impl R39K13NodeVisitorExt for NodeVisitor {
         })
     }
 
-    fn visit_embedded_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_embedded_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_embedded_statement"); 
         self.visit_node(node)
     }
 }

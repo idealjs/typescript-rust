@@ -52,7 +52,7 @@ pub const UNPREFIXED_NODE_CORE_MODULES: &[&str] = &[
     "zlib",
 ];
 
-pub fn collect_external_module_references(file: &mut SourceFile) {
+pub fn collect_external_module_references(file: &mut SourceFile) { ::tsox_core::fntrace::enter("collect_external_module_references"); 
     let statements: Vec<Arc<Node>> = if let NodeData::SourceFile(d) = &file.node.data {
         d.statements.nodes.clone()
     } else {
@@ -77,7 +77,7 @@ pub(crate) fn collect_module_references(
     file: &mut SourceFile,
     node: &Arc<Node>,
     in_ambient_module: bool,
-) {
+) { ::tsox_core::fntrace::enter("collect_module_references"); 
     if let Some(module_name_expr) = get_external_module_name(node) {
         if is_string_literal(&module_name_expr) {
             let module_name = module_name_expr.text();
@@ -141,7 +141,7 @@ pub(crate) fn collect_module_references(
     }
 }
 
-pub(crate) fn get_external_module_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_external_module_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_name"); 
     match &node.data {
         NodeData::ImportDeclaration(d) => Some(d.module_specifier.clone()),
         NodeData::ExportDeclaration(d) => d.module_specifier.clone(),
@@ -157,7 +157,7 @@ pub(crate) fn get_external_module_name(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub(crate) fn is_ambient_module(node: &Arc<Node>) -> bool {
+pub(crate) fn is_ambient_module(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_ambient_module"); 
     if node.kind != SyntaxKind::ModuleDeclaration {
         return false;
     }
@@ -169,11 +169,11 @@ pub(crate) fn is_ambient_module(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_external_module(file: &SourceFile) -> bool {
+pub(crate) fn is_external_module(file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_external_module"); 
     file.external_module_indicator.is_some()
 }
 
-pub fn set_external_module_indicator(file: &mut SourceFile) {
+pub fn set_external_module_indicator(file: &mut SourceFile) { ::tsox_core::fntrace::enter("set_external_module_indicator"); 
     if file.script_kind == ScriptKind::Json {
         return;
     }
@@ -196,7 +196,7 @@ pub fn set_external_module_indicator(file: &mut SourceFile) {
     }
 }
 
-pub(crate) fn is_external_module_indicator_node(node: &Arc<Node>) -> bool {
+pub(crate) fn is_external_module_indicator_node(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_module_indicator_node"); 
     if node.has_syntactic_modifier(ModifierFlags::Export) {
         return true;
     }
@@ -216,7 +216,7 @@ pub(crate) fn is_external_module_indicator_node(node: &Arc<Node>) -> bool {
 pub fn cannot_resolve_module_error(
     options: &tsox_core::core::compiler_options::CompilerOptions,
     module_spec: &str,
-) -> (&'static tsox_core::diagnostics::Message, Vec<String>) {
+) -> (&'static tsox_core::diagnostics::Message, Vec<String>) { ::tsox_core::fntrace::enter("cannot_resolve_module_error"); 
     use tsox_core::diagnostics::messages_generated as msg;
     let is_node_core = UNPREFIXED_NODE_CORE_MODULES.contains(&module_spec)
         || module_spec

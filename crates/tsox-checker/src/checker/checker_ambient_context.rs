@@ -6,7 +6,7 @@ use tsox_core::diagnostics::messages_generated::{
 };
 
 impl Checker {
-    pub(crate) fn node_in_ambient_context(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn node_in_ambient_context(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_in_ambient_context"); 
         let mut current = Some(Arc::clone(node));
         while let Some(n) = current {
             if n.kind == SyntaxKind::SourceFile {
@@ -23,7 +23,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn check_grammar_statement_in_ambient_context(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn check_grammar_statement_in_ambient_context(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_statement_in_ambient_context"); 
         if !self.node_in_ambient_context(node) {
             return false;
         }
@@ -65,7 +65,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn statement_kind_takes_ambient_check(kind: SyntaxKind) -> bool {
+    pub(crate) fn statement_kind_takes_ambient_check(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("statement_kind_takes_ambient_check"); 
         matches!(
             kind,
             SyntaxKind::Block
@@ -92,7 +92,7 @@ impl Checker {
     pub fn check_grammar_top_level_element_for_required_declare_modifier(
         &mut self,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_top_level_element_for_required_declare_modifier"); 
         let exempt_kind = matches!(
             node.kind,
             SyntaxKind::InterfaceDeclaration
@@ -117,7 +117,7 @@ impl Checker {
         )
     }
 
-    pub fn check_grammar_source_file(&mut self, file: &Arc<SourceFile>) -> bool {
+    pub fn check_grammar_source_file(&mut self, file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("check_grammar_source_file"); 
         if !file.is_declaration_file {
             return false;
         }

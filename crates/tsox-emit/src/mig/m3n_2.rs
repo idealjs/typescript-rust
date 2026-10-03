@@ -12,7 +12,7 @@ use tsox_frontend::ast::{has_syntactic_modifier, is_static};
 pub fn get_accessor_name_visibility_diagnostic_message(
     node: &Arc<Node>,
     symbol_accessibility_result: &SymbolAccessibilityResult,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_accessor_name_visibility_diagnostic_message"); 
     if is_static(node) {
         select_diagnostic_based_on_module_name(
             symbol_accessibility_result,
@@ -39,7 +39,7 @@ pub fn get_accessor_name_visibility_diagnostic_message(
 pub fn get_method_name_visibility_diagnostic_message(
     node: &Arc<Node>,
     symbol_accessibility_result: &SymbolAccessibilityResult,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_method_name_visibility_diagnostic_message"); 
     if is_static(node) {
         select_diagnostic_based_on_module_name(
             symbol_accessibility_result,
@@ -66,7 +66,7 @@ pub fn get_method_name_visibility_diagnostic_message(
 pub fn get_variable_declaration_type_visibility_diagnostic_message(
     node: &Arc<Node>,
     symbol_accessibility_result: &SymbolAccessibilityResult,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_variable_declaration_type_visibility_diagnostic_message"); 
     if node.kind == SyntaxKind::VariableDeclaration || node.kind == SyntaxKind::BindingElement {
         return select_diagnostic_based_on_module_name(
             symbol_accessibility_result,
@@ -114,7 +114,7 @@ pub fn get_variable_declaration_type_visibility_diagnostic_message(
 pub fn get_accessor_declaration_type_visibility_diagnostic_message(
     node: &Arc<Node>,
     symbol_accessibility_result: &SymbolAccessibilityResult,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_accessor_declaration_type_visibility_diagnostic_message"); 
     if node.kind == SyntaxKind::SetAccessor {
         if is_static(node) {
             select_diagnostic_based_on_module_name_no_name_check(

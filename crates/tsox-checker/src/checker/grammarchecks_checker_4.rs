@@ -3,7 +3,7 @@
 use crate::checker::grammarchecks::*;
 
 impl Checker {
-    pub fn check_grammar_jsx_element(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_jsx_element(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_jsx_element"); 
         let tag_name = match crate::checker::grammarchecks::jsx::jsx_tag_name(node) {
             Some(t) => t,
             None => return false,
@@ -77,7 +77,7 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_jsx_name(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_jsx_name(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_jsx_name"); 
         if node.kind == SyntaxKind::PropertyAccessExpression {
             if let NodeData::PropertyAccessExpression(data) = &node.data {
                 let expr = &data.expression;
@@ -105,7 +105,7 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_jsx_expression(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_jsx_expression(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_jsx_expression"); 
         let expr = match &node.data {
             NodeData::JsxExpression(data) => &data.expression,
             _ => return false,
@@ -121,7 +121,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn is_jsx_transform_enabled(&self) -> bool {
+    pub(crate) fn is_jsx_transform_enabled(&self) -> bool { ::tsox_core::fntrace::enter("is_jsx_transform_enabled"); 
         self.compiler_options.jsx != tsox_core::core::compiler_options::JsxEmit::None
     }
 
@@ -129,27 +129,27 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         message: &Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("grammar_error_on_node_skipped_on_no_emit"); 
         self.grammar_error_on_node(node, message)
     }
 
-    pub fn check_grammar_regular_expression_literal(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_regular_expression_literal(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_regular_expression_literal"); 
         false
     }
 
-    pub fn check_grammar_private_identifier_expression(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_private_identifier_expression(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_private_identifier_expression"); 
         false
     }
 
-    pub fn check_grammar_mapped_type(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_mapped_type(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_mapped_type"); 
         false
     }
 
-    pub fn check_grammar_decorator(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_decorator(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_decorator"); 
         false
     }
 
-    pub fn check_grammar_export_declaration(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_export_declaration(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_export_declaration"); 
         false
     }
 
@@ -157,11 +157,11 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _error_message: &Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_module_element_context"); 
         false
     }
 
-    pub fn report_obvious_modifier_errors(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn report_obvious_modifier_errors(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("report_obvious_modifier_errors"); 
         false
     }
 
@@ -169,19 +169,19 @@ impl Checker {
         &self,
         _node: &Arc<Node>,
         _allowed_modifier: SyntaxKind,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_modifier_except"); 
         None
     }
 
-    pub fn find_first_illegal_modifier(&self, _node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn find_first_illegal_modifier(&self, _node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_illegal_modifier"); 
         None
     }
 
-    pub fn report_obvious_decorator_errors(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn report_obvious_decorator_errors(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("report_obvious_decorator_errors"); 
         false
     }
 
-    pub fn find_first_illegal_decorator(&self, _node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn find_first_illegal_decorator(&self, _node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_illegal_decorator"); 
         None
     }
 
@@ -189,7 +189,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _async_modifier: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_async_modifier"); 
         false
     }
 
@@ -197,7 +197,7 @@ impl Checker {
         &mut self,
         _list: &tsox_frontend::ast::NodeList,
         _diag: &Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_disallowed_trailing_comma"); 
         false
     }
 
@@ -205,22 +205,22 @@ impl Checker {
         &mut self,
         _type_parameters: &tsox_frontend::ast::NodeList,
         _file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_type_parameter_list"); 
         false
     }
 
     pub fn check_grammar_for_use_strict_simple_parameter_list(
         &mut self,
         _node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_use_strict_simple_parameter_list"); 
         false
     }
 
-    pub fn check_grammar_function_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_function_like_declaration(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_function_like_declaration"); 
         false
     }
 
-    pub fn check_grammar_class_like_declaration(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_class_like_declaration(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_like_declaration"); 
         false
     }
 
@@ -228,15 +228,15 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_arrow_function"); 
         false
     }
 
-    pub fn check_grammar_index_signature_parameters(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_index_signature_parameters(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_index_signature_parameters"); 
         false
     }
 
-    pub fn check_grammar_index_signature(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_index_signature(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_index_signature"); 
         false
     }
 
@@ -244,7 +244,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _type_arguments: &tsox_frontend::ast::NodeList,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_at_least_one_type_argument"); 
         false
     }
 
@@ -252,19 +252,19 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _type_arguments: &tsox_frontend::ast::NodeList,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_type_arguments"); 
         false
     }
 
-    pub fn check_grammar_tagged_template_chain(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_tagged_template_chain(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_tagged_template_chain"); 
         false
     }
 
-    pub fn check_grammar_heritage_clause(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_heritage_clause(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_heritage_clause"); 
         false
     }
 
-    pub fn check_grammar_expression_with_type_arguments(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_expression_with_type_arguments(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_expression_with_type_arguments"); 
         false
     }
 
@@ -272,19 +272,19 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_declaration_heritage_clauses"); 
         false
     }
 
-    pub fn check_grammar_interface_declaration(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_interface_declaration(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_interface_declaration"); 
         false
     }
 
-    pub fn check_grammar_computed_property_name(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_computed_property_name(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_computed_property_name"); 
         false
     }
 
-    pub fn check_grammar_for_generator(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_for_generator(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_generator"); 
         false
     }
 

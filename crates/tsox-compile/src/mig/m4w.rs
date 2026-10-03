@@ -18,14 +18,14 @@ type PackageJsonInfoCache = HashMap<String, InfoCacheEntry>;
 
 static PACKAGE_JSON_INFO_CACHE: OnceLock<Mutex<PackageJsonInfoCache>> = OnceLock::new();
 
-fn package_json_info_cache() -> &'static Mutex<PackageJsonInfoCache> {
+fn package_json_info_cache() -> &'static Mutex<PackageJsonInfoCache> { ::tsox_core::fntrace::enter("package_json_info_cache"); 
     PACKAGE_JSON_INFO_CACHE.get_or_init(|| Mutex::new(HashMap::new()))
 }
 
 pub(crate) fn get_package_json_info_entry(
     resolver: &tsox_tsoptions::module::Resolver,
     package_directory: &str,
-) -> Option<InfoCacheEntry> {
+) -> Option<InfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_json_info_entry"); 
     let package_json_path = tspath::combine_paths(package_directory, &["package.json"]);
     {
         let cache = package_json_info_cache().lock().unwrap();
@@ -65,7 +65,7 @@ pub(crate) fn get_package_scope_for_path(
     resolver: &tsox_tsoptions::module::Resolver,
     typings_location: &str,
     directory: &str,
-) -> Option<InfoCacheEntry> {
+) -> Option<InfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_scope_for_path"); 
     let mut current = directory.to_string();
     loop {
         if let Some(result) = get_package_json_info_entry(resolver, &current) {
@@ -84,7 +84,7 @@ pub(crate) fn get_package_scope_for_path(
 
 pub(crate) fn package_json_cache_entries(
     f: &mut dyn FnMut(&str, &InfoCacheEntry) -> bool,
-) {
+) { ::tsox_core::fntrace::enter("package_json_cache_entries"); 
     let cache = package_json_info_cache().lock().unwrap();
     for (key, value) in cache.iter() {
         if !f(key, value) {
@@ -97,7 +97,7 @@ pub(crate) fn resolve_package_directory(
     resolver: &tsox_tsoptions::module::Resolver,
     module_name: &str,
     containing_file: &str,
-) -> Option<tsox_tsoptions::module::ResolvedModule> {
+) -> Option<tsox_tsoptions::module::ResolvedModule> { ::tsox_core::fntrace::enter("resolve_package_directory"); 
     let fs = resolver.host().fs();
     let mut directory = tspath::get_directory_path(containing_file);
     loop {
@@ -123,7 +123,7 @@ fn resolve_package_directory_in_node_modules(
     resolver: &tsox_tsoptions::module::Resolver,
     module_name: &str,
     node_modules_folder: &str,
-) -> Option<tsox_tsoptions::module::ResolvedModule> {
+) -> Option<tsox_tsoptions::module::ResolvedModule> { ::tsox_core::fntrace::enter("resolve_package_directory_in_node_modules"); 
     let fs = resolver.host().fs();
     let (package_name, _) = tsox_tsoptions::module::parse_package_name(module_name);
     let package_directory = if package_name.is_empty() {
@@ -145,7 +145,7 @@ fn resolve_package_directory_in_node_modules(
 fn create_resolved_module_handling_symlink(
     resolver: &tsox_tsoptions::module::Resolver,
     path: String,
-) -> tsox_tsoptions::module::ResolvedModule {
+) -> tsox_tsoptions::module::ResolvedModule { ::tsox_core::fntrace::enter("create_resolved_module_handling_symlink"); 
     let fs = resolver.host().fs();
     let is_external_library_import = path.contains("/node_modules/");
     let mut resolved_file_name = path.clone();
@@ -177,17 +177,17 @@ fn create_resolved_module_handling_symlink(
 }
 
 impl crate::mig::m4x_2::HasFileName for tsox_frontend::ast::mig::m3g_3::HasFileNameImpl {
-    fn path(&self) -> String {
+    fn path(&self) -> String { ::tsox_core::fntrace::enter("path"); 
         self.path().0.clone()
     }
 
-    fn file_name(&self) -> String {
+    fn file_name(&self) -> String { ::tsox_core::fntrace::enter("file_name"); 
         self.file_name().to_string()
     }
 }
 
 impl Program {
-    pub fn can_use_project_reference_source(&self) -> bool {
+    pub fn can_use_project_reference_source(&self) -> bool { ::tsox_core::fntrace::enter("can_use_project_reference_source"); 
         self.use_source_of_project_reference
             && !self
                 .options()
@@ -195,15 +195,15 @@ impl Program {
                 .is_true()
     }
 
-    pub fn content_mapper_project(&self) -> Option<Arc<dyn crate::mig::m3l_cm_2::Project>> {
+    pub fn content_mapper_project(&self) -> Option<Arc<dyn crate::mig::m3l_cm_2::Project>> { ::tsox_core::fntrace::enter("content_mapper_project"); 
         self.opts.host.content_mapper_project()
     }
 
-    pub fn get_global_typings_cache_location(&self) -> &str {
+    pub fn get_global_typings_cache_location(&self) -> &str { ::tsox_core::fntrace::enter("get_global_typings_cache_location"); 
         &self.typings_location
     }
 
-    pub fn get_nearest_ancestor_directory_with_package_json(&self, dirname: &str) -> String {
+    pub fn get_nearest_ancestor_directory_with_package_json(&self, dirname: &str) -> String { ::tsox_core::fntrace::enter("get_nearest_ancestor_directory_with_package_json"); 
         if let Some(scoped) =
             get_package_scope_for_path(&self.resolver, &self.typings_location, dirname)
             .filter(|scoped| scoped.exists())
@@ -216,7 +216,7 @@ impl Program {
     pub fn get_package_json_info(
         &self,
         pkg_json_path: &str,
-    ) -> Option<tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry> {
+    ) -> Option<tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_json_info"); 
         let directory = tspath::get_directory_path(pkg_json_path);
         if let Some(scoped) =
             get_package_scope_for_path(&self.resolver, &self.typings_location, &directory)
@@ -230,11 +230,11 @@ impl Program {
     pub fn package_json_cache_entries(
         &self,
         f: &mut dyn FnMut(&str, &tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry) -> bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("package_json_cache_entries"); 
         package_json_cache_entries(f);
     }
 
-    pub fn get_redirect_targets(&self, path: &str) -> Vec<String> {
+    pub fn get_redirect_targets(&self, path: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_redirect_targets"); 
         self.redirect_targets_map
             .get(path)
             .cloned()
@@ -244,7 +244,7 @@ impl Program {
     pub fn get_source_of_project_reference_if_output_included(
         &self,
         file: &Arc<SourceFile>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_source_of_project_reference_if_output_included"); 
         if let Some(source) = self
             .output_file_to_project_reference_source
             .get(m3b_2::path(file).as_str())
@@ -257,12 +257,12 @@ impl Program {
     pub fn get_project_reference_from_source(
         &self,
         path: &str,
-    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> {
+    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_source"); 
         self.project_reference_file_mapper
             .get_project_reference_from_source(&tspath::Path(path.to_string()))
     }
 
-    pub fn is_source_from_project_reference(&self, path: &str) -> bool {
+    pub fn is_source_from_project_reference(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("is_source_from_project_reference"); 
         self.project_reference_file_mapper
             .is_source_from_project_reference(&tspath::Path(path.to_string()))
     }
@@ -270,7 +270,7 @@ impl Program {
     pub fn get_project_reference_from_output_dts(
         &self,
         path: &str,
-    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> {
+    ) -> Option<tsox_tsoptions::mig::m5h_3::SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_output_dts"); 
         self.project_reference_file_mapper
             .get_project_reference_from_output_dts(&tspath::Path(path.to_string()))
     }
@@ -278,7 +278,7 @@ impl Program {
     pub fn get_resolved_project_reference_for(
         &self,
         path: &str,
-    ) -> (Option<Arc<ParsedCommandLine>>, bool) {
+    ) -> (Option<Arc<ParsedCommandLine>>, bool) { ::tsox_core::fntrace::enter("get_resolved_project_reference_for"); 
         self.project_reference_file_mapper
             .get_resolved_reference_for(&tspath::Path(path.to_string()))
     }
@@ -286,14 +286,14 @@ impl Program {
     pub fn get_redirect_for_resolution(
         &self,
         file: &Arc<SourceFile>,
-    ) -> Option<Arc<ParsedCommandLine>> {
+    ) -> Option<Arc<ParsedCommandLine>> { ::tsox_core::fntrace::enter("get_redirect_for_resolution"); 
         let (redirect, _) = self
             .project_reference_file_mapper
             .get_redirect_for_resolution(file);
         redirect
     }
 
-    pub fn get_parse_file_redirect(&self, file_name: &str) -> String {
+    pub fn get_parse_file_redirect(&self, file_name: &str) -> String { ::tsox_core::fntrace::enter("get_parse_file_redirect"); 
         self.project_reference_file_mapper
             .get_parse_file_redirect(&tsox_frontend::ast::mig::m3g_3::new_has_file_name(
                 file_name.to_string(),
@@ -301,7 +301,7 @@ impl Program {
             ))
     }
 
-    pub fn get_resolved_project_references(&self) -> Vec<Option<Arc<ParsedCommandLine>>> {
+    pub fn get_resolved_project_references(&self) -> Vec<Option<Arc<ParsedCommandLine>>> { ::tsox_core::fntrace::enter("get_resolved_project_references"); 
         self.project_reference_file_mapper.get_resolved_project_references()
     }
 
@@ -313,7 +313,7 @@ impl Program {
             Option<&Arc<ParsedCommandLine>>,
             usize,
         ) -> bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("range_resolved_project_reference"); 
         self.project_reference_file_mapper
             .range_resolved_project_reference(f)
     }
@@ -327,12 +327,12 @@ impl Program {
             Option<&Arc<ParsedCommandLine>>,
             usize,
         ) -> bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("range_resolved_project_reference_in_child_config"); 
         self.project_reference_file_mapper
             .range_resolved_project_reference_in_child_config(child_config, f)
     }
 
-    pub fn uses_uri_style_node_core_modules(&self) -> Tristate {
+    pub fn uses_uri_style_node_core_modules(&self) -> Tristate { ::tsox_core::fntrace::enter("uses_uri_style_node_core_modules"); 
         self.uses_uri_style_node_core_modules
     }
 
@@ -340,7 +340,7 @@ impl Program {
         &self,
         origin: &Arc<SourceFile>,
         r: &tsox_frontend::ast::node_source_file::FileReference,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_from_reference"); 
         let file_name = tspath::resolve_path(
             &tspath::get_directory_path(&origin.file_name),
             &[r.file_name.as_str()],

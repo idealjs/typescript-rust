@@ -8,7 +8,7 @@ use tsox_frontend::ast::SyntaxKind;
 use crate::checker::checker::*;
 
 impl Checker {
-    pub(crate) fn op_display(kind: tsox_frontend::ast::SyntaxKind) -> &'static str {
+    pub(crate) fn op_display(kind: tsox_frontend::ast::SyntaxKind) -> &'static str { ::tsox_core::fntrace::enter("op_display"); 
         use tsox_frontend::ast::SyntaxKind::*;
         match kind {
             AsteriskToken => "*",
@@ -43,7 +43,7 @@ impl Checker {
         }
     }
 
-    fn nonvariable_assignment_target_type(&mut self, operand: &Arc<Node>) -> Option<Arc<Type>> {
+    fn nonvariable_assignment_target_type(&mut self, operand: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("nonvariable_assignment_target_type"); 
         if operand.kind != SyntaxKind::Identifier {
             return None;
         }
@@ -63,7 +63,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         data: &tsox_frontend::ast::node_data_generated::BinaryExpressionData,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_binary_arith_pre"); 
         use tsox_frontend::ast::SyntaxKind::*;
         let op = data.operator_token.kind;
         let arith_nonplus = matches!(
@@ -156,7 +156,7 @@ impl Checker {
             }
             return;
         }
-        fn ok_number(c: &mut Checker, t: &Arc<Type>) -> bool {
+        fn ok_number(c: &mut Checker, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("ok_number"); 
             let n = c.number_type();
             if c.is_type_assignable_to(t, &n) {
                 return true;
@@ -197,7 +197,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         data: &tsox_frontend::ast::node_data_generated::BinaryExpressionData,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_binary_plus_operator_error"); 
         use tsox_frontend::ast::SyntaxKind::*;
         let op = data.operator_token.kind;
         if op != PlusToken && op != PlusEqualsToken {
@@ -263,7 +263,7 @@ impl Checker {
         &mut self,
         operator: tsox_frontend::ast::SyntaxKind,
         target: &Arc<Node>,
-    ) -> Option<(Arc<Symbol>, Arc<Type>)> {
+    ) -> Option<(Arc<Symbol>, Arc<Type>)> { ::tsox_core::fntrace::enter("logical_rhs_frame"); 
         use tsox_frontend::ast::SyntaxKind::*;
         if !matches!(target.data, tsox_frontend::ast::NodeData::Identifier(_)) {
             return None;

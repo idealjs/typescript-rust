@@ -73,11 +73,11 @@ pub struct M5uModuleReference {
 }
 
 
-fn is_external_module_augmentation(node: &Arc<Node>) -> bool {
+fn is_external_module_augmentation(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_module_augmentation"); 
     is_ambient_module(node) && is_module_augmentation_external(node)
 }
 
-pub fn node_module_specifier(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn node_module_specifier(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_module_specifier"); 
     match &declaration.data {
         NodeData::ImportDeclaration(d) => Some(Arc::clone(&d.module_specifier)),
         NodeData::ExportDeclaration(d) => d.module_specifier.as_ref().map(Arc::clone),
@@ -86,21 +86,21 @@ pub fn node_module_specifier(declaration: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn node_import_clause(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn node_import_clause(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_import_clause"); 
     match &declaration.data {
         NodeData::ImportDeclaration(d) => d.import_clause.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn node_named_bindings(import_clause: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn node_named_bindings(import_clause: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_named_bindings"); 
     match &import_clause.data {
         NodeData::ImportClause(d) => d.named_bindings.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn node_named_bindings_elements(named_bindings: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_named_bindings_elements(named_bindings: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_named_bindings_elements"); 
     match &named_bindings.data {
         NodeData::NamedImports(d) => d.elements.nodes.clone(),
         NodeData::NamedExports(d) => d.elements.nodes.clone(),
@@ -108,30 +108,30 @@ pub fn node_named_bindings_elements(named_bindings: &Arc<Node>) -> Vec<Arc<Node>
     }
 }
 
-pub fn node_import_equals_module_reference(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn node_import_equals_module_reference(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_import_equals_module_reference"); 
     match &declaration.data {
         NodeData::ImportEqualsDeclaration(d) => Some(Arc::clone(&d.module_reference)),
         _ => None,
     }
 }
 
-pub fn node_export_clause(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn node_export_clause(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_export_clause"); 
     match &declaration.data {
         NodeData::ExportDeclaration(d) => d.export_clause.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn is_ambient_module_declaration(node: &Arc<Node>) -> bool {
+pub fn is_ambient_module_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_ambient_module_declaration"); 
     is_ambient_module_declaration_node(node)
 }
 
-fn is_ambient_module_declaration_node(node: &Node) -> bool {
+fn is_ambient_module_declaration_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_ambient_module_declaration_node"); 
     ast::is_module_declaration(node)
         && node.name().map_or(false, |name| ast::is_string_literal(&name))
 }
 
-pub fn get_statements_of_source_file_like(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn get_statements_of_source_file_like(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_statements_of_source_file_like"); 
     if ast::is_source_file(node) {
         if let NodeData::SourceFile(d) = &node.data {
             return d.statements.nodes.clone();
@@ -149,7 +149,7 @@ pub fn get_statements_of_source_file_like(node: &Arc<Node>) -> Vec<Arc<Node>> {
 pub fn for_each_possible_import_or_export_statement(
     source_file_like: &Arc<Node>,
     action: &mut dyn FnMut(&Arc<Node>) -> bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("for_each_possible_import_or_export_statement"); 
     for statement in get_statements_of_source_file_like(source_file_like) {
         if action(&statement)
             || is_ambient_module_declaration(&statement)
@@ -161,7 +161,7 @@ pub fn for_each_possible_import_or_export_statement(
     false
 }
 
-pub fn get_source_file_like_for_import_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_source_file_like_for_import_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_source_file_like_for_import_declaration"); 
     if ast::is_call_expression(node) || ast::is_jsdoc_import_tag(node) {
         return ast::get_source_file_of_node(node);
     }
@@ -180,7 +180,7 @@ pub fn for_each_import(
     program: &Program,
     source_file: &Arc<SourceFile>,
     action: &mut dyn FnMut(&Arc<Node>, &Arc<Node>),
-) {
+) { ::tsox_core::fntrace::enter("for_each_import"); 
     let mut implicit_imports: Vec<Arc<Node>> = Vec::new();
     if let (_, Some(jsx_specifier)) =
         program.get_jsx_runtime_import_specifier(&source_file.file_name)
@@ -239,7 +239,7 @@ pub fn get_direct_imports_map(
     program: &Program,
     source_files: &[Arc<SourceFile>],
     checker: &Checker,
-) -> HashMap<u64, Vec<Arc<Node>>> {
+) -> HashMap<u64, Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("get_direct_imports_map"); 
     let mut result: HashMap<u64, Vec<Arc<Node>>> = HashMap::new();
     for source_file in source_files {
         for_each_import(program, source_file, &mut |import_decl, module_specifier| {
@@ -257,7 +257,7 @@ pub fn get_direct_imports_map(
 pub fn get_containing_module_symbol(
     importer: &Arc<Node>,
     checker: &Checker,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_containing_module_symbol"); 
     let source_file_like = get_source_file_like_for_import_declaration(importer)?;
     let symbol = symbol_of_node(&source_file_like)?;
     Some(checker.get_merged_symbol(&symbol))
@@ -267,7 +267,7 @@ pub fn find_namespace_re_exports(
     source_file_like: &Arc<Node>,
     name: &Arc<Node>,
     checker: &mut Checker,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("find_namespace_re_exports"); 
     let namespace_import_symbol = checker.get_symbol_at_location(name);
     let namespace_import_ptr = namespace_import_symbol.as_ref().map(Arc::as_ptr);
     for_each_possible_import_or_export_statement(source_file_like, &mut |statement| {
@@ -296,7 +296,7 @@ pub fn get_importers_for_export(
     all_direct_imports: &HashMap<u64, Vec<Arc<Node>>>,
     export_info: &M5uExportInfo,
     checker: &mut Checker,
-) -> (Vec<Arc<Node>>, Vec<Arc<SourceFile>>) {
+) -> (Vec<Arc<Node>>, Vec<Arc<SourceFile>>) { ::tsox_core::fntrace::enter("get_importers_for_export"); 
     let mut direct_imports: Vec<Arc<Node>> = Vec::new();
     let mut indirect_user_declarations: Vec<Arc<Node>> = Vec::new();
     let mut seen_direct_import: HashSet<u64> = HashSet::new();
@@ -314,7 +314,7 @@ pub fn get_importers_for_export(
             .unwrap_or_default()
     };
 
-    fn mark_seen(seen: &mut HashSet<u64>, node: &Arc<Node>) -> bool {
+    fn mark_seen(seen: &mut HashSet<u64>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("mark_seen"); 
         seen.insert(node.id())
     }
 
@@ -326,7 +326,7 @@ pub fn get_importers_for_export(
         is_available_through_global: bool,
         checker: &Checker,
         all_direct_imports: &HashMap<u64, Vec<Arc<Node>>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_indirect_user"); 
         if is_available_through_global {
             return;
         }
@@ -367,7 +367,7 @@ pub fn get_importers_for_export(
         }
     }
 
-    fn is_exported(node: &Arc<Node>, stop_at_ambient_module: bool) -> bool {
+    fn is_exported(node: &Arc<Node>, stop_at_ambient_module: bool) -> bool { ::tsox_core::fntrace::enter("is_exported"); 
         let mut current = Some(Arc::clone(node));
         while let Some(node) = current {
             if stop_at_ambient_module && is_ambient_module_declaration(&node) {
@@ -388,7 +388,7 @@ pub fn get_importers_for_export(
         is_available_through_global: bool,
         checker: &Checker,
         all_direct_imports: &HashMap<u64, Vec<Arc<Node>>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("handle_import_call"); 
         let top = ast::find_ancestor(import_call, is_ambient_module_declaration_node);
         let top = top.or_else(|| ast::get_source_file_of_node(import_call));
         if let Some(top) = top {
@@ -452,7 +452,7 @@ pub fn get_importers_for_export(
         checker: &mut Checker,
         all_direct_imports: &HashMap<u64, Vec<Arc<Node>>>,
         get_direct_imports: &dyn Fn(&Arc<Symbol>) -> Vec<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("handle_direct_imports_inner"); 
         let these_direct_imports = get_direct_imports(exporting_module_symbol);
         for direct in these_direct_imports {
             if !mark_seen(seen_direct_import, &direct) {
@@ -669,7 +669,7 @@ pub fn get_importers_for_export(
     (direct_imports, indirect_users)
 }
 
-pub fn node_as_source_file(node: &Arc<Node>) -> Option<Arc<SourceFile>> {
+pub fn node_as_source_file(node: &Arc<Node>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("node_as_source_file"); 
     tsox_checker::checker::mig::m3a_2::r31k1_defs::source_file_of_node(node)
 }
 
@@ -679,7 +679,7 @@ pub fn get_searches_from_direct_imports(
     export_kind: M5uExportKind,
     checker: &mut Checker,
     is_for_rename: bool,
-) -> (Vec<M5uLocationAndSymbol>, Vec<Arc<Node>>) {
+) -> (Vec<M5uLocationAndSymbol>, Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("get_searches_from_direct_imports"); 
     let mut import_searches: Vec<M5uLocationAndSymbol> = Vec::new();
     let mut single_references: Vec<Arc<Node>> = Vec::new();
 
@@ -862,14 +862,14 @@ pub fn get_searches_from_direct_imports(
     (import_searches, single_references)
 }
 
-pub fn import_type_qualifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn import_type_qualifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_type_qualifier"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => d.qualifier.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn import_type_argument_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn import_type_argument_literal(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_type_argument_literal"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => match &d.argument.data {
             NodeData::LiteralTypeNode(literal) => Some(Arc::clone(&literal.literal)),
@@ -879,7 +879,7 @@ pub fn import_type_argument_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn import_specifier_property_name(specifier: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn import_specifier_property_name(specifier: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_specifier_property_name"); 
     match &specifier.data {
         NodeData::ImportSpecifier(d) => d.property_name.as_ref().map(Arc::clone),
         NodeData::ExportSpecifier(d) => d.property_name.as_ref().map(Arc::clone),
@@ -892,7 +892,7 @@ pub fn get_import_or_export_symbol(
     symbol: &Arc<Symbol>,
     checker: &mut Checker,
     coming_from_export: bool,
-) -> Option<M5uImportExportSymbol> {
+) -> Option<M5uImportExportSymbol> { ::tsox_core::fntrace::enter("get_import_or_export_symbol"); 
     let export_info_of = |symbol: &Arc<Symbol>, kind: M5uExportKind| -> Option<M5uImportExportSymbol> {
         get_export_info(symbol, kind, checker).map(|export_info| M5uImportExportSymbol {
             kind: M5uImpExpKind::Export,
@@ -901,7 +901,7 @@ pub fn get_import_or_export_symbol(
         })
     };
 
-    fn get_export_kind_for_declaration(node: &Arc<Node>) -> M5uExportKind {
+    fn get_export_kind_for_declaration(node: &Arc<Node>) -> M5uExportKind { ::tsox_core::fntrace::enter("get_export_kind_for_declaration"); 
         if node.has_syntactic_modifier(ast::ModifierFlags::Default) {
             M5uExportKind::Default
         } else {
@@ -1025,7 +1025,7 @@ pub fn get_import_or_export_symbol(
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
         checker: &mut Checker,
-    ) -> Option<M5uImportExportSymbol> {
+    ) -> Option<M5uImportExportSymbol> { ::tsox_core::fntrace::enter("get_import"); 
         if !is_node_import(node) {
             return None;
         }
@@ -1060,7 +1060,7 @@ pub fn get_import_or_export_symbol(
     result
 }
 
-pub fn import_equals_module_reference_is(declaration: &Arc<Node>, node: &Arc<Node>) -> bool {
+pub fn import_equals_module_reference_is(declaration: &Arc<Node>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("import_equals_module_reference_is"); 
     node_import_equals_module_reference(declaration)
         .map_or(false, |module_reference| module_reference.id() == node.id())
 }
@@ -1069,7 +1069,7 @@ pub fn get_export_info(
     export_symbol: &Arc<Symbol>,
     export_kind: M5uExportKind,
     checker: &Checker,
-) -> Option<M5uExportInfo> {
+) -> Option<M5uExportInfo> { ::tsox_core::fntrace::enter("get_export_info"); 
     if let Some(parent) = export_symbol.parent() {
         let exporting_module_symbol = checker.get_merged_symbol(&parent);
         if tsox_checker::checker::is_external_module_symbol(&exporting_module_symbol) {
@@ -1082,7 +1082,7 @@ pub fn get_export_info(
     None
 }
 
-pub fn get_export_node(parent: &Arc<Node>, node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_export_node(parent: &Arc<Node>, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_export_node"); 
     let declaration: Option<Arc<Node>> = if ast::is_variable_declaration(parent) {
         Some(Arc::clone(parent))
     } else if ast::is_binding_element(parent) {
@@ -1110,7 +1110,7 @@ pub fn get_export_node(parent: &Arc<Node>, node: &Arc<Node>) -> Option<Arc<Node>
     Some(Arc::clone(parent))
 }
 
-pub fn is_node_import(node: &Arc<Node>) -> bool {
+pub fn is_node_import(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_node_import"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -1140,7 +1140,7 @@ pub fn is_node_import(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_external_module_import_equals(node: &Arc<Node>) -> bool {
+pub fn is_external_module_import_equals(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_module_import_equals"); 
     node_import_equals_module_reference(node).map_or(false, |module_reference| {
         ast::is_external_module_reference(&module_reference)
             && module_reference
@@ -1152,7 +1152,7 @@ pub fn is_external_module_import_equals(node: &Arc<Node>) -> bool {
 pub fn skip_export_specifier_symbol(
     symbol: &Arc<Symbol>,
     checker: &mut Checker,
-) -> Arc<Symbol> {
+) -> Arc<Symbol> { ::tsox_core::fntrace::enter("skip_export_specifier_symbol"); 
     for declaration in &symbol.declarations {
         if ast::is_export_specifier(declaration)
             && import_specifier_property_name(declaration).is_none()
@@ -1201,7 +1201,7 @@ pub fn skip_export_specifier_symbol(
 pub fn get_export_equals_local_symbol(
     imported_symbol: &Arc<Symbol>,
     checker: &mut Checker,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_export_equals_local_symbol"); 
     if imported_symbol.flags & ast::SymbolFlags::Alias != ast::SymbolFlags::None {
         return checker.get_immediate_aliased_symbol(imported_symbol);
     }
@@ -1218,14 +1218,14 @@ pub fn get_export_equals_local_symbol(
     None
 }
 
-pub fn binary_expression_right(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn binary_expression_right(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("binary_expression_right"); 
     match &node.data {
         NodeData::BinaryExpression(d) => Some(Arc::clone(&d.right)),
         _ => None,
     }
 }
 
-pub fn symbol_name_no_default(symbol: &Arc<Symbol>) -> String {
+pub fn symbol_name_no_default(symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("symbol_name_no_default"); 
     if symbol.name != "default" {
         return symbol.name.clone();
     }
@@ -1244,7 +1244,7 @@ pub fn find_module_references(
     source_files: &[Arc<SourceFile>],
     search_module_symbol: &Arc<Symbol>,
     checker: &Checker,
-) -> Vec<M5uModuleReference> {
+) -> Vec<M5uModuleReference> { ::tsox_core::fntrace::enter("find_module_references"); 
     let mut refs: Vec<M5uModuleReference> = Vec::new();
 
     for referencing_file in source_files {
@@ -1316,7 +1316,7 @@ pub fn find_module_references(
     refs
 }
 
-pub fn search_source_file_text(referencing_file: &Arc<SourceFile>) -> String {
+pub fn search_source_file_text(referencing_file: &Arc<SourceFile>) -> String { ::tsox_core::fntrace::enter("search_source_file_text"); 
     referencing_file.file_name.clone()
 }
 

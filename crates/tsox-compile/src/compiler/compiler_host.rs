@@ -8,7 +8,7 @@ pub trait CompilerHost: Send + Sync {
     fn fs_arc(&self) -> Arc<dyn FS>;
     fn current_directory(&self) -> &str;
     fn default_library_path(&self) -> &str;
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.fs().use_case_sensitive_file_names()
     }
 }
@@ -20,7 +20,7 @@ pub struct CompilerHostImpl {
 }
 
 impl CompilerHostImpl {
-    pub fn new(fs: Arc<dyn FS>, current_directory: String, default_library_path: String) -> Self {
+    pub fn new(fs: Arc<dyn FS>, current_directory: String, default_library_path: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             fs,
             current_directory,
@@ -30,16 +30,16 @@ impl CompilerHostImpl {
 }
 
 impl CompilerHost for CompilerHostImpl {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
-    fn fs_arc(&self) -> Arc<dyn FS> {
+    fn fs_arc(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs_arc"); 
         Arc::clone(&self.fs)
     }
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.current_directory
     }
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         &self.default_library_path
     }
 }
@@ -50,7 +50,7 @@ pub(crate) struct ResolutionHostAdapter {
 }
 
 impl ResolutionHostAdapter {
-    pub(crate) fn new(host: &dyn CompilerHost) -> Self {
+    pub(crate) fn new(host: &dyn CompilerHost) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             fs: host.fs_arc(),
             current_directory: host.current_directory().to_string(),
@@ -59,10 +59,10 @@ impl ResolutionHostAdapter {
 }
 
 impl tsox_tsoptions::module::ResolutionHost for ResolutionHostAdapter {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }

@@ -5,7 +5,7 @@ use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 use crate::checker::symboltracker::DEFAULT_MAXIMUM_TRUNCATION_LENGTH;
 
 impl Checker {
-    pub(crate) fn display_check_truncation(&mut self, flags: TypeFormatFlags) -> bool {
+    pub(crate) fn display_check_truncation(&mut self, flags: TypeFormatFlags) -> bool { ::tsox_core::fntrace::enter("display_check_truncation"); 
         if self.display_truncating {
             return true;
         }
@@ -18,7 +18,7 @@ impl Checker {
         self.display_truncating
     }
 
-    fn truncated_union_member_string(&mut self, ty: &Arc<Type>, flags: TypeFormatFlags) -> String {
+    fn truncated_union_member_string(&mut self, ty: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("truncated_union_member_string"); 
         let s = self.type_to_string_ex(ty, flags);
         if self.display_truncating
             && ty.flags.contains(TypeFlags::Object)
@@ -32,7 +32,7 @@ impl Checker {
         s
     }
 
-    pub(crate) fn union_to_string(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
+    pub(crate) fn union_to_string(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("union_to_string"); 
         if let TypeData::Union(u) = &t.data
             && let Some(origin) = &u.origin
         {
@@ -97,7 +97,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("intersection_to_string"); 
         let types = t.types().unwrap_or(&[]);
         let mut parts: Vec<String> = Vec::with_capacity(types.len());
         for (i, ty) in types.iter().enumerate() {
@@ -125,7 +125,7 @@ impl Checker {
         parts.join(" & ")
     }
 
-    pub(crate) fn type_parameter_to_string(&mut self, t: &Arc<Type>) -> String {
+    pub(crate) fn type_parameter_to_string(&mut self, t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("type_parameter_to_string"); 
         if let TypeData::TypeParameter(tp) = &t.data {
             if tp.is_this_type {
                 return "this".to_string();
@@ -141,7 +141,7 @@ impl Checker {
         &mut self,
         ia: &IndexedAccessTypeData,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("indexed_access_to_string"); 
         let obj = ia
             .object_type
             .as_ref()
@@ -167,7 +167,7 @@ impl Checker {
         &mut self,
         tl: &TemplateLiteralTypeData,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("template_literal_to_string"); 
         let mut result = String::new();
         for (i, text) in tl.texts.iter().enumerate() {
             result.push_str(text);
@@ -180,7 +180,7 @@ impl Checker {
         format!("`{}`", result)
     }
 
-    pub(crate) fn tuple_to_string(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
+    pub(crate) fn tuple_to_string(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("tuple_to_string"); 
         let TypeData::Tuple(tuple) = &t.data else {
             return "[]".to_string();
         };
@@ -233,7 +233,7 @@ impl Checker {
         format!("{readonly_prefix}[{}]", parts.join(", "))
     }
 
-    pub(crate) fn reference_to_string(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
+    pub(crate) fn reference_to_string(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("reference_to_string"); 
         let obj_data = match &t.data {
             TypeData::Object(o) => o,
             TypeData::Interface(i) => &i.object,
@@ -324,7 +324,7 @@ impl Checker {
     pub(crate) fn alias_chain_qualified_type_name(
         &mut self,
         symbol: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("alias_chain_qualified_type_name"); 
         use tsox_frontend::ast::SymbolFlags;
         if symbol.flags.intersects(SymbolFlags::Alias) {
             return None;
@@ -351,7 +351,7 @@ impl Checker {
         &self,
         sig: &Signature,
         i: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("signature_instantiated_param_type"); 
         let overrides = sig.instantiated_parameter_types.as_ref()?;
         let rest_offset = usize::from(sig.has_rest_parameter());
         let fixed = overrides.len().saturating_sub(rest_offset);
@@ -370,7 +370,7 @@ impl Checker {
         _t: &Arc<Type>,
         structured: &StructuredTypeData,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("function_type_to_string"); 
         let new_prefix;
         let sigs = structured.call_signatures();
         let sig = if sigs.is_empty() {
@@ -455,7 +455,7 @@ impl Checker {
         format!("{new_prefix}{tp_prefix}({}) => {}", params.join(", "), ret_str)
     }
 
-    pub(crate) fn signature_type_param_prefix(&mut self, sig: &Arc<Signature>) -> String {
+    pub(crate) fn signature_type_param_prefix(&mut self, sig: &Arc<Signature>) -> String { ::tsox_core::fntrace::enter("signature_type_param_prefix"); 
         if sig.type_parameters.is_empty() {
             return String::new();
         }
@@ -471,7 +471,7 @@ impl Checker {
         }
     }
 
-    fn type_param_decl_string(&mut self, tp: &Arc<Type>) -> String {
+    fn type_param_decl_string(&mut self, tp: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("type_param_decl_string"); 
         let Some(sym) = &tp.symbol else {
             return "T".to_string();
         };
@@ -498,7 +498,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn param_declared_optional(param: &Arc<Symbol>) -> bool {
+pub(crate) fn param_declared_optional(param: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("param_declared_optional"); 
     if param
         .flags
         .contains(tsox_frontend::ast::SymbolFlags::Optional)

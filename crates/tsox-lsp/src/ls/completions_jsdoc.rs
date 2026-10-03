@@ -117,7 +117,7 @@ pub fn jsdoc_position_completions(
     file: &Arc<SourceFile>,
     jsx: bool,
     position: usize,
-) -> JsDocPosition {
+) -> JsDocPosition { ::tsox_core::fntrace::enter("jsdoc_position_completions"); 
     let ranges = completions_context::comment_ranges(&file.text, jsx);
     let Some(range) = ranges.iter().find(|r| {
         r.pos < position && position < r.end && completions_context::is_doc_comment(r, &file.text)
@@ -270,7 +270,7 @@ pub fn jsdoc_position_completions(
     JsDocPosition::Blocked
 }
 
-fn tag_type_expression_span(tag: &Arc<Node>) -> Option<(usize, usize)> {
+fn tag_type_expression_span(tag: &Arc<Node>) -> Option<(usize, usize)> { ::tsox_core::fntrace::enter("tag_type_expression_span"); 
     let mut span: Option<(usize, usize)> = None;
     tsox_frontend::ast::node_data_generated::for_each_child(tag, |c| {
         if c.kind == SyntaxKind::JSDocTypeExpression && span.is_none() {
@@ -281,7 +281,7 @@ fn tag_type_expression_span(tag: &Arc<Node>) -> Option<(usize, usize)> {
     span
 }
 
-fn tag_name_of(tag: &Arc<Node>) -> Option<Arc<Node>> {
+fn tag_name_of(tag: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("tag_name_of"); 
     let mut name: Option<Arc<Node>> = None;
     tsox_frontend::ast::node_data_generated::for_each_child(tag, |c| {
         if c.kind == SyntaxKind::Identifier && name.is_none() {
@@ -300,7 +300,7 @@ fn parameter_name_completions(
     editing_name: &Arc<Node>,
     all_tags: &[Arc<Node>],
     doc_end: usize,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("parameter_name_completions"); 
     let name_thus_far = if editing_name.pos() < editing_name.end() {
         editing_name.text().to_string()
     } else {
@@ -364,7 +364,7 @@ pub fn jsdoc_import_tag_string_labels(
     file: &Arc<SourceFile>,
     tag: &Arc<Node>,
     position: usize,
-) -> Option<Vec<String>> {
+) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("jsdoc_import_tag_string_labels"); 
     let NodeData::JSDocImportTag(d) = &tag.data else {
         return None;
     };

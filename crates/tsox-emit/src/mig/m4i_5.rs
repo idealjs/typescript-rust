@@ -21,7 +21,7 @@ use crate::mig::m4g::r39k15_defs::NodeFactoryR39k15;
 use crate::mig::m4l_3::r39k10_defs::R39K10NodeExt;
 use tsox_frontend::ast::mig::m3c::statement_list;
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn visit_for_of_statement(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_for_of_statement(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_for_of_statement"); 
         let data = node.as_for_in_or_of_statement();
         let initializer = data.initializer.clone();
         if subtree_facts(&initializer).intersects(SubtreeFacts::CONTAINS_OBJECT_REST_OR_SPREAD)
@@ -98,7 +98,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn visit_binary_expression(&mut self, node: Arc<Node>, expression_result_is_unused: bool) -> Arc<Node> {
+    pub(crate) fn visit_binary_expression(&mut self, node: Arc<Node>, expression_result_is_unused: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_binary_expression"); 
         let data = node.as_binary_expression();
         if is_destructuring_assignment(&node) && contains_object_rest_or_spread(&data.left) {
             let mut tx = Transformer::new(|_, node| Some(node), Some(self.emit_context.clone()));
@@ -128,7 +128,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn visit_object_literal_expression(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_object_literal_expression(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_object_literal_expression"); 
         let data = node.as_object_literal_expression();
         if !subtree_facts(&node).intersects(SubtreeFacts::CONTAINS_OBJECT_REST_OR_SPREAD) {
             return self.visit_each_child(&node);
@@ -163,7 +163,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn chunk_object_literal_elements(&mut self, list: Option<&NodeList>) -> Vec<Arc<Node>> {
+    fn chunk_object_literal_elements(&mut self, list: Option<&NodeList>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("chunk_object_literal_elements"); 
         let list = match list {
             Some(l) if !l.nodes.is_empty() => l,
             _ => return Vec::new(),

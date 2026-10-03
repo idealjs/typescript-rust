@@ -7,7 +7,7 @@ use tsox_frontend::ast::{Node, SourceFile, SyntaxKind};
 pub(crate) fn is_in_property_initializer_or_class_static_block_ex(
     node: &Arc<Node>,
     ignore_arrow_functions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_in_property_initializer_or_class_static_block_ex"); 
     let mut cur = node.parent();
     while let Some(n) = cur {
         match n.kind {
@@ -48,11 +48,11 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-fn source_file_key(source_file: &SourceFile) -> usize {
+fn source_file_key(source_file: &SourceFile) -> usize { ::tsox_core::fntrace::enter("source_file_key"); 
     Arc::as_ptr(&source_file.node) as *const () as usize
 }
 
-pub(crate) fn source_file_deferred_nodes_insert(source_file: &SourceFile, node: Arc<Node>) {
+pub(crate) fn source_file_deferred_nodes_insert(source_file: &SourceFile, node: Arc<Node>) { ::tsox_core::fntrace::enter("source_file_deferred_nodes_insert"); 
     SOURCE_FILE_DEFERRED_NODES.with(|map| {
         let mut map = map.borrow_mut();
         let nodes = map.entry(source_file_key(source_file)).or_default();
@@ -64,7 +64,7 @@ pub(crate) fn source_file_deferred_nodes_insert(source_file: &SourceFile, node: 
     });
 }
 
-pub(crate) fn take_source_file_deferred_nodes(source_file: &SourceFile) -> Vec<Arc<Node>> {
+pub(crate) fn take_source_file_deferred_nodes(source_file: &SourceFile) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("take_source_file_deferred_nodes"); 
     SOURCE_FILE_DEFERRED_NODES.with(|map| {
         map.borrow_mut()
             .remove(&source_file_key(source_file))

@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn fixup_jsx_text(text: &str) -> String {
+pub(crate) fn fixup_jsx_text(text: &str) -> String { ::tsox_core::fntrace::enter("fixup_jsx_text"); 
     let decoded = decode_jsx_entities(text);
     if !decoded.contains('\n') {
         return decoded;
@@ -25,7 +25,7 @@ pub(crate) fn fixup_jsx_text(text: &str) -> String {
     parts.join(" ")
 }
 
-pub(crate) fn decode_jsx_entities(text: &str) -> String {
+pub(crate) fn decode_jsx_entities(text: &str) -> String { ::tsox_core::fntrace::enter("decode_jsx_entities"); 
     if !text.contains('&') {
         return text.to_string();
     }
@@ -43,7 +43,7 @@ pub(crate) fn decode_jsx_entities(text: &str) -> String {
     result
 }
 
-pub(crate) fn escape_js_string(text: &str) -> String {
+pub(crate) fn escape_js_string(text: &str) -> String { ::tsox_core::fntrace::enter("escape_js_string"); 
     let mut result = String::new();
     for c in text.chars() {
         match c {
@@ -62,7 +62,7 @@ pub(crate) fn build_jsx_import(
     usage: &JsxRuntimeUsage,
     import_source: &str,
     commonjs: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("build_jsx_import"); 
     let mut specs: Vec<&str> = Vec::new();
     let mut bindings: Vec<&str> = Vec::new();
     if usage.used_fragment {
@@ -94,7 +94,7 @@ pub fn emit_program(
     options: &CompilerOptions,
     fs: &dyn FS,
     write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
-) -> EmitResult {
+) -> EmitResult { ::tsox_core::fntrace::enter("emit_program"); 
     let common_source_directory = compute_program_common_source_directory(source_files, options);
     let mut result = EmitResult::default();
     for source_file in source_files {
@@ -117,7 +117,7 @@ pub fn emit_program(
 pub fn compute_program_common_source_directory(
     source_files: &[Arc<SourceFile>],
     options: &CompilerOptions,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("compute_program_common_source_directory"); 
     let common_dir = if !options.root_dir.is_empty() {
         options.root_dir.clone()
     } else if !options.config_file_path.is_empty() {
@@ -137,7 +137,7 @@ pub fn compute_program_common_source_directory(
     }
 }
 
-pub(crate) fn compute_common_source_directory_of_filenames(file_names: &[String]) -> String {
+pub(crate) fn compute_common_source_directory_of_filenames(file_names: &[String]) -> String { ::tsox_core::fntrace::enter("compute_common_source_directory_of_filenames"); 
     let mut common_components: Option<Vec<String>> = None;
     for file_name in file_names {
         let mut components = tsox_core::tspath::get_path_components(file_name, "");

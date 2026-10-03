@@ -41,14 +41,14 @@ pub mod m5v3_ext {
     }
 
     impl M5v3NodeExt for Node {
-        fn import_clause(&self) -> Option<&Arc<Node>> {
+        fn import_clause(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("import_clause"); 
             match &self.data {
                 NodeData::ImportDeclaration(d) => d.import_clause.as_ref(),
                 _ => None,
             }
         }
 
-        fn module_specifier(&self) -> Option<Arc<Node>> {
+        fn module_specifier(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("module_specifier"); 
             match &self.data {
                 NodeData::ImportDeclaration(d) => Some(Arc::clone(&d.module_specifier)),
                 NodeData::ExportDeclaration(d) => d.module_specifier.clone(),
@@ -56,7 +56,7 @@ pub mod m5v3_ext {
             }
         }
 
-        fn attributes(&self) -> Option<Arc<Node>> {
+        fn attributes(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("attributes"); 
             match &self.data {
                 NodeData::ImportDeclaration(d) => d.attributes.clone(),
                 NodeData::ExportDeclaration(d) => d.attributes.clone(),
@@ -64,21 +64,21 @@ pub mod m5v3_ext {
             }
         }
 
-        fn named_bindings(&self) -> Option<&Arc<Node>> {
+        fn named_bindings(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("named_bindings"); 
             match &self.data {
                 NodeData::ImportClause(d) => d.named_bindings.as_ref(),
                 _ => None,
             }
         }
 
-        fn phase_modifier(&self) -> Option<SyntaxKind> {
+        fn phase_modifier(&self) -> Option<SyntaxKind> { ::tsox_core::fntrace::enter("phase_modifier"); 
             match &self.data {
                 NodeData::ImportClause(d) => d.phase_modifier,
                 _ => None,
             }
         }
 
-        fn is_type_only(&self) -> bool {
+        fn is_type_only(&self) -> bool { ::tsox_core::fntrace::enter("is_type_only"); 
             match &self.data {
                 NodeData::ImportClause(d) => d.phase_modifier == Some(SyntaxKind::TypeKeyword),
                 NodeData::ImportEqualsDeclaration(d) => d.is_type_only,
@@ -148,14 +148,14 @@ pub mod m5v3_ext {
         ) -> Arc<Node>;
     }
 
-    fn clone_list(elements: &NodeList) -> Arc<NodeList> {
+    fn clone_list(elements: &NodeList) -> Arc<NodeList> { ::tsox_core::fntrace::enter("clone_list"); 
         Arc::new(NodeList {
             loc: elements.loc,
             nodes: elements.nodes.clone(),
         })
     }
 
-    fn updated_from(node: &Node, kind: SyntaxKind, data: NodeData) -> Arc<Node> {
+    fn updated_from(node: &Node, kind: SyntaxKind, data: NodeData) -> Arc<Node> { ::tsox_core::fntrace::enter("updated_from"); 
         let mut updated = Node::new(kind, data);
         updated.loc = node.loc;
         updated.flags = node.flags;
@@ -163,7 +163,7 @@ pub mod m5v3_ext {
     }
 
     impl M5v3FactoryExt for NodeFactory {
-        fn new_identifier(&self, text: &str) -> Arc<Node> {
+        fn new_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_identifier"); 
             self.new_identifier(text)
         }
 
@@ -172,7 +172,7 @@ pub mod m5v3_ext {
             is_type_only: bool,
             property_name: Option<Arc<Node>>,
             name: Arc<Node>,
-        ) -> Arc<Node> {
+        ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_specifier"); 
             Arc::new(Node::new(
                 SyntaxKind::ImportSpecifier,
                 NodeData::ImportSpecifier(ImportSpecifierData {
@@ -183,7 +183,7 @@ pub mod m5v3_ext {
             ))
         }
 
-        fn new_named_imports(&self, elements: NodeList) -> Arc<Node> {
+        fn new_named_imports(&self, elements: NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("new_named_imports"); 
             Arc::new(Node::new(
                 SyntaxKind::NamedImports,
                 NodeData::NamedImports(NamedImportsData {
@@ -197,7 +197,7 @@ pub mod m5v3_ext {
             phase_modifier: Option<SyntaxKind>,
             name: Option<Arc<Node>>,
             named_bindings: Option<Arc<Node>>,
-        ) -> Arc<Node> {
+        ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_clause"); 
             Arc::new(Node::new(
                 SyntaxKind::ImportClause,
                 NodeData::ImportClause(ImportClauseData {
@@ -214,7 +214,7 @@ pub mod m5v3_ext {
             is_type_only: bool,
             property_name: Option<Arc<Node>>,
             name: Arc<Node>,
-        ) -> Arc<Node> {
+        ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_import_specifier"); 
             updated_from(
                 node,
                 SyntaxKind::ImportSpecifier,
@@ -226,7 +226,7 @@ pub mod m5v3_ext {
             )
         }
 
-        fn update_named_imports(&self, node: &Arc<Node>, elements: NodeList) -> Arc<Node> {
+        fn update_named_imports(&self, node: &Arc<Node>, elements: NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("update_named_imports"); 
             updated_from(
                 node,
                 SyntaxKind::NamedImports,
@@ -242,7 +242,7 @@ pub mod m5v3_ext {
             phase_modifier: Option<SyntaxKind>,
             name: Option<Arc<Node>>,
             named_bindings: Option<Arc<Node>>,
-        ) -> Arc<Node> {
+        ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_import_clause"); 
             updated_from(
                 node,
                 SyntaxKind::ImportClause,
@@ -261,7 +261,7 @@ pub mod m5v3_ext {
             import_clause: Option<Arc<Node>>,
             module_specifier: Arc<Node>,
             attributes: Option<Arc<Node>>,
-        ) -> Arc<Node> {
+        ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_import_declaration"); 
             updated_from(
                 node,
                 SyntaxKind::ImportDeclaration,
@@ -274,7 +274,7 @@ pub mod m5v3_ext {
             )
         }
 
-        fn update_named_exports(&self, node: &Arc<Node>, elements: &NodeList) -> Arc<Node> {
+        fn update_named_exports(&self, node: &Arc<Node>, elements: &NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("update_named_exports"); 
             updated_from(
                 node,
                 SyntaxKind::NamedExports,
@@ -292,7 +292,7 @@ pub mod m5v3_ext {
             export_clause: Option<Arc<Node>>,
             module_specifier: Option<Arc<Node>>,
             attributes: Option<Arc<Node>>,
-        ) -> Arc<Node> {
+        ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_export_declaration"); 
             updated_from(
                 node,
                 SyntaxKind::ExportDeclaration,
@@ -317,11 +317,11 @@ pub mod m5v3_ext {
     }
 
     impl M5v3TrackerExt for crate::ls::change_tracker::Tracker {
-        fn set_emit_flags(&mut self, node: &Arc<Node>, flags: EmitFlags) {
+        fn set_emit_flags(&mut self, node: &Arc<Node>, flags: EmitFlags) { ::tsox_core::fntrace::enter("set_emit_flags"); 
             M5V3_EMIT_CONTEXT.with(|ctx| ctx.borrow().set_emit_flags(node, flags));
         }
 
-        fn add_emit_flags(&mut self, node: &Arc<Node>, flags: EmitFlags) {
+        fn add_emit_flags(&mut self, node: &Arc<Node>, flags: EmitFlags) { ::tsox_core::fntrace::enter("add_emit_flags"); 
             M5V3_EMIT_CONTEXT.with(|ctx| ctx.borrow().add_emit_flags(node, flags));
         }
     }
@@ -358,7 +358,7 @@ pub fn organize_imports_worker(
     program: &tsox_compile::compiler::Program,
     change_tracker: &mut ChangeTracker,
     ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext,
-) {
+) { ::tsox_core::fntrace::enter("organize_imports_worker"); 
     if old_import_decls.is_empty() {
         return;
     }
@@ -477,11 +477,11 @@ pub fn organize_imports_worker(
     }
 }
 
-fn new_user_preferences_for_worker() -> M5vUserPreferences {
+fn new_user_preferences_for_worker() -> M5vUserPreferences { ::tsox_core::fntrace::enter("new_user_preferences_for_worker"); 
     crate::ls::lsutil::new_default_user_preferences()
 }
 
-pub fn group_by_module_specifier(imports: &[Arc<Node>]) -> Vec<Vec<Arc<Node>>> {
+pub fn group_by_module_specifier(imports: &[Arc<Node>]) -> Vec<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("group_by_module_specifier"); 
     let mut groups: HashMap<String, Vec<Arc<Node>>> = HashMap::new();
     let mut order: Vec<String> = Vec::new();
 
@@ -507,7 +507,7 @@ pub fn remove_unused_imports(
     type_checker: &mut tsox_checker::checker::Checker,
     program: &tsox_compile::compiler::Program,
     change_tracker: &mut ChangeTracker,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("remove_unused_imports"); 
     let compiler_options = program.options();
     let jsx_elements_present = source_file
         .node
@@ -634,7 +634,7 @@ pub fn filter_used_import_specifiers(
     source_file: &Arc<SourceFile>,
     jsx_elements_present: bool,
     jsx_mode_needs_explicit_import: bool,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("filter_used_import_specifiers"); 
     let mut result = Vec::new();
     for elem in elements {
         let spec = elem.as_import_specifier();
@@ -654,7 +654,7 @@ pub fn filter_used_import_specifiers(
 pub fn has_module_declaration_matching_specifier(
     source_file: &Arc<SourceFile>,
     module_specifier: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_module_declaration_matching_specifier"); 
     let Some(module_specifier) = module_specifier else {
         return false;
     };
@@ -672,7 +672,7 @@ pub fn has_module_declaration_matching_specifier(
     false
 }
 
-pub fn get_import_attributes_key(attributes: Option<&Arc<Node>>) -> String {
+pub fn get_import_attributes_key(attributes: Option<&Arc<Node>>) -> String { ::tsox_core::fntrace::enter("get_import_attributes_key"); 
     let Some(attributes) = attributes else {
         return String::new();
     };
@@ -709,7 +709,7 @@ pub fn get_import_attributes_key(attributes: Option<&Arc<Node>>) -> String {
 pub fn group_by_newline_contiguous(
     source_file: &Arc<SourceFile>,
     decls: &[Arc<Node>],
-) -> Vec<Vec<Arc<Node>>> {
+) -> Vec<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("group_by_newline_contiguous"); 
     let mut s = scanner::Scanner::new(String::new());
     s.set_skip_trivia(false);
     let mut groups: Vec<Vec<Arc<Node>>> = Vec::new();
@@ -729,7 +729,7 @@ pub fn group_by_newline_contiguous(
     groups
 }
 
-pub fn is_new_group(source_file: &Arc<SourceFile>, decl: &Arc<Node>, s: &mut scanner::Scanner) -> bool {
+pub fn is_new_group(source_file: &Arc<SourceFile>, decl: &Arc<Node>, s: &mut scanner::Scanner) -> bool { ::tsox_core::fntrace::enter("is_new_group"); 
     let full_start = decl.pos();
     if full_start < 0 {
         return false;
@@ -770,7 +770,7 @@ pub struct ImportGroup {
 }
 
 impl ImportGroup {
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.default_imports.is_empty()
             && self.namespace_imports.is_empty()
             && self.named_imports.is_empty()
@@ -778,7 +778,7 @@ impl ImportGroup {
 }
 
 impl Default for ImportGroup {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         ImportGroup {
             default_imports: Vec::new(),
             namespace_imports: Vec::new(),
@@ -799,7 +799,7 @@ pub fn coalesce_imports_worker(
     specifier_comparer: &StatementComparer,
     source_file: Option<&Arc<SourceFile>>,
     change_tracker: &mut ChangeTracker,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("coalesce_imports_worker"); 
     if import_decls.is_empty() {
         return import_decls.to_vec();
     }
@@ -1043,7 +1043,7 @@ pub fn coalesce_imports_worker(
     coalesced_imports
 }
 
-pub fn get_categorized_imports(import_decls: &[Arc<Node>]) -> CategorizedImports {
+pub fn get_categorized_imports(import_decls: &[Arc<Node>]) -> CategorizedImports { ::tsox_core::fntrace::enter("get_categorized_imports"); 
     let mut import_without_clause: Option<Arc<Node>> = None;
     let mut type_only_imports = ImportGroup::default();
     let mut regular_imports = ImportGroup::default();
@@ -1093,7 +1093,7 @@ pub fn get_categorized_imports(import_decls: &[Arc<Node>]) -> CategorizedImports
 pub fn get_new_import_specifiers(
     named_imports: &[Arc<Node>],
     factory: &NodeFactory,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_new_import_specifiers"); 
     let mut result: Vec<Arc<Node>> = Vec::new();
 
     for named_import in named_imports {
@@ -1130,7 +1130,7 @@ pub fn get_new_import_specifiers(
     result
 }
 
-pub fn try_get_named_binding_elements(named_import: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn try_get_named_binding_elements(named_import: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_named_binding_elements"); 
     if named_import.kind != SyntaxKind::ImportDeclaration {
         return Vec::new();
     }

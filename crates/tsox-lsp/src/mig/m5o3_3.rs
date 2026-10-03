@@ -34,7 +34,7 @@ use crate::ls::lsutil_user_preferences::UserPreferences;
 use tsox_compile::compiler::Program;
 
 impl RegistryBuilder {
-    pub fn get_nearest_ancestor_directory_with_package_json(&self, file_path: &Path) -> Option<Directory> {
+    pub fn get_nearest_ancestor_directory_with_package_json(&self, file_path: &Path) -> Option<Directory> { ::tsox_core::fntrace::enter("get_nearest_ancestor_directory_with_package_json"); 
         tsox_core::tspath::mig::m3i::for_each_ancestor_directory_path(&file_path.get_directory_path(), &mut |dir_path: &Path| {
             self.directories
                 .entries
@@ -44,7 +44,7 @@ impl RegistryBuilder {
         })
     }
 
-    pub fn resolve_ambient_module_name(&self, module_name: &str, from_path: &Path) -> Vec<String> {
+    pub fn resolve_ambient_module_name(&self, module_name: &str, from_path: &Path) -> Vec<String> { ::tsox_core::fntrace::enter("resolve_ambient_module_name"); 
         tsox_core::tspath::mig::m3i::for_each_ancestor_directory_path(from_path, &mut |dir_path: &Path| {
             if let Some(bucket) = self.node_modules.entries.get(dir_path) {
                 if let Some(file_names) = bucket.ambient_module_names.get(module_name) {
@@ -62,7 +62,7 @@ impl RegistryBuilder {
         all_resolved_package_names: &HashMap<Path, Set<String>>,
         dir_name: &str,
         dir_path: &Path,
-    ) -> Option<Set<String>> {
+    ) -> Option<Set<String>> { ::tsox_core::fntrace::enter("compute_dependencies_for_node_modules_directory"); 
         for (path, _) in &change.open_files {
             if dir_path.contains_path(path) && self.get_nearest_ancestor_directory_with_package_json(path).is_none() {
                 return None;
@@ -90,7 +90,7 @@ impl RegistryBuilder {
         package_names: &Set<String>,
         dir_name: &str,
         dir_path: &Path,
-    ) -> Vec<DiscoveredPackage> {
+    ) -> Vec<DiscoveredPackage> { ::tsox_core::fntrace::enter("discover_bucket_packages"); 
         let mut result: Vec<DiscoveredPackage> = Vec::with_capacity(package_names.len());
         for package_name in package_names.iter() {
             let types_package_name = tsox_tsoptions::module::get_types_package_name(package_name);
@@ -152,7 +152,7 @@ impl RegistryBuilder {
         project_reference_outputs: &HashMap<Path, String>,
         file_exclude_patterns: Option<&crate::ls::autoimport::SpecMatcher>,
         enable_directory_search: bool,
-    ) -> Option<PerPackageExtractionResult> {
+    ) -> Option<PerPackageExtractionResult> { ::tsox_core::fntrace::enter("extract_package"); 
         let package_json = package_json?;
         if !package_json.directory_exists {
             return None;
@@ -375,11 +375,11 @@ impl RegistryBuilder {
 struct SharedRegistryCloneHost(Arc<dyn RegistryCloneHost>);
 
 impl RegistryCloneHost for SharedRegistryCloneHost {
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         self.0.fs()
     }
 
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.0.get_current_directory()
     }
 
@@ -389,14 +389,14 @@ impl RegistryCloneHost for SharedRegistryCloneHost {
     ) -> (
         tsox_core::tspath::Path,
         Option<std::sync::Arc<tsox_compile::compiler::Program>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("get_default_project"); 
         self.0.get_default_project(path)
     }
 
     fn get_program_for_project(
         &self,
         project_path: &tsox_core::tspath::Path,
-    ) -> Option<std::sync::Arc<tsox_compile::compiler::Program>> {
+    ) -> Option<std::sync::Arc<tsox_compile::compiler::Program>> { ::tsox_core::fntrace::enter("get_program_for_project"); 
         self.0.get_program_for_project(project_path)
     }
 
@@ -404,25 +404,25 @@ impl RegistryCloneHost for SharedRegistryCloneHost {
         &self,
         file_name: &str,
         path: &tsox_core::tspath::Path,
-    ) -> Option<std::sync::Arc<tsox_frontend::ast::SourceFile>> {
+    ) -> Option<std::sync::Arc<tsox_frontend::ast::SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         self.0.get_source_file(file_name, path)
     }
 
     fn get_package_json(
         &self,
         file_name: &str,
-    ) -> Option<crate::project::auto_import::PackageJsonInfoCacheEntry> {
+    ) -> Option<crate::project::auto_import::PackageJsonInfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_json"); 
         self.0.get_package_json(file_name)
     }
 
-    fn dispose(&self) {
+    fn dispose(&self) { ::tsox_core::fntrace::enter("dispose"); 
         self.0.dispose()
     }
 }
 
 fn info_cache_entry_from_host_entry(
     entry: crate::project::auto_import::PackageJsonInfoCacheEntry,
-) -> tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry {
+) -> tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry { ::tsox_core::fntrace::enter("info_cache_entry_from_host_entry"); 
     tsox_tsoptions::packagejson::mig::x12::InfoCacheEntry {
         package_directory: entry.package_directory,
         directory_exists: entry.directory_exists,
@@ -431,7 +431,7 @@ fn info_cache_entry_from_host_entry(
 }
 
 impl tsox_checker::checker::Program for crate::ls::autoimport_alias_resolver::AliasResolver {
-    fn options(&self) -> &tsox_core::core::compiler_options::CompilerOptions {
+    fn options(&self) -> &tsox_core::core::compiler_options::CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         static OPTIONS: std::sync::OnceLock<tsox_core::core::compiler_options::CompilerOptions> =
             std::sync::OnceLock::new();
         OPTIONS.get_or_init(|| {
@@ -441,44 +441,44 @@ impl tsox_checker::checker::Program for crate::ls::autoimport_alias_resolver::Al
         })
     }
 
-    fn source_files(&self) -> &[Arc<SourceFile>] {
+    fn source_files(&self) -> &[Arc<SourceFile>] { ::tsox_core::fntrace::enter("source_files"); 
         &self.root_files
     }
 
-    fn bind_source_files(&self) {}
+    fn bind_source_files(&self) { ::tsox_core::fntrace::enter("bind_source_files"); }
 
-    fn file_exists(&self, _file_name: &str) -> bool {
+    fn file_exists(&self, _file_name: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         panic!("unimplemented")
     }
 
-    fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> {
+    fn get_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         let file = self.host.get_source_file(file_name, &(self.to_path)(file_name))?;
         tsox_checker::binder::bind_source_file(&file);
         Some(file)
     }
 
-    fn is_source_file_default_library(&self, _path: &str) -> bool {
+    fn is_source_file_default_library(&self, _path: &str) -> bool { ::tsox_core::fntrace::enter("is_source_file_default_library"); 
         false
     }
 
-    fn symbol_map(&self) -> &tsox_frontend::ast::NodeSymbolMap {
+    fn symbol_map(&self) -> &tsox_frontend::ast::NodeSymbolMap { ::tsox_core::fntrace::enter("symbol_map"); 
         panic!("unimplemented")
     }
 
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         self.host.get_current_directory()
     }
 
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.host.fs().use_case_sensitive_file_names()
     }
 
-    fn common_source_directory(&self) -> String {
+    fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         panic!("unimplemented")
     }
 }
 
-fn contains_path(parent: &str, target: &str, options: &tsox_core::tspath::ComparePathsOptions) -> bool {
+fn contains_path(parent: &str, target: &str, options: &tsox_core::tspath::ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("contains_path"); 
     use tsox_core::tspath;
     let parent = tspath::combine_paths(&options.current_directory, &[parent]);
     let target = tspath::combine_paths(&options.current_directory, &[target]);

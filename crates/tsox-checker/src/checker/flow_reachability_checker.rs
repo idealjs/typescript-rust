@@ -3,7 +3,7 @@
 use crate::checker::flow_impl_chunk::*;
 
 impl Checker {
-    pub fn is_reachable_flow_node(&mut self, flow: &Arc<FlowNode>) -> bool {
+    pub fn is_reachable_flow_node(&mut self, flow: &Arc<FlowNode>) -> bool { ::tsox_core::fntrace::enter("is_reachable_flow_node"); 
         let mut reduce_labels: Vec<(usize, Vec<Arc<FlowNode>>)> = Vec::new();
         self.is_reachable_flow_node_worker(flow, false, &mut reduce_labels)
     }
@@ -13,7 +13,7 @@ impl Checker {
         flow: &Arc<FlowNode>,
         no_cache_check: bool,
         reduce_labels: &mut Vec<(usize, Vec<Arc<FlowNode>>)>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_reachable_flow_node_worker"); 
         let mut flow = Arc::clone(flow);
         let mut no_cache_check = no_cache_check;
         loop {
@@ -95,7 +95,7 @@ impl Checker {
         }
     }
 
-    pub fn function_has_implicit_return(&mut self, fn_node: &Arc<Node>) -> bool {
+    pub fn function_has_implicit_return(&mut self, fn_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("function_has_implicit_return"); 
         let Some(end_flow) = self
             .program
             .symbol_map()
@@ -111,7 +111,7 @@ impl Checker {
 fn branch_label_antecedents<'a>(
     flow: &'a Arc<FlowNode>,
     reduce_labels: &'a [(usize, Vec<Arc<FlowNode>>)],
-) -> &'a [Arc<FlowNode>] {
+) -> &'a [Arc<FlowNode>] { ::tsox_core::fntrace::enter("branch_label_antecedents"); 
     let mut i = reduce_labels.len();
     while i != 0 {
         i -= 1;

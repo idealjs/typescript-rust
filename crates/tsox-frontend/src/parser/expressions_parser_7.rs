@@ -3,7 +3,7 @@
 use crate::parser::expressions::*;
 
 impl Parser {
-    pub(crate) fn parse_object_literal_element(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_object_literal_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_object_literal_element"); 
         let pos = self.token_pos();
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
         if dot_dot_dot_token.is_some() {
@@ -200,7 +200,7 @@ impl Parser {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn is_get_or_set_accessor(&self) -> bool {
+    pub(crate) fn is_get_or_set_accessor(&self) -> bool { ::tsox_core::fntrace::enter("is_get_or_set_accessor"); 
         let mut scanner = self.scanner.clone();
         let next = scanner.scan();
 
@@ -215,7 +215,7 @@ impl Parser {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn parse_object_accessor(&mut self, pos: usize, is_get: bool) -> Arc<Node> {
+    pub(crate) fn parse_object_accessor(&mut self, pos: usize, is_get: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_object_accessor"); 
         self.next_token();
         let name = self.parse_property_name();
         let body = self.parse_block_ex(true);
@@ -255,7 +255,7 @@ impl Parser {
         pos: usize,
         modifiers: Option<Arc<ModifierList>>,
         is_get: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_accessor"); 
         self.next_token();
         let name = self.parse_property_name();
         let type_parameters = self.parse_optional_type_parameters();

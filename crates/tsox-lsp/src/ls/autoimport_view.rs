@@ -42,7 +42,7 @@ pub struct ExistingImport {
 }
 
 impl PartialEq for ExistingImport {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         self.module_specifier == other.module_specifier && self.index == other.index
     }
 }
@@ -60,19 +60,19 @@ impl View {
         _project_key: tsox_core::tspath::Path,
         _program: Arc<Program>,
         _preferences: tsox_tsoptions::modulespecifiers::UserPreferences,
-    ) -> View {
+    ) -> View { ::tsox_core::fntrace::enter("new"); 
         todo!("View::new requires program and module infrastructure")
     }
 
-    pub fn get_allowed_endings(&mut self) -> &[ModuleSpecifierEnding] {
+    pub fn get_allowed_endings(&mut self) -> &[ModuleSpecifierEnding] { ::tsox_core::fntrace::enter("get_allowed_endings"); 
         todo!("View::get_allowed_endings requires modulespecifiers infrastructure")
     }
 
-    pub fn search(&self, _query: &str, _kind: QueryKind) -> Vec<Export> {
+    pub fn search(&self, _query: &str, _kind: QueryKind) -> Vec<Export> { ::tsox_core::fntrace::enter("search"); 
         todo!("View::search requires registry buckets")
     }
 
-    pub fn search_by_export_id(&self, _id: &ExportID) -> Vec<Export> {
+    pub fn search_by_export_id(&self, _id: &ExportID) -> Vec<Export> { ::tsox_core::fntrace::enter("search_by_export_id"); 
         todo!("View::search_by_export_id requires registry buckets")
     }
 
@@ -82,7 +82,7 @@ impl View {
         _position: Position,
         _for_jsx: bool,
         _is_type_only_location: bool,
-    ) -> Vec<FixAndExport> {
+    ) -> Vec<FixAndExport> { ::tsox_core::fntrace::enter("get_completions"); 
         todo!("View::get_completions requires scanner, checker, and fix infrastructure")
     }
 
@@ -92,19 +92,19 @@ impl View {
         _for_jsx: bool,
         _is_valid_type_only_use_site: bool,
         _usage_position: Option<&Position>,
-    ) -> Vec<Fix> {
+    ) -> Vec<Fix> { ::tsox_core::fntrace::enter("get_fixes"); 
         todo!("View::get_fixes requires fix infrastructure")
     }
 
-    pub fn compare_fixes_for_ranking(&self, _a: &Fix, _b: &Fix) -> std::cmp::Ordering {
+    pub fn compare_fixes_for_ranking(&self, _a: &Fix, _b: &Fix) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_fixes_for_ranking"); 
         todo!("View::compare_fixes_for_ranking")
     }
 
-    pub fn compare_fixes_for_sorting(&self, _a: &Fix, _b: &Fix) -> std::cmp::Ordering {
+    pub fn compare_fixes_for_sorting(&self, _a: &Fix, _b: &Fix) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_fixes_for_sorting"); 
         todo!("View::compare_fixes_for_sorting")
     }
 
-    pub fn should_use_require(&mut self) -> bool {
+    pub fn should_use_require(&mut self) -> bool { ::tsox_core::fntrace::enter("should_use_require"); 
         if let Some(v) = self.should_use_require_for_fixes {
             return v;
         }
@@ -113,7 +113,7 @@ impl View {
         v
     }
 
-    fn compute_should_use_require(&self) -> bool {
+    fn compute_should_use_require(&self) -> bool { ::tsox_core::fntrace::enter("compute_should_use_require"); 
         todo!("View::compute_should_use_require requires program infrastructure")
     }
 }

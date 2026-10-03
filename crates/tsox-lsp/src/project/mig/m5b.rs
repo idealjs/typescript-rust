@@ -13,7 +13,7 @@ use crate::project::snapshot::{APISnapshotRequest, Snapshot};
 use tsox_core::collections::set::Set;
 
 impl TypingsInfo {
-    pub fn equals(&self, other: &TypingsInfo) -> bool {
+    pub fn equals(&self, other: &TypingsInfo) -> bool { ::tsox_core::fntrace::enter("equals"); 
         let type_acquisition_equal = match (&self.type_acquisition, &other.type_acquisition) {
             (None, None) => true,
             (Some(a), Some(b)) => {
@@ -47,7 +47,7 @@ impl Session {
         old_snapshot: Option<&Snapshot>,
         old_project: Option<&crate::project::project::Project>,
         file_changes: FileChangeSummary,
-    ) -> Arc<Snapshot> {
+    ) -> Arc<Snapshot> { ::tsox_core::fntrace::enter("api_create_program"); 
         if let Some(old_snapshot) = old_snapshot {
             return old_snapshot.clone_for_program(
                 root_file_names.to_vec(),
@@ -79,7 +79,7 @@ impl Session {
         base_snapshot: &Snapshot,
         uri: crate::lsp::lsproto::DocumentUri,
         new_text: &str,
-    ) -> Result<Arc<Snapshot>, String> {
+    ) -> Result<Arc<Snapshot>, String> { ::tsox_core::fntrace::enter("api_update_temporary"); 
         let path = uri.path(base_snapshot.use_case_sensitive_file_names());
 
         let mut overlays = base_snapshot

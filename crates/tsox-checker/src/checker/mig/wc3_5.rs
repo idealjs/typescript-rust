@@ -24,7 +24,7 @@ impl Checker {
         prop_node: &Arc<Node>,
         containing_type: &Arc<Type>,
         is_unchecked_js: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_nonexistent_property"); 
         let key = (
             Arc::as_ptr(prop_node) as usize,
             Arc::as_ptr(containing_type) as usize,
@@ -180,7 +180,7 @@ impl Checker {
         self.add_error_or_suggestion(is_error, diagnostic);
     }
 
-    pub fn resolve_anonymous_type_members(&mut self, t: &Arc<Type>) {
+    pub fn resolve_anonymous_type_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_anonymous_type_members"); 
         let d = t.as_object_type().expect("object type data");
         if let Some(target) = d.target.as_ref() {
             self.set_structured_type_members(t, None, Vec::new(), Vec::new(), Vec::new());
@@ -305,7 +305,7 @@ impl Checker {
         }
     }
 
-    pub fn resolve_base_types_of_class(&mut self, t: &Arc<Type>) {
+    pub fn resolve_base_types_of_class(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_base_types_of_class"); 
         let resolved_base = self
             .get_base_constructor_type_of_class(t)
             .unwrap_or_else(|| self.undefined_type());
@@ -400,7 +400,7 @@ impl Checker {
         check_mode: CheckMode,
         call_chain_flags: SignatureFlags,
         head_message: Option<&'static msg::Message>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolve_call"); 
         let is_tagged_template = node.kind == SyntaxKind::TaggedTemplateExpression;
         let is_decorator = node.kind == SyntaxKind::Decorator;
         let is_jsx_opening_or_self_closing_element = ast::mig::m3g::is_jsx_opening_like_element(node);
@@ -481,7 +481,7 @@ impl Checker {
         node: &Arc<Node>,
         candidates_out_array: Option<&mut Vec<Arc<Signature>>>,
         check_mode: CheckMode,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolve_call_expression"); 
         if node.expression().unwrap().kind == SyntaxKind::SuperKeyword {
             let expr = node.expression().unwrap();
             self.check_super_expression(&expr);
@@ -626,7 +626,7 @@ impl Checker {
         node: &Arc<Node>,
         candidates_out_array: Option<&mut Vec<Arc<Signature>>>,
         check_mode: CheckMode,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("resolve_decorator"); 
         if !ast::can_have_decorators(node.parent().as_ref().unwrap()) {
             return Some(self.resolve_error_call(node));
         }
@@ -690,7 +690,7 @@ impl Checker {
         ignore_errors: bool,
         dont_resolve_alias: bool,
         location: Option<&Arc<Node>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_entity_name"); 
         if ast::node_is_missing(Some(name)) {
             return None;
         }

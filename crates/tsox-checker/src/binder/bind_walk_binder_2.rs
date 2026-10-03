@@ -9,7 +9,7 @@ impl Binder {
         node: &Arc<Node>,
         flags: SymbolFlags,
         name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_anonymous_declaration"); 
         let symbol = self.new_symbol(flags, name.to_string());
         let symbol_ptr = Arc::as_ptr(&symbol) as *mut Symbol;
         unsafe {
@@ -19,7 +19,7 @@ impl Binder {
         self.symbol_map.set_symbol(node, symbol);
     }
 
-    pub(crate) fn bind_import_clause(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_import_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_import_clause"); 
         let has_name = matches!(&node.data, NodeData::ImportClause(data) if data.name.is_some());
         if !has_name {
             return;
@@ -34,7 +34,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_export_assignment(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_export_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_export_assignment"); 
         let (is_export_equals, expression) = match &node.data {
             NodeData::ExportAssignment(data) => (data.is_export_equals, &data.expression),
             _ => return,
@@ -72,7 +72,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_export_declaration(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_export_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_export_declaration"); 
         let export_clause: Option<Arc<Node>> = match &node.data {
             NodeData::ExportDeclaration(data) => data.export_clause.clone(),
             _ => return,
@@ -307,7 +307,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_namespace_export_declaration(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_namespace_export_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_namespace_export_declaration"); 
         let parent_sym = match self.parent_symbol.clone() {
             Some(s) => s,
             None => return,
@@ -324,7 +324,7 @@ impl Binder {
             .insert(name, symbol);
     }
 
-    pub(crate) fn bind_container(&mut self, node: &Arc<Node>, flags: ContainerFlags) {
+    pub(crate) fn bind_container(&mut self, node: &Arc<Node>, flags: ContainerFlags) { ::tsox_core::fntrace::enter("bind_container"); 
         let prev_container = self.container.clone();
         let prev_block = self.block_scope_container.take();
 
@@ -491,7 +491,7 @@ impl Binder {
         self.parent_symbol = prev_parent_symbol;
     }
 
-    pub(crate) fn bind_children(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_children(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_children"); 
         let this = self as *mut Self;
         tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
             unsafe {
@@ -501,11 +501,11 @@ impl Binder {
         });
     }
 
-    pub fn symbol_count(&self) -> usize {
+    pub fn symbol_count(&self) -> usize { ::tsox_core::fntrace::enter("symbol_count"); 
         self.symbol_count
     }
 
-    pub(crate) fn bind_type_parameter(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_type_parameter(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_type_parameter"); 
         let parent_is_infer = node
             .parent()
             .as_ref()
@@ -532,7 +532,7 @@ impl Binder {
         self.declare_symbol(node, SymbolFlags::TypeParameter, SymbolFlags::TYPE);
     }
 
-    pub(crate) fn get_infer_type_container(&self, infer_node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn get_infer_type_container(&self, infer_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_infer_type_container"); 
         let mut current = Arc::clone(infer_node);
         loop {
             let parent = match current.parent() {
@@ -555,7 +555,7 @@ impl Binder {
         }
     }
 
-    fn expression_is_alias(expression: &Arc<Node>) -> bool {
+    fn expression_is_alias(expression: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("expression_is_alias"); 
         let mut cur = expression;
         loop {
             match cur.kind {
@@ -579,7 +579,7 @@ impl Binder {
     }
 }
 
-pub(crate) fn function_like_body_is_present(node: &Arc<Node>) -> bool {
+pub(crate) fn function_like_body_is_present(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("function_like_body_is_present"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.body.is_some(),
         NodeData::FunctionExpression(_) | NodeData::ArrowFunction(_) => true,
@@ -591,7 +591,7 @@ pub(crate) fn function_like_body_is_present(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_flow_transparent_function_expression(node: &Arc<Node>) -> bool {
+pub(crate) fn is_flow_transparent_function_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_flow_transparent_function_expression"); 
     let NodeData::FunctionExpression(data) = &node.data else {
         return false;
     };

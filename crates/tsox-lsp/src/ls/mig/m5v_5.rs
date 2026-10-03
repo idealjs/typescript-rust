@@ -15,7 +15,7 @@ use crate::lsp::lsproto_lsp::{DocumentUri, Range, TextEdit};
 
 pub type M5vDiagnosticMessage = tsox_core::diagnostics::Message;
 
-fn m5v5_m5u_converters() -> crate::mig::m5u_conv::M5uConverters {
+fn m5v5_m5u_converters() -> crate::mig::m5u_conv::M5uConverters { ::tsox_core::fntrace::enter("m5v5_m5u_converters"); 
     crate::mig::m5u_conv::new_converters(
         crate::ls::lsconv_converters::PositionEncodingKind::Utf16,
         Box::new(crate::ls::lsconv_linemap::compute_lsp_line_starts),
@@ -43,7 +43,7 @@ pub struct M5vRenameInfo {
 }
 
 impl M5vRenameInfo {
-    fn error(message: String) -> Self {
+    fn error(message: String) -> Self { ::tsox_core::fntrace::enter("error"); 
         M5vRenameInfo {
             can_rename: false,
             display_name: String::new(),
@@ -58,7 +58,7 @@ impl M5vRenameInfo {
 
 pub fn deduplicate_rename_edits(
     mapped_edits: &[MappedRenameEdit],
-) -> (Option<HashMap<DocumentUri, Vec<TextEdit>>>, bool) {
+) -> (Option<HashMap<DocumentUri, Vec<TextEdit>>>, bool) { ::tsox_core::fntrace::enter("deduplicate_rename_edits"); 
     let mut edit_texts: HashMap<RenameEditKeyComparable, String> = HashMap::new();
     let mut unique_edits: Vec<&MappedRenameEdit> = Vec::with_capacity(mapped_edits.len());
     for mapped_edit in mapped_edits {
@@ -103,7 +103,7 @@ struct RenameEditKeyComparable {
 fn source_file_of_node(
     program: &tsox_compile::compiler::Program,
     node: &Arc<Node>,
-) -> Option<Arc<SourceFile>> {
+) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_of_node"); 
     let file_node = ast::get_source_file_of_node(node)?;
     program
         .source_files()
@@ -115,7 +115,7 @@ fn source_file_of_node(
 pub fn is_defined_in_library_file(
     program: &tsox_compile::compiler::Program,
     declaration: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_defined_in_library_file"); 
     let decl_source_file = source_file_of_node(program, declaration)
         .unwrap_or_else(|| panic!("is_defined_in_library_file: declaration not contained in a SourceFile"));
     program.is_source_file_default_library(&decl_source_file.file_name)
@@ -127,7 +127,7 @@ pub fn would_rename_in_other_node_modules(
     symbol: &Arc<Symbol>,
     ch: &mut Checker,
     preferences: &crate::ls::lsutil::UserPreferences,
-) -> Option<M5vDiagnosticMessage> {
+) -> Option<M5vDiagnosticMessage> { ::tsox_core::fntrace::enter("would_rename_in_other_node_modules"); 
     let mut sym = Arc::clone(symbol);
     if !preferences.use_aliases_for_rename.is_true_or_unknown()
         && symbol.flags.contains(ast::SymbolFlags::Alias)
@@ -181,7 +181,7 @@ pub fn would_rename_in_other_node_modules(
 
 pub fn client_supports_will_rename_files(
     ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("client_supports_will_rename_files"); 
     crate::mig::m5m::get_client_capabilities(ctx)
         .raw
         .pointer("/workspace/fileOperations/willRename")
@@ -191,7 +191,7 @@ pub fn client_supports_will_rename_files(
 
 pub fn client_supports_document_changes(
     ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("client_supports_document_changes"); 
     crate::mig::m5m::get_client_capabilities(ctx)
         .raw
         .pointer("/workspace/workspaceEdit/documentChanges")
@@ -201,7 +201,7 @@ pub fn client_supports_document_changes(
 
 pub fn client_supports_rename_resource_operations(
     ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("client_supports_rename_resource_operations"); 
     crate::mig::m5m::get_client_capabilities(ctx)
         .raw
         .pointer("/workspace/workspaceEdit/resourceOperations")
@@ -211,7 +211,7 @@ pub fn client_supports_rename_resource_operations(
         })
 }
 
-pub fn get_quote_from_preference(quote_preference: crate::ls::lsutil::QuotePreference) -> String {
+pub fn get_quote_from_preference(quote_preference: crate::ls::lsutil::QuotePreference) -> String { ::tsox_core::fntrace::enter("get_quote_from_preference"); 
     if quote_preference == crate::ls::lsutil::QuotePreference::Single {
         return "'".to_string();
     }
@@ -221,11 +221,11 @@ pub fn get_quote_from_preference(quote_preference: crate::ls::lsutil::QuotePrefe
 pub fn get_rename_info_error(
     ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext,
     message: M5vDiagnosticMessage,
-) -> M5vRenameInfo {
+) -> M5vRenameInfo { ::tsox_core::fntrace::enter("get_rename_info_error"); 
     M5vRenameInfo::error(message.localize(&locale_from_ctx(ctx), &[]))
 }
 
-fn locale_from_ctx(_ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext) -> tsox_core::locale::Locale {
+fn locale_from_ctx(_ctx: &crate::mig::m5m::ResolvedClientCapabilitiesContext) -> tsox_core::locale::Locale { ::tsox_core::fntrace::enter("locale_from_ctx"); 
     tsox_core::locale::Locale(String::new())
 }
 
@@ -234,7 +234,7 @@ pub fn get_rename_info_success(
     source_file: &Arc<SourceFile>,
     display_name: &str,
     converters: &crate::mig::m5u_conv::M5uConverters,
-) -> M5vRenameInfo {
+) -> M5vRenameInfo { ::tsox_core::fntrace::enter("get_rename_info_success"); 
     let mut start = astnav::get_start_of_node(node, source_file, false);
     let mut end = node.end();
     if ast::is_string_literal_like(node) {
@@ -271,7 +271,7 @@ impl LanguageService {
         specifier: &Arc<Node>,
         source_file: &Arc<SourceFile>,
         module_symbol: &Arc<Symbol>,
-    ) -> (M5vRenameInfo, bool) {
+    ) -> (M5vRenameInfo, bool) { ::tsox_core::fntrace::enter("m5v_get_rename_info_for_module"); 
         if !tsox_core::tspath::is_external_module_name_relative(&specifier.text()) {
             return (
                 get_rename_info_error(
@@ -296,7 +296,7 @@ impl LanguageService {
         old_path: &str,
         specifier_text: &str,
         new_name: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("m5v_get_new_file_name_for_module_rename"); 
         let mut new_path = tsox_core::tspath::combine_paths(
             &tsox_core::tspath::get_directory_path(old_path),
             &[new_name],
@@ -317,7 +317,7 @@ impl LanguageService {
         new_path
     }
 
-    pub fn m5v_rename_edit_range(&self, entry: &mut ReferenceEntry) -> (Range, bool) {
+    pub fn m5v_rename_edit_range(&self, entry: &mut ReferenceEntry) -> (Range, bool) { ::tsox_core::fntrace::enter("m5v_rename_edit_range"); 
         self.resolve_entry(entry);
         let Some(node) = entry.node.clone() else {
             let program = self.get_program();
@@ -361,7 +361,7 @@ impl LanguageService {
         symbol: &Arc<Symbol>,
         ch: &mut Checker,
         program: &tsox_compile::compiler::Program,
-    ) -> Option<M5vDiagnosticMessage> {
+    ) -> Option<M5vDiagnosticMessage> { ::tsox_core::fntrace::enter("m5v_rename_blocked_reason"); 
         for declaration in &symbol.declarations {
             if is_defined_in_library_file(program, &declaration) {
                 return Some(

@@ -45,15 +45,15 @@ impl R40K08EmitResolverExt for EmitResolver {
         &self,
         _node: &Arc<Node>,
         _prefix_locals: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_export_container_r40k08"); 
         None
     }
 
-    fn get_jsx_factory_entity_r40k08(&self, _location: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_jsx_factory_entity_r40k08(&self, _location: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsx_factory_entity_r40k08"); 
         None
     }
 
-    fn get_jsx_fragment_factory_entity_r40k08(&self, _location: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_jsx_fragment_factory_entity_r40k08(&self, _location: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsx_fragment_factory_entity_r40k08"); 
         None
     }
 }
@@ -87,26 +87,26 @@ pub struct JsxTransformer {
 }
 
 impl JsxTransformer {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    fn emit_context(&mut self) -> &mut EmitContext {
+    fn emit_context(&mut self) -> &mut EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         &mut self.emit_context
     }
 
-    fn visitor(&mut self) -> JsxNodeVisitor<'_> {
+    fn visitor(&mut self) -> JsxNodeVisitor<'_> { ::tsox_core::fntrace::enter("visitor"); 
         JsxNodeVisitor { tx: self }
     }
 
-    fn utilized_imports_get(&self, import_source: &str) -> Option<&HashMap<String, Arc<Node>>> {
+    fn utilized_imports_get(&self, import_source: &str) -> Option<&HashMap<String, Arc<Node>>> { ::tsox_core::fntrace::enter("utilized_imports_get"); 
         self.utilized_implicit_runtime_imports
             .iter()
             .find(|(k, _)| k == import_source)
             .map(|(_, v)| v)
     }
 
-    fn utilized_imports_entry_mut(&mut self, import_source: &str) -> &mut HashMap<String, Arc<Node>> {
+    fn utilized_imports_entry_mut(&mut self, import_source: &str) -> &mut HashMap<String, Arc<Node>> { ::tsox_core::fntrace::enter("utilized_imports_entry_mut"); 
         if let Some(idx) =
             self.utilized_implicit_runtime_imports.iter().position(|(k, _)| k == import_source)
         {
@@ -118,7 +118,7 @@ impl JsxTransformer {
         &mut self.utilized_implicit_runtime_imports[last].1
     }
 
-    pub fn get_current_file_name_expression(&mut self) -> Arc<Node> {
+    pub fn get_current_file_name_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("get_current_file_name_expression"); 
         if let Some(d) = &self.filename_declaration {
             return d.as_variable_declaration().name.clone();
         }
@@ -139,7 +139,7 @@ impl JsxTransformer {
         d.as_variable_declaration().name.clone()
     }
 
-    pub fn get_jsx_factory_callee_primitive(&self, is_static_children: bool) -> &'static str {
+    pub fn get_jsx_factory_callee_primitive(&self, is_static_children: bool) -> &'static str { ::tsox_core::fntrace::enter("get_jsx_factory_callee_primitive"); 
         if self.compiler_options.jsx == JsxEmit::ReactJSXDev {
             return "jsxDEV";
         }
@@ -149,16 +149,16 @@ impl JsxTransformer {
         "jsx"
     }
 
-    pub fn get_jsx_factory_callee(&mut self, is_static_children: bool) -> Arc<Node> {
+    pub fn get_jsx_factory_callee(&mut self, is_static_children: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("get_jsx_factory_callee"); 
         let t = self.get_jsx_factory_callee_primitive(is_static_children);
         self.get_implicit_import_for_name(t)
     }
 
-    pub fn get_implicit_jsx_fragment_reference(&mut self) -> Arc<Node> {
+    pub fn get_implicit_jsx_fragment_reference(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("get_implicit_jsx_fragment_reference"); 
         self.get_implicit_import_for_name("Fragment")
     }
 
-    pub fn get_implicit_import_for_name(&mut self, name: &str) -> Arc<Node> {
+    pub fn get_implicit_import_for_name(&mut self, name: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("get_implicit_import_for_name"); 
         let import_source = self.import_specifier.clone();
         let import_source = if name != "createElement" {
             get_jsx_runtime_import(&import_source, &self.compiler_options)
@@ -196,11 +196,11 @@ impl JsxTransformer {
         specifier.as_import_specifier().name.clone()
     }
 
-    pub fn set_in_child(&mut self, v: bool) {
+    pub fn set_in_child(&mut self, v: bool) { ::tsox_core::fntrace::enter("set_in_child"); 
         self.in_jsx_child = v;
     }
 
-    pub fn visit(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         let node = node?;
         if node.subtree_facts().intersects(SubtreeContainsJsx) {
             return Some(node.clone());
@@ -233,7 +233,7 @@ impl JsxTransformer {
         }
     }
 
-    pub fn visit_source_file(&mut self, file: &Arc<SourceFile>) -> Arc<Node> {
+    pub fn visit_source_file(&mut self, file: &Arc<SourceFile>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if file.is_declaration_file {
             return file.as_node();
         }
@@ -359,7 +359,7 @@ impl JsxTransformer {
         visited
     }
 
-    pub fn visit_jsx_element(&mut self, element: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_jsx_element(&mut self, element: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_element"); 
         let use_create_element = self.should_use_create_element(element);
         let start = skip_trivia(
             self.current_source_file.as_ref().unwrap().text(),
@@ -380,7 +380,7 @@ impl JsxTransformer {
         }
     }
 
-    pub fn visit_jsx_self_closing_element(&mut self, element: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_jsx_self_closing_element(&mut self, element: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_self_closing_element"); 
         let use_create_element = self.should_use_create_element(element);
         let location = TextRange::new(
             skip_triva_of(self, element),
@@ -393,7 +393,7 @@ impl JsxTransformer {
         }
     }
 
-    pub fn visit_jsx_fragment(&mut self, fragment: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_jsx_fragment(&mut self, fragment: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_fragment"); 
         let use_create_element = self.import_specifier.is_empty();
         let location = TextRange::new(
             skip_triva_of(self, fragment),
@@ -413,7 +413,7 @@ impl JsxTransformer {
         }
     }
 
-    pub fn transform_jsx_child_to_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_jsx_child_to_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsx_child_to_expression"); 
         let prev = self.in_jsx_child;
         self.set_in_child(true);
         let result = self.visitor().visit_node(Some(node));
@@ -424,7 +424,7 @@ impl JsxTransformer {
     fn convert_jsx_children_to_children_prop_assignment(
         &mut self,
         children: &[Arc<Node>],
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("convert_jsx_children_to_children_prop_assignment"); 
         let non_whitespace_children = get_semantic_jsx_children(children);
         if non_whitespace_children.len() == 1
             && (non_whitespace_children[0].kind != SyntaxKind::JsxExpression
@@ -469,7 +469,7 @@ impl JsxTransformer {
     fn convert_jsx_children_to_children_prop_object(
         &mut self,
         children: &[Arc<Node>],
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("convert_jsx_children_to_children_prop_object"); 
         let prop = self.convert_jsx_children_to_children_prop_assignment(children)?;
         Some(self.factory().new_object_literal_expression(
             &self.factory().new_node_list(vec![prop]),
@@ -477,7 +477,7 @@ impl JsxTransformer {
         ))
     }
 
-    pub fn get_tag_name(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_tag_name(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_tag_name"); 
         if node.kind == SyntaxKind::JsxElement {
             let opening = node.as_jsx_element().opening_element.clone();
             self.get_tag_name(&opening)
@@ -504,7 +504,7 @@ impl JsxTransformer {
         element: &Arc<Node>,
         children: Option<&NodeList>,
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_opening_like_element_jsx"); 
         let tag_name = self.get_tag_name(element);
         let mut children_prop = None;
         if let Some(children) = children
@@ -546,7 +546,7 @@ impl JsxTransformer {
         &mut self,
         attrs: &[Arc<Node>],
         children_prop: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_jsx_attributes_to_object_props"); 
         let target = self.compiler_options.get_emit_script_target();
         if target >= ScriptTarget::ES2018 {
             let props = self.transform_jsx_attributes_to_props(attrs, children_prop);
@@ -562,7 +562,7 @@ impl JsxTransformer {
         &mut self,
         attrs: &[Arc<Node>],
         children_prop: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_jsx_attributes_to_expression"); 
         let mut expressions: Vec<Arc<Node>> = Vec::with_capacity(2);
         let mut properties: Vec<Arc<Node>> = Vec::with_capacity(attrs.len());
 
@@ -621,7 +621,7 @@ impl JsxTransformer {
         &mut self,
         mut expressions: Vec<Arc<Node>>,
         props: Vec<Arc<Node>>,
-    ) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) {
+    ) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("combine_properties_into_new_expression"); 
         if props.is_empty() {
             return (expressions, props);
         }
@@ -636,7 +636,7 @@ impl JsxTransformer {
         &mut self,
         attrs: &[Arc<Node>],
         children_prop: Option<Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsx_attributes_to_props"); 
         let mut props: Vec<Arc<Node>> = Vec::with_capacity(attrs.len());
         for attr in attrs {
             if attr.kind == SyntaxKind::JsxSpreadAttribute {
@@ -655,7 +655,7 @@ impl JsxTransformer {
     pub fn transform_jsx_spread_attributes_to_props(
         &mut self,
         node: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsx_spread_attributes_to_props"); 
         let clean_object = node.expression().map_or(false, |e| {
             is_object_literal_expression(e) && !has_proto(e)
         });
@@ -674,7 +674,7 @@ impl JsxTransformer {
     pub fn transform_jsx_attribute_to_object_literal_element(
         &mut self,
         node: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_jsx_attribute_to_object_literal_element"); 
         let name = self.get_attribute_name(node);
         let expression = self
             .transform_jsx_attribute_initializer(node.as_jsx_attribute().initializer.as_ref());
@@ -682,7 +682,7 @@ impl JsxTransformer {
             .new_property_assignment(None, &name, None, None, &expression)
     }
 
-    pub fn get_attribute_name(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_attribute_name(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_attribute_name"); 
         let name = &node.as_jsx_attribute().name;
         if is_identifier(name) {
             let text = name.text();
@@ -698,7 +698,7 @@ impl JsxTransformer {
         )
     }
 
-    pub fn transform_jsx_attribute_initializer(&mut self, node: Option<&Arc<Node>>) -> Arc<Node> {
+    pub fn transform_jsx_attribute_initializer(&mut self, node: Option<&Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_jsx_attribute_initializer"); 
         let Some(node) = node else {
             return self.factory().new_true_expression();
         };
@@ -732,7 +732,7 @@ impl JsxTransformer {
         key_attr: Option<Arc<Node>>,
         children: Option<&NodeList>,
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_opening_like_element_or_fragment_jsx"); 
         let mut non_whitespace_children: Vec<Arc<Node>> = Vec::new();
         if let Some(children) = children {
             non_whitespace_children = get_semantic_jsx_children(&children.nodes);
@@ -834,7 +834,7 @@ impl JsxTransformer {
         fragment: &Arc<Node>,
         children: Option<&NodeList>,
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_opening_fragment_jsx"); 
         let mut children_props: Option<Arc<Node>> = None;
         if let Some(children) = children
             && !children.nodes.is_empty()
@@ -859,7 +859,7 @@ impl JsxTransformer {
         &mut self,
         react_namespace: &str,
         parent: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_react_namespace"); 
         let react_namespace = if react_namespace.is_empty() {
             "React"
         } else {
@@ -896,7 +896,7 @@ impl JsxTransformer {
         &mut self,
         e: &Arc<Node>,
         parent: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_jsx_factory_expression_from_entity_name"); 
         if is_qualified_name(e) {
             let left_data = e.as_qualified_name();
             let left = self.create_jsx_factory_expression_from_entity_name(&left_data.left, parent);
@@ -913,7 +913,7 @@ impl JsxTransformer {
         parent: &Arc<Node>,
         e: Option<&Arc<Node>>,
         target: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_jsx_pseudo_factory_expression"); 
         if let Some(e) = e {
             return self.create_jsx_factory_expression_from_entity_name(e, parent);
         }
@@ -923,7 +923,7 @@ impl JsxTransformer {
             .new_property_access_expression(&react_namespace, None, &target_identifier, NodeFlags::empty())
     }
 
-    pub fn create_jsx_factory_expression(&mut self, parent: &Arc<Node>) -> Arc<Node> {
+    pub fn create_jsx_factory_expression(&mut self, parent: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_jsx_factory_expression"); 
         let current_file = self.current_source_file.clone();
         let file_node = current_file.as_ref().unwrap().as_node().clone();
         let e = self
@@ -932,7 +932,7 @@ impl JsxTransformer {
         self.create_jsx_pseudo_factory_expression(parent, e.as_ref(), "createElement")
     }
 
-    pub fn create_jsx_fragment_factory_expression(&mut self, parent: &Arc<Node>) -> Arc<Node> {
+    pub fn create_jsx_fragment_factory_expression(&mut self, parent: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_jsx_fragment_factory_expression"); 
         let current_file = self.current_source_file.clone();
         let file_node = current_file.as_ref().unwrap().as_node().clone();
         let e = self
@@ -946,7 +946,7 @@ impl JsxTransformer {
         element: &Arc<Node>,
         children: Option<&NodeList>,
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_opening_like_element_create_element"); 
         let tag_name = self.get_tag_name(element);
         let attrs = element.attributes_node().properties();
         let object_properties = if !attrs.is_empty() {
@@ -998,7 +998,7 @@ impl JsxTransformer {
         fragment: &Arc<Node>,
         children: Option<&NodeList>,
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_jsx_opening_fragment_create_element"); 
         let tag_name = self.create_jsx_fragment_factory_expression(fragment);
         let callee = self.create_jsx_factory_expression(fragment);
 
@@ -1034,7 +1034,7 @@ impl JsxTransformer {
         result
     }
 
-    fn transform_jsx_children(&mut self, children: Option<&NodeList>) -> Vec<Arc<Node>> {
+    fn transform_jsx_children(&mut self, children: Option<&NodeList>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_jsx_children"); 
         let mut new_children = Vec::new();
         if let Some(children) = children {
             for c in &children.nodes {
@@ -1046,7 +1046,7 @@ impl JsxTransformer {
         new_children
     }
 
-    pub fn visit_jsx_text(&mut self, text: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_jsx_text(&mut self, text: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_jsx_text"); 
         let fixed = fixup_whitespace_and_decode_entities(text.text());
         if fixed.is_empty() {
             return None;
@@ -1054,7 +1054,7 @@ impl JsxTransformer {
         Some(self.factory().new_string_literal(&fixed, TOKEN_FLAGS_NONE))
     }
 
-    pub fn visit_jsx_expression(&mut self, expression: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_jsx_expression(&mut self, expression: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_jsx_expression"); 
         let data = expression.as_jsx_expression();
         let e = self.visitor().visit_node(data.expression.as_ref());
         if data.dot_dot_dot_token.is_some() {
@@ -1063,11 +1063,11 @@ impl JsxTransformer {
         e
     }
 
-    pub fn should_use_create_element(&self, node: &Arc<Node>) -> bool {
+    pub fn should_use_create_element(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_use_create_element"); 
         self.import_specifier.is_empty() || has_key_after_props_spread(node)
     }
 
-    pub fn is_any_prologue_directive(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_any_prologue_directive(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_any_prologue_directive"); 
         is_prologue_directive(node)
             || self
                 .emit_context()
@@ -1079,18 +1079,18 @@ impl JsxTransformer {
         &mut self,
         to: Vec<Arc<Node>>,
         statement: Option<Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("insert_statement_after_custom_prologue"); 
         insert_statement_after_prologue(to, statement, |tx, node| {
             tx.is_any_prologue_directive(node)
         }, self)
     }
 }
 
-fn skip_triva_of(tx: &JsxTransformer, node: &Arc<Node>) -> usize {
+fn skip_triva_of(tx: &JsxTransformer, node: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("skip_triva_of"); 
     skip_trivia(tx.current_source_file.as_ref().unwrap().text(), node.pos())
 }
 
-pub fn has_key_after_props_spread(node: &Arc<Node>) -> bool {
+pub fn has_key_after_props_spread(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_key_after_props_spread"); 
     let mut spread = false;
     let opener = if node.kind == SyntaxKind::JsxElement {
         node.opening_element()
@@ -1126,7 +1126,7 @@ pub fn insert_statement_after_prologue(
     statement: Option<Arc<Node>>,
     is_prologue_directive: impl Fn(&mut JsxTransformer, &Arc<Node>) -> bool,
     tx: &mut JsxTransformer,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("insert_statement_after_prologue"); 
     let Some(statement) = statement else {
         return to;
     };
@@ -1141,7 +1141,7 @@ pub fn insert_statement_after_prologue(
     to
 }
 
-pub fn sort_import_specifiers(a: &Arc<Node>, b: &Arc<Node>) -> std::cmp::Ordering {
+pub fn sort_import_specifiers(a: &Arc<Node>, b: &Arc<Node>) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("sort_import_specifiers"); 
     let a_data = a.as_import_specifier();
     let b_data = b.as_import_specifier();
     let a_property = a_data.property_name.as_ref().unwrap_or(&a_data.name);
@@ -1157,13 +1157,13 @@ pub fn sort_import_specifiers(a: &Arc<Node>, b: &Arc<Node>) -> std::cmp::Orderin
     .cmp(&0)
 }
 
-pub fn get_sorted_specifiers(m: &HashMap<String, Arc<Node>>) -> Vec<Arc<Node>> {
+pub fn get_sorted_specifiers(m: &HashMap<String, Arc<Node>>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_sorted_specifiers"); 
     let mut res: Vec<Arc<Node>> = m.values().cloned().collect();
     res.sort_by(sort_import_specifiers);
     res
 }
 
-pub fn has_proto(obj: &Arc<Node>) -> bool {
+pub fn has_proto(obj: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_proto"); 
     obj.as_object_literal_expression()
         .properties
         .nodes
@@ -1176,7 +1176,7 @@ pub fn has_proto(obj: &Arc<Node>) -> bool {
         })
 }
 
-fn add_line_of_jsx_text(acc: &mut String, trimmed_line: &str, is_initial: bool) {
+fn add_line_of_jsx_text(acc: &mut String, trimmed_line: &str, is_initial: bool) { ::tsox_core::fntrace::enter("add_line_of_jsx_text"); 
     let decoded = decode_entities(trimmed_line);
     if !is_initial {
         acc.push(' ');
@@ -1184,7 +1184,7 @@ fn add_line_of_jsx_text(acc: &mut String, trimmed_line: &str, is_initial: bool) 
     acc.push_str(&decoded);
 }
 
-pub fn fixup_whitespace_and_decode_entities(text: &str) -> String {
+pub fn fixup_whitespace_and_decode_entities(text: &str) -> String { ::tsox_core::fntrace::enter("fixup_whitespace_and_decode_entities"); 
     let mut acc = String::new();
     let mut initial = true;
     let mut first_non_whitespace: i64 = 0;
@@ -1216,7 +1216,7 @@ pub fn fixup_whitespace_and_decode_entities(text: &str) -> String {
     acc
 }
 
-pub fn decode_entities(text: &str) -> String {
+pub fn decode_entities(text: &str) -> String { ::tsox_core::fntrace::enter("decode_entities"); 
     let Some(mut i) = text.find('&') else {
         return text.to_string();
     };
@@ -1257,7 +1257,7 @@ pub fn decode_entities(text: &str) -> String {
     result
 }
 
-pub fn decode_entity(entity: &str) -> Option<char> {
+pub fn decode_entity(entity: &str) -> Option<char> { ::tsox_core::fntrace::enter("decode_entity"); 
     if entity.is_empty() {
         return None;
     }
@@ -1295,7 +1295,7 @@ pub fn decode_entity(entity: &str) -> Option<char> {
     entity_lookup(entity)
 }
 
-fn entity_lookup(entity: &str) -> Option<char> {
+fn entity_lookup(entity: &str) -> Option<char> { ::tsox_core::fntrace::enter("entity_lookup"); 
     const ENTITIES: &[(&str, u32)] = &[
         ("quot", 0x0022), ("amp", 0x0026), ("apos", 0x0027), ("lt", 0x003C), ("gt", 0x003E),
         ("nbsp", 0x00A0), ("iexcl", 0x00A1), ("cent", 0x00A2), ("pound", 0x00A3), ("curren", 0x00A4),

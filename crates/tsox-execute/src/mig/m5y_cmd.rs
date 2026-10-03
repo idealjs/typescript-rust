@@ -15,7 +15,7 @@ pub struct ApiFlags {
 }
 
 impl Default for ApiFlags {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             cwd: std::env::current_dir()
                 .map(|p| p.to_string_lossy().to_string())
@@ -29,7 +29,7 @@ impl Default for ApiFlags {
     }
 }
 
-pub fn parse_api_flags(args: &[String]) -> Result<ApiFlags, String> {
+pub fn parse_api_flags(args: &[String]) -> Result<ApiFlags, String> { ::tsox_core::fntrace::enter("parse_api_flags"); 
     let mut result = ApiFlags::default();
     let mut i = 0;
     while i < args.len() {
@@ -65,7 +65,7 @@ pub fn parse_api_flags(args: &[String]) -> Result<ApiFlags, String> {
     Ok(result)
 }
 
-pub fn run_api(args: &[String]) -> i32 {
+pub fn run_api(args: &[String]) -> i32 { ::tsox_core::fntrace::enter("run_api"); 
     let flags = match parse_api_flags(args) {
         Ok(flags) => flags,
         Err(_) => return 2,
@@ -80,7 +80,7 @@ pub fn run_api(args: &[String]) -> i32 {
     0
 }
 
-pub fn run_lsp(args: &[String]) -> i32 {
+pub fn run_lsp(args: &[String]) -> i32 { ::tsox_core::fntrace::enter("run_lsp"); 
     let mut stdio = false;
     let mut pprof_dir = String::new();
     let mut client_process_id: i64 = 0;
@@ -118,7 +118,7 @@ pub fn run_lsp(args: &[String]) -> i32 {
 
 pub fn new_parent_process_watchdog(
     client_process_id: i64,
-) -> Option<Arc<dyn Fn(i64) + Send + Sync>> {
+) -> Option<Arc<dyn Fn(i64) + Send + Sync>> { ::tsox_core::fntrace::enter("new_parent_process_watchdog"); 
     if !process_alive_supported() {
         return None;
     }
@@ -129,7 +129,7 @@ pub fn new_parent_process_watchdog(
     Some(Arc::new(|parent_pid| start_parent_process_watchdog(parent_pid)))
 }
 
-pub fn start_parent_process_watchdog(parent_pid: i64) {
+pub fn start_parent_process_watchdog(parent_pid: i64) { ::tsox_core::fntrace::enter("start_parent_process_watchdog"); 
     if parent_pid <= 0 {
         return;
     }
@@ -144,7 +144,7 @@ pub fn start_parent_process_watchdog(parent_pid: i64) {
     });
 }
 
-pub fn run_main(args: &[String]) -> i32 {
+pub fn run_main(args: &[String]) -> i32 { ::tsox_core::fntrace::enter("run_main"); 
     if let Some(first) = args.first() {
         match first.as_str() {
             "--lsp" => return run_lsp(&args[1..]),
@@ -158,12 +158,12 @@ pub fn run_main(args: &[String]) -> i32 {
 }
 
 #[cfg(unix)]
-pub fn process_alive_supported() -> bool {
+pub fn process_alive_supported() -> bool { ::tsox_core::fntrace::enter("process_alive_supported"); 
     true
 }
 
 #[cfg(unix)]
-pub fn is_process_alive(pid: i32) -> bool {
+pub fn is_process_alive(pid: i32) -> bool { ::tsox_core::fntrace::enter("is_process_alive"); 
     use std::os::unix::process::ExitStatusExt;
     let Ok(status) = std::process::Command::new("kill")
         .arg("-0")
@@ -178,27 +178,27 @@ pub fn is_process_alive(pid: i32) -> bool {
 }
 
 #[cfg(windows)]
-pub fn process_alive_supported() -> bool {
+pub fn process_alive_supported() -> bool { ::tsox_core::fntrace::enter("process_alive_supported"); 
     true
 }
 
 #[cfg(windows)]
-pub fn is_process_alive(pid: i32) -> bool {
+pub fn is_process_alive(pid: i32) -> bool { ::tsox_core::fntrace::enter("is_process_alive"); 
     false
 }
 
 #[cfg(not(any(unix, windows)))]
-pub fn process_alive_supported() -> bool {
+pub fn process_alive_supported() -> bool { ::tsox_core::fntrace::enter("process_alive_supported"); 
     false
 }
 
 #[cfg(not(any(unix, windows)))]
-pub fn is_process_alive(_pid: i32) -> bool {
+pub fn is_process_alive(_pid: i32) -> bool { ::tsox_core::fntrace::enter("is_process_alive"); 
     panic!("isProcessAlive is not supported on this platform")
 }
 
 #[cfg(windows)]
-pub fn enable_virtual_terminal_processing_init() {
+pub fn enable_virtual_terminal_processing_init() { ::tsox_core::fntrace::enter("enable_virtual_terminal_processing_init"); 
     use windows_sys::Win32::System::Console::{
         GetConsoleMode, GetStdHandle, SetConsoleMode, ENABLE_VIRTUAL_TERMINAL_PROCESSING,
         STD_OUTPUT_HANDLE,
@@ -219,7 +219,7 @@ pub fn enable_virtual_terminal_processing_init() {
 }
 
 #[cfg(not(windows))]
-pub fn enable_virtual_terminal_processing_init() {}
+pub fn enable_virtual_terminal_processing_init() { ::tsox_core::fntrace::enter("enable_virtual_terminal_processing_init"); }
 
 pub struct ChildProcess {
     pub child: Child,
@@ -228,14 +228,14 @@ pub struct ChildProcess {
 }
 
 impl ChildProcess {
-    pub fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    pub fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("read"); 
         match &mut self.stdout {
             Some(stdout) => stdout.read(buf),
             None => Ok(0),
         }
     }
 
-    pub fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+    pub fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         match &mut self.stdin {
             Some(stdin) => stdin.write(buf),
             None => Err(std::io::Error::new(
@@ -245,11 +245,11 @@ impl ChildProcess {
         }
     }
 
-    pub fn exit_code(&mut self) -> Option<i32> {
+    pub fn exit_code(&mut self) -> Option<i32> { ::tsox_core::fntrace::enter("exit_code"); 
         self.child.try_wait().ok().flatten().and_then(|s| s.code())
     }
 
-    pub fn close(&mut self) -> std::io::Result<()> {
+    pub fn close(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("close"); 
         if let Some(stdin) = self.stdin.take() {
             drop(stdin);
         }
@@ -263,7 +263,7 @@ pub fn spawn_process(
     command: &[String],
     dir: &str,
     stderr: Box<dyn Write + Send>,
-) -> std::io::Result<ChildProcess> {
+) -> std::io::Result<ChildProcess> { ::tsox_core::fntrace::enter("spawn_process"); 
     let Some((program, rest)) = command.split_first() else {
         return Err(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,
@@ -284,15 +284,15 @@ pub fn spawn_process(
 }
 
 impl crate::execute::version::OsSystem {
-    pub fn since_start(&self) -> Duration {
+    pub fn since_start(&self) -> Duration { ::tsox_core::fntrace::enter("since_start"); 
         self.start.elapsed()
     }
 
-    pub fn now(&self) -> SystemTime {
+    pub fn now(&self) -> SystemTime { ::tsox_core::fntrace::enter("now"); 
         SystemTime::now()
     }
 
-    pub fn error_writer(&self) -> Box<dyn Write + Send> {
+    pub fn error_writer(&self) -> Box<dyn Write + Send> { ::tsox_core::fntrace::enter("error_writer"); 
         Box::new(std::io::stderr())
     }
 
@@ -301,11 +301,11 @@ impl crate::execute::version::OsSystem {
         command: &[String],
         dir: &str,
         stderr: Box<dyn Write + Send>,
-    ) -> std::io::Result<ChildProcess> {
+    ) -> std::io::Result<ChildProcess> { ::tsox_core::fntrace::enter("spawn"); 
         spawn_process(command, dir, stderr)
     }
 }
 
-pub fn new_system() -> crate::execute::version::OsSystem {
+pub fn new_system() -> crate::execute::version::OsSystem { ::tsox_core::fntrace::enter("new_system"); 
     crate::execute::version::OsSystem::new()
 }

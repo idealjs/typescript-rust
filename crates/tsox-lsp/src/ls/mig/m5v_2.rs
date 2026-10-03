@@ -57,11 +57,11 @@ static FIELD_INFOS: &[FieldInfo] = &[
     FieldInfo { raw_name: "trimTrailingWhitespace", config_path: "format.trimTrailingWhitespace", fallback_config_paths: &[], field_path: "format_code_settings.trim_trailing_whitespace", raw_invert: false, config_invert: false },
 ];
 
-pub fn collect_field_infos() -> &'static [FieldInfo] {
+pub fn collect_field_infos() -> &'static [FieldInfo] { ::tsox_core::fntrace::enter("collect_field_infos"); 
     FIELD_INFOS
 }
 
-pub fn parse_config_path_tag(tag: &str) -> ConfigPathInfo {
+pub fn parse_config_path_tag(tag: &str) -> ConfigPathInfo { ::tsox_core::fntrace::enter("parse_config_path_tag"); 
     let mut parts = tag.split(',');
     let path = parts.next().unwrap_or("").to_string();
     let mut invert = false;
@@ -73,7 +73,7 @@ pub fn parse_config_path_tag(tag: &str) -> ConfigPathInfo {
     ConfigPathInfo { path, invert }
 }
 
-pub fn get_field_by_path<'a>(v: &'a Value, path: &str) -> Option<&'a Value> {
+pub fn get_field_by_path<'a>(v: &'a Value, path: &str) -> Option<&'a Value> { ::tsox_core::fntrace::enter("get_field_by_path"); 
     let mut current = v;
     for part in path.split('.') {
         current = current.get(part)?;
@@ -81,7 +81,7 @@ pub fn get_field_by_path<'a>(v: &'a Value, path: &str) -> Option<&'a Value> {
     Some(current)
 }
 
-fn get_field_by_path_mut<'a>(v: &'a mut Value, path: &str) -> Option<&'a mut Value> {
+fn get_field_by_path_mut<'a>(v: &'a mut Value, path: &str) -> Option<&'a mut Value> { ::tsox_core::fntrace::enter("get_field_by_path_mut"); 
     let mut current = v;
     for part in path.split('.') {
         current = current.get_mut(part)?;
@@ -89,7 +89,7 @@ fn get_field_by_path_mut<'a>(v: &'a mut Value, path: &str) -> Option<&'a mut Val
     Some(current)
 }
 
-pub fn set_nested_value(config: &mut Map<String, Value>, path: &str, value: Value) {
+pub fn set_nested_value(config: &mut Map<String, Value>, path: &str, value: Value) { ::tsox_core::fntrace::enter("set_nested_value"); 
     let parts: Vec<&str> = path.split('.').collect();
     let mut current = config;
     for part in &parts[..parts.len() - 1] {
@@ -108,7 +108,7 @@ pub fn set_raw_fields_from_config(
     v: &mut Value,
     infos: &[FieldInfo],
     settings: &Map<String, Value>,
-) {
+) { ::tsox_core::fntrace::enter("set_raw_fields_from_config"); 
     for (name, value) in settings {
         let Some(info) = infos.iter().find(|info| info.raw_name == *name) else {
             continue;
@@ -125,14 +125,14 @@ pub fn set_raw_fields_from_config(
     }
 }
 
-pub fn set_field_from_value(field: &mut Value, val: &Value) {
+pub fn set_field_from_value(field: &mut Value, val: &Value) { ::tsox_core::fntrace::enter("set_field_from_value"); 
     if val.is_null() {
         return;
     }
     *field = val.clone();
 }
 
-pub fn serialize_field(field: &Value) -> Option<Value> {
+pub fn serialize_field(field: &Value) -> Option<Value> { ::tsox_core::fntrace::enter("serialize_field"); 
     match field {
         Value::Null => None,
         Value::Bool(_) => Some(field.clone()),
@@ -164,7 +164,7 @@ pub fn serialize_field(field: &Value) -> Option<Value> {
 }
 
 impl UserPreferences {
-    pub fn marshal_json_to(&self, out: &mut String) -> Result<(), serde_json::Error> {
+    pub fn marshal_json_to(&self, out: &mut String) -> Result<(), serde_json::Error> { ::tsox_core::fntrace::enter("marshal_json_to"); 
         let mut config = Map::new();
         let v = serde_json::to_value(self)?;
 
@@ -196,7 +196,7 @@ impl UserPreferences {
         Ok(())
     }
 
-    pub fn unmarshal_json_from(&mut self, dec: &Value) -> Result<(), serde_json::Error> {
+    pub fn unmarshal_json_from(&mut self, dec: &Value) -> Result<(), serde_json::Error> { ::tsox_core::fntrace::enter("unmarshal_json_from"); 
         let Some(config) = dec.as_object() else {
             *self = new_default_user_preferences();
             return Ok(());
@@ -272,7 +272,7 @@ impl UserPreferences {
     pub fn parsed_auto_import_file_exclude_patterns(
         &self,
         use_case_sensitive_file_names: bool,
-    ) -> Option<tsox_tsoptions::vfs::vfsmatch::SpecMatcher> {
+    ) -> Option<tsox_tsoptions::vfs::vfsmatch::SpecMatcher> { ::tsox_core::fntrace::enter("parsed_auto_import_file_exclude_patterns"); 
         let specs: Vec<&str> = self
             .auto_import_file_exclude_patterns
             .iter()

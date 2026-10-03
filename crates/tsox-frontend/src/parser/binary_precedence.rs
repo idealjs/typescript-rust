@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn binary_precedence(token: SyntaxKind) -> u8 {
+pub(crate) fn binary_precedence(token: SyntaxKind) -> u8 { ::tsox_core::fntrace::enter("binary_precedence"); 
     match token {
         SyntaxKind::BarBarToken | SyntaxKind::QuestionQuestionToken => 1,
         SyntaxKind::AmpersandAmpersandToken => 2,
@@ -29,7 +29,7 @@ pub(crate) fn binary_precedence(token: SyntaxKind) -> u8 {
     }
 }
 
-pub(crate) fn is_assignment_operator(token: SyntaxKind) -> bool {
+pub(crate) fn is_assignment_operator(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_assignment_operator"); 
     matches!(
         token,
         SyntaxKind::EqualsToken
@@ -51,15 +51,15 @@ pub(crate) fn is_assignment_operator(token: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn is_keyword(token: SyntaxKind) -> bool {
+pub(crate) fn is_keyword(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword"); 
     crate::ast::node_data_generated::is_keyword_kind(token)
 }
 
-pub(crate) fn is_identifier_or_keyword(token: SyntaxKind) -> bool {
+pub(crate) fn is_identifier_or_keyword(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_identifier_or_keyword"); 
     token == SyntaxKind::Identifier || token == SyntaxKind::PrivateIdentifier || is_keyword(token)
 }
 
-pub(crate) fn is_reserved_word_kind(token: SyntaxKind) -> bool {
+pub(crate) fn is_reserved_word_kind(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_reserved_word_kind"); 
     matches!(
         token,
         SyntaxKind::BreakKeyword

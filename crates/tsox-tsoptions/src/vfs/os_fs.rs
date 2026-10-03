@@ -5,15 +5,15 @@ use std::path::Path;
 pub struct OsFS;
 
 impl FS for OsFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         cfg!(not(target_os = "windows"))
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         Path::new(path).is_file()
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         std::fs::read_to_string(path).ok().map(|s| {
             s.strip_prefix('\u{FEFF}')
                 .map(|t| t.to_string())
@@ -21,11 +21,11 @@ impl FS for OsFS {
         })
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         std::fs::write(path, data)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         use std::io::Write;
         let mut file = std::fs::OpenOptions::new()
             .create(true)
@@ -34,7 +34,7 @@ impl FS for OsFS {
         file.write_all(data.as_bytes())
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         if Path::new(path).is_dir() {
             std::fs::remove_dir_all(path)
         } else {
@@ -42,11 +42,11 @@ impl FS for OsFS {
         }
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         Path::new(path).is_dir()
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         let mut entries = Entries::default();
         if let Ok(read_dir) = std::fs::read_dir(path) {
             for entry in read_dir.flatten() {
@@ -74,7 +74,7 @@ impl FS for OsFS {
         entries
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         let p = Path::new(path);
         let meta = std::fs::metadata(p).ok()?;
         let symlink_meta = std::fs::symlink_metadata(p).ok()?;
@@ -87,7 +87,7 @@ impl FS for OsFS {
         })
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         std::fs::canonicalize(path)
             .map(|p| p.to_string_lossy().to_string())
             .unwrap_or_else(|_| path.to_string())

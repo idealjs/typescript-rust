@@ -16,7 +16,7 @@ pub struct ReferenceResolverImpl {
 pub fn new_reference_resolver(
     options: Option<Arc<CompilerOptions>>,
     hooks: ReferenceResolverHooks,
-) -> ReferenceResolverImpl {
+) -> ReferenceResolverImpl { ::tsox_core::fntrace::enter("new_reference_resolver"); 
     ReferenceResolverImpl {
         resolver: None,
         options,
@@ -25,7 +25,7 @@ pub fn new_reference_resolver(
 }
 
 impl ReferenceResolverImpl {
-    pub fn get_resolved_symbol(&self, node: Option<&Arc<Node>>) -> Option<Arc<Symbol>> {
+    pub fn get_resolved_symbol(&self, node: Option<&Arc<Node>>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_resolved_symbol"); 
         if let Some(node) = node {
             if let Some(callback) = &self.hooks.get_resolved_symbol_fn {
                 return callback(node);
@@ -34,7 +34,7 @@ impl ReferenceResolverImpl {
         None
     }
 
-    fn get_merged_symbol(&self, symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> {
+    fn get_merged_symbol(&self, symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_merged_symbol"); 
         if let Some(symbol) = symbol {
             if let Some(callback) = &self.hooks.get_merged_symbol_fn {
                 return callback(symbol);
@@ -52,7 +52,7 @@ impl ReferenceResolverImpl {
     fn get_export_symbol_of_value_symbol_if_exported(
         &self,
         symbol: Option<&Arc<Symbol>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_export_symbol_of_value_symbol_if_exported"); 
         if let Some(symbol) = symbol {
             if let Some(callback) = &self.hooks.get_export_symbol_of_value_symbol_if_exported_fn {
                 return callback(symbol);
@@ -74,7 +74,7 @@ impl ReferenceResolver for ReferenceResolverImpl {
         &self,
         node: &Arc<Node>,
         prefix_locals: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_export_container"); 
         let start_in_declaration_container = node.parent().as_ref().map_or(false, |parent| {
             (parent.kind == SyntaxKind::ModuleDeclaration
                 || parent.kind == SyntaxKind::EnumDeclaration)
@@ -86,22 +86,22 @@ impl ReferenceResolver for ReferenceResolverImpl {
         None
     }
 
-    fn get_referenced_import_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_import_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_import_declaration"); 
         let _ = node;
         None
     }
 
-    fn get_referenced_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declaration"); 
         let _ = node;
         None
     }
 
-    fn get_referenced_value_declarations(&self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    fn get_referenced_value_declarations(&self, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declarations"); 
         let _ = node;
         Vec::new()
     }
 
-    fn get_element_access_expression_name(&self, expression: &Arc<Node>) -> String {
+    fn get_element_access_expression_name(&self, expression: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_element_access_expression_name"); 
         if let Some(callback) = &self.hooks.get_element_access_expression_name_fn {
             if let Some(name) = callback(expression) {
                 return name;
@@ -110,7 +110,7 @@ impl ReferenceResolver for ReferenceResolverImpl {
         String::new()
     }
 
-    fn get_referenced_member_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_member_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_member_value_declaration"); 
         let mut s = self.get_resolved_symbol(Some(node));
         if s.is_none() {
             if let Some(sym) = node_symbol(node) {
@@ -127,7 +127,7 @@ impl ReferenceResolver for ReferenceResolverImpl {
     }
 }
 
-fn node_symbol(_node: &Arc<Node>) -> Option<Arc<Symbol>> {
+fn node_symbol(_node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("node_symbol"); 
     None
 }
 

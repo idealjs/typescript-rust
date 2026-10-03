@@ -26,7 +26,7 @@ use super::m2e::r19k3_defs::NodeAccessExtR19k3;
 use crate::checker::flow_flow_max_depth::FlowRef;
 
 impl Clone for FlowLoopKey {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         FlowLoopKey { flow_node: Arc::clone(&self.flow_node), ref_key: self.ref_key }
     }
 }
@@ -37,7 +37,7 @@ thread_local! {
 }
 
 impl Checker {
-    pub fn get_type_at_flow_assignment(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType {
+    pub fn get_type_at_flow_assignment(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_flow_assignment"); 
         let node = flow.node.as_ref().unwrap();
         if self.is_matching_reference(f.reference.as_ref().unwrap(), node) {
             if !self.is_reachable_flow_node(flow) {
@@ -112,7 +112,7 @@ impl Checker {
         FlowType { t: None, incomplete: false }
     }
 
-    pub fn get_initial_or_assigned_type(&mut self, f: &FlowState, flow: &Arc<FlowNode>) -> Arc<Type> {
+    pub fn get_initial_or_assigned_type(&mut self, f: &FlowState, flow: &Arc<FlowNode>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_initial_or_assigned_type"); 
         let node = flow.node.as_ref().unwrap();
         if is_variable_declaration(node) || is_binding_element(node) {
             let initial = self.get_initial_type(node);
@@ -122,7 +122,7 @@ impl Checker {
         self.get_narrowable_type_for_reference(&assigned, f.reference.as_ref().unwrap())
     }
 
-    pub fn get_type_at_flow_call(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType {
+    pub fn get_type_at_flow_call(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_flow_call"); 
         let node = flow.node.as_ref().unwrap();
         let signature = self.get_effects_signature(node);
         if let Some(signature) = signature {
@@ -157,7 +157,7 @@ impl Checker {
         FlowType { t: None, incomplete: false }
     }
 
-    pub fn get_type_at_flow_condition(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType {
+    pub fn get_type_at_flow_condition(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_flow_condition"); 
         let flow_type = self.get_type_at_flow_node(f, &flow.antecedent.clone().unwrap());
         if flow_type.t.as_ref().unwrap().flags.intersects(TypeFlags::Never) {
             return flow_type;
@@ -171,7 +171,7 @@ impl Checker {
         self.new_flow_type(&narrowed_type, flow_type.incomplete)
     }
 
-    pub fn get_type_at_switch_clause(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType {
+    pub fn get_type_at_switch_clause(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_switch_clause"); 
         let data_node = flow.node.as_ref().unwrap();
         let switch_statement = flow.switch_statement.as_ref().unwrap();
         let expr = skip_parentheses(switch_statement.expression().unwrap());
@@ -210,7 +210,7 @@ impl Checker {
         f: &mut FlowState,
         flow: &Arc<FlowNode>,
         antecedents: &[Arc<FlowNode>],
-    ) -> FlowType {
+    ) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_flow_branch_label"); 
         let antecedent_start = ANTECEDENT_TYPES.with_borrow(Vec::len);
         let mut subtype_reduction = false;
         let mut seen_incomplete = false;
@@ -272,7 +272,7 @@ impl Checker {
         f: &FlowState,
         types: &[Arc<Type>],
         subtype_reduction: UnionReduction,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_union_or_evolving_array_type"); 
         if is_evolving_array_type_list(types) {
             let element_types = types.iter().map(|t| self.get_element_type_of_evolving_array_type(t)).collect::<Vec<_>>();
             let union_type = self.get_union_type(element_types);
@@ -294,7 +294,7 @@ impl Checker {
         result
     }
 
-    pub fn get_type_at_flow_loop_label(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType {
+    pub fn get_type_at_flow_loop_label(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_flow_loop_label"); 
         if f.ref_key.is_zero() {
             f.ref_key = self.get_flow_reference_key(f);
         }
@@ -354,7 +354,7 @@ impl Checker {
         FlowType { t: Some(result), incomplete: false }
     }
 
-    pub fn get_type_at_flow_array_mutation(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType {
+    pub fn get_type_at_flow_array_mutation(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_flow_array_mutation"); 
         let declared_is_auto = f.declared_type.as_ref().is_some_and(|d| {
             self.auto_type.get().is_some_and(|a| Arc::ptr_eq(d, a))
                 || self.auto_array_type.get().is_some_and(|a| Arc::ptr_eq(d, a))
@@ -393,7 +393,7 @@ impl Checker {
         FlowType { t: None, incomplete: false }
     }
 
-    pub fn get_type_of_switch_clause(&mut self, clause: &Arc<Node>) -> Arc<Type> {
+    pub fn get_type_of_switch_clause(&mut self, clause: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_switch_clause"); 
         if clause.kind == SyntaxKind::CaseClause {
             let expr_type = self.check_expression_ex(clause.expression().unwrap(), CheckMode::Normal);
             return self.get_regular_type_of_literal_type(&expr_type);
@@ -401,7 +401,7 @@ impl Checker {
         Arc::clone(self.never_type.get().unwrap())
     }
 
-    pub fn get_type_of_dotted_name(&mut self, node: &Arc<Node>, diagnostic: Option<&Arc<Node>>) -> Option<Arc<Type>> {
+    pub fn get_type_of_dotted_name(&mut self, node: &Arc<Node>, diagnostic: Option<&Arc<Node>>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_dotted_name"); 
         if !node.flags.contains(tsox_frontend::ast::NodeFlags::InWithStatement) {
             match node.kind {
                 SyntaxKind::Identifier => {
@@ -444,7 +444,7 @@ impl Checker {
         None
     }
 
-    pub fn get_type_of_destructured_array_element(&mut self, t: &Arc<Type>, index: usize) -> Arc<Type> {
+    pub fn get_type_of_destructured_array_element(&mut self, t: &Arc<Type>, index: usize) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_destructured_array_element"); 
         if every_type_is_tuple_like_w6(self, t) {
             if let Some(element_type) = self.get_tuple_element_type(t, index) {
                 return element_type;
@@ -454,12 +454,12 @@ impl Checker {
         self.include_undefined_in_index_signature(Some(&element_type)).unwrap()
     }
 
-    pub fn get_type_of_destructured_spread_expression(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_type_of_destructured_spread_expression(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_destructured_spread_expression"); 
         let element_type = self.check_iterated_type_or_element_type(IterationUse::Destructuring, t, None);
         self.create_array_type(element_type)
     }
 
-    pub fn get_type_of_destructured_property(&mut self, t: &Arc<Type>, name: &Arc<Node>) -> Arc<Type> {
+    pub fn get_type_of_destructured_property(&mut self, t: &Arc<Type>, name: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_destructured_property"); 
         let Some(name_type) = self.get_literal_type_from_property_name(name) else {
             return Arc::clone(self.error_type.get().unwrap());
         };
@@ -476,13 +476,13 @@ impl Checker {
         Arc::clone(self.error_type.get().unwrap())
     }
 
-    pub fn is_destructuring_assignment_target(&self, parent: &Arc<Node>) -> bool {
+    pub fn is_destructuring_assignment_target(&self, parent: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_destructuring_assignment_target"); 
         let pp = parent.parent().unwrap();
         (is_binary_expression(&pp) && Arc::ptr_eq(&pp.as_binary_expression().left, parent))
             || (is_for_of_statement(&pp) && Arc::ptr_eq(pp.initializer().unwrap(), parent))
     }
 
-    pub fn is_constructed_by(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_constructed_by(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_constructed_by"); 
         if (source.flags.intersects(TypeFlags::Object) && source.object_flags.intersects(ObjectFlags::Class))
             || (target.flags.intersects(TypeFlags::Object) && target.object_flags.intersects(ObjectFlags::Class))
         {
@@ -507,7 +507,7 @@ const TYPE_FLAGS_PRIMITIVE: TypeFlags = TypeFlags::String
     .union(TypeFlags::BigIntLiteral)
     .union(TypeFlags::BooleanLiteral);
 
-fn is_optional_chain_w6(node: &Arc<Node>) -> bool {
+fn is_optional_chain_w6(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_optional_chain_w6"); 
     node.flags.contains(tsox_frontend::ast::NodeFlags::OptionalChain)
         && matches!(
             node.kind,
@@ -518,13 +518,13 @@ fn is_optional_chain_w6(node: &Arc<Node>) -> bool {
         )
 }
 
-fn union_member_ptr(u: &Arc<Type>, t: &Arc<Type>) -> bool {    let TypeData::Union(data) = &u.data else {
+fn union_member_ptr(u: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("union_member_ptr");     let TypeData::Union(data) = &u.data else {
         return false;
     };
     data.union_or_intersection.types.iter().any(|m| m.id == t.id)
 }
 
-fn union_contains_type_w6(checker: &Checker, u: &Arc<Type>, t: &Arc<Type>) -> bool {
+fn union_contains_type_w6(checker: &Checker, u: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("union_contains_type_w6"); 
     if union_member_ptr(u, t) {
         return true;
     }
@@ -545,7 +545,7 @@ fn union_contains_type_w6(checker: &Checker, u: &Arc<Type>, t: &Arc<Type>) -> bo
 pub fn get_branch_label_antecedents(
     flow: &Arc<FlowNode>,
     reduce_labels: &[Arc<tsox_frontend::ast::mig::m3e::FlowReduceLabelData>],
-) -> Vec<Arc<FlowNode>> {
+) -> Vec<Arc<FlowNode>> { ::tsox_core::fntrace::enter("get_branch_label_antecedents"); 
     for data in reduce_labels.iter().rev() {
         if Arc::ptr_eq(&data.target, flow) {
             if let Some(antecedents) = &data.antecedents {
@@ -557,7 +557,7 @@ pub fn get_branch_label_antecedents(
 }
 
 impl Checker {
-    pub fn get_type_at_flow_node(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType {
+    pub fn get_type_at_flow_node(&mut self, f: &mut FlowState, flow: &Arc<FlowNode>) -> FlowType { ::tsox_core::fntrace::enter("get_type_at_flow_node"); 
         let mut flow = flow;
         let mut owned_antecedent: Option<Arc<FlowNode>> = None;
         if f.depth == 2000 {
@@ -659,7 +659,7 @@ impl Checker {
         result
     }
 
-    pub fn narrow_type(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>, assume_true: bool) -> Arc<Type> {
+    pub fn narrow_type(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>, assume_true: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type"); 
         let parent_is_qq = match expr.parent() {
             Some(parent) if is_binary_expression(&parent) => {
                 let binary = parent.as_binary_expression();
@@ -713,7 +713,7 @@ impl Checker {
         }
     }
 
-    pub fn narrow_type_by_optionality(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>, assume_present: bool) -> Arc<Type> {
+    pub fn narrow_type_by_optionality(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>, assume_present: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_optionality"); 
         if self.is_matching_reference(f.reference.as_ref().unwrap(), expr) {
             let facts = if assume_present { TypeFacts::NE_UNDEFINED_OR_NULL } else { TypeFacts::EQ_UNDEFINED_OR_NULL };
             return self.get_adjusted_type_with_facts(t, facts);
@@ -725,7 +725,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn narrow_type_by_truthiness(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>, assume_true: bool) -> Arc<Type> {
+    pub fn narrow_type_by_truthiness(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>, assume_true: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_truthiness"); 
         let mut t = Arc::clone(t);
         if self.is_matching_reference(f.reference.as_ref().unwrap(), expr) {
             let facts = if assume_true { TypeFacts::TRUTHY } else { TypeFacts::FALSY };
@@ -741,7 +741,7 @@ impl Checker {
         t
     }
 
-    pub fn narrow_type_by_call_expression(&mut self, f: &mut FlowState, t: &Arc<Type>, call_expression: &Arc<Node>, assume_true: bool) -> Arc<Type> {
+    pub fn narrow_type_by_call_expression(&mut self, f: &mut FlowState, t: &Arc<Type>, call_expression: &Arc<Node>, assume_true: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_call_expression"); 
         if self.has_matching_argument(call_expression, f.reference.as_ref().unwrap()) {
             let predicate = if assume_true || !crate::checker::utilities_has_only_expression_initialization::is_call_chain(call_expression) {
                 self.get_effects_signature(call_expression)
@@ -765,7 +765,7 @@ impl Checker {
         predicate: &TypePredicate,
         call_expression: &Arc<Node>,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_type_predicate"); 
         if let Some(predicate_t) = &predicate.t {
             let is_global_object = self.global_object_type.get().is_some_and(|g| Arc::ptr_eq(predicate_t, g));
             let is_global_function = self.global_function_type.get().is_some_and(|g| Arc::ptr_eq(predicate_t, g));
@@ -794,7 +794,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn narrow_type_by_assertion(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>) -> Arc<Type> {
+    pub fn narrow_type_by_assertion(&mut self, f: &mut FlowState, t: &Arc<Type>, expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_assertion"); 
         let node = skip_parentheses(expr);
         if node.kind == SyntaxKind::FalseKeyword {
             return Arc::clone(&self.unreachable_never_type);
@@ -824,7 +824,7 @@ impl Checker {
         t: &Arc<Type>,
         expr: &tsox_frontend::ast::node_data_generated::BinaryExpressionData,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_binary_expression"); 
         match expr.operator_token.kind {
             SyntaxKind::EqualsToken | SyntaxKind::BarBarEqualsToken | SyntaxKind::AmpersandAmpersandEqualsToken | SyntaxKind::QuestionQuestionEqualsToken => {
                 let inner = self.narrow_type(f, t, &expr.right, assume_true);
@@ -899,7 +899,7 @@ impl Checker {
         bool_value: &Arc<Node>,
         operator: SyntaxKind,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_boolean_comparison"); 
         let assume_true =
             (assume_true != (bool_value.kind == SyntaxKind::TrueKeyword)) != (operator != SyntaxKind::ExclamationEqualsEqualsToken && operator != SyntaxKind::ExclamationEqualsToken);
         self.narrow_type(f, t, expr, assume_true)
@@ -912,7 +912,7 @@ impl Checker {
         operator: SyntaxKind,
         value: &Arc<Node>,
         assume_true: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_discriminant_property"); 
         if (operator == SyntaxKind::EqualsEqualsEqualsToken || operator == SyntaxKind::ExclamationEqualsEqualsToken)
             && t.flags.intersects(TypeFlags::Union)
         {
@@ -941,7 +941,7 @@ impl Checker {
         self.narrow_type_by_discriminant(t, access, &|checker, t| checker.narrow_type_by_equality(t, operator, value, assume_true))
     }
 
-    pub fn narrow_type_by_equality(&mut self, t: &Arc<Type>, operator: SyntaxKind, value: &Arc<Node>, assume_true: bool) -> Arc<Type> {
+    pub fn narrow_type_by_equality(&mut self, t: &Arc<Type>, operator: SyntaxKind, value: &Arc<Node>, assume_true: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_equality"); 
         if t.flags.intersects(TypeFlags::Any) {
             return Arc::clone(t);
         }
@@ -1009,7 +1009,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn narrow_type_by_switch_on_discriminant(&mut self, t: &Arc<Type>, data_node: &Arc<Node>) -> Arc<Type> {
+    pub fn narrow_type_by_switch_on_discriminant(&mut self, t: &Arc<Type>, data_node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_switch_on_discriminant"); 
         let data = data_node.as_flow_switch_clause_data();
         let switch_types = self.get_switch_clause_types(&data.switch_statement);
         if switch_types.is_empty() {
@@ -1069,7 +1069,7 @@ impl Checker {
         self.get_union_type(vec![case_type, default_type])
     }
 
-    pub fn narrow_type_by_switch_on_type_of(&mut self, t: &Arc<Type>, data_node: &Arc<Node>) -> Arc<Type> {
+    pub fn narrow_type_by_switch_on_type_of(&mut self, t: &Arc<Type>, data_node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_switch_on_type_of"); 
         let data = data_node.as_flow_switch_clause_data();
         if let Some(witnesses) = self.get_switch_clause_type_of_witnesses(&data.switch_statement) {
             let clauses = switch_clauses(&data.switch_statement);
@@ -1100,7 +1100,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn narrow_type_by_switch_on_true(&mut self, f: &mut FlowState, t: &Arc<Type>, data_node: &Arc<Node>) -> Arc<Type> {
+    pub fn narrow_type_by_switch_on_true(&mut self, f: &mut FlowState, t: &Arc<Type>, data_node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_switch_on_true"); 
         let data = data_node.as_flow_switch_clause_data();
         let clauses = switch_clauses(&data.switch_statement);
         let default_index = clauses.iter().position(|clause| clause.kind == SyntaxKind::DefaultClause);
@@ -1135,7 +1135,7 @@ impl Checker {
         self.get_union_type(types)
     }
 
-    pub fn get_switch_clause_type_of_witnesses(&mut self, node: &Arc<Node>) -> Option<Vec<String>> {
+    pub fn get_switch_clause_type_of_witnesses(&mut self, node: &Arc<Node>) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("get_switch_clause_type_of_witnesses"); 
         let clauses = switch_clauses(node);
         let mut witnesses = vec![String::new(); clauses.len()];
         for (i, clause) in clauses.iter().enumerate() {
@@ -1153,7 +1153,7 @@ impl Checker {
         Some(witnesses)
     }
 
-    pub fn get_effects_signature(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub fn get_effects_signature(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_effects_signature"); 
         if let Some(links) = self.signature_links.get(node) {
             if let Some(signature) = &links.effects_signature {
                 return Some(Arc::clone(signature));
@@ -1199,12 +1199,12 @@ impl Checker {
         signature
     }
 
-    fn unknown_signature_opt(&mut self) -> Option<Arc<Signature>> {
+    fn unknown_signature_opt(&mut self) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("unknown_signature_opt"); 
         None
     }
 }
 
-fn switch_clauses(switch_statement: &Arc<Node>) -> &[Arc<Node>] {
+fn switch_clauses(switch_statement: &Arc<Node>) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("switch_clauses"); 
     match &switch_statement.data {
         NodeData::SwitchStatement(d) => match &d.case_block.data {
             NodeData::CaseBlock(cb) => &cb.clauses.nodes,
@@ -1214,7 +1214,7 @@ fn switch_clauses(switch_statement: &Arc<Node>) -> &[Arc<Node>] {
     }
 }
 
-fn every_type_is_tuple_like_w6(checker: &mut Checker, t: &Arc<Type>) -> bool {
+fn every_type_is_tuple_like_w6(checker: &mut Checker, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("every_type_is_tuple_like_w6"); 
     if t.flags.intersects(TYPE_FLAGS_UNION) {
         t.types().unwrap_or(&[]).iter().all(|c| checker.is_tuple_like_type(c))
     } else {
@@ -1222,7 +1222,7 @@ fn every_type_is_tuple_like_w6(checker: &mut Checker, t: &Arc<Type>) -> bool {
     }
 }
 
-fn some_type_w6(checker: &mut Checker, t: &Arc<Type>, f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> bool) -> bool {
+fn some_type_w6(checker: &mut Checker, t: &Arc<Type>, f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> bool) -> bool { ::tsox_core::fntrace::enter("some_type_w6"); 
     if t.flags.intersects(TypeFlags::Union) {
         t.types().unwrap_or(&[]).iter().any(|c| f(checker, c))
     } else {
@@ -1230,7 +1230,7 @@ fn some_type_w6(checker: &mut Checker, t: &Arc<Type>, f: &mut dyn FnMut(&mut Che
     }
 }
 
-fn contains_missing_type_w6(checker: &Checker, t: &Arc<Type>) -> bool {
+fn contains_missing_type_w6(checker: &Checker, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("contains_missing_type_w6"); 
     let missing = checker.missing_type();
     Arc::ptr_eq(t, &missing)
         || t.flags.intersects(TYPE_FLAGS_UNION) && t.types().is_some_and(|types| types.first().is_some_and(|first| Arc::ptr_eq(first, &missing)))
@@ -1240,7 +1240,7 @@ fn filter_type_w6(
     checker: &mut Checker,
     t: &Arc<Type>,
     f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> bool,
-) -> Arc<Type> {
+) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_type_w6"); 
     if t.flags.intersects(TypeFlags::Union) {
         let types = t.types().unwrap_or(&[]).to_vec();
         let filtered: Vec<Arc<Type>> = types.into_iter().filter(|c| f(checker, c)).collect();

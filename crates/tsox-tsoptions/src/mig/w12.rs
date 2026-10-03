@@ -1,7 +1,7 @@
 use crate::packagejson::json::{JsonValue, JsonValueType};
 use tsox_core::collections::mig::x12::{unmarshal_decode, Decoder, Error, JsonKind};
 
-pub fn unmarshal_json_value(v: &mut JsonValue, data: &[u8]) -> Result<(), Error> {
+pub fn unmarshal_json_value(v: &mut JsonValue, data: &[u8]) -> Result<(), Error> { ::tsox_core::fntrace::enter("unmarshal_json_value"); 
     if data == b"null" {
         *v = JsonValue {
             value_type: JsonValueType::Null,
@@ -48,7 +48,7 @@ pub fn unmarshal_json_value(v: &mut JsonValue, data: &[u8]) -> Result<(), Error>
     Ok(())
 }
 
-pub fn unmarshal_json_value_v2(v: &mut JsonValue, dec: &mut Decoder) -> Result<(), Error> {
+pub fn unmarshal_json_value_v2(v: &mut JsonValue, dec: &mut Decoder) -> Result<(), Error> { ::tsox_core::fntrace::enter("unmarshal_json_value_v2"); 
     match dec.peek_kind()? {
         JsonKind::Null => {
             dec.read_token()?;

@@ -7,7 +7,7 @@ impl NameResolver {
         &self,
         _location: &Arc<Node>,
         _last_location: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("resolve_export_specifier_case"); 
         None
     }
 }

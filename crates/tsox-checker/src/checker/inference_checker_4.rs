@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_of_contextual_type"); 
         use crate::checker::types::TypeData;
 
         if t.flags.contains(TypeFlags::TypeParameter) {
@@ -133,7 +133,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn reduced_keyof_for_contextual_gate(&mut self, constraint: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn reduced_keyof_for_contextual_gate(&mut self, constraint: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("reduced_keyof_for_contextual_gate"); 
         use crate::checker::types::TypeData;
         let TypeData::Index(idx) = &constraint.data else {
             return None;
@@ -150,7 +150,7 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type"); 
         let parent = match &node.parent {
             Some(p) => Arc::clone(p),
             None => return None,
@@ -207,7 +207,7 @@ impl Checker {
     pub fn get_contextual_signature(
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_contextual_signature"); 
         let t = self.get_contextual_type(node, ContextFlags::Signature)?;
         if let TypeData::Union(u) = &t.data {
             let mut first: Option<Arc<Signature>> = None;
@@ -233,7 +233,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_contextual_call_signature"); 
         let signatures = self.get_signatures_of_type(t, SignatureKind::Call);
         let applicable: Vec<Arc<Signature>> = signatures
             .into_iter()
@@ -248,7 +248,7 @@ impl Checker {
     fn get_intersected_signatures(
         &mut self,
         signatures: Vec<Arc<Signature>>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_intersected_signatures"); 
         if !self.no_implicit_any {
             return None;
         }
@@ -272,7 +272,7 @@ impl Checker {
         combined
     }
 
-    pub(crate) fn is_arity_smaller(&self, signature: &Arc<Signature>, target: &Arc<tsox_frontend::ast::Node>) -> bool {
+    pub(crate) fn is_arity_smaller(&self, signature: &Arc<Signature>, target: &Arc<tsox_frontend::ast::Node>) -> bool { ::tsox_core::fntrace::enter("is_arity_smaller"); 
         let Some(parameters) = function_like_parameters(target) else {
             return false;
         };

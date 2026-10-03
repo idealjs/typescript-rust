@@ -36,7 +36,7 @@ pub struct Replacements {
 }
 
 impl Default for Replacements {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Replacements {
             use_case_sensitive_file_names: None,
             file_exists: None,
@@ -54,7 +54,7 @@ impl Default for Replacements {
     }
 }
 
-pub fn wrap(fs: SharedFS, replacements: Replacements) -> SharedFS {
+pub fn wrap(fs: SharedFS, replacements: Replacements) -> SharedFS { ::tsox_core::fntrace::enter("wrap"); 
     Arc::new(WrappedFS {
         fs,
         replacements,
@@ -67,70 +67,70 @@ pub struct WrappedFS {
 }
 
 impl FS for WrappedFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         if let Some(replacement) = &self.replacements.use_case_sensitive_file_names {
             return replacement();
         }
         self.fs.use_case_sensitive_file_names()
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         if let Some(replacement) = &self.replacements.file_exists {
             return replacement(path);
         }
         self.fs.file_exists(path)
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         if let Some(replacement) = &self.replacements.read_file {
             return replacement(path);
         }
         self.fs.read_file(path)
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         if let Some(replacement) = &self.replacements.write_file {
             return replacement(path, data);
         }
         self.fs.write_file(path, data)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         if let Some(replacement) = &self.replacements.append_file {
             return replacement(path, data);
         }
         self.fs.append_file(path, data)
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         if let Some(replacement) = &self.replacements.remove {
             return replacement(path);
         }
         self.fs.remove(path)
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         if let Some(replacement) = &self.replacements.directory_exists {
             return replacement(path);
         }
         self.fs.directory_exists(path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         if let Some(replacement) = &self.replacements.get_accessible_entries {
             return replacement(path);
         }
         self.fs.get_accessible_entries(path)
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         if let Some(replacement) = &self.replacements.stat {
             return replacement(path);
         }
         self.fs.stat(path)
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         if let Some(replacement) = &self.replacements.realpath {
             return replacement(path);
         }
@@ -141,7 +141,7 @@ impl FS for WrappedFS {
         &self,
         root: &str,
         walk_fn: &mut dyn FnMut(&str, &FileInfo),
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("walk_dir"); 
         if let Some(replacement) = &self.replacements.walk_dir {
             return replacement(root, walk_fn);
         }
@@ -155,7 +155,7 @@ impl WrappedFS {
         path: &str,
         a_time: SystemTime,
         m_time: SystemTime,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<()> { ::tsox_core::fntrace::enter("chtimes"); 
         if let Some(replacement) = &self.replacements.chtimes {
             return replacement(path, a_time, m_time);
         }

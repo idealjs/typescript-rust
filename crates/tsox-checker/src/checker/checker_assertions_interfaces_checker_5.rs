@@ -14,7 +14,7 @@ impl Checker {
         local_index: Option<Arc<crate::checker::IndexInfo>>,
         interface_decl: Option<Arc<Node>>,
         index_infos: &[Arc<crate::checker::IndexInfo>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_index_constraint_for_property"); 
         for info in index_infos {
             let Some(info_key) = info.key_type.clone() else {
                 continue;
@@ -67,7 +67,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn explicit_type_argument_count(node: &Arc<Node>) -> usize {
+    pub(crate) fn explicit_type_argument_count(node: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("explicit_type_argument_count"); 
         match &node.data {
             tsox_frontend::ast::NodeData::CallExpression(d) => {
                 d.type_arguments.as_ref().map(|t| t.len()).unwrap_or(0)
@@ -79,7 +79,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn has_explicit_type_arguments(node: &Arc<Node>) -> bool {
+    pub(crate) fn has_explicit_type_arguments(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_explicit_type_arguments"); 
         Self::explicit_type_argument_count(node) > 0
     }
 }

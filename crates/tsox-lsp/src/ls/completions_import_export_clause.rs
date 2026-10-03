@@ -18,7 +18,7 @@ pub(super) fn import_or_export_clause_completion(
     context_token: Option<&ScanToken>,
     root: &Arc<Node>,
     position: usize,
-) -> ClauseResult {
+) -> ClauseResult { ::tsox_core::fntrace::enter("import_or_export_clause_completion"); 
     let Some(context) = context_token else {
         return ClauseResult::Continue;
     };
@@ -81,7 +81,7 @@ pub(super) fn import_or_export_clause_completion(
     ClauseResult::Symbols(uniques)
 }
 
-fn module_specifier_of(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+fn module_specifier_of(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("module_specifier_of"); 
     match &declaration.data {
         NodeData::ImportDeclaration(d) => Some(Arc::clone(&d.module_specifier)),
         NodeData::ExportDeclaration(d) => d.module_specifier.as_ref().map(Arc::clone),
@@ -89,7 +89,7 @@ fn module_specifier_of(declaration: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-fn clause_elements(named: &Arc<Node>) -> Vec<Arc<Node>> {
+fn clause_elements(named: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("clause_elements"); 
     match &named.data {
         NodeData::NamedImports(d) => d.elements.nodes.clone(),
         NodeData::NamedExports(d) => d.elements.nodes.clone(),
@@ -97,7 +97,7 @@ fn clause_elements(named: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-fn property_name_or_name(specifier: &Arc<Node>) -> Option<String> {
+fn property_name_or_name(specifier: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("property_name_or_name"); 
     match &specifier.data {
         NodeData::ImportSpecifier(d) => Some(
             d.property_name
@@ -117,6 +117,6 @@ fn property_name_or_name(specifier: &Arc<Node>) -> Option<String> {
     }
 }
 
-fn is_currently_editing(node: &Arc<Node>, position: usize) -> bool {
+fn is_currently_editing(node: &Arc<Node>, position: usize) -> bool { ::tsox_core::fntrace::enter("is_currently_editing"); 
     node.loc.pos() <= position && position <= node.loc.end()
 }

@@ -6,7 +6,7 @@ pub type TypeId = u32;
 
 pub(crate) static NEXT_TYPE_ID: AtomicU32 = AtomicU32::new(1);
 
-pub fn next_type_id() -> u32 {
+pub fn next_type_id() -> u32 { ::tsox_core::fntrace::enter("next_type_id"); 
     NEXT_TYPE_ID.fetch_add(1, Ordering::Relaxed)
 }
 pub type SignatureId = u32;

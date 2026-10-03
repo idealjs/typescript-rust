@@ -8,7 +8,7 @@ use tsox_frontend::astnav;
 
 // ============ jsdoc.go ============
 
-pub fn declaration_jsdoc_tags(node: &Arc<Node>, file: &Arc<SourceFile>) -> Vec<Arc<Node>> {
+pub fn declaration_jsdoc_tags(node: &Arc<Node>, file: &Arc<SourceFile>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("declaration_jsdoc_tags"); 
     if !node.flags.contains(ast::NodeFlags::JSDoc) {
         let mut current = Some(Arc::clone(node));
         while let Some(cur) = current {
@@ -27,21 +27,21 @@ pub fn declaration_jsdoc_tags(node: &Arc<Node>, file: &Arc<SourceFile>) -> Vec<A
     Vec::new()
 }
 
-pub fn jsdoc_tags(jsdoc: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+pub fn jsdoc_tags(jsdoc: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("jsdoc_tags"); 
     match &jsdoc.data {
         NodeData::JSDoc(d) => d.tags.as_ref().map(|tags| tags.nodes.clone()),
         _ => None,
     }
 }
 
-pub fn jsdoc_comments(jsdoc: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+pub fn jsdoc_comments(jsdoc: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("jsdoc_comments"); 
     match &jsdoc.data {
         NodeData::JSDoc(d) => Some(d.comment.nodes.clone()),
         _ => None,
     }
 }
 
-pub fn get_jsdoc_tag_text(tag: &Arc<Node>) -> String {
+pub fn get_jsdoc_tag_text(tag: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_jsdoc_tag_text"); 
     let comment = scanner_get_text_of_jsdoc_comment(jsdoc_comment_list(tag));
     let add_comment = |s: String| -> String {
         if comment.is_empty() {
@@ -116,7 +116,7 @@ pub fn get_jsdoc_tag_text(tag: &Arc<Node>) -> String {
     }
 }
 
-pub fn jsdoc_comment_list<'a>(tag: &'a Arc<Node>) -> Option<&'a NodeList> {
+pub fn jsdoc_comment_list<'a>(tag: &'a Arc<Node>) -> Option<&'a NodeList> { ::tsox_core::fntrace::enter("jsdoc_comment_list"); 
     let comment = match &tag.data {
         NodeData::JSDoc(d) => return Some(&d.comment),
         NodeData::JSDocTypeTag(d) => &d.comment,
@@ -145,11 +145,11 @@ pub fn jsdoc_comment_list<'a>(tag: &'a Arc<Node>) -> Option<&'a NodeList> {
     comment.as_deref()
 }
 
-pub fn scanner_get_text_of_jsdoc_comment(comments: Option<&NodeList>) -> String {
+pub fn scanner_get_text_of_jsdoc_comment(comments: Option<&NodeList>) -> String { ::tsox_core::fntrace::enter("scanner_get_text_of_jsdoc_comment"); 
     tsox_frontend::scanner::mig::m3i::get_text_of_jsdoc_comment(comments)
 }
 
-pub fn scanner_get_text_of_node(node: &Arc<Node>) -> String {
+pub fn scanner_get_text_of_node(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("scanner_get_text_of_node"); 
     tsox_frontend::scanner::mig::m3i::get_text_of_node(node)
 }
 
@@ -159,7 +159,7 @@ pub fn get_matching_jsdoc_tag(
     name: &str,
     matches: impl Fn(&Arc<Node>, &str) -> bool,
     seen_symbols: &mut std::collections::HashSet<u64>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_matching_jsdoc_tag"); 
     let jsdoc = crate::ls::jsdoc::get_jsdoc_or_tag(c, node)?;
     if jsdoc.kind == SyntaxKind::JSDoc {
         if let Some(tags) = jsdoc_tags(&jsdoc) {
@@ -176,7 +176,7 @@ pub fn get_matching_jsdoc_tag(
 pub fn get_jsdoc_parameter_tag_by_position(
     c: &Checker,
     param: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_parameter_tag_by_position"); 
     let parent = param.parent()?;
 
     let params = crate::ls::mig::m5u_2::node_parameters(&parent);
@@ -210,25 +210,25 @@ pub fn get_jsdoc_parameter_tag_by_position(
     None
 }
 
-pub fn is_matching_parameter_tag(tag: &Arc<Node>, name: &str) -> bool {
+pub fn is_matching_parameter_tag(tag: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_matching_parameter_tag"); 
     tag.kind == SyntaxKind::JSDocParameterTag && is_node_with_name(tag, name)
 }
 
-pub fn is_matching_template_tag(tag: &Arc<Node>, name: &str) -> bool {
+pub fn is_matching_template_tag(tag: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_matching_template_tag"); 
     tag.kind == SyntaxKind::JSDocTemplateTag
         && tag_type_parameters(tag)
             .iter()
             .any(|tp| is_node_with_name(tp, name))
 }
 
-pub fn tag_type_parameters(tag: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn tag_type_parameters(tag: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("tag_type_parameters"); 
     match &tag.data {
         NodeData::JSDocTemplateTag(d) => d.type_parameters.nodes.clone(),
         _ => Vec::new(),
     }
 }
 
-pub fn is_node_with_name(node: &Arc<Node>, name: &str) -> bool {
+pub fn is_node_with_name(node: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_node_with_name"); 
     node.name()
         .map_or(false, |node_name| {
             ast::is_identifier(&node_name) && node_name.text() == name
@@ -238,7 +238,7 @@ pub fn is_node_with_name(node: &Arc<Node>, name: &str) -> bool {
 pub fn no_mapped_location(
     _file: &Arc<SourceFile>,
     _range: tsox_core::core::text::TextRange,
-) -> (crate::lsp::lsproto_lsp::Location, u32) {
+) -> (crate::lsp::lsproto_lsp::Location, u32) { ::tsox_core::fntrace::enter("no_mapped_location"); 
     (
         Default::default(),
         crate::mig::m5u_conv::SPANMAP_FIDELITY_NONE,
@@ -260,7 +260,7 @@ pub struct CommentOwnerInfo {
 pub fn get_comment_owner_info(
     token_at_pos: &Arc<Node>,
     generate_return_in_doc_template: bool,
-) -> Option<CommentOwnerInfo> {
+) -> Option<CommentOwnerInfo> { ::tsox_core::fntrace::enter("get_comment_owner_info"); 
     let mut node = Some(Arc::clone(token_at_pos));
     while let Some(cur) = node {
         match get_comment_owner_info_worker(&cur, generate_return_in_doc_template) {
@@ -276,7 +276,7 @@ pub fn get_comment_owner_info(
 pub fn get_comment_owner_info_worker(
     comment_owner: &Arc<Node>,
     generate_return_in_doc_template: bool,
-) -> (Option<CommentOwnerInfo>, bool) {
+) -> (Option<CommentOwnerInfo>, bool) { ::tsox_core::fntrace::enter("get_comment_owner_info_worker"); 
     match comment_owner.kind {
         SyntaxKind::FunctionDeclaration
         | SyntaxKind::FunctionExpression
@@ -442,14 +442,14 @@ pub fn get_comment_owner_info_worker(
     }
 }
 
-pub fn binary_expression_right(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn binary_expression_right(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("binary_expression_right"); 
     match &node.data {
         NodeData::BinaryExpression(d) => Some(Arc::clone(&d.right)),
         _ => None,
     }
 }
 
-pub fn has_return(node: &Arc<Node>, generate_return_in_doc_template: bool) -> bool {
+pub fn has_return(node: &Arc<Node>, generate_return_in_doc_template: bool) -> bool { ::tsox_core::fntrace::enter("has_return"); 
     if !generate_return_in_doc_template {
         return false;
     }
@@ -470,7 +470,7 @@ pub fn has_return(node: &Arc<Node>, generate_return_in_doc_template: bool) -> bo
         })
 }
 
-pub fn get_right_hand_side_of_assignment(right_hand_side: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+pub fn get_right_hand_side_of_assignment(right_hand_side: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_right_hand_side_of_assignment"); 
     let mut right_hand_side = Arc::clone(right_hand_side?);
     while right_hand_side.kind == SyntaxKind::ParenthesizedExpression {
         match &right_hand_side.data {
@@ -496,7 +496,7 @@ pub fn parameter_doc_comments(
     is_java_script_file: bool,
     indentation: &str,
     new_line: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("parameter_doc_comments"); 
     let mut b = String::new();
     for (i, parameter) in parameters.iter().enumerate() {
         let mut param_name = format!("param{i}");
@@ -523,21 +523,21 @@ pub fn parameter_doc_comments(
     b
 }
 
-pub fn parameter_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn parameter_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parameter_dot_dot_dot_token"); 
     match &node.data {
         NodeData::ParameterDeclaration(d) => d.dot_dot_dot_token.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn returns_doc_comment(indentation: &str, new_line: &str) -> String {
+pub fn returns_doc_comment(indentation: &str, new_line: &str) -> String { ::tsox_core::fntrace::enter("returns_doc_comment"); 
     format!("{indentation} * @returns{new_line}")
 }
 
 pub fn get_indentation_string_at_position(
     source_file: &Arc<SourceFile>,
     position: usize,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_indentation_string_at_position"); 
     let text = &source_file.text;
     let line_start = get_line_start_position_for_position(position, source_file);
     let mut pos = line_start;
@@ -553,18 +553,18 @@ pub fn get_indentation_string_at_position(
     text[line_start..pos].to_string()
 }
 
-pub fn is_white_space_single_line(ch: char) -> bool {
+pub fn is_white_space_single_line(ch: char) -> bool { ::tsox_core::fntrace::enter("is_white_space_single_line"); 
     tsox_core::stringutil::is_white_space_single_line(ch)
 }
 
-pub fn is_white_space_like(ch: char) -> bool {
+pub fn is_white_space_like(ch: char) -> bool { ::tsox_core::fntrace::enter("is_white_space_like"); 
     tsox_core::stringutil::is_white_space_like(ch)
 }
 
 pub fn get_doc_comment_end_at_position(
     file: &Arc<SourceFile>,
     position: usize,
-) -> (usize, bool, bool) {
+) -> (usize, bool, bool) { ::tsox_core::fntrace::enter("get_doc_comment_end_at_position"); 
     let text = &file.text;
     let line_start = get_line_start_position_for_position(position, file);
     let line_end = get_line_end_of_position(file, position);
@@ -577,7 +577,7 @@ pub fn get_doc_comment_end_at_position(
     (position + suffix_end, true, has_closing)
 }
 
-pub fn skip_whitespace(text: &str, mut position: usize) -> usize {
+pub fn skip_whitespace(text: &str, mut position: usize) -> usize { ::tsox_core::fntrace::enter("skip_whitespace"); 
     while position < text.len() {
         let Some(ch) = text[position..].chars().next() else {
             break;
@@ -590,7 +590,7 @@ pub fn skip_whitespace(text: &str, mut position: usize) -> usize {
     position
 }
 
-pub fn is_non_empty_jsdoc(jsdoc: Option<&Arc<Node>>) -> bool {
+pub fn is_non_empty_jsdoc(jsdoc: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_non_empty_jsdoc"); 
     let Some(jsdoc) = jsdoc else {
         return false;
     };
@@ -603,7 +603,7 @@ pub fn is_non_empty_jsdoc(jsdoc: Option<&Arc<Node>>) -> bool {
     }
 }
 
-pub fn has_jsdoc_tags(node: &Arc<Node>, file: &Arc<SourceFile>) -> bool {
+pub fn has_jsdoc_tags(node: &Arc<Node>, file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("has_jsdoc_tags"); 
     let jsdocs = node.jsdoc(file);
     if jsdocs.is_empty() {
         return false;
@@ -612,7 +612,7 @@ pub fn has_jsdoc_tags(node: &Arc<Node>, file: &Arc<SourceFile>) -> bool {
     jsdoc_tags(last).map_or(false, |tags| !tags.is_empty())
 }
 
-pub fn strip_jsdoc_template_indentation(template: &str, new_line: &str) -> String {
+pub fn strip_jsdoc_template_indentation(template: &str, new_line: &str) -> String { ::tsox_core::fntrace::enter("strip_jsdoc_template_indentation"); 
     let lines: Vec<String> = template
         .split(new_line)
         .map(|line| {
@@ -633,7 +633,7 @@ pub fn transform_jsdoc_template_lines(
     template: &str,
     new_line: &str,
     snippet_index: &mut i32,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("transform_jsdoc_template_lines"); 
     let mut lines: Vec<String> = template.split(new_line).map(str::to_string).collect();
     for i in 0..lines.len() {
         let line = lines[i].clone();
@@ -652,12 +652,12 @@ pub fn transform_jsdoc_template_lines(
     lines.join(new_line)
 }
 
-pub fn line_has_only_jsdoc_asterisk(line: &str) -> bool {
+pub fn line_has_only_jsdoc_asterisk(line: &str) -> bool { ::tsox_core::fntrace::enter("line_has_only_jsdoc_asterisk"); 
     let line = line.trim_start_matches([' ', '\t']);
     line.starts_with('*') && is_only_spaces_or_tabs(&line[1..])
 }
 
-pub fn transform_jsdoc_param_line(line: &str, snippet_index: &mut i32) -> Option<String> {
+pub fn transform_jsdoc_param_line(line: &str, snippet_index: &mut i32) -> Option<String> { ::tsox_core::fntrace::enter("transform_jsdoc_param_line"); 
     let mut prefix = "";
     let mut rest = line;
     if rest.starts_with(' ') {
@@ -701,7 +701,7 @@ pub fn transform_jsdoc_param_line(line: &str, snippet_index: &mut i32) -> Option
     Some(out)
 }
 
-pub fn transform_jsdoc_returns_line(line: &str, snippet_index: &mut i32) -> Option<String> {
+pub fn transform_jsdoc_returns_line(line: &str, snippet_index: &mut i32) -> Option<String> { ::tsox_core::fntrace::enter("transform_jsdoc_returns_line"); 
     let mut prefix = "";
     let mut rest = line;
     if rest.starts_with(' ') {
@@ -716,7 +716,7 @@ pub fn transform_jsdoc_returns_line(line: &str, snippet_index: &mut i32) -> Opti
     Some(text)
 }
 
-pub fn scan_non_whitespace(text: &str) -> Option<(String, &str)> {
+pub fn scan_non_whitespace(text: &str) -> Option<(String, &str)> { ::tsox_core::fntrace::enter("scan_non_whitespace"); 
     if text.is_empty() {
         return None;
     }
@@ -736,7 +736,7 @@ pub fn scan_non_whitespace(text: &str) -> Option<(String, &str)> {
     Some((text.to_string(), ""))
 }
 
-pub fn is_jsdoc_snippet_prefix(prefix: &str) -> bool {
+pub fn is_jsdoc_snippet_prefix(prefix: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_snippet_prefix"); 
     let trimmed = trim_right_single_line_whitespace(prefix);
     if trimmed.ends_with("/**") {
         return true;
@@ -756,7 +756,7 @@ pub fn is_jsdoc_snippet_prefix(prefix: &str) -> bool {
     trimmed.len() - start >= 3
 }
 
-pub fn get_jsdoc_snippet_prefix_start(prefix: &str) -> Option<usize> {
+pub fn get_jsdoc_snippet_prefix_start(prefix: &str) -> Option<usize> { ::tsox_core::fntrace::enter("get_jsdoc_snippet_prefix_start"); 
     let trimmed = trim_right_single_line_whitespace(prefix);
     let bytes = trimmed.as_bytes();
     let mut i = trimmed.len() as i64 - 1;
@@ -772,7 +772,7 @@ pub fn get_jsdoc_snippet_prefix_start(prefix: &str) -> Option<usize> {
     None
 }
 
-pub fn is_jsdoc_snippet_suffix(suffix: &str) -> bool {
+pub fn is_jsdoc_snippet_suffix(suffix: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_snippet_suffix"); 
     let start = skip_single_line_whitespace(suffix, 0);
     let trimmed = trim_right_single_line_whitespace(&suffix[start..]);
     if trimmed.is_empty() {
@@ -789,7 +789,7 @@ pub fn is_jsdoc_snippet_suffix(suffix: &str) -> bool {
     true
 }
 
-pub fn get_jsdoc_snippet_suffix_end(suffix: &str) -> (usize, bool) {
+pub fn get_jsdoc_snippet_suffix_end(suffix: &str) -> (usize, bool) { ::tsox_core::fntrace::enter("get_jsdoc_snippet_suffix_end"); 
     let mut pos = skip_single_line_whitespace(suffix, 0);
     let bytes = suffix.as_bytes();
     while pos < suffix.len() && bytes[pos] == b'*' {
@@ -801,7 +801,7 @@ pub fn get_jsdoc_snippet_suffix_end(suffix: &str) -> (usize, bool) {
     (0, false)
 }
 
-pub fn trim_right_single_line_whitespace(text: &str) -> String {
+pub fn trim_right_single_line_whitespace(text: &str) -> String { ::tsox_core::fntrace::enter("trim_right_single_line_whitespace"); 
     let mut end = 0;
     let mut pos = 0;
     while pos < text.len() {
@@ -816,7 +816,7 @@ pub fn trim_right_single_line_whitespace(text: &str) -> String {
     text[..end].to_string()
 }
 
-pub fn skip_single_line_whitespace(text: &str, mut pos: usize) -> usize {
+pub fn skip_single_line_whitespace(text: &str, mut pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_single_line_whitespace"); 
     while pos < text.len() {
         let Some(ch) = text[pos..].chars().next() else {
             break;
@@ -829,11 +829,11 @@ pub fn skip_single_line_whitespace(text: &str, mut pos: usize) -> usize {
     pos
 }
 
-pub fn is_only_single_line_whitespace(text: &str) -> bool {
+pub fn is_only_single_line_whitespace(text: &str) -> bool { ::tsox_core::fntrace::enter("is_only_single_line_whitespace"); 
     skip_single_line_whitespace(text, 0) == text.len()
 }
 
-pub fn starts_with_single_line_whitespace(text: &str) -> bool {
+pub fn starts_with_single_line_whitespace(text: &str) -> bool { ::tsox_core::fntrace::enter("starts_with_single_line_whitespace"); 
     if text.is_empty() {
         return false;
     }
@@ -842,11 +842,11 @@ pub fn starts_with_single_line_whitespace(text: &str) -> bool {
         .map_or(false, is_white_space_single_line)
 }
 
-pub fn is_only_spaces_or_tabs(text: &str) -> bool {
+pub fn is_only_spaces_or_tabs(text: &str) -> bool { ::tsox_core::fntrace::enter("is_only_spaces_or_tabs"); 
     text.bytes().all(|b| b == b' ' || b == b'\t')
 }
 
-pub fn get_line_start_position_for_position(position: usize, file: &Arc<SourceFile>) -> usize {
+pub fn get_line_start_position_for_position(position: usize, file: &Arc<SourceFile>) -> usize { ::tsox_core::fntrace::enter("get_line_start_position_for_position"); 
     let line = file.line_map.line_at(position);
     match file.line_map.line_starts.get(line) {
         Some(&start) => start as usize,
@@ -854,7 +854,7 @@ pub fn get_line_start_position_for_position(position: usize, file: &Arc<SourceFi
     }
 }
 
-pub fn get_line_end_of_position(file: &Arc<SourceFile>, position: usize) -> usize {
+pub fn get_line_end_of_position(file: &Arc<SourceFile>, position: usize) -> usize { ::tsox_core::fntrace::enter("get_line_end_of_position"); 
     crate::ls::mig::m5r::get_line_end_of_position(file, position)
 }
 
@@ -864,7 +864,7 @@ impl crate::ls::language_service::LanguageService {
         file: &Arc<SourceFile>,
         position: usize,
         new_text: &str,
-    ) -> Option<crate::ls::mig::m5q2b_3::lsproto::TextEditOrInsertReplaceEdit> {
+    ) -> Option<crate::ls::mig::m5q2b_3::lsproto::TextEditOrInsertReplaceEdit> { ::tsox_core::fntrace::enter("get_jsdoc_snippet_completion_range"); 
         let text = &file.text;
         let line_start = get_line_start_position_for_position(position, file);
         let prefix = &text[line_start..position];
@@ -910,11 +910,11 @@ impl crate::ls::language_service::LanguageService {
     }
 }
 
-pub fn fidelity_is_exact(fidelity: &u32) -> bool {
+pub fn fidelity_is_exact(fidelity: &u32) -> bool { ::tsox_core::fntrace::enter("fidelity_is_exact"); 
     *fidelity == crate::mig::m5u_conv::SPANMAP_FIDELITY_EXACT
 }
 
-pub fn client_supports_item_insert_replace() -> bool {
+pub fn client_supports_item_insert_replace() -> bool { ::tsox_core::fntrace::enter("client_supports_item_insert_replace"); 
     crate::ls::mig::m5q_3::client_supports_item_insert_replace(
         &crate::mig::m5m::ResolvedClientCapabilitiesContext { capabilities: None },
     )

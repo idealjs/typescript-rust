@@ -16,7 +16,7 @@ pub(crate) fn watch_mode(
     config_file_name: &str,
     pretty: bool,
     locale: Option<Locale>,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("watch_mode"); 
     {
         let mut writer = sys.writer();
         let _ = writeln!(writer);
@@ -101,7 +101,7 @@ pub(super) fn compile_once(
     config_file_name: &str,
     pretty: bool,
     locale: Option<Locale>,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("compile_once"); 
     let fresh = if !config_file_name.is_empty() {
         get_parsed_command_line_of_config_file(
             config_file_name,
@@ -115,7 +115,7 @@ pub(super) fn compile_once(
     perform_compilation(sys, fresh, pretty, locale.as_ref())
 }
 
-pub(super) fn print_watch_summary(sys: &dyn System, status: ExitStatus) {
+pub(super) fn print_watch_summary(sys: &dyn System, status: ExitStatus) { ::tsox_core::fntrace::enter("print_watch_summary"); 
     let mut writer = sys.writer();
     if status == ExitStatus::Success {
         let _ = writeln!(
@@ -132,7 +132,7 @@ pub(super) fn print_watch_summary(sys: &dyn System, status: ExitStatus) {
     }
 }
 
-pub(super) fn is_source_file(path: &str) -> bool {
+pub(super) fn is_source_file(path: &str) -> bool { ::tsox_core::fntrace::enter("is_source_file"); 
     path.ends_with(".ts")
         || path.ends_with(".tsx")
         || path.ends_with(".js")
@@ -142,7 +142,7 @@ pub(super) fn is_source_file(path: &str) -> bool {
         || path.ends_with(".cts")
 }
 
-pub(super) fn timestamp() -> String {
+pub(super) fn timestamp() -> String { ::tsox_core::fntrace::enter("timestamp"); 
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs())

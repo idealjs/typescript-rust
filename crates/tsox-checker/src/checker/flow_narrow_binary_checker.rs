@@ -9,7 +9,7 @@ impl Checker {
         expr: &Arc<Node>,
         target: &FlowRef,
         kind: NarrowKind,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_binary"); 
         let NodeData::BinaryExpression(bin) = &expr.data else {
             return Arc::clone(type_);
         };
@@ -136,7 +136,7 @@ impl Checker {
         value_type: &Arc<Type>,
         narrow_to_value: bool,
         is_loose: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_equality"); 
         if type_.flags.contains(TypeFlags::Any) {
             return Arc::clone(type_);
         }
@@ -203,7 +203,7 @@ impl Checker {
         type_: &Arc<Type>,
         value_type: &Arc<Type>,
         is_loose: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_comparable_or_coercible"); 
         let constituents = self.constituent_types(type_);
         let value_constituents = self.constituent_types(value_type);
         let matching: Vec<Arc<Type>> = constituents
@@ -229,7 +229,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_comparable_units"); 
         let constituents = self.constituent_types(type_);
         let value_constituents = self.constituent_types(value_type);
         let remaining: Vec<Arc<Type>> = constituents

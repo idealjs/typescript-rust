@@ -2,7 +2,7 @@
 
 use crate::checker::checker::*;
 
-pub(crate) fn get_excluded_symbol_flags(flags: SymbolFlags) -> SymbolFlags {
+pub(crate) fn get_excluded_symbol_flags(flags: SymbolFlags) -> SymbolFlags { ::tsox_core::fntrace::enter("get_excluded_symbol_flags"); 
     let mut result = SymbolFlags::None;
     if flags.intersects(SymbolFlags::BlockScopedVariable) {
         result |= SymbolFlags::BlockScopedVariableExcludes;
@@ -58,11 +58,11 @@ pub(crate) fn get_excluded_symbol_flags(flags: SymbolFlags) -> SymbolFlags {
     result
 }
 
-pub(crate) fn is_module_or_enum_name(_node: &Node) -> bool {
+pub(crate) fn is_module_or_enum_name(_node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_or_enum_name"); 
     false
 }
 
-pub(crate) fn is_non_local_alias(symbol: &Arc<Symbol>, excludes: SymbolFlags) -> bool {
+pub(crate) fn is_non_local_alias(symbol: &Arc<Symbol>, excludes: SymbolFlags) -> bool { ::tsox_core::fntrace::enter("is_non_local_alias"); 
     if symbol.flags == SymbolFlags::Alias
         || (symbol.flags.intersects(SymbolFlags::Alias)
             && symbol.flags.intersects(SymbolFlags::Assignment))
@@ -73,7 +73,7 @@ pub(crate) fn is_non_local_alias(symbol: &Arc<Symbol>, excludes: SymbolFlags) ->
     }
 }
 
-pub(crate) fn is_type_only_node(node: &Node) -> bool {
+pub(crate) fn is_type_only_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only_node"); 
     use tsox_frontend::ast::NodeData;
     match &node.data {
         NodeData::ImportSpecifier(data) => data.is_type_only,
@@ -84,7 +84,7 @@ pub(crate) fn is_type_only_node(node: &Node) -> bool {
     }
 }
 
-pub(crate) fn is_alias_symbol_declaration(node: &Node) -> bool {
+pub(crate) fn is_alias_symbol_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_alias_symbol_declaration"); 
     matches!(
         node.kind,
         SyntaxKind::ImportSpecifier
@@ -98,7 +98,7 @@ pub(crate) fn is_alias_symbol_declaration(node: &Node) -> bool {
     )
 }
 
-pub(crate) fn node_name(node: &Node) -> Option<&str> {
+pub(crate) fn node_name(node: &Node) -> Option<&str> { ::tsox_core::fntrace::enter("node_name"); 
     use tsox_frontend::ast::NodeData;
     match &node.data {
         NodeData::Identifier(data) => Some(&data.text),
@@ -108,7 +108,7 @@ pub(crate) fn node_name(node: &Node) -> Option<&str> {
     }
 }
 
-pub(crate) fn is_expression_position_kind(kind: SyntaxKind) -> bool {
+pub(crate) fn is_expression_position_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_expression_position_kind"); 
     matches!(
         kind,
         SyntaxKind::Identifier
@@ -154,7 +154,7 @@ pub(crate) fn is_expression_position_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn is_statement_kind(kind: SyntaxKind) -> bool {
+pub(crate) fn is_statement_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_statement_kind"); 
     matches!(
         kind,
         SyntaxKind::ExpressionStatement
@@ -191,7 +191,7 @@ pub(crate) fn is_statement_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn is_declaration_name(node: &Arc<Node>) -> bool {
+pub(crate) fn is_declaration_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_name"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -235,7 +235,7 @@ pub(crate) fn is_declaration_name(node: &Arc<Node>) -> bool {
     false
 }
 
-pub(crate) fn is_property_access_name(node: &Arc<Node>) -> bool {
+pub(crate) fn is_property_access_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_property_access_name"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -251,7 +251,7 @@ pub(crate) fn is_property_access_name(node: &Arc<Node>) -> bool {
     )
 }
 
-pub(crate) fn is_valid_identifier_text(s: &str) -> bool {
+pub(crate) fn is_valid_identifier_text(s: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_identifier_text"); 
     let mut chars = s.chars();
     match chars.next() {
         Some(c) if c.is_ascii_alphabetic() || c == '_' || c == '$' => {}
@@ -274,7 +274,7 @@ pub(crate) enum ImportEntityError {
     MissingMember((Arc<Node>, String, String)),
 }
 
-pub(crate) fn base_identifier_of(name: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn base_identifier_of(name: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("base_identifier_of"); 
     let mut cur = Arc::clone(name);
     loop {
         let next = match &cur.data {

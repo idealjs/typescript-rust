@@ -38,7 +38,7 @@ use super::m1b::r20k1_ext::symbol_option_ptr_eq;
 use tsox_frontend::ast::mig::m3d_2::new_diagnostic_chain;
 
 impl Checker {
-    pub fn check_function_or_method_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_function_or_method_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_function_or_method_declaration"); 
         self.check_decorators(node);
         self.check_signature_declaration(node);
         let function_flags = get_function_flags(Some(node));
@@ -87,7 +87,7 @@ impl Checker {
         }
     }
 
-    pub fn check_generator_instantiation_assignability_to_return_type(&mut self, return_type: &Arc<Type>, function_flags: FunctionFlags, error_node: &Arc<Node>) -> bool {
+    pub fn check_generator_instantiation_assignability_to_return_type(&mut self, return_type: &Arc<Type>, function_flags: FunctionFlags, error_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_generator_instantiation_assignability_to_return_type"); 
         let is_async = function_flags.contains(FunctionFlags::ASYNC);
         let generator_yield_type = self
             .get_iteration_type_of_generator_function_return_type(IterationTypeKind::YIELD, return_type, is_async)
@@ -102,7 +102,7 @@ impl Checker {
         self.check_type_assignable_to(&generator_instantiation, return_type, Some(error_node), None)
     }
 
-    pub fn check_identifier(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_identifier(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_identifier"); 
         if tsox_frontend::ast::is_this_in_type_query(node) {
             return self.check_this_expression(node);
         }
@@ -285,7 +285,7 @@ impl Checker {
         flow_type
     }
 
-    pub fn check_if_expression_refines_any_parameter(&mut self, function_node: &Arc<Node>, expr: &Arc<Node>) -> Option<TypePredicate> {
+    pub fn check_if_expression_refines_any_parameter(&mut self, function_node: &Arc<Node>, expr: &Arc<Node>) -> Option<TypePredicate> { ::tsox_core::fntrace::enter("check_if_expression_refines_any_parameter"); 
         let expr = skip_parentheses(expr);
         let return_type = self.check_expression_cached(&expr);
         if !return_type.flags.contains(TypeFlags::Boolean) {
@@ -311,7 +311,7 @@ impl Checker {
         None
     }
 
-    pub fn check_if_expression_refines_parameter(&mut self, function_node: &Arc<Node>, expr: &Arc<Node>, param: &Arc<Node>, init_type: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn check_if_expression_refines_parameter(&mut self, function_node: &Arc<Node>, expr: &Arc<Node>, param: &Arc<Node>, init_type: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("check_if_expression_refines_parameter"); 
         let mut antecedent = get_flow_node_of_node(expr);
         if antecedent.is_none() && expr.parent().map(|p| p.kind == SyntaxKind::ReturnStatement).unwrap_or(false) {
             let parent = expr.parent().unwrap();
@@ -334,7 +334,7 @@ impl Checker {
         None
     }
 
-    pub fn check_if_type_predicate_variable_is_declared_in_binding_pattern(&mut self, pattern: &Arc<Node>, predicate_variable_node: &Arc<Node>, predicate_variable_name: &str) -> bool {
+    pub fn check_if_type_predicate_variable_is_declared_in_binding_pattern(&mut self, pattern: &Arc<Node>, predicate_variable_node: &Arc<Node>, predicate_variable_name: &str) -> bool { ::tsox_core::fntrace::enter("check_if_type_predicate_variable_is_declared_in_binding_pattern"); 
         for element in node_elements(pattern) {
             let Some(name) = element.name() else {
                 continue;
@@ -353,7 +353,7 @@ impl Checker {
         false
     }
 
-    pub fn check_import_attributes(&mut self, declaration: &Arc<Node>) {
+    pub fn check_import_attributes(&mut self, declaration: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_attributes"); 
         let Some(node) = get_import_attributes(declaration) else {
             return;
         };
@@ -384,7 +384,7 @@ impl Checker {
         }
     }
 
-    pub fn check_import_attributes_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_import_attributes_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_import_attributes_expression"); 
         if self.type_node_links.get(node).and_then(|l| l.resolved_type.clone()).is_none() {
             let symbol = self.new_symbol(SymbolFlags::ObjectLiteral, InternalSymbolName::ImportAttributes);
             let mut members = SymbolTable::new();
@@ -407,7 +407,7 @@ impl Checker {
         self.type_node_links.get(node).and_then(|l| l.resolved_type.clone()).unwrap()
     }
 
-    pub fn check_import_attributes_type(&mut self, attributes: &Arc<Node>) {
+    pub fn check_import_attributes_type(&mut self, attributes: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_attributes_type"); 
         self.check_grammar_import_attributes_type(attributes);
         self.check_source_element(attributes);
         let import_attributes_type = self.get_global_import_attributes_type_checked();
@@ -417,7 +417,7 @@ impl Checker {
         }
     }
 
-    pub fn check_import_binding(&mut self, node: &Arc<Node>) {
+    pub fn check_import_binding(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_binding"); 
         let name = node.name();
         self.check_collisions_for_declaration_name(node, name);
         self.check_alias_symbol(node);
@@ -432,7 +432,7 @@ impl Checker {
         }
     }
 
-    pub fn check_import_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_import_call_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_import_call_expression"); 
         self.check_grammar_import_call_expression(node);
         let args: Vec<Arc<Node>> = node.arguments().map(|list| list.nodes.clone()).unwrap_or_default();
         if args.is_empty() {
@@ -488,7 +488,7 @@ impl Checker {
         self.create_promise_return_type(node, &any_type)
     }
 
-    pub fn check_import_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_import_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_declaration"); 
         let diagnostic = if is_in_js_file(node) {
             AN_IMPORT_DECLARATION_CAN_ONLY_BE_USED_AT_THE_TOP_LEVEL_OF_A_MODULE
         } else {
@@ -564,7 +564,7 @@ impl Checker {
         self.check_import_attributes(node);
     }
 
-    pub fn check_import_equals_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_import_equals_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_equals_declaration"); 
         let diagnostic = if is_in_js_file(node) {
             AN_IMPORT_DECLARATION_CAN_ONLY_BE_USED_AT_THE_TOP_LEVEL_OF_A_MODULE
         } else {
@@ -616,7 +616,7 @@ impl Checker {
         }
     }
 
-    pub fn check_import_meta_property(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_import_meta_property(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_import_meta_property"); 
         if ModuleKind::Node16 <= self.module_kind && self.module_kind <= ModuleKind::NodeNext {
             if self.emit_module_format_of_node_source_file(node) != ModuleKind::ESNext {
                 self.error_message(node,THE_IMPORT_META_META_PROPERTY_IS_NOT_ALLOWED_IN_FILES_WHICH_WILL_BUILD_INTO_COMMONJS_OUTPUT, &[]);
@@ -630,7 +630,7 @@ impl Checker {
         self.error_type()
     }
 
-    pub fn check_import_type(&mut self, node: &Arc<Node>) {
+    pub fn check_import_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_type"); 
         let argument = match &node.data {
             NodeData::ImportTypeNode(data) => Arc::clone(&data.argument),
             _ => Arc::clone(node),
@@ -645,7 +645,7 @@ impl Checker {
         self.check_import_attributes(node);
     }
 
-    pub fn check_index_constraint_for_index_signature(&mut self, t: &Arc<Type>, check_info: &IndexInfo) {
+    pub fn check_index_constraint_for_index_signature(&mut self, t: &Arc<Type>, check_info: &IndexInfo) { ::tsox_core::fntrace::enter("check_index_constraint_for_index_signature"); 
         let declaration = check_info.declaration.clone();
         let check_key_type = check_info.key_type.as_ref().expect("index info key type");
         let index_infos = self.get_applicable_index_infos(t, check_key_type);
@@ -715,14 +715,14 @@ impl Checker {
         }
     }
 
-    pub fn check_indexed_access_type(&mut self, node: &Arc<Node>) {
+    pub fn check_indexed_access_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_indexed_access_type"); 
         tsox_frontend::ast::for_each_child(node, |child| {
             self.check_source_element(&child)
         });
         self.check_indexed_access_index_type(node);
     }
 
-    pub fn check_infer_type(&mut self, node: &Arc<Node>) {
+    pub fn check_infer_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_infer_type"); 
         let in_extends_clause = find_ancestor_node(node, |n| {
             n.parent()
                 .map(|parent| {
@@ -766,7 +766,7 @@ impl Checker {
         self.register_for_unused_identifiers_check(node);
     }
 
-    pub fn check_inherited_properties_are_identical(&mut self, t: &Arc<Type>, type_node: &Arc<Node>) -> bool {
+    pub fn check_inherited_properties_are_identical(&mut self, t: &Arc<Type>, type_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_inherited_properties_are_identical"); 
         let base_types = self.get_base_types(t);
         if base_types.len() < 2 {
             return true;

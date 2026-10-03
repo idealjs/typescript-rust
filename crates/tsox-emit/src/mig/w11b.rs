@@ -24,7 +24,7 @@ use crate::mig::m4m_2::is_simple_inlineable_expression;
 use crate::printer::{AutoGenerateOptions, EmitContext, NodeFactory};
 
 impl ClassFieldsTransformer {
-    pub(crate) fn should_always_transform_private_static_elements(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn should_always_transform_private_static_elements(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_always_transform_private_static_elements"); 
         has_static_modifier(node)
             && self
                 .emit_context()
@@ -32,14 +32,14 @@ impl ClassFieldsTransformer {
                 .contains(EmitFlags::TRANSFORM_PRIVATE_STATIC_ELEMENTS)
     }
 
-    pub(crate) fn should_transform_class_element_to_weak_map(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn should_transform_class_element_to_weak_map(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_transform_class_element_to_weak_map"); 
         if self.should_transform_private_elements_or_class_static_blocks {
             return true;
         }
         self.should_always_transform_private_static_elements(node)
     }
 
-    pub(crate) fn should_transform_auto_accessors_in_current_class(&self) -> bool {
+    pub(crate) fn should_transform_auto_accessors_in_current_class(&self) -> bool { ::tsox_core::fntrace::enter("should_transform_auto_accessors_in_current_class"); 
         if self.should_transform_auto_accessors {
             return true;
         }
@@ -52,7 +52,7 @@ impl ClassFieldsTransformer {
             .unwrap_or(false)
     }
 
-    pub(crate) fn start_class_lexical_environment(&mut self) {
+    pub(crate) fn start_class_lexical_environment(&mut self) { ::tsox_core::fntrace::enter("start_class_lexical_environment"); 
         self.lexical_environment = Some(crate::mig::m4g::ClassLexicalEnv {
             previous: self.lexical_environment.take().map(Box::new),
             data: None,
@@ -64,7 +64,7 @@ impl ClassFieldsTransformer {
         &mut self,
         property: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property"); 
         let saved_current_class_element = self.current_class_element.clone();
         let transformed = self.transform_property_worker(property, receiver);
         if let Some(transformed) = transformed.as_ref() {
@@ -94,7 +94,7 @@ impl ClassFieldsTransformer {
         transformed
     }
 
-    pub(crate) fn transform_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn transform_field_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_field_initializer"); 
         debug_assert!(
             !has_decorators(node),
             "Decorators should already have been transformed and elided."
@@ -109,7 +109,7 @@ impl ClassFieldsTransformer {
         &mut self,
         property: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_worker"); 
         let emit_assignment = !self.compiler_options.get_use_define_for_class_fields();
         let emit_context = self.emit_context();
         let factory = NodeFactory::new(&emit_context);
@@ -303,7 +303,7 @@ fn create_private_static_field_initializer_w11b(
     factory: &NodeFactory,
     variable_name: &Arc<Node>,
     initializer: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_static_field_initializer_w11b"); 
     let initializer = initializer.unwrap_or_else(|| factory.new_void_zero_expression());
     factory.new_assignment_expression(
         variable_name,
@@ -325,7 +325,7 @@ fn create_private_instance_field_initializer_w11b(
     receiver: &Arc<Node>,
     initializer: Option<Arc<Node>>,
     weak_map_name: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_instance_field_initializer_w11b"); 
     let initializer = initializer.unwrap_or_else(|| factory.new_void_zero_expression());
     factory.new_method_call(
         weak_map_name,
@@ -334,7 +334,7 @@ fn create_private_instance_field_initializer_w11b(
     )
 }
 
-fn emit_context_mut(emit_context: &EmitContext) -> &mut EmitContext {
+fn emit_context_mut(emit_context: &EmitContext) -> &mut EmitContext { ::tsox_core::fntrace::enter("emit_context_mut"); 
     unsafe { &mut *(emit_context as *const EmitContext as *mut EmitContext) }
 }
 
@@ -344,7 +344,7 @@ fn create_member_access_for_property_name_w11b(
     receiver: &Arc<Node>,
     name: &Arc<Node>,
     location: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_member_access_for_property_name_w11b"); 
     let expression = if is_computed_property_name(name) {
         let mut expression = factory.new_element_access_expression(
             receiver,
@@ -373,7 +373,7 @@ fn new_object_define_property_call_w11b(
     target: &Arc<Node>,
     name: &Arc<Node>,
     descriptor: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_object_define_property_call_w11b"); 
     factory.new_call_expression(
         &factory.new_property_access_expression(
             &factory.new_identifier("Object"),
@@ -388,21 +388,21 @@ fn new_object_define_property_call_w11b(
     )
 }
 
-fn is_comma_like_expression_w11b(node: &Arc<Node>) -> bool {
+fn is_comma_like_expression_w11b(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_comma_like_expression_w11b"); 
     match &node.data {
         NodeData::BinaryExpression(binary) => binary.operator_token.kind == SyntaxKind::CommaToken,
         _ => false,
     }
 }
 
-fn is_void_zero_literal_w11b(node: &Arc<Node>) -> bool {
+fn is_void_zero_literal_w11b(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_void_zero_literal_w11b"); 
     is_void_expression(node)
         && node
             .expression()
             .is_some_and(|expression| is_numeric_literal(&expression))
 }
 
-pub(crate) fn should_be_captured_in_temp_variable(node: &Arc<Node>) -> bool {
+pub(crate) fn should_be_captured_in_temp_variable(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_be_captured_in_temp_variable"); 
     let target = skip_parentheses(node);
     match target.kind {
         SyntaxKind::Identifier

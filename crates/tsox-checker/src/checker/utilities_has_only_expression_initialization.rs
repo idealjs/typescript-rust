@@ -4,7 +4,7 @@ use crate::checker::utilities::*;
 
 pub(crate) use crate::checker::utilities_token_is_identifier_or_keyword::AssignmentKind;
 
-pub fn has_only_expression_initialization(kind: SyntaxKind) -> bool {
+pub fn has_only_expression_initialization(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("has_only_expression_initialization"); 
     matches!(
         kind,
         SyntaxKind::VariableDeclaration
@@ -16,18 +16,18 @@ pub fn has_only_expression_initialization(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn is_super_call(n: &Node) -> bool {
+pub fn is_super_call(n: &Node) -> bool { ::tsox_core::fntrace::enter("is_super_call"); 
     tsox_frontend::ast::is_call_expression(n)
         && n.expression()
             .map(|e| e.kind == SyntaxKind::SuperKeyword)
             .unwrap_or(false)
 }
 
-pub fn is_call_chain(node: &Node) -> bool {
+pub fn is_call_chain(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_call_chain"); 
     tsox_frontend::ast::is_call_expression(node) && node.flags.contains(NodeFlags::OptionalChain)
 }
 
-pub fn is_non_null_access(node: &Node) -> bool {
+pub fn is_non_null_access(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_non_null_access"); 
     tsox_frontend::ast::is_access_expression(node)
         && node
             .expression()
@@ -35,7 +35,7 @@ pub fn is_non_null_access(node: &Node) -> bool {
             .unwrap_or(false)
 }
 
-pub fn is_this_property(node: &Node) -> bool {
+pub fn is_this_property(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_this_property"); 
     (tsox_frontend::ast::is_property_access_expression(node)
         || tsox_frontend::ast::is_element_access_expression(node))
         && node
@@ -44,63 +44,63 @@ pub fn is_this_property(node: &Node) -> bool {
             .unwrap_or(false)
 }
 
-pub fn is_optional_declaration(declaration: &Node) -> bool {
+pub fn is_optional_declaration(declaration: &Node) -> bool { ::tsox_core::fntrace::enter("is_optional_declaration"); 
     tsox_frontend::ast::is_question_token(
         tsox_frontend::ast::mig::m3c::question_token(declaration).map(Arc::as_ref),
     )
 }
 
-pub fn is_type_assertion(node: &Node) -> bool {
+pub fn is_type_assertion(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_assertion"); 
     tsox_frontend::ast::is_assertion_expression(node)
 }
 
-pub fn is_empty_object_literal(expression: &Node) -> bool {
+pub fn is_empty_object_literal(expression: &Node) -> bool { ::tsox_core::fntrace::enter("is_empty_object_literal"); 
     tsox_frontend::ast::is_object_literal_expression(expression)
 }
 
-pub fn is_empty_array_literal(expression: &Node) -> bool {
+pub fn is_empty_array_literal(expression: &Node) -> bool { ::tsox_core::fntrace::enter("is_empty_array_literal"); 
     tsox_frontend::ast::is_array_literal_expression(expression)
 }
 
-pub fn has_type(node: &Node) -> bool {
+pub fn has_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_type"); 
     node.type_node().is_some()
 }
 
-pub fn can_have_flow_node(node: &Node) -> bool {
+pub fn can_have_flow_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("can_have_flow_node"); 
     let _ = node;
     false
 }
 
-pub fn is_private_identifier_symbol(symbol: &Symbol) -> bool {
+pub fn is_private_identifier_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_symbol"); 
     symbol.name.starts_with(&format!(
         "{}#",
         tsox_frontend::ast::INTERNAL_SYMBOL_NAME_PREFIX
     ))
 }
 
-pub fn is_known_symbol(symbol: &Symbol) -> bool {
+pub fn is_known_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_known_symbol"); 
     is_late_bound_name(&symbol.name)
 }
 
-pub fn is_external_module_symbol(module_symbol: &Symbol) -> bool {
+pub fn is_external_module_symbol(module_symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_external_module_symbol"); 
     module_symbol.flags.contains(SymbolFlags::MODULE) && module_symbol.name.starts_with('"')
 }
 
-pub fn has_export_assignment_symbol(module_symbol: &Symbol) -> bool {
+pub fn has_export_assignment_symbol(module_symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("has_export_assignment_symbol"); 
     module_symbol
         .exports
         .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
         .is_some()
 }
 
-pub fn is_static_private_identifier_property(s: &Symbol) -> bool {
+pub fn is_static_private_identifier_property(s: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_static_private_identifier_property"); 
     s.value_declaration
         .as_ref()
         .map(|d| tsox_frontend::ast::is_static(d))
         .unwrap_or(false)
 }
 
-pub fn get_declarations_of_kind(symbol: &Symbol, kind: SyntaxKind) -> Vec<Arc<Node>> {
+pub fn get_declarations_of_kind(symbol: &Symbol, kind: SyntaxKind) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_declarations_of_kind"); 
     symbol
         .declarations
         .iter()
@@ -109,7 +109,7 @@ pub fn get_declarations_of_kind(symbol: &Symbol, kind: SyntaxKind) -> Vec<Arc<No
         .collect()
 }
 
-pub fn all_declarations_in_same_source_file(symbol: &Symbol) -> bool {
+pub fn all_declarations_in_same_source_file(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("all_declarations_in_same_source_file"); 
     if symbol.declarations.len() > 1 {
         let mut source_file_id: Option<u64> = None;
         for (i, d) in symbol.declarations.iter().enumerate() {
@@ -125,13 +125,13 @@ pub fn all_declarations_in_same_source_file(symbol: &Symbol) -> bool {
     true
 }
 
-pub fn get_index_symbol_from_symbol_table(symbol_table: &SymbolTable) -> Option<Arc<Symbol>> {
+pub fn get_index_symbol_from_symbol_table(symbol_table: &SymbolTable) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_index_symbol_from_symbol_table"); 
     symbol_table
         .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_INDEX)
         .cloned()
 }
 
-pub fn symbols_to_array(symbols: &SymbolTable) -> Vec<Arc<Symbol>> {
+pub fn symbols_to_array(symbols: &SymbolTable) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("symbols_to_array"); 
     symbols
         .iter()
         .filter(|(id, _)| !is_reserved_member_name(id))
@@ -139,7 +139,7 @@ pub fn symbols_to_array(symbols: &SymbolTable) -> Vec<Arc<Symbol>> {
         .collect()
 }
 
-pub fn create_symbol_table(symbols: &[Arc<Symbol>]) -> SymbolTable {
+pub fn create_symbol_table(symbols: &[Arc<Symbol>]) -> SymbolTable { ::tsox_core::fntrace::enter("create_symbol_table"); 
     let mut result = SymbolTable::new();
     for symbol in symbols {
         result.insert(symbol.name.clone(), Arc::clone(symbol));
@@ -147,17 +147,17 @@ pub fn create_symbol_table(symbols: &[Arc<Symbol>]) -> SymbolTable {
     result
 }
 
-pub fn is_object_or_array_literal_type(t: &Type) -> bool {
+pub fn is_object_or_array_literal_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_object_or_array_literal_type"); 
     t.object_flags
         .intersects(ObjectFlags::ObjectLiteral | ObjectFlags::ArrayLiteral)
 }
 
-pub fn is_this_type_parameter(t: &Type) -> bool {
+pub fn is_this_type_parameter(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_this_type_parameter"); 
     t.flags.contains(TypeFlags::TypeParameter)
         && matches!(&t.data, TypeData::TypeParameter(tp) if tp.is_this_type)
 }
 
-pub fn get_type_name_symbol(t: &Type) -> Option<Arc<Symbol>> {
+pub fn get_type_name_symbol(t: &Type) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_type_name_symbol"); 
     if let Some(alias) = &t.alias {
         return alias.symbol.clone();
     }
@@ -171,7 +171,7 @@ pub fn get_type_name_symbol(t: &Type) -> Option<Arc<Symbol>> {
     None
 }
 
-pub fn get_object_type_name(t: &Type) -> Option<Arc<Symbol>> {
+pub fn get_object_type_name(t: &Type) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_object_type_name"); 
     if t.object_flags
         .intersects(OBJECT_FLAGS_CLASS_OR_INTERFACE | ObjectFlags::Reference)
     {
@@ -180,7 +180,7 @@ pub fn get_object_type_name(t: &Type) -> Option<Arc<Symbol>> {
     None
 }
 
-pub fn get_sort_order_flags(t: &Type) -> u32 {
+pub fn get_sort_order_flags(t: &Type) -> u32 { ::tsox_core::fntrace::enter("get_sort_order_flags"); 
     if t.flags.intersects(TypeFlags::EnumLiteral | TypeFlags::Enum)
         && !t.flags.contains(TypeFlags::Union)
     {
@@ -189,7 +189,7 @@ pub fn get_sort_order_flags(t: &Type) -> u32 {
     t.flags.bits()
 }
 
-pub fn compare_type_names(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+pub fn compare_type_names(t1: &Type, t2: &Type) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_type_names"); 
     let s1 = get_type_name_symbol(t1);
     let s2 = get_type_name_symbol(t2);
     if s1.as_ref().map(|s| s.id()) == s2.as_ref().map(|s| s.id()) {
@@ -209,7 +209,7 @@ pub fn compare_type_names(t1: &Type, t2: &Type) -> std::cmp::Ordering {
     }
 }
 
-pub fn compare_type_lists(s1: &[Arc<Type>], s2: &[Arc<Type>]) -> std::cmp::Ordering {
+pub fn compare_type_lists(s1: &[Arc<Type>], s2: &[Arc<Type>]) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_type_lists"); 
     if s1.len() != s2.len() {
         return s1.len().cmp(&s2.len());
     }
@@ -222,7 +222,7 @@ pub fn compare_type_lists(s1: &[Arc<Type>], s2: &[Arc<Type>]) -> std::cmp::Order
     std::cmp::Ordering::Equal
 }
 
-pub fn type_parameters_match(a: &Type, b: &Type) -> bool {
+pub fn type_parameters_match(a: &Type, b: &Type) -> bool { ::tsox_core::fntrace::enter("type_parameters_match"); 
     // 恒等实例（含驻留的延迟 IndexedAccess T[P]）总是匹配
     if std::ptr::eq(a as *const Type, b as *const Type) || a.id == b.id {
         return true;
@@ -252,7 +252,7 @@ pub fn type_parameters_match(a: &Type, b: &Type) -> bool {
     }
 }
 
-pub fn compare_union_members(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+pub fn compare_union_members(t1: &Type, t2: &Type) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_union_members"); 
     get_sort_order_flags(t1)
         .cmp(&get_sort_order_flags(t2))
         .then_with(|| compare_type_names(t1, t2))
@@ -276,7 +276,7 @@ pub fn compare_union_members(t1: &Type, t2: &Type) -> std::cmp::Ordering {
         })
 }
 
-fn compare_union_member_structure(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+fn compare_union_member_structure(t1: &Type, t2: &Type) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_union_member_structure"); 
     if t1.id == t2.id {
         return std::cmp::Ordering::Equal;
     }
@@ -298,7 +298,7 @@ fn compare_union_member_structure(t1: &Type, t2: &Type) -> std::cmp::Ordering {
 fn compare_sub_terms(
     s1: &Option<Arc<Type>>,
     s2: &Option<Arc<Type>>,
-) -> std::cmp::Ordering {
+) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_sub_terms"); 
     match (s1, s2) {
         (Some(a), Some(b)) => compare_union_members(a, b),
         (None, None) => std::cmp::Ordering::Equal,
@@ -307,7 +307,7 @@ fn compare_sub_terms(
     }
 }
 
-fn instantiated_signature_first(t1: &Type, t2: &Type) -> Option<std::cmp::Ordering> {
+fn instantiated_signature_first(t1: &Type, t2: &Type) -> Option<std::cmp::Ordering> { ::tsox_core::fntrace::enter("instantiated_signature_first"); 
     let product_with_sigs = |t: &Type| {
         let is_product = t.object_flags.contains(ObjectFlags::Instantiated)
             || matches!(&t.data, TypeData::Object(o) if o.mapper.is_some());
@@ -331,7 +331,7 @@ fn instantiated_signature_first(t1: &Type, t2: &Type) -> Option<std::cmp::Orderi
     }
 }
 
-pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_types"); 
     if t1.id == t2.id {
         return std::cmp::Ordering::Equal;
     }
@@ -351,7 +351,7 @@ pub fn compare_types(t1: &Type, t2: &Type) -> std::cmp::Ordering {
     t1.id.cmp(&t2.id)
 }
 
-fn compare_type_data(t1: &Type, t2: &Type) -> std::cmp::Ordering {
+fn compare_type_data(t1: &Type, t2: &Type) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_type_data"); 
     use std::cmp::Ordering;
     let flags_only_ids = TypeFlags::Any
         .union(TypeFlags::Unknown)
@@ -448,7 +448,7 @@ fn compare_type_data(t1: &Type, t2: &Type) -> std::cmp::Ordering {
     }
 }
 
-fn compare_option_types(t1: Option<&Arc<Type>>, t2: Option<&Arc<Type>>) -> std::cmp::Ordering {
+fn compare_option_types(t1: Option<&Arc<Type>>, t2: Option<&Arc<Type>>) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_option_types"); 
     match (t1, t2) {
         (None, None) => std::cmp::Ordering::Equal,
         (None, Some(_)) => std::cmp::Ordering::Greater,
@@ -457,7 +457,7 @@ fn compare_option_types(t1: Option<&Arc<Type>>, t2: Option<&Arc<Type>>) -> std::
     }
 }
 
-pub fn get_assignment_target_kind(node: &Arc<Node>) -> AssignmentKind {
+pub fn get_assignment_target_kind(node: &Arc<Node>) -> AssignmentKind { ::tsox_core::fntrace::enter("get_assignment_target_kind"); 
     let Some(target) = get_assignment_target(node) else {
         return AssignmentKind::None;
     };
@@ -484,7 +484,7 @@ pub fn get_assignment_target_kind(node: &Arc<Node>) -> AssignmentKind {
 
 /// Go isConstTypeReference：`<const>expr` 的断言类型是无实参的
 /// `const` 标识符引用（parseIdentifierName 接受关键字作类型名）
-pub fn is_const_type_reference(type_node: &Node) -> bool {
+pub fn is_const_type_reference(type_node: &Node) -> bool { ::tsox_core::fntrace::enter("is_const_type_reference"); 
     if type_node.kind != tsox_frontend::ast::SyntaxKind::TypeReference {
         return false;
     }
@@ -500,7 +500,7 @@ pub fn is_const_type_reference(type_node: &Node) -> bool {
 }
 
 impl crate::checker::checker_checker_checker::Checker {
-    pub fn compare_types_ordered(&self, t1: &Type, t2: &Type) -> std::cmp::Ordering {
+    pub fn compare_types_ordered(&self, t1: &Type, t2: &Type) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_types_ordered"); 
         use std::cmp::Ordering;
         if t1.id == t2.id {
             return Ordering::Equal;
@@ -553,7 +553,7 @@ impl crate::checker::checker_checker_checker::Checker {
         t1.id.cmp(&t2.id)
     }
 
-    fn compare_object_type_order(&self, t1: &Type, t2: &Type) -> std::cmp::Ordering {
+    fn compare_object_type_order(&self, t1: &Type, t2: &Type) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_object_type_order"); 
         use std::cmp::Ordering;
         if let (TypeData::InstantiationExpression(e1), TypeData::InstantiationExpression(e2)) =
             (&t1.data, &t2.data)
@@ -638,7 +638,7 @@ impl crate::checker::checker_checker_checker::Checker {
         &self,
         s1: &[Arc<Type>],
         s2: &[Arc<Type>],
-    ) -> std::cmp::Ordering {
+    ) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_type_lists_ordered"); 
         if s1.len() != s2.len() {
             return s1.len().cmp(&s2.len());
         }

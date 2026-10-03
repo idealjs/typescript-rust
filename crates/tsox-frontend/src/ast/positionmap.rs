@@ -11,7 +11,7 @@ pub(crate) struct PositionMapEntry {
     delta: usize,
 }
 
-pub fn compute_position_map(text: &str) -> PositionMap {
+pub fn compute_position_map(text: &str) -> PositionMap { ::tsox_core::fntrace::enter("compute_position_map"); 
     let mut entries = Vec::new();
     let mut delta = 0usize;
 
@@ -36,11 +36,11 @@ pub fn compute_position_map(text: &str) -> PositionMap {
 }
 
 impl PositionMap {
-    pub fn is_ascii_only(&self) -> bool {
+    pub fn is_ascii_only(&self) -> bool { ::tsox_core::fntrace::enter("is_ascii_only"); 
         self.ascii_only
     }
 
-    pub fn utf8_to_utf16(&self, utf8_offset: usize) -> usize {
+    pub fn utf8_to_utf16(&self, utf8_offset: usize) -> usize { ::tsox_core::fntrace::enter("utf8_to_utf16"); 
         if self.ascii_only {
             return utf8_offset;
         }
@@ -52,7 +52,7 @@ impl PositionMap {
         utf8_offset - self.entries[lo - 1].delta
     }
 
-    pub fn utf16_to_utf8(&self, utf16_offset: usize) -> usize {
+    pub fn utf16_to_utf8(&self, utf16_offset: usize) -> usize { ::tsox_core::fntrace::enter("utf16_to_utf8"); 
         if self.ascii_only {
             return utf16_offset;
         }

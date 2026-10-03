@@ -21,15 +21,15 @@ pub trait SourceMapGeneratorK06 {
 }
 
 impl SourceMapGeneratorK06 for SourceMapGenerator {
-    fn add_source(&mut self, _source_file_path: &str, next_index: SourceIndex) -> SourceIndex {
+    fn add_source(&mut self, _source_file_path: &str, next_index: SourceIndex) -> SourceIndex { ::tsox_core::fntrace::enter("add_source"); 
         next_index
     }
 
-    fn set_source_content(&mut self, _source_index: SourceIndex, _contents: &str) {}
+    fn set_source_content(&mut self, _source_index: SourceIndex, _contents: &str) { ::tsox_core::fntrace::enter("set_source_content"); }
 }
 
 impl Printer {
-    pub fn should_allow_trailing_comma(&self, node: &Node, list: &NodeList) -> bool {
+    pub fn should_allow_trailing_comma(&self, node: &Node, list: &NodeList) -> bool { ::tsox_core::fntrace::enter("should_allow_trailing_comma"); 
         if self.current_source_file.is_none()
             || self.current_source_file.as_deref().unwrap().script_kind == SCRIPT_KIND_JSON
         {
@@ -38,7 +38,7 @@ impl Printer {
         should_allow_trailing_comma_worker(node, list)
     }
 
-    pub fn get_unique_helper_name(&mut self, name: &str) -> Option<Arc<Node>> {
+    pub fn get_unique_helper_name(&mut self, name: &str) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_unique_helper_name"); 
         let helper_name = self.unique_helper_names.get(name).cloned().flatten();
         if helper_name.is_none() {
             // Go: emitContext.Factory.NewUniqueNameEx(name, FileLevel|Optimistic)。唯一名分配
@@ -54,7 +54,7 @@ impl Printer {
         Some(self.emit_context.factory().new_identifier(helper_name.text()))
     }
 
-    pub fn emit_trailing_synthetic_comments_of_node(&mut self, node: &Node, emit_flags: EmitFlags) {
+    pub fn emit_trailing_synthetic_comments_of_node(&mut self, node: &Node, emit_flags: EmitFlags) { ::tsox_core::fntrace::enter("emit_trailing_synthetic_comments_of_node"); 
         if emit_flags & EF_NO_TRAILING_COMMENTS != 0 {
             return;
         }
@@ -64,7 +64,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_trailing_synthesized_comment(&mut self, comment: &SynthesizedComment) {
+    pub fn emit_trailing_synthesized_comment(&mut self, comment: &SynthesizedComment) { ::tsox_core::fntrace::enter("emit_trailing_synthesized_comment"); 
         if !self.writer.is_at_start_of_line() {
             self.writer.write_space(" ");
         }
@@ -74,7 +74,7 @@ impl Printer {
         }
     }
 
-    pub fn should_emit_comment_if_triple_slash(&self, comment: CommentRange, triple_slash: Tristate) -> bool {
+    pub fn should_emit_comment_if_triple_slash(&self, comment: CommentRange, triple_slash: Tristate) -> bool { ::tsox_core::fntrace::enter("should_emit_comment_if_triple_slash"); 
         match triple_slash {
             Tristate::True => self.is_triple_slash_comment(comment),
             Tristate::False => !self.is_triple_slash_comment(comment),
@@ -82,7 +82,7 @@ impl Printer {
         }
     }
 
-    pub fn should_emit_new_line_before_leading_comment_of_position(&self, pos: i32, comment_pos: i32) -> bool {
+    pub fn should_emit_new_line_before_leading_comment_of_position(&self, pos: i32, comment_pos: i32) -> bool { ::tsox_core::fntrace::enter("should_emit_new_line_before_leading_comment_of_position"); 
         let Some(source_file) = self.current_source_file.as_deref() else {
             return false;
         };
@@ -91,7 +91,7 @@ impl Printer {
                 != compute_line_of_position(&source_file.ecma_line_map(), comment_pos)
     }
 
-    pub fn is_triple_slash_comment(&self, comment: CommentRange) -> bool {
+    pub fn is_triple_slash_comment(&self, comment: CommentRange) -> bool { ::tsox_core::fntrace::enter("is_triple_slash_comment"); 
         self.current_source_file.is_some()
             && is_recognized_triple_slash_comment(
                 self.current_source_file.as_deref().unwrap().text(),
@@ -99,7 +99,7 @@ impl Printer {
             )
     }
 
-    pub fn set_source_map_source(&mut self, source: &Arc<SourceFile>) {
+    pub fn set_source_map_source(&mut self, source: &Arc<SourceFile>) { ::tsox_core::fntrace::enter("set_source_map_source"); 
         if self.source_maps_disabled {
             return;
         }
@@ -143,22 +143,22 @@ impl Printer {
         self.most_recent_source_map_source_index = self.source_map_source_index;
     }
 
-    pub fn should_reuse_temp_variable_scope(&self, node: Option<&Node>) -> bool {
+    pub fn should_reuse_temp_variable_scope(&self, node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("should_reuse_temp_variable_scope"); 
         node.is_some()
             && self.emit_context.k06_emit_flags(node.unwrap()) & (EF_REUSE_TEMP_VARIABLE_SCOPE as u32) != 0
     }
 
-    pub fn push_name_generation_scope(&mut self, node: Option<&Node>) {
+    pub fn push_name_generation_scope(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("push_name_generation_scope"); 
         let reuse = self.should_reuse_temp_variable_scope(node);
         self.name_generator.push_scope(reuse);
     }
 
-    pub fn pop_name_generation_scope(&mut self, node: Option<&Node>) {
+    pub fn pop_name_generation_scope(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("pop_name_generation_scope"); 
         let reuse = self.should_reuse_temp_variable_scope(node);
         self.name_generator.pop_scope(reuse);
     }
 
-    pub fn generate_all_names(&mut self, nodes: Option<&NodeList>) {
+    pub fn generate_all_names(&mut self, nodes: Option<&NodeList>) { ::tsox_core::fntrace::enter("generate_all_names"); 
         let Some(nodes) = nodes else {
             return;
         };
@@ -167,7 +167,7 @@ impl Printer {
         }
     }
 
-    pub fn generate_names(&mut self, node: Option<&Node>) {
+    pub fn generate_names(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("generate_names"); 
         let Some(node) = node else {
             return;
         };
@@ -237,7 +237,7 @@ impl Printer {
         }
     }
 
-    pub fn generate_all_member_names(&mut self, nodes: Option<&NodeList>) {
+    pub fn generate_all_member_names(&mut self, nodes: Option<&NodeList>) { ::tsox_core::fntrace::enter("generate_all_member_names"); 
         let Some(nodes) = nodes else {
             return;
         };
@@ -246,7 +246,7 @@ impl Printer {
         }
     }
 
-    pub fn generate_member_names(&mut self, node: Option<&Node>) {
+    pub fn generate_member_names(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("generate_member_names"); 
         let Some(node) = node else {
             return;
         };
@@ -263,7 +263,7 @@ impl Printer {
         }
     }
 
-    pub fn generate_name_if_needed(&mut self, name: Option<&Node>) {
+    pub fn generate_name_if_needed(&mut self, name: Option<&Node>) { ::tsox_core::fntrace::enter("generate_name_if_needed"); 
         if let Some(name) = name {
             if is_member_name(name) {
                 self.generate_name(name);
@@ -273,11 +273,11 @@ impl Printer {
         }
     }
 
-    pub fn generate_name(&mut self, name: &Node) {
+    pub fn generate_name(&mut self, name: &Node) { ::tsox_core::fntrace::enter("generate_name"); 
         let _ = name.text();
     }
 
-    pub fn is_file_level_unique_name_in_current_file(&self, name: &str, _scoped: bool) -> bool {
+    pub fn is_file_level_unique_name_in_current_file(&self, name: &str, _scoped: bool) -> bool { ::tsox_core::fntrace::enter("is_file_level_unique_name_in_current_file"); 
         if let Some(source_file) = self.current_source_file.as_deref() {
             self.emit_context
                 .is_file_level_unique_name(source_file, name, self.has_global_name_callback())
@@ -286,11 +286,11 @@ impl Printer {
         }
     }
 
-    fn has_global_name_callback(&self) -> Option<fn(&str) -> bool> {
+    fn has_global_name_callback(&self) -> Option<fn(&str) -> bool> { ::tsox_core::fntrace::enter("has_global_name_callback"); 
         None
     }
 
-    pub fn emit_comments_before_node(&mut self, node: &Node) -> Option<CommentState> {
+    pub fn emit_comments_before_node(&mut self, node: &Node) -> Option<CommentState> { ::tsox_core::fntrace::enter("emit_comments_before_node"); 
         if !self.should_emit_comments(node) {
             return None;
         }
@@ -299,7 +299,7 @@ impl Printer {
         None
     }
 
-    pub fn emit_comments_after_node(&mut self, _node: &Node, previous_state: Option<CommentState>) {
+    pub fn emit_comments_after_node(&mut self, _node: &Node, previous_state: Option<CommentState>) { ::tsox_core::fntrace::enter("emit_comments_after_node"); 
         if previous_state.is_none() {
             return;
         }
@@ -307,7 +307,7 @@ impl Printer {
         // GetTypeNode 尾随注释。状态字段 pub(crate) 不可读，随构造器一并交接。
     }
 
-    pub fn emit_source_maps_before_node(&mut self, node: &Node) -> Option<SourceMapState> {
+    pub fn emit_source_maps_before_node(&mut self, node: &Node) -> Option<SourceMapState> { ::tsox_core::fntrace::enter("emit_source_maps_before_node"); 
         if !self.should_emit_source_maps(node) {
             return None;
         }
@@ -316,7 +316,7 @@ impl Printer {
         None
     }
 
-    pub fn emit_source_maps_after_node(&mut self, _node: &Node, previous_state: Option<SourceMapState>) {
+    pub fn emit_source_maps_after_node(&mut self, _node: &Node, previous_state: Option<SourceMapState>) { ::tsox_core::fntrace::enter("emit_source_maps_after_node"); 
         if previous_state.is_none() {
             return;
         }
@@ -329,7 +329,7 @@ impl Printer {
         pos: i32,
         context_node: &Node,
         flags: TokenEmitFlags,
-    ) -> (Option<CommentState>, i32) {
+    ) -> (Option<CommentState>, i32) { ::tsox_core::fntrace::enter("emit_comments_before_token"); 
         if flags & TEF_NO_COMMENTS != 0 || self.comments_disabled {
             let mut pos = pos;
             if self.current_source_file.is_some() && pos >= 0 {
@@ -364,7 +364,7 @@ impl Printer {
         _pos: i32,
         _context_node: &Node,
         previous_state: Option<CommentState>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_comments_after_token"); 
         if previous_state.is_none() {
             return;
         }
@@ -378,7 +378,7 @@ impl Printer {
         pos: i32,
         context_node: &Node,
         flags: TokenEmitFlags,
-    ) -> Option<SourceMapState> {
+    ) -> Option<SourceMapState> { ::tsox_core::fntrace::enter("emit_source_maps_before_token"); 
         if !self.should_emit_token_source_maps(token, pos, context_node, flags) {
             return None;
         }
@@ -393,14 +393,14 @@ impl Printer {
         _pos: i32,
         _context_node: &Node,
         previous_state: Option<SourceMapState>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_source_maps_after_token"); 
         if previous_state.is_none() {
             return;
         }
         // Go: NO_TOKEN_TRAILING_SOURCE_MAPS 检查 + emitSourcePos(loc.End())。随实体与构造器交接。
     }
 
-    pub fn enter_node(&mut self, node: &Node) -> PrinterState39k06 {
+    pub fn enter_node(&mut self, node: &Node) -> PrinterState39k06 { ::tsox_core::fntrace::enter("enter_node"); 
         let mut state = PrinterState39k06::default();
 
         if let Some(on_before_emit_node) = &mut self.on_before_emit_node {
@@ -412,7 +412,7 @@ impl Printer {
         state
     }
 
-    pub fn exit_node(&mut self, node: &Node, previous_state: PrinterState39k06) {
+    pub fn exit_node(&mut self, node: &Node, previous_state: PrinterState39k06) { ::tsox_core::fntrace::enter("exit_node"); 
         self.emit_source_maps_after_node(node, previous_state.source_map_state);
         self.emit_comments_after_node(node, previous_state.comment_state);
 
@@ -421,7 +421,7 @@ impl Printer {
         }
     }
 
-    pub fn enter_token_node(&mut self, node: &Node, flags: TokenEmitFlags) -> PrinterState39k06 {
+    pub fn enter_token_node(&mut self, node: &Node, flags: TokenEmitFlags) -> PrinterState39k06 { ::tsox_core::fntrace::enter("enter_token_node"); 
         let mut state = PrinterState39k06::default();
 
         if let Some(on_before_emit_token) = &mut self.on_before_emit_token {
@@ -437,7 +437,7 @@ impl Printer {
         state
     }
 
-    pub fn exit_token_node(&mut self, node: &Node, previous_state: PrinterState39k06) {
+    pub fn exit_token_node(&mut self, node: &Node, previous_state: PrinterState39k06) { ::tsox_core::fntrace::enter("exit_token_node"); 
         self.emit_source_maps_after_node(node, previous_state.source_map_state);
         self.emit_comments_after_node(node, previous_state.comment_state);
 
@@ -452,7 +452,7 @@ impl Printer {
         pos: i32,
         context_node: &Node,
         flags: TokenEmitFlags,
-    ) -> (PrinterState39k06, i32) {
+    ) -> (PrinterState39k06, i32) { ::tsox_core::fntrace::enter("enter_token"); 
         let mut state = PrinterState39k06::default();
         let (comment_state, pos) = self.emit_comments_before_token(token, pos, context_node, flags);
         state.comment_state = comment_state;
@@ -466,20 +466,20 @@ impl Printer {
         pos: i32,
         context_node: &Node,
         previous_state: PrinterState39k06,
-    ) {
+    ) { ::tsox_core::fntrace::enter("exit_token"); 
         self.emit_source_maps_after_token(token, pos, context_node, previous_state.source_map_state);
         self.emit_comments_after_token(token, pos, context_node, previous_state.comment_state);
     }
 }
 
-pub fn format_synthesized_comment(comment: &SynthesizedComment) -> String {
+pub fn format_synthesized_comment(comment: &SynthesizedComment) -> String { ::tsox_core::fntrace::enter("format_synthesized_comment"); 
     if comment.kind == SyntaxKind::MultiLineCommentTrivia {
         return format!("/*{}*/", comment.text);
     }
     format!("//{}", comment.text)
 }
 
-pub fn get_opening_bracket(format: ListFormat) -> &'static str {
+pub fn get_opening_bracket(format: ListFormat) -> &'static str { ::tsox_core::fntrace::enter("get_opening_bracket"); 
     match format & LF_BRACKETS_MASK {
         LF_BRACES => "{",
         LF_PARENTHESIS => "(",
@@ -489,7 +489,7 @@ pub fn get_opening_bracket(format: ListFormat) -> &'static str {
     }
 }
 
-pub fn get_closing_bracket(format: ListFormat) -> &'static str {
+pub fn get_closing_bracket(format: ListFormat) -> &'static str { ::tsox_core::fntrace::enter("get_closing_bracket"); 
     match format & LF_BRACKETS_MASK {
         LF_BRACES => "}",
         LF_PARENTHESIS => ")",

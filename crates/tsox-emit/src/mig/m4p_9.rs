@@ -23,7 +23,7 @@ impl Printer {
         format: ListFormat,
         has_trailing_comma: bool,
         children_text_range: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_list_items"); 
         let may_emit_intervening_comments = !format.intersects(ListFormat::NO_INTERVENING_COMMENTS);
         let mut should_emit_intervening_comments = may_emit_intervening_comments;
 

@@ -3,11 +3,11 @@
 use crate::checker::nodebuilder::*;
 
 impl Checker {
-    pub fn type_to_string(&mut self, t: &Arc<Type>) -> String {
+    pub fn type_to_string(&mut self, t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("type_to_string"); 
         self.type_to_string_ex(t, TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE)
     }
 
-    pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
+    pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("type_to_string_ex"); 
         let key = Arc::as_ptr(t) as usize;
         if self.type_print_stack.len() >= 300 || self.type_print_stack.contains(&key) {
             return "...".to_string();
@@ -21,7 +21,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn type_to_string_ex_worker(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String {
+    pub(crate) fn type_to_string_ex_worker(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("type_to_string_ex_worker"); 
         if let Some(name) = t.intrinsic_name() {
             if name == "error" {
                 return "any".to_string();
@@ -318,7 +318,7 @@ impl Checker {
         "<unknown type>".to_string()
     }
 
-    pub(crate) fn literal_value_to_string(&mut self, val: &LiteralValue) -> String {
+    pub(crate) fn literal_value_to_string(&mut self, val: &LiteralValue) -> String { ::tsox_core::fntrace::enter("literal_value_to_string"); 
         match val {
             LiteralValue::String(s) => format!("\"{}\"", s),
             LiteralValue::Number(n) => n.to_string(),
@@ -331,7 +331,7 @@ impl Checker {
 
 }
 
-pub(crate) fn node_name_probe(d: &Arc<tsox_frontend::ast::Node>) -> Option<String> {
+pub(crate) fn node_name_probe(d: &Arc<tsox_frontend::ast::Node>) -> Option<String> { ::tsox_core::fntrace::enter("node_name_probe"); 
     let r = tsox_frontend::ast::node_data_generated::node_name(d).map(|n| n.text().to_string());
     r
 }

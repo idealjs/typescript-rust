@@ -1,6 +1,6 @@
 use super::*;
 
-fn apply_bulk_edits(text: &str, edits: &[TextChange]) -> String {
+fn apply_bulk_edits(text: &str, edits: &[TextChange]) -> String { ::tsox_core::fntrace::enter("apply_bulk_edits"); 
     let mut result = String::with_capacity(text.len());
     let mut last_end = 0;
     for e in edits {
@@ -15,7 +15,7 @@ fn apply_bulk_edits(text: &str, edits: &[TextChange]) -> String {
 }
 
 #[test]
-fn test_format_no_trailing_space() {
+fn test_format_no_trailing_space() { ::tsox_core::fntrace::enter("test_format_no_trailing_space"); 
     let test_cases: &[(&str, &str)] = &[
         ("simple statement without trailing newline", "1;"),
         (
@@ -57,7 +57,7 @@ fn test_format_no_trailing_space() {
 }
 
 #[test]
-fn test_format() {
+fn test_format() { ::tsox_core::fntrace::enter("test_format"); 
     let text = "const x = 1;";
     let source_file = std::sync::Arc::new(
         crate::parser::Parser::parse_source_file_text("/test.ts", text.to_string()),
@@ -74,16 +74,16 @@ fn test_format() {
 }
 
 #[test]
-fn test_comment_formatting() {}
+fn test_comment_formatting() { ::tsox_core::fntrace::enter("test_comment_formatting"); }
 
 #[test]
-fn test_format_selection_preserves_comments() {}
+fn test_format_selection_preserves_comments() { ::tsox_core::fntrace::enter("test_format_selection_preserves_comments"); }
 
 #[test]
-fn test_slice_bounds_panic() {}
+fn test_slice_bounds_panic() { ::tsox_core::fntrace::enter("test_slice_bounds_panic"); }
 
 #[test]
-fn test_get_indentation_for_named_imports_position() {}
+fn test_get_indentation_for_named_imports_position() { ::tsox_core::fntrace::enter("test_get_indentation_for_named_imports_position"); }
 
 #[test]
-fn test_get_containing_list_named_imports() {}
+fn test_get_containing_list_named_imports() { ::tsox_core::fntrace::enter("test_get_containing_list_named_imports"); }

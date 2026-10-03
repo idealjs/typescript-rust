@@ -36,7 +36,7 @@ pub struct VerbosityContext {
 }
 
 impl Default for VerbosityContext {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         VerbosityContext {
             level: 0,
             max_truncation_length: 0,
@@ -52,7 +52,7 @@ pub struct NodeBuilder<'a> {
     pub verbosity: Option<VerbosityContext>,
 }
 
-pub fn new_emit_context() -> EmitContextStub {
+pub fn new_emit_context() -> EmitContextStub { ::tsox_core::fntrace::enter("new_emit_context"); 
     EmitContextStub::default()
 }
 
@@ -60,7 +60,7 @@ pub fn new_node_builder_ex<'a>(
     ch: &'a Checker,
     _e: EmitContextStub,
     id_to_symbol: HashMap<u64, Arc<Symbol>>,
-) -> NodeBuilder<'a> {
+) -> NodeBuilder<'a> { ::tsox_core::fntrace::enter("new_node_builder_ex"); 
     crate::checker::mig::m2c_5::r26k4_defs::set_builder_checker(ch);
     NodeBuilder {
         ctx_stack: Vec::new(),
@@ -70,7 +70,7 @@ pub fn new_node_builder_ex<'a>(
 }
 
 impl<'a> NodeBuilder<'a> {
-    pub fn emit_context(&self) -> &EmitContextStub {
+    pub fn emit_context(&self) -> &EmitContextStub { ::tsox_core::fntrace::enter("emit_context"); 
         &self.impl_.e
     }
 
@@ -80,7 +80,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("enter_context"); 
         let mut verbosity_level = -1;
         let mut max_truncation_length = 0;
         if let Some(verbosity) = &self.verbosity {
@@ -103,7 +103,7 @@ impl<'a> NodeBuilder<'a> {
         self.impl_.ctx.borrow_mut().tracker = Some(Box::new(tracker));
     }
 
-    pub fn propagate_verbosity_out(&mut self) {
+    pub fn propagate_verbosity_out(&mut self) { ::tsox_core::fntrace::enter("propagate_verbosity_out"); 
         let can_increase = self.impl_.ctx.borrow().can_increase_expansion_depth;
         let truncated = self.impl_.ctx.borrow().expansion_truncated;
         if let Some(verbosity) = &mut self.verbosity {
@@ -116,7 +116,7 @@ impl<'a> NodeBuilder<'a> {
         }
     }
 
-    pub fn pop_context(&mut self) {
+    pub fn pop_context(&mut self) { ::tsox_core::fntrace::enter("pop_context"); 
         if self.ctx_stack.is_empty() {
             self.impl_.ctx = Rc::new(std::cell::RefCell::new(NodeBuilderContext::default()));
         } else {
@@ -124,7 +124,7 @@ impl<'a> NodeBuilder<'a> {
         }
     }
 
-    pub fn exit_context(&mut self, result: Option<Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn exit_context(&mut self, result: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("exit_context"); 
         self.propagate_verbosity_out();
         self.exit_context_check();
         let encountered_error = self.impl_.ctx.borrow().encountered_error;
@@ -133,7 +133,7 @@ impl<'a> NodeBuilder<'a> {
         out
     }
 
-    pub fn exit_context_slice(&mut self, result: Vec<Arc<Node>>) -> Option<Vec<Arc<Node>>> {
+    pub fn exit_context_slice(&mut self, result: Vec<Arc<Node>>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("exit_context_slice"); 
         self.propagate_verbosity_out();
         self.exit_context_check();
         let encountered_error = self.impl_.ctx.borrow().encountered_error;
@@ -142,7 +142,7 @@ impl<'a> NodeBuilder<'a> {
         out
     }
 
-    pub fn exit_context_check(&mut self) {
+    pub fn exit_context_check(&mut self) { ::tsox_core::fntrace::enter("exit_context_check"); 
         let (truncating, no_truncation) = {
             let ctx = self.impl_.ctx.borrow();
             (ctx.truncating, ctx.flags.contains(NodeBuilderFlags::NoTruncation))
@@ -161,7 +161,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("symbol_to_expression"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, tracker);
         let result = self.impl_.symbol_to_expression(symbol, meaning);
         self.exit_context(Some(result))
@@ -175,7 +175,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("symbol_to_node"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, tracker);
         let result = self.impl_.symbol_to_node(symbol, meaning);
         self.exit_context(Some(result))
@@ -188,7 +188,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("symbol_to_parameter_declaration"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, tracker);
         let result = self.impl_.symbol_to_parameter_declaration(symbol, false);
         self.exit_context(Some(result))
@@ -201,7 +201,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Vec<Arc<Node>>> {
+    ) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("symbol_to_type_parameter_declarations"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, tracker);
         let result = self.impl_.symbol_to_type_parameter_declarations(symbol);
         self.exit_context_slice(result.unwrap_or_default())
@@ -214,7 +214,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_parameter_to_declaration"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, tracker);
         let result = self.impl_.type_parameter_to_declaration(parameter);
         self.exit_context(Some(result))
@@ -227,7 +227,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_predicate_to_type_predicate_node"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, tracker);
         let result = self.impl_.type_predicate_to_type_predicate_node(predicate);
         self.exit_context(Some(result))
@@ -239,7 +239,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_js_type_node_to_type_node"); 
         self.enter_context(enclosing_declaration, flags, internal_flags, tracker);
         let result = self.impl_.try_js_type_node_to_type_node(Some(node));
         self.exit_context(result)
@@ -250,7 +250,7 @@ pub fn simplify_class_declaration(
     f: &crate::checker::nodecopy_builder::NodeFactoryStub,
     class_decl: Arc<Node>,
     symbol: &Arc<Symbol>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("simplify_class_declaration"); 
     let class_declarations: Vec<&Arc<Node>> = symbol
         .declarations
         .iter()
@@ -289,7 +289,7 @@ pub fn simplify_modifiers(
     new_decl: Arc<Node>,
     is_decl_kind: fn(&Arc<Node>) -> bool,
     symbol: &Arc<Symbol>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("simplify_modifiers"); 
     let decls: Vec<&Arc<Node>> = symbol
         .declarations
         .iter()
@@ -310,7 +310,7 @@ pub fn simplify_modifiers(
 }
 
 impl Checker {
-    pub fn get_node_builder(&mut self) -> (NodeBuilder<'_>, impl FnOnce() + use<'_>) {
+    pub fn get_node_builder(&mut self) -> (NodeBuilder<'_>, impl FnOnce() + use<'_>) { ::tsox_core::fntrace::enter("get_node_builder"); 
         let builder = self.get_node_builder_ex(HashMap::new());
         (builder, || {})
     }
@@ -318,7 +318,7 @@ impl Checker {
     pub fn get_node_builder_ex(
         &mut self,
         id_to_symbol: HashMap<u64, Arc<Symbol>>,
-    ) -> NodeBuilder<'_> {
+    ) -> NodeBuilder<'_> { ::tsox_core::fntrace::enter("get_node_builder_ex"); 
         new_node_builder_ex(self, new_emit_context(), id_to_symbol)
     }
 }

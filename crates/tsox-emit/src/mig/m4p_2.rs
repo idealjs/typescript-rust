@@ -28,21 +28,21 @@ const CALL_EXPRESSION_ARGUMENTS: ListFormat = ListFormat(
     ListFormat::COMMA_DELIMITED.0 | ListFormat::SPACE_BETWEEN_SIBLINGS.0 | ListFormat::PARENTHESIS.0,
 );
 
-fn if_statement_then_statement(node: &Arc<Node>) -> &Arc<Node> {
+fn if_statement_then_statement(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("if_statement_then_statement"); 
     match &node.data {
         NodeData::IfStatement(d) => &d.then_statement,
         _ => panic!("unexpected IfStatement: {:?}", node.kind),
     }
 }
 
-fn if_statement_else_statement(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn if_statement_else_statement(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("if_statement_else_statement"); 
     match &node.data {
         NodeData::IfStatement(d) => d.else_statement.as_ref(),
         _ => None,
     }
 }
 
-fn node_statement(node: &Arc<Node>) -> &Arc<Node> {
+fn node_statement(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("node_statement"); 
     match &node.data {
         NodeData::DoStatement(d) => &d.statement,
         NodeData::ForStatement(d) => &d.statement,
@@ -52,7 +52,7 @@ fn node_statement(node: &Arc<Node>) -> &Arc<Node> {
     }
 }
 
-fn node_initializer(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn node_initializer(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node_initializer"); 
     match &node.data {
         NodeData::ForStatement(d) => d.initializer.as_ref(),
         NodeData::ForInOrOfStatement(d) => Some(&d.initializer),
@@ -60,49 +60,49 @@ fn node_initializer(node: &Arc<Node>) -> Option<&Arc<Node>> {
     }
 }
 
-fn for_statement_condition(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn for_statement_condition(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("for_statement_condition"); 
     match &node.data {
         NodeData::ForStatement(d) => d.condition.as_ref(),
         _ => None,
     }
 }
 
-fn for_statement_incrementor(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn for_statement_incrementor(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("for_statement_incrementor"); 
     match &node.data {
         NodeData::ForStatement(d) => d.incrementor.as_ref(),
         _ => None,
     }
 }
 
-fn for_in_or_of_await_modifier(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn for_in_or_of_await_modifier(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("for_in_or_of_await_modifier"); 
     match &node.data {
         NodeData::ForInOrOfStatement(d) => d.await_modifier.as_ref(),
         _ => None,
     }
 }
 
-fn labeled_statement_label(node: &Arc<Node>) -> &Arc<Node> {
+fn labeled_statement_label(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("labeled_statement_label"); 
     match &node.data {
         NodeData::LabeledStatement(d) => &d.label,
         _ => panic!("unexpected LabeledStatement: {:?}", node.kind),
     }
 }
 
-fn call_expression_question_dot_token(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn call_expression_question_dot_token(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("call_expression_question_dot_token"); 
     match &node.data {
         NodeData::CallExpression(d) => d.question_dot_token.as_ref(),
         _ => None,
     }
 }
 
-fn node_arguments(node: &Arc<Node>) -> &Arc<tsox_frontend::ast::node::NodeList> {
+fn node_arguments(node: &Arc<Node>) -> &Arc<tsox_frontend::ast::node::NodeList> { ::tsox_core::fntrace::enter("node_arguments"); 
     match &node.data {
         NodeData::CallExpression(d) => &d.arguments,
         _ => panic!("unexpected CallExpression: {:?}", node.kind),
     }
 }
 
-fn node_type_arguments(node: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::node::NodeList>> {
+fn node_type_arguments(node: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::node::NodeList>> { ::tsox_core::fntrace::enter("node_type_arguments"); 
     match &node.data {
         NodeData::CallExpression(d) => d.type_arguments.as_ref(),
         NodeData::NewExpression(d) => d.type_arguments.as_ref(),
@@ -111,7 +111,7 @@ fn node_type_arguments(node: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::node
     }
 }
 
-fn unary_expression_expression(node: &Arc<Node>) -> &Arc<Node> {
+fn unary_expression_expression(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("unary_expression_expression"); 
     match &node.data {
         NodeData::DeleteExpression(d) => &d.expression,
         NodeData::TypeOfExpression(d) => &d.expression,
@@ -126,7 +126,7 @@ fn unary_expression_expression(node: &Arc<Node>) -> &Arc<Node> {
 }
 
 impl Printer {
-    pub fn emit_expression_no_asi(&mut self, node: &Arc<Node>, precedence: OperatorPrecedence) {
+    pub fn emit_expression_no_asi(&mut self, node: &Arc<Node>, precedence: OperatorPrecedence) { ::tsox_core::fntrace::enter("emit_expression_no_asi"); 
         if self.parenthesize_expression_for_no_asi(node) {
             self.write_punctuation("(");
             self.emit_expression(node, precedence);
@@ -136,7 +136,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_expression(&mut self, node: &Arc<Node>, precedence: OperatorPrecedence) {
+    pub fn emit_expression(&mut self, node: &Arc<Node>, precedence: OperatorPrecedence) { ::tsox_core::fntrace::enter("emit_expression"); 
         let parens =
             get_expression_precedence(&skip_partially_emitted_expressions(node)) < precedence;
         if parens {
@@ -205,7 +205,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_empty_statement(&mut self, node: &Arc<Node>, is_embedded_statement: bool) {
+    pub fn emit_empty_statement(&mut self, node: &Arc<Node>, is_embedded_statement: bool) { ::tsox_core::fntrace::enter("emit_empty_statement"); 
         let state = self.enter_node(node);
         if is_embedded_statement {
             self.write_punctuation(";");
@@ -215,7 +215,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_expression_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_expression_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_expression_statement"); 
         let state = self.enter_node(node);
         let expression = node.expression().unwrap();
         if self.current_source_file.as_ref().is_some_and(|f| f.script_kind == ScriptKind::Json) {
@@ -242,7 +242,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_iife_with_parenthesized_callee(&mut self, node: &Arc<Node>) {
+    pub fn emit_iife_with_parenthesized_callee(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_iife_with_parenthesized_callee"); 
         let call = skip_partially_emitted_expressions(node);
         let state = self.enter_node(&call);
         self.write_punctuation("(");
@@ -259,7 +259,7 @@ impl Printer {
         self.exit_node(&call, state);
     }
 
-    pub fn emit_if_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_if_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_if_statement"); 
         let state = self.enter_node(node);
         let expression = node.expression().unwrap();
         let then_statement = if_statement_then_statement(node);
@@ -282,7 +282,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_do_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_do_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_do_statement"); 
         let state = self.enter_node(node);
         let expression = node.expression().unwrap();
         let statement = node_statement(node);
@@ -298,7 +298,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_for_initializer(&mut self, node: &Arc<Node>) {
+    pub fn emit_for_initializer(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_for_initializer"); 
         if node.kind == SyntaxKind::VariableDeclarationList {
             self.emit_variable_declaration_list(node);
         } else {
@@ -306,7 +306,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_for_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_for_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_for_statement"); 
         let state = self.enter_node(node);
         let mut pos = self.emit_token(SyntaxKind::ForKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_space();
@@ -332,7 +332,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_for_in_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_for_in_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_for_in_statement"); 
         let state = self.enter_node(node);
         let initializer = node_initializer(node).unwrap();
         let expression = node.expression().unwrap();
@@ -349,7 +349,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_for_of_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_for_of_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_for_of_statement"); 
         let state = self.enter_node(node);
         let initializer = node_initializer(node).unwrap();
         let expression = node.expression().unwrap();
@@ -371,7 +371,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_labeled_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_labeled_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_labeled_statement"); 
         let state = self.enter_node(node);
         let label = labeled_statement_label(node);
         self.emit_label_identifier(label);
@@ -381,60 +381,60 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_argument(&mut self, node: &Arc<Node>) {
+    pub fn emit_argument(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_argument"); 
         self.emit_expression(node, OperatorPrecedence::Spread);
     }
 
-    pub fn emit_numeric_literal(&mut self, node: &Arc<Node>) {
+    pub fn emit_numeric_literal(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_numeric_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GET_LITERAL_TEXT_FLAGS_NONE);
         self.exit_node(node, state);
     }
 
-    pub fn emit_big_int_literal(&mut self, node: &Arc<Node>) {
+    pub fn emit_big_int_literal(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_big_int_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GET_LITERAL_TEXT_FLAGS_NONE);
         self.exit_node(node, state);
     }
 
-    pub fn emit_string_literal(&mut self, node: &Arc<Node>) {
+    pub fn emit_string_literal(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_string_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GET_LITERAL_TEXT_FLAGS_NONE);
         self.exit_node(node, state);
     }
 
-    pub fn emit_no_substitution_template_literal(&mut self, node: &Arc<Node>) {
+    pub fn emit_no_substitution_template_literal(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_no_substitution_template_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GET_LITERAL_TEXT_FLAGS_NONE);
         self.exit_node(node, state);
     }
 
-    pub fn emit_regular_expression_literal(&mut self, node: &Arc<Node>) {
+    pub fn emit_regular_expression_literal(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_regular_expression_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GET_LITERAL_TEXT_FLAGS_NONE);
         self.exit_node(node, state);
     }
 
-    pub fn emit_private_identifier(&mut self, node: &Arc<Node>) {
+    pub fn emit_private_identifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_private_identifier"); 
         let state = self.enter_node(node);
         let text = node.text().to_string();
         self.write_as(&text, WriteKind::None);
         self.exit_node(node, state);
     }
 
-    pub fn emit_omitted_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_omitted_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_omitted_expression"); 
         let state = self.enter_node(node);
         self.exit_node(node, state);
     }
 
-    pub fn emit_spread_element(&mut self, node: &Arc<Node>) {
+    pub fn emit_spread_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_spread_element"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::DotDotDotToken, node.pos(), WriteKind::Punctuation, node);
         self.emit_expression(unary_expression_expression(node), OperatorPrecedence::Yield);
         self.exit_node(node, state);
     }
 
-    pub fn emit_delete_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_delete_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_delete_expression"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::DeleteKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_space();
@@ -442,7 +442,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_type_of_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_type_of_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_type_of_expression"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::TypeOfKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_space();
@@ -450,7 +450,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_void_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_void_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_void_expression"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::VoidKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_space();
@@ -458,7 +458,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_await_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_await_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_await_expression"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::AwaitKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_space();
@@ -466,7 +466,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_prefix_unary_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_prefix_unary_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_prefix_unary_expression"); 
         let state = self.enter_node(node);
         let (operator, operand) = match &node.data {
             NodeData::PrefixUnaryExpression(d) => (d.operator, &d.operand),
@@ -490,7 +490,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_postfix_unary_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_postfix_unary_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_postfix_unary_expression"); 
         let state = self.enter_node(node);
         let (operator, operand) = match &node.data {
             NodeData::PostfixUnaryExpression(d) => (d.operator, &d.operand),
@@ -501,7 +501,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_yield_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_yield_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_yield_expression"); 
         let state = self.enter_node(node);
         let (asterisk_token, expression) = match &node.data {
             NodeData::YieldExpression(d) => (d.asterisk_token.as_ref(), d.expression.as_ref()),
@@ -518,7 +518,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_as_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_as_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_as_expression"); 
         let state = self.enter_node(node);
         let (expression, type_node) = match &node.data {
             NodeData::AsExpression(d) => (&d.expression, &d.type_node),
@@ -532,7 +532,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_satisfies_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_satisfies_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_satisfies_expression"); 
         let state = self.enter_node(node);
         let (expression, type_node) = match &node.data {
             NodeData::SatisfiesExpression(d) => (&d.expression, &d.type_node),
@@ -546,14 +546,14 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_non_null_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_non_null_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_non_null_expression"); 
         let state = self.enter_node(node);
         self.emit_expression(unary_expression_expression(node), OperatorPrecedence::Member);
         self.write_as("!", WriteKind::Operator);
         self.exit_node(node, state);
     }
 
-    pub fn emit_meta_property(&mut self, node: &Arc<Node>) {
+    pub fn emit_meta_property(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_meta_property"); 
         let state = self.enter_node(node);
         let (keyword_token, name) = match &node.data {
             NodeData::MetaProperty(d) => (d.keyword_token, &d.name),
@@ -565,14 +565,14 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn parenthesize_expression_for_no_asi(&mut self, node: &Arc<Node>) -> bool {
+    pub fn parenthesize_expression_for_no_asi(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("parenthesize_expression_for_no_asi"); 
         if self.comments_disabled {
             return false;
         }
         self.will_emit_leading_new_line(node)
     }
 
-    fn will_emit_leading_new_line(&mut self, node: &Arc<Node>) -> bool {
+    fn will_emit_leading_new_line(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("will_emit_leading_new_line"); 
         use tsox_frontend::ast::node_data_generated::is_partially_emitted_expression;
         if self.current_source_file.is_none() {
             return false;
@@ -611,7 +611,7 @@ impl Printer {
         false
     }
 
-    pub fn emit_arrow_function(&mut self, node: &Arc<Node>) {
+    pub fn emit_arrow_function(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_arrow_function"); 
         let state = self.enter_node(node);
         let (modifiers, type_parameters, parameters, type_node, equals_greater_than_token, body) =
             match &node.data {
@@ -641,11 +641,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_parameters_for_arrow(&mut self, parent_node: &Arc<Node>, parameters: &Arc<tsox_frontend::ast::node::NodeList>) {
+    pub fn emit_parameters_for_arrow(&mut self, parent_node: &Arc<Node>, parameters: &Arc<tsox_frontend::ast::node::NodeList>) { ::tsox_core::fntrace::enter("emit_parameters_for_arrow"); 
         self.emit_parameters(parent_node, parameters);
     }
 
-    pub fn emit_concise_body(&mut self, body: Option<&Arc<Node>>) {
+    pub fn emit_concise_body(&mut self, body: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("emit_concise_body"); 
         let Some(body) = body else { return };
         if is_block(body) {
             self.emit_function_body(body);
@@ -654,7 +654,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_binary_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_binary_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_binary_expression"); 
         let (left, operator_token, right) = match &node.data {
             NodeData::BinaryExpression(d) => (&d.left, &d.operator_token, &d.right),
             _ => panic!("unexpected BinaryExpression: {:?}", node.kind),
@@ -668,7 +668,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_class_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_class_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_class_expression"); 
         let state = self.enter_node(node);
         let (name, modifiers, type_parameters, heritage_clauses, members) = match &node.data {
             NodeData::ClassExpression(d) => (
@@ -714,13 +714,13 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    fn generate_all_member_names13(&mut self, members: &Arc<tsox_frontend::ast::node::NodeList>) {
+    fn generate_all_member_names13(&mut self, members: &Arc<tsox_frontend::ast::node::NodeList>) { ::tsox_core::fntrace::enter("generate_all_member_names13"); 
         for member in &members.nodes {
             self.generate_name_if_needed(Some(member));
         }
     }
 
-    pub fn emit_class_element(&mut self, node: &Arc<Node>) {
+    pub fn emit_class_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_class_element"); 
         match node.kind {
             SyntaxKind::PropertyDeclaration => self.emit_property_declaration(node),
             SyntaxKind::MethodDeclaration => self.emit_method_declaration(node),
@@ -737,7 +737,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_property_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_property_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_property_declaration"); 
         let state = self.enter_node(node);
         let (modifiers, name, postfix_token, type_node, initializer) = match &node.data {
             NodeData::PropertyDeclaration(d) => (
@@ -760,7 +760,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_method_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_method_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_method_declaration"); 
         let state = self.enter_node(node);
         let (modifiers, postfix_token, name, body) = match &node.data {
             NodeData::MethodDeclaration(d) => (
@@ -784,11 +784,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_set_accessor_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_set_accessor_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_set_accessor_declaration"); 
         self.emit_accessor_declaration(SyntaxKind::SetKeyword, node);
     }
 
-    pub fn emit_constructor(&mut self, node: &Arc<Node>) {
+    pub fn emit_constructor(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_constructor"); 
         let state = self.enter_node(node);
         let (modifiers, type_parameters, parameters, body) = match &node.data {
             NodeData::ConstructorDeclaration(d) => (

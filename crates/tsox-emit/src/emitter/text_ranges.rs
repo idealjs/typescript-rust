@@ -10,7 +10,7 @@ pub(crate) fn emit_text_range<S: EmitSink>(
     cuts: &[(usize, usize)],
     replacements: &[(usize, usize, &str, Option<usize>)],
     sink: &mut S,
-) {
+) { ::tsox_core::fntrace::enter("emit_text_range"); 
     if cuts.is_empty() && replacements.is_empty() {
         sink.emit_source(source, start, end);
         return;

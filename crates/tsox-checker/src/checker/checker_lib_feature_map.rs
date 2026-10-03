@@ -500,7 +500,7 @@ const FEATURE_MAP: &[ContainerFeatures] = &[
     },
 ];
 
-fn container_features(container: &str) -> Option<&'static [FeatureMapEntry]> {
+fn container_features(container: &str) -> Option<&'static [FeatureMapEntry]> { ::tsox_core::fntrace::enter("container_features"); 
     FEATURE_MAP
         .iter()
         .chain(TYPED_ARRAY_FEATURES.iter())
@@ -510,7 +510,7 @@ fn container_features(container: &str) -> Option<&'static [FeatureMapEntry]> {
 
 // Go getSuggestedLibForNonExistentProperty：属性名命中容器特性表时给出
 // 引入该属性的最低 lib
-pub(crate) fn suggested_lib_for_property(container: &str, prop: &str) -> Option<&'static str> {
+pub(crate) fn suggested_lib_for_property(container: &str, prop: &str) -> Option<&'static str> { ::tsox_core::fntrace::enter("suggested_lib_for_property"); 
     container_features(container)?
         .iter()
         .find(|e| e.props.contains(&prop))
@@ -519,7 +519,7 @@ pub(crate) fn suggested_lib_for_property(container: &str, prop: &str) -> Option<
 
 // Go getSuggestedLibForNonExistentName：名字本身是 lib 提供的全局时给出
 // 首个提供该名字的 lib
-pub(crate) fn suggested_lib_for_name(name: &str) -> Option<&'static str> {
+pub(crate) fn suggested_lib_for_name(name: &str) -> Option<&'static str> { ::tsox_core::fntrace::enter("suggested_lib_for_name"); 
     let entries = container_features(name)?;
     entries.first().map(|e| e.lib)
 }
@@ -531,7 +531,7 @@ use std::sync::Arc;
 impl Checker {
     // Go getApparentType 的符号名语义：primitive 及字面量映射到全局包装接口名，
     // 其余取类型符号名（用于 lib 特性表查找）
-    pub(crate) fn lib_suggestion_container_name(&self, t: &Arc<Type>) -> Option<String> {
+    pub(crate) fn lib_suggestion_container_name(&self, t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("lib_suggestion_container_name"); 
         if let Some(sym) = t.symbol.as_ref() {
             return Some(sym.name.clone());
         }

@@ -5,13 +5,13 @@ use crate::checker::types_type_flags_instantiable_non_primitive::Ternary;
 use tsox_core::core::tristate::Tristate;
 
 impl TupleTypeData {
-    pub(crate) fn fixed_length(&self) -> usize {
+    pub(crate) fn fixed_length(&self) -> usize { ::tsox_core::fntrace::enter("fixed_length"); 
         self.fixed_length
     }
 }
 
 impl ConditionalTypeData {
-    pub(crate) fn extends_type(&self) -> Option<&Arc<Type>> {
+    pub(crate) fn extends_type(&self) -> Option<&Arc<Type>> { ::tsox_core::fntrace::enter("extends_type"); 
         self.extends_type.as_ref()
     }
 }
@@ -22,7 +22,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         name_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_best_match_indexed_access_type_or_undefined"); 
         let idx = self.get_indexed_access_type_or_undefined(target, name_type, AccessFlags::None, None, None);
         if idx.is_some() {
             return idx;
@@ -43,7 +43,7 @@ pub(crate) struct TracedType {
 }
 
 impl TracedType {
-    pub(crate) fn as_type(&self) -> &Type {
+    pub(crate) fn as_type(&self) -> &Type { ::tsox_core::fntrace::enter("as_type"); 
         unsafe { &*self.t }
     }
 }
@@ -51,16 +51,16 @@ impl TracedType {
 pub(crate) mod traced_type_adapter {
     use super::*;
 
-    pub(crate) fn new(t: &Type) -> TracedType {
+    pub(crate) fn new(t: &Type) -> TracedType { ::tsox_core::fntrace::enter("new"); 
         TracedType { t }
     }
 }
 
-pub(crate) fn wrap_type(t: &Type) -> TracedType {
+pub(crate) fn wrap_type(t: &Type) -> TracedType { ::tsox_core::fntrace::enter("wrap_type"); 
     TracedType { t }
 }
 
-pub(crate) fn wrap_types(types: &[Arc<Type>]) -> Vec<TracedType> {
+pub(crate) fn wrap_types(types: &[Arc<Type>]) -> Vec<TracedType> { ::tsox_core::fntrace::enter("wrap_types"); 
     if types.is_empty() {
         return Vec::new();
     }
@@ -74,7 +74,7 @@ pub(crate) struct TracedTypeAdapter {
 }
 
 impl TracedTypeAdapter {
-    pub(crate) fn evolving_array_element_type(&self) -> Option<TracedType> {
+    pub(crate) fn evolving_array_element_type(&self) -> Option<TracedType> { ::tsox_core::fntrace::enter("evolving_array_element_type"); 
         let t = unsafe { &*self.t };
         if !t.flags.intersects(TypeFlags::Object) || !t.object_flags.intersects(ObjectFlags::EvolvingArray) {
             return None;
@@ -85,7 +85,7 @@ impl TracedTypeAdapter {
             .map(wrap_type)
     }
 
-    pub(crate) fn evolving_array_final_type(&self) -> Option<TracedType> {
+    pub(crate) fn evolving_array_final_type(&self) -> Option<TracedType> { ::tsox_core::fntrace::enter("evolving_array_final_type"); 
         let t = unsafe { &*self.t };
         if !t.flags.intersects(TypeFlags::Object) || !t.object_flags.intersects(ObjectFlags::EvolvingArray) {
             return None;
@@ -96,7 +96,7 @@ impl TracedTypeAdapter {
             .map(|t| wrap_type(t.as_ref()))
     }
 
-    pub(crate) fn format_flags(&self) -> Vec<&'static str> {
+    pub(crate) fn format_flags(&self) -> Vec<&'static str> { ::tsox_core::fntrace::enter("format_flags"); 
         let t = unsafe { &*self.t };
         format_type_flags(t.flags)
     }

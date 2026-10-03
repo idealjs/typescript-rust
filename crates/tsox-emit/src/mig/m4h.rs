@@ -19,7 +19,7 @@ use r39k13_defs::set_loc;
 pub struct ExponentiationTransformer;
 
 impl ExponentiationTransformer {
-    pub fn visit(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !node.subtree_facts().intersects(SubtreeFacts::CONTAINS_EXPONENTIATION_OPERATOR) {
             return node.clone();
         }
@@ -29,7 +29,7 @@ impl ExponentiationTransformer {
         }
     }
 
-    fn visit_binary_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_binary_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_binary_expression"); 
         let operator_kind = match &node.data {
             NodeData::BinaryExpression(d) => d.operator_token.kind,
             _ => return tx.visitor().visit_each_child(node),
@@ -43,7 +43,7 @@ impl ExponentiationTransformer {
         }
     }
 
-    fn visit_exponentiation_assignment_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_exponentiation_assignment_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_exponentiation_assignment_expression"); 
         let (left_node, right_node) = match &node.data {
             NodeData::BinaryExpression(d) => (d.left.clone(), d.right.clone()),
             _ => unreachable!(),
@@ -106,7 +106,7 @@ impl ExponentiationTransformer {
         result
     }
 
-    fn visit_exponentiation_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_exponentiation_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_exponentiation_expression"); 
         let (left_node, right_node) = match &node.data {
             NodeData::BinaryExpression(d) => (d.left.clone(), d.right.clone()),
             _ => unreachable!(),
@@ -121,18 +121,18 @@ impl ExponentiationTransformer {
     }
 }
 
-pub fn new_exponentiation_transformer(opts: &TransformOptions) -> Transformer {
+pub fn new_exponentiation_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("new_exponentiation_transformer"); 
     Transformer::new(exponentiation_transformer_visit, Some(opts.context.clone()))
 }
 
-fn exponentiation_transformer_visit(tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+fn exponentiation_transformer_visit(tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("exponentiation_transformer_visit"); 
     Some(ExponentiationTransformer::visit(tx, &node))
 }
 
 pub struct LogicalAssignmentTransformer;
 
 impl LogicalAssignmentTransformer {
-    pub fn visit(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !node.subtree_facts().intersects(SubtreeFacts::CONTAINS_LOGICAL_ASSIGNMENTS) {
             return node.clone();
         }
@@ -142,7 +142,7 @@ impl LogicalAssignmentTransformer {
         }
     }
 
-    fn visit_binary_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_binary_expression(tx: &mut Transformer, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_binary_expression"); 
         let (left_node, right_node, operator_kind) = match &node.data {
             NodeData::BinaryExpression(d) => {
                 (d.left.clone(), d.right.clone(), d.operator_token.kind)
@@ -228,11 +228,11 @@ impl LogicalAssignmentTransformer {
     }
 }
 
-pub fn new_logical_assignment_transformer(opts: &TransformOptions) -> Transformer {
+pub fn new_logical_assignment_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("new_logical_assignment_transformer"); 
     Transformer::new(logical_assignment_transformer_visit, Some(opts.context.clone()))
 }
 
-fn logical_assignment_transformer_visit(tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+fn logical_assignment_transformer_visit(tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("logical_assignment_transformer_visit"); 
     Some(LogicalAssignmentTransformer::visit(tx, &node))
 }
 
@@ -240,7 +240,7 @@ fn r37k18_new_assignment_expression(
     factory: &crate::printer::NodeFactory<'_>,
     left: &Arc<Node>,
     right: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("r37k18_new_assignment_expression"); 
     factory.new_binary_expression(
         None,
         left,
@@ -250,7 +250,7 @@ fn r37k18_new_assignment_expression(
     )
 }
 
-fn expression(node: &Arc<Node>) -> &Arc<Node> {
+fn expression(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("expression"); 
     match &node.data {
         NodeData::ElementAccessExpression(d) => &d.expression,
         NodeData::PropertyAccessExpression(d) => &d.expression,
@@ -258,7 +258,7 @@ fn expression(node: &Arc<Node>) -> &Arc<Node> {
     }
 }
 
-fn argument_expression(node: &Arc<Node>) -> &Arc<Node> {
+fn argument_expression(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("argument_expression"); 
     match &node.data {
         NodeData::ElementAccessExpression(d) => &d.argument_expression,
         _ => panic!("argument_expression: not an element access expression"),

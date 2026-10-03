@@ -16,7 +16,7 @@ pub trait NodeR36k34Accessors {
 }
 
 impl NodeR36k34Accessors for Node {
-    fn as_class_declaration(&self) -> &ClassDeclarationData {
+    fn as_class_declaration(&self) -> &ClassDeclarationData { ::tsox_core::fntrace::enter("as_class_declaration"); 
         match &self.data {
             NodeData::ClassDeclaration(d) => d,
             _ => panic!("expected ClassDeclaration, got {:?}", self.kind),
@@ -25,7 +25,7 @@ impl NodeR36k34Accessors for Node {
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_parenthesized_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_parenthesized_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_parenthesized_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ParenthesizedExpression,
             NodeData::ParenthesizedExpression(ndg::ParenthesizedExpressionData {
@@ -39,7 +39,7 @@ impl<'a> NodeFactory<'a> {
         is_type_only: bool,
         property_name: Option<&Arc<Node>>,
         name: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_export_specifier"); 
         Arc::new(Node::new(
             SyntaxKind::ExportSpecifier,
             NodeData::ExportSpecifier(ndg::ExportSpecifierData {
@@ -56,7 +56,7 @@ impl<'a> NodeFactory<'a> {
         is_export_equals: bool,
         type_node: Option<&Arc<Node>>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_export_assignment"); 
         Arc::new(Node::new(
             SyntaxKind::ExportAssignment,
             NodeData::ExportAssignment(ndg::ExportAssignmentData {
@@ -84,7 +84,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_set_accessor_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::SetAccessor,
             NodeData::SetAccessorDeclaration(ndg::SetAccessorDeclarationData {
@@ -106,7 +106,7 @@ impl<'a> NodeFactory<'a> {
         type_parameters: Option<Arc<NodeList>>,
         heritage_clauses: Option<Arc<NodeList>>,
         members: Arc<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ClassExpression,
             NodeData::ClassExpression(ndg::ClassExpressionData {
@@ -124,7 +124,7 @@ impl<'a> NodeFactory<'a> {
         object: &Arc<Node>,
         method_name: &Arc<Node>,
         arguments_list: Vec<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_method_call"); 
         let property_access =
             self.new_property_access_expression(object, None, method_name, NodeFlags::empty());
         self.new_call_expression(

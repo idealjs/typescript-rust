@@ -17,7 +17,7 @@ pub trait Handler {
     fn handle_notification(&self, method: &str, params: &Value) -> Result<(), String>;
 }
 
-pub fn unmarshal_params<T: serde::de::DeserializeOwned>(params: &Value) -> Result<Option<T>, String> {
+pub fn unmarshal_params<T: serde::de::DeserializeOwned>(params: &Value) -> Result<Option<T>, String> { ::tsox_core::fntrace::enter("unmarshal_params"); 
     if params.is_null() {
         return Ok(None);
     }
@@ -31,7 +31,7 @@ pub struct JsonRpcProtocol<RW: Read + Write> {
 }
 
 impl<RW: Read + Write + Clone> JsonRpcProtocol<RW> {
-    pub fn new(rw: RW) -> JsonRpcProtocol<RW> {
+    pub fn new(rw: RW) -> JsonRpcProtocol<RW> { ::tsox_core::fntrace::enter("new"); 
         JsonRpcProtocol {
             reader: Reader::new(rw.clone()),
             writer: Writer::new(rw),
@@ -40,7 +40,7 @@ impl<RW: Read + Write + Clone> JsonRpcProtocol<RW> {
 }
 
 impl<RW: Read + Write> JsonRpcProtocol<RW> {
-    pub fn read_message(&mut self) -> Result<Message, String> {
+    pub fn read_message(&mut self) -> Result<Message, String> { ::tsox_core::fntrace::enter("read_message"); 
         let data = self.reader.read().map_err(|e| e.to_string())?;
         serde_json::from_slice(&data).map_err(|e| e.to_string())
     }
@@ -50,7 +50,7 @@ impl<RW: Read + Write> JsonRpcProtocol<RW> {
         id: &Id,
         method: &str,
         params: &Value,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("write_request"); 
         let msg = Message {
             jsonrpc: Default::default(),
             id: Some(id.clone()),
@@ -62,7 +62,7 @@ impl<RW: Read + Write> JsonRpcProtocol<RW> {
         self.write_message(&msg)
     }
 
-    pub fn write_notification(&mut self, method: &str, params: &Value) -> Result<(), String> {
+    pub fn write_notification(&mut self, method: &str, params: &Value) -> Result<(), String> { ::tsox_core::fntrace::enter("write_notification"); 
         let msg = Message {
             jsonrpc: Default::default(),
             id: None,
@@ -74,7 +74,7 @@ impl<RW: Read + Write> JsonRpcProtocol<RW> {
         self.write_message(&msg)
     }
 
-    pub fn write_response(&mut self, id: &Id, result: &Value) -> Result<(), String> {
+    pub fn write_response(&mut self, id: &Id, result: &Value) -> Result<(), String> { ::tsox_core::fntrace::enter("write_response"); 
         let result = if result.is_null() {
             Value::Null
         } else {
@@ -91,7 +91,7 @@ impl<RW: Read + Write> JsonRpcProtocol<RW> {
         self.write_message(&msg)
     }
 
-    pub fn write_error(&mut self, id: &Id, resp_err: &ResponseError) -> Result<(), String> {
+    pub fn write_error(&mut self, id: &Id, resp_err: &ResponseError) -> Result<(), String> { ::tsox_core::fntrace::enter("write_error"); 
         let msg = Message {
             jsonrpc: Default::default(),
             id: Some(id.clone()),
@@ -103,7 +103,7 @@ impl<RW: Read + Write> JsonRpcProtocol<RW> {
         self.write_message(&msg)
     }
 
-    fn write_message(&mut self, msg: &Message) -> Result<(), String> {
+    fn write_message(&mut self, msg: &Message) -> Result<(), String> { ::tsox_core::fntrace::enter("write_message"); 
         let data = serde_json::to_vec(msg).map_err(|e| e.to_string())?;
         self.writer.write(&data).map_err(|e| e.to_string())
     }
@@ -140,11 +140,11 @@ pub struct TimingCollector {
     head: usize,
 }
 
-pub fn new_timing_collector() -> TimingCollector {
+pub fn new_timing_collector() -> TimingCollector { ::tsox_core::fntrace::enter("new_timing_collector"); 
     TimingCollector::default()
 }
 
-pub fn duration_to_millis(d: Duration) -> f64 {
+pub fn duration_to_millis(d: Duration) -> f64 { ::tsox_core::fntrace::enter("duration_to_millis"); 
     if d.is_zero() || d.as_nanos() == 0 {
         return 0.0;
     }
@@ -152,7 +152,7 @@ pub fn duration_to_millis(d: Duration) -> f64 {
 }
 
 impl TimingCollector {
-    pub fn record(&mut self, method: &str, d: Duration) {
+    pub fn record(&mut self, method: &str, d: Duration) { ::tsox_core::fntrace::enter("record"); 
         let processing_ms = duration_to_millis(d);
 
         self.totals.request_count += 1;
@@ -174,7 +174,7 @@ impl TimingCollector {
         }
     }
 
-    pub fn snapshot(&self) -> ServerTimingInfo {
+    pub fn snapshot(&self) -> ServerTimingInfo { ::tsox_core::fntrace::enter("snapshot"); 
         let n = self.ring.len();
         let recent: Vec<ServerRequestTiming> = (0..n)
             .map(|i| self.ring[(self.head + i) % n.max(1)].clone())
@@ -186,21 +186,21 @@ impl TimingCollector {
         }
     }
 
-    pub fn reset(&mut self) {
+    pub fn reset(&mut self) { ::tsox_core::fntrace::enter("reset"); 
         self.totals = ServerTimingTotals::default();
         self.ring = Vec::new();
         self.head = 0;
     }
 }
 
-pub fn server_timing_snapshot(collector: Option<&TimingCollector>) -> ServerTimingInfo {
+pub fn server_timing_snapshot(collector: Option<&TimingCollector>) -> ServerTimingInfo { ::tsox_core::fntrace::enter("server_timing_snapshot"); 
     match collector {
         None => disabled_server_timing_info(),
         Some(c) => c.snapshot(),
     }
 }
 
-pub fn disabled_server_timing_info() -> ServerTimingInfo {
+pub fn disabled_server_timing_info() -> ServerTimingInfo { ::tsox_core::fntrace::enter("disabled_server_timing_info"); 
     ServerTimingInfo {
         enabled: false,
         totals: ServerTimingTotals::default(),

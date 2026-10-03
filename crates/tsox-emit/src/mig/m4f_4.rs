@@ -21,7 +21,7 @@ use tsox_frontend::ast::ModifierList;
 pub(crate) fn visit_modifiers_list_m4f4(
     visitor: &mut NodeVisitor,
     modifiers: Option<&Arc<ModifierList>>,
-) -> Option<Arc<ModifierList>> {
+) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers_list_m4f4"); 
     let modifiers = modifiers?;
     let visited: Vec<Arc<Node>> = modifiers
         .list
@@ -36,7 +36,7 @@ pub(crate) fn visit_modifiers_list_m4f4(
 }
 
 impl ClassFieldsTransformer<'_> {
-    pub fn visit_class_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_class_element(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_element"); 
         match node.kind {
             SyntaxKind::Constructor => self.set_current_class_element_and_opt(
                 Some(Arc::clone(node)),
@@ -71,7 +71,7 @@ impl ClassFieldsTransformer<'_> {
         }
     }
 
-    pub fn visit_property_name(&mut self, name: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_property_name(&mut self, name: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_name"); 
         if is_computed_property_name(name) {
             return self
                 .visit_computed_property_name(name)
@@ -80,7 +80,7 @@ impl ClassFieldsTransformer<'_> {
         self.visitor().visit_node(name)
     }
 
-    pub fn visit_accessor_field_result(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_accessor_field_result(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_accessor_field_result"); 
         match node.kind {
             SyntaxKind::PropertyDeclaration => self.transform_field_initializer(node),
             SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => self.visit_class_element(node),
@@ -90,18 +90,18 @@ impl ClassFieldsTransformer<'_> {
         }
     }
 
-    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_constructor_declaration"); 
         self.visit_each_child_of_node(node)
     }
 
-    pub fn visit_class_static_block_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_class_static_block_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_static_block_declaration"); 
         if !self.should_transform_private_elements_or_class_static_blocks {
             return self.visitor().visit_each_child(node);
         }
         None
     }
 
-    pub fn visit_computed_property_name(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_computed_property_name(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_computed_property_name"); 
         let saved_inside_computed_property_name = self.inside_computed_property_name;
         self.inside_computed_property_name = true;
         let mut restored = self.lexical_environment.take();
@@ -117,7 +117,7 @@ impl ClassFieldsTransformer<'_> {
         Some(self.factory().update_computed_property_name(node, &injected))
     }
 
-    pub fn inject_pending_expressions(&mut self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn inject_pending_expressions(&mut self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("inject_pending_expressions"); 
         if self.pending_expressions.is_empty() {
             return Arc::clone(expression);
         }
@@ -137,14 +137,14 @@ impl ClassFieldsTransformer<'_> {
         }
     }
 
-    pub fn should_transform_class_element_to_weak_map(&self, node: &Arc<Node>) -> bool {
+    pub fn should_transform_class_element_to_weak_map(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_transform_class_element_to_weak_map"); 
         if self.should_transform_private_elements_or_class_static_blocks {
             return true;
         }
         self.should_always_transform_private_static_elements(node)
     }
 
-    pub fn should_always_transform_private_static_elements(&self, node: &Arc<Node>) -> bool {
+    pub fn should_always_transform_private_static_elements(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_always_transform_private_static_elements"); 
         has_static_modifier(node)
             && self
                 .emit_context
@@ -152,7 +152,7 @@ impl ClassFieldsTransformer<'_> {
                 .contains(EmitFlags::TRANSFORM_PRIVATE_STATIC_ELEMENTS)
     }
 
-    pub fn try_get_class_this(&self) -> Option<Arc<Node>> {
+    pub fn try_get_class_this(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_class_this"); 
         if let Some(class_this) = self.try_get_class_this_no_container() {
             return Some(class_this);
         }
@@ -162,7 +162,7 @@ impl ClassFieldsTransformer<'_> {
         None
     }
 
-    pub fn try_get_class_this_no_container(&self) -> Option<Arc<Node>> {
+    pub fn try_get_class_this_no_container(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_class_this_no_container"); 
         let env = self
             .lexical_environment
             .as_ref()

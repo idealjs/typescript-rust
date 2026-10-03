@@ -32,7 +32,7 @@ pub mod r36k12_defs;
 pub mod r36k12_printer_impl;
 
 impl Printer {
-    pub fn emit_import_equals_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_equals_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_equals_declaration"); 
         let state = self.enter_node(node);
         self.emit_modifier_list(node, node.modifiers(), false);
         let name = node.name().unwrap();
@@ -56,7 +56,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_declaration"); 
         let state = self.enter_node(node);
         self.emit_modifier_list(node, node.modifiers(), false);
         self.emit_token(
@@ -81,7 +81,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_clause(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_clause"); 
         let state = self.enter_node(node);
         if let Some(phase) = phase_modifier(node) {
             self.emit_token(phase, node.pos(), WriteKind::Keyword, node);
@@ -98,7 +98,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_specifier(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_specifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_specifier"); 
         let state = self.enter_node(node);
         if is_type_only(node) {
             self.writer.write_keyword("type");
@@ -114,11 +114,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_specifier_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_specifier_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_specifier_node"); 
         self.emit_import_specifier(node);
     }
 
-    pub fn emit_export_assignment(&mut self, node: &Arc<Node>) {
+    pub fn emit_export_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_export_assignment"); 
         let state = self.enter_node(node);
         let expression = node.expression().unwrap();
         let next_pos = self.emit_token(SyntaxKind::ExportKeyword, node.pos(), WriteKind::Keyword, node);
@@ -143,7 +143,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_export_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_export_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_export_declaration"); 
         let state = self.enter_node(node);
         self.emit_modifier_list(node, node.modifiers(), false);
         let mut pos = self.emit_token(SyntaxKind::ExportKeyword, node.pos(), WriteKind::Keyword, node);
@@ -177,7 +177,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_attributes(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_attributes(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_attributes"); 
         let state = self.enter_node(node);
         self.emit_token(import_attributes_token(node), node.pos(), WriteKind::Keyword, node);
         self.writer.write_space(" ");
@@ -190,7 +190,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_attribute(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_attribute(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_attribute"); 
         let state = self.enter_node(node);
         self.emit_import_attribute_name(node.name().unwrap());
         self.writer.write_punctuation(":");
@@ -204,11 +204,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_import_attribute_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_import_attribute_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_import_attribute_node"); 
         self.emit_import_attribute(node);
     }
 
-    pub fn emit_export_specifier(&mut self, node: &Arc<Node>) {
+    pub fn emit_export_specifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_export_specifier"); 
         let state = self.enter_node(node);
         if is_type_only(node) {
             self.writer.write_keyword("type");
@@ -224,11 +224,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_export_specifier_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_export_specifier_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_export_specifier_node"); 
         self.emit_export_specifier(node);
     }
 
-    pub fn emit_embedded_statement(&mut self, parent_node: &Arc<Node>, node: &Arc<Node>) {
+    pub fn emit_embedded_statement(&mut self, parent_node: &Arc<Node>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_embedded_statement"); 
         if is_block(node)
             || self.should_emit_on_single_line(parent_node)
             || self.options.preserve_source_newlines

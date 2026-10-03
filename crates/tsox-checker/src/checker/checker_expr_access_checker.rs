@@ -4,7 +4,7 @@ use crate::checker::checker_expr_access::*;
 use crate::checker::types_type_id::{TYPE_FLAGS_ANY_OR_UNKNOWN, TYPE_FLAGS_BIG_INT_LIKE};
 
 impl Checker {
-    pub(crate) fn get_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_binary_expression"); 
         use tsox_frontend::ast::SyntaxKind::*;
         if let tsox_frontend::ast::NodeData::BinaryExpression(data) = &node.data {
             match data.operator_token.kind {
@@ -167,7 +167,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_type_of_property_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_property_access(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_property_access"); 
         let (obj_expr, name) = match &node.data {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(data) => {
                 (&data.expression, &data.name)
@@ -323,7 +323,7 @@ impl Checker {
         node: &Arc<Node>,
         prop: Option<&Arc<Symbol>>,
         prop_type: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("flow_type_of_access_expression"); 
         if Self::is_definite_assignment_target(node) {
             return prop_type;
         }
@@ -339,7 +339,7 @@ impl Checker {
         self.get_flow_type_of_reference(node, &prop_type)
     }
 
-    pub(crate) fn is_definite_assignment_target(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_definite_assignment_target(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_definite_assignment_target"); 
         let Some(parent) = &node.parent() else {
             return false;
         };
@@ -364,7 +364,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_assignment_operator(kind: tsox_frontend::ast::SyntaxKind) -> bool {
+    pub(crate) fn is_assignment_operator(kind: tsox_frontend::ast::SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_assignment_operator"); 
         use tsox_frontend::ast::SyntaxKind::*;
         matches!(
             kind,
@@ -387,7 +387,7 @@ impl Checker {
         )
     }
 
-    pub(crate) fn is_block_terminating_statement(stmt: &Arc<Node>) -> bool {
+    pub(crate) fn is_block_terminating_statement(stmt: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_block_terminating_statement"); 
         matches!(
             stmt.kind,
             SyntaxKind::ReturnStatement

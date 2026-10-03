@@ -14,7 +14,7 @@ use crate::ls::types_symbols::{ParameterInformation, SignatureInformation};
 
 type LspPrinter = tsox_frontend::format::mig::m4o_2::Printer;
 
-fn signature_help_printer_options() -> tsox_frontend::format::mig::m4o_2::PrinterOptions {
+fn signature_help_printer_options() -> tsox_frontend::format::mig::m4o_2::PrinterOptions { ::tsox_core::fntrace::enter("signature_help_printer_options"); 
     tsox_frontend::format::mig::m4o_2::PrinterOptions {
         remove_comments: false,
         new_line: tsox_core::core::compiler_options_kinds::NewLineKind::LF,
@@ -32,7 +32,7 @@ fn signature_help_printer_options() -> tsox_frontend::format::mig::m4o_2::Printe
     }
 }
 
-fn new_signature_help_printer() -> LspPrinter {
+fn new_signature_help_printer() -> LspPrinter { ::tsox_core::fntrace::enter("new_signature_help_printer"); 
     tsox_frontend::format::mig::m4o_2::new_printer(
         signature_help_printer_options(),
         tsox_frontend::format::mig::m4o_2::PrintHandlers {
@@ -49,12 +49,12 @@ fn new_signature_help_printer() -> LspPrinter {
     )
 }
 
-fn signature_help_node_builder_flags() -> tsox_checker::checker::symboltracker::NodeBuilderFlags {
+fn signature_help_node_builder_flags() -> tsox_checker::checker::symboltracker::NodeBuilderFlags { ::tsox_core::fntrace::enter("signature_help_node_builder_flags"); 
     use tsox_checker::checker::symboltracker::NodeBuilderFlags as Flags;
     Flags::OmitParameterModifiers | Flags::UseAliasDefinedOutsideCurrentScope
 }
 
-pub fn markup_kind_str(doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind) -> &'static str {
+pub fn markup_kind_str(doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind) -> &'static str { ::tsox_core::fntrace::enter("markup_kind_str"); 
     match doc_format {
         crate::lsp::lsproto_lsp_basic::MarkupKind::Markdown => "markdown",
         _ => "plaintext",
@@ -66,7 +66,7 @@ fn symbol_documentation(
     parameter: &Arc<Symbol>,
     c: &mut Checker,
     doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("symbol_documentation"); 
     let declaration = parameter.value_declaration.as_ref()?;
     let mapper = ls
         .documentation_location_mapper(crate::ls::mig::m5s::SpanFeature::Definition);
@@ -98,7 +98,7 @@ impl crate::ls::language_service::LanguageService {
         c: &mut Checker,
         doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind,
         vs_capability: bool,
-    ) -> Vec<SignatureInformation> {
+    ) -> Vec<SignatureInformation> { ::tsox_core::fntrace::enter("get_signature_help_item"); 
         let infos = if is_type_parameter_list {
             self.item_info_for_type_parameters(
                 candidate,
@@ -179,7 +179,7 @@ impl crate::ls::language_service::LanguageService {
         source_file: &Arc<SourceFile>,
         doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind,
         vs_capability: bool,
-    ) -> Vec<M5wSignatureHelpItemInfo> {
+    ) -> Vec<M5wSignatureHelpItemInfo> { ::tsox_core::fntrace::enter("item_info_for_type_parameters"); 
         let mut p = new_signature_help_printer();
 
         let type_parameters: &[Arc<tsox_checker::checker::Type>] = if let Some(target) =
@@ -297,7 +297,7 @@ impl crate::ls::language_service::LanguageService {
         source_file: &Arc<SourceFile>,
         doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind,
         vs_capability: bool,
-    ) -> Vec<M5wSignatureHelpItemInfo> {
+    ) -> Vec<M5wSignatureHelpItemInfo> { ::tsox_core::fntrace::enter("item_info_for_parameters"); 
         let mut p = new_signature_help_printer();
 
         let type_parameters = &candidate_signature.type_parameters;
@@ -411,7 +411,7 @@ impl crate::ls::language_service::LanguageService {
         label: &str,
         c: &mut Checker,
         doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind,
-    ) -> M5wSignatureHelpParameter {
+    ) -> M5wSignatureHelpParameter { ::tsox_core::fntrace::enter("m5w_create_signature_help_parameter_from_label"); 
         let parameter_info = ParameterInformation {
             label: label.to_string(),
             documentation: symbol_documentation(self, parameter, c, doc_format),
@@ -432,7 +432,7 @@ impl crate::ls::language_service::LanguageService {
         source_file: &Arc<SourceFile>,
         c: &mut Checker,
         doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind,
-    ) -> M5wSignatureHelpParameter {
+    ) -> M5wSignatureHelpParameter { ::tsox_core::fntrace::enter("m5w_create_signature_help_parameter_for_parameter"); 
         let label =
             get_parameter_label_string(parameter, source_file, enclosing_declaration, p, c);
         self.m5w_create_signature_help_parameter_from_label(parameter, &label, c, doc_format)
@@ -445,7 +445,7 @@ pub fn create_signature_help_parameter_for_type_parameter(
     enclosing_declaration: &Arc<Node>,
     c: &mut Checker,
     p: &mut LspPrinter,
-) -> Option<M5wSignatureHelpParameter> {
+) -> Option<M5wSignatureHelpParameter> { ::tsox_core::fntrace::enter("create_signature_help_parameter_for_type_parameter"); 
     let type_parameter_node = {
         let mut node_builder = tsox_checker::checker::mig::m2f::new_node_builder_ex(
             c,
@@ -478,7 +478,7 @@ pub fn get_parameter_label_string(
     enclosing_declaration: &Arc<Node>,
     p: &mut LspPrinter,
     c: &mut Checker,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_parameter_label_string"); 
     let param_node = {
         let mut node_builder = tsox_checker::checker::mig::m2f::new_node_builder_ex(
             c,
@@ -505,7 +505,7 @@ pub fn return_type_to_display_parts(
     enclosing_declaration: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     vs_capability: bool,
-) -> crate::ls::display_parts_writer::DisplayPartsWriter {
+) -> crate::ls::display_parts_writer::DisplayPartsWriter { ::tsox_core::fntrace::enter("return_type_to_display_parts"); 
     let mut dpw = crate::ls::display_parts_writer::new_display_parts_writer(vs_capability);
     dpw.write_punctuation(": ");
 
@@ -526,7 +526,7 @@ pub fn get_type_help_item(
     enclosing_declaration: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> SignatureInformation {
+) -> SignatureInformation { ::tsox_core::fntrace::enter("get_type_help_item"); 
     let mut p = new_signature_help_printer();
 
     let parameters: Vec<M5wSignatureHelpParameter> = type_parameters

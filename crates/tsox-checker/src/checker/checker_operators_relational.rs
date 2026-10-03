@@ -13,7 +13,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         data: &tsox_frontend::ast::node_data_generated::BinaryExpressionData,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_binary_relational_operator_error"); 
         use SyntaxKind::*;
         let op = data.operator_token.kind;
         if !matches!(
@@ -51,7 +51,7 @@ impl Checker {
         }
     }
 
-    fn assignable_to_number_or_bigint(&mut self, t: &Arc<Type>) -> bool {
+    fn assignable_to_number_or_bigint(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("assignable_to_number_or_bigint"); 
         let n = self.number_type();
         if self.is_type_assignable_to(t, &n) {
             return true;
@@ -67,7 +67,7 @@ impl Checker {
         lt: &Arc<Type>,
         rt: &Arc<Type>,
         op: SyntaxKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_for_disallowed_es_symbol_operand"); 
         let offending = if self.maybe_essymbol_considering_constraint(lt) {
             Some(left)
         } else if self.maybe_essymbol_considering_constraint(rt) {
@@ -90,11 +90,11 @@ impl Checker {
         }
     }
 
-    pub(crate) fn maybe_essymbol_considering_constraint(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn maybe_essymbol_considering_constraint(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("maybe_essymbol_considering_constraint"); 
         self.maybe_essymbol_considering_constraint_at(t, 10)
     }
 
-    fn maybe_essymbol_considering_constraint_at(&self, t: &Arc<Type>, depth: u32) -> bool {
+    fn maybe_essymbol_considering_constraint_at(&self, t: &Arc<Type>, depth: u32) -> bool { ::tsox_core::fntrace::enter("maybe_essymbol_considering_constraint_at"); 
         if depth == 0 {
             return false;
         }
@@ -117,7 +117,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn get_base_type_of_literal_type_for_comparison(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_base_type_of_literal_type_for_comparison(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_base_type_of_literal_type_for_comparison"); 
         if t.flags.intersects(
             TypeFlags::StringLiteral | TypeFlags::TemplateLiteral | TypeFlags::StringMapping,
         ) {
@@ -145,7 +145,7 @@ impl Checker {
         t.clone()
     }
 
-    pub(crate) fn check_non_null_type(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn check_non_null_type(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_non_null_type"); 
         let nullable = TypeFlags::Null | TypeFlags::Undefined;
         if self.strict_null_checks && t.flags.contains(TypeFlags::Unknown) {
             let text = if is_entity_name_expression(node) {
@@ -207,7 +207,7 @@ impl Checker {
 
 impl Checker {
     // 一元 ++/--（Go checkPrefixUnaryExpression/checkPostfixUnaryExpression 的算术分支）
-    pub(crate) fn check_unary_arithmetic_operand(&mut self, operand: &Arc<Node>) {
+    pub(crate) fn check_unary_arithmetic_operand(&mut self, operand: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unary_arithmetic_operand"); 
         let unwrapped = Self::skip_reference_wrappers(operand);
         if self.in_strict_context()
             && unwrapped.kind == SyntaxKind::Identifier
@@ -321,7 +321,7 @@ impl Checker {
         self.check_increment_reference_expression(operand);
     }
 
-    fn skip_reference_wrappers(node: &Arc<Node>) -> Arc<Node> {
+    fn skip_reference_wrappers(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_reference_wrappers"); 
         let mut n = Arc::clone(node);
         loop {
             let next = match &n.data {
@@ -342,7 +342,7 @@ impl Checker {
     fn enum_readonly_access_loc(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<(tsox_core::core::text::TextRange, String, String)> {
+    ) -> Option<(tsox_core::core::text::TextRange, String, String)> { ::tsox_core::fntrace::enter("enum_readonly_access_loc"); 
         match &node.data {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
                 let is_enum = pa.expression.kind == SyntaxKind::Identifier
@@ -383,7 +383,7 @@ impl Checker {
         }
     }
 
-    fn check_increment_reference_expression(&mut self, operand: &Arc<Node>) {
+    fn check_increment_reference_expression(&mut self, operand: &Arc<Node>) { ::tsox_core::fntrace::enter("check_increment_reference_expression"); 
         let node = Self::skip_reference_wrappers(operand);
         let is_access = matches!(
             node.kind,

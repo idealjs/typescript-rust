@@ -9,7 +9,7 @@ use crate::format::rule_context_2::*;
 
 use super::rule_context::FormattingContext;
 
-fn all_tokens() -> Vec<SyntaxKind> {
+fn all_tokens() -> Vec<SyntaxKind> { ::tsox_core::fntrace::enter("all_tokens"); 
     // Go getAllRules 遍历 KindFirstToken(=KindUnknown)..=KindLastToken
     // (=KindDeferKeyword)，包含 trivia kinds，仅排除 KindEndOfFile。
     // 本仓 SyntaxKind 与 Go Kind 同序（#[repr(i16)]）。
@@ -23,16 +23,16 @@ fn all_tokens() -> Vec<SyntaxKind> {
 }
 
 
-fn any_token() -> TokenRange {
+fn any_token() -> TokenRange { ::tsox_core::fntrace::enter("any_token"); 
     super::rule::non_specific_range(all_tokens())
 }
 
-fn any_token_except(tokens: &[SyntaxKind]) -> TokenRange {
+fn any_token_except(tokens: &[SyntaxKind]) -> TokenRange { ::tsox_core::fntrace::enter("any_token_except"); 
     let excluded = tokens.to_vec();
     super::rule::non_specific_range(all_tokens().into_iter().filter(|t| !excluded.contains(t)).collect())
 }
 
-fn keywords() -> TokenRange {
+fn keywords() -> TokenRange { ::tsox_core::fntrace::enter("keywords"); 
     // Go keywords = tokenRangeFromRange(FirstKeyword..LastKeyword)：specific
     let kw: Vec<SyntaxKind> = all_tokens()
         .into_iter()
@@ -41,7 +41,7 @@ fn keywords() -> TokenRange {
     kinds_range(&kw)
 }
 
-fn binary_operators() -> TokenRange {
+fn binary_operators() -> TokenRange { ::tsox_core::fntrace::enter("binary_operators"); 
     // Go tokenRangeFromRange(KindFirstBinaryOperator=LessThanToken,
     // KindLastBinaryOperator=CaretEqualsToken)：完整 iota 区间，
     // 含 QuestionToken/ColonToken/AtToken/BacktickToken 等
@@ -54,7 +54,7 @@ fn binary_operators() -> TokenRange {
     )
 }
 
-fn binary_keyword_operators() -> TokenRange {
+fn binary_keyword_operators() -> TokenRange { ::tsox_core::fntrace::enter("binary_keyword_operators"); 
     kinds_range(&[
         SyntaxKind::InKeyword,
         SyntaxKind::InstanceOfKeyword,
@@ -65,7 +65,7 @@ fn binary_keyword_operators() -> TokenRange {
     ])
 }
 
-fn unary_prefix_operators() -> TokenRange {
+fn unary_prefix_operators() -> TokenRange { ::tsox_core::fntrace::enter("unary_prefix_operators"); 
     kinds_range(&[
         SyntaxKind::PlusPlusToken,
         SyntaxKind::MinusMinusToken,
@@ -74,7 +74,7 @@ fn unary_prefix_operators() -> TokenRange {
     ])
 }
 
-fn unary_prefix_expressions() -> TokenRange {
+fn unary_prefix_expressions() -> TokenRange { ::tsox_core::fntrace::enter("unary_prefix_expressions"); 
     kinds_range(&[
         SyntaxKind::NumericLiteral,
         SyntaxKind::BigIntLiteral,
@@ -87,7 +87,7 @@ fn unary_prefix_expressions() -> TokenRange {
     ])
 }
 
-fn unary_preincrement_expressions() -> TokenRange {
+fn unary_preincrement_expressions() -> TokenRange { ::tsox_core::fntrace::enter("unary_preincrement_expressions"); 
     kinds_range(&[
         SyntaxKind::Identifier,
         SyntaxKind::OpenParenToken,
@@ -96,7 +96,7 @@ fn unary_preincrement_expressions() -> TokenRange {
     ])
 }
 
-fn unary_postincrement_expressions() -> TokenRange {
+fn unary_postincrement_expressions() -> TokenRange { ::tsox_core::fntrace::enter("unary_postincrement_expressions"); 
     kinds_range(&[
         SyntaxKind::Identifier,
         SyntaxKind::CloseParenToken,
@@ -105,14 +105,14 @@ fn unary_postincrement_expressions() -> TokenRange {
     ])
 }
 
-fn comments() -> TokenRange {
+fn comments() -> TokenRange { ::tsox_core::fntrace::enter("comments"); 
     kinds_range(&[
         SyntaxKind::SingleLineCommentTrivia,
         SyntaxKind::MultiLineCommentTrivia,
     ])
 }
 
-fn type_names() -> TokenRange {
+fn type_names() -> TokenRange { ::tsox_core::fntrace::enter("type_names"); 
     let mut tokens = vec![SyntaxKind::Identifier];
     tokens.extend(
         kinds_range(&[
@@ -142,23 +142,23 @@ fn type_names() -> TokenRange {
     kinds_range(&tokens)
 }
 
-fn any_token_including_multiline_comments() -> TokenRange {
+fn any_token_including_multiline_comments() -> TokenRange { ::tsox_core::fntrace::enter("any_token_including_multiline_comments"); 
     let mut tokens = all_tokens();
     tokens.push(SyntaxKind::MultiLineCommentTrivia);
     kinds_range(&tokens)
 }
 
-fn any_token_including_eof() -> TokenRange {
+fn any_token_including_eof() -> TokenRange { ::tsox_core::fntrace::enter("any_token_including_eof"); 
     let mut tokens = all_tokens();
     tokens.push(SyntaxKind::EndOfFile);
     kinds_range(&tokens)
 }
 
-fn function_open_brace_left() -> TokenRange {
+fn function_open_brace_left() -> TokenRange { ::tsox_core::fntrace::enter("function_open_brace_left"); 
     any_token_including_multiline_comments()
 }
 
-fn type_script_open_brace_left() -> TokenRange {
+fn type_script_open_brace_left() -> TokenRange { ::tsox_core::fntrace::enter("type_script_open_brace_left"); 
     kinds_range(&[
         SyntaxKind::Identifier,
         SyntaxKind::GreaterThanToken,
@@ -169,7 +169,7 @@ fn type_script_open_brace_left() -> TokenRange {
     ])
 }
 
-fn control_open_brace_left() -> TokenRange {
+fn control_open_brace_left() -> TokenRange { ::tsox_core::fntrace::enter("control_open_brace_left"); 
     kinds_range(&[
         SyntaxKind::CloseParenToken,
         SyntaxKind::MultiLineCommentTrivia,
@@ -181,7 +181,7 @@ fn control_open_brace_left() -> TokenRange {
     ])
 }
 
-pub(crate) fn get_all_rules() -> Vec<RuleSpec> {
+pub(crate) fn get_all_rules() -> Vec<RuleSpec> { ::tsox_core::fntrace::enter("get_all_rules"); 
     
     let mut rules: Vec<RuleSpec> = Vec::new();
 
@@ -637,10 +637,10 @@ pub(crate) fn get_all_rules() -> Vec<RuleSpec> {
     rules
 }
 
-fn is_insert_space_before_type_annotation_enabled(context: &mut crate::format::rule_context::FormattingContext) -> bool {
+fn is_insert_space_before_type_annotation_enabled(context: &mut crate::format::rule_context::FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_before_type_annotation_enabled"); 
     context.options.insert_space_before_type_annotation == crate::format::Tristate::True
 }
 
-fn is_insert_space_before_type_annotation_disabled(context: &mut crate::format::rule_context::FormattingContext) -> bool {
+fn is_insert_space_before_type_annotation_disabled(context: &mut crate::format::rule_context::FormattingContext) -> bool { ::tsox_core::fntrace::enter("is_insert_space_before_type_annotation_disabled"); 
     context.options.insert_space_before_type_annotation != crate::format::Tristate::True
 }

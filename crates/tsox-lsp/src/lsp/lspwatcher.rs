@@ -34,7 +34,7 @@ impl Watcher {
     pub fn new(
         fs: Arc<dyn FS>,
         on_changes: impl Fn(&[lsproto::FileEvent]) + Send + Sync + 'static,
-    ) -> Arc<Self> {
+    ) -> Arc<Self> { ::tsox_core::fntrace::enter("new"); 
         Arc::new(Watcher {
             fs,
             on_changes: Box::new(on_changes),
@@ -50,7 +50,7 @@ impl Watcher {
         &self,
         id: &str,
         file_system_watchers: &[lsproto::FileSystemWatcher],
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("watch_files"); 
         let mut inner = self.inner.lock().unwrap();
         if inner.closed {
             return Err("lspwatcher: closed".to_string());
@@ -78,7 +78,7 @@ impl Watcher {
         Ok(())
     }
 
-    pub fn unwatch_files(&self, id: &str) -> Result<(), String> {
+    pub fn unwatch_files(&self, id: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("unwatch_files"); 
         let mut inner = self.inner.lock().unwrap();
         match inner.watches.remove(id) {
             None => Err(format!("lspwatcher: no watcher with id {:?}", id)),
@@ -91,7 +91,7 @@ impl Watcher {
         }
     }
 
-    pub fn close(&self) {
+    pub fn close(&self) { ::tsox_core::fntrace::enter("close"); 
         let mut inner = self.inner.lock().unwrap();
         if inner.closed {
             return;
@@ -107,7 +107,7 @@ impl Watcher {
         }
     }
 
-    fn forward_events(&self, kind: lsproto::WatchKind, events: &[notify::Event]) {
+    fn forward_events(&self, kind: lsproto::WatchKind, events: &[notify::Event]) { ::tsox_core::fntrace::enter("forward_events"); 
         let mut inner = self.inner.lock().unwrap();
         if inner.closed {
             return;
@@ -150,7 +150,7 @@ impl Watcher {
     }
 }
 
-fn watch_root(file_system_watcher: &lsproto::FileSystemWatcher) -> Option<String> {
+fn watch_root(file_system_watcher: &lsproto::FileSystemWatcher) -> Option<String> { ::tsox_core::fntrace::enter("watch_root"); 
     if let Some(pattern) = &file_system_watcher.glob_pattern.pattern {
         return Some(root_from_glob(pattern));
     }
@@ -164,7 +164,7 @@ fn watch_root(file_system_watcher: &lsproto::FileSystemWatcher) -> Option<String
     None
 }
 
-fn root_from_glob(pattern: &str) -> String {
+fn root_from_glob(pattern: &str) -> String { ::tsox_core::fntrace::enter("root_from_glob"); 
     let pattern = tsox_core::tspath::normalize_slashes(pattern);
     let meta_index = pattern
         .char_indices()
@@ -187,7 +187,7 @@ fn root_from_glob(pattern: &str) -> String {
     }
 }
 
-fn watch_pattern_string(file_system_watcher: &lsproto::FileSystemWatcher) -> String {
+fn watch_pattern_string(file_system_watcher: &lsproto::FileSystemWatcher) -> String { ::tsox_core::fntrace::enter("watch_pattern_string"); 
     if let Some(pattern) = &file_system_watcher.glob_pattern.pattern {
         return pattern.clone();
     }
@@ -203,11 +203,11 @@ fn watch_pattern_string(file_system_watcher: &lsproto::FileSystemWatcher) -> Str
     String::new()
 }
 
-fn is_recursive_glob(file_system_watcher: &lsproto::FileSystemWatcher) -> bool {
+fn is_recursive_glob(file_system_watcher: &lsproto::FileSystemWatcher) -> bool { ::tsox_core::fntrace::enter("is_recursive_glob"); 
     watch_pattern_string(file_system_watcher).contains("**")
 }
 
-fn effective_kind(file_system_watcher: &lsproto::FileSystemWatcher) -> lsproto::WatchKind {
+fn effective_kind(file_system_watcher: &lsproto::FileSystemWatcher) -> lsproto::WatchKind { ::tsox_core::fntrace::enter("effective_kind"); 
     file_system_watcher.kind.unwrap_or(
         lsproto::WATCH_KIND_CREATE | lsproto::WATCH_KIND_CHANGE | lsproto::WATCH_KIND_DELETE,
     )

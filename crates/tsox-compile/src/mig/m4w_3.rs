@@ -17,7 +17,7 @@ impl Program {
         file: &Arc<SourceFile>,
         module_reference: &str,
         mode: tsox_core::core::compiler_options_kinds::ResolutionMode,
-    ) -> Option<tsox_tsoptions::module::ResolvedModule> {
+    ) -> Option<tsox_tsoptions::module::ResolvedModule> { ::tsox_core::fntrace::enter("get_resolved_module"); 
         if let Some(resolutions) = self.resolved_modules.get(m3b_2::path(file).as_str()) {
             let key = ModeAwareCacheKey {
                 name: module_reference.to_string(),
@@ -34,7 +34,7 @@ impl Program {
         &self,
         file: &Arc<SourceFile>,
         module_specifier: &Arc<Node>,
-    ) -> Option<tsox_tsoptions::module::ResolvedModule> {
+    ) -> Option<tsox_tsoptions::module::ResolvedModule> { ::tsox_core::fntrace::enter("get_resolved_module_from_module_specifier"); 
         if !tsox_frontend::ast::is_string_literal_like(module_specifier) {
             panic!("moduleSpecifier must be a StringLiteralLike");
         }
@@ -47,7 +47,7 @@ impl Program {
         source_file: Option<&Arc<SourceFile>>,
         concurrent: bool,
         collect: &mut dyn FnMut(&Arc<SourceFile>) -> Vec<Arc<Diagnostic>>,
-    ) -> Vec<Arc<Diagnostic>> {
+    ) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("collect_diagnostics"); 
         let result: Vec<Arc<Diagnostic>> = if let Some(source_file) = source_file {
             collect(source_file)
         } else {
@@ -62,7 +62,7 @@ impl Program {
         source_files: &[Arc<SourceFile>],
         _concurrent: bool,
         collect: &mut dyn FnMut(&Arc<SourceFile>) -> Vec<Arc<Diagnostic>>,
-    ) -> Vec<Vec<Arc<Diagnostic>>> {
+    ) -> Vec<Vec<Arc<Diagnostic>>> { ::tsox_core::fntrace::enter("collect_diagnostics_from_files"); 
         source_files
             .iter()
             .map(|file| collect(file))
@@ -73,7 +73,7 @@ impl Program {
         &self,
         source_file: Option<&Arc<SourceFile>>,
         collect: &mut (dyn FnMut(&tsox_checker::checker::Checker, &Arc<SourceFile>) -> Vec<Arc<Diagnostic>> + Send),
-    ) -> Vec<Arc<Diagnostic>> {
+    ) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("collect_checker_diagnostics"); 
         if let Some(source_file) = source_file {
             if self.skip_type_checking(source_file, false) {
                 return Vec::new();
@@ -91,7 +91,7 @@ impl Program {
         &self,
         source_files: &[Arc<SourceFile>],
         collect: &mut (dyn FnMut(&tsox_checker::checker::Checker, &Arc<SourceFile>) -> Vec<Arc<Diagnostic>> + Send),
-    ) -> Vec<Vec<Arc<Diagnostic>>> {
+    ) -> Vec<Vec<Arc<Diagnostic>>> { ::tsox_core::fntrace::enter("collect_checker_diagnostics_from_files"); 
         let mut diagnostics: Vec<Vec<Arc<Diagnostic>>> = vec![Vec::new(); source_files.len()];
         if let Some(compiler_checker_pool) = self.compiler_checker_pool.get() {
             let diagnostics = Mutex::new(diagnostics);
@@ -125,7 +125,7 @@ impl Program {
     pub fn get_syntactic_diagnostics(
         &self,
         source_file: Option<&Arc<SourceFile>>,
-    ) -> Vec<Arc<Diagnostic>> {
+    ) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_syntactic_diagnostics"); 
         self.collect_diagnostics(source_file, false, &mut |file: &Arc<SourceFile>| {
             let mut diags: Vec<Arc<Diagnostic>> = m3b_2::diagnostics(file)
                 .iter()
@@ -141,7 +141,7 @@ impl Program {
         })
     }
 
-    pub fn bind_source_files(&self) {
+    pub fn bind_source_files(&self) { ::tsox_core::fntrace::enter("bind_source_files"); 
         for file in &self.source_files {
             tsox_checker::binder::bind_source_file(file);
         }
@@ -150,7 +150,7 @@ impl Program {
     pub fn get_bind_diagnostics(
         &self,
         source_file: Option<&Arc<SourceFile>>,
-    ) -> Vec<Arc<Diagnostic>> {
+    ) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_bind_diagnostics"); 
         if let Some(source_file) = source_file {
             tsox_checker::binder::bind_source_file(source_file);
         } else {
@@ -164,7 +164,7 @@ impl Program {
     pub fn get_semantic_diagnostics_without_no_emit_filtering(
         &self,
         source_files: &[Arc<SourceFile>],
-    ) -> std::collections::HashMap<String, Vec<Arc<Diagnostic>>> {
+    ) -> std::collections::HashMap<String, Vec<Arc<Diagnostic>>> { ::tsox_core::fntrace::enter("get_semantic_diagnostics_without_no_emit_filtering"); 
         let all_diags = self.collect_checker_diagnostics_from_files(
             source_files,
             &mut |c, file| self.get_bind_and_check_diagnostics_with_checker(c, file),
@@ -179,14 +179,14 @@ impl Program {
     pub fn get_suggestion_diagnostics(
         &self,
         source_file: Option<&Arc<SourceFile>>,
-    ) -> Vec<Arc<Diagnostic>> {
+    ) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_suggestion_diagnostics"); 
         self.collect_checker_diagnostics(
             source_file,
             &mut |c, file| self.get_suggestion_diagnostics_with_checker(c, file),
         )
     }
 
-    pub fn get_program_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+    pub fn get_program_diagnostics(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_program_diagnostics"); 
         let mut all: Vec<Arc<Diagnostic>> = self.program_diagnostics.clone();
         all.extend(self.content_mapper_diagnostics.iter().cloned());
         all.extend(self.content_mapper_option_diagnostics.iter().cloned());
@@ -202,7 +202,7 @@ impl Program {
         sort_and_deduplicate_diagnostics(all)
     }
 
-    pub fn collect_content_mapper_option_diagnostics(&mut self) {
+    pub fn collect_content_mapper_option_diagnostics(&mut self) { ::tsox_core::fntrace::enter("collect_content_mapper_option_diagnostics"); 
         let project = self.content_mapper_project();
         let Some(project) = project else {
             return;
@@ -256,7 +256,7 @@ impl Program {
     pub fn get_include_processor_diagnostics(
         &self,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<Arc<Diagnostic>> {
+    ) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_include_processor_diagnostics"); 
         if self.skip_type_checking(source_file, false) {
             return Vec::new();
         }
@@ -280,7 +280,7 @@ impl Program {
         filtered
     }
 
-    pub fn skip_type_checking(&self, source_file: &Arc<SourceFile>, ignore_no_check: bool) -> bool {
+    pub fn skip_type_checking(&self, source_file: &Arc<SourceFile>, ignore_no_check: bool) -> bool { ::tsox_core::fntrace::enter("skip_type_checking"); 
         (!ignore_no_check && self.options().no_check.is_true())
             || self.options().skip_lib_check.is_true() && source_file.is_declaration_file
             || self.options().skip_default_lib_check.is_true()
@@ -293,7 +293,7 @@ impl Program {
 pub fn get_additional_js_syntactic_diagnostics(
     file: &Arc<SourceFile>,
     options: &tsox_core::core::compiler_options::CompilerOptions,
-) -> Vec<Arc<Diagnostic>> {
+) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_additional_js_syntactic_diagnostics"); 
     if options.experimental_decorators.is_true() {
         return Vec::new();
     }
@@ -303,7 +303,7 @@ pub fn get_additional_js_syntactic_diagnostics(
         node: &tsox_frontend::ast::Node,
         file: &Arc<SourceFile>,
         diags: &mut Vec<Arc<Diagnostic>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("walk"); 
         if node.subtree_facts()
             & tsox_frontend::ast::subtree_facts::SubtreeFacts::CONTAINS_DECORATORS
             == tsox_frontend::ast::subtree_facts::SubtreeFacts::empty()
@@ -341,6 +341,6 @@ pub fn get_additional_js_syntactic_diagnostics(
     diags
 }
 
-pub fn filter_and_sort_diagnostics(diags: Vec<Arc<Diagnostic>>) -> Vec<Arc<Diagnostic>> {
+pub fn filter_and_sort_diagnostics(diags: Vec<Arc<Diagnostic>>) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("filter_and_sort_diagnostics"); 
     sort_and_deduplicate_diagnostics(diags)
 }

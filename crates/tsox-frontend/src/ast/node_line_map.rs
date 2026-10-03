@@ -3,11 +3,11 @@ pub struct LineMap {
     pub line_starts: Vec<u32>,
 }
 
-fn is_line_break(ch: char) -> bool {
+fn is_line_break(ch: char) -> bool { ::tsox_core::fntrace::enter("is_line_break"); 
     matches!(ch, '\n' | '\r' | '\u{2028}' | '\u{2029}')
 }
 
-pub fn utf16_len(s: &str) -> usize {
+pub fn utf16_len(s: &str) -> usize { ::tsox_core::fntrace::enter("utf16_len"); 
     let mut n = 0usize;
     for c in s.chars() {
         n += c.len_utf16();
@@ -16,7 +16,7 @@ pub fn utf16_len(s: &str) -> usize {
 }
 
 impl LineMap {
-    pub fn from_text(text: &str) -> Self {
+    pub fn from_text(text: &str) -> Self { ::tsox_core::fntrace::enter("from_text"); 
         let mut line_starts = Vec::with_capacity(text.matches('\n').count() + 1);
         line_starts.push(0u32);
 
@@ -53,19 +53,19 @@ impl LineMap {
         Self { line_starts }
     }
 
-    pub fn line_at(&self, offset: usize) -> usize {
+    pub fn line_at(&self, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_at"); 
         match self.line_starts.binary_search(&(offset as u32)) {
             Ok(i) => i,
             Err(i) => i.saturating_sub(1),
         }
     }
 
-    pub fn line_start(&self, offset: usize) -> usize {
+    pub fn line_start(&self, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_start"); 
         let line = self.line_at(offset);
         self.line_starts[line] as usize
     }
 
-    pub fn utf16_column_at(&self, text: &str, offset: usize) -> usize {
+    pub fn utf16_column_at(&self, text: &str, offset: usize) -> usize { ::tsox_core::fntrace::enter("utf16_column_at"); 
         let line_start = self.line_start(offset);
         utf16_len(&text[line_start..offset])
     }

@@ -16,7 +16,7 @@ pub(crate) fn check_files(
     files: &[(&str, &str)],
     root: &str,
     configure: impl FnOnce(&mut CompilerOptions),
-) -> Vec<i32> {
+) -> Vec<i32> { ::tsox_core::fntrace::enter("check_files"); 
     let inner = Arc::new(InMemoryFS::new());
     inner.insert_dir("/proj");
     for (name, content) in files {
@@ -73,7 +73,7 @@ pub(crate) fn check_files(
 }
 
 #[test]
-fn import_meta_reports_1470_only_in_cjs_files() {
+fn import_meta_reports_1470_only_in_cjs_files() { ::tsox_core::fntrace::enter("import_meta_reports_1470_only_in_cjs_files"); 
     let files = [
         (
             "/proj/package.json",
@@ -102,7 +102,7 @@ fn import_meta_reports_1470_only_in_cjs_files() {
 }
 
 #[test]
-fn declare_global_augmentation_from_types_reference_merges() {
+fn declare_global_augmentation_from_types_reference_merges() { ::tsox_core::fntrace::enter("declare_global_augmentation_from_types_reference_merges"); 
     let files = [
         (
             "/node_modules/pkg/package.json",
@@ -178,7 +178,7 @@ fn declare_global_augmentation_from_types_reference_merges() {
 }
 
 #[test]
-fn import_helpers_missing_helper_name_reports_2343() {
+fn import_helpers_missing_helper_name_reports_2343() { ::tsox_core::fntrace::enter("import_helpers_missing_helper_name_reports_2343"); 
     let files = [
         (
             "/types.d.ts",
@@ -266,7 +266,7 @@ fn import_helpers_missing_helper_name_reports_2343() {
 }
 
 #[test]
-fn module_member_check_2305_and_2459() {
+fn module_member_check_2305_and_2459() { ::tsox_core::fntrace::enter("module_member_check_2305_and_2459"); 
     let files = [
         (
             "/mod.ts",
@@ -292,7 +292,7 @@ fn module_member_check_2305_and_2459() {
 }
 
 #[test]
-fn shorthand_ambient_module_members_exempt_from_2305() {
+fn shorthand_ambient_module_members_exempt_from_2305() { ::tsox_core::fntrace::enter("shorthand_ambient_module_members_exempt_from_2305"); 
     let files = [
         (
             "/types.d.ts",
@@ -315,7 +315,7 @@ fn shorthand_ambient_module_members_exempt_from_2305() {
 }
 
 #[test]
-fn module_member_check_default_export_forms() {
+fn module_member_check_default_export_forms() { ::tsox_core::fntrace::enter("module_member_check_default_export_forms"); 
     let files = [
         ("/a1.ts", "export default class A {}\n"),
         ("/a2.ts", "export default class {}\n"),
@@ -339,7 +339,7 @@ fn module_member_check_default_export_forms() {
 }
 
 #[test]
-fn module_member_check_export_clauses() {
+fn module_member_check_export_clauses() { ::tsox_core::fntrace::enter("module_member_check_export_clauses"); 
     let files = [
         ("/lib.ts", "export const X = 1;\n"),
         ("/local.ts", "const Y = 2;\nexport { Y };\n"),
@@ -363,7 +363,7 @@ fn module_member_check_export_clauses() {
 }
 
 #[test]
-fn module_member_check_star_chains() {
+fn module_member_check_star_chains() { ::tsox_core::fntrace::enter("module_member_check_star_chains"); 
     let files = [
         (
             "/leaf.ts",
@@ -402,7 +402,7 @@ fn module_member_check_star_chains() {
 }
 
 #[test]
-fn module_member_check_ambient_implicit_exports() {
+fn module_member_check_ambient_implicit_exports() { ::tsox_core::fntrace::enter("module_member_check_ambient_implicit_exports"); 
     let files = [
         (
             "/types.d.ts",
@@ -426,7 +426,7 @@ fn module_member_check_ambient_implicit_exports() {
 }
 
 #[test]
-fn module_member_check_export_equals_targets() {
+fn module_member_check_export_equals_targets() { ::tsox_core::fntrace::enter("module_member_check_export_equals_targets"); 
     let files = [
         (
             "/thing.d.ts",
@@ -455,7 +455,7 @@ fn module_member_check_export_equals_targets() {
 }
 
 #[test]
-fn module_member_check_synthetic_default() {
+fn module_member_check_synthetic_default() { ::tsox_core::fntrace::enter("module_member_check_synthetic_default"); 
     let files = [
         (
             "/nodefault.d.ts",
@@ -478,7 +478,7 @@ fn module_member_check_synthetic_default() {
 }
 
 #[test]
-fn module_member_check_non_type_only_ignores_resolution_mode() {
+fn module_member_check_non_type_only_ignores_resolution_mode() { ::tsox_core::fntrace::enter("module_member_check_non_type_only_ignores_resolution_mode"); 
     let files = [
         (
             "/node_modules/pkg/package.json",
@@ -513,7 +513,7 @@ fn module_member_check_non_type_only_ignores_resolution_mode() {
 }
 
 #[test]
-fn types_option_symbols_resolve_before_declaring_file_checked() {
+fn types_option_symbols_resolve_before_declaring_file_checked() { ::tsox_core::fntrace::enter("types_option_symbols_resolve_before_declaring_file_checked"); 
     let files = [
         (
             "/types/jquery/index.d.ts",
@@ -534,7 +534,7 @@ fn types_option_symbols_resolve_before_declaring_file_checked() {
 }
 
 #[test]
-fn jsx_runtime_import_source_unresolvable_reports_2875() {
+fn jsx_runtime_import_source_unresolvable_reports_2875() { ::tsox_core::fntrace::enter("jsx_runtime_import_source_unresolvable_reports_2875"); 
     let files = [
         (
             "/lib.d.ts",
@@ -564,7 +564,7 @@ fn jsx_runtime_import_source_unresolvable_reports_2875() {
 }
 
 #[test]
-fn namespace_import_alias_qualified_type_access() {
+fn namespace_import_alias_qualified_type_access() { ::tsox_core::fntrace::enter("namespace_import_alias_qualified_type_access"); 
     let files = [
         (
             "/amb.d.ts",
@@ -586,7 +586,7 @@ fn namespace_import_alias_qualified_type_access() {
 }
 
 #[test]
-fn generic_callback_reference_infers_no_2345() {
+fn generic_callback_reference_infers_no_2345() { ::tsox_core::fntrace::enter("generic_callback_reference_infers_no_2345"); 
     let codes = check_files(
         &[(
             "/index.ts",
@@ -605,7 +605,7 @@ fn generic_callback_reference_infers_no_2345() {
 }
 
 #[test]
-fn explicit_node10_resolution_ignores_exports() {
+fn explicit_node10_resolution_ignores_exports() { ::tsox_core::fntrace::enter("explicit_node10_resolution_ignores_exports"); 
     let files = [
         (
             "/node_modules/pkg/package.json",
@@ -625,7 +625,7 @@ fn explicit_node10_resolution_ignores_exports() {
 }
 
 #[test]
-fn dom_two_level_heritage_assignable_no_phantom_2739() {
+fn dom_two_level_heritage_assignable_no_phantom_2739() { ::tsox_core::fntrace::enter("dom_two_level_heritage_assignable_no_phantom_2739"); 
     let codes = check_files(
         &[(
             "/index.ts",
@@ -644,7 +644,7 @@ fn dom_two_level_heritage_assignable_no_phantom_2739() {
 }
 
 #[test]
-fn reserved_cjs_top_level_names() {
+fn reserved_cjs_top_level_names() { ::tsox_core::fntrace::enter("reserved_cjs_top_level_names"); 
     let body = "function require() {}\n\
                     const exports = {};\n\
                     class Object {}\n\
@@ -672,7 +672,7 @@ fn reserved_cjs_top_level_names() {
 }
 
 #[test]
-fn import_attributes_2823_suppressed_on_parse_error() {
+fn import_attributes_2823_suppressed_on_parse_error() { ::tsox_core::fntrace::enter("import_attributes_2823_suppressed_on_parse_error"); 
     let codes = check_files(
         &[("/proj/index.ts", "import * as f from \"./first\" with {\n")],
         "/proj/index.ts",
@@ -688,7 +688,7 @@ fn import_attributes_2823_suppressed_on_parse_error() {
 }
 
 #[test]
-fn type_only_resolution_mode_attribute_grammar() {
+fn type_only_resolution_mode_attribute_grammar() { ::tsox_core::fntrace::enter("type_only_resolution_mode_attribute_grammar"); 
     let files = [
         (
             "/proj/node_modules/pkg/package.json",
@@ -735,7 +735,7 @@ fn type_only_resolution_mode_attribute_grammar() {
 }
 
 #[test]
-fn overload_probe_does_not_leak_diagnostics() {
+fn overload_probe_does_not_leak_diagnostics() { ::tsox_core::fntrace::enter("overload_probe_does_not_leak_diagnostics"); 
     let codes = check_files(
         &[(
             "/proj/index.ts",
@@ -748,7 +748,7 @@ fn overload_probe_does_not_leak_diagnostics() {
 }
 
 #[test]
-fn generic_arity_error_suppresses_ts2564() {
+fn generic_arity_error_suppresses_ts2564() { ::tsox_core::fntrace::enter("generic_arity_error_suppresses_ts2564"); 
     let codes = check_files(
         &[(
             "/proj/index.ts",
@@ -772,7 +772,7 @@ fn generic_arity_error_suppresses_ts2564() {
 }
 
 #[test]
-fn ambient_declarations_exempt_from_reserved_names() {
+fn ambient_declarations_exempt_from_reserved_names() { ::tsox_core::fntrace::enter("ambient_declarations_exempt_from_reserved_names"); 
     let codes = check_files(
         &[(
             "/proj/index.ts",
@@ -793,7 +793,7 @@ fn ambient_declarations_exempt_from_reserved_names() {
 }
 
 #[test]
-fn es_module_marker_requires_export_and_emit() {
+fn es_module_marker_requires_export_and_emit() { ::tsox_core::fntrace::enter("es_module_marker_requires_export_and_emit"); 
     let bare = check_files(
         &[(
             "/proj/index.ts",

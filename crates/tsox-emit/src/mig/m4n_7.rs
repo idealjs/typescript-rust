@@ -16,7 +16,7 @@ impl EmitContext {
         &mut self,
         statements: &[Arc<Node>],
         declarations: &[Arc<Node>],
-    ) -> (Vec<Arc<Node>>, bool) {
+    ) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("merge_environment_inner"); 
         if declarations.is_empty() {
             return (statements.to_vec(), false);
         }
@@ -116,7 +116,7 @@ impl EmitContext {
 pub fn append_if_unique_vec(
     helpers: &[&'static EmitHelper],
     helper: &'static EmitHelper,
-) -> Vec<&'static EmitHelper> {
+) -> Vec<&'static EmitHelper> { ::tsox_core::fntrace::enter("append_if_unique_vec"); 
     let mut result = helpers.to_vec();
     if !result.iter().any(|h| std::ptr::eq(*h, helper)) {
         result.push(helper);
@@ -128,7 +128,7 @@ pub(crate) fn span_end(
     nodes: &[Arc<Node>],
     predicate: impl Fn(&Arc<Node>) -> bool,
     start: usize,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("span_end"); 
     let mut i = start;
     while i < nodes.len() && predicate(&nodes[i]) {
         i += 1;

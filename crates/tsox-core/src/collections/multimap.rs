@@ -7,35 +7,35 @@ pub struct MultiMap<K: Eq + Hash + Clone, V: Clone + PartialEq> {
 }
 
 impl<K: Eq + Hash + Clone, V: Clone + PartialEq> MultiMap<K, V> {
-    pub fn new() -> Self {
+    pub fn new() -> Self { crate::fntrace::enter("new"); 
         Self {
             inner: HashMap::new(),
         }
     }
 
-    pub fn with_capacity(capacity: usize) -> Self {
+    pub fn with_capacity(capacity: usize) -> Self { crate::fntrace::enter("with_capacity"); 
         Self {
             inner: HashMap::with_capacity(capacity),
         }
     }
 
-    pub fn contains_key(&self, key: &K) -> bool {
+    pub fn contains_key(&self, key: &K) -> bool { crate::fntrace::enter("contains_key"); 
         self.inner.contains_key(key)
     }
 
-    pub fn has(&self, key: &K) -> bool {
+    pub fn has(&self, key: &K) -> bool { crate::fntrace::enter("has"); 
         self.contains_key(key)
     }
 
-    pub fn get(&self, key: &K) -> &[V] {
+    pub fn get(&self, key: &K) -> &[V] { crate::fntrace::enter("get"); 
         self.inner.get(key).map(|v| v.as_slice()).unwrap_or(&[])
     }
 
-    pub fn add(&mut self, key: K, value: V) {
+    pub fn add(&mut self, key: K, value: V) { crate::fntrace::enter("add"); 
         self.inner.entry(key).or_default().push(value);
     }
 
-    pub fn remove(&mut self, key: &K, value: &V) {
+    pub fn remove(&mut self, key: &K, value: &V) { crate::fntrace::enter("remove"); 
         if let Some(values) = self.inner.get_mut(key) {
             if let Some(pos) = values.iter().position(|v| v == value) {
                 values.remove(pos);
@@ -46,31 +46,31 @@ impl<K: Eq + Hash + Clone, V: Clone + PartialEq> MultiMap<K, V> {
         }
     }
 
-    pub fn remove_all(&mut self, key: &K) {
+    pub fn remove_all(&mut self, key: &K) { crate::fntrace::enter("remove_all"); 
         self.inner.remove(key);
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { crate::fntrace::enter("len"); 
         self.inner.len()
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { crate::fntrace::enter("is_empty"); 
         self.inner.is_empty()
     }
 
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self) { crate::fntrace::enter("clear"); 
         self.inner.clear();
     }
 
-    pub fn keys(&self) -> impl Iterator<Item = &K> {
+    pub fn keys(&self) -> impl Iterator<Item = &K> { crate::fntrace::enter("keys"); 
         self.inner.keys()
     }
 
-    pub fn values(&self) -> impl Iterator<Item = &Vec<V>> {
+    pub fn values(&self) -> impl Iterator<Item = &Vec<V>> { crate::fntrace::enter("values"); 
         self.inner.values()
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&K, &Vec<V>)> {
+    pub fn iter(&self) -> impl Iterator<Item = (&K, &Vec<V>)> { crate::fntrace::enter("iter"); 
         self.inner.iter()
     }
 }
@@ -80,7 +80,7 @@ where
     K: Eq + Hash + Clone,
     V: Clone + PartialEq,
     F: Fn(&V) -> K,
-{
+{ crate::fntrace::enter("group_by"); 
     let mut m = MultiMap::new();
     for item in items {
         m.add(group_id(item), item.clone());

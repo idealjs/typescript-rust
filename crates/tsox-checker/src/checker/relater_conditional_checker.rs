@@ -8,7 +8,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> Option<Ternary> {
+    ) -> Option<Ternary> { ::tsox_core::fntrace::enter("conditional_type_related_to"); 
         let ct = match &target.data {
             TypeData::Conditional(ct) => ct,
             _ => return None,
@@ -84,7 +84,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> Option<Ternary> {
+    ) -> Option<Ternary> { ::tsox_core::fntrace::enter("mapped_type_related_to"); 
         match (&source.data, &target.data) {
             (TypeData::Mapped(_), TypeData::Mapped(_)) => {}
             _ => return None,
@@ -147,7 +147,7 @@ impl Checker {
         Some(constraint_related.and(template_related))
     }
 
-    pub fn get_constraint_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_constraint_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_type_from_mapped_type"); 
         if let TypeData::Mapped(m) = &t.data {
             if let Some(constraint) = &m.constraint_type {
                 return Some(Arc::clone(constraint));
@@ -167,14 +167,14 @@ impl Checker {
         None
     }
 
-    pub fn get_type_parameter_from_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_type_parameter_from_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_parameter_from_mapped_type"); 
         if let TypeData::Mapped(m) = &t.data {
             return m.type_parameter.clone();
         }
         None
     }
 
-    pub fn get_name_type_from_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_name_type_from_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_name_type_from_mapped_type"); 
         if let TypeData::Mapped(m) = &t.data {
             return m.name_type.clone();
         }
@@ -185,7 +185,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         take_true: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_forced_branch_type_of_conditional_type"); 
         let ct = match &t.data {
             TypeData::Conditional(ct) => ct,
             _ => return None,
@@ -278,7 +278,7 @@ impl Checker {
     pub(crate) fn deferred_default_constraint_of_conditional(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("deferred_default_constraint_of_conditional"); 
         let true_branch = self.get_inferred_true_type_of_conditional(t);
         let false_branch = self.get_forced_branch_type_of_conditional_type(t, false);
         match (true_branch, false_branch) {
@@ -295,7 +295,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn conditional_distribution_independent(root: &ConditionalRoot) -> bool {
+    pub(crate) fn conditional_distribution_independent(root: &ConditionalRoot) -> bool { ::tsox_core::fntrace::enter("conditional_distribution_independent"); 
         if !root.is_distributive {
             return true;
         }
@@ -317,7 +317,7 @@ impl Checker {
             && !crate::checker::typenode_type_operators::type_node_references_names(&cond_node.false_type, &[name])
     }
 
-    pub fn get_true_type_from_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_true_type_from_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_true_type_from_conditional_type"); 
         if let TypeData::Conditional(ct) = &t.data {
             if let Some(rt) = ct.resolved_true_type.get() {
                 return Some(rt.clone());
@@ -330,7 +330,7 @@ impl Checker {
         None
     }
 
-    fn get_inferred_true_type_of_conditional(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    fn get_inferred_true_type_of_conditional(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_inferred_true_type_of_conditional"); 
         if let TypeData::Conditional(ct) = &t.data {
             if let Some(rt) = ct.resolved_inferred_true_type.get() {
                 return Some(rt.clone());

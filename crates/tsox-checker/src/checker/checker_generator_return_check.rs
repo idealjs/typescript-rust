@@ -15,7 +15,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         type_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_generator_return_annotation"); 
         let is_generator = match &node.data {
             NodeData::FunctionDeclaration(d) => d.asterisk_token.is_some(),
             NodeData::MethodDeclaration(d) => d.asterisk_token.is_some(),
@@ -45,7 +45,7 @@ impl Checker {
         return_type: &Arc<crate::checker::types::Type>,
         is_async: bool,
         error_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_generator_instantiation_assignability"); 
         let any = self.get_any_type();
         let unknown = self.unknown_type();
         let types =
@@ -74,7 +74,7 @@ impl Checker {
         &mut self,
         t: &Arc<crate::checker::types::Type>,
         is_async: bool,
-    ) -> crate::checker::checker_iteration::IterationTypes {
+    ) -> crate::checker::checker_iteration::IterationTypes { ::tsox_core::fntrace::enter("iteration_types_of_generator_function_return_type"); 
         use crate::checker::checker_iteration::IterationUse;
         if t.flags.contains(TypeFlags::Any) {
             let any = self.get_any_type();
@@ -106,7 +106,7 @@ impl Checker {
         ret_type: &Arc<crate::checker::types::Type>,
         next_type: &Arc<crate::checker::types::Type>,
         is_async: bool,
-    ) -> Arc<crate::checker::types::Type> {
+    ) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("create_generator_type"); 
         let name = if is_async { "AsyncGenerator" } else { "Generator" };
         let Some(symbol) = self.globals.get(name).cloned() else {
             return self.get_any_type();

@@ -48,7 +48,7 @@ pub struct TrackerEdit {
 }
 
 impl Default for TrackerEdit {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         TrackerEdit {
             kind: TrackerEditKind::default(),
             text_range: TextRange::new(0, 0),

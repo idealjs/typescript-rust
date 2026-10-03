@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn parse_basic_version() {
+fn parse_basic_version() { crate::fntrace::enter("parse_basic_version"); 
     let v = try_parse_version("1.2.3").unwrap();
     assert_eq!(v.major, 1);
     assert_eq!(v.minor, 2);
@@ -11,19 +11,19 @@ fn parse_basic_version() {
 }
 
 #[test]
-fn parse_prerelease() {
+fn parse_prerelease() { crate::fntrace::enter("parse_prerelease"); 
     let v = try_parse_version("1.0.0-alpha.1").unwrap();
     assert_eq!(v.prerelease, vec!["alpha", "1"]);
 }
 
 #[test]
-fn parse_build() {
+fn parse_build() { crate::fntrace::enter("parse_build"); 
     let v = try_parse_version("1.0.0+build.123").unwrap();
     assert_eq!(v.build, vec!["build", "123"]);
 }
 
 #[test]
-fn parse_partial() {
+fn parse_partial() { crate::fntrace::enter("parse_partial"); 
     let v = try_parse_version("1").unwrap();
     assert_eq!(v.major, 1);
     assert_eq!(v.minor, 0);
@@ -31,14 +31,14 @@ fn parse_partial() {
 }
 
 #[test]
-fn parse_invalid() {
+fn parse_invalid() { crate::fntrace::enter("parse_invalid"); 
     assert!(try_parse_version("1.2.3.4").is_err());
     assert!(try_parse_version("01.2.3").is_err());
     assert!(try_parse_version("abc").is_err());
 }
 
 #[test]
-fn version_compare() {
+fn version_compare() { crate::fntrace::enter("version_compare"); 
     let v1 = try_parse_version("1.0.0").unwrap();
     let v2 = try_parse_version("2.0.0").unwrap();
     let v3 = try_parse_version("1.0.0").unwrap();
@@ -48,27 +48,27 @@ fn version_compare() {
 }
 
 #[test]
-fn prerelease_compare() {
+fn prerelease_compare() { crate::fntrace::enter("prerelease_compare"); 
     let v1 = try_parse_version("1.0.0-alpha").unwrap();
     let v2 = try_parse_version("1.0.0").unwrap();
     assert_eq!(v1.compare(&v2), Ordering::Less);
 }
 
 #[test]
-fn version_display() {
+fn version_display() { crate::fntrace::enter("version_display"); 
     let v = try_parse_version("1.2.3-alpha.1+build.42").unwrap();
     assert_eq!(v.to_string(), "1.2.3-alpha.1+build.42");
 }
 
 #[test]
-fn range_exact() {
+fn range_exact() { crate::fntrace::enter("range_exact"); 
     let range = try_parse_version_range("1.2.3").unwrap();
     assert!(range.test(&try_parse_version("1.2.3").unwrap()));
     assert!(!range.test(&try_parse_version("1.2.4").unwrap()));
 }
 
 #[test]
-fn range_caret() {
+fn range_caret() { crate::fntrace::enter("range_caret"); 
     let range = try_parse_version_range("^1.2.3").unwrap();
     assert!(range.test(&try_parse_version("1.2.5").unwrap()));
     assert!(range.test(&try_parse_version("1.9.0").unwrap()));
@@ -77,14 +77,14 @@ fn range_caret() {
 }
 
 #[test]
-fn range_tilde() {
+fn range_tilde() { crate::fntrace::enter("range_tilde"); 
     let range = try_parse_version_range("~1.2.3").unwrap();
     assert!(range.test(&try_parse_version("1.2.5").unwrap()));
     assert!(!range.test(&try_parse_version("1.3.0").unwrap()));
 }
 
 #[test]
-fn range_or() {
+fn range_or() { crate::fntrace::enter("range_or"); 
     let range = try_parse_version_range("1.0.0 || 2.0.0").unwrap();
     assert!(range.test(&try_parse_version("1.0.0").unwrap()));
     assert!(range.test(&try_parse_version("2.0.0").unwrap()));
@@ -92,7 +92,7 @@ fn range_or() {
 }
 
 #[test]
-fn range_wildcard() {
+fn range_wildcard() { crate::fntrace::enter("range_wildcard"); 
     let range = try_parse_version_range("1.x").unwrap();
     assert!(range.test(&try_parse_version("1.0.0").unwrap()));
     assert!(range.test(&try_parse_version("1.5.3").unwrap()));
@@ -106,7 +106,7 @@ const EQ: Ordering = Ordering::Equal;
 const GT: Ordering = Ordering::Greater;
 
 #[test]
-fn test_try_parse_semver() {
+fn test_try_parse_semver() { crate::fntrace::enter("test_try_parse_semver"); 
     let tests: &[(&str, Version)] = &[
         (
             "1.2.3-pre.4+build.5",
@@ -161,7 +161,7 @@ fn test_try_parse_semver() {
 }
 
 #[test]
-fn test_version_string() {
+fn test_version_string() { crate::fntrace::enter("test_version_string"); 
     let tests: &[(Version, &str)] = &[
         (
             Version {
@@ -230,7 +230,7 @@ fn test_version_string() {
 }
 
 #[test]
-fn test_version_compare() {
+fn test_version_compare() { crate::fntrace::enter("test_version_compare"); 
     let tests: &[(&str, &str, Ordering)] = &[
         ("1.0.0", "2.0.0", LT),
         ("1.0.0", "1.1.0", LT),
@@ -276,7 +276,7 @@ fn test_version_compare() {
     }
 }
 
-fn assert_ranges_good_bad(version_range_string: &str, good: &[&str], bad: &[&str]) {
+fn assert_ranges_good_bad(version_range_string: &str, good: &[&str], bad: &[&str]) { crate::fntrace::enter("assert_ranges_good_bad"); 
     let version_range = try_parse_version_range(version_range_string)
         .unwrap_or_else(|| panic!("TryParseVersionRange({:?}) failed", version_range_string));
     for g in good {
@@ -299,7 +299,7 @@ fn assert_ranges_good_bad(version_range_string: &str, good: &[&str], bad: &[&str
     }
 }
 
-fn assert_range_test(name: &str, range_text: &str, version_text: &str, in_range: bool) {
+fn assert_range_test(name: &str, range_text: &str, version_text: &str, in_range: bool) { crate::fntrace::enter("assert_range_test"); 
     let version_range = try_parse_version_range(range_text)
         .unwrap_or_else(|| panic!("TryParseVersionRange({:?}) failed", range_text));
     let version = try_parse_version(version_text)
@@ -316,8 +316,8 @@ fn assert_range_test(name: &str, range_text: &str, version_text: &str, in_range:
 }
 
 #[test]
-fn test_wildcards_have_same_string() {
-    fn assert_all_identical(name: &str, strs: &[&str]) {
+fn test_wildcards_have_same_string() { crate::fntrace::enter("test_wildcards_have_same_string"); 
+    fn assert_all_identical(name: &str, strs: &[&str]) { crate::fntrace::enter("assert_all_identical"); 
         for &s1 in strs {
             for &s2 in strs {
                 let v1 = try_parse_version_range(s1)
@@ -341,7 +341,7 @@ fn test_wildcards_have_same_string() {
 }
 
 #[test]
-fn test_version_ranges() {
+fn test_version_ranges() { crate::fntrace::enter("test_version_ranges"); 
     assert_ranges_good_bad(
         "1",
         &["1.0.0", "1.9.9", "1.0.0-pre", "1.0.0+build"],
@@ -387,7 +387,7 @@ fn test_version_ranges() {
 }
 
 #[test]
-fn test_comparators_of_version_ranges() {
+fn test_comparators_of_version_ranges() { crate::fntrace::enter("test_comparators_of_version_ranges"); 
     let tests: &[(&str, &str, bool)] = &[
         ("", "2.0.0", true),
         ("", "2.0.0-0", true),
@@ -1006,7 +1006,7 @@ fn test_comparators_of_version_ranges() {
 }
 
 #[test]
-fn test_conjunctions_of_version_ranges() {
+fn test_conjunctions_of_version_ranges() { crate::fntrace::enter("test_conjunctions_of_version_ranges"); 
     let tests: &[(&str, &str, bool)] = &[
         (">1.0.0 <2.0.0", "1.0.1", true),
         (">1.0.0 <2.0.0", "2.0.0", false),
@@ -1019,7 +1019,7 @@ fn test_conjunctions_of_version_ranges() {
 }
 
 #[test]
-fn test_disjunctions_of_version_ranges() {
+fn test_disjunctions_of_version_ranges() { crate::fntrace::enter("test_disjunctions_of_version_ranges"); 
     let tests: &[(&str, &str, bool)] = &[
         (">1.0.0 || <1.0.0", "1.0.1", true),
         (">1.0.0 || <1.0.0", "0.0.1", true),
@@ -1035,7 +1035,7 @@ fn test_disjunctions_of_version_ranges() {
 }
 
 #[test]
-fn test_hyphens_of_version_ranges() {
+fn test_hyphens_of_version_ranges() { crate::fntrace::enter("test_hyphens_of_version_ranges"); 
     let tests: &[(&str, &str, bool)] = &[
         ("1.0.0 - 2.0.0", "1.0.0", true),
         ("1.0.0 - 2.0.0", "1.0.1", true),
@@ -1050,7 +1050,7 @@ fn test_hyphens_of_version_ranges() {
 }
 
 #[test]
-fn test_tildes_of_version_ranges() {
+fn test_tildes_of_version_ranges() { crate::fntrace::enter("test_tildes_of_version_ranges"); 
     let tests: &[(&str, &str, bool)] = &[
         ("~0", "0.0.0", true),
         ("~0", "0.1.0", true),
@@ -1086,7 +1086,7 @@ fn test_tildes_of_version_ranges() {
 }
 
 #[test]
-fn test_carets_of_version_ranges() {
+fn test_carets_of_version_ranges() { crate::fntrace::enter("test_carets_of_version_ranges"); 
     let tests: &[(&str, &str, bool)] = &[
         ("^0", "0.0.0", true),
         ("^0", "0.1.0", true),

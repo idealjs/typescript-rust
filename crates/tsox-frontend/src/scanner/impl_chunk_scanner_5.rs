@@ -3,13 +3,13 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
-    pub(crate) fn scan_template(&mut self) -> SyntaxKind {
+    pub(crate) fn scan_template(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_template"); 
         self.scan_template_ex(false)
     }
 
     /// Go scanTemplateAndSetTokenValue(shouldEmitInvalidEscapeError)：
     /// 非 tagged 模板的非法转义即时报告，tagged 模板延迟（实际不报）
-    pub(crate) fn scan_template_ex(&mut self, report_escape_errors: bool) -> SyntaxKind {
+    pub(crate) fn scan_template_ex(&mut self, report_escape_errors: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_template_ex"); 
         self.pos += 1;
         let mut has_substitution = false;
         let mut terminated = false;
@@ -50,7 +50,7 @@ impl Scanner {
         self.token
     }
 
-    pub(crate) fn scan_punctuation(&mut self) -> SyntaxKind {
+    pub(crate) fn scan_punctuation(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_punctuation"); 
         let start = self.pos;
 
         let remaining = &self.text[start..];
@@ -156,15 +156,15 @@ impl Scanner {
         }
     }
 
-    pub fn binary_marker_pos(&self) -> Option<usize> {
+    pub fn binary_marker_pos(&self) -> Option<usize> { ::tsox_core::fntrace::enter("binary_marker_pos"); 
         self.binary_marker_pos
     }
 
-    pub fn rewind(&mut self) {
+    pub fn rewind(&mut self) { ::tsox_core::fntrace::enter("rewind"); 
         self.pos = self.token_pos;
     }
 
-    pub fn re_scan_less_than(&mut self) -> SyntaxKind {
+    pub fn re_scan_less_than(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_less_than"); 
         if self.token == SyntaxKind::LessThanLessThanToken {
             self.pos = self.token_pos + 1;
             self.token_end = self.pos;
@@ -173,7 +173,7 @@ impl Scanner {
         self.token
     }
 
-    pub fn re_scan_greater_than(&mut self) -> SyntaxKind {
+    pub fn re_scan_greater_than(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_greater_than"); 
         let token = self.token;
         if token == SyntaxKind::GreaterThanToken {
             return token;
@@ -194,7 +194,7 @@ impl Scanner {
         SyntaxKind::GreaterThanToken
     }
 
-    pub fn re_scan_greater_than_remainder(&self) -> Option<SyntaxKind> {
+    pub fn re_scan_greater_than_remainder(&self) -> Option<SyntaxKind> { ::tsox_core::fntrace::enter("re_scan_greater_than_remainder"); 
         match self.token {
             SyntaxKind::GreaterThanGreaterThanToken => Some(SyntaxKind::GreaterThanToken),
             SyntaxKind::GreaterThanGreaterThanGreaterThanToken => {
@@ -214,7 +214,7 @@ impl Scanner {
 
 impl Scanner {
     /// Go ReScanTemplateToken(isTaggedTemplate)：回到 token 起点重扫整段模板
-    pub fn re_scan_template_head_token(&mut self, is_tagged: bool) -> SyntaxKind {
+    pub fn re_scan_template_head_token(&mut self, is_tagged: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_template_head_token"); 
         self.pos = self.token_pos;
         self.token_pos = self.pos;
         self.full_start_pos = self.pos;

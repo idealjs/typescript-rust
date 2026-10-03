@@ -14,13 +14,13 @@ use super::m5t_4::{get_merged_aliased_symbol_of_namespace_export_declaration, ge
 use tsox_frontend::ast::mig::m3e_4::SemanticMeaning;
 use tsox_frontend::ast::mig::m3c as node_accessors;
 
-fn is_external_module_source_file(node: &Arc<Node>) -> bool {
+fn is_external_module_source_file(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_module_source_file"); 
     super::m5u::node_as_source_file(node)
         .map(|file| file.external_module_indicator.is_some())
         .unwrap_or(false)
 }
 
-fn get_super_container(node: &Arc<Node>, stop_on_functions: bool) -> Option<Arc<Node>> {
+fn get_super_container(node: &Arc<Node>, stop_on_functions: bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_super_container"); 
     let mut node = node.parent()?;
     loop {
         match node.kind {
@@ -67,7 +67,7 @@ impl LanguageService {
         exclude_import_type_of_export_equals: bool,
         source_files: &[Arc<SourceFile>],
         source_files_set: &std::collections::HashSet<String>,
-    ) -> Vec<SymbolAndEntries> {
+    ) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_referenced_symbols_for_module"); 
         let checker = program.get_type_checker();
         let module_refs = super::m5u::find_module_references(program, source_files, symbol, &checker);
         let program_files = program.get_source_files();
@@ -185,7 +185,7 @@ impl LanguageService {
         checker: &mut tsox_checker::checker::Checker,
         options: &RefOptions,
         source_files_set: &std::collections::HashSet<String>,
-    ) -> Option<Vec<SymbolAndEntries>> {
+    ) -> Option<Vec<SymbolAndEntries>> { ::tsox_core::fntrace::enter("get_referenced_symbols_for_module_if_declared_by_source_file"); 
         if !symbol.flags.intersects(ast::SymbolFlags::MODULE) || symbol.declarations.is_empty() {
             return None;
         }
@@ -212,7 +212,7 @@ impl LanguageService {
         node: &Arc<Node>,
         source_files: &[Arc<SourceFile>],
         checker: &mut tsox_checker::checker::Checker,
-    ) -> Vec<SymbolAndEntries> {
+    ) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_references_for_string_literal"); 
         let t = super::m5x_6::get_contextual_type_from_parent_or_ancestor_type_node(node, checker);
         let mut references: Vec<ReferenceEntry> = Vec::new();
         for source_file in source_files {
@@ -248,7 +248,7 @@ impl LanguageService {
         }]
     }
 
-    pub fn get_referenced_symbols_special(&self, node: &Arc<Node>, source_files: &[Arc<SourceFile>]) -> Option<Vec<SymbolAndEntries>> {
+    pub fn get_referenced_symbols_special(&self, node: &Arc<Node>, source_files: &[Arc<SourceFile>]) -> Option<Vec<SymbolAndEntries>> { ::tsox_core::fntrace::enter("get_referenced_symbols_special"); 
         let parent = node.parent();
         if super::m5x_3::is_type_keyword(node.kind) {
             if node.kind == SyntaxKind::VoidKeyword && parent.as_ref().map(|p| p.kind) == Some(SyntaxKind::VoidExpression) {
@@ -303,7 +303,7 @@ impl LanguageService {
         None
     }
 
-    pub fn get_references_for_this_keyword(&self, this_or_super_keyword: &Arc<Node>, source_files: &[Arc<SourceFile>]) -> Vec<SymbolAndEntries> {
+    pub fn get_references_for_this_keyword(&self, this_or_super_keyword: &Arc<Node>, source_files: &[Arc<SourceFile>]) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_references_for_this_keyword"); 
         let mut search_space_node = tsox_frontend::ast::mig::m3e_4::get_this_container(this_or_super_keyword, false, false);
         let mut static_flag = ast::ModifierFlags::Static;
         let is_parameter_name = |node: &Arc<Node>| -> bool {
@@ -398,7 +398,7 @@ impl LanguageService {
         }]
     }
 
-    pub fn get_references_for_super_keyword(&self, super_keyword: &Arc<Node>) -> Vec<SymbolAndEntries> {
+    pub fn get_references_for_super_keyword(&self, super_keyword: &Arc<Node>) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_references_for_super_keyword"); 
         let Some(mut search_space_node) = get_super_container(super_keyword, false) else {
             return Vec::new();
         };
@@ -452,17 +452,17 @@ impl LanguageService {
     }
 }
 
-fn source_file_of_node<'a>(mut program_files: impl Iterator<Item = &'a Arc<SourceFile>>, node: &Arc<Node>) -> Option<Arc<SourceFile>> {
+fn source_file_of_node<'a>(mut program_files: impl Iterator<Item = &'a Arc<SourceFile>>, node: &Arc<Node>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_of_node"); 
     let file_node = ast::get_source_file_of_node(node)?;
     program_files.find(|f| f.node.id() == file_node.id()).cloned()
 }
 
-fn source_file_of_node_by_node(l: &LanguageService, node: &Arc<Node>) -> Arc<SourceFile> {
+fn source_file_of_node_by_node(l: &LanguageService, node: &Arc<Node>) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("source_file_of_node_by_node"); 
     let program = l.get_program();
     source_file_of_node(program.get_source_files().iter(), node).expect("node should belong to a program source file")
 }
 
-pub fn is_string_literal_property_reference(node: &Arc<Node>, checker: &mut tsox_checker::checker::Checker) -> bool {
+pub fn is_string_literal_property_reference(node: &Arc<Node>, checker: &mut tsox_checker::checker::Checker) -> bool { ::tsox_core::fntrace::enter("is_string_literal_property_reference"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -485,7 +485,7 @@ pub fn get_referenced_symbols_for_symbol(
     source_files_set: &std::collections::HashSet<String>,
     checker: &mut tsox_checker::checker::Checker,
     options: &RefOptions,
-) -> Vec<SymbolAndEntries> {
+) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_referenced_symbols_for_symbol"); 
     let symbol = skip_past_export_or_import_specifier_or_union(original_symbol, node, checker, !is_for_rename_with_prefix_and_suffix_text(options))
         .unwrap_or_else(|| original_symbol.clone());
 
@@ -530,12 +530,12 @@ pub fn get_referenced_symbols_for_symbol(
     state.take_result()
 }
 
-fn types_equal(checker: &mut tsox_checker::checker::Checker, a: &Arc<tsox_checker::checker::types::Type>, b: &Arc<tsox_checker::checker::types::Type>) -> bool {
+fn types_equal(checker: &mut tsox_checker::checker::Checker, a: &Arc<tsox_checker::checker::types::Type>, b: &Arc<tsox_checker::checker::types::Type>) -> bool { ::tsox_core::fntrace::enter("types_equal"); 
     checker.is_type_identical_to(a, b)
 }
 
 impl<'a> RefState<'a> {
-    pub fn take_result(&mut self) -> Vec<SymbolAndEntries> {
+    pub fn take_result(&mut self) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("take_result"); 
         if self.pending_entries.is_empty() {
             return Vec::new();
         }

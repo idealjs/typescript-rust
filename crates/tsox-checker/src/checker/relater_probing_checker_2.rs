@@ -3,7 +3,7 @@
 use crate::checker::relater_probing::*;
 
 impl Checker {
-    pub fn get_permissive_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_permissive_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_permissive_instantiation"); 
         let key = t.id;
         if let Some(cached) = self.probe_cache_permissive.get(&key) {
             return Arc::clone(cached);
@@ -13,7 +13,7 @@ impl Checker {
         result
     }
 
-    pub fn get_restrictive_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_restrictive_instantiation(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_restrictive_instantiation"); 
         let key = t.id;
         if let Some(cached) = self.probe_cache_restrictive.get(&key) {
             return Arc::clone(cached);
@@ -24,7 +24,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn instantiate_probing(&mut self, t: &Arc<Type>, mode: ProbeMode) -> Arc<Type> {
+    pub(crate) fn instantiate_probing(&mut self, t: &Arc<Type>, mode: ProbeMode) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_probing"); 
         // Go instantiateType 先解析结构化成员（惰性签名在此填充）
         if t.flags.contains(TypeFlags::Object)
             && t.as_object()
@@ -300,7 +300,7 @@ impl Checker {
         &self,
         a: &Symbol,
         b: &Symbol,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_param_symbols_equivalent"); 
         if std::ptr::eq(a as *const Symbol, b as *const Symbol) {
             return true;
         }
@@ -330,7 +330,7 @@ impl Checker {
         &self,
         a: &Arc<Symbol>,
         b: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_param_symbols_share_container"); 
         let symbol_map = self.program.symbol_map();
         let container_of = |s: &Arc<Symbol>| -> Option<usize> {
             let mut node = s.declarations.first()?.parent()?;

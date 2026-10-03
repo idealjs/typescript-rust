@@ -40,11 +40,11 @@ pub struct FlowState {
     pub next: Option<Box<FlowState>>,
 }
 
-pub fn get_flow_node_of_node(node: &Arc<Node>) -> Option<Arc<tsox_frontend::ast::FlowNode>> {
+pub fn get_flow_node_of_node(node: &Arc<Node>) -> Option<Arc<tsox_frontend::ast::FlowNode>> { ::tsox_core::fntrace::enter("get_flow_node_of_node"); 
     flow_node_of(node)
 }
 
-pub fn is_evolving_array_type_list(types: &[Arc<Type>]) -> bool {
+pub fn is_evolving_array_type_list(types: &[Arc<Type>]) -> bool { ::tsox_core::fntrace::enter("is_evolving_array_type_list"); 
     let mut has_evolving_array_type = false;
     for t in types {
         if !t.flags.intersects(TypeFlags::Never) {
@@ -61,13 +61,13 @@ pub fn is_evolving_array_type_list(types: &[Arc<Type>]) -> bool {
 }
 
 impl FlowType {
-    pub fn is_nil(&self) -> bool {
+    pub fn is_nil(&self) -> bool { ::tsox_core::fntrace::enter("is_nil"); 
         self.t.is_none()
     }
 }
 
 impl Checker {
-    pub fn get_flow_state(&mut self) -> Box<FlowState> {
+    pub fn get_flow_state(&mut self) -> Box<FlowState> { ::tsox_core::fntrace::enter("get_flow_state"); 
         Box::new(FlowState {
             reference: None,
             declared_type: None,
@@ -81,11 +81,11 @@ impl Checker {
         })
     }
 
-    pub fn put_flow_state(&mut self, state: Box<FlowState>) {
+    pub fn put_flow_state(&mut self, state: Box<FlowState>) { ::tsox_core::fntrace::enter("put_flow_state"); 
         drop(state);
     }
 
-    pub fn is_empty_array_assignment(&self, node: &Arc<Node>) -> bool {
+    pub fn is_empty_array_assignment(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_empty_array_assignment"); 
         if is_variable_declaration(node) {
             if let Some(initializer) = node.initializer() {
                 if is_empty_array_literal(&initializer) {
@@ -106,7 +106,7 @@ impl Checker {
         false
     }
 
-    pub fn get_destructuring_property_name(&mut self, node: &Arc<Node>) -> Option<String> {
+    pub fn get_destructuring_property_name(&mut self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("get_destructuring_property_name"); 
         let parent = node.parent()?;
         if is_binding_element(node) && is_object_binding_pattern(&parent) {
             let property_name = get_binding_element_property_name(node)?;
@@ -127,7 +127,7 @@ impl Checker {
         None
     }
 
-    pub fn get_literal_property_name_text(&mut self, name: &Arc<Node>) -> Option<String> {
+    pub fn get_literal_property_name_text(&mut self, name: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("get_literal_property_name_text"); 
         let t = self.get_literal_type_from_property_name(name)?;
         if t.flags.intersects(TypeFlags::StringLiteral | TypeFlags::NumberLiteral) {
             if let Some(lit) = t.as_literal_type() {
@@ -137,7 +137,7 @@ impl Checker {
         None
     }
 
-    pub fn is_constant_reference(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_constant_reference(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_constant_reference"); 
         match node.kind {
             SyntaxKind::ThisKeyword => true,
             SyntaxKind::Identifier => {
@@ -168,7 +168,7 @@ impl Checker {
         }
     }
 
-    pub fn has_matching_argument(&mut self, expression: &Arc<Node>, reference: &Arc<Node>) -> bool {
+    pub fn has_matching_argument(&mut self, expression: &Arc<Node>, reference: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_matching_argument"); 
         let arguments = expression.arguments();
         let argument_nodes: &[Arc<Node>] = match &arguments {
             Some(list) => &list.nodes,
@@ -197,11 +197,11 @@ impl Checker {
         &mut self,
         source: &Arc<Node>,
         target: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_or_contains_matching_reference"); 
         self.is_matching_reference(source, target) || self.contains_matching_reference(source, target)
     }
 
-    pub fn get_property_name_for_known_symbol_name(&mut self, symbol_name: &str) -> String {
+    pub fn get_property_name_for_known_symbol_name(&mut self, symbol_name: &str) -> String { ::tsox_core::fntrace::enter("get_property_name_for_known_symbol_name"); 
         if let Some(ctor_type) = self.get_global_es_symbol_constructor_type_symbol_or_nil() {
             let ctor_type_of = self.get_type_of_symbol(&ctor_type);
             if let Some(unique_type) = self.get_type_of_property_of_type(&ctor_type_of, symbol_name)
@@ -214,7 +214,7 @@ impl Checker {
         format!("{}@{}", tsox_frontend::ast::INTERNAL_SYMBOL_NAME_PREFIX, symbol_name)
     }
 
-    pub fn is_declaration_with_explicit_type_annotation(&self, node: &Arc<Node>) -> bool {
+    pub fn is_declaration_with_explicit_type_annotation(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_with_explicit_type_annotation"); 
         (is_variable_declaration(node)
             || is_property_declaration(node)
             || is_property_signature_declaration(node)
@@ -226,7 +226,7 @@ impl Checker {
     pub fn is_expando_property_function_with_return_type_annotation(
         &self,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_expando_property_function_with_return_type_annotation"); 
         if node.kind == SyntaxKind::BinaryExpression {
             let NodeData::BinaryExpression(binary) = &node.data else {
                 return false;
@@ -238,7 +238,7 @@ impl Checker {
         false
     }
 
-    pub fn has_type_predicate_or_never_return_type(&mut self, sig: &Arc<Signature>) -> bool {
+    pub fn has_type_predicate_or_never_return_type(&mut self, sig: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("has_type_predicate_or_never_return_type"); 
         if self.get_type_predicate_of_signature(sig).is_some() {
             return true;
         }
@@ -249,7 +249,7 @@ impl Checker {
         false
     }
 
-    pub fn get_explicit_this_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub fn get_explicit_this_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_explicit_this_type"); 
         let container = crate::checker::checker_this_container::get_this_container(node, false, false);
         if is_function_like(&container) {
             if let Some(signature) = self.get_signature_from_declaration(&container) {
@@ -271,7 +271,7 @@ impl Checker {
         None
     }
 
-    pub fn include_undefined_in_index_signature(&mut self, t: Option<&Arc<Type>>) -> Option<Arc<Type>> {
+    pub fn include_undefined_in_index_signature(&mut self, t: Option<&Arc<Type>>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("include_undefined_in_index_signature"); 
         let t = t?;
         if self.no_unchecked_indexed_access {
             return Some(
@@ -285,7 +285,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         default_expression: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_with_default"); 
         if let Some(default_expression) = default_expression {
             let non_undefined = self.get_non_undefined_type(t);
             let default_type = self.get_type_of_expression(default_expression);
@@ -298,7 +298,7 @@ impl Checker {
         &self,
         predicate: &TypePredicate,
         call_expression: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_predicate_argument"); 
         if predicate.kind == TypePredicateKind::Identifier
             || predicate.kind == TypePredicateKind::AssertsIdentifier
         {

@@ -3,7 +3,7 @@
 use crate::checker::checker_assertions_interfaces::*;
 
 impl Checker {
-    pub(crate) fn report_function_impl_expected(&mut self, statements: &[Arc<Node>], idx: usize) {
+    pub(crate) fn report_function_impl_expected(&mut self, statements: &[Arc<Node>], idx: usize) { ::tsox_core::fntrace::enter("report_function_impl_expected"); 
         let node = Arc::clone(&statements[idx]);
         let (name_text, name_loc) = match &node.data {
             tsox_frontend::ast::NodeData::FunctionDeclaration(d) => match &d.name {
@@ -49,7 +49,7 @@ impl Checker {
         self.diagnostics.add(diagnostic);
     }
 
-    pub(crate) fn check_export_assignment_conflicts(&mut self, statements: &[Arc<Node>]) {
+    pub(crate) fn check_export_assignment_conflicts(&mut self, statements: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_export_assignment_conflicts"); 
         // Go checkExportAssignment/checkSourceFile：export= 所在容器（文件或
         // ambient 模块）逐个跑 checkExternalModuleExports 的 export= 段
         if let Some(file_sym) = self.current_file_symbol.clone() {
@@ -62,7 +62,7 @@ impl Checker {
         }
     }
 
-    fn collect_module_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> {
+    fn collect_module_declarations(statements: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_module_declarations"); 
         let mut out = Vec::new();
         let mut stack: Vec<Arc<Node>> = statements.iter().rev().cloned().collect();
         while let Some(n) = stack.pop() {
@@ -99,7 +99,7 @@ impl Checker {
 
     // Go checkExternalModuleExports 的 export= 段：模块导出含值成员，或
     // export= 指向的类型/命名空间被模块自身同名遮蔽时，报 TS2309
-    fn check_external_module_export_equals(&mut self, module_symbol: &Arc<Symbol>) {
+    fn check_external_module_export_equals(&mut self, module_symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("check_external_module_export_equals"); 
         let Some(export_equals) = module_symbol
             .exports
             .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
@@ -191,7 +191,7 @@ impl Checker {
         ));
     }
 
-    fn module_exports_have_kind(module: &Arc<Symbol>, kind: SymbolFlags) -> bool {
+    fn module_exports_have_kind(module: &Arc<Symbol>, kind: SymbolFlags) -> bool { ::tsox_core::fntrace::enter("module_exports_have_kind"); 
         module.exports.iter().any(|(name, sym)| {
             name != tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
                 && sym.flags.intersects(kind)
@@ -203,7 +203,7 @@ impl Checker {
         &mut self,
         name: &Arc<Node>,
         message: &'static tsox_core::diagnostics::Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_reserved_type_name"); 
         const RESERVED: &[&str] = &[
             "any",
             "unknown",
@@ -234,7 +234,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         kind: TypeFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_assignable_to_kind_snf"); 
         if source.flags.intersects(kind) {
             return true;
         }
@@ -257,7 +257,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn check_computed_property_name(&mut self, name: &Arc<Node>) {
+    pub(crate) fn check_computed_property_name(&mut self, name: &Arc<Node>) { ::tsox_core::fntrace::enter("check_computed_property_name"); 
         self.check_computed_property_name_type(name);
     }
 
@@ -265,7 +265,7 @@ impl Checker {
     pub(crate) fn check_computed_property_name_type(
         &mut self,
         name: &Arc<Node>,
-    ) -> std::sync::Arc<crate::checker::types::Type> {
+    ) -> std::sync::Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("check_computed_property_name_type"); 
         if name.kind != SyntaxKind::ComputedPropertyName {
             return self.error_type();
         }
@@ -331,7 +331,7 @@ impl Checker {
 
     // Go checkGrammarProperty/checkGrammarMethod 的动态名分支：
     // 按成员容器选消息（class property/method-overload/ambient/interface）
-    pub(crate) fn check_member_dynamic_name_grammar(&mut self, member: &Arc<Node>) {
+    pub(crate) fn check_member_dynamic_name_grammar(&mut self, member: &Arc<Node>) { ::tsox_core::fntrace::enter("check_member_dynamic_name_grammar"); 
         let Some(name) = Self::member_name_node(member) else {
             return;
         };
@@ -388,7 +388,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("member_name_node"); 
         match &node.data {
             tsox_frontend::ast::NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
             tsox_frontend::ast::NodeData::MethodSignatureDeclaration(d) => {
@@ -408,7 +408,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn property_name_key_type(&mut self, name: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn property_name_key_type(&mut self, name: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("property_name_key_type"); 
         match &name.data {
             tsox_frontend::ast::NodeData::ComputedPropertyName(data) => {
                 let expr = &data.expression;
@@ -440,7 +440,7 @@ impl Checker {
     // Go isNumericLiteralName：ToString(ToNumber(text)) == text 时属性名是
     // 数字名（含 Infinity/-Infinity/NaN，不含 +Infinity 前缀形式），
     // 索引约束按数字字面量键参与
-    fn literal_type_for_property_name_text(&mut self, text: &str) -> Arc<Type> {
+    fn literal_type_for_property_name_text(&mut self, text: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("literal_type_for_property_name_text"); 
         if tsox_core::jsnum::Number::from_string(text).to_string() == text {
             self.get_number_literal_type(tsox_core::jsnum::Number::from_string(text))
         } else {
@@ -448,7 +448,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn property_name_display(&self, name: &Arc<Node>) -> String {
+    pub(crate) fn property_name_display(&self, name: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("property_name_display"); 
         if name.kind == SyntaxKind::ComputedPropertyName {
             if let Some(text) = self.node_source_text(name) {
                 let inner = text
@@ -467,7 +467,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn node_source_text(&self, node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn node_source_text(&self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("node_source_text"); 
         let mut root = Arc::clone(node);
         while let Some(p) = root.parent() {
             root = p;
@@ -487,7 +487,7 @@ impl Checker {
 impl Checker {
     // Go checkExternalModuleExports 的 export * 冲突段：同一导出名多个
     // 非重载声明时报 TS2323（namespace/enum/接口合并/类型别名合并除外）
-    pub(crate) fn check_external_module_export_duplicates(&mut self, statements: &[Arc<Node>]) {
+    pub(crate) fn check_external_module_export_duplicates(&mut self, statements: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_external_module_export_duplicates"); 
         let Some(module_symbol) = self.current_file_symbol.clone() else {
             return;
         };
@@ -576,7 +576,7 @@ impl Checker {
         name: String,
         flags: SymbolFlags,
         declarations: &[Arc<Node>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_export_declarations_2323"); 
         let is_not_overload = |d: &Arc<Node>| {
             !matches!(d.kind, SyntaxKind::FunctionDeclaration | SyntaxKind::MethodDeclaration)
                 || body_of(d).is_some()
@@ -618,7 +618,7 @@ impl Checker {
 // Go bindExportAssignment/bindFunctionDeclaration/bindClassLikeDeclaration/
 // bindBlockScopedDeclaration 的 includes/excludes（default 顶层声明）；
 // re-export 的 default 命名 specifier 走 declareSymbol(Alias, AliasExcludes)
-fn default_decl_semantics(stmt: &Arc<Node>) -> Vec<(SymbolFlags, SymbolFlags, Arc<Node>)> {
+fn default_decl_semantics(stmt: &Arc<Node>) -> Vec<(SymbolFlags, SymbolFlags, Arc<Node>)> { ::tsox_core::fntrace::enter("default_decl_semantics"); 
     if let tsox_frontend::ast::NodeData::ExportAssignment(d) = &stmt.data {
         if !d.is_export_equals {
             let includes = if crate::binder::bind_js_assignment_declarations::expression_is_alias(
@@ -666,7 +666,7 @@ fn default_decl_semantics(stmt: &Arc<Node>) -> Vec<(SymbolFlags, SymbolFlags, Ar
 }
 
 // Go GetNameOfDeclaration 或节点本身（2528 的声明名定位）
-fn default_export_name_loc(d: &Arc<Node>) -> tsox_core::core::text::TextRange {
+fn default_export_name_loc(d: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("default_export_name_loc"); 
     if let tsox_frontend::ast::NodeData::ExportAssignment(data) = &d.data {
         if !data.is_export_equals {
             return data.expression.loc;
@@ -678,7 +678,7 @@ fn default_export_name_loc(d: &Arc<Node>) -> tsox_core::core::text::TextRange {
     d.name().map(|n| n.loc).unwrap_or(d.loc)
 }
 
-fn body_of(d: &Arc<Node>) -> Option<Arc<Node>> {
+fn body_of(d: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("body_of"); 
     match &d.data {
         tsox_frontend::ast::NodeData::FunctionDeclaration(f) => f.body.clone(),
         tsox_frontend::ast::NodeData::MethodDeclaration(m) => m.body.clone(),
@@ -688,7 +688,7 @@ fn body_of(d: &Arc<Node>) -> Option<Arc<Node>> {
 
 // Go scanner.GetErrorRangeForNode：报错定位到声明名（变量/函数/类等），
 // ExportAssignment 用整节点
-fn declaration_name_loc(d: &Arc<Node>) -> Option<tsox_core::core::text::TextRange> {
+fn declaration_name_loc(d: &Arc<Node>) -> Option<tsox_core::core::text::TextRange> { ::tsox_core::fntrace::enter("declaration_name_loc"); 
     if matches!(d.kind, SyntaxKind::ExportAssignment) {
         return Some(d.loc);
     }

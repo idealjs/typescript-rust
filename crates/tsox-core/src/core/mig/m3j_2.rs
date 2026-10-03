@@ -10,7 +10,7 @@ pub fn get_spelling_suggestion<T: Clone>(
     candidates: impl Iterator<Item = T>,
     get_name: impl Fn(&T) -> String,
     compare: impl Fn(&T, &T) -> Ordering,
-) -> Option<T> {
+) -> Option<T> { crate::fntrace::enter("get_spelling_suggestion"); 
     get_spelling_suggestion_with_max_candidate_count(name, candidates, get_name, compare, 0)
 }
 
@@ -20,7 +20,7 @@ pub fn get_spelling_suggestion_with_max_candidate_count<T: Clone>(
     get_name: impl Fn(&T) -> String,
     compare: impl Fn(&T, &T) -> Ordering,
     max_candidates: usize,
-) -> Option<T> {
+) -> Option<T> { crate::fntrace::enter("get_spelling_suggestion_with_max_candidate_count"); 
     let rune_name: Vec<char> = name.chars().collect();
     let maximum_length_difference = std::cmp::max(2, (rune_name.len() as f64 * 0.34) as usize);
     let mut best_distance = (rune_name.len() as f64 * 0.4).floor() + 0.9;
@@ -63,7 +63,7 @@ pub fn get_spelling_suggestion_with_max_candidate_count<T: Clone>(
     best_candidate
 }
 
-fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> {
+fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> { crate::fntrace::enter("levenshtein_with_max"); 
     let s1: Vec<char> = s1.chars().collect();
     let s2: Vec<char> = s2.chars().collect();
     let big = max + 0.01;
@@ -113,7 +113,7 @@ fn levenshtein_with_max(s1: &str, s2: &str, max: f64) -> Option<f64> {
 pub fn get_spelling_suggestion_for_strings(
     name: &str,
     candidates: impl Iterator<Item = String>,
-) -> Option<String> {
+) -> Option<String> { crate::fntrace::enter("get_spelling_suggestion_for_strings"); 
     get_spelling_suggestion(
         name,
         candidates,
@@ -122,14 +122,14 @@ pub fn get_spelling_suggestion_for_strings(
     )
 }
 
-pub fn identity<T>(t: T) -> T {
+pub fn identity<T>(t: T) -> T { crate::fntrace::enter("identity"); 
     t
 }
 
 pub fn try_map<T, U, E>(
     slice: &[T],
     f: impl Fn(&T) -> Result<U, E>,
-) -> Result<Vec<U>, E> {
+) -> Result<Vec<U>, E> { crate::fntrace::enter("try_map"); 
     let mut result = Vec::with_capacity(slice.len());
     for value in slice {
         result.push(f(value)?);
@@ -137,11 +137,11 @@ pub fn try_map<T, U, E>(
     Ok(result)
 }
 
-pub fn check_each_defined<'a, S>(s: &'a [Option<S>], msg: &str) -> Vec<&'a S> {
+pub fn check_each_defined<'a, S>(s: &'a [Option<S>], msg: &str) -> Vec<&'a S> { crate::fntrace::enter("check_each_defined"); 
     s.iter().map(|v| v.as_ref().expect(msg)).collect()
 }
 
-pub fn index_after(s: &str, pattern: &str, start_index: usize) -> Option<usize> {
+pub fn index_after(s: &str, pattern: &str, start_index: usize) -> Option<usize> { crate::fntrace::enter("index_after"); 
     if start_index > s.len() {
         return None;
     }
@@ -153,7 +153,7 @@ pub fn index_after(s: &str, pattern: &str, start_index: usize) -> Option<usize> 
 pub fn should_rewrite_module_specifier(
     specifier: &str,
     compiler_options: &CompilerOptions,
-) -> bool {
+) -> bool { crate::fntrace::enter("should_rewrite_module_specifier"); 
     compiler_options
         .rewrite_relative_import_extensions
         .is_true()
@@ -162,14 +162,14 @@ pub fn should_rewrite_module_specifier(
         && has_ts_file_extension(specifier)
 }
 
-pub fn single_element_slice<T>(element: Option<&T>) -> Vec<&T> {
+pub fn single_element_slice<T>(element: Option<&T>) -> Vec<&T> { crate::fntrace::enter("single_element_slice"); 
     match element {
         Some(element) => vec![element],
         None => Vec::new(),
     }
 }
 
-pub fn comparable_values_equal<T: PartialEq>(a: &T, b: &T) -> bool {
+pub fn comparable_values_equal<T: PartialEq>(a: &T, b: &T) -> bool { crate::fntrace::enter("comparable_values_equal"); 
     a == b
 }
 
@@ -179,7 +179,7 @@ pub fn diff_maps<K: Eq + Hash + Clone, V: PartialEq + Clone>(
     on_added: &dyn Fn(&K, &V),
     on_removed: &dyn Fn(&K, &V),
     on_changed: &dyn Fn(&K, &V, &V),
-) {
+) { crate::fntrace::enter("diff_maps"); 
     diff_maps_func(m1, m2, &|a, b| a == b, on_added, on_removed, on_changed);
 }
 
@@ -192,7 +192,7 @@ pub fn diff_maps_func<K, V1, V2>(
     on_changed: &dyn Fn(&K, &V1, &V2),
 ) where
     K: Eq + Hash,
-{
+{ crate::fntrace::enter("diff_maps_func"); 
     for (k, v2) in m2 {
         if !m1.contains_key(k) {
             on_added(k, v2);
@@ -210,7 +210,7 @@ pub fn diff_maps_func<K, V1, V2>(
     }
 }
 
-pub fn unordered_equal<T: Eq + Hash>(s1: &[T], s2: &[T]) -> bool {
+pub fn unordered_equal<T: Eq + Hash>(s1: &[T], s2: &[T]) -> bool { crate::fntrace::enter("unordered_equal"); 
     if s1.len() != s2.len() {
         return false;
     }
@@ -228,7 +228,7 @@ pub fn unordered_equal<T: Eq + Hash>(s1: &[T], s2: &[T]) -> bool {
     true
 }
 
-pub fn deduplicate<T: Clone + PartialEq>(slice: &[T]) -> Vec<T> {
+pub fn deduplicate<T: Clone + PartialEq>(slice: &[T]) -> Vec<T> { crate::fntrace::enter("deduplicate"); 
     if slice.len() > 1 {
         for (i, value) in slice.iter().enumerate() {
             if slice[..i].contains(value) {
@@ -245,7 +245,7 @@ pub fn deduplicate<T: Clone + PartialEq>(slice: &[T]) -> Vec<T> {
     slice.to_vec()
 }
 
-pub fn deduplicate_sorted<T: Clone>(slice: &[T], is_equal: impl Fn(&T, &T) -> bool) -> Vec<T> {
+pub fn deduplicate_sorted<T: Clone>(slice: &[T], is_equal: impl Fn(&T, &T) -> bool) -> Vec<T> { crate::fntrace::enter("deduplicate_sorted"); 
     if slice.is_empty() {
         return Vec::new();
     }
@@ -262,7 +262,7 @@ pub fn deduplicate_sorted<T: Clone>(slice: &[T], is_equal: impl Fn(&T, &T) -> bo
     result
 }
 
-pub fn compare_booleans(a: bool, b: bool) -> i32 {
+pub fn compare_booleans(a: bool, b: bool) -> i32 { crate::fntrace::enter("compare_booleans"); 
     if a && !b {
         1
     } else if !a && b {

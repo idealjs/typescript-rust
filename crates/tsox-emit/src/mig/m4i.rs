@@ -40,11 +40,11 @@ pub struct NullishCoalescingTransformer {
 }
 
 impl NullishCoalescingTransformer {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !subtree_facts(&node).intersects(SubtreeFacts::CONTAINS_NULLISH_COALESCING) {
             return node;
         }
@@ -54,7 +54,7 @@ impl NullishCoalescingTransformer {
         }
     }
 
-    fn visit_binary_expression(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_binary_expression(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_binary_expression"); 
         let data = node.as_binary_expression();
         match data.operator_token.kind {
             SyntaxKind::QuestionQuestionToken => {
@@ -84,7 +84,7 @@ impl NullishCoalescingTransformer {
     }
 }
 
-pub fn new_nullish_coalescing_transformer(opts: &TransformOptions) -> NullishCoalescingTransformer {
+pub fn new_nullish_coalescing_transformer(opts: &TransformOptions) -> NullishCoalescingTransformer { ::tsox_core::fntrace::enter("new_nullish_coalescing_transformer"); 
     NullishCoalescingTransformer {
         emit_context: opts.context.clone(),
     }
@@ -95,11 +95,11 @@ pub struct OptionalCatchTransformer {
 }
 
 impl OptionalCatchTransformer {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !subtree_facts(&node).intersects(SubtreeFacts::CONTAINS_MISSING_CATCH_CLAUSE_VARIABLE) {
             return node;
         }
@@ -109,7 +109,7 @@ impl OptionalCatchTransformer {
         }
     }
 
-    fn visit_catch_clause(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_catch_clause(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_catch_clause"); 
         let data = node.as_catch_clause();
         if data.variable_declaration.is_none() {
             let temp = self.factory().new_temp_variable();
@@ -126,7 +126,7 @@ impl OptionalCatchTransformer {
     }
 }
 
-pub fn new_optional_catch_transformer(opts: &TransformOptions) -> OptionalCatchTransformer {
+pub fn new_optional_catch_transformer(opts: &TransformOptions) -> OptionalCatchTransformer { ::tsox_core::fntrace::enter("new_optional_catch_transformer"); 
     OptionalCatchTransformer {
         emit_context: opts.context.clone(),
     }
@@ -138,7 +138,7 @@ pub struct UseStrictTransformer {
     get_emit_module_format_of_file: Arc<dyn Fn(&dyn HasFileName) -> ModuleKind + Send + Sync>,
 }
 
-pub fn new_use_strict_transformer(opts: &TransformOptions) -> UseStrictTransformer {
+pub fn new_use_strict_transformer(opts: &TransformOptions) -> UseStrictTransformer { ::tsox_core::fntrace::enter("new_use_strict_transformer"); 
     UseStrictTransformer {
         emit_context: opts.context.clone(),
         compiler_options: Arc::new(opts.compiler_options.clone()),
@@ -147,18 +147,18 @@ pub fn new_use_strict_transformer(opts: &TransformOptions) -> UseStrictTransform
 }
 
 impl UseStrictTransformer {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if node.kind != SyntaxKind::SourceFile {
             return node;
         }
         self.visit_source_file(node)
     }
 
-    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if node.flags.contains(NodeFlags::JsonFile) {
             return node;
         }
@@ -192,7 +192,7 @@ pub struct TaggedTemplateTransformer {
 
 pub fn new_tagged_template_lift_restriction_transformer(
     opts: &TransformOptions,
-) -> TaggedTemplateTransformer {
+) -> TaggedTemplateTransformer { ::tsox_core::fntrace::enter("new_tagged_template_lift_restriction_transformer"); 
     TaggedTemplateTransformer {
         emit_context: opts.context.clone(),
         compiler_options: Arc::new(opts.compiler_options.clone()),
@@ -203,11 +203,11 @@ pub fn new_tagged_template_lift_restriction_transformer(
 }
 
 impl TaggedTemplateTransformer {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !subtree_facts(&node).intersects(SubtreeFacts::CONTAINS_INVALID_TEMPLATE_ESCAPE) {
             return node;
         }
@@ -218,7 +218,7 @@ impl TaggedTemplateTransformer {
         }
     }
 
-    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         self.current_source_file = Some(node.clone());
         self.tagged_template_string_declarations.clear();
 
@@ -259,11 +259,11 @@ impl TaggedTemplateTransformer {
         visited
     }
 
-    fn visit_tagged_template_expression(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_tagged_template_expression(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_tagged_template_expression"); 
         self.process_tagged_template_expression(node)
     }
 
-    fn process_tagged_template_expression(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn process_tagged_template_expression(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("process_tagged_template_expression"); 
         let data = node.as_tagged_template_expression();
         let tag = self.visit_node(data.tag.clone());
         let template = data.template.clone();
@@ -330,14 +330,14 @@ impl TaggedTemplateTransformer {
 pub fn create_template_cooked(
     f: &NodeFactory<'_>,
     template: &TemplateLiteralLikeDataBase,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_template_cooked"); 
     if template.template_flags & TOKEN_FLAGS_IS_INVALID != 0 {
         return f.new_void_zero_expression();
     }
     f.new_string_literal(&template.text, TOKEN_FLAGS_NONE)
 }
 
-pub fn get_raw_literal(f: &NodeFactory<'_>, node: &Arc<Node>) -> Arc<Node> {
+pub fn get_raw_literal(f: &NodeFactory<'_>, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_raw_literal"); 
     let mut text = node.template_literal_like_data().raw_text.clone();
     if text.is_empty() {
         text = node.text().to_string();
@@ -362,6 +362,6 @@ pub struct TemplateLiteralLikeDataBase {
     pub template_flags: TokenFlags,
 }
 
-pub fn newline_normalize(text: &str) -> String {
+pub fn newline_normalize(text: &str) -> String { ::tsox_core::fntrace::enter("newline_normalize"); 
     text.replace("\r\n", "\n").replace('\r', "\n")
 }

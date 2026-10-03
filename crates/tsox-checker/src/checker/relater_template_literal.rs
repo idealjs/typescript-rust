@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &TemplateLiteralTypeData,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_matched_by_template_literal_type"); 
         let Some(inferences) = self.infer_types_from_template_literal_type(source, target) else {
             return false;
         };
@@ -23,7 +23,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_valid_type_for_template_literal_placeholder"); 
         if target.flags.contains(TypeFlags::Intersection) {
             return target.types().is_some_and(|ts| {
                 ts.iter().all(|t| {

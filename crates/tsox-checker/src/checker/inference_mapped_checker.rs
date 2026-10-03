@@ -11,7 +11,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         constraint_type: Option<&Arc<Type>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("infer_to_mapped_type"); 
         let Some(constraint) = constraint_type else {
             return false;
         };
@@ -94,7 +94,7 @@ impl Checker {
     /// 递归合并、substitution 合并 base 与 constraint，其余按 Instantiable 位判定）。
     /// Go 经 ObjectFlagsIsGenericMappedTypeComputed 将计算位永久写回
     /// t.objectFlags，Type 为不可变 Arc，等价落地为 checker 级 TypeId 永久缓存
-    pub(crate) fn is_generic_index_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_generic_index_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_index_type"); 
         if let Some(&cached) = self.generic_index_type_cache.get(&t.id) {
             return cached;
         }
@@ -127,7 +127,7 @@ impl Checker {
 
     /// Go isGenericMappedType 的约束判定路径（nameType 路径未移植：
     /// as 子句引用泛型的形态不在本簇用例域内）
-    pub(crate) fn is_generic_mapped_type_by_constraint(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_generic_mapped_type_by_constraint(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_mapped_type_by_constraint"); 
         match &t.data {
             TypeData::Mapped(m) => {
                 let constraint = m.constraint_type.clone();
@@ -144,7 +144,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_generic_mapped_types"); 
         let s_constraint = self.get_constraint_type_from_mapped_type(source);
         let t_constraint = self.get_constraint_type_from_mapped_type(target);
         if let (Some(s), Some(t)) = (&s_constraint, &t_constraint) {
@@ -168,7 +168,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         constraint: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("infer_type_for_homomorphic_mapped_type"); 
         let key = (source.id, target.id, constraint.id);
         if let Some(cached) = self.reverse_mapped_cache.get(&key) {
             return cached.clone();
@@ -184,7 +184,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         constraint: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("create_reverse_mapped_type"); 
         // Go：源有字符串索引签名，或（经 apparent 成员的）属性非空且部分可推断
         let source = &self.reify_interface_shell(source);
         let apparent = self.get_apparent_type(source);
@@ -264,7 +264,7 @@ impl Checker {
     }
 
     /// Go apparentType：原始类型的成员来自对应全局接口（Number/String/Boolean）
-    fn primitive_apparent_source(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn primitive_apparent_source(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("primitive_apparent_source"); 
         let Some(name) = self.primitive_interface_name(t) else {
             return Arc::clone(t);
         };
@@ -290,7 +290,7 @@ impl Checker {
         declared
     }
 
-    fn primitive_interface_declared_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    fn primitive_interface_declared_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("primitive_interface_declared_type"); 
         let name = self.primitive_interface_name(t)?;
         let sym = self.globals.get(name)?.clone();
         let declared = self
@@ -301,7 +301,7 @@ impl Checker {
         Some(declared)
     }
 
-    fn primitive_interface_members(&mut self, t: &Arc<Type>) -> Option<Vec<Arc<Symbol>>> {
+    fn primitive_interface_members(&mut self, t: &Arc<Type>) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("primitive_interface_members"); 
         let declared = self.primitive_interface_declared_type(t)?;
         declared.as_structured().map(|s| s.properties.clone())
     }
@@ -312,7 +312,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         constraint: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("infer_reverse_mapped_type"); 
         let key = (source.id, target.id, constraint.id);
         let _cached = self.reverse_mapped_cache.get(&key).cloned();
 
@@ -353,7 +353,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         constraint: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("infer_reverse_mapped_type_worker"); 
         let TypeData::Index(idx) = &constraint.data else {
             return None;
         };
@@ -387,7 +387,7 @@ impl Checker {
 
     /// Go resolveReverseMappedTypeMembers：source 的每个属性生成反向映射符号
     /// （类型经 reverse links 惰性求值）
-    pub(crate) fn resolve_reverse_mapped_type_members(&mut self, t: &Arc<Type>) {
+    pub(crate) fn resolve_reverse_mapped_type_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_reverse_mapped_type_members"); 
         let TypeData::ReverseMapped(r) = &t.data else {
             return;
         };
@@ -473,7 +473,7 @@ impl Checker {
         &mut self,
         mapped: Arc<Type>,
         constraint: Arc<Type>,
-    ) -> (Arc<Type>, Arc<Type>) {
+    ) -> (Arc<Type>, Arc<Type>) { ::tsox_core::fntrace::enter("normalize_reverse_mapped_links"); 
         let TypeData::Index(idx) = &constraint.data else {
             return (mapped, constraint);
         };
@@ -500,7 +500,7 @@ impl Checker {
 impl Checker {
     /// 自引用接口解析期返回的空成员壳：栈上无该符号解析时重解析完整成员并回填壳，
     /// 使所有持有壳的引用收敛（Go 声明类型一次性缓存 + 惰性成员的等价补救）
-    pub(crate) fn reify_interface_shell(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn reify_interface_shell(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("reify_interface_shell"); 
         let Some(sym) = t.symbol.clone() else {
             return Arc::clone(t);
         };
@@ -554,7 +554,7 @@ impl Checker {
         &mut self,
         obj: &Arc<Type>,
         index: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("deferred_indexed_access"); 
         let key = (obj.id, index.id);
         if let Some(cached) = self.deferred_indexed_access_cache.get(&key) {
             return Arc::clone(cached);

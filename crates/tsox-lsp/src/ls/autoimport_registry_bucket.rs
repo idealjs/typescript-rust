@@ -20,17 +20,17 @@ pub struct BucketBuildPreferences {
 }
 
 impl BucketBuildPreferences {
-    pub fn from_user_preferences(_prefs: &UserPreferences) -> BucketBuildPreferences {
+    pub fn from_user_preferences(_prefs: &UserPreferences) -> BucketBuildPreferences { ::tsox_core::fntrace::enter("from_user_preferences"); 
         BucketBuildPreferences::default()
     }
 
-    pub fn equal(&self, other: &BucketBuildPreferences) -> bool {
+    pub fn equal(&self, other: &BucketBuildPreferences) -> bool { ::tsox_core::fntrace::enter("equal"); 
         self.auto_import_entrypoint_directory_search
             == other.auto_import_entrypoint_directory_search
             && unordered_equal(&self.file_exclude_patterns, &other.file_exclude_patterns)
     }
 
-    pub fn clone_prefs(&self) -> BucketBuildPreferences {
+    pub fn clone_prefs(&self) -> BucketBuildPreferences { ::tsox_core::fntrace::enter("clone_prefs"); 
         BucketBuildPreferences {
             file_exclude_patterns: self.file_exclude_patterns.clone(),
             auto_import_entrypoint_directory_search: self.auto_import_entrypoint_directory_search,
@@ -38,7 +38,7 @@ impl BucketBuildPreferences {
     }
 }
 
-fn unordered_equal(a: &[String], b: &[String]) -> bool {
+fn unordered_equal(a: &[String], b: &[String]) -> bool { ::tsox_core::fntrace::enter("unordered_equal"); 
     if a.len() != b.len() {
         return false;
     }
@@ -60,14 +60,14 @@ pub struct BucketState {
 }
 
 impl BucketState {
-    pub fn dirty(&self) -> bool {
+    pub fn dirty(&self) -> bool { ::tsox_core::fntrace::enter("dirty"); 
         self.multiple_files_dirty
             || !self.dirty_file.0.is_empty()
             || self.new_program_structure > NewProgramStructure::False
             || self.dirty_packages.as_ref().map(|s| s.len()).unwrap_or(0) > 0
     }
 
-    pub fn dirty_file_path(&self) -> tsox_core::tspath::Path {
+    pub fn dirty_file_path(&self) -> tsox_core::tspath::Path { ::tsox_core::fntrace::enter("dirty_file_path"); 
         if self.multiple_files_dirty {
             tsox_core::tspath::Path(String::new())
         } else {
@@ -75,7 +75,7 @@ impl BucketState {
         }
     }
 
-    pub fn dirty_packages(&self) -> Option<&Set<String>> {
+    pub fn dirty_packages(&self) -> Option<&Set<String>> { ::tsox_core::fntrace::enter("dirty_packages"); 
         if self.multiple_files_dirty {
             None
         } else {
@@ -83,7 +83,7 @@ impl BucketState {
         }
     }
 
-    pub fn recursive_search_packages(&self) -> Option<&Set<String>> {
+    pub fn recursive_search_packages(&self) -> Option<&Set<String>> { ::tsox_core::fntrace::enter("recursive_search_packages"); 
         self.recursive_search_packages.as_ref()
     }
 
@@ -91,7 +91,7 @@ impl BucketState {
         &self,
         file: &tsox_core::tspath::Path,
         preferences: &UserPreferences,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("possibly_needs_rebuild_for_file"); 
         self.new_program_structure > NewProgramStructure::False
             || self.has_dirty_file_besides(file)
             || !self
@@ -100,7 +100,7 @@ impl BucketState {
             || self.dirty_packages.as_ref().map(|s| s.len()).unwrap_or(0) > 0
     }
 
-    pub fn has_dirty_file_besides(&self, file: &tsox_core::tspath::Path) -> bool {
+    pub fn has_dirty_file_besides(&self, file: &tsox_core::tspath::Path) -> bool { ::tsox_core::fntrace::enter("has_dirty_file_besides"); 
         self.multiple_files_dirty || (!self.dirty_file.0.is_empty() && &self.dirty_file != file)
     }
 }
@@ -117,7 +117,7 @@ pub struct RegistryBucket {
 }
 
 impl RegistryBucket {
-    pub fn new() -> RegistryBucket {
+    pub fn new() -> RegistryBucket { ::tsox_core::fntrace::enter("new"); 
         RegistryBucket {
             state: BucketState {
                 multiple_files_dirty: true,
@@ -128,7 +128,7 @@ impl RegistryBucket {
         }
     }
 
-    pub fn mark_project_file_dirty(&mut self, file: tsox_core::tspath::Path) {
+    pub fn mark_project_file_dirty(&mut self, file: tsox_core::tspath::Path) { ::tsox_core::fntrace::enter("mark_project_file_dirty"); 
         if self.state.has_dirty_file_besides(&file) {
             self.state.multiple_files_dirty = true;
         } else {
@@ -136,7 +136,7 @@ impl RegistryBucket {
         }
     }
 
-    pub fn mark_node_modules_dirty(&mut self, package_name: &str) {
+    pub fn mark_node_modules_dirty(&mut self, package_name: &str) { ::tsox_core::fntrace::enter("mark_node_modules_dirty"); 
         if self.state.multiple_files_dirty {
             return;
         }

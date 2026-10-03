@@ -9,7 +9,7 @@ impl Checker {
         switch_stmt: &Arc<Node>,
         (clause_start, clause_end): (usize, usize),
         access: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_switch_on_discriminant_property"); 
         let Some(prop_name) = Self::get_accessed_property_name_from_node(access) else {
             return Arc::clone(type_);
         };
@@ -75,7 +75,7 @@ impl Checker {
         self.rebuild_union_or_never(type_, filtered)
     }
 
-    pub(crate) fn get_switch_clause_types(&mut self, switch_stmt: &Arc<Node>) -> Vec<Arc<Type>> {
+    pub(crate) fn get_switch_clause_types(&mut self, switch_stmt: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_switch_clause_types"); 
         let NodeData::SwitchStatement(switch_data) = &switch_stmt.data else {
             return Vec::new();
         };
@@ -99,7 +99,7 @@ impl Checker {
         &self,
         source: &Arc<Node>,
         target: &FlowRef,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("optional_chain_contains_target"); 
         let symbol = match target {
             FlowRef::Symbol(symbol) => symbol,
             FlowRef::Node(reference) => {
@@ -113,7 +113,7 @@ impl Checker {
         &self,
         source: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("optional_chain_contains_symbol"); 
         let mut current = Arc::clone(source);
         loop {
             let (inner, is_optional) = match &current.data {
@@ -147,7 +147,7 @@ impl Checker {
         &self,
         source: &Arc<Node>,
         reference: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("optional_chain_contains_reference"); 
         let mut current = Arc::clone(source);
         loop {
             let (inner, is_optional) = match &current.data {
@@ -183,7 +183,7 @@ impl Checker {
         op: SyntaxKind,
         value_node: &Arc<Node>,
         kind: NarrowKind,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_optional_chain_containment"); 
         let is_equality =
             op == SyntaxKind::EqualsEqualsEqualsToken || op == SyntaxKind::EqualsEqualsToken;
         let is_loose =
@@ -212,11 +212,11 @@ impl Checker {
         }
     }
 
-    pub(crate) fn remove_nullable_from_union(&self, type_: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn remove_nullable_from_union(&self, type_: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_nullable_from_union"); 
         self.remove_flags_from_union(type_, TypeFlags::Undefined | TypeFlags::Null)
     }
 
-    pub(crate) fn type_contains_flags(&self, type_: &Arc<Type>, flags: TypeFlags) -> bool {
+    pub(crate) fn type_contains_flags(&self, type_: &Arc<Type>, flags: TypeFlags) -> bool { ::tsox_core::fntrace::enter("type_contains_flags"); 
         if type_.flags.intersects(flags) {
             return true;
         }

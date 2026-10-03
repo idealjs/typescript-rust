@@ -9,7 +9,7 @@ impl Checker {
         name_node: &Arc<Node>,
         prop_type: &Arc<crate::checker::types::Type>,
         ctor: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_assigned_in_constructor"); 
         if name_node.kind == SyntaxKind::ComputedPropertyName {
             return crate::checker::mig::wc1c::r24k17_defs::is_property_initialized_in_constructor(
                 self, name_node, prop_type, ctor,
@@ -31,7 +31,7 @@ impl Checker {
         Self::node_contains_this_assignment(body, name_text)
     }
 
-    pub(crate) fn node_contains_this_assignment(node: &Arc<Node>, name: &str) -> bool {
+    pub(crate) fn node_contains_this_assignment(node: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("node_contains_this_assignment"); 
         if let tsox_frontend::ast::NodeData::BinaryExpression(data) = &node.data {
             if data.operator_token.kind == SyntaxKind::EqualsToken {
                 if Self::is_this_property_access(&data.left, name) {
@@ -60,7 +60,7 @@ impl Checker {
         found
     }
 
-    fn contains_this_property_reference(node: &Arc<Node>, name: &str) -> bool {
+    fn contains_this_property_reference(node: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("contains_this_property_reference"); 
         if Self::is_this_property_access(node, name) {
             return true;
         }
@@ -75,7 +75,7 @@ impl Checker {
         found
     }
 
-    pub(crate) fn is_this_property_access(node: &Arc<Node>, name: &str) -> bool {
+    pub(crate) fn is_this_property_access(node: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_this_property_access"); 
         match &node.data {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(data) => {
                 if data.expression.kind == SyntaxKind::ThisKeyword {
@@ -102,7 +102,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn class_member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn class_member_name_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_member_name_node"); 
         match &node.data {
             tsox_frontend::ast::NodeData::MethodDeclaration(d) => Some(Arc::clone(&d.name)),
             tsox_frontend::ast::NodeData::GetAccessorDeclaration(d) => Some(Arc::clone(&d.name)),
@@ -111,7 +111,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn class_member_name_text(node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn class_member_name_text(node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("class_member_name_text"); 
         if matches!(node.kind, SyntaxKind::Constructor) {
             return Some("constructor".to_string());
         }
@@ -126,7 +126,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn class_member_has_body(node: &Arc<Node>) -> bool {
+    pub(crate) fn class_member_has_body(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_member_has_body"); 
         matches!(
             &node.data,
             tsox_frontend::ast::NodeData::MethodDeclaration(d) if d.body.is_some()
@@ -138,7 +138,7 @@ impl Checker {
 
     pub(crate) fn function_like_params_and_return(
         node: &Arc<Node>,
-    ) -> Option<(&Arc<NodeList>, Option<&Arc<Node>>)> {
+    ) -> Option<(&Arc<NodeList>, Option<&Arc<Node>>)> { ::tsox_core::fntrace::enter("function_like_params_and_return"); 
         match &node.data {
             tsox_frontend::ast::NodeData::FunctionDeclaration(d) => {
                 Some((&d.parameters, d.type_node.as_ref()))
@@ -155,7 +155,7 @@ impl Checker {
         &mut self,
         overload: &Arc<Node>,
         implementation: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("overload_signature_compatible_with_implementation"); 
         let (Some(impl_sig), Some(ov_sig)) = (
             self.signature_of_declaration_node(implementation),
             self.signature_of_declaration_node(overload),
@@ -186,7 +186,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn check_class_member_overloads(&mut self, members: &NodeList) {
+    pub(crate) fn check_class_member_overloads(&mut self, members: &NodeList) { ::tsox_core::fntrace::enter("check_class_member_overloads"); 
         let mut groups: std::collections::BTreeMap<String, Vec<usize>> =
             std::collections::BTreeMap::new();
         for (idx, m) in members.iter().enumerate() {
@@ -269,7 +269,7 @@ impl Checker {
 
     // Go getSignatureFromDeclaration：直接从声明构建签名，不经符号签名表
     // （实现签名在 getSignaturesOfSymbol 语义下被剔除，表内查不到）
-    fn signature_of_declaration_node(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> {
+    fn signature_of_declaration_node(&mut self, node: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("signature_of_declaration_node"); 
         if node.kind == SyntaxKind::Constructor {
             let class_node = node.parent()?;
             let owner_symbol = self.program.symbol_map().symbol_of(&class_node).cloned()?;
@@ -311,7 +311,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn report_implementation_expected_error(&mut self, members: &NodeList, idx: usize) {
+    pub(crate) fn report_implementation_expected_error(&mut self, members: &NodeList, idx: usize) { ::tsox_core::fntrace::enter("report_implementation_expected_error"); 
         let node = Arc::clone(&members.nodes[idx]);
         let name_text = Self::class_member_name_text(&node);
         if let Some(sib) = members.nodes.get(idx + 1) {

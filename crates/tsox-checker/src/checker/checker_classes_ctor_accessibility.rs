@@ -1,6 +1,6 @@
 use crate::checker::checker_classes::*;
 
-fn class_like_declarations(symbol: &Arc<Symbol>) -> Vec<Arc<Node>> {
+fn class_like_declarations(symbol: &Arc<Symbol>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("class_like_declarations"); 
     symbol
         .declarations
         .iter()
@@ -14,7 +14,7 @@ fn class_like_declarations(symbol: &Arc<Symbol>) -> Vec<Arc<Node>> {
         .collect()
 }
 
-fn class_display_name(decl: &Arc<Node>) -> String {
+fn class_display_name(decl: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("class_display_name"); 
     let (name, type_parameters) = match &decl.data {
         tsox_frontend::ast::NodeData::ClassDeclaration(d) => (
             d.name.as_ref().map(|n| n.text().to_string()),
@@ -48,7 +48,7 @@ fn class_display_name(decl: &Arc<Node>) -> String {
     }
 }
 
-fn node_within_class(node: &Arc<Node>, class_decl: &Arc<Node>) -> bool {
+fn node_within_class(node: &Arc<Node>, class_decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_within_class"); 
     let mut current = node.parent();
     while let Some(c) = current {
         if Arc::ptr_eq(&c, class_decl) {
@@ -60,7 +60,7 @@ fn node_within_class(node: &Arc<Node>, class_decl: &Arc<Node>) -> bool {
 }
 
 impl Checker {
-    pub(crate) fn check_new_expression_ctor_accessibility(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn check_new_expression_ctor_accessibility(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_new_expression_ctor_accessibility"); 
         let tsox_frontend::ast::NodeData::NewExpression(data) = &node.data else {
             return false;
         };
@@ -112,7 +112,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn check_extends_private_ctor(&mut self, type_ref: &Arc<Node>) {
+    pub(crate) fn check_extends_private_ctor(&mut self, type_ref: &Arc<Node>) { ::tsox_core::fntrace::enter("check_extends_private_ctor"); 
         let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ewa) = &type_ref.data else {
             return;
         };
@@ -149,7 +149,7 @@ impl Checker {
         }
     }
 
-    fn node_class_chain_contains(&self, node: &Arc<Node>, target_decl: &Arc<Node>) -> bool {
+    fn node_class_chain_contains(&self, node: &Arc<Node>, target_decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_class_chain_contains"); 
         let mut ancestor = node.parent();
         while let Some(a) = ancestor {
             if matches!(
@@ -177,7 +177,7 @@ impl Checker {
         false
     }
 
-    fn symbol_of_entity_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn symbol_of_entity_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("symbol_of_entity_expression"); 
         match node.kind {
             SyntaxKind::Identifier => self.resolve_identifier(node),
             SyntaxKind::PropertyAccessExpression | SyntaxKind::QualifiedName => {

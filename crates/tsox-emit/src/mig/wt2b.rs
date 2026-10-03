@@ -34,7 +34,7 @@ impl ClassFieldsTransformer<'_> {
         &mut self,
         properties_or_class_static_blocks: &[Arc<Node>],
         receiver: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("generate_initialized_property_expressions_or_class_static_block"); 
         let mut expressions: Vec<Arc<Node>> = Vec::new();
         for property in properties_or_class_static_blocks {
             let expression = if is_class_static_block_declaration(property) {
@@ -58,7 +58,7 @@ impl ClassFieldsTransformer<'_> {
         expressions
     }
 
-    pub fn transform_class_static_block_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_class_static_block_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_class_static_block_declaration"); 
         if !self.should_transform_private_elements_or_class_static_blocks {
             return None;
         }
@@ -130,7 +130,7 @@ impl ClassFieldsTransformer<'_> {
         Some(iife)
     }
 
-    pub fn transform_property(&mut self, property: &Arc<Node>, receiver: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_property(&mut self, property: &Arc<Node>, receiver: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property"); 
         let saved_current_class_element = self.current_class_element.clone();
         let transformed = self.transform_property_worker(property, receiver);
         if let Some(transformed) = transformed.as_ref() {
@@ -155,7 +155,7 @@ impl ClassFieldsTransformer<'_> {
         transformed
     }
 
-    fn transform_property_worker(&mut self, property: &Arc<Node>, receiver: &Arc<Node>) -> Option<Arc<Node>> {
+    fn transform_property_worker(&mut self, property: &Arc<Node>, receiver: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_worker"); 
         let emit_assignment = !self.compiler_options.get_use_define_for_class_fields();
 
         let mut property = Arc::clone(property);
@@ -325,7 +325,7 @@ impl ClassFieldsTransformer<'_> {
         Some(new_object_define_property_call_wt2b(&factory, receiver, &name, &descriptor))
     }
 
-    fn should_transform_class_element_to_weak_map_wt2b(&self, node: &Arc<Node>) -> bool {
+    fn should_transform_class_element_to_weak_map_wt2b(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_transform_class_element_to_weak_map_wt2b"); 
         if self.should_transform_private_elements_or_class_static_blocks {
             return true;
         }
@@ -337,7 +337,7 @@ impl ClassFieldsTransformer<'_> {
     }
 }
 
-fn static_block_statements(node: &Arc<Node>) -> &[Arc<Node>] {
+fn static_block_statements(node: &Arc<Node>) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("static_block_statements"); 
     match &node.data {
         NodeData::ClassStaticBlockDeclaration(static_block) => match &static_block.body.data {
             NodeData::Block(block) => &block.statements.nodes,
@@ -347,11 +347,11 @@ fn static_block_statements(node: &Arc<Node>) -> &[Arc<Node>] {
     }
 }
 
-fn static_block_first_expression(node: &Arc<Node>) -> Option<&Arc<Node>> {
+fn static_block_first_expression(node: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("static_block_first_expression"); 
     static_block_statements(node).first().and_then(|s| s.expression())
 }
 
-fn static_block_statements_loc(node: &Arc<Node>) -> TextRange {
+fn static_block_statements_loc(node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("static_block_statements_loc"); 
     match &node.data {
         NodeData::ClassStaticBlockDeclaration(static_block) => match &static_block.body.data {
             NodeData::Block(block) => block.statements.loc,
@@ -366,7 +366,7 @@ fn new_object_define_property_call_wt2b(
     target: &Arc<Node>,
     name: &Arc<Node>,
     descriptor: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_object_define_property_call_wt2b"); 
     factory.new_call_expression(
         &factory.new_property_access_expression(
             &factory.new_identifier("Object"),
@@ -381,14 +381,14 @@ fn new_object_define_property_call_wt2b(
     )
 }
 
-fn is_comma_like_expression(node: &Arc<Node>) -> bool {
+fn is_comma_like_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_comma_like_expression"); 
     match &node.data {
         NodeData::BinaryExpression(binary) => binary.operator_token.kind == SyntaxKind::CommaToken,
         _ => false,
     }
 }
 
-fn is_void_zero_literal(node: &Arc<Node>) -> bool {
+fn is_void_zero_literal(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_void_zero_literal"); 
     is_void_expression(node)
         && node
             .expression()

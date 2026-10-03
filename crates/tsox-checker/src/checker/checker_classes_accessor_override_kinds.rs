@@ -6,7 +6,7 @@ enum PropMemberKind {
     Accessor,
 }
 
-fn member_override_kind(member: &Arc<Node>) -> Option<PropMemberKind> {
+fn member_override_kind(member: &Arc<Node>) -> Option<PropMemberKind> { ::tsox_core::fntrace::enter("member_override_kind"); 
     match member.kind {
         SyntaxKind::PropertyDeclaration => Some(PropMemberKind::Property),
         SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => Some(PropMemberKind::Accessor),
@@ -14,7 +14,7 @@ fn member_override_kind(member: &Arc<Node>) -> Option<PropMemberKind> {
     }
 }
 
-fn member_name_text(member: &Arc<Node>) -> Option<String> {
+fn member_name_text(member: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("member_name_text"); 
     let name = member.name()?;
     match name.kind {
         SyntaxKind::Identifier | SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
@@ -24,19 +24,19 @@ fn member_name_text(member: &Arc<Node>) -> Option<String> {
     }
 }
 
-fn member_is_private(member: &Arc<Node>) -> bool {
+fn member_is_private(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("member_is_private"); 
     member.has_syntactic_modifier(ModifierFlags::Private)
         || member
             .name()
             .is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier)
 }
 
-fn member_is_abstract(member: &Arc<Node>) -> bool {
+fn member_is_abstract(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("member_is_abstract"); 
     member.has_syntactic_modifier(ModifierFlags::Abstract)
 }
 
 impl Checker {
-    pub(crate) fn check_property_accessor_override_kinds(&self, class_node: &Arc<Node>) {
+    pub(crate) fn check_property_accessor_override_kinds(&self, class_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_property_accessor_override_kinds"); 
         let Some((base_node, _)) = self.extends_base_of(class_node) else {
             return;
         };
@@ -112,7 +112,7 @@ impl Checker {
         &self,
         base_node: &Arc<Node>,
         name: &str,
-    ) -> Option<PropMemberKind> {
+    ) -> Option<PropMemberKind> { ::tsox_core::fntrace::enter("base_member_kind"); 
         let mut current = Arc::clone(base_node);
         let mut guard = 0;
         loop {

@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub fn check_return_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_return_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_return_statement"); 
         let container = crate::checker::utilities_get_assignment_target::
             get_containing_function_or_class_static_block(node);
         if container

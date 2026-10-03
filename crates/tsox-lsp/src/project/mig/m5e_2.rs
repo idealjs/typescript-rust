@@ -20,7 +20,7 @@ use tsox_frontend::ast;
 
 use crate::project::project::{Kind as ProjectKind, Project};
 
-fn set_tristate(m: &mut HashMap<String, serde_json::Value>, key: &str, v: core::Tristate) {
+fn set_tristate(m: &mut HashMap<String, serde_json::Value>, key: &str, v: core::Tristate) { ::tsox_core::fntrace::enter("set_tristate"); 
     if v == core::Tristate::True {
         m.insert(key.to_string(), serde_json::Value::Bool(true));
     } else if v == core::Tristate::False {
@@ -28,7 +28,7 @@ fn set_tristate(m: &mut HashMap<String, serde_json::Value>, key: &str, v: core::
     }
 }
 
-fn bool_telemetry(v: bool) -> String {
+fn bool_telemetry(v: bool) -> String { ::tsox_core::fntrace::enter("bool_telemetry"); 
     if v {
         "true".to_string()
     } else {
@@ -36,7 +36,7 @@ fn bool_telemetry(v: bool) -> String {
     }
 }
 
-fn count_file_stats(source_files: &[Arc<ast::SourceFile>]) -> lsproto::ProjectInfoTelemetryMeasurements {
+fn count_file_stats(source_files: &[Arc<ast::SourceFile>]) -> lsproto::ProjectInfoTelemetryMeasurements { ::tsox_core::fntrace::enter("count_file_stats"); 
     let mut stats = lsproto::ProjectInfoTelemetryMeasurements::default();
     for sf in source_files {
         let size = sf.node.loc.end as f64;
@@ -69,7 +69,7 @@ fn count_file_stats(source_files: &[Arc<ast::SourceFile>]) -> lsproto::ProjectIn
 }
 
 impl Session {
-    pub fn send_performance_telemetry(&self, ctx: &background::Context) {
+    pub fn send_performance_telemetry(&self, ctx: &background::Context) { ::tsox_core::fntrace::enter("send_performance_telemetry"); 
         let Some(client) = &self.client else { return };
         if !self.options.telemetry_enabled {
             return;
@@ -134,7 +134,7 @@ impl Session {
         &self,
         old_snapshot: &Snapshot,
         new_snapshot: &Snapshot,
-    ) {
+    ) { ::tsox_core::fntrace::enter("send_project_info_telemetry_for_new_projects"); 
         if !self.options.telemetry_enabled {
             return;
         }
@@ -156,7 +156,7 @@ impl Session {
         }
     }
 
-    fn send_project_info_telemetry(&self, ctx: &background::Context, project: &Project) {
+    fn send_project_info_telemetry(&self, ctx: &background::Context, project: &Project) { ::tsox_core::fntrace::enter("send_project_info_telemetry"); 
         let Some(client) = &self.client else { return };
         if !self.options.telemetry_enabled {
             return;
@@ -177,7 +177,7 @@ impl Session {
         self.seen_projects.lock().unwrap().insert(project.config_file_path.clone());
     }
 
-    fn collect_project_info_telemetry(&self, project: &Project) -> lsproto::TelemetryEvent {
+    fn collect_project_info_telemetry(&self, project: &Project) -> lsproto::TelemetryEvent { ::tsox_core::fntrace::enter("collect_project_info_telemetry"); 
         let mut opts = project
             .command_line
             .as_ref()

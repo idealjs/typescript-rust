@@ -16,7 +16,7 @@ pub struct PatternAmbientModule {
     pub symbol: Arc<Symbol>,
 }
 
-pub fn empty_conditional_type_data() -> ConditionalTypeData {
+pub fn empty_conditional_type_data() -> ConditionalTypeData { ::tsox_core::fntrace::enter("empty_conditional_type_data"); 
     ConditionalTypeData {
         constrained: ConstrainedTypeData::default(),
         root: None,
@@ -33,7 +33,7 @@ pub fn empty_conditional_type_data() -> ConditionalTypeData {
     }
 }
 
-pub fn empty_index_type_data() -> IndexTypeData {
+pub fn empty_index_type_data() -> IndexTypeData { ::tsox_core::fntrace::enter("empty_index_type_data"); 
     IndexTypeData {
         constrained: ConstrainedTypeData::default(),
         target: None,
@@ -41,7 +41,7 @@ pub fn empty_index_type_data() -> IndexTypeData {
     }
 }
 
-pub fn empty_indexed_access_type_data() -> IndexedAccessTypeData {
+pub fn empty_indexed_access_type_data() -> IndexedAccessTypeData { ::tsox_core::fntrace::enter("empty_indexed_access_type_data"); 
     IndexedAccessTypeData {
         constrained: ConstrainedTypeData::default(),
         object_type: None,
@@ -50,7 +50,7 @@ pub fn empty_indexed_access_type_data() -> IndexedAccessTypeData {
     }
 }
 
-pub fn empty_literal_type_data(value: LiteralValue) -> LiteralTypeData {
+pub fn empty_literal_type_data(value: LiteralValue) -> LiteralTypeData { ::tsox_core::fntrace::enter("empty_literal_type_data"); 
     LiteralTypeData {
         value,
         fresh_type: OnceLock::new(),
@@ -58,13 +58,13 @@ pub fn empty_literal_type_data(value: LiteralValue) -> LiteralTypeData {
     }
 }
 
-pub fn empty_intrinsic_type_data() -> IntrinsicTypeData {
+pub fn empty_intrinsic_type_data() -> IntrinsicTypeData { ::tsox_core::fntrace::enter("empty_intrinsic_type_data"); 
     IntrinsicTypeData {
         intrinsic_name: String::new(),
     }
 }
 
-pub fn empty_mapped_type_data() -> MappedTypeData {
+pub fn empty_mapped_type_data() -> MappedTypeData { ::tsox_core::fntrace::enter("empty_mapped_type_data"); 
     MappedTypeData {
         object: ObjectTypeData::default(),
         declaration: None,
@@ -80,7 +80,7 @@ pub fn empty_mapped_type_data() -> MappedTypeData {
     }
 }
 
-pub fn empty_reverse_mapped_type_data() -> ReverseMappedTypeData {
+pub fn empty_reverse_mapped_type_data() -> ReverseMappedTypeData { ::tsox_core::fntrace::enter("empty_reverse_mapped_type_data"); 
     ReverseMappedTypeData {
         object: ObjectTypeData::default(),
         source: None,
@@ -89,7 +89,7 @@ pub fn empty_reverse_mapped_type_data() -> ReverseMappedTypeData {
     }
 }
 
-pub fn empty_evolving_array_type_data() -> EvolvingArrayTypeData {
+pub fn empty_evolving_array_type_data() -> EvolvingArrayTypeData { ::tsox_core::fntrace::enter("empty_evolving_array_type_data"); 
     EvolvingArrayTypeData {
         object: ObjectTypeData::default(),
         element_type: None,
@@ -97,21 +97,21 @@ pub fn empty_evolving_array_type_data() -> EvolvingArrayTypeData {
     }
 }
 
-pub fn empty_instantiation_expression_type_data() -> InstantiationExpressionTypeData {
+pub fn empty_instantiation_expression_type_data() -> InstantiationExpressionTypeData { ::tsox_core::fntrace::enter("empty_instantiation_expression_type_data"); 
     InstantiationExpressionTypeData {
         object: ObjectTypeData::default(),
         node: None,
     }
 }
 
-pub fn empty_string_mapping_type_data() -> StringMappingTypeData {
+pub fn empty_string_mapping_type_data() -> StringMappingTypeData { ::tsox_core::fntrace::enter("empty_string_mapping_type_data"); 
     StringMappingTypeData {
         constrained: ConstrainedTypeData::default(),
         target: None,
     }
 }
 
-pub fn empty_substitution_type_data() -> SubstitutionTypeData {
+pub fn empty_substitution_type_data() -> SubstitutionTypeData { ::tsox_core::fntrace::enter("empty_substitution_type_data"); 
     SubstitutionTypeData {
         constrained: ConstrainedTypeData::default(),
         base_type: None,
@@ -119,7 +119,7 @@ pub fn empty_substitution_type_data() -> SubstitutionTypeData {
     }
 }
 
-pub fn empty_template_literal_type_data() -> TemplateLiteralTypeData {
+pub fn empty_template_literal_type_data() -> TemplateLiteralTypeData { ::tsox_core::fntrace::enter("empty_template_literal_type_data"); 
     TemplateLiteralTypeData {
         constrained: ConstrainedTypeData::default(),
         texts: Vec::new(),
@@ -127,7 +127,7 @@ pub fn empty_template_literal_type_data() -> TemplateLiteralTypeData {
     }
 }
 
-pub fn get_type_reference_name_arc(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_type_reference_name_arc(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_reference_name_arc"); 
     match node.kind {
         SyntaxKind::TypeReference => {
             Some(Arc::clone(&node.as_type_reference_node().type_name))
@@ -159,7 +159,7 @@ impl R20K6CheckerExt for Checker {
         type_reference: &Arc<Node>,
         meaning: SymbolFlags,
         ignore_errors: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_type_reference_name"); 
         let Some(name) = get_type_reference_name_arc(type_reference) else {
             return Some(self.unknown_symbol());
         };

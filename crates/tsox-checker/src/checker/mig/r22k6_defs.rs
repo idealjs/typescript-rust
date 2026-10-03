@@ -23,11 +23,11 @@ thread_local! {
         const { RefCell::new(Vec::new()) };
 }
 
-pub fn take_pattern_ambient_modules() -> Vec<PatternAmbientModule> {
+pub fn take_pattern_ambient_modules() -> Vec<PatternAmbientModule> { ::tsox_core::fntrace::enter("take_pattern_ambient_modules"); 
     PATTERN_AMBIENT_MODULES.with(|m| std::mem::take(&mut *m.borrow_mut()))
 }
 
-pub fn set_pattern_ambient_modules(modules: Vec<PatternAmbientModule>) {
+pub fn set_pattern_ambient_modules(modules: Vec<PatternAmbientModule>) { ::tsox_core::fntrace::enter("set_pattern_ambient_modules"); 
     PATTERN_AMBIENT_MODULES.with(|m| *m.borrow_mut() = modules);
 }
 
@@ -36,33 +36,33 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-pub fn subtype_reduction_cache_get(key: &CacheHashKey) -> Option<Vec<Arc<Type>>> {
+pub fn subtype_reduction_cache_get(key: &CacheHashKey) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("subtype_reduction_cache_get"); 
     SUBTYPE_REDUCTION_CACHE.with(|c| c.borrow().get(key).cloned())
 }
 
-pub fn subtype_reduction_cache_insert(key: CacheHashKey, types: Vec<Arc<Type>>) {
+pub fn subtype_reduction_cache_insert(key: CacheHashKey, types: Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("subtype_reduction_cache_insert"); 
     SUBTYPE_REDUCTION_CACHE.with(|c| c.borrow_mut().insert(key, types));
 }
 
 impl Checker {
-    pub fn get_type_facts(&mut self, t: &Arc<Type>, mask: TypeFacts) -> TypeFacts {
+    pub fn get_type_facts(&mut self, t: &Arc<Type>, mask: TypeFacts) -> TypeFacts { ::tsox_core::fntrace::enter("get_type_facts"); 
         self.get_type_facts_worker(t, mask) & mask
     }
 }
 
-pub fn node_modifier_flags(node: &Arc<Node>) -> tsox_frontend::ast::ModifierFlags {
+pub fn node_modifier_flags(node: &Arc<Node>) -> tsox_frontend::ast::ModifierFlags { ::tsox_core::fntrace::enter("node_modifier_flags"); 
     node.modifiers()
         .map(|m| m.modifier_flags)
         .unwrap_or_default()
 }
 
-pub fn set_emit_flags_single_line(_e: &EmitContextStub, _node: &Arc<Node>) {}
+pub fn set_emit_flags_single_line(_e: &EmitContextStub, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_emit_flags_single_line"); }
 
 pub struct SignatureToSignatureDeclarationOptions {
     pub name: Arc<Node>,
 }
 
-fn token_node(kind: SyntaxKind) -> Arc<Node> {
+fn token_node(kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("token_node"); 
     Arc::new(Node::new(kind, NodeData::Token))
 }
 
@@ -235,7 +235,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         question_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(PropertyDeclarationData {
@@ -259,7 +259,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_method_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::MethodDeclaration,
             NodeData::MethodDeclaration(MethodDeclarationData {
@@ -283,7 +283,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         type_parameters: NodeList,
         heritage_clauses: NodeList,
         members: NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ClassDeclaration,
             NodeData::ClassDeclaration(ClassDeclarationData {
@@ -303,7 +303,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         type_parameters: NodeList,
         heritage_clauses: NodeList,
         members: NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_interface_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::InterfaceDeclaration,
             NodeData::InterfaceDeclaration(InterfaceDeclarationData {
@@ -316,7 +316,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_heritage_clause(&self, token: SyntaxKind, types: NodeList) -> Arc<Node> {
+    fn new_heritage_clause(&self, token: SyntaxKind, types: NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("new_heritage_clause"); 
         Arc::new(Node::new(
             SyntaxKind::HeritageClause,
             NodeData::HeritageClause(HeritageClauseData {
@@ -333,7 +333,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         question_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_signature_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::PropertySignature,
             NodeData::PropertySignatureDeclaration(PropertySignatureDeclarationData {
@@ -355,7 +355,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_constructor_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::Constructor,
             NodeData::ConstructorDeclaration(ConstructorDeclarationData {
@@ -373,7 +373,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         &self,
         modifiers: Option<Arc<ModifierList>>,
         declaration_list: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_variable_statement"); 
         Arc::new(Node::new(
             SyntaxKind::VariableStatement,
             NodeData::VariableStatement(VariableStatementData {
@@ -387,7 +387,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         &self,
         declarations: NodeList,
         _flags: tsox_frontend::ast::NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_variable_declaration_list"); 
         Arc::new(Node::new(
             SyntaxKind::VariableDeclarationList,
             NodeData::VariableDeclarationList(VariableDeclarationListData {
@@ -402,7 +402,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         exclamation_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_variable_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::VariableDeclaration,
             NodeData::VariableDeclaration(VariableDeclarationData {
@@ -414,7 +414,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_expression_statement(&self, expression: Arc<Node>) -> Arc<Node> {
+    fn new_expression_statement(&self, expression: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_expression_statement"); 
         Arc::new(Node::new(
             SyntaxKind::ExpressionStatement,
             NodeData::ExpressionStatement(ExpressionStatementData { expression }),
@@ -428,7 +428,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         export_clause: Arc<Node>,
         module_specifier: Option<Arc<Node>>,
         attributes: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_export_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ExportDeclaration,
             NodeData::ExportDeclaration(ExportDeclarationData {
@@ -441,7 +441,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_named_exports(&self, elements: NodeList) -> Arc<Node> {
+    fn new_named_exports(&self, elements: NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("new_named_exports"); 
         Arc::new(Node::new(
             SyntaxKind::NamedExports,
             NodeData::NamedExports(NamedExportsData {
@@ -455,7 +455,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         is_type_only: bool,
         property_name: Option<Arc<Node>>,
         name: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_export_specifier"); 
         Arc::new(Node::new(
             SyntaxKind::ExportSpecifier,
             NodeData::ExportSpecifier(ExportSpecifierData {
@@ -473,7 +473,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         name: Arc<Node>,
         attributes: Option<Arc<Node>>,
         body: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_module_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ModuleDeclaration,
             NodeData::ModuleDeclaration(ModuleDeclarationData {
@@ -486,7 +486,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_module_block(&self, statements: NodeList) -> Arc<Node> {
+    fn new_module_block(&self, statements: NodeList) -> Arc<Node> { ::tsox_core::fntrace::enter("new_module_block"); 
         Arc::new(Node::new(
             SyntaxKind::ModuleBlock,
             NodeData::ModuleBlock(ModuleBlockData {
@@ -501,7 +501,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         name: Arc<Node>,
         type_parameters: NodeList,
         type_node: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_type_alias_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::TypeAliasDeclaration,
             NodeData::TypeAliasDeclaration(TypeAliasDeclarationData {
@@ -517,7 +517,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         &self,
         type_name: &Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_type_reference_node"); 
         Arc::new(Node::new(
             SyntaxKind::TypeReference,
             NodeData::TypeReferenceNode(TypeReferenceNodeData {
@@ -533,7 +533,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         question_dot_token: Option<Arc<Node>>,
         name: &Arc<Node>,
         _flags: tsox_frontend::ast::NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_access_expression"); 
         Arc::new(Node::new(
             SyntaxKind::PropertyAccessExpression,
             NodeData::PropertyAccessExpression(tsox_frontend::ast::node_data_generated::PropertyAccessExpressionData {
@@ -548,7 +548,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         &self,
         object_type: &Arc<Node>,
         index_type: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_indexed_access_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::IndexedAccessType,
             NodeData::IndexedAccessTypeNode(tsox_frontend::ast::node_data_generated::IndexedAccessTypeNodeData {
@@ -558,7 +558,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_parenthesized_type_node(&self, type_node: &Arc<Node>) -> Arc<Node> {
+    fn new_parenthesized_type_node(&self, type_node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_parenthesized_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::ParenthesizedType,
             NodeData::ParenthesizedTypeNode(tsox_frontend::ast::node_data_generated::ParenthesizedTypeNodeData {
@@ -567,7 +567,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_type_query_node(&self, expr_name: &Arc<Node>) -> Arc<Node> {
+    fn new_type_query_node(&self, expr_name: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_type_query_node"); 
         Arc::new(Node::new(
             SyntaxKind::TypeQuery,
             NodeData::TypeQueryNode(TypeQueryNodeData {
@@ -577,7 +577,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         ))
     }
 
-    fn new_literal_type_node(&self, literal: Arc<Node>) -> Arc<Node> {
+    fn new_literal_type_node(&self, literal: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_literal_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::LiteralType,
             NodeData::LiteralTypeNode(tsox_frontend::ast::node_data_generated::LiteralTypeNodeData { literal }),
@@ -589,7 +589,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         expression: &Arc<Node>,
         question_dot_token: Option<Arc<Node>>,
         argument_expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_element_access_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ElementAccessExpression,
             NodeData::ElementAccessExpression(tsox_frontend::ast::node_data_generated::ElementAccessExpressionData {
@@ -605,7 +605,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         node: &Arc<Node>,
         _type_name: &Arc<Node>,
         _type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_type_reference_node"); 
         Arc::clone(node)
     }
 
@@ -615,7 +615,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         _argument: Option<&Arc<Node>>,
         _qualifier: Option<&Arc<Node>>,
         _type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_import_type_node"); 
         Arc::clone(node)
     }
 
@@ -624,11 +624,11 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         node: &Arc<Node>,
         _kind: SyntaxKind,
         _text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("add_synthetic_leading_comment"); 
         Arc::clone(node)
     }
 
-    fn new_keyword_type_node_ex(&self, kind: SyntaxKind) -> Arc<Node> {
+    fn new_keyword_type_node_ex(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_keyword_type_node_ex"); 
         token_node(kind)
     }
 
@@ -640,7 +640,7 @@ impl R22K6NodeFactoryExt for NodeFactoryStub {
         type_parameters: Option<Arc<NodeList>>,
         heritage_clauses: Option<Arc<NodeList>>,
         members: Arc<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_class_declaration"); 
         if let NodeData::ClassDeclaration(d) = &node.data {
             return Arc::new(Node::new(
                 SyntaxKind::ClassDeclaration,
@@ -682,7 +682,7 @@ impl<'a> R22K6NodeBuilderExt for NodeBuilderImpl<'a> {
         signature: &Arc<Signature>,
         kind: SyntaxKind,
         options: Option<&SignatureToSignatureDeclarationOptions>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("signature_to_signature_declaration_helper"); 
         let _ = options;
         if let Some(decl) = signature.declaration.as_ref() {
             return Arc::clone(decl);
@@ -694,7 +694,7 @@ impl<'a> R22K6NodeBuilderExt for NodeBuilderImpl<'a> {
         &mut self,
         info: &crate::checker::types_impl_chunk_3::IndexInfo,
         _options: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("index_info_to_index_signature_declaration_helper"); 
         let _ = info;
         token_node(SyntaxKind::IndexSignature)
     }
@@ -703,7 +703,7 @@ impl<'a> R22K6NodeBuilderExt for NodeBuilderImpl<'a> {
         &mut self,
         property: &Arc<tsox_frontend::ast::Symbol>,
         mut elements: Vec<Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("add_property_to_element_list"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let t = ch.get_type_of_symbol(property);
         let type_node = self.type_to_type_node(&t);
@@ -724,7 +724,7 @@ pub fn filter_type_ext(
     c: &mut Checker,
     t: &Arc<Type>,
     f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> bool,
-) -> Arc<Type> {
+) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_type_ext"); 
     if t.flags.intersects(TypeFlags::Union) {
         let types = t.types().unwrap_or(&[]).to_vec();
         let filtered: Vec<Arc<Type>> = types.iter().filter(|u| f(c, u)).cloned().collect();
@@ -768,7 +768,7 @@ pub fn map_type_ext(
     c: &mut Checker,
     t: &Arc<Type>,
     f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> Option<Arc<Type>>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type_ext"); 
     if t.flags.intersects(TypeFlags::Never) {
         return Some(Arc::clone(t));
     }

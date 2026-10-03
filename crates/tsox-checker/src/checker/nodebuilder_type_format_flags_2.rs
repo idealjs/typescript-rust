@@ -20,7 +20,7 @@ impl TypeFormatFlags {
 
     pub const IN_TYPE_ALIAS: Self = Self(1 << 9);
 
-    pub fn contains(self, other: Self) -> bool {
+    pub fn contains(self, other: Self) -> bool { ::tsox_core::fntrace::enter("contains"); 
         (self.0 & other.0) == other.0
     }
 
@@ -59,7 +59,7 @@ pub enum DisplayPartKind {
 }
 
 impl DisplayPartKind {
-    pub fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
         match self {
             DisplayPartKind::Keyword => "keyword",
             DisplayPartKind::FunctionName => "functionName",
@@ -81,7 +81,7 @@ impl DisplayPartKind {
 }
 
 impl SymbolDisplayPart {
-    pub fn new(text: impl Into<String>, kind: DisplayPartKind) -> Self {
+    pub fn new(text: impl Into<String>, kind: DisplayPartKind) -> Self { ::tsox_core::fntrace::enter("new"); 
         SymbolDisplayPart {
             text: text.into(),
             kind,
@@ -89,7 +89,7 @@ impl SymbolDisplayPart {
     }
 }
 
-pub(crate) fn module_specifier_of_name(name: &str) -> String {
+pub(crate) fn module_specifier_of_name(name: &str) -> String { ::tsox_core::fntrace::enter("module_specifier_of_name"); 
     let base = name.rsplit(['/', '\\']).next().unwrap_or(name);
     for ext in [
         ".d.ts", ".d.mts", ".d.cts", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".cjs",
@@ -101,7 +101,7 @@ pub(crate) fn module_specifier_of_name(name: &str) -> String {
     base.to_string()
 }
 
-pub(crate) fn is_keyword_type_name(name: &str) -> bool {
+pub(crate) fn is_keyword_type_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_keyword_type_name"); 
     matches!(
         name,
         "any"
@@ -122,23 +122,23 @@ pub(crate) fn is_keyword_type_name(name: &str) -> bool {
     )
 }
 
-pub(crate) fn push_keyword(parts: &mut Vec<SymbolDisplayPart>, text: &str) {
+pub(crate) fn push_keyword(parts: &mut Vec<SymbolDisplayPart>, text: &str) { ::tsox_core::fntrace::enter("push_keyword"); 
     parts.push(SymbolDisplayPart::new(text, DisplayPartKind::Keyword));
 }
 
-pub(crate) fn push_space(parts: &mut Vec<SymbolDisplayPart>, text: &str) {
+pub(crate) fn push_space(parts: &mut Vec<SymbolDisplayPart>, text: &str) { ::tsox_core::fntrace::enter("push_space"); 
     parts.push(SymbolDisplayPart::new(text, DisplayPartKind::Space));
 }
 
-pub(crate) fn push_punctuation(parts: &mut Vec<SymbolDisplayPart>, text: &str) {
+pub(crate) fn push_punctuation(parts: &mut Vec<SymbolDisplayPart>, text: &str) { ::tsox_core::fntrace::enter("push_punctuation"); 
     parts.push(SymbolDisplayPart::new(text, DisplayPartKind::Punctuation));
 }
 
-pub(crate) fn push_part(parts: &mut Vec<SymbolDisplayPart>, text: &str, kind: DisplayPartKind) {
+pub(crate) fn push_part(parts: &mut Vec<SymbolDisplayPart>, text: &str, kind: DisplayPartKind) { ::tsox_core::fntrace::enter("push_part"); 
     parts.push(SymbolDisplayPart::new(text, kind));
 }
 
-pub(crate) fn display_kind_for_symbol(symbol: &Symbol) -> DisplayPartKind {
+pub(crate) fn display_kind_for_symbol(symbol: &Symbol) -> DisplayPartKind { ::tsox_core::fntrace::enter("display_kind_for_symbol"); 
     let flags = symbol.flags;
     if flags.intersects(SymbolFlags::Function | SymbolFlags::Method) {
         DisplayPartKind::FunctionName

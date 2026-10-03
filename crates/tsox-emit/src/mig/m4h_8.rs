@@ -23,7 +23,7 @@ use tsox_frontend::ast::node_data_generated::is_class_expression;
 fn class_or_constructor_parameter_is_decorated(
     use_legacy_decorators: bool,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("class_or_constructor_parameter_is_decorated"); 
     if node_is_decorated(use_legacy_decorators, node, None, None) {
         return true;
     }
@@ -35,7 +35,7 @@ fn class_or_constructor_parameter_is_decorated(
     }
 }
 
-fn can_ignore_empty_string_literal_in_assigned_name(node: Option<&Arc<Node>>) -> bool {
+fn can_ignore_empty_string_literal_in_assigned_name(node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("can_ignore_empty_string_literal_in_assigned_name"); 
     let Some(node) = node else {
         return false;
     };
@@ -46,14 +46,14 @@ fn can_ignore_empty_string_literal_in_assigned_name(node: Option<&Arc<Node>>) ->
 }
 
 impl EsDecoratorTransformer {
-    pub fn visit_this_expression(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_this_expression(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_this_expression"); 
         if let Some(class_this) = &self.class_this {
             return class_this.clone();
         }
         node.clone()
     }
 
-    pub fn visit_call_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_call_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_call_expression"); 
         let (call_expression, call_arguments) = match &node.data {
             NodeData::CallExpression(d) => (d.expression.clone(), d.arguments.clone()),
             _ => unreachable!(),
@@ -75,7 +75,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_tagged_template_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_tagged_template_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_tagged_template_expression"); 
         let (tag, template, flags) = match &node.data {
             NodeData::TaggedTemplateExpression(d) => (d.tag.clone(), d.template.clone(), node.flags),
             _ => unreachable!(),
@@ -97,7 +97,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_property_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_property_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_access_expression"); 
         let (pa_expression, pa_name) = match &node.data {
             NodeData::PropertyAccessExpression(d) => (d.expression.clone(), d.name.clone()),
             _ => unreachable!(),
@@ -119,7 +119,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_element_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_element_access_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_element_access_expression"); 
         let (ea_expression, ea_argument) = match &node.data {
             NodeData::ElementAccessExpression(d) => (d.expression.clone(), d.argument_expression.clone()),
             _ => unreachable!(),
@@ -141,7 +141,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_parameter_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_parameter_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_parameter_declaration"); 
         let mut param_node = node.clone();
         let initializer = param_node.initializer().cloned();
         if is_named_evaluation_and(
@@ -188,7 +188,7 @@ impl EsDecoratorTransformer {
         updated
     }
 
-    pub fn visit_named_evaluation_site(&mut self, node: &Arc<Node>, class_expr: Option<&Arc<Node>>) -> Arc<Node> {
+    pub fn visit_named_evaluation_site(&mut self, node: &Arc<Node>, class_expr: Option<&Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_named_evaluation_site"); 
         if is_named_evaluation_and(
             &self.transformer.emit_context(),
             node,
@@ -205,7 +205,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_for_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_for_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_for_statement"); 
         let (initializer, condition, incrementor, statement) = match &node.data {
             NodeData::ForStatement(d) => (
                 d.initializer.clone(),
@@ -238,11 +238,11 @@ impl EsDecoratorTransformer {
         )
     }
 
-    pub fn visit_expression_statement(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_expression_statement(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_expression_statement"); 
         self.discarded_visitor.visit_each_child(node)
     }
 
-    pub fn visit_referenced_property_name(&mut self, node: &Arc<Node>) -> (Arc<Node>, Arc<Node>) {
+    pub fn visit_referenced_property_name(&mut self, node: &Arc<Node>) -> (Arc<Node>, Arc<Node>) { ::tsox_core::fntrace::enter("visit_referenced_property_name"); 
         if is_property_name_literal(node) || is_private_identifier(node) {
             let referenced = self.transformer.factory().new_string_literal_from_node(node);
             let visited = self.transformer.visitor().visit_node(node);
@@ -284,14 +284,14 @@ impl EsDecoratorTransformer {
         (referenced_name, updated_name)
     }
 
-    pub fn visit_property_name(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_property_name(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_name"); 
         if is_computed_property_name(node) {
             return self.visit_computed_property_name(node);
         }
         self.transformer.visitor().visit_node(node)
     }
 
-    pub fn visit_computed_property_name(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_computed_property_name(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_computed_property_name"); 
         let cpn_expression = match &node.data {
             NodeData::ComputedPropertyName(d) => d.expression.clone(),
             _ => unreachable!(),
@@ -304,7 +304,7 @@ impl EsDecoratorTransformer {
         f.update_computed_property_name(node, &expression)
     }
 
-    pub fn visit_destructuring_assignment_target(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_destructuring_assignment_target(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_destructuring_assignment_target"); 
         if is_object_literal_expression(node) || is_array_literal_expression(node) {
             return self.visit_assignment_pattern(node);
         }
@@ -349,7 +349,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_assignment_rest_element(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_assignment_rest_element(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_assignment_rest_element"); 
         let se_expression = match &node.data {
             NodeData::SpreadElement(d) => d.expression.clone(),
             _ => unreachable!(),
@@ -362,7 +362,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_array_assignment_element(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_array_assignment_element(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_array_assignment_element"); 
         assert!(is_array_binding_or_assignment_element(node));
         if is_spread_element(node) {
             return self.visit_assignment_rest_element(node);
@@ -373,7 +373,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_assignment_rest_property(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_assignment_rest_property(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_assignment_rest_property"); 
         let sa_expression = match &node.data {
             NodeData::SpreadAssignment(d) => d.expression.clone(),
             _ => unreachable!(),
@@ -386,7 +386,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_assignment_element(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_assignment_element(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_assignment_element"); 
         if is_assignment_expression(node, true) {
             let mut node = node.clone();
             if is_named_evaluation_and(
@@ -417,7 +417,7 @@ impl EsDecoratorTransformer {
         self.visit_destructuring_assignment_target(node)
     }
 
-    pub fn visit_assignment_property_node(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_assignment_property_node(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_assignment_property_node"); 
         let (name, initializer) = match &node.data {
             NodeData::PropertyAssignment(d) => (d.name.clone(), d.initializer.clone()),
             _ => unreachable!(),
@@ -450,7 +450,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_shorthand_assignment_property(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_shorthand_assignment_property(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_shorthand_assignment_property"); 
         if is_named_evaluation_and(
             &self.transformer.emit_context(),
             node,
@@ -473,7 +473,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_object_assignment_element(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_object_assignment_element(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_object_assignment_element"); 
         assert!(is_object_binding_or_assignment_element(node));
         if is_spread_assignment(node) {
             return self.visit_assignment_rest_property(node);
@@ -487,7 +487,7 @@ impl EsDecoratorTransformer {
         self.transformer.visitor().visit_each_child(node)
     }
 
-    pub fn visit_assignment_pattern(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_assignment_pattern(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_assignment_pattern"); 
         let f = self.transformer.factory();
         if is_array_literal_expression(node) {
             let (elements, multi_line) = match &node.data {
@@ -505,11 +505,11 @@ impl EsDecoratorTransformer {
         f.update_object_literal_expression(node, &visited, multi_line)
     }
 
-    pub fn visit_export_assignment(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_export_assignment(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_export_assignment"); 
         self.visit_named_evaluation_site(node, node.expression())
     }
 
-    pub fn visit_parenthesized_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> {
+    pub fn visit_parenthesized_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_parenthesized_expression"); 
         let pe_expression = match &node.data {
             NodeData::ParenthesizedExpression(d) => d.expression.clone(),
             _ => unreachable!(),
@@ -523,7 +523,7 @@ impl EsDecoratorTransformer {
         f.update_parenthesized_expression(node, &expression)
     }
 
-    pub fn visit_partially_emitted_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> {
+    pub fn visit_partially_emitted_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_partially_emitted_expression"); 
         let pe_expression = match &node.data {
             NodeData::PartiallyEmittedExpression(d) => d.expression.clone(),
             _ => unreachable!(),
@@ -541,7 +541,7 @@ impl EsDecoratorTransformer {
         &mut self,
         pending: &[Arc<Node>],
         expression: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("prepend_expressions"); 
         let f = self.transformer.factory();
         if pending.is_empty() {
             return expression.cloned();
@@ -562,7 +562,7 @@ impl EsDecoratorTransformer {
         f.inline_expressions(exprs)
     }
 
-    pub fn inject_pending_expressions(&mut self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn inject_pending_expressions(&mut self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("inject_pending_expressions"); 
         let pending = std::mem::take(&mut self.pending_expressions);
         let result = self
             .prepend_expressions(&pending, Some(expression))
@@ -575,7 +575,7 @@ impl EsDecoratorTransformer {
         result
     }
 
-    pub fn transform_all_decorators_of_declaration(&mut self, decorators: &[Arc<Node>]) -> Vec<Arc<Node>> {
+    pub fn transform_all_decorators_of_declaration(&mut self, decorators: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("transform_all_decorators_of_declaration"); 
         if decorators.is_empty() {
             return Vec::new();
         }
@@ -586,7 +586,7 @@ impl EsDecoratorTransformer {
         result
     }
 
-    pub fn transform_decorator(&mut self, decorator: &Arc<Node>) -> Arc<Node> {
+    pub fn transform_decorator(&mut self, decorator: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_decorator"); 
         let decorator_expression = match &decorator.data {
             NodeData::Decorator(d) => d.expression.clone(),
             _ => unreachable!(),
@@ -606,7 +606,7 @@ impl EsDecoratorTransformer {
         expression
     }
 
-    fn create_call_binding(&self, expression: &Arc<Node>) -> (Arc<Node>, Arc<Node>) {
+    fn create_call_binding(&self, expression: &Arc<Node>) -> (Arc<Node>, Arc<Node>) { ::tsox_core::fntrace::enter("create_call_binding"); 
         let f = self.transformer.factory();
         let callee = skip_outer_expressions(expression, OuterExpressionKinds::ALL);
         if is_super_property(&callee) || callee.kind == SyntaxKind::SuperKeyword {
@@ -663,7 +663,7 @@ impl EsDecoratorTransformer {
         (expression.clone(), f.new_void_zero_expression())
     }
 
-    pub fn should_be_captured_in_temp_variable(&self, node: &Arc<Node>) -> bool {
+    pub fn should_be_captured_in_temp_variable(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_be_captured_in_temp_variable"); 
         let target = skip_parentheses(node);
         match target.kind {
             SyntaxKind::Identifier => true,

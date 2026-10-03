@@ -6,7 +6,7 @@ use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SyntaxKind;
 use tsox_frontend::ast::node_data_generated::NodeData;
 
-pub(crate) fn is_declaration_statement(node: &Node) -> bool {
+pub(crate) fn is_declaration_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_declaration_statement"); 
     matches!(
         node.kind,
         SyntaxKind::FunctionDeclaration
@@ -23,7 +23,7 @@ pub(crate) fn is_declaration_statement(node: &Node) -> bool {
     )
 }
 
-pub(crate) fn is_value_only_import(node: &Node) -> bool {
+pub(crate) fn is_value_only_import(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_value_only_import"); 
     if let NodeData::ImportDeclaration(d) = &node.data {
         match &d.import_clause {
             None => false,
@@ -37,7 +37,7 @@ pub(crate) fn is_value_only_import(node: &Node) -> bool {
     }
 }
 
-pub(crate) fn needs_declare_keyword(node: &Node) -> bool {
+pub(crate) fn needs_declare_keyword(node: &Node) -> bool { ::tsox_core::fntrace::enter("needs_declare_keyword"); 
     matches!(
         node.kind,
         SyntaxKind::FunctionDeclaration
@@ -48,8 +48,8 @@ pub(crate) fn needs_declare_keyword(node: &Node) -> bool {
     )
 }
 
-pub(crate) fn function_returns_jsx(body: &Arc<Node>) -> bool {
-    fn returns_jsx_recursive(node: &Arc<Node>) -> bool {
+pub(crate) fn function_returns_jsx(body: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("function_returns_jsx"); 
+    fn returns_jsx_recursive(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("returns_jsx_recursive"); 
         match &node.data {
             NodeData::ReturnStatement(d) => {
                 if let Some(expr) = &d.expression {
@@ -74,7 +74,7 @@ pub(crate) fn function_returns_jsx(body: &Arc<Node>) -> bool {
     returns_jsx_recursive(body)
 }
 
-pub(crate) fn is_jsx_expression(node: &Arc<Node>) -> bool {
+pub(crate) fn is_jsx_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_expression"); 
     if matches!(
         node.kind,
         SyntaxKind::JsxElement
@@ -91,7 +91,7 @@ pub(crate) fn is_jsx_expression(node: &Arc<Node>) -> bool {
     false
 }
 
-pub(crate) fn class_member_body(member: &Node) -> Option<&Arc<Node>> {
+pub(crate) fn class_member_body(member: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("class_member_body"); 
     match &member.data {
         NodeData::MethodDeclaration(d) => d.body.as_ref(),
         NodeData::ConstructorDeclaration(d) => d.body.as_ref(),
@@ -105,7 +105,7 @@ pub(crate) fn collect_variable_initializer_cuts(
     list: &Arc<Node>,
     cuts: &mut Vec<(usize, usize)>,
     declaration_mode: bool,
-) {
+) { ::tsox_core::fntrace::enter("collect_variable_initializer_cuts"); 
     if let NodeData::VariableDeclarationList(d) = &list.data {
         for decl in d.declarations.iter() {
             if let NodeData::VariableDeclaration(vd) = &decl.data {
@@ -127,7 +127,7 @@ pub(crate) fn get_dts_output_path(
     source_file: &SourceFile,
     options: &CompilerOptions,
     common_source_directory: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_dts_output_path"); 
     let file_name = &source_file.file_name;
     let dts_ext = get_declaration_extension(file_name);
 
@@ -151,7 +151,7 @@ pub(crate) fn get_dts_output_path(
     }
 }
 
-pub(crate) fn get_declaration_extension(file_name: &str) -> &'static str {
+pub(crate) fn get_declaration_extension(file_name: &str) -> &'static str { ::tsox_core::fntrace::enter("get_declaration_extension"); 
     if tsox_core::tspath::file_extension_is_one_of(file_name, &[".mts", ".mjs"]) {
         return ".d.mts";
     }

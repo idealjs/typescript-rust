@@ -5,7 +5,7 @@ use crate::tspath::get_normalized_absolute_path::{
     get_canonical_file_name, has_relative_path_segment, normalize_path,
 };
 
-pub fn resolve_tripleslash_reference(module_name: &str, containing_file: &str) -> String {
+pub fn resolve_tripleslash_reference(module_name: &str, containing_file: &str) -> String { crate::fntrace::enter("resolve_tripleslash_reference"); 
     let base_path = get_directory_path(containing_file);
     if is_rooted_disk_path(module_name) {
         return normalize_path(module_name);
@@ -13,7 +13,7 @@ pub fn resolve_tripleslash_reference(module_name: &str, containing_file: &str) -
     normalize_path(&combine_paths(&base_path, &[module_name]))
 }
 
-pub fn simple_normalize_path(path: &str) -> Option<String> {
+pub fn simple_normalize_path(path: &str) -> Option<String> { crate::fntrace::enter("simple_normalize_path"); 
     if !has_relative_path_segment(path) {
         return Some(path.to_string());
     }
@@ -26,7 +26,7 @@ pub fn simple_normalize_path(path: &str) -> Option<String> {
     None
 }
 
-pub fn trim_rune_count(s: &str, rune_count: usize) -> &str {
+pub fn trim_rune_count(s: &str, rune_count: usize) -> &str { crate::fntrace::enter("trim_rune_count"); 
     let mut char_indices = s.char_indices();
     for _ in 0..rune_count {
         match char_indices.next() {
@@ -38,7 +38,7 @@ pub fn trim_rune_count(s: &str, rune_count: usize) -> &str {
     &s[offset..]
 }
 
-pub fn trim_file_path_prefix(path: &str, prefix: &str, use_case_sensitive_file_names: bool) -> (String, bool) {
+pub fn trim_file_path_prefix(path: &str, prefix: &str, use_case_sensitive_file_names: bool) -> (String, bool) { crate::fntrace::enter("trim_file_path_prefix"); 
     if use_case_sensitive_file_names {
         return match path.strip_prefix(prefix) {
             Some(rest) => (rest.to_string(), true),
@@ -55,7 +55,7 @@ pub fn trim_file_path_prefix(path: &str, prefix: &str, use_case_sensitive_file_n
     )
 }
 
-pub fn split_volume_path(path: &str) -> Option<(String, &str)> {
+pub fn split_volume_path(path: &str) -> Option<(String, &str)> { crate::fntrace::enter("split_volume_path"); 
     let bytes = path.as_bytes();
     if bytes.len() >= 2 && is_volume_character(bytes[0]) && bytes[1] == b':' {
         let volume = path[..2].to_lowercase();

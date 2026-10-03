@@ -20,11 +20,11 @@ pub trait R23K8NodeFactoryExt {
 }
 
 impl R23K8NodeFactoryExt for NodeFactoryStub {
-    fn new_modifier(&self, kind: SyntaxKind) -> Arc<Node> {
+    fn new_modifier(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_modifier"); 
         NodeFactoryExt::new_modifier(self, kind)
     }
 
-    fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> NodeList {
+    fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> NodeList { ::tsox_core::fntrace::enter("new_node_list"); 
         NodeFactoryExt::new_node_list(self, nodes)
     }
 
@@ -33,7 +33,7 @@ impl R23K8NodeFactoryExt for NodeFactoryStub {
         modifiers: Option<Arc<ModifierList>>,
         parameters: NodeList,
         type_node: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_index_signature_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::IndexSignature,
             NodeData::IndexSignatureDeclaration(IndexSignatureDeclarationData {

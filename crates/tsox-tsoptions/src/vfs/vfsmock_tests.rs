@@ -13,7 +13,7 @@ struct CountingFS {
 }
 
 impl CountingFS {
-    fn new(inner: InMemoryFS) -> Self {
+    fn new(inner: InMemoryFS) -> Self { ::tsox_core::fntrace::enter("new"); 
         CountingFS {
             inner,
             file_exists_calls: Mutex::new(0),
@@ -28,56 +28,56 @@ impl CountingFS {
 }
 
 impl FS for CountingFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         *self.use_case_sensitive_calls.lock().unwrap() += 1;
         self.inner.use_case_sensitive_file_names()
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         *self.file_exists_calls.lock().unwrap() += 1;
         self.inner.file_exists(path)
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         *self.read_file_calls.lock().unwrap() += 1;
         self.inner.read_file(path)
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         *self.write_file_calls.lock().unwrap() += 1;
         self.inner.write_file(path, data)
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         self.inner.append_file(path, data)
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         self.inner.remove(path)
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         *self.directory_exists_calls.lock().unwrap() += 1;
         self.inner.directory_exists(path)
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.inner.get_accessible_entries(path)
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         *self.stat_calls.lock().unwrap() += 1;
         self.inner.stat(path)
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         *self.realpath_calls.lock().unwrap() += 1;
         self.inner.realpath(path)
     }
 }
 
 #[test]
-fn test_wrap() {
+fn test_wrap() { ::tsox_core::fntrace::enter("test_wrap"); 
     let inner = InMemoryFS::with_case_sensitivity(true);
     inner.insert_dir("/some/path");
     inner.insert_file("/some/path/file.txt", "hello world");

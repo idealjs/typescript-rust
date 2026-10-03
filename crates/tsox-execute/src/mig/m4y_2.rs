@@ -81,7 +81,7 @@ pub struct UpToDateStatus {
 }
 
 impl UpToDateStatus {
-    pub fn is_error(&self) -> bool {
+    pub fn is_error(&self) -> bool { ::tsox_core::fntrace::enter("is_error"); 
         matches!(
             self.kind,
             Some(UpToDateStatusType::ConfigFileNotFound)
@@ -90,7 +90,7 @@ impl UpToDateStatus {
         )
     }
 
-    pub fn is_pseudo_build(&self) -> bool {
+    pub fn is_pseudo_build(&self) -> bool { ::tsox_core::fntrace::enter("is_pseudo_build"); 
         matches!(
             self.kind,
             Some(UpToDateStatusType::UpToDateWithUpstreamTypes)
@@ -98,21 +98,21 @@ impl UpToDateStatus {
         )
     }
 
-    pub fn input_output_file_and_time(&self) -> Option<&InputOutputFileAndTime> {
+    pub fn input_output_file_and_time(&self) -> Option<&InputOutputFileAndTime> { ::tsox_core::fntrace::enter("input_output_file_and_time"); 
         match &self.data {
             UpToDateStatusData::InputOutputFileAndTime(data) => Some(data),
             _ => None,
         }
     }
 
-    pub fn input_output_name(&self) -> Option<&InputOutputName> {
+    pub fn input_output_name(&self) -> Option<&InputOutputName> { ::tsox_core::fntrace::enter("input_output_name"); 
         match &self.data {
             UpToDateStatusData::InputOutputName(data) => Some(data),
             _ => None,
         }
     }
 
-    pub fn oldest_output_file_name(&self) -> String {
+    pub fn oldest_output_file_name(&self) -> String { ::tsox_core::fntrace::enter("oldest_output_file_name"); 
         if !self.is_pseudo_build() && self.kind != Some(UpToDateStatusType::UpToDate) {
             panic!("only valid for up to date status of pseudo-build or up to date");
         }
@@ -129,7 +129,7 @@ impl UpToDateStatus {
         }
     }
 
-    pub fn upstream_errors(&self) -> &UpstreamErrors {
+    pub fn upstream_errors(&self) -> &UpstreamErrors { ::tsox_core::fntrace::enter("upstream_errors"); 
         match &self.data {
             UpToDateStatusData::UpstreamErrors(data) => data,
             _ => panic!("upToDateStatus data is not upstreamErrors"),
@@ -137,13 +137,13 @@ impl UpToDateStatus {
     }
 }
 
-pub fn is_build_info_file_name_default_library(file_name: &str) -> bool {
+pub fn is_build_info_file_name_default_library(file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_build_info_file_name_default_library"); 
     !tspath::path_is_relative(file_name) && !tspath::path_is_absolute(file_name)
 }
 
 pub fn content_mapper_identities(
     project: Option<&dyn tsox_compile::mig::m3l_cm_2::Project>,
-) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("content_mapper_identities"); 
     let Some(project) = project else {
         return Ok(Vec::new());
     };
@@ -153,7 +153,7 @@ pub fn content_mapper_identities(
 pub fn get_normalized_paths<'a>(
     paths: &'a [String],
     build_info_directory: &'a str,
-) -> impl Iterator<Item = String> + 'a {
+) -> impl Iterator<Item = String> + 'a { ::tsox_core::fntrace::enter("get_normalized_paths"); 
     paths
         .iter()
         .map(move |path| tspath::get_normalized_absolute_path(path, build_info_directory))
@@ -167,7 +167,7 @@ pub struct BuildInfoRoot {
 }
 
 impl Serialize for BuildInfoRoot {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         if self.start != 0 {
             if self.end != 0 {
                 return [self.start, self.end].serialize(serializer);
@@ -179,7 +179,7 @@ impl Serialize for BuildInfoRoot {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoRoot {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         if let Some(start_and_end) = value.as_array().filter(|a| a.len() == 2) {
             return Ok(BuildInfoRoot {
@@ -218,7 +218,7 @@ pub struct BuildInfoFileInfoNoSignature {
 }
 
 impl Serialize for BuildInfoFileInfoNoSignature {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         let mut map = serde_json::Map::new();
         if !self.version.is_empty() {
             map.insert("version".to_string(), serde_json::json!(self.version));
@@ -240,7 +240,7 @@ impl Serialize for BuildInfoFileInfoNoSignature {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoFileInfoNoSignature {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         let obj = value.as_object().ok_or_else(|| {
             serde::de::Error::custom("invalid BuildInfoFileInfoNoSignature")
@@ -277,7 +277,7 @@ pub struct BuildInfoFileInfoWithSignature {
 }
 
 impl Serialize for BuildInfoFileInfoWithSignature {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         let mut map = serde_json::Map::new();
         if !self.version.is_empty() {
             map.insert("version".to_string(), serde_json::json!(self.version));
@@ -299,7 +299,7 @@ impl Serialize for BuildInfoFileInfoWithSignature {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoFileInfoWithSignature {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         let obj = value.as_object().ok_or_else(|| {
             serde::de::Error::custom("invalid BuildInfoFileInfoWithSignature")
@@ -335,7 +335,7 @@ pub struct BuildInfoFileInfo {
 }
 
 impl BuildInfoFileInfo {
-    pub fn new(file_info: &crate::mig::m4z2_2::FileInfo) -> Self {
+    pub fn new(file_info: &crate::mig::m4z2_2::FileInfo) -> Self { ::tsox_core::fntrace::enter("new"); 
         if file_info.version == file_info.signature {
             if !file_info.affects_global_scope
                 && file_info.implied_node_format == ResolutionMode::CommonJS
@@ -374,7 +374,7 @@ impl BuildInfoFileInfo {
         }
     }
 
-    pub fn get_file_info(&self) -> Option<crate::mig::m4z2_2::FileInfo> {
+    pub fn get_file_info(&self) -> Option<crate::mig::m4z2_2::FileInfo> { ::tsox_core::fntrace::enter("get_file_info"); 
         if let Some(signature) = Some(&self.signature).filter(|s| !s.is_empty()) {
             return Some(crate::mig::m4z2_2::FileInfo {
                 version: signature.clone(),
@@ -407,13 +407,13 @@ impl BuildInfoFileInfo {
         })
     }
 
-    pub fn has_signature(&self) -> bool {
+    pub fn has_signature(&self) -> bool { ::tsox_core::fntrace::enter("has_signature"); 
         !self.signature.is_empty()
     }
 }
 
 impl Serialize for BuildInfoFileInfo {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         if !self.signature.is_empty() {
             return self.signature.serialize(serializer);
         }
@@ -425,7 +425,7 @@ impl Serialize for BuildInfoFileInfo {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoFileInfo {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         if let Some(v_signature) = value.as_str() {
             return Ok(BuildInfoFileInfo {
@@ -463,13 +463,13 @@ pub struct BuildInfoReferenceMapEntry {
 }
 
 impl Serialize for BuildInfoReferenceMapEntry {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         (self.file_id, self.file_id_list_id).serialize(serializer)
     }
 }
 
 impl<'de> Deserialize<'de> for BuildInfoReferenceMapEntry {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let (file_id, file_id_list_id) = <(BuildInfoFileId, BuildInfoFileIdListId)>::deserialize(
             deserializer,
         )?;
@@ -510,7 +510,7 @@ pub struct BuildInfoRepopulateInfo {
 }
 
 impl Serialize for BuildInfoRepopulateInfo {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         let mut map = serde_json::Map::new();
         map.insert("kind".to_string(), serde_json::json!(self.kind as i32));
         if !self.module_reference.is_empty() {
@@ -533,7 +533,7 @@ impl Serialize for BuildInfoRepopulateInfo {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoRepopulateInfo {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         let obj = value
             .as_object()
@@ -564,7 +564,7 @@ impl<'de> Deserialize<'de> for BuildInfoRepopulateInfo {
 }
 
 impl Serialize for BuildInfoDiagnostic {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         #[allow(non_snake_case)]
         #[derive(Serialize)]
         struct Raw<'a> {
@@ -626,14 +626,14 @@ impl Serialize for BuildInfoDiagnostic {
     }
 }
 
-fn is_zero_i32(value: &i32) -> bool {
+fn is_zero_i32(value: &i32) -> bool { ::tsox_core::fntrace::enter("is_zero_i32"); 
     *value == 0
 }
-fn bool_is_false(value: &&bool) -> bool {
+fn bool_is_false(value: &&bool) -> bool { ::tsox_core::fntrace::enter("bool_is_false"); 
     !**value
 }
 
-fn resolution_mode_from_value(value: &serde_json::Value) -> ResolutionMode {
+fn resolution_mode_from_value(value: &serde_json::Value) -> ResolutionMode { ::tsox_core::fntrace::enter("resolution_mode_from_value"); 
     match value.as_i64() {
         Some(1) => ResolutionMode::CommonJS,
         Some(2) => ResolutionMode::AMD,
@@ -652,7 +652,7 @@ fn resolution_mode_from_value(value: &serde_json::Value) -> ResolutionMode {
     }
 }
 
-fn category_from_i32(value: i32) -> Category {
+fn category_from_i32(value: i32) -> Category { ::tsox_core::fntrace::enter("category_from_i32"); 
     match value {
         1 => Category::Error,
         2 => Category::Suggestion,
@@ -662,7 +662,7 @@ fn category_from_i32(value: i32) -> Category {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoDiagnostic {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         #[allow(non_snake_case)]
         #[derive(Deserialize, Default)]
         #[serde(default)]
@@ -707,7 +707,7 @@ impl<'de> Deserialize<'de> for BuildInfoDiagnostic {
 }
 
 impl From<&BuildInfoRepopulateInfo> for RepopulateDiagnosticInfo {
-    fn from(info: &BuildInfoRepopulateInfo) -> Self {
+    fn from(info: &BuildInfoRepopulateInfo) -> Self { ::tsox_core::fntrace::enter("from"); 
         RepopulateDiagnosticInfo {
             kind: match info.kind {
                 RepopulateDiagnosticKind::ModeMismatch => RepopulateDiagnosticKind::ModeMismatch,
@@ -729,13 +729,13 @@ pub struct BuildInfoDiagnosticsOfFile {
 }
 
 impl Serialize for BuildInfoDiagnosticsOfFile {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         (&self.file_id, &self.diagnostics).serialize(serializer)
     }
 }
 
 impl<'de> Deserialize<'de> for BuildInfoDiagnosticsOfFile {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let file_id_and_diagnostics =
             Vec::<serde_json::Value>::deserialize(deserializer).map_err(|_| {
                 serde::de::Error::custom("invalid BuildInfoDiagnosticsOfFile")
@@ -765,7 +765,7 @@ pub struct BuildInfoSemanticDiagnostic {
 }
 
 impl Serialize for BuildInfoSemanticDiagnostic {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         if self.file_id != 0 {
             return self.file_id.serialize(serializer);
         }
@@ -774,7 +774,7 @@ impl Serialize for BuildInfoSemanticDiagnostic {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoSemanticDiagnostic {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         if let Some(file_id) = value.as_i64() {
             return Ok(BuildInfoSemanticDiagnostic {
@@ -800,7 +800,7 @@ pub struct BuildInfoFilePendingEmit {
 }
 
 impl Serialize for BuildInfoFilePendingEmit {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         if self.emit_kind == crate::mig::m4z2_2::FileEmitKind::None {
             return self.file_id.serialize(serializer);
         }
@@ -812,7 +812,7 @@ impl Serialize for BuildInfoFilePendingEmit {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoFilePendingEmit {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         if let Some(file_id) = value.as_i64() {
             return Ok(BuildInfoFilePendingEmit {
@@ -850,7 +850,7 @@ pub struct BuildInfoEmitSignature {
 }
 
 impl BuildInfoEmitSignature {
-    pub fn no_emit_signature(&self) -> bool {
+    pub fn no_emit_signature(&self) -> bool { ::tsox_core::fntrace::enter("no_emit_signature"); 
         self.signature.is_empty() && !self.differs_only_in_dts_map && !self.differs_in_options
     }
 
@@ -858,7 +858,7 @@ impl BuildInfoEmitSignature {
         &self,
         path: &Path,
         emit_signatures: &SyncMap<Path, crate::mig::m4z2_2::EmitSignature>,
-    ) -> crate::mig::m4z2_2::EmitSignature {
+    ) -> crate::mig::m4z2_2::EmitSignature { ::tsox_core::fntrace::enter("to_emit_signature"); 
         let mut signature = String::new();
         let mut signature_with_different_options: Vec<String> = Vec::new();
         if self.differs_only_in_dts_map {
@@ -879,7 +879,7 @@ impl BuildInfoEmitSignature {
 }
 
 impl Serialize for BuildInfoEmitSignature {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         if self.no_emit_signature() {
             return self.file_id.serialize(serializer);
         }
@@ -895,7 +895,7 @@ impl Serialize for BuildInfoEmitSignature {
 }
 
 impl<'de> Deserialize<'de> for BuildInfoEmitSignature {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         if let Some(file_id) = value.as_i64() {
             return Ok(BuildInfoEmitSignature {
@@ -963,13 +963,13 @@ pub struct BuildInfoResolvedRoot {
 }
 
 impl Serialize for BuildInfoResolvedRoot {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         [self.resolved, self.root].serialize(serializer)
     }
 }
 
 impl<'de> Deserialize<'de> for BuildInfoResolvedRoot {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let (resolved, root) = <(BuildInfoFileId, BuildInfoFileId)>::deserialize(deserializer)
             .map_err(|_| serde::de::Error::custom("invalid BuildInfoResolvedRoot"))?;
         Ok(BuildInfoResolvedRoot { resolved, root })
@@ -1077,7 +1077,7 @@ pub struct BuildInfo {
 }
 
 impl fmt::Display for BuildInfoError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(f, "{}", self.0)
     }
 }
@@ -1085,33 +1085,33 @@ impl fmt::Display for BuildInfoError {
 pub struct BuildInfoError(pub String);
 
 impl BuildInfo {
-    pub fn is_valid_version(&self) -> bool {
+    pub fn is_valid_version(&self) -> bool { ::tsox_core::fntrace::enter("is_valid_version"); 
         self.version == tsox_core::core::mig::m3k::version()
     }
 
-    pub fn content_mapper_identities_match(&self, current: &[String]) -> bool {
+    pub fn content_mapper_identities_match(&self, current: &[String]) -> bool { ::tsox_core::fntrace::enter("content_mapper_identities_match"); 
         self.content_mapper_identities == current
     }
 
-    pub fn is_incremental(&self) -> bool {
+    pub fn is_incremental(&self) -> bool { ::tsox_core::fntrace::enter("is_incremental"); 
         !self.file_names.is_empty()
     }
 
-    pub fn file_name(&self, file_id: BuildInfoFileId) -> String {
+    pub fn file_name(&self, file_id: BuildInfoFileId) -> String { ::tsox_core::fntrace::enter("file_name"); 
         if file_id < 1 || file_id as usize > self.file_names.len() {
             return String::new();
         }
         self.file_names[(file_id - 1) as usize].clone()
     }
 
-    pub fn file_info(&self, file_id: BuildInfoFileId) -> Option<&BuildInfoFileInfo> {
+    pub fn file_info(&self, file_id: BuildInfoFileId) -> Option<&BuildInfoFileInfo> { ::tsox_core::fntrace::enter("file_info"); 
         if file_id < 1 || file_id as usize > self.file_infos.len() {
             return None;
         }
         self.file_infos.get((file_id - 1) as usize)
     }
 
-    pub fn get_compiler_options(&self, build_info_directory: &str) -> CompilerOptions {
+    pub fn get_compiler_options(&self, build_info_directory: &str) -> CompilerOptions { ::tsox_core::fntrace::enter("get_compiler_options"); 
         let mut options = CompilerOptions::default();
         let Some(entries) = self.options.as_ref() else {
             return options;
@@ -1141,7 +1141,7 @@ impl BuildInfo {
         &self,
         resolved: &tsox_tsoptions::tsoptions::ParsedCommandLine,
         build_info_directory: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_emit_pending"); 
         let compiler_options = resolved.compiler_options();
         if !compiler_options.no_emit.is_true() || compiler_options.get_emit_declarations() {
             let mut pending_emit =
@@ -1160,7 +1160,7 @@ impl BuildInfo {
     pub fn get_package_jsons(
         &self,
         build_info_directory: &str,
-    ) -> impl Iterator<Item = String> + '_ {
+    ) -> impl Iterator<Item = String> + '_ { ::tsox_core::fntrace::enter("get_package_jsons"); 
         let dir = build_info_directory.to_string();
         self.package_jsons
             .as_deref()
@@ -1172,7 +1172,7 @@ impl BuildInfo {
     pub fn get_missing_package_jsons(
         &self,
         build_info_directory: &str,
-    ) -> impl Iterator<Item = String> + '_ {
+    ) -> impl Iterator<Item = String> + '_ { ::tsox_core::fntrace::enter("get_missing_package_jsons"); 
         let dir = build_info_directory.to_string();
         self.missing_package_jsons
             .as_deref()
@@ -1185,7 +1185,7 @@ impl BuildInfo {
         &'a self,
         build_info_directory: &str,
         compare_path_options: &ComparePathsOptions,
-    ) -> BuildInfoRootInfoReader<'a> {
+    ) -> BuildInfoRootInfoReader<'a> { ::tsox_core::fntrace::enter("get_build_info_root_info_reader"); 
         let mut resolved_root_file_infos: HashMap<Path, &'a BuildInfoFileInfo> =
             HashMap::with_capacity(self.file_names.len());
         let mut root_to_resolved: OrderedMap<Path, Path> =
@@ -1215,7 +1215,7 @@ impl BuildInfo {
             resolved_to_root: &HashMap<Path, Path>,
             root_to_resolved: &mut OrderedMap<Path, Path>,
             resolved_root_file_infos: &mut HashMap<Path, &'a BuildInfoFileInfo>,
-        ) {
+        ) { ::tsox_core::fntrace::enter("add_root"); 
             if resolved_root.is_empty() {
                 return;
             }
@@ -1279,7 +1279,7 @@ impl<'a> BuildInfoRootInfoReader<'a> {
     pub fn get_build_info_file_info(
         &self,
         input_file_path: &Path,
-    ) -> Option<(&'a BuildInfoFileInfo, Path)> {
+    ) -> Option<(&'a BuildInfoFileInfo, Path)> { ::tsox_core::fntrace::enter("get_build_info_file_info"); 
         if let Some(info) = self.resolved_root_file_infos.get(input_file_path) {
             return Some((info, input_file_path.clone()));
         }
@@ -1292,7 +1292,7 @@ impl<'a> BuildInfoRootInfoReader<'a> {
         None
     }
 
-    pub fn roots(&self) -> impl Iterator<Item = &Path> {
+    pub fn roots(&self) -> impl Iterator<Item = &Path> { ::tsox_core::fntrace::enter("roots"); 
         self.root_to_resolved.keys()
     }
 }
@@ -1303,5 +1303,5 @@ fn unused_refs(
     _: &BuildInfoError,
     _: &HashMap<String, String>,
     _: &tsox_tsoptions::tsoptions::BuildOptions,
-) {
+) { ::tsox_core::fntrace::enter("unused_refs"); 
 }

@@ -18,7 +18,7 @@ pub(crate) enum VisitItem<'a> {
 pub(crate) fn visit_items<'a>(
     node: &'a Node,
     f: &mut dyn FnMut(VisitItem<'a>),
-) {
+) { ::tsox_core::fntrace::enter("visit_items"); 
     match &node.data {
         NodeData::Identifier(_) => {}
         NodeData::PrivateIdentifier(_) => {}

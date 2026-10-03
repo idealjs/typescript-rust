@@ -30,7 +30,7 @@ impl Checker {
         &mut self,
         texts: &[String],
         types: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_template_literal_type"); 
         let mut data = empty_template_literal_type_data();
         data.texts = texts.to_vec();
         data.types = types.to_vec();
@@ -46,7 +46,7 @@ impl Checker {
         flags: TypeFlags,
         object_flags: ObjectFlags,
         data: TypeData,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_type"); 
         self.type_count += 1;
         let object_flags = object_flags
             & !(ObjectFlags::CouldContainTypeVariablesComputed
@@ -65,12 +65,12 @@ impl Checker {
     pub fn new_typed_property_descriptor_type(
         &mut self,
         property_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("new_typed_property_descriptor_type"); 
         let global = self.get_global_typed_property_descriptor_type();
         self.create_type_from_generic_global_type(&global, &[property_type.clone()])
     }
 
-    pub fn new_union_type(&mut self, object_flags: ObjectFlags, types: &[Arc<Type>]) -> Arc<Type> {
+    pub fn new_union_type(&mut self, object_flags: ObjectFlags, types: &[Arc<Type>]) -> Arc<Type> { ::tsox_core::fntrace::enter("new_union_type"); 
         let mut data = UnionTypeData::default();
         data.union_or_intersection.types = types.to_vec();
         self.new_type(TypeFlags::Union, object_flags, TypeData::Union(data))
@@ -82,7 +82,7 @@ impl Checker {
         name: &str,
         meaning: SymbolFlags,
         name_not_found_message: &'static tsox_core::diagnostics::Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("on_failed_to_resolve_symbol"); 
         if is_const_type_reference_name(error_location) {
             return;
         }
@@ -158,7 +158,7 @@ impl Checker {
         last_location: Option<&Arc<Node>>,
         associated_declaration_for_containing_initializer_or_binding_name: Option<&Arc<Node>>,
         within_deferred_context: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("on_successfully_resolved_symbol"); 
         let name = result.name.clone();
         let is_in_external_module = last_location.is_some_and(|location| {
             tsox_frontend::ast::is_source_file(location)
@@ -312,7 +312,7 @@ impl Checker {
         }
     }
 
-    pub fn pad_tuple_type(&mut self, t: &Arc<Type>, pattern: &Arc<Node>) -> Arc<Type> {
+    pub fn pad_tuple_type(&mut self, t: &Arc<Type>, pattern: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("pad_tuple_type"); 
         let pattern_elements = &pattern.elements().unwrap().nodes;
         let target = t.target_tuple_type().unwrap();
         if target
@@ -354,7 +354,7 @@ impl Checker {
     pub fn parameter_initializer_contains_undefined(
         &mut self,
         declaration: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("parameter_initializer_contains_undefined"); 
         let mut links_flags;
         {
             links_flags = self
@@ -402,12 +402,12 @@ impl Checker {
         links_flags.intersects(NodeCheckFlags::InitializerIsUndefined)
     }
 
-    pub fn parse_big_int_literal_type(&mut self, text: &str) -> Arc<Type> {
+    pub fn parse_big_int_literal_type(&mut self, text: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("parse_big_int_literal_type"); 
         let value = tsox_core::jsnum::PseudoBigInt::parse(text);
         self.get_big_int_literal_type(value)
     }
 
-    pub fn permissive_mapper_worker(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn permissive_mapper_worker(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("permissive_mapper_worker"); 
         if t.flags.intersects(TypeFlags::TypeParameter) {
             return self.wildcard_type();
         }
@@ -420,7 +420,7 @@ impl Checker {
         candidates: &mut Vec<Arc<Signature>>,
         args: &[Arc<Node>],
         check_mode: CheckMode,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("pick_longest_candidate_signature"); 
         let mut arg_count = args.len();
         if let Some(apparent_argument_count) =
             crate::checker::mig::m2f_4::r28k4_defs::apparent_argument_count()
@@ -459,21 +459,21 @@ impl Checker {
         instantiated
     }
 
-    pub fn pop_active_mapper(&mut self) {
+    pub fn pop_active_mapper(&mut self) { ::tsox_core::fntrace::enter("pop_active_mapper"); 
         self.active_mappers.pop();
 
         self.active_type_mappers_caches.pop();
     }
 
-    pub fn pop_contextual_type(&mut self) {
+    pub fn pop_contextual_type(&mut self) { ::tsox_core::fntrace::enter("pop_contextual_type"); 
         self.contextual_infos.pop();
     }
 
-    pub fn pop_inference_context(&mut self) {
+    pub fn pop_inference_context(&mut self) { ::tsox_core::fntrace::enter("pop_inference_context"); 
         self.inference_context_infos.pop();
     }
 
-    pub fn produce_deferred_diagnostics(&mut self) {
+    pub fn produce_deferred_diagnostics(&mut self) { ::tsox_core::fntrace::enter("produce_deferred_diagnostics"); 
         let callbacks = std::mem::take(&mut self.deferred_diagnostic_callbacks);
         for cb in callbacks {
             cb();
@@ -485,7 +485,7 @@ impl Checker {
         t: &Arc<Type>,
         node: &Arc<Node>,
         was_optional: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("propagate_optional_type_marker"); 
         if was_optional {
             if is_outermost_optional_chain(node) {
                 return self.get_optional_type(Arc::clone(t));
@@ -495,14 +495,14 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn push_active_mapper(&mut self, mapper: Arc<TypeMapper>) {
+    pub fn push_active_mapper(&mut self, mapper: Arc<TypeMapper>) { ::tsox_core::fntrace::enter("push_active_mapper"); 
         self.active_mappers.push(mapper);
 
         self.active_type_mappers_caches
             .push(HashMap::new());
     }
 
-    pub fn push_cached_contextual_type(&mut self, node: &Arc<Node>) {
+    pub fn push_cached_contextual_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_cached_contextual_type"); 
         let t = self.get_contextual_type(node, ContextFlags::empty());
         self.contextual_infos.push(ContextualInfo {
             node: Some(Arc::clone(node)),
@@ -511,7 +511,7 @@ impl Checker {
         });
     }
 
-    pub fn push_contextual_type(&mut self, node: &Arc<Node>, t: &Arc<Type>, is_cache: bool) {
+    pub fn push_contextual_type(&mut self, node: &Arc<Node>, t: &Arc<Type>, is_cache: bool) { ::tsox_core::fntrace::enter("push_contextual_type"); 
         self.contextual_infos.push(ContextualInfo {
             node: Some(Arc::clone(node)),
             t: Some(Arc::clone(t)),
@@ -519,14 +519,14 @@ impl Checker {
         });
     }
 
-    pub fn push_inference_context(&mut self, node: &Arc<Node>, context: &Arc<InferenceContext>) {
+    pub fn push_inference_context(&mut self, node: &Arc<Node>, context: &Arc<InferenceContext>) { ::tsox_core::fntrace::enter("push_inference_context"); 
         self.inference_context_infos.push(InferenceContextInfo {
             node: Some(Arc::clone(node)),
             context: Some(Arc::clone(context)),
         });
     }
 
-    pub fn recombine_unknown_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn recombine_unknown_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("recombine_unknown_type"); 
         if Arc::ptr_eq(t, &self.unknown_union_type()) {
             return self.unknown_type();
         }
@@ -538,7 +538,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         name: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("record_potential_collision_with_weak_map_set_in_generated_code"); 
         if self.language_version <= ScriptTarget::ES2021
             && (self.need_collision_check_for_identifier(node, name, "WeakMap")
                 || self.need_collision_check_for_identifier(node, name, "WeakSet"))
@@ -553,7 +553,7 @@ impl Checker {
         }
     }
 
-    pub fn register_for_unused_identifiers_check(&mut self, node: &Arc<Node>) {
+    pub fn register_for_unused_identifiers_check(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("register_for_unused_identifiers_check"); 
         if let Some(source_file) = self.get_source_file_of_node(node) {
             let links = self.source_file_links.get_or_default(&source_file);
             links.identifier_check_nodes.push(Arc::clone(node));
@@ -575,7 +575,7 @@ impl TupleNormalizer {
         c: &mut Checker,
         element_types: &[Arc<Type>],
         element_infos: &[TupleElementInfo],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("normalize"); 
         self.last_required_index = -1;
         self.first_rest_index = -1;
         self.last_optional_or_rest_index = -1;
@@ -660,7 +660,7 @@ impl TupleNormalizer {
         true
     }
 
-    fn add(&mut self, t: Arc<Type>, info: TupleElementInfo) {
+    fn add(&mut self, t: Arc<Type>, info: TupleElementInfo) { ::tsox_core::fntrace::enter("add"); 
         if info.flags.intersects(ElementFlags::Required) {
             self.last_required_index = self.types.len() as isize;
         }
@@ -682,11 +682,11 @@ pub struct ObjectLiteralDiscriminator<'a> {
 }
 
 impl<'a> ObjectLiteralDiscriminator<'a> {
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.props.len() + self.members.len()
     }
 
-    pub fn name(&mut self, index: usize) -> String {
+    pub fn name(&mut self, index: usize) -> String { ::tsox_core::fntrace::enter("name"); 
         if index < self.props.len() {
             let prop_symbol = self
                 .c

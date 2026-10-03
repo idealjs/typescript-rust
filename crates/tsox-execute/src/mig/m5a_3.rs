@@ -16,18 +16,18 @@ struct Table {
 }
 
 impl Table {
-    fn add(&mut self, name: &str, value: impl std::fmt::Display) {
+    fn add(&mut self, name: &str, value: impl std::fmt::Display) { ::tsox_core::fntrace::enter("add"); 
         self.rows.push(TableRow {
             name: name.to_string(),
             value: value.to_string(),
         });
     }
 
-    fn add_duration(&mut self, name: &str, value: f64) {
+    fn add_duration(&mut self, name: &str, value: f64) { ::tsox_core::fntrace::enter("add_duration"); 
         self.add(name, format_duration(value));
     }
 
-    fn print(&self, w: &mut dyn Write) {
+    fn print(&self, w: &mut dyn Write) { ::tsox_core::fntrace::enter("print"); 
         let name_width = self.rows.iter().map(|r| r.name.len()).max().unwrap_or(0);
         let value_width = self.rows.iter().map(|r| r.value.len()).max().unwrap_or(0);
         for r in &self.rows {
@@ -43,11 +43,11 @@ impl Table {
     }
 }
 
-pub fn format_duration(d: f64) -> String {
+pub fn format_duration(d: f64) -> String { ::tsox_core::fntrace::enter("format_duration"); 
     format!("{:.3}s", d)
 }
 
-pub fn identifier_count(program: &EmitProgram) -> usize {
+pub fn identifier_count(program: &EmitProgram) -> usize { ::tsox_core::fntrace::enter("identifier_count"); 
     program
         .get_source_files()
         .iter()
@@ -76,7 +76,7 @@ pub fn statistics_from_program(
     input: &EmitInput,
     memory_used: u64,
     memory_allocs: u64,
-) -> Statistics {
+) -> Statistics { ::tsox_core::fntrace::enter("statistics_from_program"); 
     Statistics {
         is_aggregate: false,
         projects: 0,
@@ -95,7 +95,7 @@ pub fn statistics_from_program(
 }
 
 impl Statistics {
-    pub fn report(&self, w: &mut dyn Write, testing: Option<&dyn CommandLineTesting>) {
+    pub fn report(&self, w: &mut dyn Write, testing: Option<&dyn CommandLineTesting>) { ::tsox_core::fntrace::enter("report"); 
         if let Some(testing) = testing {
             testing.on_statistics_start(w);
         }
@@ -149,7 +149,7 @@ impl Statistics {
         }
     }
 
-    fn add_content_mapper_statistics(&self, table: &mut Table, prefix: &str) {
+    fn add_content_mapper_statistics(&self, table: &mut Table, prefix: &str) { ::tsox_core::fntrace::enter("add_content_mapper_statistics"); 
         let timings = &self.compile_times.content_mapper_times;
         if timings.request_wait != 0.0 {
             table.add_duration(
@@ -186,7 +186,7 @@ impl Statistics {
         }
     }
 
-    pub fn aggregate(&mut self, stat: &Statistics) {
+    pub fn aggregate(&mut self, stat: &Statistics) { ::tsox_core::fntrace::enter("aggregate"); 
         self.is_aggregate = true;
         self.files += stat.files;
         self.lines += stat.lines;
@@ -205,38 +205,38 @@ impl Statistics {
         self.compile_times.changes_compute_time += stat.compile_times.changes_compute_time;
     }
 
-    pub fn set_total_time(&mut self, total_time: f64) {
+    pub fn set_total_time(&mut self, total_time: f64) { ::tsox_core::fntrace::enter("set_total_time"); 
         self.compile_times.total_time = total_time;
     }
 }
 pub struct EmitProgram;
 
 impl EmitProgram {
-    pub fn options(&self) -> tsox_core::core::compiler_options::CompilerOptions {
+    pub fn options(&self) -> tsox_core::core::compiler_options::CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         Default::default()
     }
-    pub fn line_count(&self) -> usize {
+    pub fn line_count(&self) -> usize { ::tsox_core::fntrace::enter("line_count"); 
         0
     }
-    pub fn identifier_count(&self) -> usize {
+    pub fn identifier_count(&self) -> usize { ::tsox_core::fntrace::enter("identifier_count"); 
         0
     }
-    pub fn symbol_count(&self) -> usize {
+    pub fn symbol_count(&self) -> usize { ::tsox_core::fntrace::enter("symbol_count"); 
         0
     }
-    pub fn type_count(&self) -> usize {
+    pub fn type_count(&self) -> usize { ::tsox_core::fntrace::enter("type_count"); 
         0
     }
-    pub fn instantiation_count(&self) -> usize {
+    pub fn instantiation_count(&self) -> usize { ::tsox_core::fntrace::enter("instantiation_count"); 
         0
     }
-    pub fn get_source_files(&self) -> Vec<SourceFileRef> {
+    pub fn get_source_files(&self) -> Vec<SourceFileRef> { ::tsox_core::fntrace::enter("get_source_files"); 
         Vec::new()
     }
-    pub fn current_directory(&self) -> &str {
+    pub fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         "."
     }
-    pub fn explain_files(&self, w: &mut dyn Write, locale: &tsox_core::locale::Locale) {
+    pub fn explain_files(&self, w: &mut dyn Write, locale: &tsox_core::locale::Locale) { ::tsox_core::fntrace::enter("explain_files"); 
         let _ = (w, locale);
     }
 }

@@ -8,7 +8,7 @@ use tsox_frontend::ast::*;
 use std::sync::Arc;
 
 impl Checker {
-    pub fn get_target_of_binary_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_binary_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_binary_expression"); 
         let NodeData::BinaryExpression(d) = &node.data else {
             return None;
         };
@@ -36,7 +36,7 @@ impl Checker {
         name: &str,
         _location: &Arc<Node>,
         _dont_resolve_alias: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_export_of_module"); 
         module_symbol.exports.get(name).cloned()
     }
 
@@ -45,7 +45,7 @@ impl Checker {
         imported_symbol: Option<&Arc<Symbol>>,
         _location: &Arc<Node>,
         _module_specifier: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_es_module_symbol"); 
         imported_symbol.cloned()
     }
 
@@ -55,7 +55,7 @@ impl Checker {
         module_symbol: &Arc<Symbol>,
         dont_resolve_alias: bool,
         _specifier: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("can_have_synthetic_default"); 
         let resolved = self.resolve_external_module_symbol(module_symbol, true);
         (!(dont_resolve_alias || !Arc::ptr_eq(&resolved, module_symbol)))
             || self.module_can_have_synthetic_default(module_symbol)

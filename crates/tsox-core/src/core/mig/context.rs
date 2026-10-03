@@ -9,11 +9,11 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new() -> Context {
+    pub fn new() -> Context { crate::fntrace::enter("new"); 
         Context::default()
     }
 
-    pub fn with_value<V: Any + Send + Sync>(self, key: &'static str, value: V) -> Context {
+    pub fn with_value<V: Any + Send + Sync>(self, key: &'static str, value: V) -> Context { crate::fntrace::enter("with_value"); 
         Context {
             parent: Some(Arc::new(self)),
             key: Some(key),
@@ -21,7 +21,7 @@ impl Context {
         }
     }
 
-    pub fn value<V: Any + Send + Sync>(&self, key: &'static str) -> Option<&V> {
+    pub fn value<V: Any + Send + Sync>(&self, key: &'static str) -> Option<&V> { crate::fntrace::enter("value"); 
         let mut ctx = self;
         loop {
             if ctx.key == Some(key) {

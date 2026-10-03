@@ -31,7 +31,7 @@ impl SnapshotFS {
         fs: Arc<dyn FS>,
         overlays: HashMap<Path, Arc<Overlay>>,
         to_path: Box<dyn Fn(&str) -> Path + Send + Sync>,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         SnapshotFS {
             fs,
             overlays,
@@ -42,11 +42,11 @@ impl SnapshotFS {
         }
     }
 
-    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         self.get_file_by_path(file_name, &(self.to_path)(file_name))
     }
 
-    pub fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> {
+    pub fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file_by_path"); 
         if let Some(overlay) = self.overlays.get(path) {
             return Some(Arc::clone(overlay) as Arc<dyn FileHandle>);
         }
@@ -62,7 +62,7 @@ impl SnapshotFS {
         }
     }
 
-    pub fn file_exists(&self, file_name: &str, path: &Path) -> bool {
+    pub fn file_exists(&self, file_name: &str, path: &Path) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         if self.overlays.contains_key(path) {
             return true;
         }
@@ -72,26 +72,26 @@ impl SnapshotFS {
         self.fs.file_exists(file_name)
     }
 
-    pub fn is_open_file(&self, file_name: &str) -> bool {
+    pub fn is_open_file(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_open_file"); 
         let path = (self.to_path)(file_name);
         self.overlays.contains_key(&path)
     }
 }
 
 impl FileSource for SnapshotFS {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
-    fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> {
+    fn get_file(&self, file_name: &str) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         SnapshotFS::get_file(self, file_name)
     }
-    fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> {
+    fn get_file_by_path(&self, file_name: &str, path: &Path) -> Option<Arc<dyn FileHandle>> { ::tsox_core::fntrace::enter("get_file_by_path"); 
         SnapshotFS::get_file_by_path(self, file_name, path)
     }
-    fn file_exists(&self, file_name: &str, path: &Path) -> bool {
+    fn file_exists(&self, file_name: &str, path: &Path) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         SnapshotFS::file_exists(self, file_name, path)
     }
-    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         self.fs.get_accessible_entries(path)
     }
 }

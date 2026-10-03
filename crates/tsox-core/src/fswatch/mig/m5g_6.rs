@@ -25,7 +25,7 @@ unsafe impl Send for WatchImpl {}
 unsafe impl Sync for WatchImpl {}
 
 impl Watch for WatchImpl {
-    fn close(&self) -> Result<(), FswatchError> {
+    fn close(&self) -> Result<(), FswatchError> { crate::fntrace::enter("close"); 
         let mut cancelled = self.mu.lock().unwrap();
         if *cancelled {
             return Ok(());
@@ -43,15 +43,15 @@ impl Watch for WatchImpl {
 }
 
 impl Watcher for WatcherImpl {
-    fn name(&self) -> &str {
+    fn name(&self) -> &str { crate::fntrace::enter("name"); 
         &self.name
     }
 
-    fn available(&self) -> bool {
+    fn available(&self) -> bool { crate::fntrace::enter("available"); 
         self.factory.is_some()
     }
 
-    fn has_fast_recursive_backend(&self) -> bool {
+    fn has_fast_recursive_backend(&self) -> bool { crate::fntrace::enter("has_fast_recursive_backend"); 
         matches!(self.name.as_str(), "windows" | "fsevents")
     }
 
@@ -60,7 +60,7 @@ impl Watcher for WatcherImpl {
         dir: &str,
         callback: WatchCallback,
         options: &[WatchOption],
-    ) -> Result<Arc<dyn Watch>, FswatchError> {
+    ) -> Result<Arc<dyn Watch>, FswatchError> { crate::fntrace::enter("watch_directory"); 
         let requests = [WatchDirectoryRequest {
             dir: dir.to_string(),
             callback: Some(callback),
@@ -73,7 +73,7 @@ impl Watcher for WatcherImpl {
     fn watch_directories(
         &self,
         requests: &[WatchDirectoryRequest],
-    ) -> Result<Vec<Arc<dyn Watch>>, FswatchError> {
+    ) -> Result<Vec<Arc<dyn Watch>>, FswatchError> { crate::fntrace::enter("watch_directories"); 
         if !self.available() {
             return Err(ERR_UNAVAILABLE.to_string());
         }
@@ -152,7 +152,7 @@ impl Watcher for WatcherImpl {
         &self,
         path: &str,
         callback: WatchCallback,
-    ) -> Result<Arc<dyn Watch>, FswatchError> {
+    ) -> Result<Arc<dyn Watch>, FswatchError> { crate::fntrace::enter("watch_file"); 
         if !self.available() {
             return Err(ERR_UNAVAILABLE.to_string());
         }

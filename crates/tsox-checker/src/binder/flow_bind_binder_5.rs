@@ -3,7 +3,7 @@
 use crate::binder::flow_bind::*;
 
 impl Binder {
-    pub(crate) fn is_mutation_tracked_reference(&self, expr: &Arc<Node>) -> bool {
+    pub(crate) fn is_mutation_tracked_reference(&self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_mutation_tracked_reference"); 
         match expr.kind {
             SyntaxKind::Identifier
             | SyntaxKind::ThisKeyword
@@ -32,7 +32,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn is_string_or_numeric_literal_like(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_string_or_numeric_literal_like(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_string_or_numeric_literal_like"); 
         matches!(
             node.kind,
             SyntaxKind::StringLiteral
@@ -41,14 +41,14 @@ impl Binder {
         )
     }
 
-    pub(crate) fn is_entity_name_expression(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_entity_name_expression(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression"); 
         matches!(
             node.kind,
             SyntaxKind::Identifier | SyntaxKind::QualifiedName
         )
     }
 
-    pub(crate) fn bind_call_expression_flow(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_call_expression_flow(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_call_expression_flow"); 
         if let NodeData::CallExpression(data) = &node.data {
             let expr = &data.expression;
 
@@ -66,9 +66,9 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_this_property_assignment(&mut self, _node: &Arc<Node>) {}
+    pub(crate) fn bind_this_property_assignment(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_this_property_assignment"); }
 
-    pub(crate) fn collect_expando_assignment(&mut self, node: &Arc<Node>) {
+    pub(crate) fn collect_expando_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("collect_expando_assignment"); 
         let NodeData::BinaryExpression(bin) = &node.data else {
             return;
         };
@@ -106,7 +106,7 @@ impl Binder {
         &self,
         base_name: &str,
         scope: &Option<Arc<Node>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup_entity_single_scope"); 
         let sc = scope.as_ref()?;
         if let Some(sym) = self
             .symbol_map
@@ -123,7 +123,7 @@ impl Binder {
             .cloned()
     }
 
-    pub(crate) fn process_expando_assignments(&mut self) {
+    pub(crate) fn process_expando_assignments(&mut self) { ::tsox_core::fntrace::enter("process_expando_assignments"); 
         let assignments = std::mem::take(&mut self.expando_assignments);
         for info in assignments {
             let node = info.node;
@@ -250,7 +250,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_expression_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_expression_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_expression_statement"); 
         if let NodeData::ExpressionStatement(data) = &node.data {
             self.bind(&data.expression);
 
@@ -288,7 +288,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn is_in_for_in_or_of_head(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_in_for_in_or_of_head(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_for_in_or_of_head"); 
         let Some(parent) = &node.parent() else {
             return false;
         };

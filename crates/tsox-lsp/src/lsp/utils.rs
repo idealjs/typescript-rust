@@ -2,7 +2,7 @@ use serde_json::{Value, json};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-pub(super) fn build_program(path: &str, content: &str) -> Arc<tsox_compile::compiler::Program> {
+pub(super) fn build_program(path: &str, content: &str) -> Arc<tsox_compile::compiler::Program> { ::tsox_core::fntrace::enter("build_program"); 
     let fs = Arc::new(tsox_tsoptions::vfs::InMemoryFS::new());
     let parent = std::path::Path::new(path)
         .parent()
@@ -39,14 +39,14 @@ pub(super) fn build_program(path: &str, content: &str) -> Arc<tsox_compile::comp
 
 pub(super) fn display_parts_to_string(
     parts: &[tsox_checker::checker::nodebuilder::SymbolDisplayPart],
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("display_parts_to_string"); 
     parts.iter().map(|p| p.text.as_str()).collect()
 }
 
 pub(super) fn find_deepest_node(
     node: &Arc<tsox_frontend::ast::Node>,
     offset: usize,
-) -> Arc<tsox_frontend::ast::Node> {
+) -> Arc<tsox_frontend::ast::Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -67,7 +67,7 @@ pub(super) fn find_deepest_node(
     deepest
 }
 
-pub(super) fn position_to_offset(params: &Value, content: &str) -> usize {
+pub(super) fn position_to_offset(params: &Value, content: &str) -> usize { ::tsox_core::fntrace::enter("position_to_offset"); 
     let line = params
         .get("position")
         .and_then(|p| p.get("line"))
@@ -84,7 +84,7 @@ pub(super) fn position_to_offset(params: &Value, content: &str) -> usize {
 
 pub(super) fn build_program_from_documents(
     documents: &HashMap<String, String>,
-) -> Option<Arc<tsox_compile::compiler::Program>> {
+) -> Option<Arc<tsox_compile::compiler::Program>> { ::tsox_core::fntrace::enter("build_program_from_documents"); 
     if documents.is_empty() {
         return None;
     }
@@ -122,7 +122,7 @@ pub(super) fn build_program_from_documents(
     ))
 }
 
-pub(super) fn path_to_uri(path: &str) -> String {
+pub(super) fn path_to_uri(path: &str) -> String { ::tsox_core::fntrace::enter("path_to_uri"); 
     if path.starts_with('/') {
         format!("file://{path}")
     } else {
@@ -133,7 +133,7 @@ pub(super) fn path_to_uri(path: &str) -> String {
 pub(super) fn diagnostic_to_lsp(
     diag: &tsox_frontend::ast::diagnostic::Diagnostic,
     content: &str,
-) -> Value {
+) -> Value { ::tsox_core::fntrace::enter("diagnostic_to_lsp"); 
     let (line, col) = if let Some(file) = &diag.file {
         tsox_frontend::diagnosticwriter::line_and_character(
             &file.line_map,
@@ -167,7 +167,7 @@ pub(super) fn diagnostic_to_lsp(
     })
 }
 
-pub(super) fn make_response(id: Option<Value>, result: Value) -> Value {
+pub(super) fn make_response(id: Option<Value>, result: Value) -> Value { ::tsox_core::fntrace::enter("make_response"); 
     json!({
         "jsonrpc": "2.0",
         "id": id,
@@ -175,7 +175,7 @@ pub(super) fn make_response(id: Option<Value>, result: Value) -> Value {
     })
 }
 
-pub(super) fn make_error_response(id: Option<Value>, code: i32, message: &str) -> Value {
+pub(super) fn make_error_response(id: Option<Value>, code: i32, message: &str) -> Value { ::tsox_core::fntrace::enter("make_error_response"); 
     json!({
         "jsonrpc": "2.0",
         "id": id,

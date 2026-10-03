@@ -5,13 +5,13 @@ pub struct Reader<R: Read> {
 }
 
 impl<R: Read> Reader<R> {
-    pub fn new(r: R) -> Self {
+    pub fn new(r: R) -> Self { ::tsox_core::fntrace::enter("new"); 
         Reader {
             r: BufReader::new(r),
         }
     }
 
-    pub fn read(&mut self) -> io::Result<Vec<u8>> {
+    pub fn read(&mut self) -> io::Result<Vec<u8>> { ::tsox_core::fntrace::enter("read"); 
         let mut content_length: i64 = 0;
 
         loop {
@@ -75,11 +75,11 @@ pub struct Writer<W: Write> {
 }
 
 impl<W: Write> Writer<W> {
-    pub fn new(w: W) -> Self {
+    pub fn new(w: W) -> Self { ::tsox_core::fntrace::enter("new"); 
         Writer { w }
     }
 
-    pub fn write(&mut self, data: &[u8]) -> io::Result<()> {
+    pub fn write(&mut self, data: &[u8]) -> io::Result<()> { ::tsox_core::fntrace::enter("write"); 
         write!(self.w, "Content-Length: {}\r\n\r\n", data.len())?;
         self.w.write_all(data)?;
         self.w.flush()

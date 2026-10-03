@@ -107,7 +107,7 @@ pub const OBJECT_FLAGS_CLASS_OR_INTERFACE: ObjectFlags =
 pub const OBJECT_FLAGS_REQUIRES_WIDENING: ObjectFlags = ObjectFlags::from_bits_truncate(
     ObjectFlags::ContainsWideningType.bits() | ObjectFlags::ContainsObjectOrArrayLiteral.bits(),
 );
-pub fn regular_literal_object_flags(original: ObjectFlags) -> ObjectFlags {
+pub fn regular_literal_object_flags(original: ObjectFlags) -> ObjectFlags { ::tsox_core::fntrace::enter("regular_literal_object_flags"); 
     ObjectFlags::Anonymous
         | ObjectFlags::ObjectLiteral
         | (original & (ObjectFlags::JSLiteral | ObjectFlags::NonInferrableType))
@@ -255,7 +255,7 @@ pub enum Ternary {
 }
 
 impl std::ops::BitAndAssign for Ternary {
-    fn bitand_assign(&mut self, rhs: Self) {
+    fn bitand_assign(&mut self, rhs: Self) { ::tsox_core::fntrace::enter("bitand_assign"); 
         if *self == Ternary::False || rhs == Ternary::False {
             *self = Ternary::False;
         } else if *self == Ternary::Maybe || rhs == Ternary::Maybe {

@@ -19,7 +19,7 @@ use super::completions_members_receiver::{
 /// scope 符号），非点后语境返回 None 交由 scope 路径
 /// Go isRightOfDot 守卫（completions.go:683）：点的接收者是未闭合的调用/
 /// 函数式节点（Math.min(./**/) 恢复形态，用户可能在写 spread）→ 无补全
-fn receiver_is_unclosed_call_or_function(receiver: &Arc<Node>, text: &str) -> bool {
+fn receiver_is_unclosed_call_or_function(receiver: &Arc<Node>, text: &str) -> bool { ::tsox_core::fntrace::enter("receiver_is_unclosed_call_or_function"); 
     let function_like = matches!(
         receiver.kind,
         SyntaxKind::FunctionExpression
@@ -54,7 +54,7 @@ pub(super) fn member_symbols_after_dot(
     checker: &mut Checker,
     node: &Arc<Node>,
     position: usize,
-) -> MemberDotResult {
+) -> MemberDotResult { ::tsox_core::fntrace::enter("member_symbols_after_dot"); 
     use tsox_frontend::ast::NodeData;
     use tsox_frontend::ast::SyntaxKind;
     let _dbg_result = (|| {
@@ -355,7 +355,7 @@ pub(super) fn jsdoc_type_dot_members(
     checker: &mut Checker,
     type_expr: &Arc<Node>,
     dot: usize,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("jsdoc_type_dot_members"); 
     if let Some(recv) = deepest_node_ending_at(type_expr, dot) {
         return member_symbols_of_receiver(checker, &recv, false, false).unwrap_or_default();
     }
@@ -370,7 +370,7 @@ pub(super) fn jsdoc_type_dot_members(
             .unwrap_or_default();
     }
     let mut found: Option<Arc<Node>> = None;
-    fn deepest_import_type_containing(n: &Arc<Node>, dot: usize, found: &mut Option<Arc<Node>>) {
+    fn deepest_import_type_containing(n: &Arc<Node>, dot: usize, found: &mut Option<Arc<Node>>) { ::tsox_core::fntrace::enter("deepest_import_type_containing"); 
         if n.pos() > dot || n.end() <= dot {
             return;
         }
@@ -394,7 +394,7 @@ fn member_symbols_of_receiver(
     receiver: &Arc<Node>,
     value_only: bool,
     is_namespace_name: bool,
-) -> Option<Vec<Arc<Symbol>>> {
+) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("member_symbols_of_receiver"); 
     if std::env::var_os("TSOX_DEBUG_CMP").is_some() {
         eprintln!("[msr] recv={} value_only={} is_ns={}", receiver.text(), value_only, is_namespace_name);
     }
@@ -563,7 +563,7 @@ fn member_symbols_of_receiver(
 
 /// `this` / `super` 接收者的类型：this 走 checker 结构化解析
 /// （checkThisExpression/getThisContainer，Go getTypeAtLocation 同源）
-fn receiver_type(checker: &mut Checker, receiver: &Arc<Node>) -> Arc<Type> {
+fn receiver_type(checker: &mut Checker, receiver: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("receiver_type"); 
     if std::env::var_os("TSOX_DEBUG_CMP").is_some() && receiver.kind == SyntaxKind::Identifier {
         let t = checker.get_type_of_node(receiver);
         let props = t.as_structured().map(|s| s.properties.len());
@@ -585,7 +585,7 @@ fn receiver_type(checker: &mut Checker, receiver: &Arc<Node>) -> Arc<Type> {
     }
 }
 
-fn base_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn base_class_of(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("base_class_of"); 
     let class = enclosing_class_of(node)?;
     let heritage = match &class.data {
         NodeData::ClassDeclaration(d) => d.heritage_clauses.clone(),
@@ -619,7 +619,7 @@ fn base_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
 
 /// receiver（限定段/标识符）向上是否归属 namespace 声明名（Go
 /// isNamespaceName）
-fn receiver_in_namespace_declaration(receiver: &Arc<Node>) -> bool {
+fn receiver_in_namespace_declaration(receiver: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("receiver_in_namespace_declaration"); 
     let mut cur = receiver.parent();
     while let Some(c) = cur {
         if matches!(c.kind, SyntaxKind::QualifiedName | SyntaxKind::Identifier) {
@@ -632,7 +632,7 @@ fn receiver_in_namespace_declaration(receiver: &Arc<Node>) -> bool {
 }
 
 /// receiver 是否为某 ImportTypeNode 的 qualifier 链上的标识符/限定名
-fn in_import_type_qualifier(receiver: &Arc<Node>) -> bool {
+fn in_import_type_qualifier(receiver: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("in_import_type_qualifier"); 
     if !matches!(receiver.kind, SyntaxKind::Identifier | SyntaxKind::QualifiedName) {
         return false;
     }
@@ -660,7 +660,7 @@ fn import_type_module_members(
     checker: &mut Checker,
     module: &Arc<Symbol>,
     value_only: bool,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("import_type_module_members"); 
     let mut exports: Vec<Arc<Symbol>> = Vec::new();
     checker.for_each_export_and_property_of_module(module, &mut |sym, _| {
         if !exports.iter().any(|e| Arc::ptr_eq(e, sym)) {
@@ -707,7 +707,7 @@ fn symbol_referenced_at_type_location(
     checker: &mut Checker,
     symbol: &Arc<Symbol>,
     seen: &mut Vec<*const Symbol>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("symbol_referenced_at_type_location"); 
     let key = Arc::as_ptr(symbol);
     if seen.contains(&key) {
         return false;
@@ -737,7 +737,7 @@ fn symbol_referenced_at_type_location(
 fn resolve_module_qualified(
     checker: &mut Checker,
     receiver: &Arc<Node>,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_module_qualified"); 
     let mut names: Vec<String> = Vec::new();
     let mut cur = Arc::clone(receiver);
     loop {
@@ -774,7 +774,7 @@ fn resolve_module_qualified(
 }
 
 /// JS 模块文件 jsdoc 中的 @typedef/@callback 名字（类型位补全用）
-fn jsdoc_typedef_names(checker: &Checker, module: &Arc<Symbol>) -> Vec<String> {
+fn jsdoc_typedef_names(checker: &Checker, module: &Arc<Symbol>) -> Vec<String> { ::tsox_core::fntrace::enter("jsdoc_typedef_names"); 
     let mut names = Vec::new();
     for decl in &module.declarations {
         if decl.kind != SyntaxKind::SourceFile {
@@ -805,7 +805,7 @@ fn jsdoc_typedef_names(checker: &Checker, module: &Arc<Symbol>) -> Vec<String> {
     names
 }
 
-fn collect_typedef_names(node: &Arc<Node>, names: &mut Vec<String>) {
+fn collect_typedef_names(node: &Arc<Node>, names: &mut Vec<String>) { ::tsox_core::fntrace::enter("collect_typedef_names"); 
     if matches!(
         node.kind,
         SyntaxKind::JSDocTypedefTag | SyntaxKind::JSDocCallbackTag

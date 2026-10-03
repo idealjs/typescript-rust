@@ -26,7 +26,7 @@ pub trait EmitContextCommentRangeR36k26 {
 }
 
 impl EmitContextCommentRangeR36k26 for crate::printer::EmitContext {
-    fn comment_range(&self, node: &Arc<Node>) -> TextRange {
+    fn comment_range(&self, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("comment_range"); 
         if let Some(emit_node) = self.emit_nodes_try_get(node) {
             if emit_node.flags & HAS_COMMENT_RANGE != 0 {
                 return emit_node.comment_range;
@@ -35,7 +35,7 @@ impl EmitContextCommentRangeR36k26 for crate::printer::EmitContext {
         node.loc
     }
 
-    fn source_map_range(&self, node: &Arc<Node>) -> TextRange {
+    fn source_map_range(&self, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("source_map_range"); 
         if let Some(emit_node) = self.emit_nodes_try_get(node) {
             if emit_node.flags & HAS_SOURCE_MAP_RANGE != 0 {
                 return emit_node.source_map_range;
@@ -44,12 +44,12 @@ impl EmitContextCommentRangeR36k26 for crate::printer::EmitContext {
         node.loc
     }
 
-    fn request_emit_helper(&self, _helper: &'static Arc<EmitHelper>) {}
+    fn request_emit_helper(&self, _helper: &'static Arc<EmitHelper>) { ::tsox_core::fntrace::enter("request_emit_helper"); }
 
-    fn set_text_source(&self, _node: &Arc<Node>, _source: &Arc<Node>) {}
+    fn set_text_source(&self, _node: &Arc<Node>, _source: &Arc<Node>) { ::tsox_core::fntrace::enter("set_text_source"); }
 }
 
-fn prop_key_helper_arc() -> &'static Arc<EmitHelper> {
+fn prop_key_helper_arc() -> &'static Arc<EmitHelper> { ::tsox_core::fntrace::enter("prop_key_helper_arc"); 
     static HELPER: OnceLock<Arc<EmitHelper>> = OnceLock::new();
     HELPER.get_or_init(|| {
         Arc::new(EmitHelper {
@@ -65,7 +65,7 @@ fn prop_key_helper_arc() -> &'static Arc<EmitHelper> {
     })
 }
 
-pub fn prop_key_helper() -> &'static EmitHelper {
+pub fn prop_key_helper() -> &'static EmitHelper { ::tsox_core::fntrace::enter("prop_key_helper"); 
     prop_key_helper_arc()
 }
 
@@ -75,7 +75,7 @@ impl<'a> NodeFactory<'a> {
         target: &Arc<Node>,
         this_arg: &Arc<Node>,
         arguments_list: &[Arc<Node>],
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_function_call_call"); 
         let mut args = Vec::with_capacity(1 + arguments_list.len());
         args.push(Arc::clone(this_arg));
         args.extend(arguments_list.iter().cloned());
@@ -98,7 +98,7 @@ impl<'a> NodeFactory<'a> {
         target: &Arc<Node>,
         property_key: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_reflect_get_call"); 
         self.new_call_expression(
             &self.new_property_access_expression(
                 &self.new_identifier("Reflect"),
@@ -123,7 +123,7 @@ impl<'a> NodeFactory<'a> {
         property_key: &Arc<Node>,
         value: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_reflect_set_call"); 
         self.new_call_expression(
             &self.new_property_access_expression(
                 &self.new_identifier("Reflect"),
@@ -143,7 +143,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_string_literal_from_node(&self, text_source_node: &Arc<Node>) -> Arc<Node> {
+    pub fn new_string_literal_from_node(&self, text_source_node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal_from_node"); 
         let mut text = String::new();
         match text_source_node.kind {
             SyntaxKind::Identifier
@@ -172,7 +172,7 @@ impl<'a> NodeFactory<'a> {
         node
     }
 
-    pub fn new_prop_key_helper(&self, expr: &Arc<Node>) -> Arc<Node> {
+    pub fn new_prop_key_helper(&self, expr: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_prop_key_helper"); 
         self.emit_context.request_emit_helper(prop_key_helper_arc());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__propKey"),
@@ -191,7 +191,7 @@ impl<'a> NodeFactory<'a> {
         question_dot_token: Option<Arc<Node>>,
         template: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_tagged_template_expression"); 
         let mut updated = Node::new(
             SyntaxKind::TaggedTemplateExpression,
             NodeData::TaggedTemplateExpression(ndg::TaggedTemplateExpressionData {
@@ -215,7 +215,7 @@ impl<'a> NodeFactory<'a> {
         question_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parameter_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ndg::ParameterDeclarationData {
@@ -239,7 +239,7 @@ impl<'a> NodeFactory<'a> {
         condition: Option<&Arc<Node>>,
         incrementor: Option<&Arc<Node>>,
         statement: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_for_statement"); 
         let mut updated = Node::new(
             SyntaxKind::ForStatement,
             NodeData::ForStatement(ndg::ForStatementData {
@@ -258,7 +258,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         node: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_computed_property_name"); 
         let mut updated = Node::new(
             SyntaxKind::ComputedPropertyName,
             NodeData::ComputedPropertyName(ndg::ComputedPropertyNameData {
@@ -270,7 +270,7 @@ impl<'a> NodeFactory<'a> {
         Arc::new(updated)
     }
 
-    pub fn update_spread_element(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn update_spread_element(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_spread_element"); 
         let mut updated = Node::new(
             SyntaxKind::SpreadElement,
             NodeData::SpreadElement(ndg::SpreadElementData {
@@ -282,7 +282,7 @@ impl<'a> NodeFactory<'a> {
         Arc::new(updated)
     }
 
-    pub fn update_spread_assignment(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn update_spread_assignment(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_spread_assignment"); 
         let mut updated = Node::new(
             SyntaxKind::SpreadAssignment,
             NodeData::SpreadAssignment(ndg::SpreadAssignmentData {
@@ -299,7 +299,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         elements: &[Arc<Node>],
         multi_line: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_array_literal_expression"); 
         let mut updated = Node::new(
             SyntaxKind::ArrayLiteralExpression,
             NodeData::ArrayLiteralExpression(ndg::ArrayLiteralExpressionData {
@@ -317,7 +317,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         properties: &[Arc<Node>],
         multi_line: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_object_literal_expression"); 
         let mut updated = Node::new(
             SyntaxKind::ObjectLiteralExpression,
             NodeData::ObjectLiteralExpression(ndg::ObjectLiteralExpressionData {
@@ -334,7 +334,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         node: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parenthesized_expression"); 
         let mut updated = Node::new(
             SyntaxKind::ParenthesizedExpression,
             NodeData::ParenthesizedExpression(ndg::ParenthesizedExpressionData {
@@ -350,7 +350,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         node: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_partially_emitted_expression"); 
         let mut updated = Node::new(
             SyntaxKind::PartiallyEmittedExpression,
             NodeData::PartiallyEmittedExpression(ndg::PartiallyEmittedExpressionData {
@@ -362,11 +362,11 @@ impl<'a> NodeFactory<'a> {
         Arc::new(updated)
     }
 
-    pub fn is_ignorable_paren(&self, node: &Arc<Node>) -> bool {
-        fn node_is_synthesized(node: &Node) -> bool {
+    pub fn is_ignorable_paren(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_ignorable_paren"); 
+        fn node_is_synthesized(node: &Node) -> bool { ::tsox_core::fntrace::enter("node_is_synthesized"); 
             (node.pos() as i32) < 0 || (node.end() as i32) < 0
         }
-        fn range_is_synthesized(loc: TextRange) -> bool {
+        fn range_is_synthesized(loc: TextRange) -> bool { ::tsox_core::fntrace::enter("range_is_synthesized"); 
             (loc.pos() as i32) < 0 || (loc.end() as i32) < 0
         }
         is_parenthesized_expression(node)
@@ -385,7 +385,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         outer_expression: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_outer_expression"); 
         match outer_expression.kind {
             SyntaxKind::ParenthesizedExpression => {
                 self.update_parenthesized_expression(outer_expression, expression)
@@ -405,7 +405,7 @@ impl<'a> NodeFactory<'a> {
         outer_expression: &Arc<Node>,
         inner_expression: &Arc<Node>,
         kinds: OuterExpressionKinds,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("restore_outer_expressions"); 
         if is_outer_expression(outer_expression, kinds) && !self.is_ignorable_paren(outer_expression)
         {
             let outer_inner = outer_expression

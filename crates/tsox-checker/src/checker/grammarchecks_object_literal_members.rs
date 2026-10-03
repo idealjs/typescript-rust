@@ -6,7 +6,7 @@ impl Checker {
     pub(crate) fn check_grammar_object_literal_member_modifiers(
         &mut self,
         properties: &[Arc<Node>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_grammar_object_literal_member_modifiers"); 
         for prop in properties.iter() {
             if !matches!(
                 prop.kind,
@@ -67,7 +67,7 @@ impl Checker {
     }
 }
 
-fn prop_postfix_token(prop: &Arc<Node>) -> Option<Arc<Node>> {
+fn prop_postfix_token(prop: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("prop_postfix_token"); 
     match &prop.data {
         NodeData::MethodDeclaration(d) => d.postfix_token.clone(),
         NodeData::PropertyAssignment(d) => d.postfix_token.clone(),

@@ -15,11 +15,11 @@ use crate::printer::{EmitContext, NodeFactory};
 pub mod r38k9_defs;
 use self::r38k9_defs::{R38K9NodeCastExt, r38k9_same_node};
 
-fn node_opt_is(opt: Option<&Arc<Node>>, name: &Arc<Node>) -> bool {
+fn node_opt_is(opt: Option<&Arc<Node>>, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_opt_is"); 
     opt.is_some_and(|e| Arc::ptr_eq(e, name))
 }
 
-pub fn is_identifier_reference(name: &Arc<Node>, parent: &Arc<Node>) -> bool {
+pub fn is_identifier_reference(name: &Arc<Node>, parent: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_identifier_reference"); 
     match parent.kind {
         SyntaxKind::BinaryExpression
         | SyntaxKind::PrefixUnaryExpression
@@ -102,7 +102,7 @@ pub fn is_identifier_reference(name: &Arc<Node>, parent: &Arc<Node>) -> bool {
 pub fn convert_binding_element_to_array_assignment_element(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_array_assignment_element"); 
     let binding = element.as_binding_element();
     if binding.name.is_none() {
         let elision = emit_context.factory().new_omitted_expression();
@@ -135,7 +135,7 @@ pub fn convert_binding_element_to_array_assignment_element(
 pub fn convert_binding_element_to_object_assignment_element(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_object_assignment_element"); 
     let binding = element.as_binding_element();
     if binding.dot_dot_dot_token.is_some() {
         let spread = emit_context
@@ -186,7 +186,7 @@ pub fn convert_binding_element_to_object_assignment_element(
 pub fn convert_binding_pattern_to_assignment_pattern(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_pattern_to_assignment_pattern"); 
     match element.kind {
         SyntaxKind::ArrayBindingPattern => {
             convert_binding_element_to_array_assignment_pattern(emit_context, element)
@@ -201,7 +201,7 @@ pub fn convert_binding_pattern_to_assignment_pattern(
 pub fn convert_binding_element_to_object_assignment_pattern(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_object_assignment_pattern"); 
     let mut properties: Vec<Arc<Node>> = vec![];
     let elements = element.as_binding_pattern().elements.clone();
     for child in elements.nodes.iter() {
@@ -225,7 +225,7 @@ pub fn convert_binding_element_to_object_assignment_pattern(
 pub fn convert_binding_element_to_array_assignment_pattern(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_array_assignment_pattern"); 
     let mut elements_out: Vec<Arc<Node>> = vec![];
     let elements = element.as_binding_pattern().elements.clone();
     for child in elements.nodes.iter() {
@@ -248,7 +248,7 @@ pub fn convert_binding_element_to_array_assignment_pattern(
 pub fn convert_binding_name_to_assignment_element_target(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_name_to_assignment_element_target"); 
     if is_binding_pattern(element) {
         return convert_binding_pattern_to_assignment_pattern(emit_context, element);
     }
@@ -258,7 +258,7 @@ pub fn convert_binding_name_to_assignment_element_target(
 pub fn convert_variable_declaration_to_assignment_expression(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("convert_variable_declaration_to_assignment_expression"); 
     let declaration = element.as_variable_declaration();
     declaration.initializer.clone()?;
     let expression = convert_binding_name_to_assignment_element_target(
@@ -274,7 +274,7 @@ pub fn convert_variable_declaration_to_assignment_expression(
     Some(assignment)
 }
 
-pub fn single_or_many(nodes: Option<&[Arc<Node>]>, factory: &NodeFactory) -> Option<Arc<Node>> {
+pub fn single_or_many(nodes: Option<&[Arc<Node>]>, factory: &NodeFactory) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("single_or_many"); 
     let nodes = nodes?;
     if nodes.len() == 1 {
         return Some(nodes[0].clone());
@@ -282,14 +282,14 @@ pub fn single_or_many(nodes: Option<&[Arc<Node>]>, factory: &NodeFactory) -> Opt
     Some(factory.new_syntax_list(nodes.to_vec()))
 }
 
-pub fn is_simple_copiable_expression(expression: &Arc<Node>) -> bool {
+pub fn is_simple_copiable_expression(expression: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_simple_copiable_expression"); 
     is_string_literal_like(expression)
         || is_numeric_literal(expression)
         || is_keyword_kind(expression.kind)
         || is_identifier(expression)
 }
 
-pub fn is_original_node_single_line(emit_context: &EmitContext, node: Option<&Arc<Node>>) -> bool {
+pub fn is_original_node_single_line(emit_context: &EmitContext, node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_original_node_single_line"); 
     let node = match node {
         Some(n) => n,
         None => return false,
@@ -308,6 +308,6 @@ pub fn is_original_node_single_line(emit_context: &EmitContext, node: Option<&Ar
     start_line == end_line
 }
 
-pub fn is_simple_inlineable_expression(expression: &Arc<Node>) -> bool {
+pub fn is_simple_inlineable_expression(expression: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_simple_inlineable_expression"); 
     !is_identifier(expression) && is_simple_copiable_expression(expression)
 }

@@ -3,14 +3,14 @@
 use crate::binder::bind_walk::*;
 
 impl Binder {
-    pub(crate) fn bind_module_declaration(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_module_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_module_declaration"); 
         self.set_export_context_flag(node);
         self.bind_module_declaration_inner(node)
     }
 
     /// Go setExportContextFlag：ambient 模块且无 export 声明时是隐式导出语境
     /// （declare namespace 内未加 export 的声明自动入 exports）
-    pub fn set_export_context_flag(&mut self, node: &Arc<Node>) {
+    pub fn set_export_context_flag(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_export_context_flag"); 
         let is_ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
             || node.flags.contains(NodeFlags::Ambient)
             || self.in_ambient_context(node);
@@ -24,7 +24,7 @@ impl Binder {
 
     /// Go parser 的 NodeFlagsAmbient 由解析器上下文注入（d.ts 整文件、declare
     /// 声明子树），Rust parser 未承载该位，此处按容器链等价重建
-    fn in_ambient_context(&self, node: &Arc<Node>) -> bool {
+    fn in_ambient_context(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("in_ambient_context"); 
         if self
             .current_source_file
             .as_ref()
@@ -42,12 +42,12 @@ impl Binder {
         false
     }
 
-    fn bind_module_declaration_inner(&mut self, node: &Arc<Node>) {
+    fn bind_module_declaration_inner(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_module_declaration_inner"); 
         let dotted_name = match &node.data {
             tsox_frontend::ast::NodeData::ModuleDeclaration(md) => match md.name.kind {
                 SyntaxKind::Identifier => md.name.text().to_string(),
                 SyntaxKind::QualifiedName => {
-                    fn qualified_text(n: &Arc<Node>) -> String {
+                    fn qualified_text(n: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("qualified_text"); 
                         match &n.data {
                             tsox_frontend::ast::NodeData::QualifiedName(q) => {
                                 format!("{}.{}", qualified_text(&q.left), q.right.text())
@@ -202,7 +202,7 @@ impl Binder {
         }
     }
 
-    fn module_symbol_flags(node: &Arc<Node>) -> (SymbolFlags, SymbolFlags) {
+    fn module_symbol_flags(node: &Arc<Node>) -> (SymbolFlags, SymbolFlags) { ::tsox_core::fntrace::enter("module_symbol_flags"); 
         let state = get_module_instance_state(node);
         if state != ModuleInstanceState::NonInstantiated {
             (SymbolFlags::ValueModule, SymbolFlags::ValueModuleExcludes)

@@ -1,7 +1,7 @@
 use crate::checker::checker_expressions::*;
 
 impl Checker {
-    pub(crate) fn check_object_literal_spread_overrides(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_object_literal_spread_overrides(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_object_literal_spread_overrides"); 
         if !self.strict_null_checks {
             return;
         }
@@ -31,7 +31,7 @@ impl Checker {
         }
     }
 
-    fn spread_expression(prop: &Arc<Node>) -> Option<&Arc<Node>> {
+    fn spread_expression(prop: &Arc<Node>) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("spread_expression"); 
         match &prop.data {
             tsox_frontend::ast::NodeData::SpreadElement(d) => Some(&d.expression),
             tsox_frontend::ast::NodeData::SpreadAssignment(d) => Some(&d.expression),
@@ -39,7 +39,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_jsx_attributes_spread_overrides(&mut self, attrs: &Arc<Node>) {
+    pub(crate) fn check_jsx_attributes_spread_overrides(&mut self, attrs: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_attributes_spread_overrides"); 
         if !self.strict_null_checks {
             return;
         }
@@ -75,7 +75,7 @@ impl Checker {
         own_props: &[(String, Arc<Node>)],
         reported: &mut std::collections::HashSet<String>,
         spread_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_spread_prop_overrides"); 
         for right in self.get_properties_of_type(spread_type) {
             if right.flags.contains(SymbolFlags::Optional) || reported.contains(&right.name) {
                 continue;
@@ -87,7 +87,7 @@ impl Checker {
         }
     }
 
-    fn literal_property_name(prop: &Arc<Node>) -> Option<String> {
+    fn literal_property_name(prop: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("literal_property_name"); 
         let name = prop.name()?;
         match name.kind {
             SyntaxKind::Identifier | SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
@@ -102,7 +102,7 @@ impl Checker {
         name: &str,
         own_node: &Arc<Node>,
         spread_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_spread_overwrites_property"); 
         let file = self
             .get_source_file_of_node(own_node)
             .or_else(|| self.current_file.clone());

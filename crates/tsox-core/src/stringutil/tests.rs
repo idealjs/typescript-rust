@@ -1,14 +1,14 @@
 use super::*;
 
 #[test]
-fn test_is_digit() {
+fn test_is_digit() { crate::fntrace::enter("test_is_digit"); 
     assert!(is_digit('0'));
     assert!(is_digit('9'));
     assert!(!is_digit('a'));
 }
 
 #[test]
-fn test_is_hex_digit() {
+fn test_is_hex_digit() { crate::fntrace::enter("test_is_hex_digit"); 
     assert!(is_hex_digit('0'));
     assert!(is_hex_digit('a'));
     assert!(is_hex_digit('F'));
@@ -16,20 +16,20 @@ fn test_is_hex_digit() {
 }
 
 #[test]
-fn test_equate_case_insensitive() {
+fn test_equate_case_insensitive() { crate::fntrace::enter("test_equate_case_insensitive"); 
     assert!(equate_string_case_insensitive("Hello", "hello"));
     assert!(!equate_string_case_insensitive("Hello", "world"));
 }
 
 #[test]
-fn test_split_lines() {
+fn test_split_lines() { crate::fntrace::enter("test_split_lines"); 
     assert_eq!(split_lines("a\nb\nc"), vec!["a", "b", "c"]);
     assert_eq!(split_lines("a\r\nb"), vec!["a", "b"]);
     assert_eq!(split_lines("a\rb"), vec!["a", "b"]);
 }
 
 #[test]
-fn test_contains_non_ascii() {
+fn test_contains_non_ascii() { crate::fntrace::enter("test_contains_non_ascii"); 
     assert!(!contains_non_ascii("abc"));
     assert!(contains_non_ascii("é"));
     assert!(contains_non_ascii("café"));
@@ -37,7 +37,7 @@ fn test_contains_non_ascii() {
 }
 
 #[test]
-fn test_is_white_space_like() {
+fn test_is_white_space_like() { crate::fntrace::enter("test_is_white_space_like"); 
     assert!(is_white_space_like(' '));
     assert!(is_white_space_like('\t'));
     assert!(is_white_space_like('\n'));
@@ -46,7 +46,7 @@ fn test_is_white_space_like() {
 }
 
 #[test]
-fn test_is_line_break() {
+fn test_is_line_break() { crate::fntrace::enter("test_is_line_break"); 
     assert!(is_line_break('\n'));
     assert!(is_line_break('\r'));
     assert!(is_line_break('\u{2028}'));
@@ -55,7 +55,7 @@ fn test_is_line_break() {
 }
 
 #[test]
-fn test_is_octal_digit() {
+fn test_is_octal_digit() { crate::fntrace::enter("test_is_octal_digit"); 
     assert!(is_octal_digit('0'));
     assert!(is_octal_digit('7'));
     assert!(!is_octal_digit('8'));
@@ -63,7 +63,7 @@ fn test_is_octal_digit() {
 }
 
 #[test]
-fn test_is_ascii_letter() {
+fn test_is_ascii_letter() { crate::fntrace::enter("test_is_ascii_letter"); 
     assert!(is_ascii_letter('a'));
     assert!(is_ascii_letter('Z'));
     assert!(!is_ascii_letter('0'));
@@ -71,27 +71,27 @@ fn test_is_ascii_letter() {
 }
 
 #[test]
-fn test_compare_strings_case_insensitive() {
+fn test_compare_strings_case_insensitive() { crate::fntrace::enter("test_compare_strings_case_insensitive"); 
     assert_eq!(compare_strings_case_insensitive("hello", "HELLO"), 0);
     assert!(compare_strings_case_insensitive("abc", "abd") < 0);
     assert!(compare_strings_case_insensitive("abd", "abc") > 0);
 }
 
 #[test]
-fn test_compare_strings_case_sensitive() {
+fn test_compare_strings_case_sensitive() { crate::fntrace::enter("test_compare_strings_case_sensitive"); 
     assert_eq!(compare_strings_case_sensitive("hello", "hello"), 0);
     assert!(compare_strings_case_sensitive("abc", "abd") < 0);
     assert!(compare_strings_case_sensitive("abd", "abc") > 0);
 }
 
 #[test]
-fn test_equate_string_case_sensitive() {
+fn test_equate_string_case_sensitive() { crate::fntrace::enter("test_equate_string_case_sensitive"); 
     assert!(equate_string_case_sensitive("Hello", "Hello"));
     assert!(!equate_string_case_sensitive("Hello", "hello"));
 }
 
 #[test]
-fn test_is_white_space_single_line() {
+fn test_is_white_space_single_line() { crate::fntrace::enter("test_is_white_space_single_line"); 
     assert!(is_white_space_single_line(' '));
     assert!(is_white_space_single_line('\t'));
     assert!(!is_white_space_single_line('\n'));
@@ -99,23 +99,23 @@ fn test_is_white_space_single_line() {
 }
 
 #[test]
-fn test_split_lines_empty() {
+fn test_split_lines_empty() { crate::fntrace::enter("test_split_lines_empty"); 
     assert_eq!(split_lines(""), vec![""]);
 }
 
 #[test]
-fn test_split_lines_trailing_newline() {
+fn test_split_lines_trailing_newline() { crate::fntrace::enter("test_split_lines_trailing_newline"); 
     assert_eq!(split_lines("a\n"), vec!["a", ""]);
     assert_eq!(split_lines("a\nb\n"), vec!["a", "b", ""]);
 }
 
 #[test]
-fn test_split_lines_mixed() {
+fn test_split_lines_mixed() { crate::fntrace::enter("test_split_lines_mixed"); 
     assert_eq!(split_lines("a\r\nb\nc\r\nd"), vec!["a", "b", "c", "d"]);
 }
 
 #[test]
-fn test_encode_uri() {
+fn test_encode_uri() { crate::fntrace::enter("test_encode_uri"); 
     assert_eq!(encode_uri("a b"), "a%20b");
     assert_eq!(encode_uri(";/?:@&=+$,#"), ";/?:@&=+$,#");
     assert_eq!(
@@ -125,13 +125,13 @@ fn test_encode_uri() {
 }
 
 #[test]
-fn test_contains_non_ascii_go_port() {
+fn test_contains_non_ascii_go_port() { crate::fntrace::enter("test_contains_non_ascii_go_port"); 
     assert!(!contains_non_ascii("abc"));
     assert!(contains_non_ascii("é"));
 }
 
 #[test]
-fn test_js_casing() {
+fn test_js_casing() { crate::fntrace::enter("test_js_casing"); 
     assert_eq!(to_lower_js("HELLO"), "hello");
     assert_eq!(to_upper_js("hello"), "HELLO");
 

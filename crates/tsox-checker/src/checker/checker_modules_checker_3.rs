@@ -3,7 +3,7 @@
 use crate::checker::checker_modules::*;
 
 impl Checker {
-    pub(crate) fn check_module_export_names(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_module_export_names(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_module_export_names"); 
         use tsox_core::core::compiler_options::ModuleKind;
 
         let mut names: Vec<(Arc<Node>, bool)> = Vec::new();
@@ -85,7 +85,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_import_untyped_module(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_import_untyped_module(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_untyped_module"); 
         use tsox_core::core::compiler_options::ModuleKind;
 
         let NodeData::ImportDeclaration(d) = &node.data else {
@@ -150,7 +150,7 @@ impl Checker {
         self.diagnostics.add(diag);
     }
 
-    pub(crate) fn check_module_specifier_members(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_module_specifier_members(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_module_specifier_members"); 
         use tsox_frontend::ast::NodeData;
 
         let (spec_node, attrs, exclusively_type_only, elements): (
@@ -335,7 +335,7 @@ impl Checker {
         ic: &tsox_frontend::ast::ImportClauseData,
         spec_node: &Arc<Node>,
         attrs: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_default_import_binding"); 
         use tsox_core::diagnostics::messages_generated as msgs;
 
         let Some(binding) = &ic.name else {

@@ -19,7 +19,7 @@ use crate::mig::m4g_2::r37k13_defs::{ClassFieldsTransformerR37k13, K13Visitor, N
 use crate::mig::w11b::should_be_captured_in_temp_variable;
 use crate::mig::m4j_2::extract_modifiers;
 
-pub fn k15_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor {
+pub fn k15_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor { ::tsox_core::fntrace::enter("k15_m3c_visitor"); 
     tsox_frontend::ast::mig::m3c::NodeVisitor {
         factory: tsox_frontend::ast::mig::m3c::NodeFactory {
             hooks: tsox_frontend::ast::mig::m3c::NodeFactoryHooks::default(),
@@ -29,7 +29,7 @@ pub fn k15_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor {
     }
 }
 
-fn kind_to_str(kind: &PrivateIdentifierKind) -> &'static str {
+fn kind_to_str(kind: &PrivateIdentifierKind) -> &'static str { ::tsox_core::fntrace::enter("kind_to_str"); 
     match kind {
         PrivateIdentifierKind::Field => "f",
         PrivateIdentifierKind::Method => "m",
@@ -44,7 +44,7 @@ pub fn new_class_private_field_get_helper_k15(
     state: &Arc<Node>,
     kind: &PrivateIdentifierKind,
     fn_: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_private_field_get_helper_k15"); 
     let mut args = vec![
         receiver.clone(),
         state.clone(),
@@ -69,7 +69,7 @@ pub fn new_class_private_field_set_helper_k15(
     value: &Arc<Node>,
     kind: &PrivateIdentifierKind,
     fn_: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_private_field_set_helper_k15"); 
     let mut args = vec![
         receiver.clone(),
         state.clone(),
@@ -181,7 +181,7 @@ fn property_declaration_data(
     postfix_token: Option<Arc<Node>>,
     type_node: Option<Arc<Node>>,
     initializer: Option<Arc<Node>>,
-) -> ndg::PropertyDeclarationData {
+) -> ndg::PropertyDeclarationData { ::tsox_core::fntrace::enter("property_declaration_data"); 
     let old = match &node.data {
         NodeData::PropertyDeclaration(d) => d,
         _ => panic!("expected PropertyDeclaration"),
@@ -196,7 +196,7 @@ fn property_declaration_data(
 }
 
 impl NodeFactoryR39k15 for NodeFactory {
-    fn new_assignment_target_wrapper(&self, name: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+    fn new_assignment_target_wrapper(&self, name: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_assignment_target_wrapper"); 
         let assignment = self.new_binary_expression(
             None,
             name,
@@ -207,7 +207,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         self.new_parenthesized_expression(&assignment)
     }
 
-    fn new_class_private_field_in_helper(&self, name: &Arc<Node>, receiver: &Arc<Node>) -> Arc<Node> {
+    fn new_class_private_field_in_helper(&self, name: &Arc<Node>, receiver: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_private_field_in_helper"); 
         self.new_call_expression(
             &self.new_unscoped_helper_name("__classPrivateFieldIn"),
             None,
@@ -217,14 +217,14 @@ impl NodeFactoryR39k15 for NodeFactory {
         )
     }
 
-    fn new_syntax_list(&self, nodes: Vec<Arc<Node>>) -> Arc<Node> {
+    fn new_syntax_list(&self, nodes: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_syntax_list"); 
         Arc::new(Node::new(
             SyntaxKind::SyntaxList,
             NodeData::SyntaxList(ndg::SyntaxListData { children: nodes }),
         ))
     }
 
-    fn new_expression_statement(&self, expression: &Arc<Node>) -> Arc<Node> {
+    fn new_expression_statement(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_expression_statement"); 
         Arc::new(Node::new(
             SyntaxKind::ExpressionStatement,
             NodeData::ExpressionStatement(ndg::ExpressionStatementData {
@@ -243,7 +243,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_function_expression"); 
         Arc::new(Node::new(
             SyntaxKind::FunctionExpression,
             NodeData::FunctionExpression(ndg::FunctionExpressionData {
@@ -259,7 +259,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         ))
     }
 
-    fn new_assignment_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    fn new_assignment_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_assignment_expression"); 
         self.new_binary_expression(None, left, None, self.new_token(SyntaxKind::EqualsToken), right)
     }
 
@@ -267,7 +267,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         &self,
         modifiers: Option<Arc<ModifierList>>,
         body: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_class_static_block_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ClassStaticBlockDeclaration,
             NodeData::ClassStaticBlockDeclaration(ndg::ClassStaticBlockDeclarationData {
@@ -277,11 +277,11 @@ impl NodeFactoryR39k15 for NodeFactory {
         ))
     }
 
-    fn new_comma_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    fn new_comma_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_comma_expression"); 
         self.new_binary_expression(None, left, None, self.new_token(SyntaxKind::CommaToken), right)
     }
 
-    fn inline_expressions(&self, expressions: Vec<Arc<Node>>) -> Arc<Node> {
+    fn inline_expressions(&self, expressions: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("inline_expressions"); 
         let mut iter = expressions.into_iter();
         let mut expression = iter.next().expect("expected at least one expression");
         for next in iter {
@@ -295,7 +295,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         target: &Arc<Node>,
         this_arg: &Arc<Node>,
         arguments: Option<Vec<Arc<Node>>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_function_bind_call"); 
         let mut args = vec![this_arg.clone()];
         args.extend(arguments.unwrap_or_default());
         self.new_method_call(target, &self.new_identifier("bind"), &args)
@@ -309,7 +309,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         postfix_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(property_declaration_data(
@@ -328,7 +328,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         question_dot_token: Option<Arc<Node>>,
         name: Option<Arc<Node>>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_access_expression"); 
         let old = match &node.data {
             NodeData::PropertyAccessExpression(d) => d,
             _ => panic!("expected PropertyAccessExpression"),
@@ -354,7 +354,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         type_arguments: Option<Arc<NodeList>>,
         arguments: Arc<NodeList>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_call_expression"); 
         let mut updated = Node::new(
             SyntaxKind::CallExpression,
             NodeData::CallExpression(ndg::CallExpressionData {
@@ -377,7 +377,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         type_arguments: Option<Arc<NodeList>>,
         template: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_tagged_template_expression"); 
         let mut updated = Node::new(
             SyntaxKind::TaggedTemplateExpression,
             NodeData::TaggedTemplateExpression(ndg::TaggedTemplateExpressionData {
@@ -400,7 +400,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         type_node: Option<Arc<Node>>,
         operator_token: Arc<Node>,
         right: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_binary_expression"); 
         let mut updated = Node::new(
             SyntaxKind::BinaryExpression,
             NodeData::BinaryExpression(ndg::BinaryExpressionData {
@@ -423,7 +423,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         condition: Option<Arc<Node>>,
         incrementor: Option<Arc<Node>>,
         statement: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_for_statement"); 
         let mut updated = Node::new(
             SyntaxKind::ForStatement,
             NodeData::ForStatement(ndg::ForStatementData {
@@ -438,7 +438,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         Arc::new(updated)
     }
 
-    fn update_expression_statement(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+    fn update_expression_statement(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_expression_statement"); 
         let mut updated = Node::new(
             SyntaxKind::ExpressionStatement,
             NodeData::ExpressionStatement(ndg::ExpressionStatementData {
@@ -450,7 +450,7 @@ impl NodeFactoryR39k15 for NodeFactory {
         Arc::new(updated)
     }
 
-    fn update_computed_property_name(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> {
+    fn update_computed_property_name(&self, node: &Arc<Node>, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("update_computed_property_name"); 
         let mut updated = Node::new(
             SyntaxKind::ComputedPropertyName,
             NodeData::ComputedPropertyName(ndg::ComputedPropertyNameData {
@@ -472,7 +472,7 @@ pub trait K13VisitorR39k15 {
 }
 
 impl K13VisitorR39k15 for K13Visitor {
-    fn visit_nodes_list(&mut self, nodes: &Arc<NodeList>) -> Option<Arc<NodeList>> {
+    fn visit_nodes_list(&mut self, nodes: &Arc<NodeList>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("visit_nodes_list"); 
         let visited: Vec<Arc<Node>> = nodes.nodes.iter().map(|n| self.visit_each_child(n)).collect();
         Some(Arc::new(NodeList::new(visited)))
     }
@@ -480,7 +480,7 @@ impl K13VisitorR39k15 for K13Visitor {
     fn visit_modifiers_list(
         &mut self,
         modifiers: Option<&Arc<ModifierList>>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers_list"); 
         let modifiers = modifiers?;
         let visited: Vec<Arc<Node>> =
             modifiers.list.nodes.iter().map(|m| self.visit_each_child(m)).collect();
@@ -527,7 +527,7 @@ pub trait ClassFieldsTransformerR39k15 {
 }
 
 impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
-    fn get_hoisted_function_name(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_hoisted_function_name(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_hoisted_function_name"); 
         let name = node.name();
         debug_assert!(name.is_some() && tsox_frontend::ast::is_private_identifier(name.unwrap()));
         let info = self.access_private_identifier(name?)?;
@@ -549,7 +549,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
     fn extract_non_static_non_accessor_modifiers(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("extract_non_static_non_accessor_modifiers"); 
         let ec = Arc::new(crate::printer::EmitContext::new());
         extract_modifiers(
             &ec,
@@ -560,7 +560,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         .map(Arc::new)
     }
 
-    fn create_call_binding(&mut self, node: &Arc<Node>) -> (Arc<Node>, Arc<Node>) {
+    fn create_call_binding(&mut self, node: &Arc<Node>) -> (Arc<Node>, Arc<Node>) { ::tsox_core::fntrace::enter("create_call_binding"); 
         if tsox_frontend::ast::mig::m3g_2::is_super_property(node) {
             return (self.factory().new_this_expression(), node.clone());
         }
@@ -594,7 +594,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         &mut self,
         info: &PrivateIdentifierInfo,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_identifier_access"); 
         let receiver = self.visitor().visit_node(receiver);
         self.create_private_identifier_access_helper(info, &receiver)
     }
@@ -603,7 +603,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         &mut self,
         info: &PrivateIdentifierInfo,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_identifier_access_helper"); 
         self.emit_context().set_comment_range(
             receiver,
             tsox_core::core::text::TextRange::new(0, receiver.end()),
@@ -635,7 +635,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         receiver: &Arc<Node>,
         right: &Arc<Node>,
         operator: SyntaxKind,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_identifier_assignment"); 
         let mut receiver = self.visitor().visit_node(receiver);
         let mut right = self.visitor().visit_node(right);
 
@@ -669,7 +669,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         )
     }
 
-    fn inject_pending_expressions(&mut self, expression: &Arc<Node>) -> Arc<Node> {
+    fn inject_pending_expressions(&mut self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("inject_pending_expressions"); 
         if self.pending_expressions.is_empty() {
             return expression.clone();
         }
@@ -687,7 +687,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         }
     }
 
-    fn visit_this_expression_k15(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_this_expression_k15(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_this_expression_k15"); 
         let data = self.lexical_environment.as_ref().and_then(|env| env.data.as_ref());
         if let Some(data) = data {
             if self.inside_computed_property_name
@@ -727,7 +727,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         &mut self,
         name: &Arc<Node>,
         should_hoist: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_property_name_expression_if_needed"); 
         if !tsox_frontend::ast::is_computed_property_name(name) {
             return None;
         }
@@ -771,7 +771,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
         &mut self,
         property: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_or_class_static_block"); 
         let expression = if property.kind == SyntaxKind::ClassStaticBlockDeclaration {
             let saved = self.current_class_element.replace(property.clone());
             let visited = self.class_element_visitor().visit_each_child(property);
@@ -799,7 +799,7 @@ impl ClassFieldsTransformerR39k15 for ClassFieldsTransformer {
     }
 }
 
-fn find_computed_property_name_cache_assignment_k15(name: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_computed_property_name_cache_assignment_k15(name: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_computed_property_name_cache_assignment_k15"); 
     let mut node = Arc::clone(name.expression().expect("computed property name requires expression"));
     loop {
         node = tsox_frontend::ast::mig::m3g_3::skip_outer_expressions(
@@ -822,7 +822,7 @@ fn find_computed_property_name_cache_assignment_k15(name: &Arc<Node>) -> Option<
     None
 }
 
-fn binary_operator_token_kind(node: &Node) -> SyntaxKind {
+fn binary_operator_token_kind(node: &Node) -> SyntaxKind { ::tsox_core::fntrace::enter("binary_operator_token_kind"); 
     match &node.data {
         NodeData::BinaryExpression(d) => d.operator_token.kind,
         _ => panic!("expected BinaryExpression"),

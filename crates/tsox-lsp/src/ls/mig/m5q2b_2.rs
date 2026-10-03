@@ -25,7 +25,7 @@ pub fn get_insert_text_and_replacement_span_for_import_completion(
     file: &Arc<SourceFile>,
     preferences: &UserPreferences,
     is_snippet: bool,
-) -> (String, Option<lsproto::Range>) {
+) -> (String, Option<lsproto::Range>) { ::tsox_core::fntrace::enter("get_insert_text_and_replacement_span_for_import_completion"); 
     let quoted_module_specifier = escape_snippet_text(&super::m5x_3::quote(
         file,
         preferences,
@@ -80,11 +80,11 @@ pub fn get_insert_text_and_replacement_span_for_import_completion(
     }
 }
 
-pub fn get_line_of_position_m5q2b(file: &Arc<SourceFile>, pos: usize) -> usize {
+pub fn get_line_of_position_m5q2b(file: &Arc<SourceFile>, pos: usize) -> usize { ::tsox_core::fntrace::enter("get_line_of_position_m5q2b"); 
     file.line_map.line_at(pos)
 }
 
-pub fn lsutil_script_element_kind_modifier_flags(kind_modifiers: &[String]) -> u32 {
+pub fn lsutil_script_element_kind_modifier_flags(kind_modifiers: &[String]) -> u32 { ::tsox_core::fntrace::enter("lsutil_script_element_kind_modifier_flags"); 
     let mut flags = 0;
     for modifier in kind_modifiers {
         match modifier.as_str() {
@@ -99,11 +99,11 @@ pub fn lsutil_script_element_kind_modifier_flags(kind_modifiers: &[String]) -> u
 pub const LSUTIL_SCRIPT_ELEMENT_KIND_MODIFIER_OPTIONAL: u32 = 1 << 0;
 pub const LSUTIL_SCRIPT_ELEMENT_KIND_MODIFIER_DEPRECATED: u32 = 1 << 1;
 
-pub fn supplemental_file_index_m5q2b(file: &Arc<SourceFile>) -> Option<i32> {
+pub fn supplemental_file_index_m5q2b(file: &Arc<SourceFile>) -> Option<i32> { ::tsox_core::fntrace::enter("supplemental_file_index_m5q2b"); 
     super::m5r::supplemental_file_index(file)
 }
 
-pub fn could_be_type_only_import_specifier_m5q2b(import_specifier: &Arc<Node>, context_token: &Arc<Node>) -> bool {
+pub fn could_be_type_only_import_specifier_m5q2b(import_specifier: &Arc<Node>, context_token: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("could_be_type_only_import_specifier_m5q2b"); 
     ast::is_import_specifier(import_specifier)
         && (import_specifier_is_type_only_m5q2b(import_specifier)
             || (import_specifier
@@ -112,20 +112,20 @@ pub fn could_be_type_only_import_specifier_m5q2b(import_specifier: &Arc<Node>, c
                 && is_type_keyword_token_or_identifier_m5q2b(context_token)))
 }
 
-fn import_specifier_is_type_only_m5q2b(node: &Arc<Node>) -> bool {
+fn import_specifier_is_type_only_m5q2b(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("import_specifier_is_type_only_m5q2b"); 
     match &node.data {
         ast::node_data_generated::NodeData::ImportSpecifier(d) => d.is_type_only,
         _ => false,
     }
 }
 
-fn is_type_keyword_token_or_identifier_m5q2b(node: &Arc<Node>) -> bool {
+fn is_type_keyword_token_or_identifier_m5q2b(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_keyword_token_or_identifier_m5q2b"); 
     ast::mig::m3g_2::is_type_keyword_token(node)
         || ast::is_identifier(node)
             && scanner::mig::m3i::identifier_to_keyword_kind(node) == SyntaxKind::TypeKeyword
 }
 
-pub fn can_complete_from_named_bindings(named_bindings: &Arc<Node>) -> bool {
+pub fn can_complete_from_named_bindings(named_bindings: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("can_complete_from_named_bindings"); 
     let import_declaration = named_bindings.parent().and_then(|p| p.parent());
     let module_specifier_missing = import_declaration
         .as_ref()
@@ -157,7 +157,7 @@ pub fn can_complete_from_named_bindings(named_bindings: &Arc<Node>) -> bool {
 
 pub fn get_potentially_invalid_import_specifier_m5q2b(
     named_bindings: Option<&Arc<Node>>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_potentially_invalid_import_specifier_m5q2b"); 
     let named_bindings = named_bindings?;
     if named_bindings.kind != SyntaxKind::NamedImports {
         return None;

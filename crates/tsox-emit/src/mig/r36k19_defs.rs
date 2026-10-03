@@ -16,7 +16,7 @@ use tsox_frontend::scanner::TokenFlags;
 use crate::printer::NodeFactory;
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_string_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_string_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal"); 
         Arc::new(Node::new(
             SyntaxKind::StringLiteral,
             NodeData::StringLiteral(StringLiteralData {
@@ -26,7 +26,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_private_identifier(&self, text: &str) -> Arc<Node> {
+    pub fn new_private_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_private_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::PrivateIdentifier,
             NodeData::PrivateIdentifier(PrivateIdentifierData {
@@ -42,7 +42,7 @@ impl<'a> NodeFactory<'a> {
         postfix_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(PropertyDeclarationData {
@@ -61,7 +61,7 @@ impl<'a> NodeFactory<'a> {
         question_dot_token: Option<&Arc<Node>>,
         argument_expression: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_element_access_expression"); 
         let mut node = Node::new(
             SyntaxKind::ElementAccessExpression,
             NodeData::ElementAccessExpression(ElementAccessExpressionData {
@@ -81,7 +81,7 @@ impl<'a> NodeFactory<'a> {
         name: &Arc<Node>,
         attributes: Option<&Arc<Node>>,
         body: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_module_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::ModuleDeclaration,
             NodeData::ModuleDeclaration(ModuleDeclarationData {
@@ -94,7 +94,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_module_block(&self, statements: Arc<NodeList>) -> Arc<Node> {
+    pub fn new_module_block(&self, statements: Arc<NodeList>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_module_block"); 
         Arc::new(Node::new(
             SyntaxKind::ModuleBlock,
             NodeData::ModuleBlock(ModuleBlockData {
@@ -103,7 +103,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_syntax_list(&self, children: Vec<Arc<Node>>) -> Arc<Node> {
+    pub fn new_syntax_list(&self, children: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_syntax_list"); 
         Arc::new(Node::new(
             SyntaxKind::SyntaxList,
             NodeData::SyntaxList(SyntaxListData { children }),
@@ -115,7 +115,7 @@ impl<'a> NodeFactory<'a> {
         text: &str,
         raw_text: &str,
         template_flags: TokenFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_head"); 
         Arc::new(Node::new(
             SyntaxKind::TemplateHead,
             NodeData::TemplateHead(TemplateHeadData {
@@ -131,7 +131,7 @@ impl<'a> NodeFactory<'a> {
         text: &str,
         raw_text: &str,
         template_flags: TokenFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_tail"); 
         Arc::new(Node::new(
             SyntaxKind::TemplateTail,
             NodeData::TemplateTail(TemplateTailData {
@@ -142,7 +142,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_template_span(&self, expression: &Arc<Node>, literal: &Arc<Node>) -> Arc<Node> {
+    pub fn new_template_span(&self, expression: &Arc<Node>, literal: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_span"); 
         Arc::new(Node::new(
             SyntaxKind::TemplateSpan,
             NodeData::TemplateSpan(TemplateSpanData {
@@ -156,7 +156,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         head: &Arc<Node>,
         template_spans: Arc<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_expression"); 
         Arc::new(Node::new(
             SyntaxKind::TemplateExpression,
             NodeData::TemplateExpression(TemplateExpressionData {
@@ -166,7 +166,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_import_star_helper(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_import_star_helper(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_star_helper"); 
         self.new_call_expression(
             &self.new_unscoped_helper_name("__importStar"),
             None,

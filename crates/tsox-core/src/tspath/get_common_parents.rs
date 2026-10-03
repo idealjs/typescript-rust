@@ -6,7 +6,7 @@ pub fn get_common_parents(
     paths: &[String],
     min_components: usize,
     options: &ComparePathsOptions,
-) -> (Vec<String>, std::collections::HashSet<String>) {
+) -> (Vec<String>, std::collections::HashSet<String>) { crate::fntrace::enter("get_common_parents"); 
     if min_components < 1 {
         panic!("minComponents must be at least 1");
     }
@@ -49,7 +49,7 @@ pub(crate) fn get_common_parents_worker(
     component_groups: &[Vec<String>],
     min_components: usize,
     options: &ComparePathsOptions,
-) -> Vec<Vec<String>> {
+) -> Vec<Vec<String>> { crate::fntrace::enter("get_common_parents_worker"); 
     if component_groups.is_empty() {
         return vec![];
     }

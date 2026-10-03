@@ -21,7 +21,7 @@ thread_local! {
         const { std::cell::RefCell::new(Vec::new()) };
 }
 
-fn set_thread_context_flag(flag: NodeFlags, value: bool) {
+fn set_thread_context_flag(flag: NodeFlags, value: bool) { ::tsox_core::fntrace::enter("set_thread_context_flag"); 
     CONTEXT_FLAGS.with(|c| {
         let mut bits = c.get();
         if value {
@@ -33,7 +33,7 @@ fn set_thread_context_flag(flag: NodeFlags, value: bool) {
     });
 }
 
-fn set_flag_in_arc(node: Arc<Node>, f: impl FnOnce(&mut Node)) -> Arc<Node> {
+fn set_flag_in_arc(node: Arc<Node>, f: impl FnOnce(&mut Node)) -> Arc<Node> { ::tsox_core::fntrace::enter("set_flag_in_arc"); 
     match Arc::try_unwrap(node) {
         Ok(mut owned) => {
             f(&mut owned);
@@ -44,11 +44,11 @@ fn set_flag_in_arc(node: Arc<Node>, f: impl FnOnce(&mut Node)) -> Arc<Node> {
 }
 
 impl Parser {
-    pub(crate) fn source_text(&self) -> &str {
+    pub(crate) fn source_text(&self) -> &str { ::tsox_core::fntrace::enter("source_text"); 
         self.scanner.text()
     }
 
-    pub(crate) fn context_flags(&self) -> NodeFlags {
+    pub(crate) fn context_flags(&self) -> NodeFlags { ::tsox_core::fntrace::enter("context_flags"); 
         let mut flags = NodeFlags::empty();
         if self.disallow_in_context {
             flags |= NodeFlags::DisallowInContext;
@@ -74,7 +74,7 @@ impl Parser {
         flag: NodeFlags,
         value: bool,
         f: impl FnOnce(&mut Parser) -> T,
-    ) -> T {
+    ) -> T { ::tsox_core::fntrace::enter("do_in_context"); 
         let saved = CONTEXT_FLAGS.with(|c| c.get());
         set_thread_context_flag(flag, value);
         let result = f(self);
@@ -82,7 +82,7 @@ impl Parser {
         result
     }
 
-    pub(crate) fn override_parent_in_immediate_children(&self, node: &Arc<Node>) {
+    pub(crate) fn override_parent_in_immediate_children(&self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("override_parent_in_immediate_children"); 
         let children = [node.expression(), node.type_node(), node.name()];
         for child in children.into_iter().flatten() {
             child.set_parent(node);
@@ -92,7 +92,7 @@ impl Parser {
     pub(crate) fn try_parse_async_simple_arrow_function_expression(
         &mut self,
         allow_return_type_in_arrow_function: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_async_simple_arrow_function_expression"); 
         if self.token == SyntaxKind::AsyncKeyword
             && self.look_ahead(Parser::next_is_un_parenthesized_async_arrow_function)
         {
@@ -111,7 +111,7 @@ impl Parser {
         None
     }
 
-    pub(crate) fn try_parse_constraint_of_infer_type(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn try_parse_constraint_of_infer_type(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_constraint_of_infer_type"); 
         let state = self.mark();
         if self.parse_optional(SyntaxKind::ExtendsKeyword) {
             let constraint = self.do_in_context(
@@ -133,7 +133,7 @@ impl Parser {
         pos: usize,
         jsdoc: JSDocScannerInfo,
         modifiers: Option<Arc<crate::ast::node_node_list::ModifierList>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_constructor_declaration"); 
         let state = self.mark();
         if self.token == SyntaxKind::ConstructorKeyword
             || self.token == SyntaxKind::StringLiteral
@@ -168,7 +168,7 @@ impl Parser {
 
     pub(crate) fn parse_modifiers_for_arrow_function(
         &mut self,
-    ) -> Option<Arc<crate::ast::node_node_list::ModifierList>> {
+    ) -> Option<Arc<crate::ast::node_node_list::ModifierList>> { ::tsox_core::fntrace::enter("parse_modifiers_for_arrow_function"); 
         if self.token == SyntaxKind::AsyncKeyword {
             let pos = self.node_pos();
             self.next_token();
@@ -186,7 +186,7 @@ impl Parser {
     pub(crate) fn parse_binary_expression_or_higher(
         &mut self,
         precedence: OperatorPrecedence,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_binary_expression_or_higher"); 
         let min_precedence = match precedence {
             OperatorPrecedence::Comma
             | OperatorPrecedence::Spread
@@ -205,7 +205,7 @@ impl Parser {
         allow_return_type_in_arrow_function: bool,
         jsdoc: JSDocScannerInfo,
         async_modifier: Option<Arc<crate::ast::node_node_list::ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_simple_arrow_function_expression"); 
         let identifier_pos = identifier.pos();
         let mut parameter = Node::with_loc(
             SyntaxKind::Parameter,
@@ -248,7 +248,7 @@ impl Parser {
         result
     }
 
-    pub(crate) fn parse_type_parameters(&mut self) -> Option<Arc<NodeList>> {
+    pub(crate) fn parse_type_parameters(&mut self) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("parse_type_parameters"); 
         if self.token != SyntaxKind::LessThanToken {
             return None;
         }
@@ -262,7 +262,7 @@ impl Parser {
         }))
     }
 
-    pub(crate) fn parse_parameters(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_parameters(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_parameters"); 
         self.parse_parameter_list()
     }
 
@@ -270,7 +270,7 @@ impl Parser {
         &mut self,
         return_token: SyntaxKind,
         is_type: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_return_type"); 
         if return_token == SyntaxKind::EqualsGreaterThanToken {
             self.expect(SyntaxKind::EqualsGreaterThanToken);
             return Some(self.parse_type_or_type_predicate());
@@ -287,7 +287,7 @@ impl Parser {
         None
     }
 
-    pub(crate) fn with_jsdoc(&self, node: &Arc<Node>, jsdoc: JSDocScannerInfo) {
+    pub(crate) fn with_jsdoc(&self, node: &Arc<Node>, jsdoc: JSDocScannerInfo) { ::tsox_core::fntrace::enter("with_jsdoc"); 
         if jsdoc.has_jsdoc() {
             let owned = node.clone();
             let updated = set_flag_in_arc(owned, |n| n.flags |= NodeFlags::HasJSDoc);
@@ -297,7 +297,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn check_js_syntax(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_js_syntax(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_js_syntax"); 
         if !node.flags.contains(NodeFlags::JavaScriptFile)
             || node.flags.intersects(NodeFlags::JSDoc | NodeFlags::Reparsed)
         {
@@ -335,7 +335,7 @@ impl Parser {
         has_seen_static_modifier: bool,
         permit_const_as_modifier: bool,
         stop_on_start_of_class_static_block: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_modifier"); 
         let pos = self.node_pos();
         let kind = self.token;
         if self.token == SyntaxKind::ConstKeyword && permit_const_as_modifier {
@@ -362,7 +362,7 @@ impl Parser {
     pub(crate) fn try_parse_parenthesized_arrow_function_expression(
         &mut self,
         allow_return_type_in_arrow_function: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_parenthesized_arrow_function_expression"); 
         let tristate = self.is_parenthesized_arrow_function_expression();
         if tristate == Tristate::False {
             return None;
@@ -385,14 +385,14 @@ impl Parser {
         &mut self,
         _allow_ambiguity: bool,
         _allow_return_type_in_arrow_function: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parenthesized_arrow_function_expression"); 
         self.parse_parenthesized_arrow_function()
     }
 
     pub(crate) fn parse_possible_parenthesized_arrow_function_expression(
         &mut self,
         allow_return_type_in_arrow_function: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_possible_parenthesized_arrow_function_expression"); 
         let tristate = self.is_parenthesized_arrow_function_expression();
         if tristate == Tristate::True {
             return Some(self.parse_parenthesized_arrow_function_expression(
@@ -403,7 +403,7 @@ impl Parser {
         None
     }
 
-    pub(crate) fn try_reparse_optional_chain(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn try_reparse_optional_chain(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("try_reparse_optional_chain"); 
         if node.flags.intersects(NodeFlags::OptionalChain) {
             return true;
         }
@@ -437,7 +437,7 @@ impl Parser {
         expression: Option<&Arc<Node>>,
         type_arguments: Option<&NodeList>,
         result: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("unparse_expression_with_type_arguments"); 
         if let Some(expression) = expression {
             expression.set_parent(result);
         }
@@ -452,7 +452,7 @@ impl Parser {
         &mut self,
         source_file: &SourceFile,
         node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("validate_json_object_literal"); 
         for element in crate::ast::mig::m3b::properties(node).iter() {
             if element.kind != SyntaxKind::PropertyAssignment {
                 let span = get_error_span_for_node(&self.source_text(), element);
@@ -477,7 +477,7 @@ impl Parser {
         &mut self,
         source_file: &SourceFile,
         value_expression: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("validate_json_value"); 
         let Some(value_expression) = value_expression else {
             return;
         };
@@ -536,7 +536,7 @@ impl Parser {
         &self,
         node: Arc<Node>,
         location_node: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("finish_reparsed_node"); 
         let flags = self.context_flags() | NodeFlags::Reparsed;
         let loc = location_node.loc;
         let node = set_flag_in_arc(node, |n| {
@@ -547,11 +547,11 @@ impl Parser {
         node
     }
 
-    pub(crate) fn finish_mutated_node(&self, node: &Arc<Node>) {
+    pub(crate) fn finish_mutated_node(&self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("finish_mutated_node"); 
         self.override_parent_in_immediate_children(node);
     }
 
-    pub(crate) fn add_deep_clone_reparse(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn add_deep_clone_reparse(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("add_deep_clone_reparse"); 
         let clone = crate::ast::mig::m3d::NodeFactory {
             node_count: 0,
             hooks: crate::ast::mig::m3d::NodeFactoryHooks::default(),
@@ -567,14 +567,14 @@ impl Parser {
         &mut self,
         new_node: Arc<Node>,
         old: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("add_transformed_reparse"); 
         let new_node = self.finish_reparsed_node(new_node, old);
         let new_node = set_flag_in_arc(new_node, |n| n.flags |= NodeFlags::ReparserTransformedLiteral);
         REPARSED_CLONES.with(|c| c.borrow_mut().push(new_node.clone()));
         new_node
     }
 
-    pub(crate) fn check_non_identifier_name(&mut self, name: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub(crate) fn check_non_identifier_name(&mut self, name: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("check_non_identifier_name"); 
         let name = name?;
         let text = match &name.data {
             NodeData::Identifier(d) => d.text.as_str(),

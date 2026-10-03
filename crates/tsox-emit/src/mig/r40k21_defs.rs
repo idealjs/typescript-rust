@@ -21,7 +21,7 @@ pub trait R40K21NodeFactoryExt {
 }
 
 impl R40K21NodeFactoryExt for NodeFactory<'_> {
-    fn new_keyword_type_node(&self, kind: SyntaxKind) -> Arc<Node> {
+    fn new_keyword_type_node(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_keyword_type_node"); 
         Arc::new(Node::new(kind, NodeData::Token))
     }
 
@@ -34,7 +34,7 @@ impl R40K21NodeFactoryExt for NodeFactory<'_> {
         question_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parameter_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ndg::ParameterDeclarationData {

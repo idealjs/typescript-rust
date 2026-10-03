@@ -8,7 +8,7 @@ use crate::checker::types::*;
 use std::sync::Arc;
 use tsox_frontend::ast::{Diagnostic, Node, NodeData};
 
-fn is_hyphenated_jsx_name(name: &str) -> bool {
+fn is_hyphenated_jsx_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_hyphenated_jsx_name"); 
     name.contains('-') || name.contains(':')
 }
 
@@ -20,7 +20,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         mut out: Option<&mut Vec<Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_jsx_components_impl"); 
         let properties = match &node.data {
             NodeData::JsxAttributes(d) => &d.properties,
             _ => return false,

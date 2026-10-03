@@ -12,7 +12,7 @@ use crate::ls::semantic_tokens::SemanticToken;
 use crate::ls::semantic_tokens::token_modifier;
 use crate::ls::semantic_tokens::token_type;
 
-pub fn classify_symbol(symbol: &Symbol, _meaning: u32) -> (u32, bool) {
+pub fn classify_symbol(symbol: &Symbol, _meaning: u32) -> (u32, bool) { ::tsox_core::fntrace::enter("classify_symbol"); 
     let flags = symbol.flags;
     if flags.contains(SymbolFlags::TypeParameter) {
         return (token_type::TYPE_PARAMETER, true);
@@ -59,7 +59,7 @@ pub fn classify_symbol(symbol: &Symbol, _meaning: u32) -> (u32, bool) {
     (token_type::INVALID, false)
 }
 
-pub fn token_from_declaration_mapping(kind: tsox_frontend::ast::SyntaxKind) -> u32 {
+pub fn token_from_declaration_mapping(kind: tsox_frontend::ast::SyntaxKind) -> u32 { ::tsox_core::fntrace::enter("token_from_declaration_mapping"); 
     use tsox_frontend::ast::SyntaxKind;
     match kind {
         SyntaxKind::VariableDeclaration => token_type::VARIABLE,
@@ -90,7 +90,7 @@ pub(super) fn collect_tokens(
     span_start: usize,
     span_end: usize,
     tokens: &mut Vec<SemanticToken>,
-) {
+) { ::tsox_core::fntrace::enter("collect_tokens"); 
     if node.end() <= span_start || node.pos() >= span_end {
         return;
     }
@@ -107,7 +107,7 @@ pub(super) fn collect_tokens(
     });
 }
 
-fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticToken> {
+fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticToken> { ::tsox_core::fntrace::enter("classify_node_token"); 
     let kind = node.kind;
 
     match kind {
@@ -203,12 +203,12 @@ fn classify_node_token(checker: &Checker, node: &Arc<Node>) -> Option<SemanticTo
     None
 }
 
-pub(super) fn is_keyword_kind(kind: SyntaxKind) -> bool {
+pub(super) fn is_keyword_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword_kind"); 
     (kind as i16) >= (SyntaxKind::BreakKeyword as i16)
         && (kind as i16) <= (SyntaxKind::DeferKeyword as i16)
 }
 
-pub(super) fn is_name_of_declaration(name: &Arc<Node>, declaration: &Arc<Node>) -> bool {
+pub(super) fn is_name_of_declaration(name: &Arc<Node>, declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_name_of_declaration"); 
     declaration
         .name()
         .map(|n| Arc::ptr_eq(n, name))

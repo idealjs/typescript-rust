@@ -33,7 +33,7 @@ impl LanguageService {
         argument_info: &M5wArgumentListInfo,
         program: &Arc<tsox_compile::compiler::Program>,
         c: &mut Checker,
-    ) -> Option<SignatureHelp> {
+    ) -> Option<SignatureHelp> { ::tsox_core::fntrace::enter("create_js_signature_help_items"); 
         if argument_info.invocation.contextual_invocation.is_some() {
             return None;
         }
@@ -69,7 +69,7 @@ impl LanguageService {
         name: &str,
         argument_info: &M5wArgumentListInfo,
         c: &mut Checker,
-    ) -> Option<SignatureHelp> {
+    ) -> Option<SignatureHelp> { ::tsox_core::fntrace::enter("find_signature_help_from_named_declarations"); 
         let mut result: Option<SignatureHelp> = None;
         m5v2_visit_named_declaration(
             self,
@@ -89,7 +89,7 @@ impl LanguageService {
         sig: &M5v2SignatureInformation,
         argument_index: usize,
         supports_null: bool,
-    ) -> Option<u32> {
+    ) -> Option<u32> { ::tsox_core::fntrace::enter("compute_active_parameter"); 
         let param_count = sig.parameters.len();
         if param_count == 0 {
             return None;
@@ -125,7 +125,7 @@ fn m5v2_visit_named_declaration(
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
     result: &mut Option<SignatureHelp>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("m5v2_visit_named_declaration"); 
     if result.is_some() {
         return true;
     }

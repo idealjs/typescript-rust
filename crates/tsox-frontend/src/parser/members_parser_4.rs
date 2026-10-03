@@ -3,7 +3,7 @@
 use crate::parser::members::*;
 
 impl Parser {
-    pub(crate) fn parse_class_member(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_class_member(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_member"); 
         let pos = self.token_pos();
 
         if self.token == SyntaxKind::SemicolonToken {
@@ -302,7 +302,7 @@ impl Parser {
         name: &Arc<Node>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("parse_semicolon_after_property_name"); 
         if self.token == SyntaxKind::AtToken && !self.has_preceding_line_break() {
             self.parse_error_at_current_token(
                 tsox_core::diagnostics::DECORATORS_MUST_PRECEDE_THE_NAME_AND_ALL_KEYWORDS_OF_PROPERTY_DECLARATIONS,

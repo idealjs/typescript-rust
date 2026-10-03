@@ -19,11 +19,11 @@ pub struct VfsParseConfigHost {
 }
 
 impl VfsParseConfigHost {
-    pub fn fs(&self) -> &dyn FS {
+    pub fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.vfs.as_ref()
     }
 
-    pub fn get_current_directory(&self) -> &str {
+    pub fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }
@@ -32,7 +32,7 @@ pub fn new_vfs_parse_config_host(
     files: &HashMap<String, String>,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> VfsParseConfigHost {
+) -> VfsParseConfigHost { ::tsox_core::fntrace::enter("new_vfs_parse_config_host"); 
     VfsParseConfigHost {
         vfs: vfstest_from_map(files, use_case_sensitive_file_names),
         current_directory: current_directory.to_string(),
@@ -44,7 +44,7 @@ pub fn new_vfs_parse_config_host_with_symlinks(
     symlinks: &HashMap<String, String>,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> VfsParseConfigHost {
+) -> VfsParseConfigHost { ::tsox_core::fntrace::enter("new_vfs_parse_config_host_with_symlinks"); 
     if symlinks.is_empty() {
         return new_vfs_parse_config_host(files, current_directory, use_case_sensitive_file_names);
     }
@@ -69,12 +69,12 @@ pub enum VfstestEntry {
     Symlink(String),
 }
 
-pub fn vfstest_from_map(files: &HashMap<String, String>, use_case_sensitive_file_names: bool) -> Arc<dyn FS> {
+pub fn vfstest_from_map(files: &HashMap<String, String>, use_case_sensitive_file_names: bool) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("vfstest_from_map"); 
     let _ = (files, use_case_sensitive_file_names);
     Arc::new(NoopFS)
 }
 
-pub fn vfstest_from_map_entries(entries: &HashMap<String, VfstestEntry>, use_case_sensitive_file_names: bool) -> Arc<dyn FS> {
+pub fn vfstest_from_map_entries(entries: &HashMap<String, VfstestEntry>, use_case_sensitive_file_names: bool) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("vfstest_from_map_entries"); 
     let _ = (entries, use_case_sensitive_file_names);
     Arc::new(NoopFS)
 }
@@ -82,39 +82,39 @@ pub fn vfstest_from_map_entries(entries: &HashMap<String, VfstestEntry>, use_cas
 struct NoopFS;
 
 impl FS for NoopFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         true
     }
-    fn file_exists(&self, _path: &str) -> bool {
+    fn file_exists(&self, _path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         false
     }
-    fn read_file(&self, _path: &str) -> Option<String> {
+    fn read_file(&self, _path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         None
     }
-    fn write_file(&self, _path: &str, _data: &str) -> std::io::Result<()> {
+    fn write_file(&self, _path: &str, _data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         Ok(())
     }
-    fn append_file(&self, _path: &str, _data: &str) -> std::io::Result<()> {
+    fn append_file(&self, _path: &str, _data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         Ok(())
     }
-    fn remove(&self, _path: &str) -> std::io::Result<()> {
+    fn remove(&self, _path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         Ok(())
     }
-    fn directory_exists(&self, _path: &str) -> bool {
+    fn directory_exists(&self, _path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         false
     }
-    fn get_accessible_entries(&self, _path: &str) -> Entries {
+    fn get_accessible_entries(&self, _path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         Entries::default()
     }
-    fn stat(&self, _path: &str) -> Option<FileInfo> {
+    fn stat(&self, _path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         None
     }
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         path.to_string()
     }
 }
 
-pub fn fix_root(path: &str) -> String {
+pub fn fix_root(path: &str) -> String { ::tsox_core::fntrace::enter("fix_root"); 
     let root_length = tspath::get_root_length(path);
     if root_length == 0 {
         return path.to_string();
@@ -130,7 +130,7 @@ pub fn get_parsed_command_line(
     files: &HashMap<String, String>,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> CrateParsedCommandLine {
+) -> CrateParsedCommandLine { ::tsox_core::fntrace::enter("get_parsed_command_line"); 
     let host = new_vfs_parse_config_host(files, current_directory, use_case_sensitive_file_names);
     let config_file_name = tspath::combine_paths(current_directory, &["tsconfig.json"]);
     let config_path = tspath::to_path(&config_file_name, current_directory, use_case_sensitive_file_names);
@@ -161,7 +161,7 @@ pub fn parse_json_source_file_config_file_content(
     config_file_name: &str,
     resolution_stack: &[String],
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
-) -> CrateParsedCommandLine {
+) -> CrateParsedCommandLine { ::tsox_core::fntrace::enter("parse_json_source_file_config_file_content"); 
     let _ = (existing_options, existing_options_raw, extended_config_cache);
     parse_json_config_file_content_worker(
         None,
@@ -186,7 +186,7 @@ pub fn get_wildcard_directories(
     include: &[String],
     exclude: &[String],
     compare_paths_options: &tsox_core::tspath::ComparePathsOptions,
-) -> HashMap<String, bool> {
+) -> HashMap<String, bool> { ::tsox_core::fntrace::enter("get_wildcard_directories"); 
     if include.is_empty() {
         return HashMap::new();
     }
@@ -255,7 +255,7 @@ pub fn get_wildcard_directories(
     wildcard_directories
 }
 
-pub fn to_canonical_key(path: &str, use_case_sensitive_file_names: bool) -> String {
+pub fn to_canonical_key(path: &str, use_case_sensitive_file_names: bool) -> String { ::tsox_core::fntrace::enter("to_canonical_key"); 
     if use_case_sensitive_file_names {
         path.to_string()
     } else {
@@ -269,7 +269,7 @@ pub struct WildcardDirectoryMatch {
     pub recursive: bool,
 }
 
-pub fn get_wildcard_directory_from_spec(spec: &str, use_case_sensitive_file_names: bool) -> Option<WildcardDirectoryMatch> {
+pub fn get_wildcard_directory_from_spec(spec: &str, use_case_sensitive_file_names: bool) -> Option<WildcardDirectoryMatch> { ::tsox_core::fntrace::enter("get_wildcard_directory_from_spec"); 
     if let Some(first_wildcard) = spec.find(|c| c == '*' || c == '?') {
         if let Some(last_sep_before_wildcard) = spec[..first_wildcard].rfind(tspath::DIRECTORY_SEPARATOR) {
             let path = &spec[..last_sep_before_wildcard];
@@ -296,6 +296,6 @@ pub fn get_wildcard_directory_from_spec(spec: &str, use_case_sensitive_file_name
     None
 }
 
-pub fn vfsmatch_is_implicit_glob(_last_segment: &str) -> bool {
+pub fn vfsmatch_is_implicit_glob(_last_segment: &str) -> bool { ::tsox_core::fntrace::enter("vfsmatch_is_implicit_glob"); 
     false
 }

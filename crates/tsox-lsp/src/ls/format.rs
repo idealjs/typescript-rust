@@ -18,7 +18,7 @@ impl LanguageService {
         &self,
         file: &Arc<SourceFile>,
         changes: &[TextChange],
-    ) -> Vec<TextEdit> {
+    ) -> Vec<TextEdit> { ::tsox_core::fntrace::enter("to_ls_proto_text_edits"); 
         let script = super::language_service::ScriptInfo {
             file_name: file.file_name.clone(),
             text: file.text.clone(),
@@ -36,7 +36,7 @@ impl LanguageService {
         &self,
         _document_uri: &DocumentUri,
         _formatting_options: &crate::lsp::lsproto_lsp::FormattingOptions,
-    ) -> Vec<TextEdit> {
+    ) -> Vec<TextEdit> { ::tsox_core::fntrace::enter("provide_format_document"); 
         let (_program, file) = self.get_program_and_file(_document_uri);
         let format_opts = self.format_options().clone();
         let edits = self.get_formatting_edits_for_document(&file, &format_opts);
@@ -48,7 +48,7 @@ impl LanguageService {
         _document_uri: &DocumentUri,
         _formatting_options: &crate::lsp::lsproto_lsp::FormattingOptions,
         range: Range,
-    ) -> Vec<TextEdit> {
+    ) -> Vec<TextEdit> { ::tsox_core::fntrace::enter("provide_format_document_range"); 
         let (_program, file) = self.get_program_and_file(_document_uri);
         let format_opts = self.format_options().clone();
         let start = crate::ls::position::lsp_position_to_offset(
@@ -73,7 +73,7 @@ impl LanguageService {
         _formatting_options: &crate::lsp::lsproto_lsp::FormattingOptions,
         position: Position,
         character: &str,
-    ) -> Vec<TextEdit> {
+    ) -> Vec<TextEdit> { ::tsox_core::fntrace::enter("provide_format_document_on_type"); 
         let (_program, file) = self.get_program_and_file(_document_uri);
         let format_opts = self.format_options().clone();
         let offset = crate::ls::position::lsp_position_to_offset(
@@ -92,7 +92,7 @@ impl LanguageService {
         &self,
         file: &Arc<SourceFile>,
         options: &FormatCodeSettings,
-    ) -> Vec<TextChange> {
+    ) -> Vec<TextChange> { ::tsox_core::fntrace::enter("get_formatting_edits_for_document"); 
         let ctx_opts = to_engine_settings(options);
         let ctx = tsox_frontend::format::with_format_code_settings(ctx_opts, "\n");
         tsox_frontend::format::format_document(&ctx, file)
@@ -106,7 +106,7 @@ impl LanguageService {
         file: &Arc<SourceFile>,
         options: &FormatCodeSettings,
         r: TextRange,
-    ) -> Vec<TextChange> {
+    ) -> Vec<TextChange> { ::tsox_core::fntrace::enter("get_formatting_edits_for_range"); 
         let ctx_opts = to_engine_settings(options);
         let ctx = tsox_frontend::format::with_format_code_settings(ctx_opts, "\n");
         tsox_frontend::format::format_selection(&ctx, file, r.pos(), r.end())
@@ -121,7 +121,7 @@ impl LanguageService {
         options: &FormatCodeSettings,
         position: usize,
         key: &str,
-    ) -> Vec<TextChange> {
+    ) -> Vec<TextChange> { ::tsox_core::fntrace::enter("get_formatting_edits_after_keystroke"); 
         let ctx_opts = to_engine_settings(options);
         let ctx = tsox_frontend::format::with_format_code_settings(ctx_opts, "\n");
         let token_at_position = tsox_frontend::astnav::get_token_at_position(&file.node, position);
@@ -145,7 +145,7 @@ impl LanguageService {
 /// lsutil::FormatCodeSettings → 引擎 FormatCodeSettings
 fn to_engine_settings(
     options: &FormatCodeSettings,
-) -> tsox_frontend::format::FormatCodeSettings {
+) -> tsox_frontend::format::FormatCodeSettings { ::tsox_core::fntrace::enter("to_engine_settings"); 
     let tristate = |t: tsox_core::core::tristate::Tristate| match t {
         tsox_core::core::tristate::Tristate::True => tsox_frontend::format::Tristate::True,
         tsox_core::core::tristate::Tristate::False => tsox_frontend::format::Tristate::False,
@@ -227,7 +227,7 @@ pub fn get_range_of_enclosing_comment(
     position: usize,
     preceding_token: Option<&Arc<tsox_frontend::ast::Node>>,
     token_at_position: Option<&Arc<tsox_frontend::ast::Node>>,
-) -> Option<tsox_frontend::scanner::CommentRange> {
+) -> Option<tsox_frontend::scanner::CommentRange> { ::tsox_core::fntrace::enter("get_range_of_enclosing_comment"); 
     use tsox_frontend::scanner::{get_leading_comment_ranges, get_trailing_comment_ranges};
 
     let mut token_at_position = token_at_position.cloned()?;

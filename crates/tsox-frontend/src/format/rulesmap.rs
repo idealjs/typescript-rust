@@ -28,12 +28,12 @@ struct Bucket {
 }
 
 impl Bucket {
-    fn new() -> Self {
+    fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Bucket { rules: Vec::new(), state: 0 }
     }
 
     /// Go getRuleInsertionIndex（position 为位偏移 = 段号 * MASK_BIT_SIZE）
-    fn insertion_index(&self, bit_position: u16) -> usize {
+    fn insertion_index(&self, bit_position: u16) -> usize { ::tsox_core::fntrace::enter("insertion_index"); 
         let mut index = 0u32;
         let mut bitmap = self.state;
         let mut pos: u16 = 0;
@@ -46,14 +46,14 @@ impl Bucket {
     }
 
     /// Go increaseInsertionIndex
-    fn increase(&mut self, bit_position: u16) {
+    fn increase(&mut self, bit_position: u16) { ::tsox_core::fntrace::enter("increase"); 
         let shift = bit_position;
         let value = ((self.state >> shift) & MASK) + 1;
         debug_assert!((value & MASK) == value);
         self.state = (self.state & !(MASK << shift)) | (value << shift);
     }
 
-    fn add(&mut self, rule: RuleImpl, specific_tokens: bool) {
+    fn add(&mut self, rule: RuleImpl, specific_tokens: bool) { ::tsox_core::fntrace::enter("add"); 
         let position = if rule.action.intersects(RuleAction::STOP_ACTION) {
             if specific_tokens { 0 } else { 1 }
         } else if !rule.context.is_empty() {
@@ -73,7 +73,7 @@ impl Bucket {
 
 static RULES_MAP: OnceLock<HashMap<BucketKey, Vec<RuleImpl>>> = OnceLock::new();
 
-fn build_rules_map() -> HashMap<BucketKey, Vec<RuleImpl>> {
+fn build_rules_map() -> HashMap<BucketKey, Vec<RuleImpl>> { ::tsox_core::fntrace::enter("build_rules_map"); 
     let mut raw: HashMap<BucketKey, Bucket> = HashMap::new();
     for spec in get_all_rules() {
         let specific = spec.left_token_range.is_specific && spec.right_token_range.is_specific;
@@ -90,7 +90,7 @@ fn build_rules_map() -> HashMap<BucketKey, Vec<RuleImpl>> {
         .collect()
 }
 
-pub(crate) fn get_rules(left: SyntaxKind, right: SyntaxKind) -> &'static [RuleImpl] {
+pub(crate) fn get_rules(left: SyntaxKind, right: SyntaxKind) -> &'static [RuleImpl] { ::tsox_core::fntrace::enter("get_rules"); 
     let map = RULES_MAP.get_or_init(build_rules_map);
     map.get(&BucketKey(left as u16, right as u16))
         .map(|v| v.as_slice())

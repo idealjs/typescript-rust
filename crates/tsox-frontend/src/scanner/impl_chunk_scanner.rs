@@ -3,7 +3,7 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
-    pub(crate) fn save_state(&self) -> ScannerState {
+    pub(crate) fn save_state(&self) -> ScannerState { ::tsox_core::fntrace::enter("save_state"); 
         ScannerState {
             pos: self.pos,
             end: self.end,
@@ -21,7 +21,7 @@ impl Scanner {
         }
     }
 
-    pub(crate) fn restore_state(&mut self, state: ScannerState) {
+    pub(crate) fn restore_state(&mut self, state: ScannerState) { ::tsox_core::fntrace::enter("restore_state"); 
         self.pos = state.pos;
         self.end = state.end;
         self.token = state.token;
@@ -38,7 +38,7 @@ impl Scanner {
             .truncate(state.comment_directives_len);
     }
 
-    pub fn new(text: impl Into<String>) -> Self {
+    pub fn new(text: impl Into<String>) -> Self { ::tsox_core::fntrace::enter("new"); 
         let text: std::sync::Arc<str> = std::sync::Arc::from(text.into());
         let len = text.len();
         Self {
@@ -64,40 +64,40 @@ impl Scanner {
         }
     }
 
-    pub fn with_error_callback(mut self, cb: ErrorCallback) -> Self {
+    pub fn with_error_callback(mut self, cb: ErrorCallback) -> Self { ::tsox_core::fntrace::enter("with_error_callback"); 
         self.error_callback = Some(cb);
         self
     }
 
-    pub fn set_script_target(&mut self, target: tsox_core::core::compiler_options::ScriptTarget) {
+    pub fn set_script_target(&mut self, target: tsox_core::core::compiler_options::ScriptTarget) { ::tsox_core::fntrace::enter("set_script_target"); 
         self.script_target = target;
     }
 
-    pub fn set_language_variant(&mut self, variant: crate::ast::LanguageVariant) {
+    pub fn set_language_variant(&mut self, variant: crate::ast::LanguageVariant) { ::tsox_core::fntrace::enter("set_language_variant"); 
         self.language_variant = variant;
     }
 
     /// Go SetSkipTrivia
-    pub fn set_skip_trivia(&mut self, skip: bool) {
+    pub fn set_skip_trivia(&mut self, skip: bool) { ::tsox_core::fntrace::enter("set_skip_trivia"); 
         self.skip_trivia = skip;
     }
 
-    pub(crate) fn report_error(&mut self, kind: DiagnosticKind, pos: usize, length: usize) {
+    pub(crate) fn report_error(&mut self, kind: DiagnosticKind, pos: usize, length: usize) { ::tsox_core::fntrace::enter("report_error"); 
         if let Some(cb) = self.error_callback {
             cb(kind, pos, length);
         }
         self.errors.push(ScannerError { kind, pos, length });
     }
 
-    pub fn take_errors(&mut self) -> Vec<ScannerError> {
+    pub fn take_errors(&mut self) -> Vec<ScannerError> { ::tsox_core::fntrace::enter("take_errors"); 
         std::mem::take(&mut self.errors)
     }
 
-    pub fn comment_directives(&self) -> &[CommentDirective] {
+    pub fn comment_directives(&self) -> &[CommentDirective] { ::tsox_core::fntrace::enter("comment_directives"); 
         &self.comment_directives
     }
 
-    pub(crate) fn process_comment_directive(&mut self, start: usize, end: usize, multiline: bool) {
+    pub(crate) fn process_comment_directive(&mut self, start: usize, end: usize, multiline: bool) { ::tsox_core::fntrace::enter("process_comment_directive"); 
         let text = self.text.as_bytes();
         let mut pos = start;
         if multiline {
@@ -139,27 +139,27 @@ impl Scanner {
         });
     }
 
-    pub fn token(&self) -> SyntaxKind {
+    pub fn token(&self) -> SyntaxKind { ::tsox_core::fntrace::enter("token"); 
         self.token
     }
 
-    pub fn token_pos(&self) -> usize {
+    pub fn token_pos(&self) -> usize { ::tsox_core::fntrace::enter("token_pos"); 
         self.token_pos
     }
 
-    pub fn full_start_pos(&self) -> usize {
+    pub fn full_start_pos(&self) -> usize { ::tsox_core::fntrace::enter("full_start_pos"); 
         self.full_start_pos
     }
 
-    pub fn token_end(&self) -> usize {
+    pub fn token_end(&self) -> usize { ::tsox_core::fntrace::enter("token_end"); 
         self.token_end
     }
 
-    pub fn token_text(&self) -> &str {
+    pub fn token_text(&self) -> &str { ::tsox_core::fntrace::enter("token_text"); 
         &self.text[self.token_pos..self.token_end]
     }
 
-    pub fn token_value(&self) -> String {
+    pub fn token_value(&self) -> String { ::tsox_core::fntrace::enter("token_value"); 
         if let Some(cooked) = &self.identifier_value {
             return cooked.clone();
         }
@@ -177,40 +177,40 @@ impl Scanner {
         text.to_string()
     }
 
-    pub fn has_preceding_line_break(&self) -> bool {
+    pub fn has_preceding_line_break(&self) -> bool { ::tsox_core::fntrace::enter("has_preceding_line_break"); 
         self.has_preceding_line_break
     }
 
-    pub fn token_flags(&self) -> TokenFlags {
+    pub fn token_flags(&self) -> TokenFlags { ::tsox_core::fntrace::enter("token_flags"); 
         self.token_flags
     }
 
-    pub fn has_preceding_jsdoc_comment(&self) -> bool {
+    pub fn has_preceding_jsdoc_comment(&self) -> bool { ::tsox_core::fntrace::enter("has_preceding_jsdoc_comment"); 
         token_flags_contains(self.token_flags, TOKEN_FLAGS_PRECEDING_JSDOC_COMMENT)
     }
 
-    pub fn has_preceding_jsdoc_leading_asterisks(&self) -> bool {
+    pub fn has_preceding_jsdoc_leading_asterisks(&self) -> bool { ::tsox_core::fntrace::enter("has_preceding_jsdoc_leading_asterisks"); 
         token_flags_contains(
             self.token_flags,
             TOKEN_FLAGS_PRECEDING_JSDOC_LEADING_ASTERISKS,
         )
     }
 
-    pub fn has_preceding_jsdoc_with_deprecated_tag(&self) -> bool {
+    pub fn has_preceding_jsdoc_with_deprecated_tag(&self) -> bool { ::tsox_core::fntrace::enter("has_preceding_jsdoc_with_deprecated_tag"); 
         token_flags_contains(
             self.token_flags,
             TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED,
         )
     }
 
-    pub fn has_preceding_jsdoc_with_see_or_link(&self) -> bool {
+    pub fn has_preceding_jsdoc_with_see_or_link(&self) -> bool { ::tsox_core::fntrace::enter("has_preceding_jsdoc_with_see_or_link"); 
         token_flags_contains(
             self.token_flags,
             TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK,
         )
     }
 
-    pub fn set_skip_jsdoc_leading_asterisks(&mut self, skip: bool) {
+    pub fn set_skip_jsdoc_leading_asterisks(&mut self, skip: bool) { ::tsox_core::fntrace::enter("set_skip_jsdoc_leading_asterisks"); 
         if skip {
             self.skip_jsdoc_leading_asterisks += 1;
         } else {
@@ -218,27 +218,27 @@ impl Scanner {
         }
     }
 
-    pub fn pos(&self) -> usize {
+    pub fn pos(&self) -> usize { ::tsox_core::fntrace::enter("pos"); 
         self.pos
     }
 
-    pub fn end(&self) -> usize {
+    pub fn end(&self) -> usize { ::tsox_core::fntrace::enter("end"); 
         self.end
     }
 
-    pub fn skip_jsdoc_leading_asterisks_raw(&self) -> i32 {
+    pub fn skip_jsdoc_leading_asterisks_raw(&self) -> i32 { ::tsox_core::fntrace::enter("skip_jsdoc_leading_asterisks_raw"); 
         self.skip_jsdoc_leading_asterisks
     }
 
-    pub fn set_skip_jsdoc_leading_asterisks_raw(&mut self, value: i32) {
+    pub fn set_skip_jsdoc_leading_asterisks_raw(&mut self, value: i32) { ::tsox_core::fntrace::enter("set_skip_jsdoc_leading_asterisks_raw"); 
         self.skip_jsdoc_leading_asterisks = value;
     }
 
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 
-    pub fn set_range(&mut self, pos: usize, end: usize) {
+    pub fn set_range(&mut self, pos: usize, end: usize) { ::tsox_core::fntrace::enter("set_range"); 
         self.pos = pos;
         self.end = end;
         self.full_start_pos = pos;

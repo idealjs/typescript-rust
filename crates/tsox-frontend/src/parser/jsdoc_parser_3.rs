@@ -3,7 +3,7 @@
 use crate::parser::jsdoc::*;
 
 impl crate::parser::Parser {
-    pub(crate) fn parse_tag(&mut self, margin: usize) -> Arc<Node> {
+    pub(crate) fn parse_tag(&mut self, margin: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_tag"); 
         debug_assert_eq!(self.token, SyntaxKind::AtToken);
         let start = self.token_pos();
         self.next_token_jsdoc();
@@ -85,7 +85,7 @@ impl crate::parser::Parser {
         margin: usize,
         indent_text: &str,
         kind: SyntaxKind,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_simple_tag"); 
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
             self.token_end(),
@@ -125,7 +125,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_deprecated_tag"); 
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
             self.token_end(),
@@ -149,7 +149,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_unknown_tag"); 
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
             self.token_end(),
@@ -173,7 +173,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_return_tag"); 
         let type_expression = self.try_parse_type_expression();
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),
@@ -201,7 +201,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_tag"); 
         let type_expression = self.parse_jsdoc_type_expression(true);
         let comment = if margin != usize::MAX {
             Some(self.parse_trailing_tag_comments(
@@ -235,7 +235,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_this_tag"); 
         let type_expression = self.parse_jsdoc_type_expression(true);
         self.skip_whitespace();
         let comment = self.parse_trailing_tag_comments(
@@ -262,7 +262,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_satisfies_tag"); 
         let type_expression = self.parse_jsdoc_type_expression(false);
         let comment = self.parse_trailing_tag_comments(
             self.token_pos(),

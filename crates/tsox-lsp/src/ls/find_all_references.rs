@@ -35,7 +35,7 @@ pub struct RefOptions {
 }
 
 impl Default for RefOptions {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         RefOptions {
             find_in_strings: false,
             find_in_comments: false,
@@ -103,7 +103,7 @@ pub fn new_symbol_and_entries(
     node: Option<Arc<Node>>,
     symbol: Option<Arc<Symbol>>,
     references: Vec<ReferenceEntry>,
-) -> SymbolAndEntries {
+) -> SymbolAndEntries { ::tsox_core::fntrace::enter("new_symbol_and_entries"); 
     SymbolAndEntries {
         definition: Definition { kind, symbol, node },
         references,
@@ -124,16 +124,16 @@ pub struct NonLocalDefinition {
 }
 
 impl NonLocalDefinition {
-    pub fn text_document_uri(&self) -> &DocumentUri {
+    pub fn text_document_uri(&self) -> &DocumentUri { ::tsox_core::fntrace::enter("text_document_uri"); 
         &self.uri
     }
-    pub fn text_document_position(&self) -> &Position {
+    pub fn text_document_position(&self) -> &Position { ::tsox_core::fntrace::enter("text_document_position"); 
         &self.position
     }
-    pub fn get_source_position(&self) -> Option<&NonLocalDefinition> {
+    pub fn get_source_position(&self) -> Option<&NonLocalDefinition> { ::tsox_core::fntrace::enter("get_source_position"); 
         None
     }
-    pub fn get_generated_position(&self) -> Option<&NonLocalDefinition> {
+    pub fn get_generated_position(&self) -> Option<&NonLocalDefinition> { ::tsox_core::fntrace::enter("get_generated_position"); 
         None
     }
 }
@@ -145,7 +145,7 @@ impl LanguageService {
         position: Position,
         include_declaration: bool,
         _orchestrator: Option<&dyn CrossProjectOrchestrator>,
-    ) -> Vec<Location> {
+    ) -> Vec<Location> { ::tsox_core::fntrace::enter("provide_references"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let offset = lsp_position_to_offset(line_map, &position);
@@ -186,7 +186,7 @@ impl LanguageService {
         _document_uri: &DocumentUri,
         _position: Position,
         _orchestrator: Option<&dyn CrossProjectOrchestrator>,
-    ) -> Vec<Location> {
+    ) -> Vec<Location> { ::tsox_core::fntrace::enter("provide_implementations"); 
         Vec::new()
     }
 
@@ -196,19 +196,19 @@ impl LanguageService {
         _position: Position,
         _is_rename: bool,
         _implementations: bool,
-    ) -> Option<SymbolAndEntriesData> {
+    ) -> Option<SymbolAndEntriesData> { ::tsox_core::fntrace::enter("provide_symbols_and_entries"); 
         None
     }
 
-    pub fn get_range_of_entry(&self, _entry: &ReferenceEntry) -> Range {
+    pub fn get_range_of_entry(&self, _entry: &ReferenceEntry) -> Range { ::tsox_core::fntrace::enter("get_range_of_entry"); 
         Range::default()
     }
 
-    pub fn get_file_name_of_entry(&self, entry: &ReferenceEntry) -> String {
+    pub fn get_file_name_of_entry(&self, entry: &ReferenceEntry) -> String { ::tsox_core::fntrace::enter("get_file_name_of_entry"); 
         entry.file_name.clone()
     }
 
-    pub fn resolve_entry<'a>(&self, entry: &'a ReferenceEntry) -> &'a ReferenceEntry {
+    pub fn resolve_entry<'a>(&self, entry: &'a ReferenceEntry) -> &'a ReferenceEntry { ::tsox_core::fntrace::enter("resolve_entry"); 
         entry
     }
 }
@@ -220,11 +220,11 @@ pub fn get_referenced_symbols_for_node(
     _program: &Program,
     _source_files: &[Arc<SourceFile>],
     _options: RefOptions,
-) -> Vec<SymbolAndEntries> {
+) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_referenced_symbols_for_node"); 
     Vec::new()
 }
 
-fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -245,21 +245,21 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
 
-fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
+fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range { ::tsox_core::fntrace::enter("node_range_to_lsp_range"); 
     Range {
         start: offset_to_position(line_map, node.pos()),
         end: offset_to_position(line_map, node.end()),
     }
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -268,7 +268,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

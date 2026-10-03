@@ -12,7 +12,7 @@ use crate::ast::visitor::NodeVisitor;
 use super::m3d::*;
 
 impl SourceFile {
-    pub fn copy_from(&mut self, other: &SourceFile) {
+    pub fn copy_from(&mut self, other: &SourceFile) { ::tsox_core::fntrace::enter("copy_from"); 
         self.language_variant = other.language_variant;
         self.script_kind = other.script_kind;
         self.is_declaration_file = other.is_declaration_file;
@@ -36,7 +36,7 @@ impl SourceFile {
         }
     }
 
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         match &self.node.data {
             NodeData::SourceFile(d) => propagate_node_list_subtree_facts(
                 Some(&d.statements),
@@ -53,7 +53,7 @@ pub struct SourceFileDataCell<T> {
 }
 
 impl<T> Default for SourceFileDataCell<T> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             once: std::sync::Once::new(),
             value: std::sync::Mutex::new(None),
@@ -62,7 +62,7 @@ impl<T> Default for SourceFileDataCell<T> {
 }
 
 impl<T: Clone> SourceFileDataCell<T> {
-    pub fn get_or_init(&self, compute: impl FnOnce() -> T) -> T {
+    pub fn get_or_init(&self, compute: impl FnOnce() -> T) -> T { ::tsox_core::fntrace::enter("get_or_init"); 
         self.once.call_once(|| {
             *self.value.lock().unwrap() = Some(compute());
         });
@@ -78,7 +78,7 @@ pub struct SourceFileDataKey<T> {
 static SOURCE_FILE_DATA_KEY_COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
 impl<T> SourceFileDataKey<T> {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             key: SOURCE_FILE_DATA_KEY_COUNTER.fetch_add(1, Ordering::Relaxed) + 1,
             _marker: std::marker::PhantomData,
@@ -87,7 +87,7 @@ impl<T> SourceFileDataKey<T> {
 }
 
 impl<T> Default for SourceFileDataKey<T> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
@@ -97,7 +97,7 @@ type SourceFileDataCells = std::collections::HashMap<
     Arc<dyn std::any::Any + Send + Sync>,
 >;
 
-fn global_source_file_data_cells() -> &'static std::sync::Mutex<SourceFileDataCells> {
+fn global_source_file_data_cells() -> &'static std::sync::Mutex<SourceFileDataCells> { ::tsox_core::fntrace::enter("global_source_file_data_cells"); 
     static CELLS: std::sync::OnceLock<std::sync::Mutex<SourceFileDataCells>> =
         std::sync::OnceLock::new();
     CELLS.get_or_init(|| std::sync::Mutex::new(std::collections::HashMap::new()))
@@ -106,7 +106,7 @@ fn global_source_file_data_cells() -> &'static std::sync::Mutex<SourceFileDataCe
 pub fn get_source_file_data_cell<T: Send + Sync + 'static>(
     file: &SourceFile,
     key: &SourceFileDataKey<T>,
-) -> Arc<SourceFileDataCell<T>> {
+) -> Arc<SourceFileDataCell<T>> { ::tsox_core::fntrace::enter("get_source_file_data_cell"); 
     if key.key == 0 {
         panic!("invalid SourceFileDataKey; use NewSourceFileDataKey");
     }
@@ -120,7 +120,7 @@ pub fn get_source_file_data_cell<T: Send + Sync + 'static>(
         .expect("SourceFileDataCell type mismatch")
 }
 
-fn file_token_factory(file: &SourceFile) -> Arc<NodeFactory> {
+fn file_token_factory(file: &SourceFile) -> Arc<NodeFactory> { ::tsox_core::fntrace::enter("file_token_factory"); 
     static TOKEN_FACTORY_KEY: std::sync::OnceLock<SourceFileDataKey<Arc<NodeFactory>>> =
         std::sync::OnceLock::new();
     let key = TOKEN_FACTORY_KEY.get_or_init(|| SourceFileDataKey::<Arc<NodeFactory>>::new());
@@ -133,7 +133,7 @@ pub fn create_token(
     pos: usize,
     end: usize,
     flags: TokenFlags,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_token"); 
     let token_factory = file_token_factory(file);
     let text = &file.text[pos..end];
     match kind {
@@ -157,7 +157,7 @@ pub fn create_token(
 }
 
 impl NodeFactory {
-    pub fn new_numeric_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_numeric_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_numeric_literal"); 
         Arc::new(Node::new(
             SyntaxKind::NumericLiteral,
             NodeData::NumericLiteral(NumericLiteralData {
@@ -167,7 +167,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_string_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_string_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal"); 
         Arc::new(Node::new(
             SyntaxKind::StringLiteral,
             NodeData::StringLiteral(StringLiteralData {
@@ -177,7 +177,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_identifier(&self, text: &str) -> Arc<Node> {
+    pub fn new_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {
@@ -186,7 +186,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_big_int_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_big_int_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_big_int_literal"); 
         Arc::new(Node::new(
             SyntaxKind::BigIntLiteral,
             NodeData::BigIntLiteral(BigIntLiteralData {
@@ -196,7 +196,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_jsx_text(&self, text: &str, contains_only_trivia_white_spaces: bool) -> Arc<Node> {
+    pub fn new_jsx_text(&self, text: &str, contains_only_trivia_white_spaces: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("new_jsx_text"); 
         Arc::new(Node::new(
             SyntaxKind::JsxText,
             NodeData::JsxText(JsxTextData {
@@ -210,7 +210,7 @@ impl NodeFactory {
         &self,
         text: &str,
         token_flags: TokenFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_regular_expression_literal"); 
         Arc::new(Node::new(
             SyntaxKind::RegularExpressionLiteral,
             NodeData::RegularExpressionLiteral(RegularExpressionLiteralData {
@@ -224,7 +224,7 @@ impl NodeFactory {
         &self,
         text: &str,
         template_flags: TokenFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_no_substitution_template_literal"); 
         Arc::new(Node::new(
             SyntaxKind::NoSubstitutionTemplateLiteral,
             NodeData::NoSubstitutionTemplateLiteral(NoSubstitutionTemplateLiteralData {
@@ -234,7 +234,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_template_head(&self, text: &str, raw_text: &str, template_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_template_head(&self, text: &str, raw_text: &str, template_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_head"); 
         Arc::new(Node::new(
             SyntaxKind::TemplateHead,
             NodeData::TemplateHead(TemplateHeadData {
@@ -245,7 +245,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_template_middle(&self, text: &str, raw_text: &str, template_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_template_middle(&self, text: &str, raw_text: &str, template_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_middle"); 
         Arc::new(Node::new(
             SyntaxKind::TemplateMiddle,
             NodeData::TemplateMiddle(TemplateMiddleData {
@@ -256,7 +256,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_template_tail(&self, text: &str, raw_text: &str, template_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_template_tail(&self, text: &str, raw_text: &str, template_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_tail"); 
         Arc::new(Node::new(
             SyntaxKind::TemplateTail,
             NodeData::TemplateTail(TemplateTailData {
@@ -267,7 +267,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_private_identifier(&self, text: &str) -> Arc<Node> {
+    pub fn new_private_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_private_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::PrivateIdentifier,
             NodeData::PrivateIdentifier(PrivateIdentifierData {
@@ -286,7 +286,7 @@ impl NodeFactory {
         type_expression: Option<Arc<Node>>,
         is_name_first: bool,
         comment: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_jsdoc_parameter_or_property_tag"); 
         let _ = self;
         Arc::new(Node::new(
             kind,
@@ -305,7 +305,7 @@ impl NodeFactory {
 pub fn for_each_child_jsdoc_parameter_or_property_tag(
     node: &JSDocParameterOrPropertyTagData,
     v: &mut dyn FnMut(&Node) -> bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("for_each_child_jsdoc_parameter_or_property_tag"); 
     visit(v, Some(node.tag_name.as_ref()))
         || (node.is_name_first
             && (visit(v, Some(node.name.as_ref())) || visit(v, node.type_expression.as_deref())))
@@ -317,7 +317,7 @@ pub fn for_each_child_jsdoc_parameter_or_property_tag(
 pub fn visit_each_child_jsdoc_parameter_or_property_tag(
     node: &Arc<Node>,
     v: &mut NodeVisitor,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child_jsdoc_parameter_or_property_tag"); 
     let NodeData::JSDocParameterOrPropertyTag(data) = &node.data else {
         return Arc::clone(node);
     };

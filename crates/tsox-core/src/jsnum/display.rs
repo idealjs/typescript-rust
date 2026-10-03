@@ -1,7 +1,7 @@
 use super::number::{MAX_SAFE_INTEGER, MIN_SAFE_INTEGER, Number};
 use std::fmt;
 
-fn expand_exponential(s: &str) -> String {
+fn expand_exponential(s: &str) -> String { crate::fntrace::enter("expand_exponential"); 
     let (negative, rest) = if let Some(r) = s.strip_prefix('-') {
         (true, r)
     } else {
@@ -48,7 +48,7 @@ fn expand_exponential(s: &str) -> String {
 }
 
 impl fmt::Display for Number {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         if self.is_nan() {
             return write!(f, "NaN");
         }
@@ -84,7 +84,7 @@ impl fmt::Display for Number {
 }
 
 impl fmt::Debug for Number {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         fmt::Display::fmt(self, f)
     }
 }

@@ -10,7 +10,7 @@ impl Checker {
         &mut self,
         element_type: &Arc<Type>,
         caller: &Arc<Node>,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_uninstantiated_jsx_signatures_of_type"); 
         if element_type.flags.contains(TypeFlags::String) {
             let mut sig = Signature::new();
             let _ = sig.resolved_return_type.set(self.get_any_type());
@@ -65,7 +65,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         _location: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_intrinsic_attributes_type_from_string_literal_type"); 
         let intrinsic_elements = self.get_jsx_intrinsic_elements()?;
         let elements_type = self.get_type_of_symbol(&intrinsic_elements);
         if self.is_error_type(&elements_type) {
@@ -88,7 +88,7 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         result: &Arc<Type>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("create_signature_for_jsx_intrinsic"); 
         let mut element_type = self.get_error_type();
         if let Some(ns) = self.get_jsx_namespace()
             && let Some(sym) = ns

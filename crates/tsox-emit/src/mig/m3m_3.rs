@@ -29,7 +29,7 @@ use super::m3n_4::{
 };
 use super::m3n_5::create_diagnostic_for_node;
 
-fn is_parent_for_idd_diagnostic_ast(node: &Arc<Node>) -> FindAncestorResult {
+fn is_parent_for_idd_diagnostic_ast(node: &Arc<Node>) -> FindAncestorResult { ::tsox_core::fntrace::enter("is_parent_for_idd_diagnostic_ast"); 
     if ast::is_export_assignment(node) {
         return FindAncestorResult::True;
     }
@@ -39,7 +39,7 @@ fn is_parent_for_idd_diagnostic_ast(node: &Arc<Node>) -> FindAncestorResult {
     to_find_ancestor_result(!ast::is_parenthesized_expression(node) && !ast::is_assertion_expression(node))
 }
 
-pub fn create_entity_in_type_node_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_entity_in_type_node_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_entity_in_type_node_error"); 
     let text = get_text_of_node(node);
     let mut diag = create_diagnostic_for_node(
         node,
@@ -50,7 +50,7 @@ pub fn create_entity_in_type_node_error(node: &Arc<Node>) -> Diagnostic {
     diag
 }
 
-pub fn create_accessor_type_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_accessor_type_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_accessor_type_error"); 
     // 交接: Node 缺少 symbol() 访问器,Go 侧为 node.Symbol().Declarations,
     // 待 symbol map/resolver 接线后替换此行(见 progress_notes_r38k7.md);
     // 空声明切片仅影响 related-info 建议项,主诊断不受影响
@@ -87,14 +87,14 @@ pub fn create_accessor_type_error(node: &Arc<Node>) -> Diagnostic {
     diagnostic
 }
 
-pub fn create_array_literal_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_array_literal_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_array_literal_error"); 
     let mut diagnostic =
         create_diagnostic_for_node(node, get_error_by_declaration_kind(node.kind), &[]);
     add_parent_declaration_related_info(node, &mut diagnostic);
     diagnostic
 }
 
-pub fn create_binding_element_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_binding_element_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_binding_element_error"); 
     create_diagnostic_for_node(
         node,
         Some(&BINDING_ELEMENTS_WITH_INITIALIZERS_CAN_T_BE_EXPORTED_DIRECTLY_WITH_ISOLATEDDECLARATIONS),
@@ -102,11 +102,11 @@ pub fn create_binding_element_error(node: &Arc<Node>) -> Diagnostic {
     )
 }
 
-pub fn create_expression_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_expression_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_expression_error"); 
     create_expression_error_ex(node, None)
 }
 
-pub fn create_class_expression_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_class_expression_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_class_expression_error"); 
     create_expression_error_ex(
         node,
         Some(&diag::messages_generated::INFERENCE_FROM_CLASS_EXPRESSIONS_IS_NOT_SUPPORTED_WITH_ISOLATEDDECLARATIONS),
@@ -116,7 +116,7 @@ pub fn create_class_expression_error(node: &Arc<Node>) -> Diagnostic {
 pub fn create_expression_error_ex(
     node: &Arc<Node>,
     diagnostic_message: Option<&'static Message>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_expression_error_ex"); 
     let Some(parent_declaration) = find_nearest_declaration(node) else {
         let diagnostic_message = diagnostic_message.unwrap_or(
             &diag::messages_generated::EXPRESSION_TYPE_CAN_T_BE_INFERRED_WITH_ISOLATEDDECLARATIONS,
@@ -164,7 +164,7 @@ pub fn create_expression_error_ex(
     diagnostic
 }
 
-fn create_parameter_error(resolver: &EmitResolver, node: &Arc<Node>) -> Diagnostic {
+fn create_parameter_error(resolver: &EmitResolver, node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_parameter_error"); 
     if let Some(parent) = node.parent() {
         if ast::is_set_accessor_declaration(&parent) {
             return create_accessor_type_error(&parent);
@@ -192,7 +192,7 @@ fn create_parameter_error(resolver: &EmitResolver, node: &Arc<Node>) -> Diagnost
 
 pub fn create_get_isolated_declaration_errors(
     resolver: EmitResolver,
-) -> impl Fn(&Arc<Node>) -> Diagnostic {
+) -> impl Fn(&Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_get_isolated_declaration_errors"); 
     move |node: &Arc<Node>| -> Diagnostic {
         let heritage_clause = ast::find_ancestor(node, ast::is_heritage_clause);
         if heritage_clause.is_some() {

@@ -45,7 +45,7 @@ use super::m4m_4::move_range_past_decorators as move_range_past_decorators_2;
 fn class_or_constructor_parameter_is_decorated(
     use_legacy_decorators: bool,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("class_or_constructor_parameter_is_decorated"); 
     if node_is_decorated(use_legacy_decorators, node, None, None) {
         return true;
     }
@@ -57,14 +57,14 @@ fn class_or_constructor_parameter_is_decorated(
     }
 }
 
-fn modifier_list_from_node_list(modifiers: Option<NodeList>) -> Option<Arc<ModifierList>> {
+fn modifier_list_from_node_list(modifiers: Option<NodeList>) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("modifier_list_from_node_list"); 
     modifiers.map(|m| {
         let flags = modifiers_to_flags(&m.nodes);
         Arc::new(ModifierList::new(m.nodes.clone(), flags))
     })
 }
 
-fn method_asterisk_token(member: &Arc<Node>) -> Option<Arc<Node>> {
+fn method_asterisk_token(member: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("method_asterisk_token"); 
     match &member.data {
         tsox_frontend::ast::node_data_generated::NodeData::MethodDeclaration(d) => {
             d.asterisk_token.clone()
@@ -74,7 +74,7 @@ fn method_asterisk_token(member: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 impl EsDecoratorTransformer {
-    pub fn enter_class(&mut self, ci: Arc<ClassInfo>) {
+    pub fn enter_class(&mut self, ci: Arc<ClassInfo>) { ::tsox_core::fntrace::enter("enter_class"); 
         let top = self.top.take();
         self.top = Some(Box::new(LexicalEntry {
             kind: LexicalEntryKind::Class,
@@ -88,7 +88,7 @@ impl EsDecoratorTransformer {
         self.update_state();
     }
 
-    pub fn exit_class(&mut self) {
+    pub fn exit_class(&mut self) { ::tsox_core::fntrace::enter("exit_class"); 
         let top = self.top.as_mut().expect("top should be set");
         debug_assert_eq!(top.kind, LexicalEntryKind::Class);
         self.pending_expressions = top.saved_pending_expressions.clone();
@@ -97,7 +97,7 @@ impl EsDecoratorTransformer {
         self.update_state();
     }
 
-    pub fn enter_class_element(&mut self, node: &Arc<Node>) {
+    pub fn enter_class_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("enter_class_element"); 
         debug_assert!(self.top.as_ref().is_some_and(|t| t.kind == LexicalEntryKind::Class));
         let top = self.top.take();
         let mut entry = Box::new(LexicalEntry {
@@ -119,7 +119,7 @@ impl EsDecoratorTransformer {
         self.update_state();
     }
 
-    pub fn exit_class_element(&mut self) {
+    pub fn exit_class_element(&mut self) { ::tsox_core::fntrace::enter("exit_class_element"); 
         debug_assert!(self
             .top
             .as_ref()
@@ -129,7 +129,7 @@ impl EsDecoratorTransformer {
         self.update_state();
     }
 
-    pub fn enter_name(&mut self) {
+    pub fn enter_name(&mut self) { ::tsox_core::fntrace::enter("enter_name"); 
         debug_assert!(self
             .top
             .as_ref()
@@ -147,14 +147,14 @@ impl EsDecoratorTransformer {
         self.update_state();
     }
 
-    pub fn exit_name(&mut self) {
+    pub fn exit_name(&mut self) { ::tsox_core::fntrace::enter("exit_name"); 
         debug_assert!(self.top.as_ref().is_some_and(|t| t.kind == LexicalEntryKind::Name));
         let next = self.top.as_mut().unwrap().next.take();
         self.top = next;
         self.update_state();
     }
 
-    pub fn enter_other(&mut self) {
+    pub fn enter_other(&mut self) { ::tsox_core::fntrace::enter("enter_other"); 
         if self.top.as_ref().is_some_and(|t| t.kind == LexicalEntryKind::Other) {
             debug_assert!(self.pending_expressions.is_empty());
             self.top.as_mut().unwrap().depth += 1;
@@ -173,7 +173,7 @@ impl EsDecoratorTransformer {
         }
     }
 
-    pub fn exit_other(&mut self) {
+    pub fn exit_other(&mut self) { ::tsox_core::fntrace::enter("exit_other"); 
         debug_assert!(self.top.as_ref().is_some_and(|t| t.kind == LexicalEntryKind::Other));
         let top = self.top.as_mut().unwrap();
         if top.depth > 0 {
@@ -187,7 +187,7 @@ impl EsDecoratorTransformer {
         }
     }
 
-    pub fn class_element_visitor_visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn class_element_visitor_visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_element_visitor_visit"); 
         match node.kind {
             SyntaxKind::Constructor => Some(self.visit_constructor_declaration(node)),
             SyntaxKind::MethodDeclaration => Some(self.visit_method_declaration(node)),
@@ -199,21 +199,21 @@ impl EsDecoratorTransformer {
         }
     }
 
-    pub fn constructor_class_element_visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn constructor_class_element_visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("constructor_class_element_visit"); 
         if is_constructor_declaration(node) {
             return self.class_element_visitor_visit(node);
         }
         Some(node.clone())
     }
 
-    pub fn export_stripping_modifier_visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn export_stripping_modifier_visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("export_stripping_modifier_visit"); 
         if node.kind == SyntaxKind::ExportKeyword {
             return None;
         }
         self.modifier_visitor_visit(node)
     }
 
-    pub fn create_helper_variable(&mut self, node: &Arc<Node>, suffix: &str) -> Arc<Node> {
+    pub fn create_helper_variable(&mut self, node: &Arc<Node>, suffix: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("create_helper_variable"); 
         let name = format!("{}_{}", get_helper_variable_name(&self.transformer.emit_context(), node), suffix);
         self.transformer.factory().generated_name_node(&self.transformer.factory().new_unique_name_ex(
             &name,
@@ -224,14 +224,14 @@ impl EsDecoratorTransformer {
         ))
     }
 
-    pub fn create_let(&mut self, name: &Arc<Node>, initializer: Option<Arc<Node>>) -> Arc<Node> {
+    pub fn create_let(&mut self, name: &Arc<Node>, initializer: Option<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_let"); 
         let decl = self.transformer.factory().new_variable_declaration(name, None, None, initializer.as_ref());
         let list = self.transformer.factory().new_node_list(vec![decl]);
         let decl_list = self.transformer.factory().new_variable_declaration_list(&list, NodeFlags::Let);
         self.transformer.factory().new_variable_statement(None, &decl_list)
     }
 
-    pub fn create_class_info(&mut self, node: &Arc<Node>) -> Arc<ClassInfo> {
+    pub fn create_class_info(&mut self, node: &Arc<Node>) -> Arc<ClassInfo> { ::tsox_core::fntrace::enter("create_class_info"); 
         let mut ci = ClassInfo {
             class: Arc::clone(node),
             class_decorators_name: None,
@@ -358,7 +358,7 @@ impl EsDecoratorTransformer {
         Arc::new(ci)
     }
 
-    fn set_initializer_source_map_range(&self, initializer: &Arc<Node>, node: &Arc<Node>) {
+    fn set_initializer_source_map_range(&self, initializer: &Arc<Node>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_initializer_source_map_range"); 
         match node.name() {
             Some(name) => self
                 .emit_context()
@@ -369,7 +369,7 @@ impl EsDecoratorTransformer {
         }
     }
 
-    pub fn emit_member_info_declarations(&mut self, ci: &mut ClassInfo, is_static: bool) -> Vec<Arc<Node>> {
+    pub fn emit_member_info_declarations(&mut self, ci: &mut ClassInfo, is_static: bool) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("emit_member_info_declarations"); 
         let mut stmts = Vec::new();
         let entries: Vec<(Arc<Node>, MemberInfo)> = ci
             .member_infos
@@ -400,14 +400,14 @@ impl EsDecoratorTransformer {
         stmts
     }
 
-    fn create_let_of(&mut self, name: &Option<Arc<Node>>) -> Arc<Node> {
+    fn create_let_of(&mut self, name: &Option<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_let_of"); 
         match name {
             Some(name) => self.create_let(name, None),
             None => self.create_let(&self.transformer.factory().new_identifier(""), None),
         }
     }
 
-    pub fn can_ignore_empty_string_literal_in_assigned_name(&self, node: Option<&Arc<Node>>) -> bool {
+    pub fn can_ignore_empty_string_literal_in_assigned_name(&self, node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("can_ignore_empty_string_literal_in_assigned_name"); 
         let Some(node) = node else {
             return false;
         };
@@ -426,7 +426,7 @@ impl EsDecoratorTransformer {
         kind: &str,
         parameters: NodeList,
         body: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_descriptor_method"); 
         let body = body.unwrap_or_else(|| self.transformer.factory().new_block(&self.transformer.factory().new_node_list(Vec::new()), false));
 
         let func_expr = self.transformer.factory().new_function_expression(
@@ -475,7 +475,7 @@ impl EsDecoratorTransformer {
         &mut self,
         member: &Arc<Node>,
         modifiers: Option<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_method_descriptor_object"); 
         let parameters = self
             .transformer
             .visitor()
@@ -499,7 +499,7 @@ impl EsDecoratorTransformer {
         &mut self,
         member: &Arc<Node>,
         modifiers: Option<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_get_accessor_descriptor_object"); 
         let body = member.body().map(|b| self.transformer.visitor().visit_node(&b));
         let get_method = self.create_descriptor_method(
             member,
@@ -518,7 +518,7 @@ impl EsDecoratorTransformer {
         &mut self,
         member: &Arc<Node>,
         modifiers: Option<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_set_accessor_descriptor_object"); 
         let parameters = self
             .transformer
             .visitor()
@@ -541,7 +541,7 @@ impl EsDecoratorTransformer {
         &mut self,
         member: &Arc<Node>,
         _modifiers: Option<NodeList>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_accessor_property_descriptor_object"); 
         let backing_field_name = self.transformer.factory().generated_name_node(
             &self.transformer.factory().new_generated_private_name_for_node_ex(
             &member.name().unwrap(),
@@ -609,7 +609,7 @@ impl EsDecoratorTransformer {
         modifiers: Option<NodeList>,
         name: &Arc<Node>,
         descriptor_name: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_method_descriptor_forwarder"); 
         let static_only = self.static_only_modifier_visitor.visit_modifiers(modifiers.as_ref());
         new_get_accessor_declaration_full_r39k05(
             &self.transformer.factory(),
@@ -638,7 +638,7 @@ impl EsDecoratorTransformer {
         modifiers: Option<NodeList>,
         name: &Arc<Node>,
         descriptor_name: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_get_accessor_descriptor_forwarder"); 
         let static_only = self.static_only_modifier_visitor.visit_modifiers(modifiers.as_ref());
         new_get_accessor_declaration_full_r39k05(
             &self.transformer.factory(),
@@ -672,7 +672,7 @@ impl EsDecoratorTransformer {
         modifiers: Option<NodeList>,
         name: &Arc<Node>,
         descriptor_name: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_set_accessor_descriptor_forwarder"); 
         let static_only = self.static_only_modifier_visitor.visit_modifiers(modifiers.as_ref());
         self.transformer.factory().new_set_accessor_declaration(
             static_only,
@@ -707,7 +707,7 @@ impl EsDecoratorTransformer {
         )
     }
 
-    pub fn create_metadata(&mut self, name: &Arc<Node>, class_super: Option<&Arc<Node>>) -> Arc<Node> {
+    pub fn create_metadata(&mut self, name: &Arc<Node>, class_super: Option<&Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_metadata"); 
         let super_metadata = match class_super {
             Some(class_super) => self.create_symbol_metadata_reference(class_super),
             None => self.transformer.factory().new_token(SyntaxKind::NullKeyword),
@@ -751,7 +751,7 @@ impl EsDecoratorTransformer {
         self.transformer.factory().new_variable_statement(None, &var_decl_list)
     }
 
-    pub fn create_symbol_metadata(&mut self, target: &Arc<Node>, value: &Arc<Node>) -> Arc<Node> {
+    pub fn create_symbol_metadata(&mut self, target: &Arc<Node>, value: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_symbol_metadata"); 
         let symbol_metadata = self.transformer.factory().new_property_access_expression(
             &self.transformer.factory().new_identifier("Symbol"),
             None,
@@ -816,7 +816,7 @@ impl EsDecoratorTransformer {
         if_statement
     }
 
-    pub fn create_symbol_metadata_reference(&mut self, class_super: &Arc<Node>) -> Arc<Node> {
+    pub fn create_symbol_metadata_reference(&mut self, class_super: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_symbol_metadata_reference"); 
         let symbol_metadata = self.transformer.factory().new_property_access_expression(
             &self.transformer.factory().new_identifier("Symbol"),
             None,
@@ -839,7 +839,7 @@ impl EsDecoratorTransformer {
     }
 }
 
-pub fn get_helper_variable_name(ec: &crate::printer::EmitContext, node: &Arc<Node>) -> String {
+pub fn get_helper_variable_name(ec: &crate::printer::EmitContext, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_helper_variable_name"); 
     let name = node.name();
     let mut declaration_name = String::new();
     match &name {
@@ -882,7 +882,7 @@ pub fn get_helper_variable_name(ec: &crate::printer::EmitContext, node: &Arc<Nod
     format!("_{}", declaration_name)
 }
 
-fn clone_member_info(mi: &MemberInfo) -> MemberInfo {
+fn clone_member_info(mi: &MemberInfo) -> MemberInfo { ::tsox_core::fntrace::enter("clone_member_info"); 
     MemberInfo {
         member_decorators_name: mi.member_decorators_name.clone(),
         member_initializers_name: mi.member_initializers_name.clone(),

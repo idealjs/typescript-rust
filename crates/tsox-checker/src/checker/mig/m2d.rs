@@ -23,16 +23,16 @@ pub struct EmitResolver {
     pub(crate) reference_resolver: Option<Arc<ReferenceResolverImpl>>,
 }
 
-pub fn new_emit_resolver(checker: &mut Checker) -> Arc<EmitResolver> {
+pub fn new_emit_resolver(checker: &mut Checker) -> Arc<EmitResolver> { ::tsox_core::fntrace::enter("new_emit_resolver"); 
     Arc::new(EmitResolver {
         checker,
         reference_resolver: None,
     })
 }
 
-pub fn noop_add_visible_alias(_declaration: &Arc<Node>, _aliasing_statement: &Arc<Node>) {}
+pub fn noop_add_visible_alias(_declaration: &Arc<Node>, _aliasing_statement: &Arc<Node>) { ::tsox_core::fntrace::enter("noop_add_visible_alias"); }
 
-pub fn is_const_enum_or_const_enum_only_module(s: &Arc<Symbol>) -> bool {
+pub fn is_const_enum_or_const_enum_only_module(s: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_const_enum_or_const_enum_only_module"); 
     is_const_enum_symbol(s) || s.flags.contains(SymbolFlags::ConstEnumOnlyModule)
 }
 
@@ -41,7 +41,7 @@ impl EmitResolver {
         &self,
         checker: &mut Checker,
         parameter: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("declared_parameter_type_contains_undefined"); 
         let Some(type_node) = parameter.type_() else {
             return false;
         };
@@ -52,7 +52,7 @@ impl EmitResolver {
     pub fn get_reference_resolver(
         &mut self,
         checker: &mut Checker,
-    ) -> Arc<ReferenceResolverImpl> {
+    ) -> Arc<ReferenceResolverImpl> { ::tsox_core::fntrace::enter("get_reference_resolver"); 
         if self.reference_resolver.is_none() {
             let checker_ptr: *mut Checker = checker;
             let mut hooks = ReferenceResolverHooks::new();
@@ -108,7 +108,7 @@ impl EmitResolver {
         checker: &mut Checker,
         symbol: Option<&Arc<Symbol>>,
         exclude_type_only_values: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_alias_resolved_to_value"); 
         let Some(symbol) = symbol else {
             return false;
         };
@@ -141,7 +141,7 @@ impl EmitResolver {
         &self,
         checker: &Checker,
         parameter: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_optional_uninitialized_parameter_property"); 
         checker.strict_null_checks
             && checker.is_optional_parameter(parameter)
             && parameter.initializer().is_none()
@@ -156,7 +156,7 @@ impl EmitResolver {
         checker: &Checker,
         parameter: &Arc<Node>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_required_initialized_parameter"); 
         if !checker.strict_null_checks
             || checker.is_optional_parameter(parameter)
             || parameter.initializer().is_none()
@@ -177,7 +177,7 @@ impl EmitResolver {
         &self,
         checker: &mut Checker,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_value_alias_declaration_worker"); 
         match node.kind {
             SyntaxKind::ImportEqualsDeclaration => self.is_alias_resolved_to_value(
                 checker,
@@ -240,7 +240,7 @@ impl EmitResolver {
         declaration: &Arc<Node>,
         symbol: Option<&Arc<Symbol>>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("requires_adding_implicit_undefined"); 
         if !is_parse_tree_node(declaration) {
             return false;
         }
@@ -282,13 +282,13 @@ impl EmitResolver {
         checker: &mut Checker,
         parameter: &Arc<Node>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("requires_adding_implicit_undefined_worker"); 
         (self.is_required_initialized_parameter(checker, parameter, enclosing_declaration)
             || self.is_optional_uninitialized_parameter_property(checker, parameter))
             && !self.declared_parameter_type_contains_undefined(checker, parameter)
     }
 
-    fn emit_reference_resolver(&self) -> Arc<ReferenceResolverImpl> {
+    fn emit_reference_resolver(&self) -> Arc<ReferenceResolverImpl> { ::tsox_core::fntrace::enter("emit_reference_resolver"); 
         // Go emitresolver.go getReferenceResolver: 惰性初始化并把结果写回缓存字段。
         let this = unsafe { &mut *(self as *const EmitResolver as *mut EmitResolver) };
         let checker = unsafe { &mut *this.checker };
@@ -301,7 +301,7 @@ impl ReferenceResolver for EmitResolver {
         &self,
         node: &Arc<Node>,
         prefix_locals: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_export_container"); 
         if !is_parse_tree_node(node) {
             return None;
         }
@@ -309,35 +309,35 @@ impl ReferenceResolver for EmitResolver {
             .get_referenced_export_container(node, prefix_locals)
     }
 
-    fn get_referenced_import_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_import_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_import_declaration"); 
         if !is_parse_tree_node(node) {
             return None;
         }
         self.emit_reference_resolver().get_referenced_import_declaration(node)
     }
 
-    fn get_referenced_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declaration"); 
         if !is_parse_tree_node(node) {
             return None;
         }
         self.emit_reference_resolver().get_referenced_value_declaration(node)
     }
 
-    fn get_referenced_value_declarations(&self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    fn get_referenced_value_declarations(&self, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declarations"); 
         if !is_parse_tree_node(node) {
             return Vec::new();
         }
         self.emit_reference_resolver().get_referenced_value_declarations(node)
     }
 
-    fn get_element_access_expression_name(&self, expression: &Arc<Node>) -> String {
+    fn get_element_access_expression_name(&self, expression: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_element_access_expression_name"); 
         if !is_parse_tree_node(expression) {
             return String::new();
         }
         self.emit_reference_resolver().get_element_access_expression_name(expression)
     }
 
-    fn get_referenced_member_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn get_referenced_member_value_declaration(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_member_value_declaration"); 
         if !is_parse_tree_node(node) {
             return None;
         }

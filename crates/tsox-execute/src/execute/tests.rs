@@ -11,7 +11,7 @@ struct TestSystem {
 }
 
 impl TestSystem {
-    fn new(inner_fs: Arc<InMemoryFS>, cwd: &str) -> Self {
+    fn new(inner_fs: Arc<InMemoryFS>, cwd: &str) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             fs: Arc::new(BundledFS::new(inner_fs as Arc<dyn FS>)),
             cwd: cwd.to_string(),
@@ -19,33 +19,33 @@ impl TestSystem {
         }
     }
 
-    fn output_string(&self) -> String {
+    fn output_string(&self) -> String { ::tsox_core::fntrace::enter("output_string"); 
         String::from_utf8_lossy(&self.output.lock().unwrap()).to_string()
     }
 }
 
 impl System for TestSystem {
-    fn writer(&self) -> Box<dyn Write + Send> {
+    fn writer(&self) -> Box<dyn Write + Send> { ::tsox_core::fntrace::enter("writer"); 
         Box::new(BufferWriter {
             buf: Arc::clone(&self.output),
         })
     }
-    fn fs(&self) -> Arc<dyn FS> {
+    fn fs(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs"); 
         Arc::clone(&self.fs) as Arc<dyn FS>
     }
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         "bundled:///libs"
     }
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.cwd
     }
-    fn write_output_is_tty(&self) -> bool {
+    fn write_output_is_tty(&self) -> bool { ::tsox_core::fntrace::enter("write_output_is_tty"); 
         false
     }
-    fn width_of_terminal(&self) -> usize {
+    fn width_of_terminal(&self) -> usize { ::tsox_core::fntrace::enter("width_of_terminal"); 
         80
     }
-    fn environment_variable(&self, _name: &str) -> Option<String> {
+    fn environment_variable(&self, _name: &str) -> Option<String> { ::tsox_core::fntrace::enter("environment_variable"); 
         None
     }
 }
@@ -55,17 +55,17 @@ struct BufferWriter {
 }
 
 impl Write for BufferWriter {
-    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.buf.lock().unwrap().extend_from_slice(data);
         Ok(data.len())
     }
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         Ok(())
     }
 }
 
 #[test]
-fn version_flag_prints_version() {
+fn version_flag_prints_version() { ::tsox_core::fntrace::enter("version_flag_prints_version"); 
     let fs = Arc::new(InMemoryFS::new());
     let sys = TestSystem::new(fs, "/proj");
     let args = vec!["--version".to_string()];
@@ -75,7 +75,7 @@ fn version_flag_prints_version() {
 }
 
 #[test]
-fn help_flag_prints_help() {
+fn help_flag_prints_help() { ::tsox_core::fntrace::enter("help_flag_prints_help"); 
     let fs = Arc::new(InMemoryFS::new());
     let sys = TestSystem::new(fs, "/proj");
     let args = vec!["--help".to_string()];
@@ -106,7 +106,7 @@ fn help_flag_prints_help() {
 }
 
 #[test]
-fn init_flag_writes_tsconfig() {
+fn init_flag_writes_tsconfig() { ::tsox_core::fntrace::enter("init_flag_writes_tsconfig"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     let sys = TestSystem::new(Arc::clone(&fs), "/proj");
@@ -120,7 +120,7 @@ fn init_flag_writes_tsconfig() {
 }
 
 #[test]
-fn init_flag_errors_when_tsconfig_exists() {
+fn init_flag_errors_when_tsconfig_exists() { ::tsox_core::fntrace::enter("init_flag_errors_when_tsconfig_exists"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/index.ts", "");
@@ -133,7 +133,7 @@ fn init_flag_errors_when_tsconfig_exists() {
 }
 
 #[test]
-fn no_config_no_files_shows_help_and_errors() {
+fn no_config_no_files_shows_help_and_errors() { ::tsox_core::fntrace::enter("no_config_no_files_shows_help_and_errors"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     let sys = TestSystem::new(fs, "/proj");
@@ -144,7 +144,7 @@ fn no_config_no_files_shows_help_and_errors() {
 }
 
 #[test]
-fn compiles_simple_file() {
+fn compiles_simple_file() { ::tsox_core::fntrace::enter("compiles_simple_file"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x: number = 1;");
@@ -162,7 +162,7 @@ fn compiles_simple_file() {
 }
 
 #[test]
-fn non_ascii_invalid_character_does_not_panic_in_command_line() {
+fn non_ascii_invalid_character_does_not_panic_in_command_line() { ::tsox_core::fntrace::enter("non_ascii_invalid_character_does_not_panic_in_command_line"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/middle-dot.ts", "·");
@@ -180,7 +180,7 @@ fn non_ascii_invalid_character_does_not_panic_in_command_line() {
 }
 
 #[test]
-fn finds_config_in_ancestor_directory() {
+fn finds_config_in_ancestor_directory() { ::tsox_core::fntrace::enter("finds_config_in_ancestor_directory"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/root");
     fs.insert_dir("/root/sub");
@@ -196,7 +196,7 @@ fn finds_config_in_ancestor_directory() {
 }
 
 #[test]
-fn build_mode_produces_output() {
+fn build_mode_produces_output() { ::tsox_core::fntrace::enter("build_mode_produces_output"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x: number = 1;");
@@ -220,7 +220,7 @@ fn build_mode_produces_output() {
 }
 
 #[test]
-fn regular_compilation_produces_output() {
+fn regular_compilation_produces_output() { ::tsox_core::fntrace::enter("regular_compilation_produces_output"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -238,7 +238,7 @@ fn regular_compilation_produces_output() {
 }
 
 #[test]
-fn no_emit_flag_skips_output() {
+fn no_emit_flag_skips_output() { ::tsox_core::fntrace::enter("no_emit_flag_skips_output"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/c.ts", "let y = 2;");
@@ -254,7 +254,7 @@ fn no_emit_flag_skips_output() {
 }
 
 #[test]
-fn out_dir_redirects_output() {
+fn out_dir_redirects_output() { ::tsox_core::fntrace::enter("out_dir_redirects_output"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj/src");
     fs.insert_file("/proj/src/d.ts", "let z: string = \"hi\";");
@@ -273,7 +273,7 @@ fn out_dir_redirects_output() {
 }
 
 #[test]
-fn no_emit_on_error_skips_output_when_errors() {
+fn no_emit_on_error_skips_output_when_errors() { ::tsox_core::fntrace::enter("no_emit_on_error_skips_output_when_errors"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/e.ts", "interface { x: number }\nlet y = 1;");
@@ -297,7 +297,7 @@ fn no_emit_on_error_skips_output_when_errors() {
 }
 
 #[test]
-fn no_emit_on_error_emits_when_no_errors() {
+fn no_emit_on_error_emits_when_no_errors() { ::tsox_core::fntrace::enter("no_emit_on_error_emits_when_no_errors"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/f.ts", "let x: number = 1;");
@@ -315,7 +315,7 @@ fn no_emit_on_error_emits_when_no_errors() {
 }
 
 #[test]
-fn errors_without_no_emit_on_error_still_emits() {
+fn errors_without_no_emit_on_error_still_emits() { ::tsox_core::fntrace::enter("errors_without_no_emit_on_error_still_emits"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/g.ts", "interface { x: number }\nlet y = 1;");
@@ -338,7 +338,7 @@ fn errors_without_no_emit_on_error_still_emits() {
 }
 
 #[test]
-fn list_files_only_skips_output() {
+fn list_files_only_skips_output() { ::tsox_core::fntrace::enter("list_files_only_skips_output"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/h.ts", "let x: number = 1;");
@@ -356,7 +356,7 @@ fn list_files_only_skips_output() {
 }
 
 #[test]
-fn build_mode_with_out_dir() {
+fn build_mode_with_out_dir() { ::tsox_core::fntrace::enter("build_mode_with_out_dir"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -381,7 +381,7 @@ fn build_mode_with_out_dir() {
 }
 
 #[test]
-fn build_mode_builds_referenced_solution_project() {
+fn build_mode_builds_referenced_solution_project() { ::tsox_core::fntrace::enter("build_mode_builds_referenced_solution_project"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_dir("/proj/src");
@@ -407,7 +407,7 @@ fn build_mode_builds_referenced_solution_project() {
 }
 
 #[test]
-fn build_mode_detects_two_project_cycle() {
+fn build_mode_detects_two_project_cycle() { ::tsox_core::fntrace::enter("build_mode_detects_two_project_cycle"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/cyc/a");
     fs.insert_dir("/cyc/b");
@@ -444,7 +444,7 @@ fn build_mode_detects_two_project_cycle() {
 }
 
 #[test]
-fn build_mode_detects_three_project_cycle() {
+fn build_mode_detects_three_project_cycle() { ::tsox_core::fntrace::enter("build_mode_detects_three_project_cycle"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/cyc3/a");
     fs.insert_dir("/cyc3/b");
@@ -484,7 +484,7 @@ fn build_mode_detects_three_project_cycle() {
 }
 
 #[test]
-fn build_mode_no_cycle_builds_in_dependency_order() {
+fn build_mode_no_cycle_builds_in_dependency_order() { ::tsox_core::fntrace::enter("build_mode_no_cycle_builds_in_dependency_order"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/chain/a");
     fs.insert_dir("/chain/b");
@@ -525,7 +525,7 @@ fn build_mode_no_cycle_builds_in_dependency_order() {
 }
 
 #[test]
-fn show_config_with_boolean_option() {
+fn show_config_with_boolean_option() { ::tsox_core::fntrace::enter("show_config_with_boolean_option"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/index.ts", "");
@@ -540,7 +540,7 @@ fn show_config_with_boolean_option() {
 }
 
 #[test]
-fn show_config_with_enum_options() {
+fn show_config_with_enum_options() { ::tsox_core::fntrace::enter("show_config_with_enum_options"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/index.ts", "");
@@ -561,7 +561,7 @@ fn show_config_with_enum_options() {
 }
 
 #[test]
-fn show_config_with_list_options() {
+fn show_config_with_list_options() { ::tsox_core::fntrace::enter("show_config_with_list_options"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/index.ts", "");
@@ -581,7 +581,7 @@ fn show_config_with_list_options() {
 }
 
 #[test]
-fn show_config_with_tsconfig_file() {
+fn show_config_with_tsconfig_file() { ::tsox_core::fntrace::enter("show_config_with_tsconfig_file"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj/src");
     fs.insert_file("/proj/src/index.ts", "export const a = 1;");
@@ -620,7 +620,7 @@ fn show_config_with_tsconfig_file() {
 }
 
 #[test]
-fn show_config_with_paths() {
+fn show_config_with_paths() { ::tsox_core::fntrace::enter("show_config_with_paths"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj/src");
     fs.insert_file("/proj/src/index.ts", "export const a = 1;");
@@ -652,7 +652,7 @@ fn show_config_with_paths() {
 }
 
 #[test]
-fn show_config_with_exclude() {
+fn show_config_with_exclude() { ::tsox_core::fntrace::enter("show_config_with_exclude"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj/src");
     fs.insert_file("/proj/src/index.ts", "export const a = 1;");
@@ -677,7 +677,7 @@ fn show_config_with_exclude() {
 }
 
 #[test]
-fn show_config_with_advanced_options() {
+fn show_config_with_advanced_options() { ::tsox_core::fntrace::enter("show_config_with_advanced_options"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/index.ts", "");
@@ -701,7 +701,7 @@ fn show_config_with_advanced_options() {
 }
 
 #[test]
-fn project_with_file_path() {
+fn project_with_file_path() { ::tsox_core::fntrace::enter("project_with_file_path"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/first.ts", "export const a = 1;");
@@ -722,7 +722,7 @@ fn project_with_file_path() {
 }
 
 #[test]
-fn project_with_folder_path() {
+fn project_with_folder_path() { ::tsox_core::fntrace::enter("project_with_folder_path"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/first.ts", "export const a = 1;");
@@ -737,7 +737,7 @@ fn project_with_folder_path() {
 }
 
 #[test]
-fn project_with_dot_folder() {
+fn project_with_dot_folder() { ::tsox_core::fntrace::enter("project_with_dot_folder"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/first.ts", "export const a = 1;");
@@ -752,7 +752,7 @@ fn project_with_dot_folder() {
 }
 
 #[test]
-fn project_with_nonexistent_path() {
+fn project_with_nonexistent_path() { ::tsox_core::fntrace::enter("project_with_nonexistent_path"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     let sys = TestSystem::new(fs, "/proj");
@@ -763,7 +763,7 @@ fn project_with_nonexistent_path() {
 }
 
 #[test]
-fn project_with_nonexistent_directory() {
+fn project_with_nonexistent_directory() { ::tsox_core::fntrace::enter("project_with_nonexistent_directory"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     let sys = TestSystem::new(fs, "/proj");
@@ -774,7 +774,7 @@ fn project_with_nonexistent_directory() {
 }
 
 #[test]
-fn project_mixed_with_files_errors() {
+fn project_mixed_with_files_errors() { ::tsox_core::fntrace::enter("project_mixed_with_files_errors"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x = 1;");
@@ -794,7 +794,7 @@ fn project_mixed_with_files_errors() {
 }
 
 #[test]
-fn empty_tsconfig_file() {
+fn empty_tsconfig_file() { ::tsox_core::fntrace::enter("empty_tsconfig_file"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/first.ts", "export const a = 1;");
@@ -812,7 +812,7 @@ fn empty_tsconfig_file() {
 }
 
 #[test]
-fn watch_and_list_files_only_errors() {
+fn watch_and_list_files_only_errors() { ::tsox_core::fntrace::enter("watch_and_list_files_only_errors"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x = 1;");
@@ -830,7 +830,7 @@ fn watch_and_list_files_only_errors() {
 }
 
 #[test]
-fn build_not_first_argument() {
+fn build_not_first_argument() { ::tsox_core::fntrace::enter("build_not_first_argument"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x: number = 1;");
@@ -847,7 +847,7 @@ fn build_not_first_argument() {
 }
 
 #[test]
-fn compiles_multiple_files() {
+fn compiles_multiple_files() { ::tsox_core::fntrace::enter("compiles_multiple_files"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "export const x = 1;");
@@ -865,7 +865,7 @@ fn compiles_multiple_files() {
 }
 
 #[test]
-fn declaration_option_compiles_with_flag() {
+fn declaration_option_compiles_with_flag() { ::tsox_core::fntrace::enter("declaration_option_compiles_with_flag"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file(
@@ -890,7 +890,7 @@ fn declaration_option_compiles_with_flag() {
 }
 
 #[test]
-fn source_map_option_compiles_with_flag() {
+fn source_map_option_compiles_with_flag() { ::tsox_core::fntrace::enter("source_map_option_compiles_with_flag"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x: number = 1;");
@@ -906,7 +906,7 @@ fn source_map_option_compiles_with_flag() {
 }
 
 #[test]
-fn parse_enum_options_module_target() {
+fn parse_enum_options_module_target() { ::tsox_core::fntrace::enter("parse_enum_options_module_target"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x = 1;");
@@ -925,7 +925,7 @@ fn parse_enum_options_module_target() {
 }
 
 #[test]
-fn show_config_with_module_and_target() {
+fn show_config_with_module_and_target() { ::tsox_core::fntrace::enter("show_config_with_module_and_target"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/index.ts", "");
@@ -953,7 +953,7 @@ struct EnvTestSystem {
 }
 
 impl EnvTestSystem {
-    fn new(inner_fs: Arc<InMemoryFS>, cwd: &str) -> Self {
+    fn new(inner_fs: Arc<InMemoryFS>, cwd: &str) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             fs: Arc::new(BundledFS::new(inner_fs as Arc<dyn FS>)),
             cwd: cwd.to_string(),
@@ -962,44 +962,44 @@ impl EnvTestSystem {
         }
     }
 
-    fn with_env(mut self, key: &str, val: &str) -> Self {
+    fn with_env(mut self, key: &str, val: &str) -> Self { ::tsox_core::fntrace::enter("with_env"); 
         self.env.insert(key.to_string(), val.to_string());
         self
     }
 
-    fn output_string(&self) -> String {
+    fn output_string(&self) -> String { ::tsox_core::fntrace::enter("output_string"); 
         String::from_utf8_lossy(&self.output.lock().unwrap()).to_string()
     }
 }
 
 impl System for EnvTestSystem {
-    fn writer(&self) -> Box<dyn Write + Send> {
+    fn writer(&self) -> Box<dyn Write + Send> { ::tsox_core::fntrace::enter("writer"); 
         Box::new(BufferWriter {
             buf: Arc::clone(&self.output),
         })
     }
-    fn fs(&self) -> Arc<dyn FS> {
+    fn fs(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs"); 
         Arc::clone(&self.fs) as Arc<dyn FS>
     }
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         "bundled:///libs"
     }
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.cwd
     }
-    fn write_output_is_tty(&self) -> bool {
+    fn write_output_is_tty(&self) -> bool { ::tsox_core::fntrace::enter("write_output_is_tty"); 
         false
     }
-    fn width_of_terminal(&self) -> usize {
+    fn width_of_terminal(&self) -> usize { ::tsox_core::fntrace::enter("width_of_terminal"); 
         80
     }
-    fn environment_variable(&self, name: &str) -> Option<String> {
+    fn environment_variable(&self, name: &str) -> Option<String> { ::tsox_core::fntrace::enter("environment_variable"); 
         self.env.get(name).cloned()
     }
 }
 
 #[test]
-fn no_color_env_disables_pretty() {
+fn no_color_env_disables_pretty() { ::tsox_core::fntrace::enter("no_color_env_disables_pretty"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "interface { x: number }");
@@ -1021,7 +1021,7 @@ fn no_color_env_disables_pretty() {
 }
 
 #[test]
-fn force_color_enables_pretty() {
+fn force_color_enables_pretty() { ::tsox_core::fntrace::enter("force_color_enables_pretty"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "interface { x: number }");
@@ -1036,7 +1036,7 @@ fn force_color_enables_pretty() {
 }
 
 #[test]
-fn list_files_prints_source_files() {
+fn list_files_prints_source_files() { ::tsox_core::fntrace::enter("list_files_prints_source_files"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x = 1;");
@@ -1056,7 +1056,7 @@ fn list_files_prints_source_files() {
 }
 
 #[test]
-fn show_config_with_compile_on_save() {
+fn show_config_with_compile_on_save() { ::tsox_core::fntrace::enter("show_config_with_compile_on_save"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj/src");
     fs.insert_file("/proj/src/index.ts", "export const a = 1;");
@@ -1081,7 +1081,7 @@ fn show_config_with_compile_on_save() {
 }
 
 #[test]
-fn show_config_with_references() {
+fn show_config_with_references() { ::tsox_core::fntrace::enter("show_config_with_references"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj/src");
     fs.insert_file("/proj/src/index.ts", "export const a = 1;");
@@ -1107,7 +1107,7 @@ fn show_config_with_references() {
 }
 
 #[test]
-fn missing_file_in_tsconfig_reports_error() {
+fn missing_file_in_tsconfig_reports_error() { ::tsox_core::fntrace::enter("missing_file_in_tsconfig_reports_error"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/tsconfig.json", r#"{"files":["./doesNotExist.ts"]}"#);
@@ -1119,7 +1119,7 @@ fn missing_file_in_tsconfig_reports_error() {
 }
 
 #[test]
-fn all_flag_prints_help() {
+fn all_flag_prints_help() { ::tsox_core::fntrace::enter("all_flag_prints_help"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     let sys = TestSystem::new(fs, "/proj");
@@ -1152,7 +1152,7 @@ fn all_flag_prints_help() {
 }
 
 #[test]
-fn watch_is_source_file_matches_known_extensions() {
+fn watch_is_source_file_matches_known_extensions() { ::tsox_core::fntrace::enter("watch_is_source_file_matches_known_extensions"); 
     let yes = [".ts", ".tsx", ".js", ".jsx", ".json", ".mts", ".cts"];
     for ext in yes {
         let path = format!("/proj/src/a{ext}");
@@ -1167,7 +1167,7 @@ fn watch_is_source_file_matches_known_extensions() {
 }
 
 #[test]
-fn watch_timestamp_is_hh_mm_ss() {
+fn watch_timestamp_is_hh_mm_ss() { ::tsox_core::fntrace::enter("watch_timestamp_is_hh_mm_ss"); 
     let ts = watch::timestamp();
     let parts: Vec<&str> = ts.split(':').collect();
     assert_eq!(parts.len(), 3, "expected HH:MM:SS, got {ts}");
@@ -1181,7 +1181,7 @@ fn watch_timestamp_is_hh_mm_ss() {
 }
 
 #[test]
-fn watch_summary_reports_zero_errors_on_success() {
+fn watch_summary_reports_zero_errors_on_success() { ::tsox_core::fntrace::enter("watch_summary_reports_zero_errors_on_success"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     let sys = TestSystem::new(fs, "/proj");
@@ -1192,7 +1192,7 @@ fn watch_summary_reports_zero_errors_on_success() {
 }
 
 #[test]
-fn watch_summary_reports_errors_on_failure() {
+fn watch_summary_reports_errors_on_failure() { ::tsox_core::fntrace::enter("watch_summary_reports_errors_on_failure"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     let sys = TestSystem::new(fs, "/proj");
@@ -1202,7 +1202,7 @@ fn watch_summary_reports_errors_on_failure() {
 }
 
 #[test]
-fn watch_compile_once_runs_initial_compilation() {
+fn watch_compile_once_runs_initial_compilation() { ::tsox_core::fntrace::enter("watch_compile_once_runs_initial_compilation"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/a.ts", "let x: number = 1;");

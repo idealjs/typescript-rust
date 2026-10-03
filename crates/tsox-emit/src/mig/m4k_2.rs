@@ -60,7 +60,7 @@ pub struct ImportRequireStatements {
     pub require_helper_name: Arc<Node>,
 }
 
-pub fn new_es_module_transformer(opts: &TransformOptions) -> Transformer {
+pub fn new_es_module_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("new_es_module_transformer"); 
     let _tx = ESModuleTransformer {
         emit_context: opts.context.clone(),
         compiler_options: opts.compiler_options,
@@ -76,24 +76,24 @@ pub fn new_es_module_transformer(opts: &TransformOptions) -> Transformer {
 fn es_module_transformer_visit(
     _transformer: &mut Transformer,
     node: Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("es_module_transformer_visit"); 
     Some(node)
 }
 
 impl<'a> ESModuleTransformer<'a> {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    fn visitor(&self) -> Visitor {
+    fn visitor(&self) -> Visitor { ::tsox_core::fntrace::enter("visitor"); 
         Visitor
     }
 
-    fn emit_context(&self) -> EmitContext {
+    fn emit_context(&self) -> EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         self.emit_context.clone()
     }
 
-    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         match node.kind {
             SyntaxKind::SourceFile => self.visit_source_file(node),
             SyntaxKind::ImportDeclaration => self.visit_import_declaration(node),
@@ -105,7 +105,7 @@ impl<'a> ESModuleTransformer<'a> {
         }
     }
 
-    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if node.is_declaration_file_node()
             || !(node.is_external_module_node() || self.compiler_options.get_isolated_modules())
         {
@@ -179,7 +179,7 @@ impl<'a> ESModuleTransformer<'a> {
         Some(result)
     }
 
-    pub fn visit_import_declaration(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_import_declaration(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_import_declaration"); 
         if !self.compiler_options.rewrite_relative_import_extensions.is_true() {
             return Some(node);
         }
@@ -210,7 +210,7 @@ impl<'a> ESModuleTransformer<'a> {
     pub fn visit_import_equals_declaration(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_import_equals_declaration"); 
         if self.compiler_options.get_emit_module_kind() < ModuleKind::Node16 {
             return None;
         }
@@ -246,7 +246,7 @@ impl<'a> ESModuleTransformer<'a> {
         &mut self,
         mut statements: Vec<Arc<Node>>,
         node: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("append_exports_of_import_equals_declaration"); 
         if has_syntactic_modifier(node, ModifierFlags::Export) {
             let named_exports = self.factory().new_named_exports(&self.factory().new_node_list(vec![
                 self.factory().new_export_specifier(
@@ -266,7 +266,7 @@ impl<'a> ESModuleTransformer<'a> {
         statements
     }
 
-    pub fn visit_export_assignment(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_export_assignment(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_export_assignment"); 
         let export_assignment = node.as_export_assignment();
         if !export_assignment.is_export_equals {
             return self.visitor().visit_each_child(node);
@@ -291,7 +291,7 @@ impl<'a> ESModuleTransformer<'a> {
         Some(statement)
     }
 
-    pub fn visit_export_declaration(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_export_declaration(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_export_declaration"); 
         let export_decl = node.as_export_declaration();
         if export_decl.module_specifier.is_none() {
             return Some(node.clone());
@@ -374,7 +374,7 @@ impl<'a> ESModuleTransformer<'a> {
         )
     }
 
-    pub fn visit_call_expression(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_call_expression(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_call_expression"); 
         if self.compiler_options.rewrite_relative_import_extensions.is_true() {
             if (is_import_call(&node)
                 && !node.as_call_expression().arguments.nodes.is_empty())
@@ -387,7 +387,7 @@ impl<'a> ESModuleTransformer<'a> {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_import_or_require_call(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_import_or_require_call(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_import_or_require_call"); 
         let call_expr = node.as_call_expression();
         if call_expr.arguments.nodes.is_empty() {
             return self.visitor().visit_each_child(node);
@@ -430,7 +430,7 @@ impl<'a> ESModuleTransformer<'a> {
         ))
     }
 
-    pub fn create_require_call(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn create_require_call(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_require_call"); 
         let module_name = get_external_module_name_literal(
             &self.factory(),
             node,
@@ -563,7 +563,7 @@ pub struct ImpliedModuleTransformer<'a> {
     pub esm_transformer: Option<Transformer>,
 }
 
-pub fn new_implied_module_transformer(opts: &TransformOptions) -> Transformer {
+pub fn new_implied_module_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("new_implied_module_transformer"); 
     let _tx = ImpliedModuleTransformer {
         opts,
         resolver: opts.resolver.clone(),
@@ -580,19 +580,19 @@ pub fn new_implied_module_transformer(opts: &TransformOptions) -> Transformer {
 fn implied_module_transformer_visit(
     _transformer: &mut Transformer,
     node: Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("implied_module_transformer_visit"); 
     Some(node)
 }
 
 impl<'a> ImpliedModuleTransformer<'a> {
-    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         match node.kind {
             SyntaxKind::SourceFile => self.visit_source_file(node),
             _ => Some(node),
         }
     }
 
-    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if node.is_declaration_file() {
             return Some(node);
         }
@@ -617,7 +617,7 @@ impl<'a> ImpliedModuleTransformer<'a> {
 pub fn is_declaration_name_of_enum_or_namespace(
     emit_context: EmitContext,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_declaration_name_of_enum_or_namespace"); 
     let original = emit_context.most_original(node);
     if let Some(parent) = original.parent() {
         if matches!(
@@ -634,7 +634,7 @@ pub fn rewrite_module_specifier(
     mut emit_context: EmitContext,
     node: Option<&Arc<Node>>,
     compiler_options: &CompilerOptions,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("rewrite_module_specifier"); 
     let node = node?;
     if !is_string_literal(node) || !should_rewrite_module_specifier(node.text(), compiler_options)
     {
@@ -655,7 +655,7 @@ pub fn rewrite_module_specifier(
     Some(node.clone())
 }
 
-pub fn create_empty_imports(factory: &NodeFactory) -> Arc<Node> {
+pub fn create_empty_imports(factory: &NodeFactory) -> Arc<Node> { ::tsox_core::fntrace::enter("create_empty_imports"); 
     factory.new_export_declaration(
         None,
         false,
@@ -672,7 +672,7 @@ pub fn get_external_module_name_literal(
     host: Option<&EmitHost>,
     resolver: Option<EmitResolver>,
     compiler_options: &CompilerOptions,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_name_literal"); 
         let module_name = get_external_module_name(import_node)?;
         let mut name = try_get_module_name_from_declaration(
             import_node,
@@ -696,7 +696,7 @@ pub fn try_get_module_name_from_file(
     file: Option<&Arc<Node>>,
     host: Option<&EmitHost>,
     options: &CompilerOptions,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_module_name_from_file"); 
     let _file = file?;
     None
 }
@@ -707,7 +707,7 @@ pub fn try_get_module_name_from_declaration(
     factory: &NodeFactory,
     resolver: Option<EmitResolver>,
     compiler_options: &CompilerOptions,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_module_name_from_declaration"); 
     let resolver = resolver?;
     let _ = resolver;
     None
@@ -717,7 +717,7 @@ pub fn get_external_module_name_from_path(
     host: &ResolveModuleNameResolutionHost,
     file_name: &str,
     reference_path: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_external_module_name_from_path"); 
     String::new()
 }
 
@@ -725,14 +725,14 @@ pub fn try_rename_external_module(
     factory: &NodeFactory,
     module_name: &Arc<Node>,
     source_file: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_rename_external_module"); 
     None
 }
 
 pub fn is_file_level_reserved_generated_identifier(
     emit_context: EmitContext,
     name: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_file_level_reserved_generated_identifier"); 
     match emit_context.get_auto_generate_info(name) {
         Some(info) => {
             info.flags.is_file_level() && info.flags.is_optimistic() && info.flags.is_reserved_in_nested_scopes()
@@ -741,7 +741,7 @@ pub fn is_file_level_reserved_generated_identifier(
     }
 }
 
-pub fn is_simple_inlineable_expression(expression: Option<&Arc<Node>>) -> bool {
+pub fn is_simple_inlineable_expression(expression: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_simple_inlineable_expression"); 
     match expression {
         Some(expression) => {
             !is_identifier(expression) && is_simple_copiable_expression(expression)
@@ -759,7 +759,7 @@ impl Transformer {
     pub fn new(
         visit: fn(&mut Self, Arc<Node>) -> Option<Arc<Node>>,
         emit_context: Option<EmitContext>,
-    ) -> Transformer {
+    ) -> Transformer { ::tsox_core::fntrace::enter("new"); 
         let emit_context = emit_context.unwrap_or_else(|| *EmitContext::new_emit_context());
         let visitor = emit_context.new_node_visitor(visit);
         Transformer {
@@ -768,19 +768,19 @@ impl Transformer {
         }
     }
 
-    pub fn emit_context(&self) -> EmitContext {
+    pub fn emit_context(&self) -> EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         self.emit_context.clone().unwrap()
     }
 
-    pub fn visitor(&mut self) -> &mut NodeVisitor {
+    pub fn visitor(&mut self) -> &mut NodeVisitor { ::tsox_core::fntrace::enter("visitor"); 
         self.visitor.as_mut().unwrap()
     }
 
-    pub fn factory(&self) -> NodeFactory<'_> {
+    pub fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(self.emit_context.as_ref().unwrap())
     }
 
-    pub fn transform_source_file(&mut self, file: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_source_file(&mut self, file: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_source_file"); 
         Some(self.visitor().visit_node(&file))
     }
 }

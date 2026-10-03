@@ -3,7 +3,7 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
-    pub(crate) fn scan_identifier(&mut self) -> SyntaxKind {
+    pub(crate) fn scan_identifier(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_identifier"); 
         let start = self.pos;
 
         let bytes = self.text.as_bytes();
@@ -64,7 +64,7 @@ impl Scanner {
     pub(crate) fn scan_identifier_escape_part(
         &mut self,
         at_identifier_start: bool,
-    ) -> Option<(usize, char)> {
+    ) -> Option<(usize, char)> { ::tsox_core::fntrace::enter("scan_identifier_escape_part"); 
         let escape_start = self.pos;
         let next = self.text.as_bytes().get(self.pos + 1).copied();
         if next != Some(b'u') {
@@ -83,7 +83,7 @@ impl Scanner {
         Some((escape_start, escaped))
     }
 
-    pub(crate) fn scan_unicode_escape(&mut self) -> Option<char> {
+    pub(crate) fn scan_unicode_escape(&mut self) -> Option<char> { ::tsox_core::fntrace::enter("scan_unicode_escape"); 
         let escape_start = self.pos;
         let bytes = self.text.as_bytes();
         if bytes.get(self.pos) != Some(&b'\\') || bytes.get(self.pos + 1) != Some(&b'u') {
@@ -130,7 +130,7 @@ impl Scanner {
         char::from_u32(code)
     }
 
-    pub(crate) fn scan_private_identifier(&mut self) -> SyntaxKind {
+    pub(crate) fn scan_private_identifier(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_private_identifier"); 
         self.pos += 1;
 
         if self.pos < self.end {

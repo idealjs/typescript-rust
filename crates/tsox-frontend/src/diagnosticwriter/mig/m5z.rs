@@ -41,15 +41,15 @@ pub trait FileLike {
 }
 
 impl FileLike for SourceFile {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 
-    fn ecma_line_map(&self) -> &LineMap {
+    fn ecma_line_map(&self) -> &LineMap { ::tsox_core::fntrace::enter("ecma_line_map"); 
         &self.line_map
     }
 }
@@ -60,7 +60,7 @@ pub struct OriginalTextFile {
     line_map: LineMap,
 }
 
-pub fn new_original_text_file(file: &SourceFile, file_name: String) -> OriginalTextFile {
+pub fn new_original_text_file(file: &SourceFile, file_name: String) -> OriginalTextFile { ::tsox_core::fntrace::enter("new_original_text_file"); 
     let text = file.text.clone();
     OriginalTextFile {
         file_name,
@@ -70,15 +70,15 @@ pub fn new_original_text_file(file: &SourceFile, file_name: String) -> OriginalT
 }
 
 impl FileLike for OriginalTextFile {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 
-    fn ecma_line_map(&self) -> &LineMap {
+    fn ecma_line_map(&self) -> &LineMap { ::tsox_core::fntrace::enter("ecma_line_map"); 
         &self.line_map
     }
 }
@@ -89,15 +89,15 @@ pub struct RenamedFile {
 }
 
 impl FileLike for RenamedFile {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.file.text
     }
 
-    fn ecma_line_map(&self) -> &LineMap {
+    fn ecma_line_map(&self) -> &LineMap { ::tsox_core::fntrace::enter("ecma_line_map"); 
         &self.file.line_map
     }
 }
@@ -121,7 +121,7 @@ pub trait AstDiagnosticExt {
 }
 
 impl AstDiagnosticExt for Diagnostic {
-    fn resolve(&self) -> ResolvedLocation {
+    fn resolve(&self) -> ResolvedLocation { ::tsox_core::fntrace::enter("resolve"); 
         let loc = self.loc;
         match &self.file {
             None => ResolvedLocation {
@@ -146,23 +146,23 @@ impl AstDiagnosticExt for Diagnostic {
         }
     }
 
-    fn source(&self) -> &str {
+    fn source(&self) -> &str { ::tsox_core::fntrace::enter("source"); 
         ""
     }
 
-    fn ast_pos(&self) -> usize {
+    fn ast_pos(&self) -> usize { ::tsox_core::fntrace::enter("ast_pos"); 
         self.resolve().loc.pos() as usize
     }
 
-    fn ast_end(&self) -> usize {
+    fn ast_end(&self) -> usize { ::tsox_core::fntrace::enter("ast_end"); 
         self.resolve().loc.end() as usize
     }
 
-    fn ast_len(&self) -> usize {
+    fn ast_len(&self) -> usize { ::tsox_core::fntrace::enter("ast_len"); 
         self.resolve().loc.len() as usize
     }
 
-    fn file_like(&self) -> Option<std::sync::Arc<dyn FileLike>> {
+    fn file_like(&self) -> Option<std::sync::Arc<dyn FileLike>> { ::tsox_core::fntrace::enter("file_like"); 
         let file = self.file.clone()?;
         let file_name = file.file_name.clone();
         if self.resolve().use_original {
@@ -180,7 +180,7 @@ impl AstDiagnosticExt for Diagnostic {
         Some(std::sync::Arc::new(clone_source_file_alias(&file)))
     }
 
-    fn wrapped_message_chain(&self) -> Vec<Diagnostic> {
+    fn wrapped_message_chain(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("wrapped_message_chain"); 
         let mut result: Vec<Diagnostic> = self
             .message_chain
             .iter()
@@ -198,7 +198,7 @@ impl AstDiagnosticExt for Diagnostic {
         result
     }
 
-    fn wrapped_related_information(&self) -> Vec<Diagnostic> {
+    fn wrapped_related_information(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("wrapped_related_information"); 
         self.related_information
             .iter()
             .map(wrap_ast_diagnostic_owned)
@@ -206,7 +206,7 @@ impl AstDiagnosticExt for Diagnostic {
     }
 }
 
-fn clone_source_file_alias(file: &SourceFile) -> SourceFileClone {
+fn clone_source_file_alias(file: &SourceFile) -> SourceFileClone { ::tsox_core::fntrace::enter("clone_source_file_alias"); 
     SourceFileClone {
         file_name: file.file_name.clone(),
         text: file.text.clone(),
@@ -221,40 +221,40 @@ pub struct SourceFileClone {
 }
 
 impl FileLike for SourceFileClone {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 
-    fn ecma_line_map(&self) -> &LineMap {
+    fn ecma_line_map(&self) -> &LineMap { ::tsox_core::fntrace::enter("ecma_line_map"); 
         &self.line_map
     }
 }
 
-pub fn wrap_ast_diagnostic(d: Diagnostic) -> Diagnostic {
+pub fn wrap_ast_diagnostic(d: Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("wrap_ast_diagnostic"); 
     d
 }
 
-pub fn wrap_ast_diagnostic_owned(d: &Diagnostic) -> Diagnostic {
+pub fn wrap_ast_diagnostic_owned(d: &Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("wrap_ast_diagnostic_owned"); 
     d.clone()
 }
 
-pub fn wrap_ast_diagnostics(diags: &[Diagnostic]) -> Vec<Diagnostic> {
+pub fn wrap_ast_diagnostics(diags: &[Diagnostic]) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("wrap_ast_diagnostics"); 
     diags.iter().map(wrap_ast_diagnostic_owned).collect()
 }
 
-pub fn from_ast_diagnostics(diags: &[Diagnostic]) -> Vec<Diagnostic> {
+pub fn from_ast_diagnostics(diags: &[Diagnostic]) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("from_ast_diagnostics"); 
     diags.iter().map(wrap_ast_diagnostic_owned).collect()
 }
 
-pub fn to_diagnostics(diags: Vec<Diagnostic>) -> Vec<Diagnostic> {
+pub fn to_diagnostics(diags: Vec<Diagnostic>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("to_diagnostics"); 
     diags
 }
 
-pub fn diagnostic_prefix(diagnostic: &Diagnostic) -> String {
+pub fn diagnostic_prefix(diagnostic: &Diagnostic) -> String { ::tsox_core::fntrace::enter("diagnostic_prefix"); 
     let source = diagnostic.source();
     if !source.is_empty() {
         return source.to_string();
@@ -262,7 +262,7 @@ pub fn diagnostic_prefix(diagnostic: &Diagnostic) -> String {
     "TS".to_string()
 }
 
-pub fn get_category_format(category: Category) -> &'static str {
+pub fn get_category_format(category: Category) -> &'static str { ::tsox_core::fntrace::enter("get_category_format"); 
     match category {
         Category::Error => FOREGROUND_COLOR_ESCAPE_RED,
         Category::Warning => FOREGROUND_COLOR_ESCAPE_YELLOW,
@@ -273,7 +273,7 @@ pub fn get_category_format(category: Category) -> &'static str {
 
 pub type FormattedWriter = fn(&mut dyn std::io::Write, &str, &str);
 
-pub fn write_with_style_and_reset(output: &mut dyn std::io::Write, text: &str, format_style: &str) {
+pub fn write_with_style_and_reset(output: &mut dyn std::io::Write, text: &str, format_style: &str) { ::tsox_core::fntrace::enter("write_with_style_and_reset"); 
     let _ = std::io::Write::write_all(output, format_style.as_bytes());
     let _ = std::io::Write::write_all(output, text.as_bytes());
     let _ = std::io::Write::write_all(output, RESET_ESCAPE_SEQUENCE.as_bytes());
@@ -285,7 +285,7 @@ pub fn write_location(
     pos: usize,
     format_opts: &FormattingOptions,
     write_with_style: FormattedWriter,
-) {
+) { ::tsox_core::fntrace::enter("write_location"); 
     let (first_line, first_char) =
         super::super::line_and_character(file.ecma_line_map(), file.text(), pos);
     let relative_file_name = tsox_core::tspath::convert_to_relative_path(

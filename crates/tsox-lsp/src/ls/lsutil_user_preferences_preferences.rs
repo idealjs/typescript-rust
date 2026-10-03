@@ -8,7 +8,7 @@ use crate::ls::lsutil_format_code_options::FormatCodeSettings;
 use crate::ls::lsutil_format_code_options::get_default_format_code_settings;
 use serde_json::{Map, Value};
 
-pub fn new_default_user_preferences() -> UserPreferences {
+pub fn new_default_user_preferences() -> UserPreferences { ::tsox_core::fntrace::enter("new_default_user_preferences"); 
     UserPreferences {
         format_code_settings: get_default_format_code_settings(),
 
@@ -164,7 +164,7 @@ pub struct UserPreferences {
 }
 
 impl UserPreferences {
-    pub fn is_ata_disabled(&self) -> bool {
+    pub fn is_ata_disabled(&self) -> bool { ::tsox_core::fntrace::enter("is_ata_disabled"); 
         if !self.automatic_type_acquisition_enabled.is_unknown() {
             return !self.automatic_type_acquisition_enabled.is_true();
         }
@@ -173,7 +173,7 @@ impl UserPreferences {
 
     pub fn module_specifier_preferences(
         &self,
-    ) -> tsox_tsoptions::modulespecifiers::UserPreferences {
+    ) -> tsox_tsoptions::modulespecifiers::UserPreferences { ::tsox_core::fntrace::enter("module_specifier_preferences"); 
         tsox_tsoptions::modulespecifiers::UserPreferences {
             import_module_specifier_preference: self.import_module_specifier_preference.clone(),
             import_module_specifier_ending: self.import_module_specifier_ending.clone(),
@@ -183,14 +183,14 @@ impl UserPreferences {
         }
     }
 
-    pub fn is_module_specifier_excluded(&self, module_specifier: &str) -> bool {
+    pub fn is_module_specifier_excluded(&self, module_specifier: &str) -> bool { ::tsox_core::fntrace::enter("is_module_specifier_excluded"); 
         tsox_tsoptions::modulespecifiers::is_excluded_by_regex(
             module_specifier,
             &self.auto_import_specifier_exclude_regexes,
         )
     }
 
-    pub fn with_config(&self, config: &Map<String, Value>) -> UserPreferences {
+    pub fn with_config(&self, config: &Map<String, Value>) -> UserPreferences { ::tsox_core::fntrace::enter("with_config"); 
         let mut prefs = self.clone();
 
         apply_raw_fields(&mut prefs, config);
@@ -235,7 +235,7 @@ pub struct CodeLensUserPreferences {
     pub implementations_code_lens_show_on_all_class_methods: Tristate,
 }
 
-pub fn parse_user_preferences(items: &Map<String, Value>) -> UserPreferences {
+pub fn parse_user_preferences(items: &Map<String, Value>) -> UserPreferences { ::tsox_core::fntrace::enter("parse_user_preferences"); 
     let mut prefs = new_default_user_preferences();
 
     if let Some(Value::Object(editor_settings)) = items.get("editor") {

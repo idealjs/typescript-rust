@@ -67,17 +67,17 @@ pub struct InternalFlags(pub u32);
 
 impl InternalFlags {
     pub const empty: InternalFlags = InternalFlags(0);
-    pub fn contains(self, other: InternalFlags) -> bool {
+    pub fn contains(self, other: InternalFlags) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
-    pub fn intersects(self, other: InternalFlags) -> bool {
+    pub fn intersects(self, other: InternalFlags) -> bool { ::tsox_core::fntrace::enter("intersects"); 
         self.0 & other.0 != 0
     }
 }
 
 pub type SymbolTracker = dyn crate::checker::symboltracker::SymbolTracker;
 
-pub fn get_string_literal_value(t: &Arc<Type>) -> String {
+pub fn get_string_literal_value(t: &Arc<Type>) -> String { ::tsox_core::fntrace::enter("get_string_literal_value"); 
     match &t.as_literal_type().unwrap().value {
         LiteralValue::String(s) => s.clone(),
         _ => String::new(),
@@ -88,7 +88,7 @@ pub fn append_type_mapping(
     mapper: Option<&Arc<TypeMapper>>,
     type_parameter: &Arc<Type>,
     key_type: &Arc<Type>,
-) -> Option<Arc<TypeMapper>> {
+) -> Option<Arc<TypeMapper>> { ::tsox_core::fntrace::enter("append_type_mapping"); 
     let mapper = mapper?;
     let key_mapper = crate::checker::mig::w9a::new_type_mapper(
         vec![Arc::clone(type_parameter)],
@@ -99,7 +99,7 @@ pub fn append_type_mapping(
 }
 
 impl Checker {
-    pub fn get_awaited_type_no_alias(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_awaited_type_no_alias(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_awaited_type_no_alias"); 
         self.get_awaited_type_no_alias_ex(t, None, None, &[])
     }
 
@@ -107,7 +107,7 @@ impl Checker {
         &self,
         m1: Option<&Arc<TypeMapper>>,
         m2: Option<&Arc<TypeMapper>>,
-    ) -> Option<Arc<TypeMapper>> {
+    ) -> Option<Arc<TypeMapper>> { ::tsox_core::fntrace::enter("combine_type_mappers"); 
         match m1 {
             Some(m1) => {
                 crate::checker::mapper::merge_type_mappers(Some(m1.as_ref()), m2.map(|m| m.as_ref()))
@@ -123,20 +123,20 @@ impl Checker {
         name: &str,
         skip_object_function_property_augment: bool,
         include_type_only_members: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_property_of_type_ex"); 
         let _ = (skip_object_function_property_augment, include_type_only_members);
         self.get_property_of_type(t, name)
     }
 
-    pub fn get_symbol_of_declaration_opt(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_of_declaration_opt(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_declaration_opt"); 
         self.get_symbol_of_declaration(node)
     }
 
-    pub fn get_function_flags(&self, node: &Arc<Node>) -> tsox_frontend::ast::mig::m3e::FunctionFlags {
+    pub fn get_function_flags(&self, node: &Arc<Node>) -> tsox_frontend::ast::mig::m3e::FunctionFlags { ::tsox_core::fntrace::enter("get_function_flags"); 
         tsox_frontend::ast::mig::m3e::get_function_flags(Some(node))
     }
 
-    pub fn get_target_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_target_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_target_type"); 
         t.target().cloned().unwrap_or_else(|| Arc::clone(t))
     }
 }

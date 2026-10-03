@@ -19,7 +19,7 @@ use crate::ls::change_tracker::TrailingTriviaOption;
 impl Tracker {
     pub(crate) fn get_text_changes_from_changes(
         &self,
-    ) -> std::collections::HashMap<String, Vec<TextEdit>> {
+    ) -> std::collections::HashMap<String, Vec<TextEdit>> { ::tsox_core::fntrace::enter("get_text_changes_from_changes"); 
         std::collections::HashMap::new()
     }
 
@@ -33,7 +33,7 @@ impl Tracker {
         _options: &NodeOptions,
         _target_source_file: &SourceFile,
         _source_file: &SourceFile,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("compute_new_text"); 
         todo!("computeNewText")
     }
 
@@ -44,7 +44,7 @@ impl Tracker {
         _source_file: &SourceFile,
         _pos: usize,
         _options: &NodeOptions,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_formatted_text_of_node"); 
         todo!("getFormattedTextOfNode")
     }
 
@@ -52,7 +52,7 @@ impl Tracker {
         &mut self,
         _node: &Arc<Node>,
         _source_file: &SourceFile,
-    ) -> (String, Arc<Node>) {
+    ) -> (String, Arc<Node>) { ::tsox_core::fntrace::enter("get_nonformatted_text"); 
         todo!("getNonformattedText")
     }
 
@@ -63,7 +63,7 @@ impl Tracker {
         _end_node: &Arc<Node>,
         _leading_option: LeadingTriviaOption,
         _trailing_option: TrailingTriviaOption,
-    ) -> Range {
+    ) -> Range { ::tsox_core::fntrace::enter("get_adjusted_range"); 
         todo!("GetAdjustedRange")
     }
 
@@ -73,7 +73,7 @@ impl Tracker {
         _node: &Arc<Node>,
         _leading_option: LeadingTriviaOption,
         _has_trailing_comment: bool,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_adjusted_start_position"); 
         todo!("getAdjustedStartPosition")
     }
 
@@ -82,7 +82,7 @@ impl Tracker {
         _source_file: &SourceFile,
         _node: &Arc<Node>,
         _trailing_opt: TrailingTriviaOption,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_end_position_of_multiline_trailing_comment"); 
         todo!("getEndPositionOfMultilineTrailingComment")
     }
 
@@ -91,14 +91,14 @@ impl Tracker {
         _source_file: &SourceFile,
         _node: &Arc<Node>,
         _trailing_option: TrailingTriviaOption,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_adjusted_end_position"); 
         todo!("getAdjustedEndPosition")
     }
 
     pub(crate) fn get_insertion_position_at_source_file_top(
         &self,
         _source_file: &SourceFile,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_insertion_position_at_source_file_top"); 
         todo!("getInsertionPositionAtSourceFileTop")
     }
 }
@@ -106,7 +106,7 @@ impl Tracker {
 pub fn get_format_code_settings_for_writing(
     mut options: FormatCodeSettings,
     source_file: &SourceFile,
-) -> FormatCodeSettings {
+) -> FormatCodeSettings { ::tsox_core::fntrace::enter("get_format_code_settings_for_writing"); 
     let should_auto_detect_semicolon_preference = options.semicolons == SemicolonPreference::Ignore;
     let should_remove_semicolons = options.semicolons == SemicolonPreference::Remove
         || (should_auto_detect_semicolon_preference && !probably_uses_semicolons(source_file));

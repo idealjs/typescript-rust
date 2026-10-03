@@ -19,7 +19,7 @@ use crate::tspath::supported_ts_extensions_flat::{
     SUPPORTED_TS_IMPLEMENTATION_EXTENSIONS,
 };
 
-pub fn compare_number_of_directory_separators(path1: &str, path2: &str) -> i32 {
+pub fn compare_number_of_directory_separators(path1: &str, path2: &str) -> i32 { crate::fntrace::enter("compare_number_of_directory_separators"); 
     match path1.matches('/').count().cmp(&path2.matches('/').count()) {
         std::cmp::Ordering::Less => -1,
         std::cmp::Ordering::Equal => 0,
@@ -28,7 +28,7 @@ pub fn compare_number_of_directory_separators(path1: &str, path2: &str) -> i32 {
 }
 
 impl ComparePathsOptions {
-    pub fn get_comparer(&self) -> impl Fn(&str, &str) -> i32 {
+    pub fn get_comparer(&self) -> impl Fn(&str, &str) -> i32 { crate::fntrace::enter("get_comparer"); 
         let case_sensitive = self.use_case_sensitive_file_names;
         move |a: &str, b: &str| {
             if case_sensitive {
@@ -40,7 +40,7 @@ impl ComparePathsOptions {
     }
 }
 
-pub fn compare_paths(a: &str, b: &str, options: &ComparePathsOptions) -> i32 {
+pub fn compare_paths(a: &str, b: &str, options: &ComparePathsOptions) -> i32 { crate::fntrace::enter("compare_paths"); 
     let a = combine_paths(&options.current_directory, &[a]);
     let b = combine_paths(&options.current_directory, &[b]);
 
@@ -86,7 +86,7 @@ pub fn compare_paths(a: &str, b: &str, options: &ComparePathsOptions) -> i32 {
     }
 }
 
-pub fn compare_paths_case_sensitive(a: &str, b: &str, current_directory: &str) -> i32 {
+pub fn compare_paths_case_sensitive(a: &str, b: &str, current_directory: &str) -> i32 { crate::fntrace::enter("compare_paths_case_sensitive"); 
     compare_paths(
         a,
         b,
@@ -97,7 +97,7 @@ pub fn compare_paths_case_sensitive(a: &str, b: &str, current_directory: &str) -
     )
 }
 
-pub fn compare_paths_case_insensitive(a: &str, b: &str, current_directory: &str) -> i32 {
+pub fn compare_paths_case_insensitive(a: &str, b: &str, current_directory: &str) -> i32 { crate::fntrace::enter("compare_paths_case_insensitive"); 
     compare_paths(
         a,
         b,
@@ -111,7 +111,7 @@ pub fn compare_paths_case_insensitive(a: &str, b: &str, current_directory: &str)
 pub fn for_each_ancestor_directory_path<T, F>(directory: &Path, mut callback: F) -> Option<T>
 where
     F: FnMut(&Path) -> Option<T>,
-{
+{ crate::fntrace::enter("for_each_ancestor_directory_path"); 
     let mut directory = directory.clone();
     loop {
         if let Some(result) = callback(&directory) {
@@ -132,7 +132,7 @@ pub fn for_each_ancestor_directory_stopping_at_global_cache<T, F>(
 ) -> Option<T>
 where
     F: FnMut(&str) -> Option<T>,
-{
+{ crate::fntrace::enter("for_each_ancestor_directory_stopping_at_global_cache"); 
     let mut result: Option<T> = None;
     for_each_ancestor_directory(directory, |ancestor_directory| {
         if let Some(value) = callback(ancestor_directory) {
@@ -148,7 +148,7 @@ fn try_get_extension_from_path(
     path: &str,
     extension: &str,
     ignore_case: bool,
-) -> String {
+) -> String { crate::fntrace::enter("try_get_extension_from_path"); 
     let extension = if extension.starts_with('.') {
         extension.to_string()
     } else {
@@ -171,7 +171,7 @@ pub fn get_longest_extension_from_path(
     path: &str,
     extensions: &[&str],
     ignore_case: bool,
-) -> String {
+) -> String { crate::fntrace::enter("get_longest_extension_from_path"); 
     let path = remove_trailing_directory_separator(path);
     let mut longest = String::new();
     for extension in extensions {
@@ -185,7 +185,7 @@ pub fn get_longest_extension_from_path(
     longest
 }
 
-pub fn get_normalized_path_components(path: &str, current_directory: &str) -> Vec<String> {
+pub fn get_normalized_path_components(path: &str, current_directory: &str) -> Vec<String> { crate::fntrace::enter("get_normalized_path_components"); 
     let combined = combine_paths(current_directory, &[path]);
     get_normalized_path_components_from_combined(&combined)
 }
@@ -194,7 +194,7 @@ pub fn get_relative_path_from_directory(
     from_directory: &str,
     to: &str,
     options: &ComparePathsOptions,
-) -> String {
+) -> String { crate::fntrace::enter("get_relative_path_from_directory"); 
     if (get_root_length(from_directory) > 0) != (get_root_length(to) > 0) {
         panic!("paths must either both be absolute or both be relative");
     }
@@ -206,7 +206,7 @@ pub fn get_relative_path_from_file(
     from: &str,
     to: &str,
     options: &ComparePathsOptions,
-) -> String {
+) -> String { crate::fntrace::enter("get_relative_path_from_file"); 
     ensure_path_is_non_module_name(&get_relative_path_from_directory(
         &get_directory_path(from),
         to,
@@ -224,7 +224,7 @@ const SUPPORTED_TS_EXTENSIONS_FOR_EXTRACT_EXTENSION: &[&str] = &[
     EXTENSION_CTS,
 ];
 
-pub fn try_extract_ts_extension(file_name: &str) -> &'static str {
+pub fn try_extract_ts_extension(file_name: &str) -> &'static str { crate::fntrace::enter("try_extract_ts_extension"); 
     for ext in SUPPORTED_TS_EXTENSIONS_FOR_EXTRACT_EXTENSION {
         if file_extension_is(file_name, ext) {
             return ext;
@@ -233,7 +233,7 @@ pub fn try_extract_ts_extension(file_name: &str) -> &'static str {
     ""
 }
 
-pub fn remove_any_file_extension(path: &str) -> String {
+pub fn remove_any_file_extension(path: &str) -> String { crate::fntrace::enter("remove_any_file_extension"); 
     let without_extension = remove_file_extension(path);
     if without_extension != path {
         return without_extension;
@@ -245,16 +245,16 @@ pub fn remove_any_file_extension(path: &str) -> String {
     path.to_string()
 }
 
-pub fn has_implementation_ts_file_extension(path: &str) -> bool {
+pub fn has_implementation_ts_file_extension(path: &str) -> bool { crate::fntrace::enter("has_implementation_ts_file_extension"); 
     file_extension_is_one_of(path, SUPPORTED_TS_IMPLEMENTATION_EXTENSIONS)
         && !is_declaration_file_name(path)
 }
 
-pub fn extension_is_one_of(ext: &str, extensions: &[&str]) -> bool {
+pub fn extension_is_one_of(ext: &str, extensions: &[&str]) -> bool { crate::fntrace::enter("extension_is_one_of"); 
     extensions.contains(&ext)
 }
 
-pub fn get_declaration_emit_extension_for_path(path: &str) -> String {
+pub fn get_declaration_emit_extension_for_path(path: &str) -> String { crate::fntrace::enter("get_declaration_emit_extension_for_path"); 
     if file_extension_is_one_of(path, &[EXTENSION_MJS, EXTENSION_MTS]) {
         return EXTENSION_DMTS.to_string();
     }
@@ -277,7 +277,7 @@ pub fn change_any_extension(
     ext: &str,
     extensions: &[&str],
     ignore_case: bool,
-) -> String {
+) -> String { crate::fntrace::enter("change_any_extension"); 
     let pathext = get_any_extension_from_path(path, extensions, ignore_case);
     if !pathext.is_empty() {
         let result = &path[..path.len() - pathext.len()];
@@ -292,7 +292,7 @@ pub fn change_any_extension(
     path.to_string()
 }
 
-pub fn change_full_extension(path: &str, new_extension: &str) -> String {
+pub fn change_full_extension(path: &str, new_extension: &str) -> String { crate::fntrace::enter("change_full_extension"); 
     let declaration_extension = get_declaration_file_extension(path);
     if !declaration_extension.is_empty() {
         let ext = if new_extension.starts_with('.') {
@@ -309,7 +309,7 @@ pub fn change_full_extension(path: &str, new_extension: &str) -> String {
     change_extension(path, new_extension)
 }
 
-pub fn get_possible_original_input_extension_for_extension(path: &str) -> Vec<String> {
+pub fn get_possible_original_input_extension_for_extension(path: &str) -> Vec<String> { crate::fntrace::enter("get_possible_original_input_extension_for_extension"); 
     if file_extension_is_one_of(path, &[EXTENSION_DMTS, EXTENSION_MJS, EXTENSION_MTS]) {
         return vec![EXTENSION_MTS.to_string(), EXTENSION_MJS.to_string()];
     }

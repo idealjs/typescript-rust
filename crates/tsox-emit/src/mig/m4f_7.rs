@@ -16,7 +16,7 @@ pub(crate) fn create_accessor_property_get_redirector_m4f5(
     modifiers: Option<Arc<ModifierList>>,
     name: &Arc<Node>,
     receiver: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_accessor_property_get_redirector_m4f5"); 
     let backing_field_name = factory.generated_name_node(
         &factory.new_generated_private_name_for_node_ex(
             node.name().expect("property declaration requires a name"),
@@ -53,7 +53,7 @@ pub(crate) fn create_accessor_property_set_redirector_m4f5(
     modifiers: Option<Arc<ModifierList>>,
     name: &Arc<Node>,
     receiver: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_accessor_property_set_redirector_m4f5"); 
     let backing_field_name = factory.generated_name_node(
         &factory.new_generated_private_name_for_node_ex(
             node.name().expect("property declaration requires a name"),

@@ -35,7 +35,7 @@ pub enum PollingKind {
     FixedChunkSize = 4,
 }
 
-pub fn parse_watch_file_kind(s: &str) -> Option<WatchFileKind> {
+pub fn parse_watch_file_kind(s: &str) -> Option<WatchFileKind> { crate::fntrace::enter("parse_watch_file_kind"); 
     match s.to_lowercase().as_str() {
         "fixedpollinginterval" => Some(WatchFileKind::FixedPollingInterval),
         "prioritypollinginterval" => Some(WatchFileKind::PriorityPollingInterval),
@@ -47,7 +47,7 @@ pub fn parse_watch_file_kind(s: &str) -> Option<WatchFileKind> {
     }
 }
 
-pub fn parse_watch_directory_kind(s: &str) -> Option<WatchDirectoryKind> {
+pub fn parse_watch_directory_kind(s: &str) -> Option<WatchDirectoryKind> { crate::fntrace::enter("parse_watch_directory_kind"); 
     match s.to_lowercase().as_str() {
         "usefsevents" => Some(WatchDirectoryKind::UseFsEvents),
         "fixedpollinginterval" => Some(WatchDirectoryKind::FixedPollingInterval),
@@ -57,7 +57,7 @@ pub fn parse_watch_directory_kind(s: &str) -> Option<WatchDirectoryKind> {
     }
 }
 
-pub fn parse_polling_kind(s: &str) -> Option<PollingKind> {
+pub fn parse_polling_kind(s: &str) -> Option<PollingKind> { crate::fntrace::enter("parse_polling_kind"); 
     match s.to_lowercase().as_str() {
         "fixedinterval" => Some(PollingKind::FixedInterval),
         "priorityinterval" => Some(PollingKind::PriorityInterval),
@@ -85,7 +85,7 @@ pub struct WatchOptions {
 }
 
 impl WatchOptions {
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { crate::fntrace::enter("is_empty"); 
         self.interval.is_none()
             && self.file_kind == WatchFileKind::None
             && self.directory_kind == WatchDirectoryKind::None
@@ -95,7 +95,7 @@ impl WatchOptions {
             && self.exclude_files.is_empty()
     }
 
-    pub fn watch_interval_ms(&self) -> i32 {
+    pub fn watch_interval_ms(&self) -> i32 { crate::fntrace::enter("watch_interval_ms"); 
         self.interval.unwrap_or(2000)
     }
 }

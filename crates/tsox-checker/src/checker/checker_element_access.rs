@@ -5,7 +5,7 @@ use tsox_frontend::ast::Node;
 use crate::checker::checker::*;
 
 impl Checker {
-    pub(crate) fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_element_access"); 
         let (obj_expr, arg_expr, question_dot) = match &node.data {
             tsox_frontend::ast::NodeData::ElementAccessExpression(data) => (
                 &data.expression,
@@ -155,14 +155,14 @@ impl Checker {
         &mut self,
         t: Arc<Type>,
         from_index_signature: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("index_access_with_no_unchecked_undefined"); 
         if self.no_unchecked_indexed_access && from_index_signature {
             return self.get_union_type(vec![t, self.undefined_type()]);
         }
         t
     }
 
-    fn member_allows_dynamic_index(&self, m: &Arc<Type>, want_string: bool) -> bool {        if m.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never) {
+    fn member_allows_dynamic_index(&self, m: &Arc<Type>, want_string: bool) -> bool { ::tsox_core::fntrace::enter("member_allows_dynamic_index");         if m.flags.intersects(TypeFlags::Any | TypeFlags::Unknown | TypeFlags::Never) {
             return true;
         }
         let has = |string: bool| {
@@ -192,7 +192,7 @@ impl Checker {
         arg_expr: &Arc<Node>,
         effective_arg: &Arc<Type>,
         report_nia: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("element_access_result_type"); 
         // Go getIndexedAccessTypeOrUndefined：命名属性访问（含知名符号
         // `[Symbol.iterator]`、字面量下标命中的成员）先于数组/元组下标捷径
         let early_prop_name = self
@@ -330,7 +330,7 @@ impl Checker {
     }
 }
 
-fn element_name_resolved_from_index(obj_type: &Arc<Type>, name: &str) -> bool {
+fn element_name_resolved_from_index(obj_type: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("element_name_resolved_from_index"); 
     let Some(structured) = obj_type.as_structured() else {
         return false;
     };

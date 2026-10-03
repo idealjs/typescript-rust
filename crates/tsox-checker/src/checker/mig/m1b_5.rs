@@ -5,7 +5,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::NodeFlags;
 
 impl Checker {
-    pub fn check_property_access_chain(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_property_access_chain(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_property_access_chain"); 
         let expression = node.expression().cloned().unwrap_or_else(|| Arc::clone(node));
         let left_type = self.check_expression_ex(&expression, CheckMode::Normal);
         let non_optional_type = self.get_optional_expression_type(&left_type, &expression);
@@ -22,7 +22,7 @@ impl Checker {
         self.propagate_optional_type_marker(&checked, node, !Arc::ptr_eq(&non_optional_type, &left_type))
     }
 
-    pub fn check_property_access_expression(&mut self, node: &Arc<Node>, check_mode: CheckMode, write_only: bool) -> Arc<Type> {
+    pub fn check_property_access_expression(&mut self, node: &Arc<Node>, check_mode: CheckMode, write_only: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("check_property_access_expression"); 
         if node.flags.contains(NodeFlags::OptionalChain) {
             return self.check_property_access_chain(node, check_mode);
         }

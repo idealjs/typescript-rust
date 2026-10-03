@@ -10,7 +10,7 @@ impl Checker {
         check_mode: SignatureCheckMode,
         relation: RelationKind,
         mut result: Ternary,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_signature_return_type"); 
         if !check_mode.contains(SignatureCheckMode::IgnoreReturnTypes) {
             let target_return = self.get_non_circular_return_type_of_signature(&target);
 

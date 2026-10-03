@@ -11,7 +11,7 @@ pub struct ProgramCounter {
 }
 
 impl ProgramCounter {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         ProgramCounter {
             refs: Mutex::new(HashMap::new()),
         }
@@ -23,7 +23,7 @@ impl ProgramCounter {
         *refs.entry(key).or_insert(0) += 1;
     }
 
-    pub fn deref(&self, program: &Arc<Program>) -> bool {
+    pub fn deref(&self, program: &Arc<Program>) -> bool { ::tsox_core::fntrace::enter("deref"); 
         let key = Arc::as_ptr(program) as usize;
         let mut refs = self.refs.lock().unwrap();
         match refs.get_mut(&key) {
@@ -43,13 +43,13 @@ impl ProgramCounter {
         }
     }
 
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
         self.refs.lock().unwrap().len()
     }
 }
 
 impl Default for ProgramCounter {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }

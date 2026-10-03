@@ -7,7 +7,7 @@ pub struct PseudoBigInt {
 }
 
 impl PseudoBigInt {
-    pub fn new(value: &str, negative: bool) -> PseudoBigInt {
+    pub fn new(value: &str, negative: bool) -> PseudoBigInt { crate::fntrace::enter("new"); 
         let value = value.trim_start_matches('0');
         PseudoBigInt {
             negative: negative && !value.is_empty(),
@@ -15,11 +15,11 @@ impl PseudoBigInt {
         }
     }
 
-    pub fn is_zero(&self) -> bool {
+    pub fn is_zero(&self) -> bool { crate::fntrace::enter("is_zero"); 
         self.base10_value.is_empty()
     }
 
-    pub fn sign(&self) -> i32 {
+    pub fn sign(&self) -> i32 { crate::fntrace::enter("sign"); 
         if self.base10_value.is_empty() {
             0
         } else if self.negative {
@@ -29,7 +29,7 @@ impl PseudoBigInt {
         }
     }
 
-    pub fn parse(text: &str) -> PseudoBigInt {
+    pub fn parse(text: &str) -> PseudoBigInt { crate::fntrace::enter("parse"); 
         let (text, negative) = text
             .strip_prefix('-')
             .map_or((text, false), |rest| (rest, true));
@@ -39,7 +39,7 @@ impl PseudoBigInt {
 }
 
 impl fmt::Display for PseudoBigInt {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         if self.base10_value.is_empty() {
             return write!(f, "0");
         }
@@ -51,7 +51,7 @@ impl fmt::Display for PseudoBigInt {
     }
 }
 
-fn parse_pseudo_big_int(string_value: &str) -> String {
+fn parse_pseudo_big_int(string_value: &str) -> String { crate::fntrace::enter("parse_pseudo_big_int"); 
     let s = string_value.strip_suffix('n').unwrap_or(string_value);
     if s.len() > 1 {
         match s.as_bytes()[1] {

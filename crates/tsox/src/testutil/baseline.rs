@@ -13,7 +13,7 @@ pub struct BaselineOptions {
 }
 
 impl BaselineOptions {
-    pub fn new(subfolder: &str) -> Self {
+    pub fn new(subfolder: &str) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             subfolder: subfolder.to_string(),
             is_submodule: false,
@@ -21,19 +21,19 @@ impl BaselineOptions {
     }
 }
 
-fn baseline_root() -> PathBuf {
+fn baseline_root() -> PathBuf { ::tsox_core::fntrace::enter("baseline_root"); 
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("testdata/baselines")
 }
 
-pub fn local_root() -> PathBuf {
+pub fn local_root() -> PathBuf { ::tsox_core::fntrace::enter("local_root"); 
     baseline_root().join("local")
 }
 
-pub fn reference_root() -> PathBuf {
+pub fn reference_root() -> PathBuf { ::tsox_core::fntrace::enter("reference_root"); 
     baseline_root().join("reference")
 }
 
-pub fn run(file_name: &str, actual: &str, opts: &BaselineOptions) -> Result<(), String> {
+pub fn run(file_name: &str, actual: &str, opts: &BaselineOptions) -> Result<(), String> { ::tsox_core::fntrace::enter("run"); 
     let subfolder = if opts.is_submodule {
         format!("submodule/{}", opts.subfolder)
     } else {
@@ -88,7 +88,7 @@ pub fn run(file_name: &str, actual: &str, opts: &BaselineOptions) -> Result<(), 
     }
 }
 
-fn summarize(s: &str) -> String {
+fn summarize(s: &str) -> String { ::tsox_core::fntrace::enter("summarize"); 
     let lines: Vec<&str> = s.lines().collect();
     if lines.len() <= 3 {
         s.to_string()
@@ -97,14 +97,14 @@ fn summarize(s: &str) -> String {
     }
 }
 
-pub fn enumerate_test_files(dir: &Path, pattern: &regex::Regex) -> Vec<String> {
+pub fn enumerate_test_files(dir: &Path, pattern: &regex::Regex) -> Vec<String> { ::tsox_core::fntrace::enter("enumerate_test_files"); 
     let mut files = Vec::new();
     enumerate_recursive(dir, dir, pattern, &mut files);
     files.sort();
     files
 }
 
-fn enumerate_recursive(base: &Path, current: &Path, pattern: &Regex, files: &mut Vec<String>) {
+fn enumerate_recursive(base: &Path, current: &Path, pattern: &Regex, files: &mut Vec<String>) { ::tsox_core::fntrace::enter("enumerate_recursive"); 
     if let Ok(entries) = fs::read_dir(current) {
         for entry in entries.flatten() {
             let path = entry.path();

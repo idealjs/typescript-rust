@@ -27,7 +27,7 @@ use tsox_frontend::ast::{self, Node, NodeData, NodeList, SourceFile, Symbol, Syn
 impl<'a> MissingMemberFixer<'a> {
     pub fn create_node_builder(
         &mut self,
-    ) -> (nb2::NodeBuilder<'_>, HashMap<u64, Arc<Symbol>>) {
+    ) -> (nb2::NodeBuilder<'_>, HashMap<u64, Arc<Symbol>>) { ::tsox_core::fntrace::enter("create_node_builder"); 
         let id_to_symbol: HashMap<u64, Arc<Symbol>> = HashMap::new();
         let node_builder = self.type_checker.get_node_builder_ex(HashMap::new());
         (node_builder, id_to_symbol)
@@ -36,7 +36,7 @@ impl<'a> MissingMemberFixer<'a> {
     pub fn get_call_signatures_for_type(
         &self,
         t: &Arc<Type>,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_call_signatures_for_type"); 
         if t.is_union() {
             let mut signatures: Vec<Arc<Signature>> = Vec::new();
             if let Some(types) = t.types() {
@@ -56,7 +56,7 @@ impl<'a> MissingMemberFixer<'a> {
         flags: Flags,
         node_builder: &mut nb2::NodeBuilder<'_>,
         id_to_symbol: &mut HashMap<u64, Arc<Symbol>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_type_node"); 
         let type_node = node_builder.type_to_type_node_ex(
             t,
             Some(enclosing_declaration),
@@ -70,7 +70,7 @@ impl<'a> MissingMemberFixer<'a> {
         &self,
         symbol: &Arc<Symbol>,
         declaration: Option<&Arc<Node>>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("create_modifiers"); 
         let mut modifier_flags = ast::ModifierFlags::empty();
         if let Some(declaration) = declaration {
             let effective = tsox_checker::checker::get_declaration_modifier_flags_from_symbol(
@@ -101,7 +101,7 @@ impl<'a> MissingMemberFixer<'a> {
         )))
     }
 
-    pub fn should_add_override_keyword(&self, declaration: Option<&Arc<Node>>) -> bool {
+    pub fn should_add_override_keyword(&self, declaration: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("should_add_override_keyword"); 
         match declaration {
             Some(declaration) => {
                 self.program.options().no_implicit_override.is_true()
@@ -121,7 +121,7 @@ impl<'a> MissingMemberFixer<'a> {
         modifiers: Option<Arc<ModifierList>>,
         name: Option<Arc<Node>>,
         optional: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_signature_declaration_from_signature"); 
         let quote_preference = lsutil_get_quote_preference(source_file, self.preferences);
         let mut flags = Flags::NoTruncation
             | Flags::SuppressAnyReturnType
@@ -309,7 +309,7 @@ impl<'a> MissingMemberFixer<'a> {
         quote_preference: QuotePreference,
         body: Option<Arc<Node>>,
         enclosing_declaration: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_signature_declaration_from_signatures"); 
         if signatures.is_empty() {
             return None;
         }
@@ -398,7 +398,7 @@ impl<'a> MissingMemberFixer<'a> {
         &mut self,
         signatures: &[Arc<Signature>],
         enclosing_declaration: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_return_type_from_signatures"); 
         if signatures.is_empty() {
             return None;
         }
@@ -427,7 +427,7 @@ impl<'a> MissingMemberFixer<'a> {
         &mut self,
         type_node: Option<Arc<Node>>,
         id_to_symbol: &HashMap<u64, Arc<Symbol>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_type_node"); 
         let type_node = type_node?;
         if self.import_adder.is_none() {
             return Some(type_node);
@@ -473,7 +473,7 @@ impl<'a> MissingMemberFixer<'a> {
         Some(type_node)
     }
 
-    pub fn get_exported_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn get_exported_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_exported_symbol"); 
         let symbol = self.type_checker.get_export_symbol_of_symbol(symbol);
         if symbol.parent().is_none() {
             return None;
@@ -486,7 +486,7 @@ impl<'a> MissingMemberFixer<'a> {
         class_declaration: &Arc<Node>,
         implemented_type: &Arc<Type>,
         key_type: &Arc<Type>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_index_signature_declaration_from_type"); 
         let index_info = self
             .type_checker
             .get_index_info_of_type(implemented_type, key_type)?;
@@ -506,7 +506,7 @@ impl<'a> MissingMemberFixer<'a> {
         body: Option<Arc<Node>>,
         quote_preference: QuotePreference,
         signature_only: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_body"); 
         if signature_only {
             return None;
         }
@@ -517,7 +517,7 @@ impl<'a> MissingMemberFixer<'a> {
         }
     }
 
-    pub fn create_stubbed_method_body(&self, quote_preference: QuotePreference) -> Option<Arc<Node>> {
+    pub fn create_stubbed_method_body(&self, quote_preference: QuotePreference) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_stubbed_method_body"); 
         let token_flags = if quote_preference == QuotePreference::Single {
             tsox_frontend::scanner::TOKEN_FLAGS_SINGLE_QUOTE
         } else {
@@ -549,7 +549,7 @@ pub fn create_dummy_parameters(
     types: &[Option<Arc<Node>>],
     min_argument_count: usize,
     in_js: bool,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("create_dummy_parameters"); 
     let mut parameters: Vec<Arc<Node>> = Vec::with_capacity(arg_count);
     let mut parameter_name_counts: HashMap<String, i32> = HashMap::new();
 
@@ -603,7 +603,7 @@ pub fn create_declaration_name(
     type_checker: &Checker,
     symbol: Option<&Arc<Symbol>>,
     declaration: Option<&Arc<Node>>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_declaration_name"); 
     if let Some(symbol) = symbol {
         if symbol.check_flags.intersects(ast::CheckFlags::Mapped) {
             let name_type = type_checker.get_name_type_of_symbol(symbol);
@@ -628,7 +628,7 @@ pub fn create_declaration_name(
 pub fn create_property_name(
     node: &Arc<Node>,
     quote_preference: QuotePreference,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_property_name"); 
     if ast::is_identifier(node) && node.text() == "constructor" {
         let token_flags = if quote_preference == QuotePreference::Single {
             tsox_frontend::scanner::TOKEN_FLAGS_SINGLE_QUOTE
@@ -649,7 +649,7 @@ fn update_type_parameter_declaration(
     constraint: Option<Arc<Node>>,
     expression: Option<Arc<Node>>,
     default_type: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_type_parameter_declaration"); 
     Arc::new(Node::new(
         SyntaxKind::TypeParameter,
         NodeData::TypeParameterDeclaration(TypeParameterDeclarationData {
@@ -669,7 +669,7 @@ fn update_parameter_declaration(
     question_token: Option<Arc<Node>>,
     type_node: Option<Arc<Node>>,
     initializer: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parameter_declaration"); 
     Arc::new(Node::new(
         SyntaxKind::Parameter,
         NodeData::ParameterDeclaration(ParameterDeclarationData {
@@ -692,7 +692,7 @@ fn update_function_expression(
     type_node: Option<Arc<Node>>,
     full_signature: Option<Arc<Node>>,
     body: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_function_expression"); 
     Arc::new(Node::new(
         SyntaxKind::FunctionExpression,
         NodeData::FunctionExpression(FunctionExpressionData {
@@ -719,7 +719,7 @@ fn update_arrow_function(
     full_signature: Option<Arc<Node>>,
     equals_greater_than_token: Arc<Node>,
     body: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_arrow_function"); 
     Arc::new(Node::new(
         SyntaxKind::ArrowFunction,
         NodeData::ArrowFunction(ArrowFunctionData {
@@ -748,7 +748,7 @@ fn update_method_declaration(
     full_signature: Option<Arc<Node>>,
     body: Option<Arc<Node>>,
     postfix_token: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_method_declaration"); 
     Arc::new(Node::new(
         SyntaxKind::MethodDeclaration,
         NodeData::MethodDeclaration(MethodDeclarationData {
@@ -774,7 +774,7 @@ fn update_function_declaration(
     type_node: Option<Arc<Node>>,
     full_signature: Option<Arc<Node>>,
     body: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_function_declaration"); 
     Arc::new(Node::new(
         SyntaxKind::FunctionDeclaration,
         NodeData::FunctionDeclaration(FunctionDeclarationData {
@@ -800,7 +800,7 @@ fn new_method_declaration_m5q2(
     type_node: Option<Arc<Node>>,
     full_signature: Option<Arc<Node>>,
     body: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_method_declaration_m5q2"); 
     Arc::new(Node::new(
         SyntaxKind::MethodDeclaration,
         NodeData::MethodDeclaration(MethodDeclarationData {
@@ -817,14 +817,14 @@ fn new_method_declaration_m5q2(
     ))
 }
 
-fn new_array_type_node_m5q2(element_type: Arc<Node>) -> Arc<Node> {
+fn new_array_type_node_m5q2(element_type: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_array_type_node_m5q2"); 
     Arc::new(Node::new(
         SyntaxKind::ArrayType,
         NodeData::ArrayTypeNode(ArrayTypeNodeData { element_type }),
     ))
 }
 
-fn new_computed_property_name_m5q2(expression: Arc<Node>) -> Arc<Node> {
+fn new_computed_property_name_m5q2(expression: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_computed_property_name_m5q2"); 
     Arc::new(Node::new(
         SyntaxKind::ComputedPropertyName,
         NodeData::ComputedPropertyName(ComputedPropertyNameData { expression }),
@@ -834,7 +834,7 @@ fn new_computed_property_name_m5q2(expression: Arc<Node>) -> Arc<Node> {
 fn new_string_literal_m5q2(
     text: &str,
     token_flags: tsox_frontend::ast::node_data_generated::TokenFlags,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal_m5q2"); 
     Arc::new(Node::new(
         SyntaxKind::StringLiteral,
         NodeData::StringLiteral(StringLiteralData {
@@ -848,7 +848,7 @@ fn new_new_expression_m5q2(
     expression: Arc<Node>,
     type_arguments: Option<Arc<NodeList>>,
     arguments: Option<Arc<NodeList>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("new_new_expression_m5q2"); 
     Arc::new(Node::new(
         SyntaxKind::NewExpression,
         NodeData::NewExpression(NewExpressionData {
@@ -859,14 +859,14 @@ fn new_new_expression_m5q2(
     ))
 }
 
-fn new_throw_statement_m5q2(expression: Arc<Node>) -> Arc<Node> {
+fn new_throw_statement_m5q2(expression: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_throw_statement_m5q2"); 
     Arc::new(Node::new(
         SyntaxKind::ThrowStatement,
         NodeData::ThrowStatement(ThrowStatementData { expression }),
     ))
 }
 
-fn new_block_m5q2(statements: Arc<NodeList>, multi_line: bool) -> Arc<Node> {
+fn new_block_m5q2(statements: Arc<NodeList>, multi_line: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("new_block_m5q2"); 
     Arc::new(Node::new(
         SyntaxKind::Block,
         NodeData::Block(BlockData {

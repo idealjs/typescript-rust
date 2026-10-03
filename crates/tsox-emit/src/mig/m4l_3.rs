@@ -40,7 +40,7 @@ trait LegacyDecoratorsVisitorExt {
     ) -> Option<Arc<ModifierList>>;
 }
 
-fn m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor {
+fn m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor { ::tsox_core::fntrace::enter("m3c_visitor"); 
     tsox_frontend::ast::mig::m3c::NodeVisitor {
         factory: tsox_frontend::ast::mig::m3c::NodeFactory {
             hooks: tsox_frontend::ast::mig::m3c::NodeFactoryHooks::default(),
@@ -51,11 +51,11 @@ fn m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor {
 }
 
 impl LegacyDecoratorsVisitorExt for NodeVisitor {
-    fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         visit_each_child(node, &mut m3c_visitor())
     }
 
-    fn visit_nodes(&mut self, nodes: Option<&NodeList>) -> NodeList {
+    fn visit_nodes(&mut self, nodes: Option<&NodeList>) -> NodeList { ::tsox_core::fntrace::enter("visit_nodes"); 
         match nodes {
             Some(list) => {
                 let visited = list.nodes.iter().map(|n| self.visit_node(n)).collect();
@@ -70,7 +70,7 @@ impl LegacyDecoratorsVisitorExt for NodeVisitor {
     fn visit_modifiers(
         &mut self,
         modifiers: Option<&Arc<ModifierList>>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         modifiers.map(|m| {
             let visited = m.list.nodes.iter().map(|n| self.visit_node(n)).collect();
             let mut new_list = NodeList::new(visited);
@@ -85,7 +85,7 @@ impl LegacyDecoratorsVisitorExt for NodeVisitor {
 
 impl LegacyDecoratorsTransformer {
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         if !node
             .subtree_facts()
             .intersects(SubtreeContainsDecorators)
@@ -120,7 +120,7 @@ impl LegacyDecoratorsTransformer {
         }
     }
 
-    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_declaration"); 
         let decorated = class_or_constructor_parameter_is_decorated(true, node);
         if !(decorated || child_is_decorated(true, node, None)) {
             return Some(self.visitor().visit_each_child(node));
@@ -132,7 +132,7 @@ impl LegacyDecoratorsTransformer {
         self.transform_class_declaration_without_class_decorators(node, node.name().cloned())
     }
 
-    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_expression"); 
         let heritage_clauses = self
             .visitor()
             .visit_nodes(node.heritage_clauses().map(|l| l.as_ref()));
@@ -148,7 +148,7 @@ impl LegacyDecoratorsTransformer {
         ))
     }
 
-    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_constructor_declaration"); 
         let parameters = self
             .visitor()
             .visit_nodes(node.parameters().map(|l| l.as_ref()));
@@ -165,7 +165,7 @@ impl LegacyDecoratorsTransformer {
         ))
     }
 
-    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_get_accessor_declaration"); 
         let name = self.visit_property_name_of_class_element(node);
         let parameters = self
             .visitor()
@@ -185,7 +185,7 @@ impl LegacyDecoratorsTransformer {
         Some(self.finish_class_element(&updated, node))
     }
 
-    pub fn visit_identifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_identifier(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_identifier"); 
         for d in &self.enclosing_classes {
             if let Some(alias) = self.class_aliases.get(&node_key(d)) {
                 let matches = self
@@ -205,7 +205,7 @@ impl LegacyDecoratorsTransformer {
         Some(Arc::clone(node))
     }
 
-    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_method_declaration"); 
         let name = self.visit_property_name_of_class_element(node);
         let parameters = self
             .visitor()
@@ -227,7 +227,7 @@ impl LegacyDecoratorsTransformer {
         Some(self.finish_class_element(&updated, node))
     }
 
-    pub fn visit_paramer_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_paramer_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_paramer_declaration"); 
         let name = self.visitor().visit_node(node.name().unwrap());
         let initializer = self.visitor().visit_node_opt(node.initializer());
         let mut updated = self.factory().r39k20_update_parameter_declaration(
@@ -255,7 +255,7 @@ impl LegacyDecoratorsTransformer {
         Some(updated)
     }
 
-    pub fn visit_property_access_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_property_access_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_property_access_expression"); 
         let flags = node.flags;
         let (expression, question_dot_token, name) = match &node.data {
             tsox_frontend::ast::node_data_generated::NodeData::PropertyAccessExpression(d) => (
@@ -278,7 +278,7 @@ impl LegacyDecoratorsTransformer {
         Some(Arc::clone(node))
     }
 
-    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_property_declaration"); 
         if node.flags.contains(NodeFlags::Ambient) {
             return None;
         }
@@ -300,7 +300,7 @@ impl LegacyDecoratorsTransformer {
         Some(self.finish_class_element(&updated, node))
     }
 
-    pub fn visit_property_name_of_class_element(&mut self, member: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_property_name_of_class_element(&mut self, member: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_name_of_class_element"); 
         let name = member.name().unwrap();
         if is_computed_property_name(&name) && has_decorators(member) {
             if let NodeData::ComputedPropertyName(d) = &name.data {
@@ -323,7 +323,7 @@ impl LegacyDecoratorsTransformer {
         self.visitor().visit_node(&name)
     }
 
-    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_set_accessor_declaration"); 
         let name = self.visit_property_name_of_class_element(node);
         let parameters = self
             .visitor()

@@ -3,7 +3,7 @@
 use crate::checker::relater_relate_impl_chunk::*;
 
 impl Checker {
-    pub(crate) fn property_name_arg(arg: &str) -> String {
+    pub(crate) fn property_name_arg(arg: &str) -> String { ::tsox_core::fntrace::enter("property_name_arg"); 
         if let Some(first) = arg.chars().next()
             && matches!(first, '"' | '\'' | '`')
         {
@@ -13,7 +13,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn property_chain_name(head: &str, tail: &str) -> String {
+    pub(crate) fn property_chain_name(head: &str, tail: &str) -> String { ::tsox_core::fntrace::enter("property_chain_name"); 
         let head = Self::property_name_arg(head);
         let tail = Self::property_name_arg(tail);
         let mut head = head;
@@ -45,7 +45,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("try_elaborate_primitive_and_object"); 
         use tsox_core::diagnostics::messages_generated as msg;
         if !source.flags.contains(TypeFlags::Object)
             || !target.flags.intersects(
@@ -87,7 +87,7 @@ impl Checker {
         message: tsox_core::diagnostics::Message,
         args: Vec<String>,
         related: Option<crate::checker::relater_relation::ChainRelated>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("relater_report_error_with_related"); 
         self.relater_report_error_impl(message, args, related)
     }
 
@@ -95,7 +95,7 @@ impl Checker {
         &mut self,
         message: tsox_core::diagnostics::Message,
         args: Vec<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("relater_report_error"); 
         self.relater_report_error_impl(message, args, None)
     }
 
@@ -104,7 +104,7 @@ impl Checker {
         message: tsox_core::diagnostics::Message,
         args: Vec<String>,
         related: Option<crate::checker::relater_relation::ChainRelated>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("relater_report_error_impl"); 
         use tsox_core::diagnostics::messages_generated as msg;
         if !self.relater_chain_active {
             return;
@@ -196,7 +196,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: crate::checker::relater_relation::RelationKind,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_nested_relation_failure"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let (source_str, target_str) = self.get_type_names_for_error_display(source, target);
         let generalized = if !target.flags.contains(TypeFlags::Never)
@@ -220,15 +220,15 @@ impl Checker {
         self.push_relation_head_with_tp_note(source, target, head, vec![head_source, head_target]);
     }
 
-    pub(crate) fn silence_relation_chain(&mut self) -> bool {
+    pub(crate) fn silence_relation_chain(&mut self) -> bool { ::tsox_core::fntrace::enter("silence_relation_chain"); 
         std::mem::replace(&mut self.relater_chain_active, false)
     }
 
-    pub(crate) fn restore_relation_chain(&mut self, was: bool) {
+    pub(crate) fn restore_relation_chain(&mut self, was: bool) { ::tsox_core::fntrace::enter("restore_relation_chain"); 
         self.relater_chain_active = was;
     }
 
-    pub(crate) fn chain_property_arg_name(&self, prop: &Arc<tsox_frontend::ast::Symbol>) -> String {
+    pub(crate) fn chain_property_arg_name(&self, prop: &Arc<tsox_frontend::ast::Symbol>) -> String { ::tsox_core::fntrace::enter("chain_property_arg_name"); 
         let decl = prop
             .value_declaration
             .clone()
@@ -253,7 +253,7 @@ impl Checker {
         target: &Arc<Type>,
         head: tsox_core::diagnostics::Message,
         head_args: Vec<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("push_relation_head_with_tp_note"); 
         use tsox_core::diagnostics::messages_generated as msg;
 
         let target_flags_view = if target.flags.contains(TypeFlags::IndexedAccess)
@@ -335,7 +335,7 @@ impl Checker {
         t: &Arc<Type>,
         stack: &[Arc<Type>],
         max_depth: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_deeply_nested_type"); 
         if stack.len() < max_depth {
             return false;
         }

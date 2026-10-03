@@ -15,7 +15,7 @@ pub enum LsError {
 }
 
 impl std::fmt::Display for LsError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         match self {
             LsError::NoSourceFile(name) => write!(f, "source file not found: {name}"),
             LsError::NoTokenAtPosition(loc) => {
@@ -32,7 +32,7 @@ impl LanguageService {
         &self,
         _file_name: &str,
         _position: usize,
-    ) -> Result<Option<Arc<Symbol>>, LsError> {
+    ) -> Result<Option<Arc<Symbol>>, LsError> { ::tsox_core::fntrace::enter("get_symbol_at_position"); 
         let (_program, file) = self.try_get_program_and_file(_file_name);
         let file = file.ok_or_else(|| LsError::NoSourceFile(_file_name.to_string()))?;
         let _ = file;
@@ -40,18 +40,18 @@ impl LanguageService {
         Ok(None)
     }
 
-    pub fn get_symbol_at_location(&self, _node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_at_location(&self, _node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_at_location"); 
         None
     }
 
     pub fn get_type_of_symbol(
         &self,
         _symbol: &Arc<Symbol>,
-    ) -> Option<Arc<tsox_checker::checker::Type>> {
+    ) -> Option<Arc<tsox_checker::checker::Type>> { ::tsox_core::fntrace::enter("get_type_of_symbol"); 
         None
     }
 }
 
-pub fn get_source_file_of_node(_node: &Arc<Node>) -> Option<Arc<SourceFile>> {
+pub fn get_source_file_of_node(_node: &Arc<Node>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_of_node"); 
     None
 }

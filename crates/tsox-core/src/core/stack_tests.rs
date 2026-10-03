@@ -1,7 +1,7 @@
 use crate::core::stack::*;
 
 #[test]
-fn push_pop() {
+fn push_pop() { crate::fntrace::enter("push_pop"); 
     let mut s = Stack::new();
     s.push(1);
     s.push(2);
@@ -14,7 +14,7 @@ fn push_pop() {
 }
 
 #[test]
-fn peek() {
+fn peek() { crate::fntrace::enter("peek"); 
     let mut s = Stack::new();
     s.push("a");
     s.push("b");

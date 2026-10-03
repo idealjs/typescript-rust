@@ -9,7 +9,7 @@ impl Checker {
     pub(crate) fn import_declaration_context(
         &mut self,
         decl: &Arc<Node>,
-    ) -> Option<(Arc<Symbol>, String)> {
+    ) -> Option<(Arc<Symbol>, String)> { ::tsox_core::fntrace::enter("import_declaration_context"); 
         let import_decl = self
             .ancestor_of_kind(decl, SyntaxKind::ImportDeclaration)?;
         let NodeData::ImportDeclaration(d) = &import_decl.data else {
@@ -25,7 +25,7 @@ impl Checker {
         Some((module, spec))
     }
 
-    pub(crate) fn module_symbol_of_containing_file(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn module_symbol_of_containing_file(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("module_symbol_of_containing_file"); 
         let file = self.get_source_file_of_node(node)?;
         let program = self.program.symbol_map();
         program.symbol_of(&file.node).map(Arc::clone)
@@ -35,7 +35,7 @@ impl Checker {
         &self,
         node: &'a Arc<Node>,
         kind: SyntaxKind,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("ancestor_of_kind"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             if n.kind == kind {
@@ -47,7 +47,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn is_alias_declaration(node: &Arc<Node>) -> bool {
+pub(crate) fn is_alias_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_alias_declaration"); 
     matches!(
         node.kind,
         SyntaxKind::ImportClause

@@ -8,7 +8,7 @@ impl Checker {
         &mut self,
         object_type: &Arc<Type>,
         index_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("substitute_generic_mapped_indexed_access"); 
         let (constraint, name_type, type_parameter) = match &object_type.data {
             TypeData::Mapped(m) => (
                 m.constraint_type.clone()?,
@@ -37,7 +37,7 @@ impl Checker {
         })
     }
 
-    fn mapped_index_access_optionality(&mut self, m: &MappedTypeData) -> bool {
+    fn mapped_index_access_optionality(&mut self, m: &MappedTypeData) -> bool { ::tsox_core::fntrace::enter("mapped_index_access_optionality"); 
         if Self::declared_mapped_optionality(m) > 0 {
             return true;
         }
@@ -46,7 +46,7 @@ impl Checker {
             .is_some_and(|mt| self.combined_mapped_optionality(mt) > 0)
     }
 
-    fn combined_mapped_optionality(&self, t: &Arc<Type>) -> i32 {
+    fn combined_mapped_optionality(&self, t: &Arc<Type>) -> i32 { ::tsox_core::fntrace::enter("combined_mapped_optionality"); 
         if let TypeData::Mapped(m) = &t.data {
             let optionality = Self::declared_mapped_optionality(m);
             if optionality != 0 {
@@ -75,7 +75,7 @@ impl Checker {
         0
     }
 
-    fn declared_mapped_optionality(m: &MappedTypeData) -> i32 {
+    fn declared_mapped_optionality(m: &MappedTypeData) -> i32 { ::tsox_core::fntrace::enter("declared_mapped_optionality"); 
         m.declaration
             .as_ref()
             .and_then(|decl| match &decl.data {

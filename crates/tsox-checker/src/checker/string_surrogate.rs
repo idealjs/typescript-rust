@@ -1,4 +1,4 @@
-pub(crate) fn lone_surrogate_escape_at(s: &str, pos: usize) -> Option<u32> {
+pub(crate) fn lone_surrogate_escape_at(s: &str, pos: usize) -> Option<u32> { ::tsox_core::fntrace::enter("lone_surrogate_escape_at"); 
     let b = s.as_bytes();
     if pos + 6 > b.len() || b[pos] != b'\\' || b[pos + 1] != b'u' {
         return None;
@@ -11,7 +11,7 @@ pub(crate) fn lone_surrogate_escape_at(s: &str, pos: usize) -> Option<u32> {
     (0xD800..=0xDFFF).contains(&n).then_some(n)
 }
 
-pub(crate) fn combine_surrogate_pairs(s: &str) -> String {
+pub(crate) fn combine_surrogate_pairs(s: &str) -> String { ::tsox_core::fntrace::enter("combine_surrogate_pairs"); 
     if !s.as_bytes().contains(&b'\\') {
         return s.to_string();
     }
@@ -39,7 +39,7 @@ pub(crate) fn combine_surrogate_pairs(s: &str) -> String {
     out
 }
 
-pub(crate) fn advance_js_code_point(s: &str, pos: usize) -> usize {
+pub(crate) fn advance_js_code_point(s: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("advance_js_code_point"); 
     if lone_surrogate_escape_at(s, pos).is_some() {
         return 6;
     }

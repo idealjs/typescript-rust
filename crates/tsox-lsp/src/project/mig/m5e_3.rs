@@ -23,11 +23,11 @@ mod core {
 
 pub fn has_content_mapper_operation_timings(
     timings: &HashMap<String, contentmapper::MapperTimings>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_content_mapper_operation_timings"); 
     timings.values().any(|t| has_content_mapper_operation_timing(t))
 }
 
-pub fn has_content_mapper_operation_timing(timing: &contentmapper::MapperTimings) -> bool {
+pub fn has_content_mapper_operation_timing(timing: &contentmapper::MapperTimings) -> bool { ::tsox_core::fntrace::enter("has_content_mapper_operation_timing"); 
     timing.spawn.count != 0
         || timing.open_project.count != 0
         || timing.close_project.count != 0
@@ -35,7 +35,7 @@ pub fn has_content_mapper_operation_timing(timing: &contentmapper::MapperTimings
 }
 
 impl Session {
-    pub fn get_snapshot(&self, request: ResourceRequest, caller_ref: bool) -> Arc<Snapshot> {
+    pub fn get_snapshot(&self, request: ResourceRequest, caller_ref: bool) -> Arc<Snapshot> { ::tsox_core::fntrace::enter("get_snapshot"); 
         self.cancel_scheduled_snapshot_update();
         let (file_changes, overlays) = self.flush_changes();
         let update_snapshot = !file_changes.is_empty();
@@ -109,7 +109,7 @@ impl Session {
         &self,
         uri: &lsproto::DocumentUri,
         caller_ref: bool,
-    ) -> Result<(Arc<Snapshot>, Arc<Project>, Arc<LanguageService>), String> {
+    ) -> Result<(Arc<Snapshot>, Arc<Project>, Arc<LanguageService>), String> { ::tsox_core::fntrace::enter("get_snapshot_and_default_project"); 
         let snapshot = self.get_snapshot(
             ResourceRequest {
                 documents: vec![uri.clone()],
@@ -148,7 +148,7 @@ impl Session {
     pub fn get_projects_for_file(
         &self,
         uri: &lsproto::DocumentUri,
-    ) -> Vec<Project> {
+    ) -> Vec<Project> { ::tsox_core::fntrace::enter("get_projects_for_file"); 
         let snapshot = self.get_snapshot(
             ResourceRequest {
                 configured_project_documents: vec![uri.clone()],
@@ -165,7 +165,7 @@ impl Session {
     pub fn get_language_services_for_documents_loading_project_tree(
         &self,
         uris: &[lsproto::DocumentUri],
-    ) -> Vec<Arc<LanguageService>> {
+    ) -> Vec<Arc<LanguageService>> { ::tsox_core::fntrace::enter("get_language_services_for_documents_loading_project_tree"); 
         let snapshot = self.get_snapshot(
             ResourceRequest {
                 documents: uris.to_vec(),
@@ -199,7 +199,7 @@ impl Session {
         &self,
         requested_project_trees: HashSet<Path>,
         mut f: impl FnMut(&Arc<Snapshot>),
-    ) {
+    ) { ::tsox_core::fntrace::enter("with_snapshot_loading_project_tree"); 
         let snapshot = self.get_snapshot(
             ResourceRequest {
                 project_tree: Some(ProjectTreeRequest {
@@ -217,7 +217,7 @@ impl Session {
         &self,
         uri: &lsproto::DocumentUri,
         mut f: impl FnMut(&Arc<Snapshot>),
-    ) {
+    ) { ::tsox_core::fntrace::enter("with_snapshot_for_document"); 
         let snapshot = self.get_snapshot(
             ResourceRequest {
                 documents: vec![uri.clone()],
@@ -236,7 +236,7 @@ impl Session {
             &Arc<LanguageService>,
             &Arc<Snapshot>,
         ) -> Result<Option<Box<dyn FnOnce() -> Result<(), String>>>, String>,
-    ) -> Result<Option<Box<dyn FnOnce() -> Result<(), String>>>, String> {
+    ) -> Result<Option<Box<dyn FnOnce() -> Result<(), String>>>, String> { ::tsox_core::fntrace::enter("with_language_service_and_snapshot"); 
         let (snapshot, _, language_service) = self.get_snapshot_and_default_project(uri, true)?;
         let async_work = f(&language_service, &snapshot)?;
         let Some(async_work) = async_work else {
@@ -255,7 +255,7 @@ impl Session {
         &self,
         base_snapshot: &Arc<Snapshot>,
         uri: &lsproto::DocumentUri,
-    ) -> Result<Arc<LanguageService>, String> {
+    ) -> Result<Arc<LanguageService>, String> { ::tsox_core::fntrace::enter("get_language_service_with_auto_imports"); 
         let new_snapshot = self.clone_with_auto_imports(base_snapshot, uri, false);
         let Some(project) = new_snapshot.get_default_project(uri) else {
             new_snapshot.deref(self);
@@ -274,7 +274,7 @@ impl Session {
         &self,
         base_snapshot: &Arc<Snapshot>,
         uri: &lsproto::DocumentUri,
-    ) -> Arc<Snapshot> {
+    ) -> Arc<Snapshot> { ::tsox_core::fntrace::enter("get_snapshot_with_auto_imports"); 
         let new_snapshot = self.clone_with_auto_imports(base_snapshot, uri, true);
         self.adopt_snapshot_change_in_background(base_snapshot, Arc::clone(&new_snapshot));
         new_snapshot
@@ -285,7 +285,7 @@ impl Session {
         base_snapshot: &Arc<Snapshot>,
         uri: &lsproto::DocumentUri,
         caller_ref: bool,
-    ) -> Arc<Snapshot> {
+    ) -> Arc<Snapshot> { ::tsox_core::fntrace::enter("clone_with_auto_imports"); 
         let change = SnapshotChange {
             reason: UpdateReason::RequestedLanguageServiceWithAutoImports,
             resource_request: ResourceRequest {
@@ -306,7 +306,7 @@ impl Session {
         &self,
         base_snapshot: &Arc<Snapshot>,
         new_snapshot: Arc<Snapshot>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("adopt_snapshot_change_in_background"); 
         let base = Arc::clone(base_snapshot);
         let session = unsafe_clone_session(self);
         self.background_queue.enqueue(move || {
@@ -314,7 +314,7 @@ impl Session {
         });
     }
 
-    pub fn adopt_snapshot_change(&self, base_snapshot: &Arc<Snapshot>, new_snapshot: &Arc<Snapshot>) {
+    pub fn adopt_snapshot_change(&self, base_snapshot: &Arc<Snapshot>, new_snapshot: &Arc<Snapshot>) { ::tsox_core::fntrace::enter("adopt_snapshot_change"); 
         let mut current = self.snapshot.write().unwrap();
         let old_snapshot = current.clone().expect("snapshot");
         if Arc::ptr_eq(&old_snapshot, base_snapshot) {
@@ -358,11 +358,11 @@ impl Session {
         &self,
         overlays: HashMap<Path, Arc<Overlay>>,
         change: SnapshotChange,
-    ) -> Arc<Snapshot> {
+    ) -> Arc<Snapshot> { ::tsox_core::fntrace::enter("update_snapshot_ref"); 
         self.update_snapshot_internal(overlays, change, true)
     }
 
-    pub fn take_content_mapper_timing_delta(&self) -> contentmapper::Timings {
+    pub fn take_content_mapper_timing_delta(&self) -> contentmapper::Timings { ::tsox_core::fntrace::enter("take_content_mapper_timing_delta"); 
         let Some(host) = &self.content_mapper_host else {
             return contentmapper::Timings::default();
         };
@@ -373,7 +373,7 @@ impl Session {
         delta
     }
 
-    pub fn log_content_mapper_timings(&self, timings: &contentmapper::Timings) {
+    pub fn log_content_mapper_timings(&self, timings: &contentmapper::Timings) { ::tsox_core::fntrace::enter("log_content_mapper_timings"); 
         if timings.request_wait.is_zero()
             && !has_content_mapper_operation_timings(&timings.mappers)
         {
@@ -421,18 +421,18 @@ impl Session {
 }
 
 impl crate::ls::host::Host for Arc<Snapshot> {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.fs
             .as_ref()
             .map_or(true, |fs| fs.fs.use_case_sensitive_file_names())
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         let handle = self.fs.as_ref()?.get_file(path)?;
         Some(handle.content().to_string())
     }
 
-    fn converters(&self) -> crate::ls::lsconv_converters::Converters {
+    fn converters(&self) -> crate::ls::lsconv_converters::Converters { ::tsox_core::fntrace::enter("converters"); 
         crate::ls::lsconv_converters::Converters::new(
             self.converters
                 .as_ref()
@@ -441,18 +441,18 @@ impl crate::ls::host::Host for Arc<Snapshot> {
         )
     }
 
-    fn get_preferences(&self, _active_file: &str) -> crate::ls::lsutil::UserPreferences {
+    fn get_preferences(&self, _active_file: &str) -> crate::ls::lsutil::UserPreferences { ::tsox_core::fntrace::enter("get_preferences"); 
         self.user_preferences.clone()
     }
 
-    fn get_ecma_line_info(&self, file_name: &str) -> Option<crate::ls::host::EcmaLineInfo> {
+    fn get_ecma_line_info(&self, file_name: &str) -> Option<crate::ls::host::EcmaLineInfo> { ::tsox_core::fntrace::enter("get_ecma_line_info"); 
         self.fs
             .as_ref()?
             .get_file(file_name)
             .map(|_| crate::ls::host::EcmaLineInfo)
     }
 
-    fn auto_import_registry(&self) -> crate::ls::host::AutoImportRegistry {
+    fn auto_import_registry(&self) -> crate::ls::host::AutoImportRegistry { ::tsox_core::fntrace::enter("auto_import_registry"); 
         crate::ls::host::AutoImportRegistry
     }
 
@@ -464,7 +464,7 @@ impl crate::ls::host::Host for Arc<Snapshot> {
         excludes: &[String],
         includes: &[String],
         depth: i32,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("read_directory"); 
         let Some(fs) = self.fs.as_ref() else {
             return Vec::new();
         };
@@ -482,20 +482,20 @@ impl crate::ls::host::Host for Arc<Snapshot> {
         )
     }
 
-    fn get_directories(&self, path: &str) -> Vec<String> {
+    fn get_directories(&self, path: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_directories"); 
         self.fs
             .as_ref()
             .map(|fs| fs.fs.get_accessible_entries(path).directories)
             .unwrap_or_default()
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.fs
             .as_ref()
             .map_or(false, |fs| fs.fs.directory_exists(path))
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.fs
             .as_ref()
             .map_or(false, |fs| fs.fs.file_exists(path))

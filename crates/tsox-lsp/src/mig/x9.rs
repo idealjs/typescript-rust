@@ -4,7 +4,7 @@ pub fn original_start_projections(
     segments: &[Segment],
     start: TextPos,
     feature: Feature,
-) -> Vec<TextPos> {
+) -> Vec<TextPos> { ::tsox_core::fntrace::enter("original_start_projections"); 
     let mut results = Vec::with_capacity(segments.len());
     for segment in segments {
         if !supports_feature(*segment, feature) {
@@ -27,7 +27,7 @@ pub fn original_end_projections(
     segments: &[Segment],
     end: TextPos,
     feature: Feature,
-) -> Vec<TextPos> {
+) -> Vec<TextPos> { ::tsox_core::fntrace::enter("original_end_projections"); 
     let mut results = Vec::with_capacity(segments.len());
     for segment in segments {
         if !supports_feature(*segment, feature) {

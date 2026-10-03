@@ -1,31 +1,31 @@
 use crate::project::ata_validate_package_name::*;
 
 #[test]
-fn test_validate_package_name_ok() {
+fn test_validate_package_name_ok() { ::tsox_core::fntrace::enter("test_validate_package_name_ok"); 
     let (result, _, _) = validate_package_name("react");
     assert_eq!(result, NameValidationResult::NameOk);
 }
 
 #[test]
-fn test_validate_package_name_empty() {
+fn test_validate_package_name_empty() { ::tsox_core::fntrace::enter("test_validate_package_name_empty"); 
     let (result, _, _) = validate_package_name("");
     assert_eq!(result, NameValidationResult::EmptyName);
 }
 
 #[test]
-fn test_validate_package_name_starts_with_dot() {
+fn test_validate_package_name_starts_with_dot() { ::tsox_core::fntrace::enter("test_validate_package_name_starts_with_dot"); 
     let (result, _, _) = validate_package_name(".foo");
     assert_eq!(result, NameValidationResult::NameStartsWithDot);
 }
 
 #[test]
-fn test_validate_package_name_starts_with_underscore() {
+fn test_validate_package_name_starts_with_underscore() { ::tsox_core::fntrace::enter("test_validate_package_name_starts_with_underscore"); 
     let (result, _, _) = validate_package_name("_foo");
     assert_eq!(result, NameValidationResult::NameStartsWithUnderscore);
 }
 
 #[test]
-fn test_validate_package_name_scoped() {
+fn test_validate_package_name_scoped() { ::tsox_core::fntrace::enter("test_validate_package_name_scoped"); 
     let (result, _, _) = validate_package_name("@scope/package");
     assert_eq!(result, NameValidationResult::NameOk);
 }

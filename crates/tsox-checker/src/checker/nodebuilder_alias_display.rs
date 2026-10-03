@@ -4,7 +4,7 @@ use crate::checker::nodebuilder::*;
 use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
 impl Checker {
-    pub(crate) fn alias_symbol_for_type_node(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn alias_symbol_for_type_node(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("alias_symbol_for_type_node"); 
         let mut host = node.parent()?;
         loop {
             let recurse = match &host.data {
@@ -25,7 +25,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn attach_alias_for_type_node(&mut self, node: &Arc<Node>, result: &Arc<Type>) {
+    pub(crate) fn attach_alias_for_type_node(&mut self, node: &Arc<Node>, result: &Arc<Type>) { ::tsox_core::fntrace::enter("attach_alias_for_type_node"); 
         let attachable = match &result.data {
             TypeData::Union(_) | TypeData::Intersection(_) | TypeData::Mapped(_) => true,
             TypeData::Conditional(c) => {
@@ -66,7 +66,7 @@ impl Checker {
         &mut self,
         types: &[&Arc<Type>],
         flags: TypeFormatFlags,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("type_list_strings"); 
         let rendered: Vec<String> = types
             .iter()
             .map(|t| self.type_to_string_ex(t, flags))
@@ -108,7 +108,7 @@ impl Checker {
     }
 }
 
-fn is_bare_identifier_reference(s: &str) -> bool {
+fn is_bare_identifier_reference(s: &str) -> bool { ::tsox_core::fntrace::enter("is_bare_identifier_reference"); 
     if let Some(pos) = s.find('<') {
         let rest = &s[pos..];
         if !rest.ends_with('>') || !balanced_angle(rest) {
@@ -119,7 +119,7 @@ fn is_bare_identifier_reference(s: &str) -> bool {
     is_identifier(s)
 }
 
-fn balanced_angle(s: &str) -> bool {
+fn balanced_angle(s: &str) -> bool { ::tsox_core::fntrace::enter("balanced_angle"); 
     let mut depth = 0i32;
     for ch in s.chars() {
         match ch {
@@ -137,7 +137,7 @@ fn balanced_angle(s: &str) -> bool {
     depth == 0
 }
 
-fn is_identifier(s: &str) -> bool {
+fn is_identifier(s: &str) -> bool { ::tsox_core::fntrace::enter("is_identifier"); 
     let mut chars = s.chars();
     match chars.next() {
         Some(c) if c.is_alphabetic() || c == '_' || c == '$' => {}
@@ -146,14 +146,14 @@ fn is_identifier(s: &str) -> bool {
     chars.all(|c| c.is_alphanumeric() || c == '_' || c == '$')
 }
 
-fn identifier_head(s: &str) -> String {
+fn identifier_head(s: &str) -> String { ::tsox_core::fntrace::enter("identifier_head"); 
     match s.find('<') {
         Some(pos) => s[..pos].to_string(),
         None => s.to_string(),
     }
 }
 
-fn types_same_reference(a: &Arc<Type>, b: &Arc<Type>) -> bool {
+fn types_same_reference(a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("types_same_reference"); 
     if Arc::ptr_eq(a, b) {
         return true;
     }

@@ -6,14 +6,14 @@ use crate::ls::lsutil_format_code_options::IndentStyle;
 use crate::ls::lsutil_format_code_options::SemicolonPreference;
 use serde_json::{Map, Value};
 
-pub(super) fn apply_raw_fields(prefs: &mut UserPreferences, config: &Map<String, Value>) {
+pub(super) fn apply_raw_fields(prefs: &mut UserPreferences, config: &Map<String, Value>) { ::tsox_core::fntrace::enter("apply_raw_fields"); 
     for (name, value) in config {
         apply_raw_field(prefs, name, value);
     }
 }
 
 #[allow(clippy::too_many_lines)]
-pub(super) fn apply_raw_field(prefs: &mut UserPreferences, raw_name: &str, value: &Value) {
+pub(super) fn apply_raw_field(prefs: &mut UserPreferences, raw_name: &str, value: &Value) { ::tsox_core::fntrace::enter("apply_raw_field"); 
     let invert_bool = |v: &Value| -> Value {
         if let Value::Bool(b) = v {
             Value::Bool(!b)

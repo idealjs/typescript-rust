@@ -48,18 +48,18 @@ pub struct InlayHintState<'a> {
     pub result: Vec<M5uInlayHint>,
 }
 
-pub fn should_show_parameter_name_hints(preferences: &InlayHintsPreferences) -> bool {
+pub fn should_show_parameter_name_hints(preferences: &InlayHintsPreferences) -> bool { ::tsox_core::fntrace::enter("should_show_parameter_name_hints"); 
     preferences.include_inlay_parameter_name_hints == IncludeInlayParameterNameHints::Literals
         || preferences.include_inlay_parameter_name_hints == IncludeInlayParameterNameHints::All
 }
 
 pub fn should_show_literal_parameter_name_hints_only(
     preferences: &InlayHintsPreferences,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_show_literal_parameter_name_hints_only"); 
     preferences.include_inlay_parameter_name_hints == IncludeInlayParameterNameHints::Literals
 }
 
-pub fn is_signature_supporting_return_annotation(node: &Arc<Node>) -> bool {
+pub fn is_signature_supporting_return_annotation(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_signature_supporting_return_annotation"); 
     ast::is_arrow_function(node)
         || ast::is_function_expression(node)
         || ast::is_function_declaration(node)
@@ -67,7 +67,7 @@ pub fn is_signature_supporting_return_annotation(node: &Arc<Node>) -> bool {
         || ast::is_get_accessor_declaration(node)
 }
 
-pub fn is_hintable_declaration(node: &Arc<Node>) -> bool {
+pub fn is_hintable_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_hintable_declaration"); 
     if (ast::mig::m3g_2::is_part_of_parameter_declaration(node)
         || ast::is_variable_declaration(node) && ast::mig::m3g_3::is_var_const(node))
         && node.initializer().is_some()
@@ -81,7 +81,7 @@ pub fn is_hintable_declaration(node: &Arc<Node>) -> bool {
     true
 }
 
-pub fn is_hintable_literal(node: &Arc<Node>) -> bool {
+pub fn is_hintable_literal(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_hintable_literal"); 
     match node.kind {
         SyntaxKind::PrefixUnaryExpression => {
             let operand = prefix_unary_operand(node);
@@ -104,12 +104,12 @@ pub fn is_hintable_literal(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_module_reference_type(t: &tsox_checker::checker::Type) -> bool {
+pub fn is_module_reference_type(t: &tsox_checker::checker::Type) -> bool { ::tsox_core::fntrace::enter("is_module_reference_type"); 
     t.symbol()
         .map_or(false, |symbol| symbol.flags & ast::SymbolFlags::MODULE != ast::SymbolFlags::None)
 }
 
-pub fn get_parameter_declaration_identifier(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+pub fn get_parameter_declaration_identifier(symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_parameter_declaration_identifier"); 
     symbol
         .value_declaration
         .as_ref()
@@ -122,7 +122,7 @@ pub fn get_parameter_declaration_identifier(symbol: &Arc<Symbol>) -> Option<Arc<
 pub fn identifier_or_access_expression_postfix_matches_parameter_name(
     expr: &Arc<Node>,
     parameter_name: &str,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("identifier_or_access_expression_postfix_matches_parameter_name"); 
     if ast::is_identifier(expr) {
         return expr.text() == parameter_name;
     }
@@ -135,7 +135,7 @@ pub fn identifier_or_access_expression_postfix_matches_parameter_name(
 }
 
 impl<'a> InlayHintState<'a> {
-    pub fn visit(&mut self, node: Option<&Arc<Node>>) -> bool {
+    pub fn visit(&mut self, node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("visit"); 
         let Some(node) = node else {
             return false;
         };
@@ -209,7 +209,7 @@ impl<'a> InlayHintState<'a> {
         })
     }
 
-    pub fn visit_function_declaration_like_for_return_type(&mut self, decl: &Arc<Node>) {
+    pub fn visit_function_declaration_like_for_return_type(&mut self, decl: &Arc<Node>) { ::tsox_core::fntrace::enter("visit_function_declaration_like_for_return_type"); 
         if ast::is_arrow_function(decl)
             && astnav::find_child_of_kind(decl, SyntaxKind::OpenParenToken).is_none()
         {
@@ -247,7 +247,7 @@ impl<'a> InlayHintState<'a> {
         self.add_type_hints(hint_parts, pos);
     }
 
-    pub fn visit_call_or_new_expression(&mut self, expr: &Arc<Node>) {
+    pub fn visit_call_or_new_expression(&mut self, expr: &Arc<Node>) { ::tsox_core::fntrace::enter("visit_call_or_new_expression"); 
         let args = node_arguments(expr);
         if args.is_empty() {
             return;
@@ -329,7 +329,7 @@ impl<'a> InlayHintState<'a> {
         }
     }
 
-    pub fn visit_enum_member(&mut self, member: &Arc<Node>) {
+    pub fn visit_enum_member(&mut self, member: &Arc<Node>) { ::tsox_core::fntrace::enter("visit_enum_member"); 
         if member.initializer().is_some() {
             return;
         }
@@ -340,7 +340,7 @@ impl<'a> InlayHintState<'a> {
         }
     }
 
-    pub fn visit_variable_like_declaration(&mut self, decl: &Arc<Node>) {
+    pub fn visit_variable_like_declaration(&mut self, decl: &Arc<Node>) { ::tsox_core::fntrace::enter("visit_variable_like_declaration"); 
         let name_is_binding_pattern = decl.name().map_or(false, |n| ast::is_binding_pattern(&n));
         if (decl.initializer().is_none()
             && !(ast::is_property_declaration(decl)
@@ -393,7 +393,7 @@ impl<'a> InlayHintState<'a> {
         }
     }
 
-    pub fn visit_function_like_for_parameter_type(&mut self, node: &Arc<Node>) {
+    pub fn visit_function_like_for_parameter_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("visit_function_like_for_parameter_type"); 
         let Some(signature) = self.checker.get_signature_from_declaration(node) else {
             return;
         };
@@ -417,7 +417,7 @@ impl<'a> InlayHintState<'a> {
         }
     }
 
-    pub fn add_parameter_type_hint(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) {
+    pub fn add_parameter_type_hint(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("add_parameter_type_hint"); 
         if node.type_node().is_some() {
             return;
         }
@@ -434,7 +434,7 @@ impl<'a> InlayHintState<'a> {
     pub fn get_parameter_declaration_type_hints(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<StringOrInlayHintLabelParts> {
+    ) -> Option<StringOrInlayHintLabelParts> { ::tsox_core::fntrace::enter("get_parameter_declaration_type_hints"); 
         let value_declaration = symbol.value_declaration.as_ref()?;
         if !ast::is_parameter_declaration(value_declaration) {
             return None;
@@ -453,7 +453,7 @@ impl<'a> InlayHintState<'a> {
     pub fn type_to_inlay_hint_parts(
         &mut self,
         t: &Arc<tsox_checker::checker::Type>,
-    ) -> StringOrInlayHintLabelParts {
+    ) -> StringOrInlayHintLabelParts { ::tsox_core::fntrace::enter("type_to_inlay_hint_parts"); 
         let flags = node_builder_flags_ignore_errors()
             | node_builder_flags_allow_unique_es_symbol_type()
             | node_builder_flags_use_alias_defined_outside_current_scope();
@@ -483,7 +483,7 @@ impl<'a> InlayHintState<'a> {
     pub fn type_predicate_to_inlay_hint_parts(
         &mut self,
         type_predicate: &tsox_checker::checker::TypePredicate,
-    ) -> StringOrInlayHintLabelParts {
+    ) -> StringOrInlayHintLabelParts { ::tsox_core::fntrace::enter("type_predicate_to_inlay_hint_parts"); 
         let flags = node_builder_flags_ignore_errors()
             | node_builder_flags_allow_unique_es_symbol_type()
             | node_builder_flags_use_alias_defined_outside_current_scope();
@@ -510,7 +510,7 @@ impl<'a> InlayHintState<'a> {
         }
     }
 
-    pub fn add_type_hints(&mut self, mut hint: StringOrInlayHintLabelParts, position: usize) {
+    pub fn add_type_hints(&mut self, mut hint: StringOrInlayHintLabelParts, position: usize) { ::tsox_core::fntrace::enter("add_type_hints"); 
         let script = crate::mig::m5u_conv::SourceFileScriptView {
             file: Arc::clone(&self.file),
         };
@@ -536,7 +536,7 @@ impl<'a> InlayHintState<'a> {
         });
     }
 
-    pub fn add_enum_member_value_hints(&mut self, text: String, position: usize) {
+    pub fn add_enum_member_value_hints(&mut self, text: String, position: usize) { ::tsox_core::fntrace::enter("add_enum_member_value_hints"); 
         let script = crate::mig::m5u_conv::SourceFileScriptView {
             file: Arc::clone(&self.file),
         };
@@ -566,7 +566,7 @@ impl<'a> InlayHintState<'a> {
         parameter: &Arc<Node>,
         position: usize,
         is_first_variadic_argument: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_parameter_hints"); 
         let script = crate::mig::m5u_conv::SourceFileScriptView {
             file: Arc::clone(&self.file),
         };
@@ -599,10 +599,10 @@ impl<'a> InlayHintState<'a> {
         &self,
         node: &Arc<Node>,
         id_to_symbol: &mut HashMap<u64, Arc<Symbol>>,
-    ) -> Vec<InlayHintLabelPart> {
+    ) -> Vec<InlayHintLabelPart> { ::tsox_core::fntrace::enter("get_inlay_hint_label_parts"); 
         let mut parts: Vec<InlayHintLabelPart> = Vec::new();
 
-        fn push_part(parts: &mut Vec<InlayHintLabelPart>, value: &str) {
+        fn push_part(parts: &mut Vec<InlayHintLabelPart>, value: &str) { ::tsox_core::fntrace::enter("push_part"); 
             parts.push(InlayHintLabelPart { value: value.to_string(), location: None });
         }
 
@@ -612,7 +612,7 @@ impl<'a> InlayHintState<'a> {
             nodes: &[Arc<Node>],
             separator: &str,
             id_to_symbol: &mut HashMap<u64, Arc<Symbol>>,
-        ) {
+        ) { ::tsox_core::fntrace::enter("visit_display_part_list"); 
             for (i, n) in nodes.iter().enumerate() {
                 if i > 0 {
                     push_part(parts, separator);
@@ -626,7 +626,7 @@ impl<'a> InlayHintState<'a> {
             parts: &mut Vec<InlayHintLabelPart>,
             node: &Arc<Node>,
             id_to_symbol: &mut HashMap<u64, Arc<Symbol>>,
-        ) {
+        ) { ::tsox_core::fntrace::enter("visit_parameters_and_type_parameters"); 
             let type_parameters = node_type_parameters(node);
             if !type_parameters.is_empty() {
                 push_part(parts, "<");
@@ -643,7 +643,7 @@ impl<'a> InlayHintState<'a> {
             parts: &mut Vec<InlayHintLabelPart>,
             node: &Arc<Node>,
             id_to_symbol: &mut HashMap<u64, Arc<Symbol>>,
-        ) {
+        ) { ::tsox_core::fntrace::enter("visit_for_display_parts"); 
             let token_string = tsox_frontend::scanner::token_to_string(node.kind);
             if !token_string.is_empty() {
                 push_part(parts, token_string);
@@ -1089,7 +1089,7 @@ impl<'a> InlayHintState<'a> {
         parts
     }
 
-    pub fn get_node_display_part(&self, text: &str, node: &Arc<Node>) -> InlayHintLabelPart {
+    pub fn get_node_display_part(&self, text: &str, node: &Arc<Node>) -> InlayHintLabelPart { ::tsox_core::fntrace::enter("get_node_display_part"); 
         let part = InlayHintLabelPart { value: text.to_string(), location: None };
         let Some(source_file_node) = ast::get_source_file_of_node(node) else {
             return part;
@@ -1123,7 +1123,7 @@ impl<'a> InlayHintState<'a> {
         part
     }
 
-    pub fn get_literal_text(&self, node: &Arc<Node>) -> String {
+    pub fn get_literal_text(&self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_literal_text"); 
         match node.kind {
             SyntaxKind::StringLiteral => {
                 if self.quote_preference == QuotePreference::Single {
@@ -1159,7 +1159,7 @@ impl<'a> InlayHintState<'a> {
         &mut self,
         signature: &tsox_checker::checker::Signature,
         pos: usize,
-    ) -> Option<ParameterInfo> {
+    ) -> Option<ParameterInfo> { ::tsox_core::fntrace::enter("get_parameter_identifier_info_at_position"); 
         let parameters = signature.parameters();
         let param_count =
             parameters.len() - if signature_has_rest_parameter(signature) { 1 } else { 0 };
@@ -1229,7 +1229,7 @@ impl<'a> InlayHintState<'a> {
         &self,
         node: &Arc<Node>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("leading_comments_contains_parameter_name"); 
         if !tsox_frontend::scanner::mig::m3i::is_identifier_text(
             name,
             self.file.language_variant,
@@ -1250,7 +1250,7 @@ impl<'a> InlayHintState<'a> {
         false
     }
 
-    pub fn get_type_annotation_position(&self, decl: &Arc<Node>) -> usize {
+    pub fn get_type_annotation_position(&self, decl: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("get_type_annotation_position"); 
         if let Some(close_paren_token) =
             astnav::find_child_of_kind(decl, SyntaxKind::CloseParenToken)
         {
@@ -1263,7 +1263,7 @@ impl<'a> InlayHintState<'a> {
 pub const INLAY_HINT_KIND_TYPE: i32 = 1;
 pub const INLAY_HINT_KIND_PARAMETER: i32 = 2;
 
-pub fn node_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_arguments"); 
     match &node.data {
         NodeData::CallExpression(d) => d.arguments.nodes.clone(),
         NodeData::NewExpression(d) => d
@@ -1275,7 +1275,7 @@ pub fn node_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-pub fn node_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_parameters"); 
     match &node.data {
         NodeData::IndexSignatureDeclaration(d) => d.parameters.nodes.clone(),
         _ => ast::mig::m3f_2::node_parameters(node)
@@ -1284,13 +1284,13 @@ pub fn node_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-pub fn node_type_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_type_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_type_parameters"); 
     ast::mig::m3f_2::node_type_parameters(node)
         .map(|type_parameters| type_parameters.nodes.clone())
         .unwrap_or_default()
 }
 
-pub fn node_type_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_type_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_type_arguments"); 
     let type_arguments = match &node.data {
         NodeData::TypeReferenceNode(d) => d.type_arguments.as_ref(),
         NodeData::TypeQueryNode(d) => d.type_arguments.as_ref(),
@@ -1302,7 +1302,7 @@ pub fn node_type_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> {
         .unwrap_or_default()
 }
 
-pub fn node_members(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_members(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_members"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => d.members.nodes.clone(),
         NodeData::ClassExpression(d) => d.members.nodes.clone(),
@@ -1318,7 +1318,7 @@ pub fn node_members(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-pub fn node_elements(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_elements(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_elements"); 
     match &node.data {
         NodeData::TupleTypeNode(d) => d.elements.nodes.clone(),
         NodeData::BindingPattern(d) => d.elements.nodes.clone(),
@@ -1326,11 +1326,11 @@ pub fn node_elements(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-pub fn node_parameter_list(node: &Arc<Node>) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+pub fn node_parameter_list(node: &Arc<Node>) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("node_parameter_list"); 
     ast::mig::m3f_2::node_parameters(node).cloned()
 }
 
-pub fn node_postfix_token(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn node_postfix_token(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_postfix_token"); 
     match &node.data {
         NodeData::PropertySignatureDeclaration(d) => d.postfix_token.clone(),
         NodeData::MethodSignatureDeclaration(d) => d.postfix_token.clone(),
@@ -1339,11 +1339,11 @@ pub fn node_postfix_token(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn node_question_token_of(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn node_question_token_of(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_question_token_of"); 
     ast::mig::m3f_2::question_token(node).cloned()
 }
 
-pub fn node_raw_text(node: &Arc<Node>) -> &str {
+pub fn node_raw_text(node: &Arc<Node>) -> &str { ::tsox_core::fntrace::enter("node_raw_text"); 
     match &node.data {
         NodeData::TemplateHead(d) => &d.raw_text,
         NodeData::TemplateMiddle(d) => &d.raw_text,
@@ -1352,98 +1352,98 @@ pub fn node_raw_text(node: &Arc<Node>) -> &str {
     }
 }
 
-pub fn prefix_unary_operand(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn prefix_unary_operand(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("prefix_unary_operand"); 
     match &node.data {
         NodeData::PrefixUnaryExpression(d) => Some(Arc::clone(&d.operand)),
         _ => None,
     }
 }
 
-pub fn prefix_unary_operator(node: &Arc<Node>) -> SyntaxKind {
+pub fn prefix_unary_operator(node: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("prefix_unary_operator"); 
     match &node.data {
         NodeData::PrefixUnaryExpression(d) => d.operator,
         _ => SyntaxKind::EndOfFile,
     }
 }
 
-pub fn qualified_name_left(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn qualified_name_left(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("qualified_name_left"); 
     match &node.data {
         NodeData::QualifiedName(d) => Some(Arc::clone(&d.left)),
         _ => None,
     }
 }
 
-pub fn qualified_name_right(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn qualified_name_right(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("qualified_name_right"); 
     match &node.data {
         NodeData::QualifiedName(d) => Some(Arc::clone(&d.right)),
         _ => None,
     }
 }
 
-pub fn type_predicate_parameter_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn type_predicate_parameter_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_predicate_parameter_name"); 
     match &node.data {
         NodeData::TypePredicateNode(d) => Some(Arc::clone(&d.parameter_name)),
         _ => None,
     }
 }
 
-pub fn type_predicate_asserts_modifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn type_predicate_asserts_modifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_predicate_asserts_modifier"); 
     match &node.data {
         NodeData::TypePredicateNode(d) => d.asserts_modifier.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn type_reference_type_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn type_reference_type_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_reference_type_name"); 
     match &node.data {
         NodeData::TypeReferenceNode(d) => Some(Arc::clone(&d.type_name)),
         _ => None,
     }
 }
 
-pub fn type_parameter_constraint(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn type_parameter_constraint(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_parameter_constraint"); 
     match &node.data {
         NodeData::TypeParameterDeclaration(d) => d.constraint.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn type_parameter_default_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn type_parameter_default_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_parameter_default_type"); 
     match &node.data {
         NodeData::TypeParameterDeclaration(d) => d.default_type.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn parameter_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn parameter_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parameter_dot_dot_dot_token"); 
     match &node.data {
         NodeData::ParameterDeclaration(d) => d.dot_dot_dot_token.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn type_query_expr_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn type_query_expr_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_query_expr_name"); 
     match &node.data {
         NodeData::TypeQueryNode(d) => Some(Arc::clone(&d.expr_name)),
         _ => None,
     }
 }
 
-pub fn array_type_element_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn array_type_element_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("array_type_element_type"); 
     match &node.data {
         NodeData::ArrayTypeNode(d) => Some(Arc::clone(&d.element_type)),
         _ => None,
     }
 }
 
-pub fn named_tuple_member_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn named_tuple_member_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("named_tuple_member_dot_dot_dot_token"); 
     match &node.data {
         NodeData::NamedTupleMember(d) => d.dot_dot_dot_token.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn union_or_intersection_type_nodes(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn union_or_intersection_type_nodes(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("union_or_intersection_type_nodes"); 
     match &node.data {
         NodeData::UnionTypeNode(d) => d.types.nodes.clone(),
         NodeData::IntersectionTypeNode(d) => d.types.nodes.clone(),
@@ -1451,203 +1451,203 @@ pub fn union_or_intersection_type_nodes(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-pub fn conditional_type_check_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn conditional_type_check_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("conditional_type_check_type"); 
     match &node.data {
         NodeData::ConditionalTypeNode(d) => Some(Arc::clone(&d.check_type)),
         _ => None,
     }
 }
 
-pub fn conditional_type_extends_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn conditional_type_extends_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("conditional_type_extends_type"); 
     match &node.data {
         NodeData::ConditionalTypeNode(d) => Some(Arc::clone(&d.extends_type)),
         _ => None,
     }
 }
 
-pub fn conditional_type_true_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn conditional_type_true_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("conditional_type_true_type"); 
     match &node.data {
         NodeData::ConditionalTypeNode(d) => Some(Arc::clone(&d.true_type)),
         _ => None,
     }
 }
 
-pub fn conditional_type_false_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn conditional_type_false_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("conditional_type_false_type"); 
     match &node.data {
         NodeData::ConditionalTypeNode(d) => Some(Arc::clone(&d.false_type)),
         _ => None,
     }
 }
 
-pub fn infer_type_type_parameter(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn infer_type_type_parameter(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("infer_type_type_parameter"); 
     match &node.data {
         NodeData::InferTypeNode(d) => Some(Arc::clone(&d.type_parameter)),
         _ => None,
     }
 }
 
-pub fn type_operator_operator(node: &Arc<Node>) -> SyntaxKind {
+pub fn type_operator_operator(node: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("type_operator_operator"); 
     match &node.data {
         NodeData::TypeOperatorNode(d) => d.operator,
         _ => SyntaxKind::EndOfFile,
     }
 }
 
-pub fn indexed_access_object_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn indexed_access_object_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("indexed_access_object_type"); 
     match &node.data {
         NodeData::IndexedAccessTypeNode(d) => Some(Arc::clone(&d.object_type)),
         _ => None,
     }
 }
 
-pub fn indexed_access_index_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn indexed_access_index_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("indexed_access_index_type"); 
     match &node.data {
         NodeData::IndexedAccessTypeNode(d) => Some(Arc::clone(&d.index_type)),
         _ => None,
     }
 }
 
-pub fn mapped_type_readonly_token(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn mapped_type_readonly_token(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("mapped_type_readonly_token"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => d.readonly_token.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn mapped_type_type_parameter(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn mapped_type_type_parameter(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("mapped_type_type_parameter"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => Some(Arc::clone(&d.type_parameter)),
         _ => None,
     }
 }
 
-pub fn mapped_type_name_type(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn mapped_type_name_type(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("mapped_type_name_type"); 
     match &node.data {
         NodeData::MappedTypeNode(d) => d.name_type.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn literal_type_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn literal_type_literal(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("literal_type_literal"); 
     match &node.data {
         NodeData::LiteralTypeNode(d) => Some(Arc::clone(&d.literal)),
         _ => None,
     }
 }
 
-pub fn template_literal_type_head(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn template_literal_type_head(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("template_literal_type_head"); 
     match &node.data {
         NodeData::TemplateLiteralTypeNode(d) => Some(Arc::clone(&d.head)),
         _ => None,
     }
 }
 
-pub fn template_literal_type_spans(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn template_literal_type_spans(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("template_literal_type_spans"); 
     match &node.data {
         NodeData::TemplateLiteralTypeNode(d) => d.template_spans.nodes.clone(),
         _ => Vec::new(),
     }
 }
 
-pub fn template_literal_type_span_literal(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn template_literal_type_span_literal(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("template_literal_type_span_literal"); 
     match &node.data {
         NodeData::TemplateLiteralTypeSpan(d) => Some(Arc::clone(&d.literal)),
         _ => None,
     }
 }
 
-pub fn element_access_argument_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn element_access_argument_expression(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("element_access_argument_expression"); 
     match &node.data {
         NodeData::ElementAccessExpression(d) => Some(Arc::clone(&d.argument_expression)),
         _ => None,
     }
 }
 
-pub fn import_type_is_type_of(node: &Arc<Node>) -> bool {
+pub fn import_type_is_type_of(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("import_type_is_type_of"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => d.is_type_of,
         _ => false,
     }
 }
 
-pub fn import_type_argument(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn import_type_argument(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_type_argument"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => Some(Arc::clone(&d.argument)),
         _ => None,
     }
 }
 
-pub fn import_type_qualifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn import_type_qualifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_type_qualifier"); 
     match &node.data {
         NodeData::ImportTypeNode(d) => d.qualifier.as_ref().map(Arc::clone),
         _ => None,
     }
 }
 
-pub fn checker_element_flags_required() -> tsox_checker::checker::ElementFlags {
+pub fn checker_element_flags_required() -> tsox_checker::checker::ElementFlags { ::tsox_core::fntrace::enter("checker_element_flags_required"); 
     tsox_checker::checker::ElementFlags::Required
 }
 
-pub fn node_builder_flags_ignore_errors() -> tsox_checker::checker::symboltracker::NodeBuilderFlags {
+pub fn node_builder_flags_ignore_errors() -> tsox_checker::checker::symboltracker::NodeBuilderFlags { ::tsox_core::fntrace::enter("node_builder_flags_ignore_errors"); 
     tsox_checker::checker::symboltracker::NodeBuilderFlags::IGNORE_ERRORS
 }
 
 pub fn node_builder_flags_allow_unique_es_symbol_type(
-) -> tsox_checker::checker::symboltracker::NodeBuilderFlags {
+) -> tsox_checker::checker::symboltracker::NodeBuilderFlags { ::tsox_core::fntrace::enter("node_builder_flags_allow_unique_es_symbol_type"); 
     tsox_checker::checker::symboltracker::NodeBuilderFlags::AllowUniqueESSymbolType
 }
 
 pub fn node_builder_flags_use_alias_defined_outside_current_scope(
-) -> tsox_checker::checker::symboltracker::NodeBuilderFlags {
+) -> tsox_checker::checker::symboltracker::NodeBuilderFlags { ::tsox_core::fntrace::enter("node_builder_flags_use_alias_defined_outside_current_scope"); 
     tsox_checker::checker::symboltracker::NodeBuilderFlags::UseAliasDefinedOutsideCurrentScope
 }
 
-pub fn spanmap_feature_inlay_hints() -> u32 {
+pub fn spanmap_feature_inlay_hints() -> u32 { ::tsox_core::fntrace::enter("spanmap_feature_inlay_hints"); 
     crate::mig::m5u_conv::SPANMAP_FEATURE_INLAY_HINTS
 }
 
-pub fn fidelity_is_none(fidelity: &u32) -> bool {
+pub fn fidelity_is_none(fidelity: &u32) -> bool { ::tsox_core::fntrace::enter("fidelity_is_none"); 
     *fidelity == crate::mig::m5u_conv::SPANMAP_FIDELITY_NONE
 }
 
-pub fn fidelity_is_single_segment(fidelity: &u32) -> bool {
+pub fn fidelity_is_single_segment(fidelity: &u32) -> bool { ::tsox_core::fntrace::enter("fidelity_is_single_segment"); 
     *fidelity == crate::mig::m5u_conv::SPANMAP_FIDELITY_SINGLE_SEGMENT
 }
 
 pub fn printer_escape_string(
     text: &str,
     quote: tsox_frontend::format::mig::m4t_2::QuoteChar,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("printer_escape_string"); 
     tsox_frontend::format::mig::m4t_2::escape_string(text, quote)
 }
 
-pub fn printer_quote_char_single_quote() -> tsox_frontend::format::mig::m4t_2::QuoteChar {
+pub fn printer_quote_char_single_quote() -> tsox_frontend::format::mig::m4t_2::QuoteChar { ::tsox_core::fntrace::enter("printer_quote_char_single_quote"); 
     tsox_frontend::format::mig::m4t_2::QuoteChar::SingleQuote
 }
 
-pub fn printer_quote_char_double_quote() -> tsox_frontend::format::mig::m4t_2::QuoteChar {
+pub fn printer_quote_char_double_quote() -> tsox_frontend::format::mig::m4t_2::QuoteChar { ::tsox_core::fntrace::enter("printer_quote_char_double_quote"); 
     tsox_frontend::format::mig::m4t_2::QuoteChar::DoubleQuote
 }
 
-pub fn printer_quote_char_backtick() -> tsox_frontend::format::mig::m4t_2::QuoteChar {
+pub fn printer_quote_char_backtick() -> tsox_frontend::format::mig::m4t_2::QuoteChar { ::tsox_core::fntrace::enter("printer_quote_char_backtick"); 
     tsox_frontend::format::mig::m4t_2::QuoteChar::Backtick
 }
 
-pub fn evaluator_any_to_string(value: &str) -> String {
+pub fn evaluator_any_to_string(value: &str) -> String { ::tsox_core::fntrace::enter("evaluator_any_to_string"); 
     value.to_string()
 }
 
-pub fn equate_string_case_insensitive(a: &str, b: &str) -> bool {
+pub fn equate_string_case_insensitive(a: &str, b: &str) -> bool { ::tsox_core::fntrace::enter("equate_string_case_insensitive"); 
     a.eq_ignore_ascii_case(b)
 }
 
-pub fn signature_has_rest_parameter(signature: &tsox_checker::checker::Signature) -> bool {
+pub fn signature_has_rest_parameter(signature: &tsox_checker::checker::Signature) -> bool { ::tsox_core::fntrace::enter("signature_has_rest_parameter"); 
     signature.has_rest_parameter()
 }
 
 pub fn get_leading_comment_ranges_of_node(
     node: &Arc<Node>,
     file: &Arc<SourceFile>,
-) -> Vec<tsox_frontend::scanner::CommentRange> {
+) -> Vec<tsox_frontend::scanner::CommentRange> { ::tsox_core::fntrace::enter("get_leading_comment_ranges_of_node"); 
     crate::ls::utilities::get_leading_comment_ranges_of_node(node, file)
 }

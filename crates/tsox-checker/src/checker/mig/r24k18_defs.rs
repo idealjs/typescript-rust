@@ -5,7 +5,7 @@ use crate::checker::types_impl_chunk_3::Signature;
 use std::sync::{Arc, OnceLock};
 use tsox_frontend::ast::{Node, SyntaxKind};
 
-fn clone_resolved_return_type(l: &OnceLock<Arc<crate::checker::types::Type>>) -> OnceLock<Arc<crate::checker::types::Type>> {
+fn clone_resolved_return_type(l: &OnceLock<Arc<crate::checker::types::Type>>) -> OnceLock<Arc<crate::checker::types::Type>> { ::tsox_core::fntrace::enter("clone_resolved_return_type"); 
     let out = OnceLock::new();
     if let Some(v) = l.get() {
         let _ = out.set(Arc::clone(v));
@@ -14,7 +14,7 @@ fn clone_resolved_return_type(l: &OnceLock<Arc<crate::checker::types::Type>>) ->
 }
 
 impl Clone for Signature {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         Self {
             id: self.id,
             flags: self.flags,
@@ -35,7 +35,7 @@ impl Clone for Signature {
 }
 
 impl Clone for CallState {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         Self {
             node: self.node.clone(),
             args: self.args.clone(),
@@ -54,8 +54,8 @@ impl Clone for CallState {
 pub(crate) fn for_each_yield_expression(
     body: Option<&Arc<Node>>,
     visitor: &mut impl FnMut(&Arc<Node>) -> bool,
-) -> bool {
-    fn traverse(node: &Arc<Node>, visitor: &mut impl FnMut(&Arc<Node>) -> bool) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("for_each_yield_expression"); 
+    fn traverse(node: &Arc<Node>, visitor: &mut impl FnMut(&Arc<Node>) -> bool) -> bool { ::tsox_core::fntrace::enter("traverse"); 
         match node.kind {
             SyntaxKind::YieldExpression => {
                 if visitor(node) {

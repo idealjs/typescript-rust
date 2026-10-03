@@ -9,11 +9,11 @@ use crate::checker::mig::m2g::r21k9_defs as tsox_printer;
 use std::sync::Arc;
 use tsox_frontend::ast::{get_source_file_of_node, Node, Symbol, SymbolFlags, SyntaxKind};
 
-pub fn create_printer_with_defaults(emit_context: &EmitContext) -> Printer {
+pub fn create_printer_with_defaults(emit_context: &EmitContext) -> Printer { ::tsox_core::fntrace::enter("create_printer_with_defaults"); 
     tsox_printer::new_printer(PrinterOptions::default(), PrintHandlers::default(), emit_context)
 }
 
-pub fn create_printer_with_remove_comments(emit_context: &EmitContext) -> Printer {
+pub fn create_printer_with_remove_comments(emit_context: &EmitContext) -> Printer { ::tsox_core::fntrace::enter("create_printer_with_remove_comments"); 
     tsox_printer::new_printer(
         PrinterOptions {
             remove_comments: true,
@@ -26,7 +26,7 @@ pub fn create_printer_with_remove_comments(emit_context: &EmitContext) -> Printe
 
 pub fn create_printer_with_remove_comments_omit_trailing_semicolon(
     emit_context: &EmitContext,
-) -> Printer {
+) -> Printer { ::tsox_core::fntrace::enter("create_printer_with_remove_comments_omit_trailing_semicolon"); 
     tsox_printer::new_printer(
         PrinterOptions {
             remove_comments: true,
@@ -40,7 +40,7 @@ pub fn create_printer_with_remove_comments_omit_trailing_semicolon(
 
 pub fn create_printer_with_remove_comments_omit_trailing_semicolon_never_ascii_escape(
     emit_context: &EmitContext,
-) -> Printer {
+) -> Printer { ::tsox_core::fntrace::enter("create_printer_with_remove_comments_omit_trailing_semicolon_never_ascii_escape"); 
     tsox_printer::new_printer(
         PrinterOptions {
             remove_comments: true,
@@ -55,7 +55,7 @@ pub fn create_printer_with_remove_comments_omit_trailing_semicolon_never_ascii_e
 
 pub fn create_printer_with_remove_comments_never_ascii_escape(
     emit_context: &EmitContext,
-) -> Printer {
+) -> Printer { ::tsox_core::fntrace::enter("create_printer_with_remove_comments_never_ascii_escape"); 
     tsox_printer::new_printer(
         PrinterOptions {
             remove_comments: true,
@@ -67,7 +67,7 @@ pub fn create_printer_with_remove_comments_never_ascii_escape(
     )
 }
 
-pub fn to_node_builder_flags(flags: TypeFormatFlags) -> NodeBuilderFlags {
+pub fn to_node_builder_flags(flags: TypeFormatFlags) -> NodeBuilderFlags { ::tsox_core::fntrace::enter("to_node_builder_flags"); 
     NodeBuilderFlags::from_bits_truncate(flags.bits() & TYPE_FORMAT_FLAGS_NODE_BUILDER_FLAGS_MASK)
 }
 
@@ -77,7 +77,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
         vc: Option<&mut VerbosityContext>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("expand_symbol_for_hover"); 
         let (mut node_builder, release) = self.get_node_builder();
         let old_verbosity = node_builder.verbosity.take();
         node_builder.verbosity = vc.as_deref().map(|vc| VerbosityContext {
@@ -120,7 +120,7 @@ impl Checker {
         t: &Arc<Type>,
         enclosing_declaration: Option<&Arc<Node>>,
         vc: Option<&mut VerbosityContext>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("type_parameter_to_string_ex"); 
         let (mut node_builder, release) = self.get_node_builder();
         let old_verbosity = node_builder.verbosity.take();
         node_builder.verbosity = vc.as_deref().map(|vc| VerbosityContext {
@@ -160,7 +160,7 @@ impl Checker {
         kind: SyntaxKind,
         enclosing_declaration: Option<&Arc<Node>>,
         flags: NodeBuilderFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("signature_to_signature_declaration"); 
         let (mut node_builder, release) = self.get_node_builder();
         let result = node_builder
             .signature_to_signature_declaration_ex(
@@ -182,7 +182,7 @@ impl Checker {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         id_to_symbol: IdToSymbolMap,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_to_type_node_ex"); 
         let mut node_builder = self.get_node_builder_ex(id_to_symbol);
         node_builder
             .type_to_type_node_ex(t, enclosing_declaration, flags, internal_flags)
@@ -195,7 +195,7 @@ impl Checker {
         enclosing_declaration: Option<&Arc<Node>>,
         flags: NodeBuilderFlags,
         id_to_symbol: IdToSymbolMap,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_predicate_to_type_predicate_node"); 
         let mut node_builder = self.get_node_builder_ex(id_to_symbol);
         node_builder
             .type_predicate_to_type_predicate_node_ex(
@@ -207,7 +207,7 @@ impl Checker {
             .expect("type predicate node")
     }
 
-    pub fn value_to_string(&mut self, value: &PseudoLiteralValue) -> String {
+    pub fn value_to_string(&mut self, value: &PseudoLiteralValue) -> String { ::tsox_core::fntrace::enter("value_to_string"); 
         value_to_string(value)
     }
 
@@ -217,7 +217,7 @@ impl Checker {
         enclosing_declaration: Option<&Arc<Node>>,
         flags: TypeFormatFlags,
         vc: Option<&mut VerbosityContext>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("signature_to_string_ex"); 
         let is_constructor = signature.flags.contains(SignatureFlags::Construct)
             && !flags.contains(TypeFormatFlags::WriteCallStyleSignature);
         let sig_output = if flags.contains(TypeFormatFlags::WriteArrowStyleSignature) {
@@ -280,7 +280,7 @@ impl Checker {
         type_predicate: &TypePredicate,
         enclosing_declaration: Option<&Arc<Node>>,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("type_predicate_to_string_ex"); 
         let mut writer = single_line_string_writer();
         let (mut node_builder, release) = self.get_node_builder();
         let combined_flags = to_node_builder_flags(flags)
@@ -305,7 +305,7 @@ impl Checker {
         &mut self,
         types: &[Arc<Type>],
         expanding_enum: bool,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("format_union_types"); 
         let mut result: Vec<Arc<Type>> = Vec::new();
         let mut flags = TypeFlags::empty();
         let mut i = 0;

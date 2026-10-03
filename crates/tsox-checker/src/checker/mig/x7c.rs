@@ -21,7 +21,7 @@ impl Relater {
         report_errors: bool,
         intersection_state: IntersectionState,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("is_property_symbol_type_related"); 
         let target_is_optional =
             self.strict_null_checks && target_prop.check_flags.contains(CheckFlags::ReadPartial | CheckFlags::WritePartial);
         let target_type = self.get_non_missing_type_of_symbol(target_prop);
@@ -53,7 +53,7 @@ impl Relater {
         report_errors: bool,
         head_message: Option<&tsox_core::diagnostics::Message>,
         intersection_state: IntersectionState,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("is_related_to_ex"); 
         let _ = (recursion_flags, report_errors, head_message, intersection_state);
         if self.is_type_related_to(source, target, RelationKind::Assignable) {
             Ternary::True
@@ -69,7 +69,7 @@ impl Checker {
         t: &Arc<Type>,
         prop_name: &str,
         assume_true: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_presence_possible"); 
         if let Some(prop) = self.get_property_of_type(t, prop_name) {
             return prop.flags.contains(SymbolFlags::Optional)
                 || prop.check_flags.contains(CheckFlags::ReadPartial | CheckFlags::WritePartial)
@@ -82,7 +82,7 @@ impl Checker {
 impl<'a> NodeBuilderImpl<'a> {
     // 单线程 checker 内经共享引用回写缓存，与 BUILDER_CHECKER 通道/w4a checker_ptr 同款约定
     #[allow(invalid_reference_casting)]
-    pub fn is_trivially_serializable_computed_name(&self, e: Option<&Arc<Node>>) -> bool {
+    pub fn is_trivially_serializable_computed_name(&self, e: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_trivially_serializable_computed_name"); 
         let Some(e) = e else {
             return false;
         };

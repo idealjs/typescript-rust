@@ -1,6 +1,6 @@
 use crate::semver::version_range::{ComparatorOperator, VersionComparator};
 
-pub(crate) fn format_disjunction(sb: &mut String, alternatives: &[Vec<VersionComparator>]) {
+pub(crate) fn format_disjunction(sb: &mut String, alternatives: &[Vec<VersionComparator>]) { crate::fntrace::enter("format_disjunction"); 
     let orig_len = sb.len();
     for (i, alternative) in alternatives.iter().enumerate() {
         if i > 0 {
@@ -13,7 +13,7 @@ pub(crate) fn format_disjunction(sb: &mut String, alternatives: &[Vec<VersionCom
     }
 }
 
-pub(crate) fn format_alternative(sb: &mut String, comparators: &[VersionComparator]) {
+pub(crate) fn format_alternative(sb: &mut String, comparators: &[VersionComparator]) { crate::fntrace::enter("format_alternative"); 
     for (i, comparator) in comparators.iter().enumerate() {
         if i > 0 {
             sb.push(' ');
@@ -22,7 +22,7 @@ pub(crate) fn format_alternative(sb: &mut String, comparators: &[VersionComparat
     }
 }
 
-pub(crate) fn format_comparator(sb: &mut String, comparator: &VersionComparator) {
+pub(crate) fn format_comparator(sb: &mut String, comparator: &VersionComparator) { crate::fntrace::enter("format_comparator"); 
     let operator = match comparator.operator {
         ComparatorOperator::LessThan => "<",
         ComparatorOperator::LessThanEqual => "<=",

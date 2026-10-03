@@ -16,7 +16,7 @@ pub struct SourceFileMetaData {
     pub implied_node_format: ResolutionMode,
 }
 
-pub fn get_class_like_declaration_of_symbol(symbol: &Symbol) -> Option<Arc<Node>> {
+pub fn get_class_like_declaration_of_symbol(symbol: &Symbol) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_class_like_declaration_of_symbol"); 
     symbol
         .declarations
         .iter()
@@ -24,12 +24,12 @@ pub fn get_class_like_declaration_of_symbol(symbol: &Symbol) -> Option<Arc<Node>
         .cloned()
 }
 
-pub fn get_containing_function(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_containing_function(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_containing_function"); 
     let parent = node.parent()?;
     find_ancestor(&parent, is_function_like)
 }
 
-pub fn get_elements_of_binding_or_assignment_pattern(name: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn get_elements_of_binding_or_assignment_pattern(name: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_elements_of_binding_or_assignment_pattern"); 
     match name.kind {
         SyntaxKind::ObjectBindingPattern
         | SyntaxKind::ArrayBindingPattern
@@ -43,7 +43,7 @@ pub fn get_emit_module_format_of_file_worker(
     file_name: &str,
     options: &CompilerOptions,
     source_file_meta_data: SourceFileMetaData,
-) -> ModuleKind {
+) -> ModuleKind { ::tsox_core::fntrace::enter("get_emit_module_format_of_file_worker"); 
     let result = get_implied_node_format_for_emit_worker(
         file_name,
         options.get_emit_module_kind(),
@@ -55,7 +55,7 @@ pub fn get_emit_module_format_of_file_worker(
     options.get_emit_module_kind()
 }
 
-pub fn get_external_module_import_equals_declaration_expression(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_external_module_import_equals_declaration_expression(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_external_module_import_equals_declaration_expression"); 
     match &node.data {
         NodeData::ImportEqualsDeclaration(d) => match &d.module_reference.data {
             NodeData::ExternalModuleReference(e) => e.expression.clone(),
@@ -65,7 +65,7 @@ pub fn get_external_module_import_equals_declaration_expression(node: &Arc<Node>
     }
 }
 
-pub fn get_first_constructor_with_body(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_first_constructor_with_body(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_first_constructor_with_body"); 
     for member in crate::ast::mig::m3b::members(node) {
         if is_constructor_declaration(member) {
             if let NodeData::ConstructorDeclaration(d) = &member.data {
@@ -78,7 +78,7 @@ pub fn get_first_constructor_with_body(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub fn get_host_signature_from_jsdoc(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_host_signature_from_jsdoc(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_host_signature_from_jsdoc"); 
     let host = get_jsdoc_host(node)?;
     if is_property_signature_declaration(&host) {
         if let Some(type_node) = host.type_node() {
@@ -97,7 +97,7 @@ pub fn get_implied_node_format_for_emit_worker(
     file_name: &str,
     emit_module_kind: ModuleKind,
     source_file_meta_data: SourceFileMetaData,
-) -> ResolutionMode {
+) -> ResolutionMode { ::tsox_core::fntrace::enter("get_implied_node_format_for_emit_worker"); 
     if ModuleKind::Node16 <= emit_module_kind && emit_module_kind <= ModuleKind::NodeNext {
         return source_file_meta_data.implied_node_format;
     }
@@ -122,7 +122,7 @@ pub fn get_implied_node_format_for_emit_worker(
     ResolutionMode::None
 }
 
-pub fn get_implied_node_format_for_file(path: &str, package_json_type: &str) -> ModuleKind {
+pub fn get_implied_node_format_for_file(path: &str, package_json_type: &str) -> ModuleKind { ::tsox_core::fntrace::enter("get_implied_node_format_for_file"); 
     let mut implied_node_format = ResolutionMode::None;
     if file_extension_is_one_of(
         path,
@@ -162,7 +162,7 @@ pub fn get_implied_node_format_for_file(path: &str, package_json_type: &str) -> 
     implied_node_format
 }
 
-pub fn get_invoked_expression(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_invoked_expression(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_invoked_expression"); 
     match node.kind {
         SyntaxKind::TaggedTemplateExpression => {
             if let NodeData::TaggedTemplateExpression(d) = &node.data {
@@ -183,7 +183,7 @@ pub fn get_invoked_expression(node: &Arc<Node>) -> Arc<Node> {
     node.expression().cloned().unwrap_or_else(|| node.clone())
 }
 
-pub fn get_jsdoc_deprecated_tag(node: &Arc<Node>, source_file: &SourceFile) -> Option<Arc<Node>> {
+pub fn get_jsdoc_deprecated_tag(node: &Arc<Node>, source_file: &SourceFile) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_deprecated_tag"); 
     for jsdoc in node.jsdoc(source_file) {
         if let NodeData::JSDoc(d) = &jsdoc.data {
             if let Some(tags) = &d.tags {
@@ -198,12 +198,12 @@ pub fn get_jsdoc_deprecated_tag(node: &Arc<Node>, source_file: &SourceFile) -> O
     None
 }
 
-pub fn get_jsdoc_host(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_jsdoc_host(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_host"); 
     let js_doc = get_jsdoc_root(node)?;
     js_doc.parent()
 }
 
-pub fn get_jsdoc_root(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_jsdoc_root(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_root"); 
     let parent = node.parent()?;
     find_ancestor(&parent, |n| n.kind == SyntaxKind::JSDoc)
 }
@@ -211,7 +211,7 @@ pub fn get_jsdoc_root(node: &Arc<Node>) -> Option<Arc<Node>> {
 pub fn get_jsx_implicit_import_base(
     compiler_options: &CompilerOptions,
     file: &SourceFile,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_jsx_implicit_import_base"); 
     let jsx_import_source_pragma =
         crate::ast::mig::m3f::get_pragma_from_source_file(Some(file), "jsximportsource");
     let jsx_runtime_pragma =
@@ -238,7 +238,7 @@ pub fn get_jsx_implicit_import_base(
     String::new()
 }
 
-pub fn get_jsx_runtime_import(base: &str, options: &CompilerOptions) -> String {
+pub fn get_jsx_runtime_import(base: &str, options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_jsx_runtime_import"); 
     if base.is_empty() {
         return base.to_string();
     }

@@ -10,11 +10,11 @@ use crate::ls::autoimport_export::ModuleID;
 
 pub fn try_get_module_id_and_file_name_of_module_symbol(
     _symbol: &Symbol,
-) -> Option<(ModuleID, String)> {
+) -> Option<(ModuleID, String)> { ::tsox_core::fntrace::enter("try_get_module_id_and_file_name_of_module_symbol"); 
     todo!("try_get_module_id_and_file_name_of_module_symbol requires ast helpers")
 }
 
-pub fn get_module_id_and_file_name_of_module_symbol(symbol: &Symbol) -> (ModuleID, String) {
+pub fn get_module_id_and_file_name_of_module_symbol(symbol: &Symbol) -> (ModuleID, String) { ::tsox_core::fntrace::enter("get_module_id_and_file_name_of_module_symbol"); 
     if !symbol.is_external_module() {
         panic!("symbol is not an external module");
     }
@@ -24,11 +24,11 @@ pub fn get_module_id_and_file_name_of_module_symbol(symbol: &Symbol) -> (ModuleI
     }
 }
 
-pub fn word_indices(s: &str) -> Vec<usize> {
+pub fn word_indices(s: &str) -> Vec<usize> { ::tsox_core::fntrace::enter("word_indices"); 
     crate::ls::autoimport_index::word_indices(s)
 }
 
-pub fn get_package_names_in_node_modules(node_modules_dir: &str, fs: &dyn FS) -> Set<String> {
+pub fn get_package_names_in_node_modules(node_modules_dir: &str, fs: &dyn FS) -> Set<String> { ::tsox_core::fntrace::enter("get_package_names_in_node_modules"); 
     let mut package_names = Set::new();
     if tsox_core::tspath::get_base_file_name(node_modules_dir) != "node_modules" {
         panic!("nodeModulesDir is not a node_modules directory");
@@ -64,18 +64,18 @@ pub fn get_package_names_in_node_modules(node_modules_dir: &str, fs: &dyn FS) ->
     package_names
 }
 
-pub fn get_default_like_export_name_from_declaration(_symbol: &Symbol) -> String {
+pub fn get_default_like_export_name_from_declaration(_symbol: &Symbol) -> String { ::tsox_core::fntrace::enter("get_default_like_export_name_from_declaration"); 
     todo!("getDefaultLikeExportNameFromDeclaration requires ast helpers")
 }
 
-pub fn get_resolved_package_names(_program: &Program) -> Set<String> {
+pub fn get_resolved_package_names(_program: &Program) -> Set<String> { ::tsox_core::fntrace::enter("get_resolved_package_names"); 
     todo!("getResolvedPackageNames requires program and checker methods")
 }
 
 pub fn add_project_reference_output_mappings(
     _program: &Program,
     _result: &mut HashMap<tsox_core::tspath::Path, String>,
-) {
+) { ::tsox_core::fntrace::enter("add_project_reference_output_mappings"); 
     todo!("addProjectReferenceOutputMappings requires project reference infrastructure")
 }
 
@@ -85,11 +85,11 @@ pub fn create_checker_pool(
     Box<dyn Fn() -> (Checker, Box<dyn FnOnce()>) + Send + Sync>,
     Box<dyn FnOnce() + Send>,
     Box<dyn Fn() -> i32 + Send + Sync>,
-) {
+) { ::tsox_core::fntrace::enter("create_checker_pool"); 
     todo!("createCheckerPool requires checker.NewChecker")
 }
 
-pub fn add_package_json_dependencies(_deps: &mut Set<String>) {
+pub fn add_package_json_dependencies(_deps: &mut Set<String>) { ::tsox_core::fntrace::enter("add_package_json_dependencies"); 
     todo!("addPackageJsonDependencies requires packagejson.Contents.RangeDependencies")
 }
 
@@ -99,7 +99,7 @@ pub fn get_package_realpath_funcs(
 ) -> (
     Box<dyn Fn(&str) -> String + Send + Sync>,
     Box<dyn Fn(&str) -> String + Send + Sync>,
-) {
+) { ::tsox_core::fntrace::enter("get_package_realpath_funcs"); 
     let real_package_dir = fs.realpath(package_dir);
     let is_symlinked = real_package_dir != package_dir;
 
@@ -156,10 +156,10 @@ pub struct ResolutionHost {
 }
 
 impl ResolutionHost {
-    pub fn get_current_directory(&self) -> &str {
+    pub fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
-    pub fn fs(&self) -> &dyn FS {
+    pub fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
 }

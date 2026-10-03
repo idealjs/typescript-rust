@@ -11,7 +11,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::{self, Node, Symbol, SyntaxKind};
 
 impl Checker {
-    pub fn get_intended_type_from_jsdoc_type_reference(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub fn get_intended_type_from_jsdoc_type_reference(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_intended_type_from_jsdoc_type_reference"); 
         if !node.flags.intersects(ast::NodeFlags::JSDoc) || !ast::is_type_reference_node(node) {
             return None;
         }
@@ -94,7 +94,7 @@ impl Checker {
         t: &Arc<Type>,
         name: &str,
         name_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_of_contextual_type_ex"); 
         map_type_ex_self(self, t, &mut |c, t| {
             if t.flags.intersects(TypeFlags::Intersection) {
                 let mut types: Vec<Arc<Type>> = vec![];
@@ -160,7 +160,7 @@ impl Checker {
         }, true)
     }
 
-    pub fn get_widened_type_for_assignment_declaration(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_widened_type_for_assignment_declaration(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_type_for_assignment_declaration"); 
         let mut t: Option<Arc<Type>> = None;
         let (kind, location) = self.is_constructor_declared_this_property(symbol);
         match kind {
@@ -233,7 +233,7 @@ impl Checker {
         is_readonly: bool,
         properties: &[Arc<Symbol>],
         key_type: &Arc<Type>,
-    ) -> IndexInfo {
+    ) -> IndexInfo { ::tsox_core::fntrace::enter("get_object_literal_index_info"); 
         let mut prop_types: Vec<Arc<Type>> = vec![];
         let mut components: Vec<Arc<Node>> = vec![];
         for prop in properties {

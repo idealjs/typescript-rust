@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn parse_identifier() {
+fn parse_identifier() { ::tsox_core::fntrace::enter("parse_identifier"); 
     let mut p = Parser::new("foo");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::Identifier);
@@ -10,7 +10,7 @@ fn parse_identifier() {
 }
 
 #[test]
-fn parse_numeric_literal() {
+fn parse_numeric_literal() { ::tsox_core::fntrace::enter("parse_numeric_literal"); 
     let mut p = Parser::new("42");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::NumericLiteral);
@@ -18,14 +18,14 @@ fn parse_numeric_literal() {
 }
 
 #[test]
-fn parse_string_literal() {
+fn parse_string_literal() { ::tsox_core::fntrace::enter("parse_string_literal"); 
     let mut p = Parser::new("\"hello\"");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::StringLiteral);
 }
 
 #[test]
-fn parse_private_identifier_class_field() {
+fn parse_private_identifier_class_field() { ::tsox_core::fntrace::enter("parse_private_identifier_class_field"); 
     let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
         "a.ts",
         "class C { #name: string; }".to_string(),
@@ -38,7 +38,7 @@ fn parse_private_identifier_class_field() {
 }
 
 #[test]
-fn parse_private_identifier_member_access() {
+fn parse_private_identifier_member_access() { ::tsox_core::fntrace::enter("parse_private_identifier_member_access"); 
     let mut p = Parser::new("this.#name");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::PropertyAccessExpression);
@@ -50,7 +50,7 @@ fn parse_private_identifier_member_access() {
 }
 
 #[test]
-fn parse_less_than_is_comparison_not_type_args() {
+fn parse_less_than_is_comparison_not_type_args() { ::tsox_core::fntrace::enter("parse_less_than_is_comparison_not_type_args"); 
     // Go parsePrimaryExpression：保留字不作表达式标识符，输入须为合法表达式
     let mut p = Parser::new("x < 10");
     let _ = p.parse_expression();
@@ -65,7 +65,7 @@ fn parse_less_than_is_comparison_not_type_args() {
 }
 
 #[test]
-fn parse_generic_call_keeps_type_arguments() {
+fn parse_generic_call_keeps_type_arguments() { ::tsox_core::fntrace::enter("parse_generic_call_keeps_type_arguments"); 
     let mut p = Parser::new("f<string>(x)");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::CallExpression);
@@ -77,7 +77,7 @@ fn parse_generic_call_keeps_type_arguments() {
 }
 
 #[test]
-fn parse_generic_arrow_function() {
+fn parse_generic_arrow_function() { ::tsox_core::fntrace::enter("parse_generic_arrow_function"); 
     let mut p = Parser::new("<T>(x: T): T => x");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::ArrowFunction);
@@ -89,7 +89,7 @@ fn parse_generic_arrow_function() {
 }
 
 #[test]
-fn parse_async_generic_arrow_function() {
+fn parse_async_generic_arrow_function() { ::tsox_core::fntrace::enter("parse_async_generic_arrow_function"); 
     let mut p = Parser::new("async <T>(value: T): T => value");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::ArrowFunction);
@@ -101,7 +101,7 @@ fn parse_async_generic_arrow_function() {
 }
 
 #[test]
-fn parse_generic_arrow_not_confused_with_comparison() {
+fn parse_generic_arrow_not_confused_with_comparison() { ::tsox_core::fntrace::enter("parse_generic_arrow_not_confused_with_comparison"); 
     let mut p = Parser::new("let r = a < b;");
     let _ = p.parse_expression();
     assert!(
@@ -115,7 +115,7 @@ fn parse_generic_arrow_not_confused_with_comparison() {
 }
 
 #[test]
-fn parse_for_loop_condition_less_than() {
+fn parse_for_loop_condition_less_than() { ::tsox_core::fntrace::enter("parse_for_loop_condition_less_than"); 
     let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
         "a.ts",
         "function f() { for (let i = 0; i < n; i++) { } }".to_string(),
@@ -131,7 +131,7 @@ fn parse_for_loop_condition_less_than() {
 }
 
 #[test]
-fn parse_multi_declarator_variable_list() {
+fn parse_multi_declarator_variable_list() { ::tsox_core::fntrace::enter("parse_multi_declarator_variable_list"); 
     let (_, diags) = Parser::parse_source_file_text_with_diagnostics(
         "a.ts",
         "let a = 1, b = 2, c = 3;\na; b; c;".to_string(),
@@ -147,7 +147,7 @@ fn parse_multi_declarator_variable_list() {
 }
 
 #[test]
-fn parse_parenthesized() {
+fn parse_parenthesized() { ::tsox_core::fntrace::enter("parse_parenthesized"); 
     let mut p = Parser::new("(foo)");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::ParenthesizedExpression);
@@ -155,35 +155,35 @@ fn parse_parenthesized() {
 }
 
 #[test]
-fn parse_unary() {
+fn parse_unary() { ::tsox_core::fntrace::enter("parse_unary"); 
     let mut p = Parser::new("!foo");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::PrefixUnaryExpression);
 }
 
 #[test]
-fn parse_binary_precedence() {
+fn parse_binary_precedence() { ::tsox_core::fntrace::enter("parse_binary_precedence"); 
     let mut p = Parser::new("a + b * c");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::BinaryExpression);
 }
 
 #[test]
-fn parse_var_statement() {
+fn parse_var_statement() { ::tsox_core::fntrace::enter("parse_var_statement"); 
     let mut p = Parser::new("var x = 1;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::VariableStatement);
 }
 
 #[test]
-fn parse_let_statement() {
+fn parse_let_statement() { ::tsox_core::fntrace::enter("parse_let_statement"); 
     let mut p = Parser::new("let x: number = 42;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::VariableStatement);
 }
 
 #[test]
-fn parse_declare_variable_statement() {
+fn parse_declare_variable_statement() { ::tsox_core::fntrace::enter("parse_declare_variable_statement"); 
     let mut p = Parser::new("declare var x: string;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::VariableStatement);
@@ -191,7 +191,7 @@ fn parse_declare_variable_statement() {
 }
 
 #[test]
-fn parse_declare_function_statement() {
+fn parse_declare_function_statement() { ::tsox_core::fntrace::enter("parse_declare_function_statement"); 
     let mut p = Parser::new("declare function f(): void;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::FunctionDeclaration);
@@ -199,7 +199,7 @@ fn parse_declare_function_statement() {
 }
 
 #[test]
-fn parse_declare_type_alias_statement() {
+fn parse_declare_type_alias_statement() { ::tsox_core::fntrace::enter("parse_declare_type_alias_statement"); 
     let mut p = Parser::new("declare type Name = string;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::TypeAliasDeclaration);
@@ -207,7 +207,7 @@ fn parse_declare_type_alias_statement() {
 }
 
 #[test]
-fn parse_export_declare_interface_statement() {
+fn parse_export_declare_interface_statement() { ::tsox_core::fntrace::enter("parse_export_declare_interface_statement"); 
     let mut p = Parser::new("export declare interface Box { value: string; }");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::InterfaceDeclaration);
@@ -215,126 +215,126 @@ fn parse_export_declare_interface_statement() {
 }
 
 #[test]
-fn parse_if_statement() {
+fn parse_if_statement() { ::tsox_core::fntrace::enter("parse_if_statement"); 
     let mut p = Parser::new("if (x) { y; }");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::IfStatement);
 }
 
 #[test]
-fn parse_if_else_statement() {
+fn parse_if_else_statement() { ::tsox_core::fntrace::enter("parse_if_else_statement"); 
     let mut p = Parser::new("if (x) { y; } else { z; }");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::IfStatement);
 }
 
 #[test]
-fn parse_return_statement() {
+fn parse_return_statement() { ::tsox_core::fntrace::enter("parse_return_statement"); 
     let mut p = Parser::new("return 42;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::ReturnStatement);
 }
 
 #[test]
-fn parse_return_void() {
+fn parse_return_void() { ::tsox_core::fntrace::enter("parse_return_void"); 
     let mut p = Parser::new("return;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::ReturnStatement);
 }
 
 #[test]
-fn parse_while_statement() {
+fn parse_while_statement() { ::tsox_core::fntrace::enter("parse_while_statement"); 
     let mut p = Parser::new("while (true) { x; }");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::WhileStatement);
 }
 
 #[test]
-fn parse_for_statement() {
+fn parse_for_statement() { ::tsox_core::fntrace::enter("parse_for_statement"); 
     let mut p = Parser::new("for (let i = 0; i < 10; i++) { x; }");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::ForStatement);
 }
 
 #[test]
-fn parse_break_statement() {
+fn parse_break_statement() { ::tsox_core::fntrace::enter("parse_break_statement"); 
     let mut p = Parser::new("break;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::BreakStatement);
 }
 
 #[test]
-fn parse_continue_statement() {
+fn parse_continue_statement() { ::tsox_core::fntrace::enter("parse_continue_statement"); 
     let mut p = Parser::new("continue;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::ContinueStatement);
 }
 
 #[test]
-fn parse_throw_statement() {
+fn parse_throw_statement() { ::tsox_core::fntrace::enter("parse_throw_statement"); 
     let mut p = Parser::new("throw new Error();");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::ThrowStatement);
 }
 
 #[test]
-fn parse_block() {
+fn parse_block() { ::tsox_core::fntrace::enter("parse_block"); 
     let mut p = Parser::new("{ x; y; }");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::Block);
 }
 
 #[test]
-fn parse_empty_statement() {
+fn parse_empty_statement() { ::tsox_core::fntrace::enter("parse_empty_statement"); 
     let mut p = Parser::new(";");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::EmptyStatement);
 }
 
 #[test]
-fn parse_debugger_statement() {
+fn parse_debugger_statement() { ::tsox_core::fntrace::enter("parse_debugger_statement"); 
     let mut p = Parser::new("debugger;");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::DebuggerStatement);
 }
 
 #[test]
-fn parse_member_access() {
+fn parse_member_access() { ::tsox_core::fntrace::enter("parse_member_access"); 
     let mut p = Parser::new("a.b.c");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::PropertyAccessExpression);
 }
 
 #[test]
-fn parse_call_expression() {
+fn parse_call_expression() { ::tsox_core::fntrace::enter("parse_call_expression"); 
     let mut p = Parser::new("foo(1, 2)");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::CallExpression);
 }
 
 #[test]
-fn parse_array_literal() {
+fn parse_array_literal() { ::tsox_core::fntrace::enter("parse_array_literal"); 
     let mut p = Parser::new("[1, 2, 3]");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::ArrayLiteralExpression);
 }
 
 #[test]
-fn parse_object_literal() {
+fn parse_object_literal() { ::tsox_core::fntrace::enter("parse_object_literal"); 
     let mut p = Parser::new("{ a: 1, b: 2 }");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::ObjectLiteralExpression);
 }
 
 #[test]
-fn parse_assignment_expression() {
+fn parse_assignment_expression() { ::tsox_core::fntrace::enter("parse_assignment_expression"); 
     let mut p = Parser::new("x = 42");
     let node = p.parse_expression();
     assert_eq!(node.kind, SyntaxKind::BinaryExpression);
 }
 
 #[test]
-fn script_kind_from_file_name_matches_go_mapping() {
+fn script_kind_from_file_name_matches_go_mapping() { ::tsox_core::fntrace::enter("script_kind_from_file_name_matches_go_mapping"); 
     assert_eq!(script_kind_from_file_name("a.ts"), ScriptKind::Ts);
     assert_eq!(script_kind_from_file_name("a.mts"), ScriptKind::Ts);
     assert_eq!(script_kind_from_file_name("a.cts"), ScriptKind::Ts);
@@ -356,7 +356,7 @@ fn script_kind_from_file_name_matches_go_mapping() {
 }
 
 #[test]
-fn namespace_import_is_wrapped_in_import_clause() {
+fn namespace_import_is_wrapped_in_import_clause() { ::tsox_core::fntrace::enter("namespace_import_is_wrapped_in_import_clause"); 
     let mut p = Parser::new("import * as ns from \"mod\";");
     let node = p.parse_statement();
     let import = match &node.data {
@@ -379,7 +379,7 @@ fn namespace_import_is_wrapped_in_import_clause() {
     assert_eq!(named_bindings.kind, SyntaxKind::NamespaceImport);
 }
 
-fn first_import_specifier(source: &str) -> (bool, Option<String>, String) {
+fn first_import_specifier(source: &str) -> (bool, Option<String>, String) { ::tsox_core::fntrace::enter("first_import_specifier"); 
     let (_file, diags) =
         Parser::parse_source_file_text_with_diagnostics("a.ts", source.to_string());
     assert!(diags.is_empty(), "{source}: {diags:?}");
@@ -411,7 +411,7 @@ fn first_import_specifier(source: &str) -> (bool, Option<String>, String) {
 }
 
 #[test]
-fn specifier_bare_type_is_the_name() {
+fn specifier_bare_type_is_the_name() { ::tsox_core::fntrace::enter("specifier_bare_type_is_the_name"); 
     assert_eq!(
         first_import_specifier("import { type } from \"mod\";"),
         (false, None, "type".to_string())
@@ -424,7 +424,7 @@ fn specifier_bare_type_is_the_name() {
 }
 
 #[test]
-fn specifier_type_as_shapes() {
+fn specifier_type_as_shapes() { ::tsox_core::fntrace::enter("specifier_type_as_shapes"); 
     assert_eq!(
         first_import_specifier("import { type as } from \"mod\";"),
         (true, None, "as".to_string())
@@ -452,7 +452,7 @@ fn specifier_type_as_shapes() {
 }
 
 #[test]
-fn import_type_named_imports_use_phase_modifier() {
+fn import_type_named_imports_use_phase_modifier() { ::tsox_core::fntrace::enter("import_type_named_imports_use_phase_modifier"); 
     let mut p = Parser::new("import type { A, B as C } from \"mod\";");
     let node = p.parse_statement();
     assert!(p.diagnostics.is_empty(), "{:?}", p.diagnostics);
@@ -478,7 +478,7 @@ fn import_type_named_imports_use_phase_modifier() {
 }
 
 #[test]
-fn import_type_multiline_named_imports() {
+fn import_type_multiline_named_imports() { ::tsox_core::fntrace::enter("import_type_multiline_named_imports"); 
     let source = "import type {\n  A,\n  B,\n} from \"mod\";";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("a.ts", source.to_string());
@@ -486,7 +486,7 @@ fn import_type_multiline_named_imports() {
 }
 
 #[test]
-fn import_default_named_type_is_not_phase_modifier() {
+fn import_default_named_type_is_not_phase_modifier() { ::tsox_core::fntrace::enter("import_default_named_type_is_not_phase_modifier"); 
     let mut p = Parser::new("import type from \"mod\";");
     let node = p.parse_statement();
     assert!(p.diagnostics.is_empty(), "{:?}", p.diagnostics);
@@ -507,7 +507,7 @@ fn import_default_named_type_is_not_phase_modifier() {
 }
 
 #[test]
-fn import_equals_declaration_matches_go_entry_split() {
+fn import_equals_declaration_matches_go_entry_split() { ::tsox_core::fntrace::enter("import_equals_declaration_matches_go_entry_split"); 
     let mut p = Parser::new("import type A = B.C;");
     let node = p.parse_statement();
     assert!(p.diagnostics.is_empty(), "{:?}", p.diagnostics);
@@ -524,7 +524,7 @@ fn import_equals_declaration_matches_go_entry_split() {
 }
 
 #[test]
-fn record_warn4_import_blocks_from_ai_color_toner_parse() {
+fn record_warn4_import_blocks_from_ai_color_toner_parse() { ::tsox_core::fntrace::enter("record_warn4_import_blocks_from_ai_color_toner_parse"); 
     let cases = [
         (
             "AiModelField.tsx",
@@ -566,7 +566,7 @@ fn record_warn4_import_blocks_from_ai_color_toner_parse() {
 }
 
 #[test]
-fn record_warn6_arrow_and_as_const_fragments_parse() {
+fn record_warn6_arrow_and_as_const_fragments_parse() { ::tsox_core::fntrace::enter("record_warn6_arrow_and_as_const_fragments_parse"); 
     let cases = [
         (
             "AiModelField.test.tsx",
@@ -597,7 +597,7 @@ fn record_warn6_arrow_and_as_const_fragments_parse() {
 }
 
 #[test]
-fn record_warn6_tsx_jsx_fragment_from_app_parse() {
+fn record_warn6_tsx_jsx_fragment_from_app_parse() { ::tsox_core::fntrace::enter("record_warn6_tsx_jsx_fragment_from_app_parse"); 
     let source = "function App() {\n  const controller = useAppController()\n\n  return (\n    <div className=\"app-shell\" onMouseDown={() => controller.setFloatPanel(null)}>\n      <nav className=\"top-nav\" onMouseDown={(event) => event.stopPropagation()}>\n        <button\n          className=\"brand\"\n          type=\"button\"\n          onClick={() => controller.navigate('palette')}\n        >\n          <span>COLOR</span>\n          <span>TONER</span>\n        </button>\n        {NAV_ITEMS.map(([itemPage, label]) => (\n          <button\n            className={controller.page === itemPage ? 'active' : ''}\n            key={itemPage}\n            type=\"button\"\n            onClick={() => controller.navigate(itemPage)}\n          >\n            {label}\n          </button>\n        ))}\n      </nav>\n    </div>\n  )\n}\n";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("App.tsx", source.to_string());
@@ -605,7 +605,7 @@ fn record_warn6_tsx_jsx_fragment_from_app_parse() {
 }
 
 #[test]
-fn parse_jsx_simple_element() {
+fn parse_jsx_simple_element() { ::tsox_core::fntrace::enter("parse_jsx_simple_element"); 
     let source = "const x = <div>hello</div>;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -613,7 +613,7 @@ fn parse_jsx_simple_element() {
 }
 
 #[test]
-fn parse_jsx_fragment() {
+fn parse_jsx_fragment() { ::tsox_core::fntrace::enter("parse_jsx_fragment"); 
     let source = "const x = <>fragment text</>;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -621,7 +621,7 @@ fn parse_jsx_fragment() {
 }
 
 #[test]
-fn parse_jsx_self_closing() {
+fn parse_jsx_self_closing() { ::tsox_core::fntrace::enter("parse_jsx_self_closing"); 
     let source = "const x = <img src=\"foo.png\" alt=\"bar\" />;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -629,7 +629,7 @@ fn parse_jsx_self_closing() {
 }
 
 #[test]
-fn parse_jsx_dashed_tag_name() {
+fn parse_jsx_dashed_tag_name() { ::tsox_core::fntrace::enter("parse_jsx_dashed_tag_name"); 
     let source = "const x = <my-component data-foo=\"bar\">text</my-component>;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -637,7 +637,7 @@ fn parse_jsx_dashed_tag_name() {
 }
 
 #[test]
-fn parse_jsx_expression_children() {
+fn parse_jsx_expression_children() { ::tsox_core::fntrace::enter("parse_jsx_expression_children"); 
     let source = "const x = <div>{items.map(i => <span key={i}>{i}</span>)}</div>;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -645,7 +645,7 @@ fn parse_jsx_expression_children() {
 }
 
 #[test]
-fn parse_jsx_nested_elements() {
+fn parse_jsx_nested_elements() { ::tsox_core::fntrace::enter("parse_jsx_nested_elements"); 
     let source = "const x = <div><p><span>deep</span></p></div>;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -653,7 +653,7 @@ fn parse_jsx_nested_elements() {
 }
 
 #[test]
-fn parse_jsx_spread_attribute() {
+fn parse_jsx_spread_attribute() { ::tsox_core::fntrace::enter("parse_jsx_spread_attribute"); 
     let source = "const x = <div {...props}>text</div>;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -661,7 +661,7 @@ fn parse_jsx_spread_attribute() {
 }
 
 #[test]
-fn parse_jsx_member_expression_tag() {
+fn parse_jsx_member_expression_tag() { ::tsox_core::fntrace::enter("parse_jsx_member_expression_tag"); 
     let source = "const x = <Foo.Bar>text</Foo.Bar>;";
     let (_file, diagnostics) =
         Parser::parse_source_file_text_with_diagnostics("test.tsx", source.to_string());
@@ -669,7 +669,7 @@ fn parse_jsx_member_expression_tag() {
 }
 
 #[test]
-fn parse_primitive_keyword_type_nodes() {
+fn parse_primitive_keyword_type_nodes() { ::tsox_core::fntrace::enter("parse_primitive_keyword_type_nodes"); 
     for (src, expected_kind) in [
         ("type T = any;", SyntaxKind::AnyKeyword),
         ("type T = unknown;", SyntaxKind::UnknownKeyword),
@@ -699,7 +699,7 @@ fn parse_primitive_keyword_type_nodes() {
 }
 
 #[test]
-fn parse_keyword_type_followed_by_dot_is_type_reference() {
+fn parse_keyword_type_followed_by_dot_is_type_reference() { ::tsox_core::fntrace::enter("parse_keyword_type_followed_by_dot_is_type_reference"); 
     let mut p = Parser::new("type T = String.fromCharCode;");
     let node = p.parse_statement();
     let alias = match &node.data {
@@ -710,7 +710,7 @@ fn parse_keyword_type_followed_by_dot_is_type_reference() {
 }
 
 #[test]
-fn parse_typeof_type_query() {
+fn parse_typeof_type_query() { ::tsox_core::fntrace::enter("parse_typeof_type_query"); 
     let mut p = Parser::new("type T = typeof foo;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -722,7 +722,7 @@ fn parse_typeof_type_query() {
 }
 
 #[test]
-fn parse_import_type() {
+fn parse_import_type() { ::tsox_core::fntrace::enter("parse_import_type"); 
     let mut p = Parser::new("type T = import(\"mod\").Foo;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -734,7 +734,7 @@ fn parse_import_type() {
 }
 
 #[test]
-fn parse_import_type_with_attributes() {
+fn parse_import_type_with_attributes() { ::tsox_core::fntrace::enter("parse_import_type_with_attributes"); 
     let mut p =
         Parser::new("type T = import(\"pkg\", { with: { \"resolution-mode\": \"import\" } }).Foo;");
     let node = p.parse_statement();
@@ -762,7 +762,7 @@ fn parse_import_type_with_attributes() {
 }
 
 #[test]
-fn parse_import_type_missing_with_reports_1005() {
+fn parse_import_type_missing_with_reports_1005() { ::tsox_core::fntrace::enter("parse_import_type_missing_with_reports_1005"); 
     let mut p = Parser::new("type T = import(\"pkg\", {\"resolution-mode\": \"require\"}).Foo;");
     let node = p.parse_statement();
     let diags = p.diagnostics();
@@ -774,7 +774,7 @@ fn parse_import_type_missing_with_reports_1005() {
 }
 
 #[test]
-fn parse_typeof_import_type() {
+fn parse_typeof_import_type() { ::tsox_core::fntrace::enter("parse_typeof_import_type"); 
     let mut p = Parser::new("type T = typeof import(\"mod\").Foo;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -791,7 +791,7 @@ fn parse_typeof_import_type() {
 }
 
 #[test]
-fn parse_negative_literal_type() {
+fn parse_negative_literal_type() { ::tsox_core::fntrace::enter("parse_negative_literal_type"); 
     let mut p = Parser::new("type T = -1;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -803,7 +803,7 @@ fn parse_negative_literal_type() {
 }
 
 #[test]
-fn parse_this_type() {
+fn parse_this_type() { ::tsox_core::fntrace::enter("parse_this_type"); 
     let mut p = Parser::new("type T = this;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -815,7 +815,7 @@ fn parse_this_type() {
 }
 
 #[test]
-fn parse_tuple_types() {
+fn parse_tuple_types() { ::tsox_core::fntrace::enter("parse_tuple_types"); 
     let mut p = Parser::new("type T = [string, number];");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -853,7 +853,7 @@ fn parse_tuple_types() {
 }
 
 #[test]
-fn parse_union_intersection_precedence() {
+fn parse_union_intersection_precedence() { ::tsox_core::fntrace::enter("parse_union_intersection_precedence"); 
     let mut p = Parser::new("type T = A | B & C;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -881,7 +881,7 @@ fn parse_union_intersection_precedence() {
 }
 
 #[test]
-fn parse_generic_type_params_and_references() {
+fn parse_generic_type_params_and_references() { ::tsox_core::fntrace::enter("parse_generic_type_params_and_references"); 
     let mut p = Parser::new("type T<A, B extends string = \"x\"> = A | B;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -920,7 +920,7 @@ fn parse_generic_type_params_and_references() {
 }
 
 #[test]
-fn parse_mapped_types() {
+fn parse_mapped_types() { ::tsox_core::fntrace::enter("parse_mapped_types"); 
     let mut p = Parser::new("type M<T> = { [K in keyof T]: string };");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -948,7 +948,7 @@ fn parse_mapped_types() {
 }
 
 #[test]
-fn parse_conditional_types() {
+fn parse_conditional_types() { ::tsox_core::fntrace::enter("parse_conditional_types"); 
     let mut p = Parser::new("type R<T> = T extends string ? number : boolean;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -968,7 +968,7 @@ fn parse_conditional_types() {
 }
 
 #[test]
-fn parse_call_and_construct_signatures() {
+fn parse_call_and_construct_signatures() { ::tsox_core::fntrace::enter("parse_call_and_construct_signatures"); 
     let mut p = Parser::new("type T = { (): string };");
     let _node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -1001,7 +1001,7 @@ fn parse_call_and_construct_signatures() {
 }
 
 #[test]
-fn parse_index_signatures() {
+fn parse_index_signatures() { ::tsox_core::fntrace::enter("parse_index_signatures"); 
     let mut p = Parser::new("type T = { [key: string]: number };");
     let _node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -1016,7 +1016,7 @@ fn parse_index_signatures() {
 }
 
 #[test]
-fn parse_satisfies_and_as_const() {
+fn parse_satisfies_and_as_const() { ::tsox_core::fntrace::enter("parse_satisfies_and_as_const"); 
     let mut p = Parser::new("const x = { a: 1 } as const;");
     let _node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics());
@@ -1031,7 +1031,7 @@ fn parse_satisfies_and_as_const() {
 }
 
 #[test]
-fn parse_declare_module_string_literal() {
+fn parse_declare_module_string_literal() { ::tsox_core::fntrace::enter("parse_declare_module_string_literal"); 
     let mut p = Parser::new("declare module \"foo\";");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1055,7 +1055,7 @@ fn parse_declare_module_string_literal() {
 }
 
 #[test]
-fn parse_declare_namespace_dotted() {
+fn parse_declare_namespace_dotted() { ::tsox_core::fntrace::enter("parse_declare_namespace_dotted"); 
     let mut p = Parser::new("declare namespace A.B.C { export const x: number; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1063,7 +1063,7 @@ fn parse_declare_namespace_dotted() {
 }
 
 #[test]
-fn parse_declare_global() {
+fn parse_declare_global() { ::tsox_core::fntrace::enter("parse_declare_global"); 
     let mut p = Parser::new("declare global { const x: number; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1078,7 +1078,7 @@ fn parse_declare_global() {
 }
 
 #[test]
-fn parse_declare_class_full_body() {
+fn parse_declare_class_full_body() { ::tsox_core::fntrace::enter("parse_declare_class_full_body"); 
     let mut p =
         Parser::new("declare class C extends Base { constructor(x: number); foo(): void; }");
     let node = p.parse_statement();
@@ -1087,7 +1087,7 @@ fn parse_declare_class_full_body() {
 }
 
 #[test]
-fn parse_declare_var_and_function() {
+fn parse_declare_var_and_function() { ::tsox_core::fntrace::enter("parse_declare_var_and_function"); 
     let mut p = Parser::new("declare var x: number;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1113,7 +1113,7 @@ fn parse_declare_var_and_function() {
 }
 
 #[test]
-fn parse_declare_enum_and_interface() {
+fn parse_declare_enum_and_interface() { ::tsox_core::fntrace::enter("parse_declare_enum_and_interface"); 
     let mut p = Parser::new("declare enum E { A, B }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1131,7 +1131,7 @@ fn parse_declare_enum_and_interface() {
 }
 
 #[test]
-fn parse_asi_basic() {
+fn parse_asi_basic() { ::tsox_core::fntrace::enter("parse_asi_basic"); 
     let mut p = Parser::new("let x = 1");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1155,7 +1155,7 @@ fn parse_asi_basic() {
 }
 
 #[test]
-fn parse_asi_postfix_no_line_break() {
+fn parse_asi_postfix_no_line_break() { ::tsox_core::fntrace::enter("parse_asi_postfix_no_line_break"); 
     let mut p = Parser::new("let x = 1\n++y");
     let s1 = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1166,7 +1166,7 @@ fn parse_asi_postfix_no_line_break() {
 }
 
 #[test]
-fn parse_asi_throw_needs_expression() {
+fn parse_asi_throw_needs_expression() { ::tsox_core::fntrace::enter("parse_asi_throw_needs_expression"); 
     let mut p = Parser::new("throw\nnew Error()");
     let node = p.parse_statement();
     assert_eq!(node.kind, SyntaxKind::ThrowStatement);
@@ -1188,7 +1188,7 @@ fn parse_asi_throw_needs_expression() {
 }
 
 #[test]
-fn parse_scanner_errors_reach_parser_diagnostics() {
+fn parse_scanner_errors_reach_parser_diagnostics() { ::tsox_core::fntrace::enter("parse_scanner_errors_reach_parser_diagnostics"); 
     let (file, diags) = Parser::parse_source_file_text_with_diagnostics("test.ts", "·".to_string());
     assert!(
         diags.iter().any(|d| d.message.code == 1127),
@@ -1205,7 +1205,7 @@ fn parse_scanner_errors_reach_parser_diagnostics() {
 }
 
 #[test]
-fn parse_regex_flag_diagnostics_reach_parser() {
+fn parse_regex_flag_diagnostics_reach_parser() { ::tsox_core::fntrace::enter("parse_regex_flag_diagnostics_reach_parser"); 
     let (_file, diags) =
         Parser::parse_source_file_text_with_diagnostics("test.ts", "let x = /foo/z;".to_string());
     assert!(
@@ -1238,7 +1238,7 @@ fn parse_regex_flag_diagnostics_reach_parser() {
 }
 
 #[test]
-fn parse_import_attributes_with() {
+fn parse_import_attributes_with() { ::tsox_core::fntrace::enter("parse_import_attributes_with"); 
     let mut p = Parser::new(r#"import x from "y" with { type: "json" }"#);
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1284,7 +1284,7 @@ fn parse_import_attributes_with() {
 }
 
 #[test]
-fn parse_decorators() {
+fn parse_decorators() { ::tsox_core::fntrace::enter("parse_decorators"); 
     let mut p = Parser::new("@decorator\nclass Foo {}");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1362,7 +1362,7 @@ fn parse_decorators() {
 }
 
 #[test]
-fn parse_regex_literal() {
+fn parse_regex_literal() { ::tsox_core::fntrace::enter("parse_regex_literal"); 
     let mut p = Parser::new("let x = /foo/g;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1392,7 +1392,7 @@ fn parse_regex_literal() {
 }
 
 #[test]
-fn parse_regex_in_call_expression() {
+fn parse_regex_in_call_expression() { ::tsox_core::fntrace::enter("parse_regex_in_call_expression"); 
     let mut p = Parser::new("let r = str.replace(/foo/g, 'bar');");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1400,7 +1400,7 @@ fn parse_regex_in_call_expression() {
 }
 
 #[test]
-fn parse_comment_directives_propagate_to_source_file() {
+fn parse_comment_directives_propagate_to_source_file() { ::tsox_core::fntrace::enter("parse_comment_directives_propagate_to_source_file"); 
     use crate::scanner::CommentDirectiveKind;
     let file = Parser::parse_source_file_text(
         "test.ts",
@@ -1418,7 +1418,7 @@ fn parse_comment_directives_propagate_to_source_file() {
 }
 
 #[test]
-fn parse_using_declaration() {
+fn parse_using_declaration() { ::tsox_core::fntrace::enter("parse_using_declaration"); 
     let mut p = Parser::new("using x = getResource();");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1440,7 +1440,7 @@ fn parse_using_declaration() {
 }
 
 #[test]
-fn parse_await_using_declaration() {
+fn parse_await_using_declaration() { ::tsox_core::fntrace::enter("parse_await_using_declaration"); 
     let mut p = Parser::new("await using x = getResource();");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1453,7 +1453,7 @@ fn parse_await_using_declaration() {
 }
 
 #[test]
-fn parse_accessor_property() {
+fn parse_accessor_property() { ::tsox_core::fntrace::enter("parse_accessor_property"); 
     let mut p = Parser::new("class C { accessor x = 1; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1473,7 +1473,7 @@ fn parse_accessor_property() {
 }
 
 #[test]
-fn parse_type_predicate_in_function_type_return() {
+fn parse_type_predicate_in_function_type_return() { ::tsox_core::fntrace::enter("parse_type_predicate_in_function_type_return"); 
     let mut p = Parser::new("type Predicate = (value: T) => value is S;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1489,7 +1489,7 @@ fn parse_type_predicate_in_function_type_return() {
 }
 
 #[test]
-fn parse_type_predicate_in_method_return_type() {
+fn parse_type_predicate_in_method_return_type() { ::tsox_core::fntrace::enter("parse_type_predicate_in_method_return_type"); 
     let mut p = Parser::new("interface I { isFoo(x: any): x is Foo; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1506,7 +1506,7 @@ fn parse_type_predicate_in_method_return_type() {
 }
 
 #[test]
-fn parse_computed_property_name_in_type_member() {
+fn parse_computed_property_name_in_type_member() { ::tsox_core::fntrace::enter("parse_computed_property_name_in_type_member"); 
     let mut p = Parser::new("interface I { [Symbol.iterator](): Iterator<T>; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1531,7 +1531,7 @@ fn parse_computed_property_name_in_type_member() {
 }
 
 #[test]
-fn parse_contextual_keyword_as_property_name_in_type_member() {
+fn parse_contextual_keyword_as_property_name_in_type_member() { ::tsox_core::fntrace::enter("parse_contextual_keyword_as_property_name_in_type_member"); 
     let mut p = Parser::new("interface X { readonly static: boolean; }");
     let _node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1551,7 +1551,7 @@ fn parse_contextual_keyword_as_property_name_in_type_member() {
 }
 
 #[test]
-fn parse_heritage_clause_with_tuple_type_arguments() {
+fn parse_heritage_clause_with_tuple_type_arguments() { ::tsox_core::fntrace::enter("parse_heritage_clause_with_tuple_type_arguments"); 
     let mut p = Parser::new("interface X extends Array<[number, number] | undefined> {}");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1571,7 +1571,7 @@ fn parse_heritage_clause_with_tuple_type_arguments() {
 }
 
 #[test]
-fn parse_contextual_keyword_as_class_member_name() {
+fn parse_contextual_keyword_as_class_member_name() { ::tsox_core::fntrace::enter("parse_contextual_keyword_as_class_member_name"); 
     let mut p = Parser::new("class C { static: number = 1; }");
     let _node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1590,7 +1590,7 @@ fn parse_contextual_keyword_as_class_member_name() {
 }
 
 #[test]
-fn parse_const_enum() {
+fn parse_const_enum() { ::tsox_core::fntrace::enter("parse_const_enum"); 
     let mut p = Parser::new("const enum E { A, B, C }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1598,7 +1598,7 @@ fn parse_const_enum() {
 }
 
 #[test]
-fn parse_const_variable_not_treated_as_enum() {
+fn parse_const_variable_not_treated_as_enum() { ::tsox_core::fntrace::enter("parse_const_variable_not_treated_as_enum"); 
     let mut p = Parser::new("const x = 1;");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1606,7 +1606,7 @@ fn parse_const_variable_not_treated_as_enum() {
 }
 
 #[test]
-fn parse_abstract_class() {
+fn parse_abstract_class() { ::tsox_core::fntrace::enter("parse_abstract_class"); 
     let mut p = Parser::new("abstract class Animal { abstract makeSound(): void; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1614,7 +1614,7 @@ fn parse_abstract_class() {
 }
 
 #[test]
-fn parse_async_function() {
+fn parse_async_function() { ::tsox_core::fntrace::enter("parse_async_function"); 
     let mut p = Parser::new("async function fetchData(): Promise<void> { return; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1622,7 +1622,7 @@ fn parse_async_function() {
 }
 
 #[test]
-fn parse_async_generator() {
+fn parse_async_generator() { ::tsox_core::fntrace::enter("parse_async_generator"); 
     let mut p = Parser::new("async function* gen() { yield 1; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1630,7 +1630,7 @@ fn parse_async_generator() {
 }
 
 #[test]
-fn parse_yield_in_generator() {
+fn parse_yield_in_generator() { ::tsox_core::fntrace::enter("parse_yield_in_generator"); 
     let mut p = Parser::new("function* counter() { yield 1; yield* [2, 3]; }");
     let node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1638,14 +1638,14 @@ fn parse_yield_in_generator() {
 }
 
 #[test]
-fn parse_yield_await_in_async_generator() {
+fn parse_yield_await_in_async_generator() { ::tsox_core::fntrace::enter("parse_yield_await_in_async_generator"); 
     let mut p = Parser::new("async function* gen() { yield await fetch('url'); }");
     let _node = p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 }
 
 #[test]
-fn parse_for_await_of() {
+fn parse_for_await_of() { ::tsox_core::fntrace::enter("parse_for_await_of"); 
     let mut p = Parser::new(
         "async function process(stream) { for await (const chunk of stream) { console.log(chunk); } }",
     );
@@ -1654,7 +1654,7 @@ fn parse_for_await_of() {
 }
 
 #[test]
-fn parse_optional_chaining() {
+fn parse_optional_chaining() { ::tsox_core::fntrace::enter("parse_optional_chaining"); 
     let mut p = Parser::new("const x = obj?.foo?.bar;");
     p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
@@ -1665,14 +1665,14 @@ fn parse_optional_chaining() {
 }
 
 #[test]
-fn parse_nullish_coalescing() {
+fn parse_nullish_coalescing() { ::tsox_core::fntrace::enter("parse_nullish_coalescing"); 
     let mut p = Parser::new("const x = a ?? b;");
     p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);
 }
 
 #[test]
-fn parse_variance_annotations() {
+fn parse_variance_annotations() { ::tsox_core::fntrace::enter("parse_variance_annotations"); 
     let mut p = Parser::new("interface Box<in T> { value: T; }");
     p.parse_statement();
     assert!(p.diagnostics().is_empty(), "{:?}", p.diagnostics);

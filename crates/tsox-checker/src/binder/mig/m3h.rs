@@ -10,16 +10,16 @@ thread_local! {
 
 pub(crate) const INTERNAL_SYMBOL_NAME_ASSIGNMENT_DECLARATION: &str = "\u{FE}assignment";
 
-pub(crate) fn get_exports(symbol: &Arc<Symbol>) -> &mut SymbolTable {
+pub(crate) fn get_exports(symbol: &Arc<Symbol>) -> &mut SymbolTable { ::tsox_core::fntrace::enter("get_exports"); 
     let ptr = Arc::as_ptr(symbol) as *mut Symbol;
     unsafe { &mut (*ptr).exports }
 }
 
-pub(crate) fn add_antecedent(b: &Binder, label: &Arc<FlowNode>, antecedent: &Arc<FlowNode>) {
+pub(crate) fn add_antecedent(b: &Binder, label: &Arc<FlowNode>, antecedent: &Arc<FlowNode>) { ::tsox_core::fntrace::enter("add_antecedent"); 
     b.add_antecedent_to_flow(label, antecedent);
 }
 
-pub(crate) fn clone_active_label(label: &ActiveLabel) -> Box<ActiveLabel> {
+pub(crate) fn clone_active_label(label: &ActiveLabel) -> Box<ActiveLabel> { ::tsox_core::fntrace::enter("clone_active_label"); 
     Box::new(ActiveLabel {
         name: label.name.clone(),
         break_target: Arc::clone(&label.break_target),
@@ -30,15 +30,15 @@ pub(crate) fn clone_active_label(label: &ActiveLabel) -> Box<ActiveLabel> {
 }
 
 impl ActiveLabel {
-    pub(crate) fn break_target(&self) -> Arc<FlowNode> {
+    pub(crate) fn break_target(&self) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("break_target"); 
         Arc::clone(&self.break_target)
     }
 
-    pub(crate) fn continue_target(&self) -> Option<Arc<FlowNode>> {
+    pub(crate) fn continue_target(&self) -> Option<Arc<FlowNode>> { ::tsox_core::fntrace::enter("continue_target"); 
         self.continue_target.as_ref().map(Arc::clone)
     }
 
-    pub(crate) fn set_referenced(&self) {
+    pub(crate) fn set_referenced(&self) { ::tsox_core::fntrace::enter("set_referenced"); 
         let ptr = self as *const ActiveLabel as *mut ActiveLabel;
         unsafe {
             (*ptr).referenced = true;
@@ -46,28 +46,28 @@ impl ActiveLabel {
     }
 }
 
-pub(crate) fn set_symbol_flags_or(symbol: &Arc<Symbol>, flags: SymbolFlags) {
+pub(crate) fn set_symbol_flags_or(symbol: &Arc<Symbol>, flags: SymbolFlags) { ::tsox_core::fntrace::enter("set_symbol_flags_or"); 
     let ptr = Arc::as_ptr(symbol) as *mut Symbol;
     unsafe {
         (*ptr).flags |= flags;
     }
 }
 
-pub(crate) fn remove_symbol_flags(symbol: &Arc<Symbol>, flags: SymbolFlags) {
+pub(crate) fn remove_symbol_flags(symbol: &Arc<Symbol>, flags: SymbolFlags) { ::tsox_core::fntrace::enter("remove_symbol_flags"); 
     let ptr = Arc::as_ptr(symbol) as *mut Symbol;
     unsafe {
         (*ptr).flags = (*ptr).flags.difference(flags);
     }
 }
 
-pub(crate) fn push_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) {
+pub(crate) fn push_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_declaration"); 
     let ptr = Arc::as_ptr(symbol) as *mut Symbol;
     unsafe {
         (*ptr).declarations.push(Arc::clone(node));
     }
 }
 
-pub(crate) fn push_declaration_if_unique(symbol: &Arc<Symbol>, node: &Arc<Node>) {
+pub(crate) fn push_declaration_if_unique(symbol: &Arc<Symbol>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("push_declaration_if_unique"); 
     let ptr = Arc::as_ptr(symbol) as *mut Symbol;
     unsafe {
         if !(*ptr).declarations.iter().any(|d| Arc::ptr_eq(d, node)) {
@@ -79,7 +79,7 @@ pub(crate) fn push_declaration_if_unique(symbol: &Arc<Symbol>, node: &Arc<Node>)
 pub(crate) fn find_use_strict_prologue(
     source_file: &Arc<SourceFile>,
     statements: &[Arc<Node>],
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_use_strict_prologue"); 
     for statement in statements {
         if is_prologue_directive(statement) {
             if is_use_strict_prologue_directive(source_file, statement) {
@@ -95,7 +95,7 @@ pub(crate) fn find_use_strict_prologue(
 fn is_use_strict_prologue_directive(
     source_file: &Arc<SourceFile>,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_use_strict_prologue_directive"); 
     let node_text =
         get_source_text_of_node_from_source_file(source_file, &node.expression().unwrap(), false);
     node_text == "\"use strict\"" || node_text == "'use strict'"
@@ -104,7 +104,7 @@ fn is_use_strict_prologue_directive(
 pub(crate) fn get_symbol_name_for_private_identifier(
     containing_class_symbol: &Arc<Symbol>,
     description: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_symbol_name_for_private_identifier"); 
     format!(
         "{}#{}@{}",
         INTERNAL_SYMBOL_NAME_PREFIX,
@@ -113,7 +113,7 @@ pub(crate) fn get_symbol_name_for_private_identifier(
     )
 }
 
-pub(crate) fn set_value_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) {
+pub(crate) fn set_value_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_value_declaration"); 
     let value_declaration = symbol.value_declaration.as_ref();
     let replace = match value_declaration {
         None => true,
@@ -130,7 +130,7 @@ pub(crate) fn set_value_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) {
     }
 }
 
-pub(crate) fn get_parent_of_property_assignment(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_parent_of_property_assignment(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_parent_of_property_assignment"); 
     let parent = node.parent()?;
     if parent.kind == SyntaxKind::PropertyAssignment {
         return Some(parent);
@@ -143,12 +143,12 @@ pub(crate) fn get_parent_of_property_assignment(node: &Arc<Node>) -> Option<Arc<
     }
 }
 
-pub(crate) fn get_alias_target_symbol(initializer: &Arc<Node>) -> Option<Arc<Symbol>> {
+pub(crate) fn get_alias_target_symbol(initializer: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_alias_target_symbol"); 
     let _ = initializer;
     None
 }
 
-pub(crate) fn get_initializer_symbol(symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> {
+pub(crate) fn get_initializer_symbol(symbol: Option<&Arc<Symbol>>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_initializer_symbol"); 
     let symbol = symbol?;
     if symbol.flags.intersects(SymbolFlags::Alias) {
         let first_declaration = symbol.declarations.first()?;
@@ -164,7 +164,7 @@ impl Binder {
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_declaration_to_symbol"); 
         set_symbol_flags_or(symbol, symbol_flags);
         self.symbol_map.set_symbol(node, Arc::clone(symbol));
         push_declaration_if_unique(symbol, node);
@@ -185,7 +185,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn add_diagnostic(&mut self, diagnostic: &Arc<Diagnostic>) {
+    pub(crate) fn add_diagnostic(&mut self, diagnostic: &Arc<Diagnostic>) { ::tsox_core::fntrace::enter("add_diagnostic"); 
         self.symbol_map
             .binder_diagnostics
             .push((**diagnostic).clone());
@@ -200,7 +200,7 @@ impl Binder {
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_late_bound_assignment_declaration_to_symbol"); 
         let exports = get_exports(symbol);
         let assignment_symbol = match exports.get(INTERNAL_SYMBOL_NAME_ASSIGNMENT_DECLARATION) {
             Some(existing) => Arc::clone(existing),
@@ -217,7 +217,7 @@ impl Binder {
         push_declaration(&assignment_symbol, node);
     }
 
-    pub(crate) fn add_to_container_chain(&mut self, next: &Arc<Node>) {
+    pub(crate) fn add_to_container_chain(&mut self, next: &Arc<Node>) { ::tsox_core::fntrace::enter("add_to_container_chain"); 
         let _ = next;
         LAST_CONTAINER.with(|c| *c.borrow_mut() = Some(Arc::clone(next)));
     }
@@ -227,7 +227,7 @@ impl Binder {
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
         symbol_excludes: SymbolFlags,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_block_scoped_declaration"); 
         match self.block_scope_container.as_ref().map(|c| c.kind) {
             Some(SyntaxKind::ModuleDeclaration) => {
                 self.declare_module_member(node, symbol_flags, symbol_excludes);
@@ -250,7 +250,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_break_or_continue_flow(&mut self, flow_label: Option<&Arc<FlowNode>>) {
+    pub(crate) fn bind_break_or_continue_flow(&mut self, flow_label: Option<&Arc<FlowNode>>) { ::tsox_core::fntrace::enter("bind_break_or_continue_flow"); 
         if let Some(flow_label) = flow_label {
             FlowLabel::push_antecedent(flow_label, Arc::clone(self.current_flow.as_ref().unwrap()));
             let current = self.current_flow.as_ref().unwrap();
@@ -265,7 +265,7 @@ impl Binder {
         label: Option<&Arc<Node>>,
         current_target: Option<Arc<FlowNode>>,
         get_target: impl Fn(&ActiveLabel) -> Option<Arc<FlowNode>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_break_or_continue_statement"); 
         if let Some(label) = label {
             self.bind(label);
             let active_label = self.find_active_label_cloned(tsox_frontend::ast::Node::text(label));
@@ -279,7 +279,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn find_active_label_cloned(&self, name: &str) -> Option<Box<ActiveLabel>> {
+    pub(crate) fn find_active_label_cloned(&self, name: &str) -> Option<Box<ActiveLabel>> { ::tsox_core::fntrace::enter("find_active_label_cloned"); 
         let mut label = self.active_label_list.as_ref();
         while let Some(current) = label {
             if current.name == name {
@@ -290,7 +290,7 @@ impl Binder {
         None
     }
 
-    pub(crate) fn bind_call_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_call_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_call_expression"); 
         let indicator_none = self
             .current_source_file
             .as_ref()

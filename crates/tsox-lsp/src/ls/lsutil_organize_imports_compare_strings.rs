@@ -1,10 +1,10 @@
 use std::cmp::Ordering;
 
-pub(super) fn compare_booleans(a: bool, b: bool) -> i32 {
+pub(super) fn compare_booleans(a: bool, b: bool) -> i32 { ::tsox_core::fntrace::enter("compare_booleans"); 
     cmp_compare_i32(a as i32, b as i32)
 }
 
-pub(super) fn cmp_compare_i32(a: i32, b: i32) -> i32 {
+pub(super) fn cmp_compare_i32(a: i32, b: i32) -> i32 { ::tsox_core::fntrace::enter("cmp_compare_i32"); 
     if a < b {
         -1
     } else if a > b {
@@ -14,7 +14,7 @@ pub(super) fn cmp_compare_i32(a: i32, b: i32) -> i32 {
     }
 }
 
-pub(super) fn ord_to_i32(ord: Ordering) -> i32 {
+pub(super) fn ord_to_i32(ord: Ordering) -> i32 { ::tsox_core::fntrace::enter("ord_to_i32"); 
     match ord {
         Ordering::Less => -1,
         Ordering::Equal => 0,
@@ -22,7 +22,7 @@ pub(super) fn ord_to_i32(ord: Ordering) -> i32 {
     }
 }
 
-pub(super) fn next_rune(s: &str) -> (char, usize) {
+pub(super) fn next_rune(s: &str) -> (char, usize) { ::tsox_core::fntrace::enter("next_rune"); 
     match s.chars().next() {
         Some(c) => (c, c.len_utf8()),
         None => ('\0', 0),
@@ -33,7 +33,7 @@ pub(super) fn compare_organize_imports_natural_strings(
     a: &str,
     b: &str,
     case_sensitive: bool,
-) -> i32 {
+) -> i32 { ::tsox_core::fntrace::enter("compare_organize_imports_natural_strings"); 
     let ord = compare_strings_numeric(&natural_collation_key(a), &natural_collation_key(b));
     if ord != 0 {
         return ord;
@@ -56,7 +56,7 @@ pub(super) fn compare_organize_imports_unicode_strings(
     case_first: crate::ls::lsutil_user_preferences::OrganizeImportsCaseFirst,
     numeric: bool,
     accents: bool,
-) -> i32 {
+) -> i32 { ::tsox_core::fntrace::enter("compare_organize_imports_unicode_strings"); 
     let ord = compare_organize_imports_unicode_keys(
         &natural_collation_key(a),
         &natural_collation_key(b),
@@ -87,14 +87,14 @@ pub(super) fn compare_organize_imports_unicode_strings(
     ord_to_i32(a.cmp(b))
 }
 
-fn natural_collation_key(s: &str) -> String {
+fn natural_collation_key(s: &str) -> String { ::tsox_core::fntrace::enter("natural_collation_key"); 
     s.to_ascii_lowercase()
         .chars()
         .filter(|&c| !is_combining_mark(c))
         .collect()
 }
 
-fn is_combining_mark(c: char) -> bool {
+fn is_combining_mark(c: char) -> bool { ::tsox_core::fntrace::enter("is_combining_mark"); 
     let cp = c as u32;
     (0x0300..=0x036F).contains(&cp)
         || (0x0483..=0x0489).contains(&cp)
@@ -114,7 +114,7 @@ fn is_combining_mark(c: char) -> bool {
         || (0x0730..=0x074A).contains(&cp)
 }
 
-pub(super) fn compare_organize_imports_unicode_keys(a: &str, b: &str, numeric: bool) -> i32 {
+pub(super) fn compare_organize_imports_unicode_keys(a: &str, b: &str, numeric: bool) -> i32 { ::tsox_core::fntrace::enter("compare_organize_imports_unicode_keys"); 
     if numeric {
         compare_strings_numeric(a, b)
     } else {
@@ -122,7 +122,7 @@ pub(super) fn compare_organize_imports_unicode_keys(a: &str, b: &str, numeric: b
     }
 }
 
-fn compare_strings_numeric(a: &str, b: &str) -> i32 {
+fn compare_strings_numeric(a: &str, b: &str) -> i32 { ::tsox_core::fntrace::enter("compare_strings_numeric"); 
     let mut a = a;
     let mut b = b;
     while !a.is_empty() && !b.is_empty() {
@@ -152,15 +152,15 @@ fn compare_strings_numeric(a: &str, b: &str) -> i32 {
     cmp_compare_i32(a.len() as i32, b.len() as i32)
 }
 
-fn is_ascii_digit(ch: u8) -> bool {
+fn is_ascii_digit(ch: u8) -> bool { ::tsox_core::fntrace::enter("is_ascii_digit"); 
     ch.is_ascii_digit()
 }
 
-fn ascii_digit_run_end(s: &str) -> usize {
+fn ascii_digit_run_end(s: &str) -> usize { ::tsox_core::fntrace::enter("ascii_digit_run_end"); 
     s.bytes().take_while(|c| is_ascii_digit(*c)).count()
 }
 
-fn compare_numeric_text(a: &str, b: &str) -> i32 {
+fn compare_numeric_text(a: &str, b: &str) -> i32 { ::tsox_core::fntrace::enter("compare_numeric_text"); 
     let mut a_digits = a.trim_start_matches('0');
     let mut b_digits = b.trim_start_matches('0');
     if a_digits.is_empty() {
@@ -180,7 +180,7 @@ fn compare_numeric_text(a: &str, b: &str) -> i32 {
     ord_to_i32(a.cmp(b))
 }
 
-fn compare_organize_imports_case_upper_first(a: &str, b: &str) -> i32 {
+fn compare_organize_imports_case_upper_first(a: &str, b: &str) -> i32 { ::tsox_core::fntrace::enter("compare_organize_imports_case_upper_first"); 
     compare_organize_imports_case(
         a,
         b,
@@ -192,7 +192,7 @@ pub(super) fn compare_organize_imports_case(
     a: &str,
     b: &str,
     case_first: crate::ls::lsutil_user_preferences::OrganizeImportsCaseFirst,
-) -> i32 {
+) -> i32 { ::tsox_core::fntrace::enter("compare_organize_imports_case"); 
     let a_runes: Vec<char> = a.chars().collect();
     let b_runes: Vec<char> = b.chars().collect();
     let min_len = a_runes.len().min(b_runes.len());

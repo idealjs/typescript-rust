@@ -375,13 +375,13 @@ pub struct CachedSignatureKey {
 }
 
 impl PartialEq for CachedSignatureKey {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         Arc::ptr_eq(&self.sig, &other.sig) && self.key == other.key
     }
 }
 impl Eq for CachedSignatureKey {}
 impl std::hash::Hash for CachedSignatureKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { ::tsox_core::fntrace::enter("hash"); 
         Arc::as_ptr(&self.sig).hash(state);
         self.key.hash(state);
     }
@@ -410,13 +410,13 @@ pub struct FlowLoopKey {
 }
 
 impl PartialEq for FlowLoopKey {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         Arc::ptr_eq(&self.flow_node, &other.flow_node) && self.ref_key == other.ref_key
     }
 }
 impl Eq for FlowLoopKey {}
 impl std::hash::Hash for FlowLoopKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { ::tsox_core::fntrace::enter("hash"); 
         Arc::as_ptr(&self.flow_node).hash(state);
         self.ref_key.hash(state);
     }
@@ -434,7 +434,7 @@ pub enum TypeSystemEntity {
 }
 
 impl PartialEq for TypeSystemEntity {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         match (self, other) {
             (TypeSystemEntity::Type(a), TypeSystemEntity::Type(b)) => Arc::ptr_eq(a, b),
             (TypeSystemEntity::Symbol(a), TypeSystemEntity::Symbol(b)) => Arc::ptr_eq(a, b),
@@ -452,43 +452,43 @@ pub struct TypeResolution {
 }
 
 impl Checker {
-    pub(crate) fn unknown_symbol(&self) -> Arc<Symbol> {
+    pub(crate) fn unknown_symbol(&self) -> Arc<Symbol> { ::tsox_core::fntrace::enter("unknown_symbol"); 
         self.unknown_symbol.clone().expect("unknown_symbol not initialized")
     }
 
-    pub(crate) fn require_symbol(&self) -> Option<Arc<Symbol>> {
+    pub(crate) fn require_symbol(&self) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("require_symbol"); 
         self.require_symbol.clone()
     }
 
-    pub(crate) fn current_node(&self) -> Option<Arc<Node>> {
+    pub(crate) fn current_node(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("current_node"); 
         self.current_node.clone()
     }
 
-    pub(crate) fn any_signature(&self) -> Arc<Signature> {
+    pub(crate) fn any_signature(&self) -> Arc<Signature> { ::tsox_core::fntrace::enter("any_signature"); 
         self.any_signature.get().cloned().expect("any_signature not initialized")
     }
 
-    pub(crate) fn global_function_type(&self) -> Arc<Type> {
+    pub(crate) fn global_function_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("global_function_type"); 
         self.global_function_type.get().cloned().expect("global_function_type not initialized")
     }
 
-    pub(crate) fn missing_type(&self) -> Arc<Type> {
+    pub(crate) fn missing_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("missing_type"); 
         Arc::clone(&self.missing_type)
     }
 
-    pub(crate) fn null_widening_type(&self) -> Arc<Type> {
+    pub(crate) fn null_widening_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("null_widening_type"); 
         Arc::clone(&self.null_widening_type)
     }
 
-    pub(crate) fn unique_literal_type(&self) -> Arc<Type> {
+    pub(crate) fn unique_literal_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("unique_literal_type"); 
         Arc::clone(&self.unique_literal_type)
     }
 
-    pub(crate) fn regular_false_type(&self) -> Arc<Type> {
+    pub(crate) fn regular_false_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("regular_false_type"); 
         Arc::clone(&self.regular_false_type)
     }
 
-    pub(crate) fn number_or_big_int_type(&self) -> Arc<Type> {
+    pub(crate) fn number_or_big_int_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("number_or_big_int_type"); 
         Arc::clone(&self.number_or_big_int_type)
     }
 }

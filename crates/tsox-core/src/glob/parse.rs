@@ -1,7 +1,7 @@
 use super::Glob;
 use super::element::Element;
 
-pub(super) fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> {
+pub(super) fn parse_inner(pattern: &str, nested: bool) -> Result<(Glob, &str), String> { crate::fntrace::enter("parse_inner"); 
     let mut elems = Vec::new();
     let mut chars = pattern.char_indices().peekable();
     let bytes = pattern.as_bytes();

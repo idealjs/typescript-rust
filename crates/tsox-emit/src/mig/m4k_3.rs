@@ -58,7 +58,7 @@ pub fn collect_external_module_info(
     compiler_options: &CompilerOptions,
     emit_context: EmitContext,
     resolver: Arc<dyn ReferenceResolver>,
-) -> ExternalModuleInfo {
+) -> ExternalModuleInfo { ::tsox_core::fntrace::enter("collect_external_module_info"); 
     let mut c = ExternalModuleInfoCollector {
         source_file,
         compiler_options,
@@ -80,11 +80,11 @@ pub fn collect_external_module_info(
 }
 
 impl<'a> ExternalModuleInfoCollector<'a> {
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub fn collect(&mut self) -> ExternalModuleInfo {
+    pub fn collect(&mut self) -> ExternalModuleInfo { ::tsox_core::fntrace::enter("collect"); 
         let mut has_import_star = false;
         let mut has_import_default = false;
         let statements = self.source_file.as_source_file_data().statements.nodes.clone();
@@ -225,7 +225,7 @@ impl<'a> ExternalModuleInfoCollector<'a> {
         )
     }
 
-    pub fn add_unique_export(&mut self, name: &str) -> bool {
+    pub fn add_unique_export(&mut self, name: &str) -> bool { ::tsox_core::fntrace::enter("add_unique_export"); 
         if !self.unique_exports.contains(name) {
             self.unique_exports.insert(name.to_string());
             return true;
@@ -233,22 +233,22 @@ impl<'a> ExternalModuleInfoCollector<'a> {
         false
     }
 
-    pub fn add_exported_binding(&mut self, decl: &Arc<Node>, name: &Arc<Node>) {
+    pub fn add_exported_binding(&mut self, decl: &Arc<Node>, name: &Arc<Node>) { ::tsox_core::fntrace::enter("add_exported_binding"); 
         let original = self.emit_context.most_original(decl);
         self.output
             .exported_bindings
             .push((original, name.clone()));
     }
 
-    pub fn add_external_import(&mut self, node: &Arc<Node>) {
+    pub fn add_external_import(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("add_external_import"); 
         self.output.external_imports.push(node.clone());
     }
 
-    pub fn add_exported_name(&mut self, name: Arc<Node>) {
+    pub fn add_exported_name(&mut self, name: Arc<Node>) { ::tsox_core::fntrace::enter("add_exported_name"); 
         self.output.exported_names.push(name);
     }
 
-    pub fn add_exported_names_for_export_declaration(&mut self, node: &Arc<Node>) {
+    pub fn add_exported_names_for_export_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("add_exported_names_for_export_declaration"); 
         let export_decl = node.as_export_declaration();
         let elements = export_decl
             .export_clause
@@ -303,7 +303,7 @@ impl<'a> ExternalModuleInfoCollector<'a> {
         node: &Arc<Node>,
         name: Option<&Arc<Node>>,
         is_default: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_exported_function_declaration"); 
         let original = self.emit_context.most_original(node);
         self.output.exported_functions.push(original);
         if is_default {
@@ -330,7 +330,7 @@ impl<'a> ExternalModuleInfoCollector<'a> {
         }
     }
 
-    pub fn collect_exported_variable_info(&mut self, decl: &Arc<Node>) {
+    pub fn collect_exported_variable_info(&mut self, decl: &Arc<Node>) { ::tsox_core::fntrace::enter("collect_exported_variable_info"); 
         let name = decl.name().unwrap().clone();
         if is_binding_pattern(&name) {
             for element in name.elements_list_r39k02().nodes.clone() {
@@ -360,7 +360,7 @@ pub fn create_external_helpers_import_declaration_if_needed(
     has_export_stars_to_export_values: bool,
     has_import_star: bool,
     has_import_default: bool,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_external_helpers_import_declaration_if_needed"); 
     if compiler_options.import_helpers.is_true()
         && source_file.is_effective_external_module_node(compiler_options)
     {
@@ -460,7 +460,7 @@ pub fn create_external_helpers_import_declaration_if_needed(
 pub fn get_imported_helpers(
     emit_context: &EmitContext,
     source_file: &Arc<Node>,
-) -> Vec<Arc<EmitHelper>> {
+) -> Vec<Arc<EmitHelper>> { ::tsox_core::fntrace::enter("get_imported_helpers"); 
     let mut helpers: Vec<Arc<EmitHelper>> = Vec::new();
     for helper in emit_context.get_emit_helpers(source_file) {
         if !helper.scoped {
@@ -478,7 +478,7 @@ pub fn get_or_create_external_helpers_module_name_if_needed(
     has_export_stars_to_export_values: bool,
     has_import_star_or_import_default: bool,
     file_module_kind: ModuleKind,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_or_create_external_helpers_module_name_if_needed"); 
     if let Some(external_helpers_module_name) =
         emit_context.get_external_helpers_module_name(node)
     {
@@ -503,20 +503,20 @@ pub fn get_or_create_external_helpers_module_name_if_needed(
     None
 }
 
-pub fn is_named_default_reference(e: &Arc<Node>) -> bool {
+pub fn is_named_default_reference(e: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_named_default_reference"); 
     module_export_name_is_default(&e.property_name_or_name())
 }
 
-pub fn contains_default_reference(node: &Arc<Node>) -> bool {
+pub fn contains_default_reference(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("contains_default_reference"); 
     is_named_imports(node)
         || is_named_exports(node) && some(&node.elements_list_r39k02().nodes, is_named_default_reference)
 }
 
-pub fn get_export_needs_import_star_helper(node: &Arc<Node>) -> bool {
+pub fn get_export_needs_import_star_helper(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("get_export_needs_import_star_helper"); 
     get_namespace_declaration_node(node).is_some()
 }
 
-pub fn get_import_needs_import_star_helper(node: &Arc<Node>) -> bool {
+pub fn get_import_needs_import_star_helper(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("get_import_needs_import_star_helper"); 
     if get_namespace_declaration_node(node).is_some() {
         return true;
     }
@@ -544,7 +544,7 @@ pub fn get_import_needs_import_star_helper(node: &Arc<Node>) -> bool {
         || ((elements.len() - default_ref_count) != 0 && is_default_import(node))
 }
 
-pub fn get_import_needs_import_default_helper(node: &Arc<Node>) -> bool {
+pub fn get_import_needs_import_default_helper(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("get_import_needs_import_default_helper"); 
     !get_import_needs_import_star_helper(node)
         && (is_default_import(node)
             || (node.as_import_declaration().import_clause.is_some()
@@ -577,7 +577,7 @@ pub struct ImportElisionTransformer<'a> {
     pub emit_resolver: &'a EmitResolver,
 }
 
-pub fn new_import_elision_transformer(opt: &TransformOptions) -> Transformer {
+pub fn new_import_elision_transformer(opt: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("new_import_elision_transformer"); 
     let compiler_options = opt.compiler_options;
     let emit_context = opt.context;
     if compiler_options.verbatim_module_syntax.is_true() {
@@ -595,24 +595,24 @@ pub fn new_import_elision_transformer(opt: &TransformOptions) -> Transformer {
 fn import_elision_transformer_visit(
     _transformer: &mut Transformer,
     node: Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("import_elision_transformer_visit"); 
     Some(node)
 }
 
 impl<'a> ImportElisionTransformer<'a> {
-    fn visitor(&self) -> crate::mig::m4k::Visitor {
+    fn visitor(&self) -> crate::mig::m4k::Visitor { ::tsox_core::fntrace::enter("visitor"); 
         crate::mig::m4k::Visitor
     }
 
-    fn factory(&self) -> NodeFactory<'_> {
+    fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(self.emit_context)
     }
 
-    fn emit_context(&self) -> &'a EmitContext {
+    fn emit_context(&self) -> &'a EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         self.emit_context
     }
 
-    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         if is_source_file(&node) {
             let most_original = self.emit_context().most_original(&node);
             self.emit_resolver
@@ -755,18 +755,18 @@ impl<'a> ImportElisionTransformer<'a> {
         }
     }
 
-    pub fn should_emit_alias_declaration(&self, node: &Arc<Node>) -> bool {
+    pub fn should_emit_alias_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_alias_declaration"); 
         is_in_js_file(node) || self.is_referenced_alias_declaration(node)
     }
 
-    pub fn should_emit_import_equals_declaration(&self, node: &Arc<Node>) -> bool {
+    pub fn should_emit_import_equals_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_import_equals_declaration"); 
         let current_source_file = self.current_source_file.clone().unwrap();
         self.should_emit_alias_declaration(node)
             || (!current_source_file.is_external_module_node()
                 && self.is_top_level_value_import_equals_with_entity_name(node))
     }
 
-    pub fn is_referenced_alias_declaration(&self, node: &Arc<Node>) -> bool {
+    pub fn is_referenced_alias_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_referenced_alias_declaration"); 
         match self.emit_context().parse_node(node) {
             None => true,
             Some(node) => self
@@ -775,14 +775,14 @@ impl<'a> ImportElisionTransformer<'a> {
         }
     }
 
-    pub fn is_value_alias_declaration(&self, node: &Arc<Node>) -> bool {
+    pub fn is_value_alias_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_value_alias_declaration"); 
         match self.emit_context().parse_node(node) {
             None => true,
             Some(node) => self.emit_resolver.is_value_alias_declaration_r39k02(&node),
         }
     }
 
-    pub fn is_top_level_value_import_equals_with_entity_name(&self, node: &Arc<Node>) -> bool {
+    pub fn is_top_level_value_import_equals_with_entity_name(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_top_level_value_import_equals_with_entity_name"); 
         match self.emit_context().parse_node(node) {
             None => false,
             Some(node) => self

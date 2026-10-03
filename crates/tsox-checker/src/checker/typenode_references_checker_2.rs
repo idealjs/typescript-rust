@@ -3,7 +3,7 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn resolve_type_reference(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn resolve_type_reference(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_reference"); 
         let (type_name, type_arguments) = match &node.data {
             NodeData::TypeReferenceNode(data) => (&data.type_name, data.type_arguments.clone()),
             NodeData::ExpressionWithTypeArguments(data) => {
@@ -510,7 +510,7 @@ impl Checker {
         self.resolve_type_alias_reference(&symbol, type_arguments)
     }
 
-    pub(crate) fn interface_default_type_arguments(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
+    pub(crate) fn interface_default_type_arguments(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("interface_default_type_arguments"); 
         let decl = symbol.declarations.iter().find(|d| {
             matches!(d.data, NodeData::InterfaceDeclaration(_))
         });

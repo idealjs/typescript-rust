@@ -20,7 +20,7 @@ impl Checker {
         hint: ReferenceHint,
         prop_symbol: Option<&Arc<Symbol>>,
         parent_type: Option<&Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("mark_linked_references"); 
         if !self.can_collect_symbol_alias_accessibility_data {
             return;
         }
@@ -58,7 +58,7 @@ impl Checker {
         }
     }
 
-    fn mark_linked_references_unspecified(&mut self, location: &Arc<Node>) {
+    fn mark_linked_references_unspecified(&mut self, location: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_linked_references_unspecified"); 
         if location.flags.contains(NodeFlags::InWithStatement) {
             return;
         }

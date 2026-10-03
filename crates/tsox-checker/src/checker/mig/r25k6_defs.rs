@@ -9,7 +9,7 @@ pub(crate) fn map_type_with_checker(
     c: &mut Checker,
     t: &Arc<Type>,
     f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> Option<Arc<Type>>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type_with_checker"); 
     map_type_ex_with_checker(c, t, f, false)
 }
 
@@ -18,7 +18,7 @@ fn map_type_ex_with_checker(
     t: &Arc<Type>,
     f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> Option<Arc<Type>>,
     no_reductions: bool,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type_ex_with_checker"); 
     if t.flags.contains(TypeFlags::Never) {
         return Some(Arc::clone(t));
     }
@@ -65,14 +65,14 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-fn alias_instantiations_slot(symbol: &Arc<Symbol>) -> usize {
+fn alias_instantiations_slot(symbol: &Arc<Symbol>) -> usize { ::tsox_core::fntrace::enter("alias_instantiations_slot"); 
     Arc::as_ptr(symbol) as *const () as usize
 }
 
 pub(crate) fn alias_instantiations_get(
     symbol: &Arc<Symbol>,
     key: &CacheHashKey,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("alias_instantiations_get"); 
     ALIAS_TYPE_INSTANTIATIONS.with(|map| {
         map.borrow_mut()
             .get(&alias_instantiations_slot(symbol))
@@ -85,7 +85,7 @@ pub(crate) fn alias_instantiations_insert(
     symbol: &Arc<Symbol>,
     key: CacheHashKey,
     instantiation: Arc<Type>,
-) {
+) { ::tsox_core::fntrace::enter("alias_instantiations_insert"); 
     ALIAS_TYPE_INSTANTIATIONS.with(|map| {
         map.borrow_mut()
             .entry(alias_instantiations_slot(symbol))

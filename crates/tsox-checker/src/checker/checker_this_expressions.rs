@@ -12,7 +12,7 @@ use tsox_frontend::ast::{
 
 impl Checker {
     /// Go checkThisExpression 的检查入口：module/enum 容器报错 + 类型解析（含 TS2683）
-    pub(crate) fn check_this_expression_reference(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_this_expression_reference(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_this_expression_reference"); 
         let container = get_this_container(node, false, false);
         if self.this_location_errors_reported.insert(node.id()) {
             let diagnostic = match container.kind {
@@ -66,7 +66,7 @@ impl Checker {
     }
 
     /// Go checkThisExpression 的类型解析主干（诊断与 flow 收窄不在此层）
-    pub(crate) fn this_expression_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn this_expression_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("this_expression_type"); 
         // Go checkThisInStaticClassFieldInitializerInDecoratedClass：
         // legacy 装饰器类的 static 属性初始化器禁用 this（TS2816）
         let container = get_this_container(node, false, false);
@@ -137,7 +137,7 @@ impl Checker {
     }
 
     /// Go getContextualThisParameterType
-    pub(crate) fn contextual_this_parameter_type(&mut self, container: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn contextual_this_parameter_type(&mut self, container: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("contextual_this_parameter_type"); 
         if container.kind == SyntaxKind::ArrowFunction {
             return None;
         }
@@ -202,7 +202,7 @@ impl Checker {
 
     /// Go getContextualSignature：对象字面量方法经所在字面量的 contextual type
     /// 取方法属性的调用签名；其余走常规 contextual signature
-    fn contextual_signature_for(&mut self, container: &Arc<Node>) -> Option<Arc<Signature>> {
+    fn contextual_signature_for(&mut self, container: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("contextual_signature_for"); 
         if is_object_literal_method(container) {
             let literal = container.parent()?;
             let name_node = container.name()?;
@@ -217,14 +217,14 @@ impl Checker {
         self.get_contextual_signature(container)
     }
 
-    fn type_of_this_parameter_node(&mut self, param: &Arc<Node>) -> Arc<Type> {
+    fn type_of_this_parameter_node(&mut self, param: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_this_parameter_node"); 
         if let Some(symbol) = self.get_symbol_of_declaration(param) {
             return self.get_type_of_symbol(&symbol);
         }
         self.get_any_type()
     }
 
-    fn global_this_type_value(&mut self) -> Option<Arc<Type>> {
+    fn global_this_type_value(&mut self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("global_this_type_value"); 
         // Go tryGetThisTypeAtEx SourceFile 分支：getTypeOfSymbol(globalThisSymbol)
         //（匿名对象型、symbol=globalThisSymbol，wc3 初始化 resolved_type）；
         // 非globalThisType 字段（那是 lib ThisType<T> 接口，仅 ThisType<T>
@@ -234,7 +234,7 @@ impl Checker {
     }
 }
 
-fn is_object_literal_method(node: &Arc<Node>) -> bool {
+fn is_object_literal_method(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_object_literal_method"); 
     node.kind == SyntaxKind::MethodDeclaration
         && node
             .parent()
@@ -243,7 +243,7 @@ fn is_object_literal_method(node: &Arc<Node>) -> bool {
 }
 
 /// Go getContainingObjectLiteral：函数/方法所在的最近对象字面量（不跨函数边界）
-fn containing_object_literal(fn_node: &Arc<Node>) -> Option<Arc<Node>> {
+fn containing_object_literal(fn_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("containing_object_literal"); 
     let mut current = fn_node.parent();
     while let Some(n) = current {
         match n.kind {
@@ -262,7 +262,7 @@ fn containing_object_literal(fn_node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 /// `obj.xxx = function(...) {...}` 形态下 obj 的表达式节点
-fn assignment_target_object(fn_node: &Arc<Node>) -> Option<Arc<Node>> {
+fn assignment_target_object(fn_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("assignment_target_object"); 
     let mut parent = fn_node.parent()?;
     while parent.kind == SyntaxKind::ParenthesizedExpression {
         parent = parent.parent()?;
@@ -282,7 +282,7 @@ fn assignment_target_object(fn_node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 impl Checker {
-    fn container_file_is_external_module(&self, source_file_node: &Arc<Node>) -> bool {
+    fn container_file_is_external_module(&self, source_file_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("container_file_is_external_module"); 
         if let Some(f) = &self.current_file {
             return f.external_module_indicator.is_some();
         }
@@ -293,7 +293,7 @@ impl Checker {
     }
 }
 
-fn is_module_indicator(statement: &Arc<Node>) -> bool {
+fn is_module_indicator(statement: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_indicator"); 
     match &statement.data {
         NodeData::ExportDeclaration(d) => d.export_clause.is_some() || d.module_specifier.is_some(),
         NodeData::ImportEqualsDeclaration(d) => {

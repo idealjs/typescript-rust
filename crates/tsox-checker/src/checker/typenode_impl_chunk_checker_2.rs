@@ -10,7 +10,7 @@ impl Checker {
         is_construct: bool,
         contextual_signature: Option<&Arc<Signature>>,
         declaration: Option<Arc<Node>>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("build_signature_from_function_like_type_node"); 
         let type_parameters = self.type_parameters_of_declaration(&declaration);
         // Go instantiateSignatureEx（erase=false）：实例化窗口内构建的签名，自身
         // 类型参数克隆为新实例并经组合 mapper（[旧参→克隆]⊕[容器实参映射]）流入
@@ -200,7 +200,7 @@ impl Checker {
     pub(crate) fn type_parameters_of_declaration(
         &mut self,
         declaration: &Option<Arc<Node>>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("type_parameters_of_declaration"); 
         let Some(decl) = declaration else {
             return Vec::new();
         };
@@ -239,7 +239,7 @@ impl Checker {
         &self,
         sigs: Vec<Arc<Signature>>,
         is_construct: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_function_or_constructor_type"); 
         self.create_function_or_constructor_type_ex(sigs, is_construct, None)
     }
 
@@ -248,7 +248,7 @@ impl Checker {
         sigs: Vec<Arc<Signature>>,
         is_construct: bool,
         symbol: Option<Arc<Symbol>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_function_or_constructor_type_ex"); 
         let call_signature_count = if is_construct { 0 } else { sigs.len() };
         let mut structured = StructuredTypeData::default();
         structured.signatures = sigs;
@@ -272,7 +272,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         types: &[Arc<Type>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_cross_product_union"); 
         if Self::cross_product_union_size(types) < 100_000 {
             return true;
         }
@@ -296,7 +296,7 @@ impl Checker {
         false
     }
 
-    pub fn get_nullable_type(&mut self, t: &Arc<Type>, flags: TypeFlags) -> Arc<Type> {
+    pub fn get_nullable_type(&mut self, t: &Arc<Type>, flags: TypeFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("get_nullable_type"); 
         let missing = (flags & !t.flags) & (TypeFlags::Undefined | TypeFlags::Null);
         if missing.is_empty() {
             return Arc::clone(t);
@@ -317,7 +317,7 @@ impl Checker {
         types: &mut Vec<Arc<Type>>,
         has_return_with_no_expression: &mut bool,
         has_return_of_type_never: &mut bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_return_types_from_node"); 
         use tsox_frontend::ast::node_data_generated::for_each_child;
         match node.kind {
             SyntaxKind::ReturnStatement => {
@@ -374,7 +374,7 @@ impl Checker {
         });
     }
 
-    fn is_bare_recursive_call(&mut self, fn_node: Option<&Arc<Node>>, expr: &Arc<Node>) -> bool {
+    fn is_bare_recursive_call(&mut self, fn_node: Option<&Arc<Node>>, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_bare_recursive_call"); 
         if expr.kind != SyntaxKind::CallExpression {
             return false;
         }
@@ -422,7 +422,7 @@ impl Checker {
         true
     }
 
-    pub fn may_return_never(fn_node: &Arc<Node>) -> bool {
+    pub fn may_return_never(fn_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("may_return_never"); 
         match fn_node.kind {
             SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction => true,
             SyntaxKind::MethodDeclaration => fn_node
@@ -432,7 +432,7 @@ impl Checker {
         }
     }
 
-    fn is_async_function(fn_node: Option<&Arc<Node>>) -> bool {
+    fn is_async_function(fn_node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_async_function"); 
         fn_node
             .is_some_and(|n| n.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Async))
     }
@@ -442,7 +442,7 @@ impl Checker {
         fn_node: Option<&Arc<Node>>,
         body: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_function_return_type"); 
         if let Some(type_node) = type_node {
             return self.get_type_from_type_node(type_node);
         }
@@ -471,7 +471,7 @@ impl Checker {
         &mut self,
         body: &Arc<Node>,
         fn_node: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_function_return_type_inner"); 
         let is_async = fn_node
             .map(|n| n.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Async))
             .unwrap_or(false);
@@ -537,7 +537,7 @@ impl Checker {
         &mut self,
         fn_node: Option<&Arc<Node>>,
         t: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("awaited_type_of_body_return"); 
         self.check_awaited_type_no_alias(
             &t,
             fn_node,
@@ -554,7 +554,7 @@ impl Checker {
         fn_node: Option<&Arc<Node>>,
         mut t: Arc<Type>,
         is_async: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("finalize_inferred_return_type"); 
         if crate::checker::is_unit_type(&t) {
             let contextual = match fn_node.and_then(|f| self.get_contextual_signature(f)) {
                 Some(sig) => {
@@ -593,7 +593,7 @@ impl Checker {
 
     // Go getWidenedType：仅 RequiresWidening（widening null/undefined、对象/
     // 数组字面量）参与加宽；裸 fresh literal 与非数组/元组引用的类型实参不 widen
-    fn widen_inferred_return_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn widen_inferred_return_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("widen_inferred_return_type"); 
         if t.flags.intersects(crate::checker::types::TYPE_FLAGS_NULLABLE)
             && t
                 .object_flags
@@ -654,7 +654,7 @@ impl Checker {
     }
 
     // Go createPromiseType：全局 Promise 泛型壳 + awaited 型实参
-    pub(crate) fn create_promise_return_type_for(&mut self, promised: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn create_promise_return_type_for(&mut self, promised: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_promise_return_type_for"); 
         let Some(promise_sym) = self.globals.get("Promise").cloned() else {
             return self.unknown_type();
         };
@@ -667,7 +667,7 @@ impl Checker {
 
     /// Go getWidenedTypeForVariableLikeDeclaration 的绑定模式分支：
     /// 数组模式 → 元组（默认值取加宽型，rest 元素成数组尾）；对象模式 → 匿名对象
-    pub fn implied_type_for_binding_pattern(&mut self, pattern: &Arc<Node>) -> Arc<Type> {
+    pub fn implied_type_for_binding_pattern(&mut self, pattern: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("implied_type_for_binding_pattern"); 
         match &pattern.data {
             NodeData::BindingPattern(bp) => match pattern.kind {
                 SyntaxKind::ArrayBindingPattern => {

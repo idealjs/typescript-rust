@@ -7,7 +7,7 @@ pub const COMPARISON_LESS_THAN: Comparison = -1;
 pub const COMPARISON_EQUAL: Comparison = 0;
 pub const COMPARISON_GREATER_THAN: Comparison = 1;
 
-pub fn equate_string_case_insensitive(a: &str, b: &str) -> bool {
+pub fn equate_string_case_insensitive(a: &str, b: &str) -> bool { crate::fntrace::enter("equate_string_case_insensitive"); 
     if a == b {
         return true;
     }
@@ -31,11 +31,11 @@ pub fn equate_string_case_insensitive(a: &str, b: &str) -> bool {
     }
 }
 
-fn simple_fold_lower(c: char) -> Vec<char> {
+fn simple_fold_lower(c: char) -> Vec<char> { crate::fntrace::enter("simple_fold_lower"); 
     c.to_lowercase().collect()
 }
 
-pub fn get_string_equality_comparer(ignore_case: bool) -> fn(&str, &str) -> bool {
+pub fn get_string_equality_comparer(ignore_case: bool) -> fn(&str, &str) -> bool { crate::fntrace::enter("get_string_equality_comparer"); 
     if ignore_case {
         equate_string_case_insensitive
     } else {
@@ -43,11 +43,11 @@ pub fn get_string_equality_comparer(ignore_case: bool) -> fn(&str, &str) -> bool
     }
 }
 
-fn equate_string_case_sensitive(a: &str, b: &str) -> bool {
+fn equate_string_case_sensitive(a: &str, b: &str) -> bool { crate::fntrace::enter("equate_string_case_sensitive"); 
     a == b
 }
 
-pub fn compare_strings_case_insensitive(a: &str, b: &str) -> Comparison {
+pub fn compare_strings_case_insensitive(a: &str, b: &str) -> Comparison { crate::fntrace::enter("compare_strings_case_insensitive"); 
     if a == b {
         return COMPARISON_EQUAL;
     }
@@ -72,7 +72,7 @@ pub fn compare_strings_case_insensitive(a: &str, b: &str) -> Comparison {
     }
 }
 
-fn compare_strings_case_sensitive(a: &str, b: &str) -> Comparison {
+fn compare_strings_case_sensitive(a: &str, b: &str) -> Comparison { crate::fntrace::enter("compare_strings_case_sensitive"); 
     match a.cmp(b) {
         std::cmp::Ordering::Less => COMPARISON_LESS_THAN,
         std::cmp::Ordering::Equal => COMPARISON_EQUAL,
@@ -80,7 +80,7 @@ fn compare_strings_case_sensitive(a: &str, b: &str) -> Comparison {
     }
 }
 
-pub fn get_string_comparer(ignore_case: bool) -> fn(&str, &str) -> Comparison {
+pub fn get_string_comparer(ignore_case: bool) -> fn(&str, &str) -> Comparison { crate::fntrace::enter("get_string_comparer"); 
     if ignore_case {
         compare_strings_case_insensitive
     } else {
@@ -88,7 +88,7 @@ pub fn get_string_comparer(ignore_case: bool) -> fn(&str, &str) -> Comparison {
     }
 }
 
-pub fn has_prefix(s: &str, prefix: &str, case_sensitive: bool) -> bool {
+pub fn has_prefix(s: &str, prefix: &str, case_sensitive: bool) -> bool { crate::fntrace::enter("has_prefix"); 
     if case_sensitive {
         return s.starts_with(prefix);
     }
@@ -98,7 +98,7 @@ pub fn has_prefix(s: &str, prefix: &str, case_sensitive: bool) -> bool {
     equate_string_case_insensitive(&s[..prefix.len()], prefix)
 }
 
-pub fn has_suffix(s: &str, suffix: &str, case_sensitive: bool) -> bool {
+pub fn has_suffix(s: &str, suffix: &str, case_sensitive: bool) -> bool { crate::fntrace::enter("has_suffix"); 
     if case_sensitive {
         return s.ends_with(suffix);
     }
@@ -113,14 +113,14 @@ pub fn has_prefix_and_suffix_without_overlap(
     prefix: &str,
     suffix: &str,
     case_sensitive: bool,
-) -> bool {
+) -> bool { crate::fntrace::enter("has_prefix_and_suffix_without_overlap"); 
     if prefix.len() + suffix.len() > s.len() {
         return false;
     }
     has_prefix(s, prefix, case_sensitive) && has_suffix(s, suffix, case_sensitive)
 }
 
-pub fn compare_strings_case_insensitive_then_sensitive(a: &str, b: &str) -> Comparison {
+pub fn compare_strings_case_insensitive_then_sensitive(a: &str, b: &str) -> Comparison { crate::fntrace::enter("compare_strings_case_insensitive_then_sensitive"); 
     let cmp = compare_strings_case_insensitive(a, b);
     if cmp != COMPARISON_EQUAL {
         return cmp;
@@ -128,7 +128,7 @@ pub fn compare_strings_case_insensitive_then_sensitive(a: &str, b: &str) -> Comp
     compare_strings_case_sensitive(a, b)
 }
 
-pub fn compare_strings_case_insensitive_eslint_compatible(a: &str, b: &str) -> Comparison {
+pub fn compare_strings_case_insensitive_eslint_compatible(a: &str, b: &str) -> Comparison { crate::fntrace::enter("compare_strings_case_insensitive_eslint_compatible"); 
     if a == b {
         return COMPARISON_EQUAL;
     }
@@ -141,10 +141,10 @@ pub fn compare_strings_case_insensitive_eslint_compatible(a: &str, b: &str) -> C
     }
 }
 
-pub fn is_unicode_identifier_start(ch: char) -> bool {
+pub fn is_unicode_identifier_start(ch: char) -> bool { crate::fntrace::enter("is_unicode_identifier_start"); 
     unicode_esnext_identifier_start(ch)
 }
 
-pub fn is_unicode_identifier_part(ch: char) -> bool {
+pub fn is_unicode_identifier_part(ch: char) -> bool { crate::fntrace::enter("is_unicode_identifier_part"); 
     unicode_esnext_identifier_part(ch)
 }

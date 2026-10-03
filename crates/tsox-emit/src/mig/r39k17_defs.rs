@@ -20,22 +20,22 @@ use crate::mig::m4q::r33k12_defs::{
 };
 
 impl<'a> Printer<'a> {
-    pub fn should_emit_on_single_line(&self, node: &Arc<Node>) -> bool {
+    pub fn should_emit_on_single_line(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_on_single_line"); 
         self.emit_context.emit_flags(node) & EmitFlags::SINGLE_LINE.0 != 0
     }
 
-    pub fn should_elide_indentation(&self, node: &Arc<Node>) -> bool {
+    pub fn should_elide_indentation(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_elide_indentation"); 
         self.emit_context.emit_flags(node) & EmitFlags::NO_INDENTATION.0 != 0
     }
 
-    pub fn should_emit_on_new_line(&self, node: &Arc<Node>, format: ListFormat) -> bool {
+    pub fn should_emit_on_new_line(&self, node: &Arc<Node>, format: ListFormat) -> bool { ::tsox_core::fntrace::enter("should_emit_on_new_line"); 
         if self.emit_context.emit_flags(node) & EmitFlags::START_ON_NEW_LINE.0 != 0 {
             return true;
         }
         format.0 & LF_PREFER_NEW_LINE != 0
     }
 
-    pub fn get_effective_lines(&self, get_line_difference: impl Fn(bool) -> i32) -> i32 {
+    pub fn get_effective_lines(&self, get_line_difference: impl Fn(bool) -> i32) -> i32 { ::tsox_core::fntrace::enter("get_effective_lines"); 
         let lines = get_line_difference(true);
         if lines == 0 {
             return get_line_difference(false);
@@ -48,7 +48,7 @@ impl<'a> Printer<'a> {
         parent: &Arc<Node>,
         node1: &Arc<Node>,
         node2: &Arc<Node>,
-    ) -> i32 {
+    ) -> i32 { ::tsox_core::fntrace::enter("get_lines_between_nodes"); 
         if self.should_elide_indentation(parent) {
             return 0;
         }
@@ -92,7 +92,7 @@ impl<'a> Printer<'a> {
         parent_node: Option<&Arc<Node>>,
         first_child: Option<&Arc<Node>>,
         format: ListFormat,
-    ) -> i32 {
+    ) -> i32 { ::tsox_core::fntrace::enter("get_leading_line_terminator_count"); 
         if format.0 & LF_PRESERVE_LINES != 0 || self.preserve_source_newlines {
             if format.0 & LF_PREFER_NEW_LINE != 0 {
                 return 1;
@@ -162,7 +162,7 @@ impl<'a> Printer<'a> {
         last_child: Option<&Arc<Node>>,
         format: ListFormat,
         children_text_range: TextRange,
-    ) -> i32 {
+    ) -> i32 { ::tsox_core::fntrace::enter("get_closing_line_terminator_count"); 
         if format.0 & LF_PRESERVE_LINES != 0 || self.preserve_source_newlines {
             if format.0 & LF_PREFER_NEW_LINE != 0 {
                 return 1;
@@ -223,7 +223,7 @@ impl<'a> Printer<'a> {
     }
 }
 
-fn r39k17_skip_synthesized_parentheses(node: &Arc<Node>) -> &Arc<Node> {
+fn r39k17_skip_synthesized_parentheses(node: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("r39k17_skip_synthesized_parentheses"); 
     let mut current = node;
     while current.kind == SyntaxKind::ParenthesizedExpression && node_is_synthesized(current) {
         match current.expression() {

@@ -9,7 +9,7 @@ impl Checker {
         symbol_from_symbol_table: &Arc<Symbol>,
         resolved_imported_symbol: &Arc<Symbol>,
         ignore_qualification: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_candidate_list_for_symbol"); 
         if self.is_accessible(
             ctx,
             symbol_from_symbol_table,
@@ -49,7 +49,7 @@ impl Checker {
         symbol_from_symbol_table: &Arc<Symbol>,
         resolved_alias_symbol: Option<&Arc<Symbol>>,
         ignore_qualification: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_accessible"); 
         let mut like_symbols = false;
         if let Some(ref resolved) = resolved_alias_symbol {
             if ctx.symbol.id() == resolved.id() {
@@ -91,7 +91,7 @@ impl Checker {
         ctx: &AccessibleSymbolChainContext,
         symbol_from_symbol_table: &Arc<Symbol>,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("can_qualify_symbol"); 
         if !self.needs_qualification(
             symbol_from_symbol_table,
             ctx.enclosing_declaration.as_ref(),
@@ -121,7 +121,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("needs_qualification"); 
         let mut qualify = false;
         let tables = self.collect_symbol_tables_in_scope(enclosing_declaration);
         for info in &tables {
@@ -160,7 +160,7 @@ impl Checker {
     pub(crate) fn collect_symbol_tables_in_scope(
         &mut self,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) -> Vec<SymbolTableInScope> {
+    ) -> Vec<SymbolTableInScope> { ::tsox_core::fntrace::enter("collect_symbol_tables_in_scope"); 
         let mut result: Vec<SymbolTableInScope> = Vec::new();
         let mut location = enclosing_declaration.cloned();
 
@@ -260,7 +260,7 @@ impl Checker {
     pub(crate) fn get_class_expression_name_table(
         &mut self,
         location: &Arc<Node>,
-    ) -> Option<SymbolTable> {
+    ) -> Option<SymbolTable> { ::tsox_core::fntrace::enter("get_class_expression_name_table"); 
         let node_id = location.id();
 
         if let Some(table) = self.class_expression_name_tables.get(&node_id) {
@@ -284,7 +284,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         _should_compute_aliases_to_make_visible: bool,
-    ) -> Option<SymbolAccessibilityResult> {
+    ) -> Option<SymbolAccessibilityResult> { ::tsox_core::fntrace::enter("has_visible_declarations_with_aliases"); 
         self.has_visible_declarations(symbol)
     }
 }

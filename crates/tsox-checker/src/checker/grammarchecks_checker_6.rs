@@ -3,7 +3,7 @@
 use crate::checker::grammarchecks::*;
 
 impl Checker {
-    pub fn check_grammar_modifiers(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_modifiers(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_modifiers"); 
         let modifiers = match node.modifiers() {
             Some(ml) => Arc::clone(ml),
             None => return false,
@@ -153,7 +153,7 @@ impl Checker {
     }
 
     // Go ast.NodeCanBeDecorated
-    pub(crate) fn node_can_be_decorated(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn node_can_be_decorated(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_can_be_decorated"); 
         if self.legacy_decorators
             && node.name().is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier)
         {

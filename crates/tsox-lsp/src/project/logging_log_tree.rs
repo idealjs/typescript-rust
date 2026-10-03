@@ -14,7 +14,7 @@ struct LogEntry {
 }
 
 impl LogEntry {
-    fn new(child: Option<Box<LogTree>>, message: String) -> Self {
+    fn new(child: Option<Box<LogTree>>, message: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         LogEntry {
             seq: SEQ.fetch_add(1, Ordering::SeqCst),
             time: format_time_now(),
@@ -24,7 +24,7 @@ impl LogEntry {
     }
 }
 
-fn format_time_now() -> String {
+fn format_time_now() -> String { ::tsox_core::fntrace::enter("format_time_now"); 
     "[time]".to_string()
 }
 
@@ -43,7 +43,7 @@ unsafe impl Send for LogTree {}
 unsafe impl Sync for LogTree {}
 
 impl LogTree {
-    pub fn new(name: &str) -> Box<LogTree> {
+    pub fn new(name: &str) -> Box<LogTree> { ::tsox_core::fntrace::enter("new"); 
         let lc = Box::new(LogTree {
             name: name.to_string(),
             logs: Mutex::new(Vec::new()),
@@ -60,7 +60,7 @@ impl LogTree {
         unsafe { Box::from_raw(raw) }
     }
 
-    fn root_ref(&self) -> &LogTree {
+    fn root_ref(&self) -> &LogTree { ::tsox_core::fntrace::enter("root_ref"); 
         if self.root.is_null() {
             self
         } else {
@@ -68,7 +68,7 @@ impl LogTree {
         }
     }
 
-    fn add(&self, log: LogEntry) {
+    fn add(&self, log: LogEntry) { ::tsox_core::fntrace::enter("add"); 
         let root = self.root_ref();
         root.string_length.fetch_add(
             (self.level + 15 + log.message.len() + 1) as i32,
@@ -79,25 +79,25 @@ impl LogTree {
         logs.push(log);
     }
 
-    pub fn log(&self, message: &str) {
+    pub fn log(&self, message: &str) { ::tsox_core::fntrace::enter("log"); 
         let entry = LogEntry::new(None, message.to_string());
         self.add(entry);
     }
 
-    pub fn logf(&self, format: &str, args: &[&dyn std::fmt::Display]) {
+    pub fn logf(&self, format: &str, args: &[&dyn std::fmt::Display]) { ::tsox_core::fntrace::enter("logf"); 
         let msg = format_string(format, args);
         self.log(&msg);
     }
 
-    pub fn is_verbose(&self) -> bool {
+    pub fn is_verbose(&self) -> bool { ::tsox_core::fntrace::enter("is_verbose"); 
         *self.verbose.lock().unwrap()
     }
 
-    pub fn set_verbose(&self, verbose: bool) {
+    pub fn set_verbose(&self, verbose: bool) { ::tsox_core::fntrace::enter("set_verbose"); 
         *self.verbose.lock().unwrap() = verbose;
     }
 
-    pub fn fork(&self, message: &str) -> Box<LogTree> {
+    pub fn fork(&self, message: &str) -> Box<LogTree> { ::tsox_core::fntrace::enter("fork"); 
         let child = Box::new(LogTree {
             name: String::new(),
             logs: Mutex::new(Vec::new()),
@@ -123,7 +123,7 @@ impl LogTree {
         new_child
     }
 
-    pub fn embed(&self, logs: &LogTree) {
+    pub fn embed(&self, logs: &LogTree) { ::tsox_core::fntrace::enter("embed"); 
         if logs.name.is_empty() {
             return;
         }
@@ -145,7 +145,7 @@ impl LogTree {
 }
 
 impl fmt::Display for LogTree {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         let root = self.root_ref();
         if !std::ptr::eq(root, self) {
             panic!("can only call String on root LogTree");
@@ -158,7 +158,7 @@ impl fmt::Display for LogTree {
 }
 
 impl LogTree {
-    fn write_logs_recursive(&self, f: &mut fmt::Formatter<'_>, indent: &str) -> fmt::Result {
+    fn write_logs_recursive(&self, f: &mut fmt::Formatter<'_>, indent: &str) -> fmt::Result { ::tsox_core::fntrace::enter("write_logs_recursive"); 
         let logs = self.logs.lock().unwrap();
         for log in logs.iter() {
             f.write_str(indent)?;
@@ -171,7 +171,7 @@ impl LogTree {
     }
 }
 
-fn format_string(format: &str, args: &[&dyn std::fmt::Display]) -> String {
+fn format_string(format: &str, args: &[&dyn std::fmt::Display]) -> String { ::tsox_core::fntrace::enter("format_string"); 
     let mut result = format.to_string();
     for arg in args {
         result = result.replacen("{}", &arg.to_string(), 1);
@@ -179,6 +179,6 @@ fn format_string(format: &str, args: &[&dyn std::fmt::Display]) -> String {
     result
 }
 
-pub fn new_log_tree(name: &str) -> Box<LogTree> {
+pub fn new_log_tree(name: &str) -> Box<LogTree> { ::tsox_core::fntrace::enter("new_log_tree"); 
     LogTree::new(name)
 }

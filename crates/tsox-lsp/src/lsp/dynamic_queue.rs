@@ -16,7 +16,7 @@ pub struct DynamicQueue<T: Send> {
 }
 
 impl<T: Send> DynamicQueue<T> {
-    pub fn new() -> Arc<Self> {
+    pub fn new() -> Arc<Self> { ::tsox_core::fntrace::enter("new"); 
         let (idle_tx, idle_rx) = mpsc::channel();
         let (ready_tx, ready_rx) = mpsc::channel();
 
@@ -31,7 +31,7 @@ impl<T: Send> DynamicQueue<T> {
         })
     }
 
-    pub fn put(&self, item: T) -> Result<(), T> {
+    pub fn put(&self, item: T) -> Result<(), T> { ::tsox_core::fntrace::enter("put"); 
         let mut state = self
             .idle_rx
             .lock()
@@ -65,7 +65,7 @@ impl<T: Send> DynamicQueue<T> {
         }
     }
 
-    pub fn get(&self) -> Option<T> {
+    pub fn get(&self) -> Option<T> { ::tsox_core::fntrace::enter("get"); 
         let mut state = self.ready_rx.lock().unwrap().recv().ok().flatten()?;
         if state.items.is_empty() {
             self.idle_tx.lock().unwrap().send(Some(state)).ok();
@@ -80,7 +80,7 @@ impl<T: Send> DynamicQueue<T> {
         Some(item)
     }
 
-    pub fn try_get(&self) -> Option<T> {
+    pub fn try_get(&self) -> Option<T> { ::tsox_core::fntrace::enter("try_get"); 
         let mut state = self
             .ready_rx
             .lock()

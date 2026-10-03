@@ -12,7 +12,7 @@ use tsox_frontend::ast::*;
 use tsox_frontend::scanner::mig::m4d_2::get_range_of_token_at_position;
 
 impl Binder {
-    pub(crate) fn declare_module_symbol(&mut self, node: &Arc<Node>) -> ModuleInstanceState {
+    pub(crate) fn declare_module_symbol(&mut self, node: &Arc<Node>) -> ModuleInstanceState { ::tsox_core::fntrace::enter("declare_module_symbol"); 
         let state = get_module_instance_state(node);
         let instantiated = state != ModuleInstanceState::NonInstantiated;
         let (includes, excludes) = if instantiated {
@@ -32,7 +32,7 @@ impl Binder {
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
         symbol_excludes: SymbolFlags,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_source_file_member"); 
         let file = self.current_source_file.clone().unwrap();
         if is_external_module(&file) {
             self.declare_module_member(node, symbol_flags, symbol_excludes)
@@ -51,7 +51,7 @@ impl Binder {
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
         symbol_excludes: SymbolFlags,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_symbol_and_add_to_symbol_table"); 
         let container_kind = self.container.as_ref().unwrap().kind;
         match container_kind {
             SyntaxKind::ModuleDeclaration => {
@@ -124,7 +124,7 @@ impl Binder {
         excludes: SymbolFlags,
         is_replaceable_by_method: bool,
         is_computed_name: bool,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_symbol_ex"); 
         let is_default_export = has_syntactic_modifier(node, ModifierFlags::Default)
             || is_export_specifier(node)
                 && module_export_name_is_default(&export_specifier_name(node));
@@ -255,7 +255,7 @@ impl Binder {
         node: &Arc<Node>,
         message: &'static Message,
         args: &[String],
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_on_first_token"); 
         let file = self.current_source_file.clone().unwrap();
         let span = get_range_of_token_at_position(&file, node.pos());
         self.symbol_map
@@ -268,7 +268,7 @@ impl Binder {
         node: &Arc<Node>,
         message: &'static Message,
         args: &[String],
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_on_node"); 
         let diag = self.create_diagnostic_for_node(node, message, args);
         self.symbol_map.binder_diagnostics.push(diag);
     }

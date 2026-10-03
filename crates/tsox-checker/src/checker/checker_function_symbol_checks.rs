@@ -14,7 +14,7 @@ const FLAGS_TO_CHECK: ModifierFlags = ModifierFlags::Export
     .union(ModifierFlags::Abstract);
 
 impl Checker {
-    fn emit_node_error(&mut self, node: &Arc<Node>, message: tsox_core::diagnostics::Message) {
+    fn emit_node_error(&mut self, node: &Arc<Node>, message: tsox_core::diagnostics::Message) { ::tsox_core::fntrace::enter("emit_node_error"); 
         let file = self
             .get_source_file_of_node(node)
             .or_else(|| self.current_file.clone());
@@ -31,7 +31,7 @@ impl Checker {
         node: &Arc<Node>,
         message: tsox_core::diagnostics::Message,
         args: Vec<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_node_error_with_args"); 
         let file = self
             .get_source_file_of_node(node)
             .or_else(|| self.current_file.clone());
@@ -43,7 +43,7 @@ impl Checker {
         ));
     }
 
-    pub fn check_function_or_constructor_symbol(&mut self, symbol: &Arc<Symbol>) {
+    pub fn check_function_or_constructor_symbol(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("check_function_or_constructor_symbol"); 
         let already = self
             .value_symbol_links
             .get_or_default(symbol)
@@ -57,7 +57,7 @@ impl Checker {
         self.check_function_or_constructor_symbol_worker(symbol);
     }
 
-    fn effective_declaration_flags(&self, node: &Arc<Node>) -> ModifierFlags {
+    fn effective_declaration_flags(&self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("effective_declaration_flags"); 
         let mut flags = node.syntactic_modifier_flags();
         let parent_is_classish = node.parent().is_some_and(|p| {
             matches!(
@@ -74,7 +74,7 @@ impl Checker {
     }
 
     /// declare namespace/module 祖先（ambient 语境，成员无自身标志）
-    fn has_ambient_ancestor(node: &Arc<Node>) -> bool {
+    fn has_ambient_ancestor(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_ambient_ancestor"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
@@ -93,7 +93,7 @@ impl Checker {
         false
     }
 
-    fn is_function_like_declaration_kind(kind: SyntaxKind) -> bool {
+    fn is_function_like_declaration_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_function_like_declaration_kind"); 
         matches!(
             kind,
             SyntaxKind::FunctionDeclaration
@@ -103,7 +103,7 @@ impl Checker {
         )
     }
 
-    fn check_function_or_constructor_symbol_worker(&mut self, symbol: &Arc<Symbol>) {
+    fn check_function_or_constructor_symbol_worker(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("check_function_or_constructor_symbol_worker"); 
         let declarations = symbol.declarations.clone();
         let is_constructor = symbol.flags.contains(SymbolFlags::Constructor);
         let mut some_node_flags = ModifierFlags::empty();
@@ -224,7 +224,7 @@ impl Checker {
     }
 
     /// Go NodeIsPresent：零宽节点（parse 恢复产物）视为缺失 body
-    fn node_body_is_present(&self, node: &Arc<Node>) -> bool {
+    fn node_body_is_present(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_body_is_present"); 
         let body = match &node.data {
             NodeData::FunctionDeclaration(d) => d.body.as_ref(),
             NodeData::MethodDeclaration(d) => d.body.as_ref(),
@@ -240,7 +240,7 @@ impl Checker {
     fn canonical_overload<'a>(
         overloads: &[&'a Arc<Node>],
         implementation: Option<&'a Arc<Node>>,
-    ) -> &'a Arc<Node> {
+    ) -> &'a Arc<Node> { ::tsox_core::fntrace::enter("canonical_overload"); 
         let shares_container = implementation
             .zip(overloads.first())
             .and_then(|(impl_, first)| {
@@ -263,7 +263,7 @@ impl Checker {
         implementation: Option<&Arc<Node>>,
         some_flags: ModifierFlags,
         all_flags: ModifierFlags,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_flag_agreement_between_overloads"); 
         let some_but_not_all = some_flags ^ all_flags;
         if some_but_not_all.is_empty() {
             return;
@@ -332,7 +332,7 @@ impl Checker {
         implementation: Option<&Arc<Node>>,
         some_have_question_token: bool,
         all_have_question_token: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_question_token_agreement_between_overloads"); 
         if some_have_question_token == all_have_question_token {
             return;
         }
@@ -358,7 +358,7 @@ impl Checker {
         }
     }
 
-    fn report_implementation_expected_error_for_symbol(&mut self, node: &Arc<Node>) {
+    fn report_implementation_expected_error_for_symbol(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("report_implementation_expected_error_for_symbol"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let Some(name) = node.name() else {
             return;
@@ -431,12 +431,12 @@ impl Checker {
         }
     }
 
-    fn node_is_missing(node: &Arc<Node>) -> bool {
+    fn node_is_missing(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_is_missing"); 
         node.loc.pos() >= node.loc.end()
     }
 
     /// Go reportImplementationExpectedError 同名判定：计算名按类型同一性
-    fn declaration_names_match_for_merge(a: &Arc<Node>, b: &Arc<Node>) -> bool {
+    fn declaration_names_match_for_merge(a: &Arc<Node>, b: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_names_match_for_merge"); 
         let (na, nb) = match (a.name(), b.name()) {
             (Some(x), Some(y)) => (x, y),
             _ => return false,

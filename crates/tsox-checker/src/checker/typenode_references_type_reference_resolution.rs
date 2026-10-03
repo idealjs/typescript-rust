@@ -3,7 +3,7 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn resolve_type_parameter_reference(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn resolve_type_parameter_reference(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_parameter_reference"); 
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
         let mut hit_depth = usize::MAX;
         let mut hit: Option<Arc<Type>> = None;
@@ -77,7 +77,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_alias_reference"); 
         // Go getNoInferType（checker.go 27744）：NoInfer 实参为 isNoInferTargetType
         // 时包装为 unknown 约束的 Substitution（推断期候选被 is_no_infer_type 拦截，
         // 关系/显示按 base 展开）；实参具体且非目标形态时走常规别名展开。base 取
@@ -188,7 +188,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         arg_types: Vec<Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_alias_from_types"); 
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
         let frame = (key as usize, arg_types.iter().map(|t| t.id).collect::<Vec<_>>());
         if let Some(cached) = self.alias_instantiation_cache.get(&frame).cloned() {
@@ -215,7 +215,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         arg_types: Vec<Arc<Type>>,
         frame: (usize, Vec<u32>),
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_alias_from_types_inner"); 
         let declared = {
             let cached = self
                 .type_alias_links

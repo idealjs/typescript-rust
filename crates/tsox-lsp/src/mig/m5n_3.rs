@@ -507,8 +507,8 @@ mod lsproto {
     pub fn compare_diagnostics(
         pre: &[crate::ls::types::Diagnostic],
         post: &[crate::ls::types::Diagnostic],
-    ) -> (Vec<crate::ls::types::Diagnostic>, Vec<crate::ls::types::Diagnostic>) {
-        fn key(d: &crate::ls::types::Diagnostic) -> String {
+    ) -> (Vec<crate::ls::types::Diagnostic>, Vec<crate::ls::types::Diagnostic>) { ::tsox_core::fntrace::enter("compare_diagnostics"); 
+        fn key(d: &crate::ls::types::Diagnostic) -> String { ::tsox_core::fntrace::enter("key"); 
             serde_json::to_string(d).unwrap_or_default()
         }
         let pre_keys: std::collections::HashSet<String> = pre.iter().map(key).collect();
@@ -526,11 +526,11 @@ mod lsproto {
         (missing_from_pre, missing_from_post)
     }
 
-    pub fn diagnostic_code_as_string(d: &crate::ls::types::Diagnostic) -> String {
+    pub fn diagnostic_code_as_string(d: &crate::ls::types::Diagnostic) -> String { ::tsox_core::fntrace::enter("diagnostic_code_as_string"); 
         format!("Code({})", integer_or_string_code_as_string(&d.code))
     }
 
-    pub fn diagnostic_as_string(d: &crate::ls::types::Diagnostic) -> String {
+    pub fn diagnostic_as_string(d: &crate::ls::types::Diagnostic) -> String { ::tsox_core::fntrace::enter("diagnostic_as_string"); 
         format!(
             "{} ({}:{}-{}:{}): {}",
             integer_or_string_code_as_string(&d.code),
@@ -543,7 +543,7 @@ mod lsproto {
     }
 }
 
-fn integer_or_string_code_as_string(code: &Option<Value>) -> String {
+fn integer_or_string_code_as_string(code: &Option<Value>) -> String { ::tsox_core::fntrace::enter("integer_or_string_code_as_string"); 
     match code {
         Some(Value::String(s)) => s.clone(),
         Some(Value::Number(n)) => n.to_string(),
@@ -552,7 +552,7 @@ fn integer_or_string_code_as_string(code: &Option<Value>) -> String {
 }
 
 impl Server {
-    pub fn handle_did_change_workspace_configuration(&self, params: &lsproto::DidChangeConfigurationParams) -> LspResult<()> {
+    pub fn handle_did_change_workspace_configuration(&self, params: &lsproto::DidChangeConfigurationParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_did_change_workspace_configuration"); 
         let Some(settings) = &params.settings else {
             return Ok(());
         };
@@ -565,7 +565,7 @@ impl Server {
         Ok(())
     }
 
-    pub fn handle_did_open(&self, params: &lsproto::DidOpenTextDocumentParams) -> LspResult<()> {
+    pub fn handle_did_open(&self, params: &lsproto::DidOpenTextDocumentParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_did_open"); 
         self.session.as_ref().unwrap().did_open_file(
             &params.text_document.uri,
             params.text_document.version,
@@ -575,7 +575,7 @@ impl Server {
         Ok(())
     }
 
-    pub fn handle_did_change(&self, params: &lsproto::DidChangeTextDocumentParams) -> LspResult<()> {
+    pub fn handle_did_change(&self, params: &lsproto::DidChangeTextDocumentParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_did_change"); 
         self.session.as_ref().unwrap().did_change_file(
             &params.text_document.uri,
             params.text_document.version,
@@ -584,17 +584,17 @@ impl Server {
         Ok(())
     }
 
-    pub fn handle_did_save(&self, params: &lsproto::DidSaveTextDocumentParams) -> LspResult<()> {
+    pub fn handle_did_save(&self, params: &lsproto::DidSaveTextDocumentParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_did_save"); 
         self.session.as_ref().unwrap().did_save_file(&params.text_document.uri);
         Ok(())
     }
 
-    pub fn handle_did_close(&self, params: &lsproto::DidCloseTextDocumentParams) -> LspResult<()> {
+    pub fn handle_did_close(&self, params: &lsproto::DidCloseTextDocumentParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_did_close"); 
         self.session.as_ref().unwrap().did_close_file(&params.text_document.uri);
         Ok(())
     }
 
-    pub fn handle_did_change_watched_files(&self, params: &lsproto::DidChangeWatchedFilesParams) -> LspResult<()> {
+    pub fn handle_did_change_watched_files(&self, params: &lsproto::DidChangeWatchedFilesParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_did_change_watched_files"); 
         self.session
             .as_ref()
             .unwrap()
@@ -602,11 +602,11 @@ impl Server {
         Ok(())
     }
 
-    pub fn handle_set_trace(&self, _params: &lsproto::SetTraceParams) -> LspResult<()> {
+    pub fn handle_set_trace(&self, _params: &lsproto::SetTraceParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_set_trace"); 
         Ok(())
     }
 
-    pub fn handle_set_log_verbosity(&self, params: &lsproto::SetLogVerbosityParams) -> LspResult<()> {
+    pub fn handle_set_log_verbosity(&self, params: &lsproto::SetLogVerbosityParams) -> LspResult<()> { ::tsox_core::fntrace::enter("handle_set_log_verbosity"); 
         if !logger::is_valid_log_verbosity(params.verbosity) {
             return Err(LspError::new(
                 lsproto::ErrorCode::InvalidParams,
@@ -621,7 +621,7 @@ impl Server {
         &self,
         language_service: &LanguageService,
         params: &lsproto::DocumentDiagnosticParams,
-    ) -> LspResult<lsproto::DocumentDiagnosticResponse> {
+    ) -> LspResult<lsproto::DocumentDiagnosticResponse> { ::tsox_core::fntrace::enter("handle_document_diagnostic"); 
         let provide = || lsproto::DocumentDiagnosticResponse {
             full_document_diagnostic_report: lsproto::FullDocumentDiagnosticReport {
                 items: language_service.provide_diagnostics(&params.text_document.uri),
@@ -677,7 +677,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::HoverParams,
-    ) -> LspResult<lsproto::HoverResponse> {
+    ) -> LspResult<lsproto::HoverResponse> { ::tsox_core::fntrace::enter("handle_hover"); 
         Ok(lsproto::OrNull(
             ls.provide_hover(&params.text_document.uri, params.position.clone()),
         ))
@@ -687,7 +687,7 @@ impl Server {
         &self,
         language_service: &LanguageService,
         params: &lsproto::PrepareRenameParams,
-    ) -> LspResult<lsproto::PrepareRenameResponse> {
+    ) -> LspResult<lsproto::PrepareRenameResponse> { ::tsox_core::fntrace::enter("handle_prepare_rename"); 
         let info = language_service.get_rename_info("", &params.text_document.uri, params.position.clone());
         if !info.can_rename {
             return Err(LspError::new(
@@ -705,7 +705,7 @@ impl Server {
         &self,
         params: &lsproto::RenameParams,
         req: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::RenameResponse> {
+    ) -> LspResult<lsproto::RenameResponse> { ::tsox_core::fntrace::enter("handle_rename"); 
         let (default_ls, _orchestrator) =
             self.get_language_service_and_cross_project_orchestrator(&params.text_document.uri, req)?;
         let info = default_ls.get_rename_info(&params.new_name, &params.text_document.uri, params.position.clone());
@@ -758,7 +758,7 @@ impl Server {
         &self,
         params: &lsproto::RenameFilesParams,
         msg: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::WillRenameFilesResponse> {
+    ) -> LspResult<lsproto::WillRenameFilesResponse> { ::tsox_core::fntrace::enter("handle_will_rename_files"); 
         self.handle_will_rename_files_worker(params, false)
     }
 
@@ -766,7 +766,7 @@ impl Server {
         &self,
         params: &lsproto::RenameFilesParams,
         send_rename_file: bool,
-    ) -> LspResult<lsproto::WillRenameFilesResponse> {
+    ) -> LspResult<lsproto::WillRenameFilesResponse> { ::tsox_core::fntrace::enter("handle_will_rename_files_worker"); 
         if params.files.is_empty() {
             return Ok(lsproto::WillRenameFilesResponse::default());
         }
@@ -850,7 +850,7 @@ impl Server {
         &self,
         language_service: &LanguageService,
         params: &lsproto::SignatureHelpParams,
-    ) -> LspResult<lsproto::SignatureHelpResponse> {
+    ) -> LspResult<lsproto::SignatureHelpResponse> { ::tsox_core::fntrace::enter("handle_signature_help"); 
         let ls_context = params.context.as_ref().map(|c| crate::ls::types::SignatureHelpContext {
             trigger_kind: c.trigger_kind as u32,
             trigger_character: c.trigger_character.clone(),
@@ -866,7 +866,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::FoldingRangeParams,
-    ) -> LspResult<lsproto::FoldingRangeResponse> {
+    ) -> LspResult<lsproto::FoldingRangeResponse> { ::tsox_core::fntrace::enter("handle_folding_range"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_folding_range(&params.text_document.uri),
         )))
@@ -876,7 +876,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::VSOnAutoInsertParams,
-    ) -> LspResult<lsproto::VSOnAutoInsertResponse> {
+    ) -> LspResult<lsproto::VSOnAutoInsertResponse> { ::tsox_core::fntrace::enter("handle_vs_on_auto_insert"); 
         let ls_params = crate::ls::types::VsOnAutoInsertParams {
             text_document: crate::ls::types::TextDocumentIdentifier {
                 uri: params.text_document.uri.clone(),
@@ -891,7 +891,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::LinkedEditingRangeParams,
-    ) -> LspResult<lsproto::LinkedEditingRangeResponse> {
+    ) -> LspResult<lsproto::LinkedEditingRangeResponse> { ::tsox_core::fntrace::enter("handle_linked_editing_range"); 
         let ls_params = crate::ls::types::LinkedEditingRangeParams {
             text_document: crate::ls::types::TextDocumentIdentifier {
                 uri: params.text_document.uri.clone(),
@@ -905,7 +905,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::DefinitionParams,
-    ) -> LspResult<lsproto::DefinitionResponse> {
+    ) -> LspResult<lsproto::DefinitionResponse> { ::tsox_core::fntrace::enter("handle_definition"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_definition(&params.text_document.uri, params.position.clone()),
         )))
@@ -915,7 +915,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::TextDocumentPositionParams,
-    ) -> LspResult<lsproto::CustomTextDocumentSourceDefinitionResponse> {
+    ) -> LspResult<lsproto::CustomTextDocumentSourceDefinitionResponse> { ::tsox_core::fntrace::enter("handle_source_definition"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_source_definition(&params.text_document.uri, params.position.clone()),
         )))
@@ -925,7 +925,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::TypeDefinitionParams,
-    ) -> LspResult<lsproto::TypeDefinitionResponse> {
+    ) -> LspResult<lsproto::TypeDefinitionResponse> { ::tsox_core::fntrace::enter("handle_type_definition"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_type_definition(&params.text_document.uri, params.position.clone()),
         )))
@@ -935,7 +935,7 @@ impl Server {
         &self,
         language_service: &LanguageService,
         params: &lsproto::CompletionParams,
-    ) -> LspResult<lsproto::CompletionResponse> {
+    ) -> LspResult<lsproto::CompletionResponse> { ::tsox_core::fntrace::enter("handle_completion"); 
         Ok(lsproto::OrNull(Some(
             language_service.provide_completion(
                 &params.text_document.uri,
@@ -949,7 +949,7 @@ impl Server {
         &self,
         params: &lsproto::CompletionItem,
         req_msg: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::CompletionResolveResponse> {
+    ) -> LspResult<lsproto::CompletionResolveResponse> { ::tsox_core::fntrace::enter("handle_completion_item_resolve"); 
         let Some(data) = &params.data else {
             return Err(LspError::new(lsproto::ErrorCode::InternalError, "completion item data is nil"));
         };
@@ -971,7 +971,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::DocumentFormattingParams,
-    ) -> LspResult<lsproto::DocumentFormattingResponse> {
+    ) -> LspResult<lsproto::DocumentFormattingResponse> { ::tsox_core::fntrace::enter("handle_document_format"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_format_document(&params.text_document.uri, &params.options),
         )))
@@ -981,7 +981,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::DocumentRangeFormattingParams,
-    ) -> LspResult<lsproto::DocumentRangeFormattingResponse> {
+    ) -> LspResult<lsproto::DocumentRangeFormattingResponse> { ::tsox_core::fntrace::enter("handle_document_range_format"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_format_document_range(&params.text_document.uri, &params.options, params.range.clone()),
         )))
@@ -991,7 +991,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::DocumentOnTypeFormattingParams,
-    ) -> LspResult<lsproto::DocumentOnTypeFormattingResponse> {
+    ) -> LspResult<lsproto::DocumentOnTypeFormattingResponse> { ::tsox_core::fntrace::enter("handle_document_on_type_format"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_format_document_on_type(&params.text_document.uri, &params.options, params.position.clone(), &params.ch),
         )))
@@ -1001,7 +1001,7 @@ impl Server {
         &self,
         params: &lsproto::WorkspaceSymbolParams,
         _req_msg: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::WorkspaceSymbolResponse> {
+    ) -> LspResult<lsproto::WorkspaceSymbolResponse> { ::tsox_core::fntrace::enter("handle_workspace_symbol"); 
         let session = self.session.as_ref().unwrap();
         let mut programs: Vec<Arc<compiler::Program>> = Vec::new();
         if let Some(text_document) = &params.text_document {
@@ -1037,7 +1037,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::DocumentSymbolParams,
-    ) -> LspResult<lsproto::DocumentSymbolResponse> {
+    ) -> LspResult<lsproto::DocumentSymbolResponse> { ::tsox_core::fntrace::enter("handle_document_symbol"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_document_symbols(&params.text_document.uri),
         )))
@@ -1047,7 +1047,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::DocumentHighlightParams,
-    ) -> LspResult<lsproto::DocumentHighlightResponse> {
+    ) -> LspResult<lsproto::DocumentHighlightResponse> { ::tsox_core::fntrace::enter("handle_document_highlight"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_document_highlights(&params.text_document.uri, params.position.clone()),
         )))
@@ -1057,7 +1057,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::MultiDocumentHighlightParams,
-    ) -> LspResult<lsproto::CustomMultiDocumentHighlightResponse> {
+    ) -> LspResult<lsproto::CustomMultiDocumentHighlightResponse> { ::tsox_core::fntrace::enter("handle_multi_document_highlight"); 
         let highlights =
             ls.provide_multi_document_highlights(&params.text_document.uri, params.position.clone(), &params.files_to_search);
         Ok(lsproto::CustomMultiDocumentHighlightResponse {
@@ -1069,7 +1069,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::SelectionRangeParams,
-    ) -> LspResult<lsproto::SelectionRangeResponse> {
+    ) -> LspResult<lsproto::SelectionRangeResponse> { ::tsox_core::fntrace::enter("handle_selection_range"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_selection_ranges(&params.text_document.uri, &params.positions),
         )))
@@ -1079,7 +1079,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::CodeActionParams,
-    ) -> LspResult<lsproto::CodeActionResponse> {
+    ) -> LspResult<lsproto::CodeActionResponse> { ::tsox_core::fntrace::enter("handle_code_action"); 
         let ls_params = crate::ls::types::CodeActionParams {
             text_document: crate::ls::types::TextDocumentIdentifier {
                 uri: params.text_document.uri.clone(),
@@ -1094,7 +1094,7 @@ impl Server {
         &self,
         language_service: &LanguageService,
         params: &lsproto::InlayHintParams,
-    ) -> LspResult<lsproto::InlayHintResponse> {
+    ) -> LspResult<lsproto::InlayHintResponse> { ::tsox_core::fntrace::enter("handle_inlay_hint"); 
         Ok(lsproto::OrNullArray(Some(
             language_service.provide_inlay_hint(&params.text_document.uri),
         )))
@@ -1104,7 +1104,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::CodeLensParams,
-    ) -> LspResult<lsproto::CodeLensResponse> {
+    ) -> LspResult<lsproto::CodeLensResponse> { ::tsox_core::fntrace::enter("handle_code_lens"); 
         Ok(lsproto::OrNullArray(Some(
             ls.provide_code_lenses(&params.text_document.uri),
         )))
@@ -1114,7 +1114,7 @@ impl Server {
         &self,
         code_lens: &lsproto::CodeLens,
         req_msg: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::CodeLens> {
+    ) -> LspResult<lsproto::CodeLens> { ::tsox_core::fntrace::enter("handle_code_lens_resolve"); 
         let Ok((default_ls, _orchestrator)) =
             self.get_language_service_and_cross_project_orchestrator(&code_lens.data.uri, req_msg)
         else {
@@ -1151,7 +1151,7 @@ impl Server {
         &self,
         language_service: &LanguageService,
         params: &lsproto::CallHierarchyPrepareParams,
-    ) -> LspResult<lsproto::CallHierarchyPrepareResponse> {
+    ) -> LspResult<lsproto::CallHierarchyPrepareResponse> { ::tsox_core::fntrace::enter("handle_prepare_call_hierarchy"); 
         Ok(lsproto::OrNullArray(Some(
             language_service.prepare_call_hierarchy(&params.text_document.uri, params.position.clone()),
         )))
@@ -1161,7 +1161,7 @@ impl Server {
         &self,
         params: &lsproto::CallHierarchyIncomingCallsParams,
         req_msg: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::CallHierarchyIncomingCallsResponse> {
+    ) -> LspResult<lsproto::CallHierarchyIncomingCallsResponse> { ::tsox_core::fntrace::enter("handle_call_hierarchy_incoming_calls"); 
         let (default_ls, _orchestrator) =
             self.get_language_service_and_cross_project_orchestrator(&params.item.text_document.uri, req_msg)?;
         Ok(lsproto::OrNullArray(Some(
@@ -1176,7 +1176,7 @@ impl Server {
         &self,
         params: &lsproto::CallHierarchyOutgoingCallsParams,
         _req_msg: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::CallHierarchyOutgoingCallsResponse> {
+    ) -> LspResult<lsproto::CallHierarchyOutgoingCallsResponse> { ::tsox_core::fntrace::enter("handle_call_hierarchy_outgoing_calls"); 
         let language_service = self
             .session
             .as_ref()
@@ -1195,7 +1195,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::SemanticTokensParams,
-    ) -> LspResult<lsproto::SemanticTokensResponse> {
+    ) -> LspResult<lsproto::SemanticTokensResponse> { ::tsox_core::fntrace::enter("handle_semantic_tokens_full"); 
         Ok(lsproto::OrNull(
             ls.provide_semantic_tokens(&params.text_document.uri),
         ))
@@ -1205,7 +1205,7 @@ impl Server {
         &self,
         ls: &LanguageService,
         params: &lsproto::SemanticTokensRangeParams,
-    ) -> LspResult<lsproto::SemanticTokensRangeResponse> {
+    ) -> LspResult<lsproto::SemanticTokensRangeResponse> { ::tsox_core::fntrace::enter("handle_semantic_tokens_range"); 
         Ok(lsproto::OrNull(
             ls.provide_semantic_tokens_range(&params.text_document.uri, params.range.clone()),
         ))
@@ -1215,7 +1215,7 @@ impl Server {
         &self,
         params: &lsproto::InitializeAPISessionParams,
         _req: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::CustomInitializeAPISessionResponse> {
+    ) -> LspResult<lsproto::CustomInitializeAPISessionResponse> { ::tsox_core::fntrace::enter("handle_initialize_api_session"); 
         let mut api_sessions = self.api_sessions.lock().unwrap();
         let api_session = crate::mig::m5n::api::session::Session::new(
             self.session.as_ref().unwrap().clone(),
@@ -1254,7 +1254,7 @@ impl Server {
         ))
     }
 
-    pub fn generate_api_pipe_path(&self) -> String {
+    pub fn generate_api_pipe_path(&self) -> String { ::tsox_core::fntrace::enter("generate_api_pipe_path"); 
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos())
@@ -1266,27 +1266,27 @@ impl Server {
         ipc::generate_pipe_path(&format!("tsgo-api-{now:x}-{rnd:x}"))
     }
 
-    pub fn handle_run_gc(&self) -> LspResult<lsproto::RunGCResponse> {
+    pub fn handle_run_gc(&self) -> LspResult<lsproto::RunGCResponse> { ::tsox_core::fntrace::enter("handle_run_gc"); 
         pprof::run_gc();
         self.logger.info("GC triggered");
         Ok(lsproto::RunGCResponse::Null)
     }
 
-    pub fn handle_save_heap_profile(&self, params: &lsproto::ProfileParams) -> LspResult<lsproto::ProfileResult> {
+    pub fn handle_save_heap_profile(&self, params: &lsproto::ProfileParams) -> LspResult<lsproto::ProfileResult> { ::tsox_core::fntrace::enter("handle_save_heap_profile"); 
         let file_path = pprof::save_heap_profile(&params.dir)
             .map_err(|e| LspError::new(lsproto::ErrorCode::InternalError, e))?;
         self.logger.info(&format!("Heap profile saved to: {file_path}"));
         Ok(lsproto::ProfileResult { file: file_path })
     }
 
-    pub fn handle_save_alloc_profile(&self, params: &lsproto::ProfileParams) -> LspResult<lsproto::ProfileResult> {
+    pub fn handle_save_alloc_profile(&self, params: &lsproto::ProfileParams) -> LspResult<lsproto::ProfileResult> { ::tsox_core::fntrace::enter("handle_save_alloc_profile"); 
         let file_path = pprof::save_alloc_profile(&params.dir)
             .map_err(|e| LspError::new(lsproto::ErrorCode::InternalError, e))?;
         self.logger.info(&format!("Allocation profile saved to: {file_path}"));
         Ok(lsproto::ProfileResult { file: file_path })
     }
 
-    pub fn handle_start_cpu_profile(&self, params: &lsproto::ProfileParams) -> LspResult<lsproto::StartCPUProfileResponse> {
+    pub fn handle_start_cpu_profile(&self, params: &lsproto::ProfileParams) -> LspResult<lsproto::StartCPUProfileResponse> { ::tsox_core::fntrace::enter("handle_start_cpu_profile"); 
         self.cpu_profiler
             .start_cpu_profile(&params.dir)
             .map_err(|e| LspError::new(lsproto::ErrorCode::InternalError, e))?;
@@ -1295,7 +1295,7 @@ impl Server {
         Ok(lsproto::StartCPUProfileResponse::Null)
     }
 
-    pub fn handle_stop_cpu_profile(&self) -> LspResult<lsproto::ProfileResult> {
+    pub fn handle_stop_cpu_profile(&self) -> LspResult<lsproto::ProfileResult> { ::tsox_core::fntrace::enter("handle_stop_cpu_profile"); 
         let file_path = self
             .cpu_profiler
             .stop_cpu_profile()
@@ -1308,7 +1308,7 @@ impl Server {
         &self,
         params: &lsproto::ProjectInfoParams,
         _req: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::CustomProjectInfoResponse> {
+    ) -> LspResult<lsproto::CustomProjectInfoResponse> { ::tsox_core::fntrace::enter("handle_project_info"); 
         let uri = &params.text_document.uri;
         let (default_project, _, _) = self
             .session
@@ -1329,7 +1329,7 @@ impl Server {
         &self,
         params: &lsproto::SetContentMapperContributionsParams,
         _req: &lsproto::RequestMessage,
-    ) -> LspResult<lsproto::CustomSetContentMapperContributionsResponse> {
+    ) -> LspResult<lsproto::CustomSetContentMapperContributionsResponse> { ::tsox_core::fntrace::enter("handle_set_content_mapper_contributions"); 
         let contributions = parse_content_mapper_contributions(&params.contributions)?;
         let documents: Vec<crate::lsp::lsproto::DocumentUri> =
             params.open_documents.iter().map(|d| d.uri.clone()).collect();
@@ -1340,13 +1340,13 @@ impl Server {
         Ok(lsproto::CustomSetContentMapperContributionsResponse::Null)
     }
 
-    pub fn content_mapper_spawner(&self) -> Option<Arc<dyn cm2::Spawner>> {
+    pub fn content_mapper_spawner(&self) -> Option<Arc<dyn cm2::Spawner>> { ::tsox_core::fntrace::enter("content_mapper_spawner"); 
         self.spawn
             .as_ref()
             .map(|spawn| Arc::new(ServerSpawner(spawn.clone())) as Arc<dyn cm2::Spawner>)
     }
 
-    pub fn content_mapper_logger(&self) -> cm2::Logger {
+    pub fn content_mapper_logger(&self) -> cm2::Logger { ::tsox_core::fntrace::enter("content_mapper_logger"); 
         let logger = self.logger.clone();
         cm2::Logger::from_fn(Arc::new(move |message: &str| {
             if logger.is_tracing() {
@@ -1355,12 +1355,12 @@ impl Server {
         }))
     }
 
-    pub fn telemetry_enabled(&self) -> bool {
+    pub fn telemetry_enabled(&self) -> bool { ::tsox_core::fntrace::enter("telemetry_enabled"); 
         use std::sync::atomic::Ordering;
         self.telemetry_enabled.load(Ordering::SeqCst)
     }
 
-    fn raw_client_capability_flag(&self, pointer: &str) -> bool {
+    fn raw_client_capability_flag(&self, pointer: &str) -> bool { ::tsox_core::fntrace::enter("raw_client_capability_flag"); 
         self.initialize_params
             .as_ref()
             .and_then(|p| p.capabilities.as_ref())
@@ -1369,16 +1369,16 @@ impl Server {
             .unwrap_or(false)
     }
 
-    pub fn client_supports_will_rename_files(&self) -> bool {
+    pub fn client_supports_will_rename_files(&self) -> bool { ::tsox_core::fntrace::enter("client_supports_will_rename_files"); 
         self.raw_client_capability_flag("/workspace/fileOperations/willRename")
     }
 
-    pub fn client_supports_document_changes(&self) -> bool {
+    pub fn client_supports_document_changes(&self) -> bool { ::tsox_core::fntrace::enter("client_supports_document_changes"); 
         self.raw_client_capability_flag("/workspace/workspaceEdit/documentChanges")
     }
 }
 
-pub fn workspace_symbols_scope_is_current_project(session: &crate::project::session::Session) -> bool {
+pub fn workspace_symbols_scope_is_current_project(session: &crate::project::session::Session) -> bool { ::tsox_core::fntrace::enter("workspace_symbols_scope_is_current_project"); 
     let _ = session.config();
     false
 }
@@ -1387,7 +1387,7 @@ pub fn provide_workspace_symbols_response(
     session: &crate::project::session::Session,
     programs: &[Arc<compiler::Program>],
     query: &str,
-) -> LspResult<lsproto::WorkspaceSymbolResponse> {
+) -> LspResult<lsproto::WorkspaceSymbolResponse> { ::tsox_core::fntrace::enter("provide_workspace_symbols_response"); 
     let services = session.get_language_services_for_documents_loading_project_tree(&[]);
     let Some(service) = services.first() else {
         return Ok(lsproto::OrNullArray(None));
@@ -1404,7 +1404,7 @@ pub fn provide_workspace_symbols_response(
     )))
 }
 
-pub fn next_api_session_id() -> String {
+pub fn next_api_session_id() -> String { ::tsox_core::fntrace::enter("next_api_session_id"); 
     use std::sync::atomic::{AtomicU64, Ordering};
     static SESSION_ID_COUNTER: AtomicU64 = AtomicU64::new(0);
     format!("api-session-{}", SESSION_ID_COUNTER.fetch_add(1, Ordering::SeqCst) + 1)
@@ -1417,22 +1417,22 @@ struct SpawnedProcessConn {
 }
 
 impl std::io::Read for SpawnedProcessConn {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("read"); 
         self.stdout.lock().unwrap().read(buf)
     }
 }
 
 impl std::io::Write for SpawnedProcessConn {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.stdin.lock().unwrap().write(buf)
     }
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         self.stdin.lock().unwrap().flush()
     }
 }
 
 impl cm2::ReadWriteCloser for SpawnedProcessConn {
-    fn close(&mut self) -> std::io::Result<()> {
+    fn close(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("close"); 
         if let Some(close) = self.close.lock().unwrap().take() {
             close();
         }
@@ -1450,7 +1450,7 @@ impl cm2::Spawner for ServerSpawner {
         command: &[String],
         dir: &str,
         _stderr: &mut dyn std::io::Write,
-    ) -> std::io::Result<Box<dyn cm2::ReadWriteCloser>> {
+    ) -> std::io::Result<Box<dyn cm2::ReadWriteCloser>> { ::tsox_core::fntrace::enter("spawn"); 
         let process = (self.0)(command, dir).map_err(std::io::Error::other)?;
         Ok(Box::new(SpawnedProcessConn {
             stdout: Mutex::new(process.stdout),
@@ -1464,7 +1464,7 @@ pub fn generate_diagnostic_diff_string(
     missing_from_pre: &[crate::ls::types::Diagnostic],
     missing_from_post: &[crate::ls::types::Diagnostic],
     stringifier: &dyn Fn(&crate::ls::types::Diagnostic) -> String,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("generate_diagnostic_diff_string"); 
     let mut b = String::new();
     for elem in missing_from_pre {
         b.push_str(&format!(
@@ -1483,7 +1483,7 @@ pub fn generate_diagnostic_diff_string(
 
 pub fn parse_content_mapper_contributions(
     values: &[lsproto::ContentMapperContribution],
-) -> LspResult<crate::project::mig::m5e::ContentMapperContributions> {
+) -> LspResult<crate::project::mig::m5e::ContentMapperContributions> { ::tsox_core::fntrace::enter("parse_content_mapper_contributions"); 
     let mut result = crate::project::mig::m5e::ContentMapperContributions::default();
     let mut claimed_extensions: tsox_core::collections::set::Set<String> = Default::default();
     for (index, value) in values.iter().enumerate() {
@@ -1569,7 +1569,7 @@ pub fn parse_content_mapper_contributions(
     Ok(result)
 }
 
-pub fn all_supported_extensions_with_json() -> Vec<String> {
+pub fn all_supported_extensions_with_json() -> Vec<String> { ::tsox_core::fntrace::enter("all_supported_extensions_with_json"); 
     use tsox_core::tspath::{
         EXTENSION_CJS, EXTENSION_CTS, EXTENSION_DCTS, EXTENSION_DMTS, EXTENSION_DTS, EXTENSION_JSON,
         EXTENSION_JS, EXTENSION_JSX, EXTENSION_MJS, EXTENSION_MTS, EXTENSION_TS, EXTENSION_TSX,
@@ -1584,7 +1584,7 @@ pub fn all_supported_extensions_with_json() -> Vec<String> {
     .collect()
 }
 
-pub fn is_valid_contributed_content_mapper_extension(extension: &str) -> bool {
+pub fn is_valid_contributed_content_mapper_extension(extension: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_contributed_content_mapper_extension"); 
     if extension.len() <= 1 || !extension.starts_with('.') {
         return false;
     }

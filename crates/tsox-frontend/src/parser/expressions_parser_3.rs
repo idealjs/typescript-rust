@@ -3,7 +3,7 @@
 use crate::parser::expressions::*;
 
 impl Parser {
-    pub(crate) fn try_parse_generic_arrow_function(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn try_parse_generic_arrow_function(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_generic_arrow_function"); 
         let starts_with_async = self.token == SyntaxKind::AsyncKeyword;
         if !starts_with_async && self.token != SyntaxKind::LessThanToken {
             return None;
@@ -113,7 +113,7 @@ impl Parser {
         &mut self,
         identifier: Arc<Node>,
         async_modifier: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_simple_arrow_function_with_async"); 
         let modifiers = self.make_async_modifier_list(async_modifier);
         let pos = identifier.pos();
         let parameter = Arc::new(Node::with_loc(
@@ -161,7 +161,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_parenthesized_arrow_function(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_parenthesized_arrow_function(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parenthesized_arrow_function"); 
         let pos = self.token_pos();
         let parameters = self.parse_parameter_list();
         let type_node = self.parse_optional_return_type();
@@ -199,7 +199,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_simple_arrow_function(&mut self, identifier: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn parse_simple_arrow_function(&mut self, identifier: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_simple_arrow_function"); 
         let pos = identifier.pos();
         let outer_yield = self.yield_context;
         let outer_await = self.await_context;
@@ -246,7 +246,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_binary_expression(&mut self, min_precedence: u8) -> Arc<Node> {
+    pub(crate) fn parse_binary_expression(&mut self, min_precedence: u8) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_binary_expression"); 
         let mut left = self.parse_unary_expression();
 
         loop {

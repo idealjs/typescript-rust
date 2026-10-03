@@ -10,7 +10,7 @@ use crate::ast::subtree_facts::*;
 use crate::ast::utilities::*;
 use super::m3d::*;
 
-pub fn compute_subtree_facts_token(kind: SyntaxKind) -> SubtreeFacts {
+pub fn compute_subtree_facts_token(kind: SyntaxKind) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_token"); 
     match kind {
         SyntaxKind::UsingKeyword => SubtreeFacts::Using,
         SyntaxKind::PublicKeyword
@@ -51,46 +51,46 @@ pub fn compute_subtree_facts_token(kind: SyntaxKind) -> SubtreeFacts {
     }
 }
 
-pub fn compute_subtree_facts_type_syntax_base() -> SubtreeFacts {
+pub fn compute_subtree_facts_type_syntax_base() -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_type_syntax_base"); 
     SubtreeFacts::TypeScript
 }
 
-pub fn propagate_subtree_facts_type_syntax_base() -> SubtreeFacts {
+pub fn propagate_subtree_facts_type_syntax_base() -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts_type_syntax_base"); 
     SubtreeFacts::TypeScript
 }
 
-pub fn compute_subtree_facts_node_default() -> SubtreeFacts {
+pub fn compute_subtree_facts_node_default() -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_node_default"); 
     SUBTREE_FACTS_NONE
 }
 
-pub fn propagate_subtree_facts_node_default(facts: SubtreeFacts) -> SubtreeFacts {
+pub fn propagate_subtree_facts_node_default(facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts_node_default"); 
     facts.difference(SUBTREE_EXCLUSIONS_NODE)
 }
 
-pub fn set_modifiers_node_default() {}
+pub fn set_modifiers_node_default() { ::tsox_core::fntrace::enter("set_modifiers_node_default"); }
 
 pub fn set_modifiers_modifiers_base(
     modifiers_field: &mut Option<Arc<ModifierList>>,
     modifiers: Option<Arc<ModifierList>>,
-) {
+) { ::tsox_core::fntrace::enter("set_modifiers_modifiers_base"); 
     *modifiers_field = modifiers;
 }
 
 pub fn set_modifiers_named_member_base(
     modifiers_field: &mut Option<Arc<ModifierList>>,
     modifiers: Option<Arc<ModifierList>>,
-) {
+) { ::tsox_core::fntrace::enter("set_modifiers_named_member_base"); 
     *modifiers_field = modifiers;
 }
 
-pub fn subtree_facts_worker_default(compute: impl FnOnce() -> SubtreeFacts) -> SubtreeFacts {
+pub fn subtree_facts_worker_default(compute: impl FnOnce() -> SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("subtree_facts_worker_default"); 
     compute()
 }
 
 pub fn subtree_facts_worker_composite(
     facts_cell: &AtomicU32,
     compute: impl FnOnce() -> SubtreeFacts,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("subtree_facts_worker_composite"); 
     let mut facts = SubtreeFacts::from_bits_truncate(facts_cell.load(Ordering::Relaxed));
     if !facts.intersects(SubtreeFacts::Computed) {
         facts |= compute() | SubtreeFacts::Computed;
@@ -100,16 +100,16 @@ pub fn subtree_facts_worker_composite(
 }
 
 impl Node {
-    pub fn subtree_facts(&self) -> SubtreeFacts {
+    pub fn subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("subtree_facts"); 
         subtree_facts_worker_default(|| compute_subtree_facts_dispatch(self))
     }
 
-    pub fn propagate_subtree_facts(&self) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         propagate_subtree_facts_node_default(self.subtree_facts())
     }
 }
 
-pub fn compute_subtree_facts_dispatch(node: &Node) -> SubtreeFacts {
+pub fn compute_subtree_facts_dispatch(node: &Node) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_dispatch"); 
     match &node.data {
         NodeData::Token => compute_subtree_facts_token(node.kind),
         NodeData::SpreadAssignment(d) => d.compute_subtree_facts(),
@@ -145,7 +145,7 @@ pub fn compute_subtree_facts_dispatch(node: &Node) -> SubtreeFacts {
 }
 
 impl SpreadAssignmentData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.expression))
             .union(SubtreeFacts::ESObjectRestOrSpread)
             .union(SubtreeFacts::ObjectRestOrSpread)
@@ -153,13 +153,13 @@ impl SpreadAssignmentData {
 }
 
 impl SpreadElementData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.expression)).union(SubtreeFacts::RestOrSpread)
     }
 }
 
 impl TaggedTemplateExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.tag))
             .union(propagate_subtree_facts(self.question_dot_token.as_ref()))
             .union(propagate_eraseable_syntax_list_subtree_facts(self.type_arguments.as_deref()))
@@ -168,7 +168,7 @@ impl TaggedTemplateExpressionData {
 }
 
 impl TemplateHeadData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self.template_flags & TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE != 0 {
             return SubtreeFacts::InvalidTemplateEscape;
         }
@@ -177,7 +177,7 @@ impl TemplateHeadData {
 }
 
 impl TemplateMiddleData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self.template_flags & TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE != 0 {
             return SubtreeFacts::InvalidTemplateEscape;
         }
@@ -186,7 +186,7 @@ impl TemplateMiddleData {
 }
 
 impl TemplateTailData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self.template_flags & TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE != 0 {
             return SubtreeFacts::InvalidTemplateEscape;
         }
@@ -195,17 +195,17 @@ impl TemplateTailData {
 }
 
 impl TypeAssertionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.expression)).union(SubtreeFacts::TypeScript)
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_OUTER_EXPRESSION)
     }
 }
 
 impl VariableDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.name))
             .union(propagate_eraseable_syntax_subtree_facts(self.exclamation_token.as_ref()))
             .union(propagate_eraseable_syntax_subtree_facts(self.type_node.as_ref()))
@@ -214,7 +214,7 @@ impl VariableDeclarationData {
 }
 
 impl VariableDeclarationListData {
-    pub fn compute_subtree_facts(&self, node_flags: NodeFlags) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self, node_flags: NodeFlags) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         let mut facts = propagate_node_list_subtree_facts(Some(&self.declarations), |n: &Arc<Node>| propagate_subtree_facts(Some(n)));
         if node_flags.intersects(NodeFlags::Using) {
             facts |= SubtreeFacts::Using;
@@ -222,13 +222,13 @@ impl VariableDeclarationListData {
         facts
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_VARIABLE_DECLARATION_LIST)
     }
 }
 
 impl VariableStatementData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self
             .modifiers
             .as_ref()
@@ -243,14 +243,14 @@ impl VariableStatementData {
 }
 
 impl YieldExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(self.expression.as_ref())
             .union(SubtreeFacts::ForAwaitOrAsyncGenerator)
     }
 }
 
 impl CatchClauseData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         let mut res = propagate_subtree_facts(self.variable_declaration.as_ref())
             .union(propagate_subtree_facts(Some(&self.block)));
         if self.variable_declaration.is_none() {
@@ -259,13 +259,13 @@ impl CatchClauseData {
         res
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_CATCH_CLAUSE)
     }
 }
 
 impl ClassDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         class_like_compute_subtree_facts(
             self.modifiers.as_deref(),
             self.name.as_ref(),
@@ -275,13 +275,13 @@ impl ClassDeclarationData {
         )
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_CLASS)
     }
 }
 
 impl ClassExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         class_like_compute_subtree_facts(
             self.modifiers.as_deref(),
             self.name.as_ref(),
@@ -291,7 +291,7 @@ impl ClassExpressionData {
         )
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_CLASS)
     }
 }
@@ -302,7 +302,7 @@ fn class_like_compute_subtree_facts(
     type_parameters: Option<&NodeList>,
     heritage_clauses: Option<&NodeList>,
     members: &NodeList,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("class_like_compute_subtree_facts"); 
     if modifiers
         .map(|m| m.modifier_flags.intersects(ModifierFlags::Ambient))
         .unwrap_or(false)
@@ -317,7 +317,7 @@ fn class_like_compute_subtree_facts(
 }
 
 impl ConstructorDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self.body.is_none() {
             return SubtreeFacts::TypeScript;
         }
@@ -329,13 +329,13 @@ impl ConstructorDeclarationData {
             .union(propagate_subtree_facts(self.body.as_ref()))
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_CONSTRUCTOR)
     }
 }
 
 impl FunctionDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self.body.is_none()
             || self
                 .modifiers
@@ -369,13 +369,13 @@ impl FunctionDeclarationData {
             })
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_FUNCTION)
     }
 }
 
 impl FunctionExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         let is_async = self
             .modifiers
             .as_ref()
@@ -401,13 +401,13 @@ impl FunctionExpressionData {
             })
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_FUNCTION)
     }
 }
 
 impl MethodDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self.body.is_none() {
             return SubtreeFacts::TypeScript;
         }
@@ -437,7 +437,7 @@ impl MethodDeclarationData {
             })
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts
             .difference(SUBTREE_EXCLUSIONS_METHOD)
             .union(propagate_subtree_facts(Some(&self.name)))
@@ -445,7 +445,7 @@ impl MethodDeclarationData {
 }
 
 impl ModuleDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if self
             .modifiers
             .as_ref()
@@ -459,13 +459,13 @@ impl ModuleDeclarationData {
             .union(SubtreeFacts::TypeScript)
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_MODULE)
     }
 }
 
 impl ArrowFunctionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_modifier_list_subtree_facts(self.modifiers.as_deref())
             .union(propagate_eraseable_syntax_list_subtree_facts(self.type_parameters.as_deref()))
             .union(propagate_node_list_subtree_facts(Some(&self.parameters), |n: &Arc<Node>| propagate_subtree_facts(Some(n))))
@@ -485,33 +485,33 @@ impl ArrowFunctionData {
             )
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_ARROW_FUNCTION)
     }
 }
 
 impl AsExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.expression)).union(SubtreeFacts::TypeScript)
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_OUTER_EXPRESSION)
     }
 }
 
 impl SatisfiesExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.expression)).union(SubtreeFacts::TypeScript)
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_OUTER_EXPRESSION)
     }
 }
 
 impl PropertyAccessExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         let private_name = if is_identifier(&self.name) {
             SUBTREE_FACTS_NONE
         } else {
@@ -523,19 +523,19 @@ impl PropertyAccessExpressionData {
             .union(private_name)
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_PROPERTY_ACCESS)
     }
 }
 
 impl ElementAccessExpressionData {
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_ELEMENT_ACCESS)
     }
 }
 
 impl PropertyDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_modifier_list_subtree_facts(self.modifiers.as_deref())
             .union(propagate_subtree_facts(Some(&self.name)))
             .union(propagate_eraseable_syntax_subtree_facts(self.postfix_token.as_ref()))
@@ -544,7 +544,7 @@ impl PropertyDeclarationData {
             .union(SubtreeFacts::ClassFields)
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts
             .difference(SUBTREE_EXCLUSIONS_PROPERTY)
             .union(propagate_subtree_facts(Some(&self.name)))
@@ -552,7 +552,7 @@ impl PropertyDeclarationData {
 }
 
 impl CallExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.expression))
             .union(propagate_subtree_facts(self.question_dot_token.as_ref()))
             .union(propagate_eraseable_syntax_list_subtree_facts(self.type_arguments.as_deref()))
@@ -564,25 +564,25 @@ impl CallExpressionData {
             })
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_CALL)
     }
 }
 
 impl NewExpressionData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         propagate_subtree_facts(Some(&self.expression))
             .union(propagate_eraseable_syntax_list_subtree_facts(self.type_arguments.as_deref()))
             .union(propagate_node_list_subtree_facts(self.arguments.as_deref(), |n: &Arc<Node>| propagate_subtree_facts(Some(n))))
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_NEW)
     }
 }
 
 impl BindingPatternData {
-    pub fn compute_subtree_facts(&self, kind: SyntaxKind) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self, kind: SyntaxKind) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         match kind {
             SyntaxKind::ObjectBindingPattern => propagate_node_list_subtree_facts(
                 Some(&self.elements),
@@ -596,13 +596,13 @@ impl BindingPatternData {
         }
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_BINDING_PATTERN)
     }
 }
 
 impl ParameterDeclarationData {
-    pub fn compute_subtree_facts(&self) -> SubtreeFacts {
+    pub fn compute_subtree_facts(&self) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts"); 
         if is_this_identifier(Some(&self.name)) {
             return SubtreeFacts::TypeScript;
         }
@@ -613,25 +613,25 @@ impl ParameterDeclarationData {
             .union(propagate_subtree_facts(self.initializer.as_ref()))
     }
 
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_PARAMETER)
     }
 }
 
 impl ArrayLiteralExpressionData {
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_ARRAY_LITERAL)
     }
 }
 
 impl ObjectLiteralExpressionData {
-    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts {
+    pub fn propagate_subtree_facts(&self, facts: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
         facts.difference(SUBTREE_EXCLUSIONS_OBJECT_LITERAL)
     }
 }
 
 impl BinaryExpressionData {
-    pub fn set_modifiers(&mut self, modifiers: Option<Arc<ModifierList>>) {
+    pub fn set_modifiers(&mut self, modifiers: Option<Arc<ModifierList>>) { ::tsox_core::fntrace::enter("set_modifiers"); 
         self.modifiers = modifiers;
     }
 }

@@ -32,7 +32,7 @@ pub struct LockedEntry<'a, K: Eq + Hash + Clone, V: Clone> {
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
-    pub fn value(&self) -> Option<V> {
+    pub fn value(&self) -> Option<V> { ::tsox_core::fntrace::enter("value"); 
         let state = self.inner.lock().unwrap();
         if let Some(proxy) = state.proxy_for.clone() {
             drop(state);
@@ -41,7 +41,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         self.value_locked(&state)
     }
 
-    pub fn value_locked(&self, state: &EntryState<K, V>) -> Option<V> {
+    pub fn value_locked(&self, state: &EntryState<K, V>) -> Option<V> { ::tsox_core::fntrace::enter("value_locked"); 
         if state.delete {
             None
         } else {
@@ -49,7 +49,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         }
     }
 
-    pub fn dirty(&self) -> bool {
+    pub fn dirty(&self) -> bool { ::tsox_core::fntrace::enter("dirty"); 
         let state = self.inner.lock().unwrap();
         if let Some(proxy) = state.proxy_for.clone() {
             drop(state);
@@ -58,7 +58,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         state.dirty
     }
 
-    pub fn locked<R>(&self, f: impl FnOnce(&LockedEntry<K, V>) -> R) -> R {
+    pub fn locked<R>(&self, f: impl FnOnce(&LockedEntry<K, V>) -> R) -> R { ::tsox_core::fntrace::enter("locked"); 
         let state = self.inner.lock().unwrap();
         if let Some(proxy) = state.proxy_for.clone() {
             drop(state);
@@ -71,7 +71,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         f(&locked)
     }
 
-    pub fn change(&self, apply: impl FnOnce(&mut V)) {
+    pub fn change(&self, apply: impl FnOnce(&mut V)) { ::tsox_core::fntrace::enter("change"); 
         let mut state = self.inner.lock().unwrap();
         if let Some(proxy) = state.proxy_for.as_ref() {
             let proxy = proxy.clone();
@@ -82,7 +82,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         self.change_locked(&mut state, apply);
     }
 
-    pub fn change_locked(&self, state: &mut EntryState<K, V>, apply: impl FnOnce(&mut V)) {
+    pub fn change_locked(&self, state: &mut EntryState<K, V>, apply: impl FnOnce(&mut V)) { ::tsox_core::fntrace::enter("change_locked"); 
         if state.dirty {
             apply(&mut state.value);
             return;
@@ -109,7 +109,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         }
     }
 
-    pub fn change_if(&self, cond: impl FnOnce(&V) -> bool, apply: impl FnOnce(&mut V)) -> bool {
+    pub fn change_if(&self, cond: impl FnOnce(&V) -> bool, apply: impl FnOnce(&mut V)) -> bool { ::tsox_core::fntrace::enter("change_if"); 
         let mut state = self.inner.lock().unwrap();
         if let Some(proxy) = state.proxy_for.as_ref() {
             let proxy = proxy.clone();
@@ -124,7 +124,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         }
     }
 
-    pub fn delete(&self) {
+    pub fn delete(&self) { ::tsox_core::fntrace::enter("delete"); 
         let mut state = self.inner.lock().unwrap();
         if let Some(proxy) = state.proxy_for.as_ref() {
             let proxy = proxy.clone();
@@ -148,7 +148,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         }
     }
 
-    pub fn delete_locked(&self, state: &mut EntryState<K, V>) {
+    pub fn delete_locked(&self, state: &mut EntryState<K, V>) { ::tsox_core::fntrace::enter("delete_locked"); 
         if state.dirty {
             state.delete = true;
             return;
@@ -169,7 +169,7 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
         }
     }
 
-    pub fn delete_if(&self, cond: impl FnOnce(&V) -> bool) {
+    pub fn delete_if(&self, cond: impl FnOnce(&V) -> bool) { ::tsox_core::fntrace::enter("delete_if"); 
         let mut state = self.inner.lock().unwrap();
         if let Some(proxy) = state.proxy_for.as_ref() {
             let proxy = proxy.clone();
@@ -184,23 +184,23 @@ impl<K: Eq + Hash + Clone, V: Clone> SyncMapEntry<K, V> {
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> LockedEntry<'_, K, V> {
-    pub fn value(&self) -> Option<V> {
+    pub fn value(&self) -> Option<V> { ::tsox_core::fntrace::enter("value"); 
         self.entry.value_locked(&self.guard)
     }
 
-    pub fn original(&self) -> V {
+    pub fn original(&self) -> V { ::tsox_core::fntrace::enter("original"); 
         self.guard.original.clone()
     }
 
-    pub fn dirty(&self) -> bool {
+    pub fn dirty(&self) -> bool { ::tsox_core::fntrace::enter("dirty"); 
         self.guard.dirty
     }
 
-    pub fn change(&mut self, apply: impl FnOnce(&mut V)) {
+    pub fn change(&mut self, apply: impl FnOnce(&mut V)) { ::tsox_core::fntrace::enter("change"); 
         apply(&mut self.guard.value);
     }
 
-    pub fn change_if(&mut self, cond: impl FnOnce(&V) -> bool, apply: impl FnOnce(&mut V)) -> bool {
+    pub fn change_if(&mut self, cond: impl FnOnce(&V) -> bool, apply: impl FnOnce(&mut V)) -> bool { ::tsox_core::fntrace::enter("change_if"); 
         if cond(&self.guard.value) {
             apply(&mut self.guard.value);
             true
@@ -209,17 +209,17 @@ impl<K: Eq + Hash + Clone, V: Clone> LockedEntry<'_, K, V> {
         }
     }
 
-    pub fn delete(&mut self) {
+    pub fn delete(&mut self) { ::tsox_core::fntrace::enter("delete"); 
         self.entry.delete_locked(&mut self.guard);
     }
 
-    pub fn locked(&mut self, f: impl FnOnce(&mut LockedEntry<K, V>)) {
+    pub fn locked(&mut self, f: impl FnOnce(&mut LockedEntry<K, V>)) { ::tsox_core::fntrace::enter("locked"); 
         f(self)
     }
 }
 
 impl<K: Eq + Hash + Clone, V: Clone> DirtySyncMap<K, V> {
-    pub fn range(&self, mut f: impl FnMut(&Arc<SyncMapEntry<K, V>>) -> bool) {
+    pub fn range(&self, mut f: impl FnMut(&Arc<SyncMapEntry<K, V>>) -> bool) { ::tsox_core::fntrace::enter("range"); 
         let mut seen = std::collections::HashSet::new();
         self.dirty.for_each(|key, entry| {
             seen.insert(key.clone());
@@ -247,14 +247,14 @@ impl<K: Eq + Hash + Clone, V: Clone> DirtySyncMap<K, V> {
         }
     }
 
-    pub fn finalize(&self) -> (HashMap<K, V>, bool) {
+    pub fn finalize(&self) -> (HashMap<K, V>, bool) { ::tsox_core::fntrace::enter("finalize"); 
         self.finalize_with(|_key, _value| {})
     }
 
     pub fn finalize_with(
         &self,
         mut on_discard: impl FnMut(&K, &V),
-    ) -> (HashMap<K, V>, bool) {
+    ) -> (HashMap<K, V>, bool) { ::tsox_core::fntrace::enter("finalize_with"); 
         if self.dirty.is_empty() {
             return (self.base.clone(), false);
         }
@@ -273,10 +273,10 @@ impl<K: Eq + Hash + Clone, V: Clone> DirtySyncMap<K, V> {
     }
 }
 
-fn self_arc<K: Eq + Hash + Clone, V: Clone>(_e: &SyncMapEntry<K, V>) -> Arc<SyncMapEntry<K, V>> {
+fn self_arc<K: Eq + Hash + Clone, V: Clone>(_e: &SyncMapEntry<K, V>) -> Arc<SyncMapEntry<K, V>> { ::tsox_core::fntrace::enter("self_arc"); 
     unreachable!("requires Arc back-reference; see handoff")
 }
 
-fn arc_of<K: Eq + Hash + Clone, V: Clone>(_m: &DirtySyncMap<K, V>) -> Arc<DirtySyncMap<K, V>> {
+fn arc_of<K: Eq + Hash + Clone, V: Clone>(_m: &DirtySyncMap<K, V>) -> Arc<DirtySyncMap<K, V>> { ::tsox_core::fntrace::enter("arc_of"); 
     unreachable!("requires Arc back-reference; see handoff")
 }

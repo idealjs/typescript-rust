@@ -8,7 +8,7 @@ impl Checker {
         node: &Arc<Node>,
         expr: &Arc<Node>,
         type_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_assertion_overlap"); 
         if type_node.kind == SyntaxKind::TypeReference && type_node.text() == "const" {
             return;
         }
@@ -71,7 +71,7 @@ impl Checker {
         expr: &Arc<Node>,
         expr_type: &Arc<Type>,
         target_type: &Arc<Type>,
-    ) -> Option<(TextRange, String, String)> {
+    ) -> Option<(TextRange, String, String)> { ::tsox_core::fntrace::enter("assertion_excess_detail"); 
         let (elem_source, elem_target, literal_node) = match &expr.data {
             NodeData::ObjectLiteralExpression(_) => (
                 Arc::clone(expr_type),
@@ -99,7 +99,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("element_type_of"); 
         if t.flags.contains(TypeFlags::Object) {
             if let TypeData::Object(obj) = &t.data
                 && !obj.type_arguments.is_empty()
@@ -110,7 +110,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn check_accessor_in_type_context(&mut self, member: &Arc<Node>) {
+    pub(crate) fn check_accessor_in_type_context(&mut self, member: &Arc<Node>) { ::tsox_core::fntrace::enter("check_accessor_in_type_context"); 
         let body = match &member.data {
             tsox_frontend::ast::NodeData::GetAccessorDeclaration(d) => d.body.clone(),
             tsox_frontend::ast::NodeData::SetAccessorDeclaration(d) => d.body.clone(),
@@ -128,7 +128,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_entity_name_expression(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_entity_name_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression"); 
         if node.kind == SyntaxKind::Identifier {
             return true;
         }
@@ -138,7 +138,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn check_interface_members(&mut self, members: &NodeList) {
+    pub(crate) fn check_interface_members(&mut self, members: &NodeList) { ::tsox_core::fntrace::enter("check_interface_members"); 
         for member in members.iter() {
             if matches!(
                 member.kind,

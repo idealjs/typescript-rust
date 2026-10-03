@@ -6,7 +6,7 @@ pub const FILENAME_DIRECTIVE: &str = "@Filename:";
 pub const SYMLINK_DIRECTIVE: &str = "@SYMlink:";
 pub const GLOBAL_OPTIONS_DIRECTIVE: &str = "@GlobalOptions:";
 
-fn strip_directive<'a>(rest: &'a str, directive: &str) -> Option<&'a str> {
+fn strip_directive<'a>(rest: &'a str, directive: &str) -> Option<&'a str> { ::tsox_core::fntrace::enter("strip_directive"); 
     let rb = rest.as_bytes();
     let db = directive.as_bytes();
     if rb.len() >= db.len() && rb[..db.len()].eq_ignore_ascii_case(db) {
@@ -57,7 +57,7 @@ struct FileAccumulator {
 }
 
 impl FileAccumulator {
-    fn new() -> Self {
+    fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             name: None,
             options: BTreeMap::new(),
@@ -66,11 +66,11 @@ impl FileAccumulator {
         }
     }
 
-    fn is_empty(&self) -> bool {
+    fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.name.is_none() && self.lines.is_empty() && self.symlink.is_none()
     }
 
-    fn finish(mut self, default_name: &str, data: &mut TestData) {
+    fn finish(mut self, default_name: &str, data: &mut TestData) { ::tsox_core::fntrace::enter("finish"); 
         if self.is_empty() {
             // 无内容无文件名的头部选项行（首个 @Filename 前的 // @option）按
             // Go fourslash 语义并入全项目选项
@@ -105,7 +105,7 @@ impl FileAccumulator {
     }
 }
 
-pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData {
+pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData { ::tsox_core::fntrace::enter("parse_test_data"); 
     let contents = contents.replace("\r\n", "\n");
     let mut data = TestData::default();
     let mut acc = FileAccumulator::new();
@@ -159,7 +159,7 @@ pub fn parse_test_data(contents: &str, default_file_name: &str) -> TestData {
 }
 
 /// Go chompLeadingSpace：所有非空行均以空格开头时，每行剥掉 1 个前导空格
-fn chomp_leading_space(content: &str) -> String {
+fn chomp_leading_space(content: &str) -> String { ::tsox_core::fntrace::enter("chomp_leading_space"); 
     let lines: Vec<&str> = content.split('\n').collect();
     if lines.iter().any(|l| !l.is_empty() && !l.starts_with(' ')) {
         return content.to_string();
@@ -179,7 +179,7 @@ fn parse_file_content(
     BTreeMap<String, String>,
     Vec<Marker>,
     Vec<RangeMarker>,
-) {
+) { ::tsox_core::fntrace::enter("parse_file_content"); 
     let content = chomp_leading_space(content);
     let chars: Vec<char> = content.chars().collect();
     let mut out = String::new();
@@ -191,7 +191,7 @@ fn parse_file_content(
     let mut last_normal = 0usize;
     let mut state = 0u8; // 0 普通, 1 slash-star 标记, 2 对象标记
 
-    fn flush(out: &mut String, chars: &[char], from: &mut usize, to: Option<usize>) {
+    fn flush(out: &mut String, chars: &[char], from: &mut usize, to: Option<usize>) { ::tsox_core::fntrace::enter("flush"); 
         let end = to.unwrap_or(chars.len()).min(chars.len());
         if *from < end {
             out.extend(chars[*from..end].iter());

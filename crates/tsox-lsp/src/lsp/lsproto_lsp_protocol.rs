@@ -19,13 +19,13 @@ pub struct TextDocumentPositionParams {
 }
 
 impl HasTextDocumentUri for TextDocumentPositionParams {
-    fn text_document_uri(&self) -> &DocumentUri {
+    fn text_document_uri(&self) -> &DocumentUri { ::tsox_core::fntrace::enter("text_document_uri"); 
         &self.text_document.uri
     }
 }
 
 impl HasTextDocumentPosition for TextDocumentPositionParams {
-    fn text_document_position(&self) -> &Position {
+    fn text_document_position(&self) -> &Position { ::tsox_core::fntrace::enter("text_document_position"); 
         &self.position
     }
 }

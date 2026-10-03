@@ -10,7 +10,7 @@ pub struct ProfileSession {
     log_writer: Box<dyn Write + Send>,
 }
 
-pub fn begin_profiling(profile_dir: &str, log_writer: Box<dyn Write + Send>) -> ProfileSession {
+pub fn begin_profiling(profile_dir: &str, log_writer: Box<dyn Write + Send>) -> ProfileSession { crate::fntrace::enter("begin_profiling"); 
     std::fs::create_dir_all(profile_dir).expect("failed to create profile dir");
 
     let pid = std::process::id();
@@ -29,7 +29,7 @@ pub fn begin_profiling(profile_dir: &str, log_writer: Box<dyn Write + Send>) -> 
 }
 
 impl ProfileSession {
-    pub fn stop(&mut self) {
+    pub fn stop(&mut self) { crate::fntrace::enter("stop"); 
         runtime_pprof::stop_cpu_profile();
         self.cpu_file = None;
 
@@ -50,19 +50,19 @@ pub struct CpuProfiler {
 }
 
 impl Default for CpuProfiler {
-    fn default() -> Self {
+    fn default() -> Self { crate::fntrace::enter("default"); 
         Self::new()
     }
 }
 
 impl CpuProfiler {
-    pub fn new() -> Self {
+    pub fn new() -> Self { crate::fntrace::enter("new"); 
         CpuProfiler {
             session: Mutex::new(None),
         }
     }
 
-    pub fn start_cpu_profile(&self, profile_dir: &str) -> Result<(), String> {
+    pub fn start_cpu_profile(&self, profile_dir: &str) -> Result<(), String> { crate::fntrace::enter("start_cpu_profile"); 
         let mut session = self.session.lock().unwrap();
 
         if session.is_some() {
@@ -96,7 +96,7 @@ impl CpuProfiler {
         Ok(())
     }
 
-    pub fn stop_cpu_profile(&self) -> Result<String, String> {
+    pub fn stop_cpu_profile(&self) -> Result<String, String> { crate::fntrace::enter("stop_cpu_profile"); 
         let mut session = self.session.lock().unwrap();
 
         match session.take() {
@@ -110,7 +110,7 @@ impl CpuProfiler {
     }
 }
 
-pub fn save_heap_profile(profile_dir: &str) -> Result<String, String> {
+pub fn save_heap_profile(profile_dir: &str) -> Result<String, String> { crate::fntrace::enter("save_heap_profile"); 
     std::fs::create_dir_all(profile_dir)
         .map_err(|e| format!("failed to create profile directory: {e}"))?;
 
@@ -134,7 +134,7 @@ pub fn save_heap_profile(profile_dir: &str) -> Result<String, String> {
     Ok(heap_profile_path.to_string_lossy().into_owned())
 }
 
-pub fn save_alloc_profile(profile_dir: &str) -> Result<String, String> {
+pub fn save_alloc_profile(profile_dir: &str) -> Result<String, String> { crate::fntrace::enter("save_alloc_profile"); 
     std::fs::create_dir_all(profile_dir)
         .map_err(|e| format!("failed to create profile directory: {e}"))?;
 
@@ -157,7 +157,7 @@ pub fn save_alloc_profile(profile_dir: &str) -> Result<String, String> {
     Ok(alloc_profile_path.to_string_lossy().into_owned())
 }
 
-pub fn run_gc() {
+pub fn run_gc() { crate::fntrace::enter("run_gc"); 
     runtime_gc();
 }
 
@@ -169,7 +169,7 @@ mod runtime_pprof {
     pub struct Error;
 
     impl fmt::Display for Error {
-        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
             f.write_str("runtime profiling is not supported")
         }
     }
@@ -177,21 +177,21 @@ mod runtime_pprof {
     pub struct Profile;
 
     impl Profile {
-        pub fn write_to<W: Write + ?Sized>(&self, _w: &mut W) -> Result<(), Error> {
+        pub fn write_to<W: Write + ?Sized>(&self, _w: &mut W) -> Result<(), Error> { crate::fntrace::enter("write_to"); 
             Ok(())
         }
     }
 
-    pub fn start_cpu_profile(_w: &dyn Write) -> Result<(), Error> {
+    pub fn start_cpu_profile(_w: &dyn Write) -> Result<(), Error> { crate::fntrace::enter("start_cpu_profile"); 
         Ok(())
     }
 
-    pub fn stop_cpu_profile() {}
+    pub fn stop_cpu_profile() { crate::fntrace::enter("stop_cpu_profile"); }
 
-    pub fn lookup(_name: &str) -> Profile {
+    pub fn lookup(_name: &str) -> Profile { crate::fntrace::enter("lookup"); 
         Profile
     }
 }
 
-fn runtime_gc() {
+fn runtime_gc() { crate::fntrace::enter("runtime_gc"); 
     }

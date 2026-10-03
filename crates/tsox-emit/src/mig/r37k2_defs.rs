@@ -54,14 +54,14 @@ impl R37K2NodeExt for Node {
     node_data_accessor!(as_block, Block, BlockData, SyntaxKind::Block);
     node_data_accessor!(as_shorthand_property_assignment, ShorthandPropertyAssignment, ShorthandPropertyAssignmentData, SyntaxKind::ShorthandPropertyAssignment);
 
-    fn as_switch_statement_data(&self) {}
+    fn as_switch_statement_data(&self) { ::tsox_core::fntrace::enter("as_switch_statement_data"); }
 }
 
 impl Visitor {
     pub fn visit_modifiers(
         &mut self,
         modifiers: Option<tsox_frontend::ast::node::ModifierList>,
-    ) -> Option<Arc<tsox_frontend::ast::node::ModifierList>> {
+    ) -> Option<Arc<tsox_frontend::ast::node::ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         modifiers.map(|m| Arc::new(m))
     }
 }
@@ -72,17 +72,17 @@ pub trait R37K2NodeVisitorExt {
 }
 
 impl R37K2NodeVisitorExt for tsox_frontend::ast::visitor::NodeVisitor {
-    fn visit_each_child(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_each_child(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_each_child"); 
         Some(node)
     }
 
-    fn visit_embedded_statement(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_embedded_statement(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_embedded_statement"); 
         Some(node)
     }
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_empty_statement(&self) -> Arc<Node> {
+    pub fn new_empty_statement(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_empty_statement"); 
         Arc::new(Node::new(SyntaxKind::EmptyStatement, NodeData::EmptyStatement))
     }
 
@@ -91,7 +91,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         statement: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_do_statement"); 
         let mut updated = Node::new(
             SyntaxKind::DoStatement,
             NodeData::DoStatement(ndg::DoStatementData {
@@ -109,7 +109,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         statement: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_while_statement"); 
         let mut updated = Node::new(
             SyntaxKind::WhileStatement,
             NodeData::WhileStatement(ndg::WhileStatementData {
@@ -127,7 +127,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         statement: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_with_statement"); 
         let mut updated = Node::new(
             SyntaxKind::WithStatement,
             NodeData::WithStatement(ndg::WithStatementData {
@@ -146,7 +146,7 @@ impl<'a> NodeFactory<'a> {
         expression: &Arc<Node>,
         then_statement: &Arc<Node>,
         else_statement: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_if_statement"); 
         let mut updated = Node::new(
             SyntaxKind::IfStatement,
             NodeData::IfStatement(ndg::IfStatementData {
@@ -165,7 +165,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         case_block: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_switch_statement"); 
         let mut updated = Node::new(
             SyntaxKind::SwitchStatement,
             NodeData::SwitchStatement(ndg::SwitchStatementData {
@@ -183,7 +183,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         expression: Option<&Arc<Node>>,
         statements: &NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_case_or_default_clause"); 
         let mut updated = Node::new(
             node.kind,
             NodeData::CaseOrDefaultClause(ndg::CaseOrDefaultClauseData {
@@ -206,7 +206,7 @@ impl<'a> NodeFactory<'a> {
         node: &Arc<Node>,
         variable_declaration: Option<&Arc<Node>>,
         block: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_catch_clause"); 
         let mut updated = Node::new(
             SyntaxKind::CatchClause,
             NodeData::CatchClause(ndg::CatchClauseData {

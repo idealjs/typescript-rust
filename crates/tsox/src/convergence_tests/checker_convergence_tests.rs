@@ -16,7 +16,7 @@ use tsox_tsoptions::vfs::InMemoryFS;
 pub(crate) fn build_program_and_checker(
     source: &str,
     lib_spec: &[&str],
-) -> (Arc<Program>, Checker) {
+) -> (Arc<Program>, Checker) { ::tsox_core::fntrace::enter("build_program_and_checker"); 
     use tsox_checker::bundled::BundledFS;
     let inner = Arc::new(InMemoryFS::new());
     inner.insert_file("/proj/entry.ts", source);
@@ -45,7 +45,7 @@ pub(crate) fn build_program_and_checker(
     (program, checker)
 }
 
-pub(crate) fn error_codes(checker: &Checker) -> Vec<i32> {
+pub(crate) fn error_codes(checker: &Checker) -> Vec<i32> { ::tsox_core::fntrace::enter("error_codes"); 
     checker
         .diagnostics
         .get_all()
@@ -60,7 +60,7 @@ pub(crate) fn error_codes(checker: &Checker) -> Vec<i32> {
 }
 
 #[test]
-fn any_base_is_not_degradation() {
+fn any_base_is_not_degradation() { ::tsox_core::fntrace::enter("any_base_is_not_degradation"); 
     let (program, mut checker) =
         crate::convergence_tests::checker_convergence_tests::build_program_and_checker(
             "type AnyAlias = any;\n\
@@ -115,7 +115,7 @@ fn any_base_is_not_degradation() {
 }
 
 #[test]
-fn cyclic_base_interfaces_converge() {
+fn cyclic_base_interfaces_converge() { ::tsox_core::fntrace::enter("cyclic_base_interfaces_converge"); 
     let source = "interface A extends B { a: number; }\n\
                       interface B extends A { b: string; }\n\
                       declare const v1: A; declare const v2: A;\n\
@@ -151,7 +151,7 @@ fn cyclic_base_interfaces_converge() {
 }
 
 #[test]
-fn subst_cache_respects_capacity() {
+fn subst_cache_respects_capacity() { ::tsox_core::fntrace::enter("subst_cache_respects_capacity"); 
     let (program, mut checker) =
         crate::convergence_tests::checker_convergence_tests::build_program_and_checker(
             "declare const a: string[]; declare const b: number[];\n\
@@ -177,7 +177,7 @@ fn subst_cache_respects_capacity() {
 }
 
 #[test]
-fn deep_class_chain_bounded() {
+fn deep_class_chain_bounded() { ::tsox_core::fntrace::enter("deep_class_chain_bounded"); 
     let mut source = String::from("class C0 { m0: number = 0; }\n");
     for i in 1..=260 {
         source.push_str(&format!(

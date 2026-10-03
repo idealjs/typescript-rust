@@ -3,7 +3,7 @@
 use crate::checker::checker_classes::*;
 
 impl Checker {
-    pub(crate) fn check_indexed_access_index_type(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_indexed_access_index_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_indexed_access_index_type"); 
         use crate::checker::types::{TypeData, TypeFlags};
         let t = self.get_type_from_type_node(node);
 
@@ -96,7 +96,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn property_name_from_index(&mut self, t: &Arc<Type>) -> Option<String> {
+    pub(crate) fn property_name_from_index(&mut self, t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("property_name_from_index"); 
         if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(t)
         {
             let name = crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(t);
@@ -106,7 +106,7 @@ impl Checker {
         }
         None
     }
-    pub(crate) fn check_heritage_clause(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_heritage_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_heritage_clause"); 
         let data = match &node.data {
             tsox_frontend::ast::NodeData::HeritageClause(d) => d,
             _ => return,
@@ -762,12 +762,12 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> {
+    pub(crate) fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_class_instance_type"); 
         self.build_interface_type_from_members(members)
     }
 }
 
-fn entity_name_text(node: &Arc<Node>) -> String {
+fn entity_name_text(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("entity_name_text"); 
     match &node.data {
         tsox_frontend::ast::NodeData::Identifier(id) => id.text.clone(),
         tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {

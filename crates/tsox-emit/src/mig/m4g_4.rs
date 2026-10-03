@@ -26,7 +26,7 @@ use crate::mig::m4g::r33k7_defs::{
 use crate::mig::m4h_2::{is_named_evaluation_and, transform_named_evaluation};
 use crate::mig::w7t::is_static_property_declaration_or_class_static_block;
 
-fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> {
+fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> { ::tsox_core::fntrace::enter("with_loc"); 
     if let Some(n) = Arc::get_mut(&mut node) {
         n.loc = loc;
     }
@@ -34,7 +34,7 @@ fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> {
 }
 
 impl ClassFieldsTransformer {
-    pub fn visit_call_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_call_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_call_expression"); 
         let call_target = call_expression_expression(node);
         if is_property_access_expression(call_target)
             && is_private_identifier(property_access_name(call_target))
@@ -115,7 +115,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_tagged_template_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_tagged_template_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_tagged_template_expression"); 
         let tag = tagged_template_tag(node);
         if is_property_access_expression(tag)
             && is_private_identifier(property_access_name(tag))
@@ -189,7 +189,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_binary_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> {
+    pub fn visit_binary_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_binary_expression"); 
         if is_destructuring_assignment(node) {
             let saved_pending_expressions = std::mem::take(&mut self.pending_expressions);
             let updated = self.factory().update_binary_expression(
@@ -265,7 +265,7 @@ impl ClassFieldsTransformer {
         self.visitor().visit_each_child(node)
     }
 
-    pub fn visit_parenthesized_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> {
+    pub fn visit_parenthesized_expression(&mut self, node: &Arc<Node>, discarded: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_parenthesized_expression"); 
         let expression = parenthesized_expression(node);
         let visited = if discarded {
             self.discarded_value_visitor().visit_node(expression)
@@ -306,21 +306,21 @@ use crate::mig::x6a::is_class_this_assignment_block;
 use tsox_frontend::format::mig::m4o;
 
 impl ClassFieldsTransformer {
-    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_class_declaration"); 
         self.visit_in_new_class_lexical_environment(
             node,
             Self::visit_class_declaration_in_new_class_lexical_environment,
         )
     }
 
-    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_class_expression"); 
         self.visit_in_new_class_lexical_environment(
             node,
             Self::visit_class_expression_in_new_class_lexical_environment,
         )
     }
 
-    fn new_reserved_temp_variable_m4g4(&self) -> Arc<Node> {
+    fn new_reserved_temp_variable_m4g4(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_reserved_temp_variable_m4g4"); 
         let emit_context = self.emit_context();
         let factory = PrinterNodeFactory::new(&emit_context);
         factory.generated_name_node(&factory.new_temp_variable_ex(AutoGenerateOptions {
@@ -329,7 +329,7 @@ impl ClassFieldsTransformer {
         }))
     }
 
-    fn get_local_name_m4g4(&self, node: &Arc<Node>) -> Arc<Node> {
+    fn get_local_name_m4g4(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_local_name_m4g4"); 
         let emit_context = self.emit_context();
         let factory = PrinterNodeFactory::new(&emit_context);
         factory.get_local_name(node)
@@ -339,7 +339,7 @@ impl ClassFieldsTransformer {
         &mut self,
         node: &Arc<Node>,
         visitor: fn(&mut Self, &Arc<Node>, ClassFacts) -> Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_in_new_class_lexical_environment"); 
         let saved_current_class_container = self.current_class_container.take();
         let saved_pending_expressions = std::mem::take(&mut self.pending_expressions);
         let saved_lexical_environment = self.lexical_environment.take();
@@ -404,7 +404,7 @@ impl ClassFieldsTransformer {
         &mut self,
         node: &Arc<Node>,
         facts: ClassFacts,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_class_declaration_in_new_class_lexical_environment"); 
         let mut pending_class_reference_assignment: Option<Arc<Node>> = None;
         if facts.contains(ClassFacts::NeedsClassConstructorReference) {
             let class_this = self.emit_context().class_this(node);
@@ -530,7 +530,7 @@ impl ClassFieldsTransformer {
         &mut self,
         node: &Arc<Node>,
         facts: ClassFacts,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_class_expression_in_new_class_lexical_environment"); 
         let is_decorated_class_declaration = facts.contains(ClassFacts::ClassWasDecorated);
 
         let class_this = self.emit_context().class_this(node);
@@ -727,7 +727,7 @@ impl ClassFieldsTransformer {
         self.factory().inline_expressions(expressions)
     }
 
-    fn get_class_facts(&mut self, node: &Arc<Node>) -> ClassFacts {
+    fn get_class_facts(&mut self, node: &Arc<Node>) -> ClassFacts { ::tsox_core::fntrace::enter("get_class_facts"); 
         let mut facts = ClassFacts::empty();
 
         let original = self.emit_context().most_original(node);
@@ -819,7 +819,7 @@ impl ClassFieldsTransformer {
         facts
     }
 
-    fn class_contains_constructor_reference(&self, node: &Arc<Node>) -> bool {
+    fn class_contains_constructor_reference(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_contains_constructor_reference"); 
         for member in members(node) {
             if self.member_contains_constructor_reference(member, node) {
                 return true;
@@ -832,7 +832,7 @@ impl ClassFieldsTransformer {
         &self,
         member: &Arc<Node>,
         class_decl: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("member_contains_constructor_reference"); 
         let class_original = self.emit_context().most_original(class_decl);
         let class_name = class_decl.name();
         let check =
@@ -867,7 +867,7 @@ impl ClassFieldsTransformer {
         n: &Arc<Node>,
         class_original: &Arc<Node>,
         class_name: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("contains_constructor_reference_worker"); 
         let not_class_name = match class_name {
             Some(class_name) => !Arc::ptr_eq(class_name, n),
             None => true,
@@ -890,7 +890,7 @@ impl ClassFieldsTransformer {
         })
     }
 
-    fn class_expression_needs_block_scoped_temp(&self) -> bool {
+    fn class_expression_needs_block_scoped_temp(&self) -> bool { ::tsox_core::fntrace::enter("class_expression_needs_block_scoped_temp"); 
         if !self.requires_block_scoped_var() {
             return false;
         }
@@ -913,7 +913,7 @@ impl ClassFieldsTransformer {
     }
 }
 
-fn get_private_instance_methods_and_accessors_m4g4(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn get_private_instance_methods_and_accessors_m4g4(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_private_instance_methods_and_accessors_m4g4"); 
     members(node)
         .iter()
         .filter(|m| is_non_static_method_or_accessor_with_private_name(m))
@@ -921,7 +921,7 @@ fn get_private_instance_methods_and_accessors_m4g4(node: &Arc<Node>) -> Vec<Arc<
         .collect()
 }
 
-fn is_non_static_method_or_accessor_with_private_name(member: &Arc<Node>) -> bool {
+fn is_non_static_method_or_accessor_with_private_name(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_non_static_method_or_accessor_with_private_name"); 
     !has_static_modifier(member)
         && (is_method_declaration(member)
             || is_get_accessor_declaration(member)
@@ -933,21 +933,21 @@ fn is_non_static_method_or_accessor_with_private_name(member: &Arc<Node>) -> boo
             .unwrap_or(false)
 }
 
-fn class_static_block_body(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn class_static_block_body(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_static_block_body"); 
     match &node.data {
         ndg::NodeData::ClassStaticBlockDeclaration(d) => Some(d.body.clone()),
         _ => None,
     }
 }
 
-fn block_statement_nodes(block: &Arc<Node>) -> Vec<Arc<Node>> {
+fn block_statement_nodes(block: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("block_statement_nodes"); 
     match &block.data {
         ndg::NodeData::Block(d) => d.statements.nodes.clone(),
         _ => Vec::new(),
     }
 }
 
-fn function_like_body(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn function_like_body(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("function_like_body"); 
     match &node.data {
         ndg::NodeData::MethodDeclaration(d) => d.body.clone(),
         ndg::NodeData::GetAccessorDeclaration(d) => d.body.clone(),

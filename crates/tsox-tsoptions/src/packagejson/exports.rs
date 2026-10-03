@@ -17,26 +17,26 @@ pub struct ExportsOrImports {
 }
 
 impl ExportsOrImports {
-    pub fn from_json_value(json_value: JsonValue) -> Self {
+    pub fn from_json_value(json_value: JsonValue) -> Self { ::tsox_core::fntrace::enter("from_json_value"); 
         ExportsOrImports {
             json_value,
             object_kind: ObjectKind::Unknown,
         }
     }
 
-    pub fn is_subpaths(&self) -> bool {
+    pub fn is_subpaths(&self) -> bool { ::tsox_core::fntrace::enter("is_subpaths"); 
         self.compute_object_kind() == ObjectKind::Subpaths
     }
 
-    pub fn is_imports(&self) -> bool {
+    pub fn is_imports(&self) -> bool { ::tsox_core::fntrace::enter("is_imports"); 
         self.compute_object_kind() == ObjectKind::Imports
     }
 
-    pub fn is_conditions(&self) -> bool {
+    pub fn is_conditions(&self) -> bool { ::tsox_core::fntrace::enter("is_conditions"); 
         self.compute_object_kind() == ObjectKind::Conditions
     }
 
-    pub fn compute_object_kind(&self) -> ObjectKind {
+    pub fn compute_object_kind(&self) -> ObjectKind { ::tsox_core::fntrace::enter("compute_object_kind"); 
         if self.object_kind != ObjectKind::Unknown {
             return self.object_kind.clone();
         }

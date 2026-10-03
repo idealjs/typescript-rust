@@ -7,7 +7,7 @@ impl Parser {
         &mut self,
         expr: Arc<Node>,
         member_only: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_call_and_member_chain"); 
         let mut expr = expr;
         loop {
             if member_only
@@ -194,7 +194,7 @@ impl Parser {
         expr
     }
 
-    pub(crate) fn parse_tagged_template_literal(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_tagged_template_literal(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_tagged_template_literal"); 
         // Go parseTaggedTemplateRest：无替换模板为字面量 token，带插值的走模板表达式
         if self.token == SyntaxKind::NoSubstitutionTemplateLiteral {
             let text = self.scanner.token_value();
@@ -216,7 +216,7 @@ impl Parser {
     }
 
     // Go canFollowTypeArgumentsInExpression：实参表后可被表达式语境跟随的 token 集
-    fn can_follow_type_arguments_in_expression(&self) -> bool {
+    fn can_follow_type_arguments_in_expression(&self) -> bool { ::tsox_core::fntrace::enter("can_follow_type_arguments_in_expression"); 
         match self.token {
             SyntaxKind::OpenParenToken
             | SyntaxKind::NoSubstitutionTemplateLiteral
@@ -234,7 +234,7 @@ impl Parser {
     }
 
     // Go tryParseTypeArgumentsInExpression：JS 文件禁用（与二元 `<` 歧义），失败整体回退
-    pub(crate) fn try_parse_type_arguments_in_expression(&mut self) -> Option<Arc<NodeList>> {
+    pub(crate) fn try_parse_type_arguments_in_expression(&mut self) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("try_parse_type_arguments_in_expression"); 
         if self.javascript_file || self.token != SyntaxKind::LessThanToken {
             return None;
         }
@@ -261,7 +261,7 @@ impl Parser {
         None
     }
 
-    pub(crate) fn parse_element_access_argument(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_element_access_argument(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_element_access_argument"); 
         if self.token == SyntaxKind::CloseBracketToken {
             let pos = self.scanner.full_start_pos();
             self.parse_error_at(
@@ -282,7 +282,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_argument_list(&mut self) -> Arc<NodeList> {
+    pub(crate) fn parse_argument_list(&mut self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_argument_list"); 
         self.expect(SyntaxKind::OpenParenToken);
         let nodes =
             self.parse_delimited_list(ParsingContext::ArgumentExpressions, Parser::parse_argument);
@@ -290,7 +290,7 @@ impl Parser {
         Arc::new(nodes)
     }
 
-    pub(crate) fn parse_argument(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_argument(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_argument"); 
         if self.token == SyntaxKind::DotDotDotToken {
             let pos = self.token_pos();
             self.parse_optional(SyntaxKind::DotDotDotToken);
@@ -305,7 +305,7 @@ impl Parser {
         self.allow_in(|p| p.parse_assignment_expression())
     }
 
-    pub(crate) fn parse_optional_type_arguments(&mut self) -> Option<Arc<NodeList>> {
+    pub(crate) fn parse_optional_type_arguments(&mut self) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("parse_optional_type_arguments"); 
         if self.token == SyntaxKind::LessThanLessThanToken {
             self.token = self.scanner.re_scan_less_than();
             self.drain_scanner_errors();
@@ -330,7 +330,7 @@ impl Parser {
     pub(crate) fn try_parse_type_arguments(
         &mut self,
         require_following_paren: bool,
-    ) -> Option<Arc<NodeList>> {
+    ) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("try_parse_type_arguments"); 
         if self.token != SyntaxKind::LessThanToken {
             return None;
         }

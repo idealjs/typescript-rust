@@ -19,7 +19,7 @@ pub struct LazyValue<T> {
 }
 
 impl<T> Default for LazyValue<T> {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             value: None,
             once: Once::new(),
@@ -29,7 +29,7 @@ impl<T> Default for LazyValue<T> {
 }
 
 impl<T> LazyValue<T> {
-    pub fn get_value(&mut self, compute: impl FnOnce() -> T) -> &T {
+    pub fn get_value(&mut self, compute: impl FnOnce() -> T) -> &T { ::tsox_core::fntrace::enter("get_value"); 
         self.once.call_once(|| {
             if self.value.is_none() {
                 self.value = Some(compute());
@@ -40,7 +40,7 @@ impl<T> LazyValue<T> {
         self.value.as_ref().unwrap()
     }
 
-    pub fn try_reuse(&mut self, from: &LazyValue<T>) {
+    pub fn try_reuse(&mut self, from: &LazyValue<T>) { ::tsox_core::fntrace::enter("try_reuse"); 
         if from.initialized.load(std::sync::atomic::Ordering::SeqCst) {
             self.value = unsafe { std::ptr::read(&from.value) };
             self.initialized
@@ -49,7 +49,7 @@ impl<T> LazyValue<T> {
     }
 }
 
-pub fn has_zero_or_one_asterisk_character(s: &str) -> bool {
+pub fn has_zero_or_one_asterisk_character(s: &str) -> bool { ::tsox_core::fntrace::enter("has_zero_or_one_asterisk_character"); 
     let mut seen_asterisk = false;
     for ch in s.chars() {
         if ch == '*' {
@@ -65,7 +65,7 @@ pub fn has_zero_or_one_asterisk_character(s: &str) -> bool {
 
 pub fn module_resolution_supports_package_json_exports_and_imports(
     module_resolution: tsox_core::core::compiler_options_kinds::ModuleResolutionKind,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("module_resolution_supports_package_json_exports_and_imports"); 
     let module_resolution = module_resolution as i32;
     (module_resolution >= tsox_core::core::compiler_options_kinds::ModuleResolutionKind::Node16 as i32
         && module_resolution
@@ -75,11 +75,11 @@ pub fn module_resolution_supports_package_json_exports_and_imports(
 }
 
 impl Program {
-    pub(crate) fn project_reference_file_mapper(&self) -> &ProjectReferenceFileMapper {
+    pub(crate) fn project_reference_file_mapper(&self) -> &ProjectReferenceFileMapper { ::tsox_core::fntrace::enter("project_reference_file_mapper"); 
         self.project_reference_file_mapper.as_ref()
     }
 
-    pub fn to_path(&self, filename: &str) -> Path {
+    pub fn to_path(&self, filename: &str) -> Path { ::tsox_core::fntrace::enter("to_path"); 
         tspath::to_path(
             filename,
             self.get_current_directory(),
@@ -87,7 +87,7 @@ impl Program {
         )
     }
 
-    pub fn init_checker_pool(self: &Arc<Self>) {
+    pub fn init_checker_pool(self: &Arc<Self>) { ::tsox_core::fntrace::enter("init_checker_pool"); 
         if !self.finished_processing {
             panic!("Program must finish processing files before initializing checker pool");
         }
@@ -103,7 +103,7 @@ impl Program {
         self.compiler_checker_pool.set(pool).ok();
     }
 
-    pub fn needs_import_helpers_import_specifier(&self, file: &Arc<SourceFile>) -> bool {
+    pub fn needs_import_helpers_import_specifier(&self, file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("needs_import_helpers_import_specifier"); 
         let (redirect, _) = self
             .project_reference_file_mapper()
             .get_redirect_for_resolution(file);
@@ -125,7 +125,7 @@ impl Program {
         true
     }
 
-    pub fn jsx_runtime_import_specifier(&self, file: &Arc<SourceFile>) -> String {
+    pub fn jsx_runtime_import_specifier(&self, file: &Arc<SourceFile>) -> String { ::tsox_core::fntrace::enter("jsx_runtime_import_specifier"); 
         if !tsox_frontend::ast::is_source_file_js(file)
             && file.script_kind != tsox_frontend::ast::ScriptKind::Tsx
         {
@@ -149,7 +149,7 @@ impl Program {
         target_source_files: Option<&[Arc<SourceFile>]>,
         force_dts_emit: bool,
         force_js_emit: bool,
-    ) -> Vec<Arc<SourceFile>> {
+    ) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_files_to_emit"); 
         super::m4v::get_source_files_to_emit(
             self,
             target_source_files.map(|files| files.to_vec()),
@@ -162,7 +162,7 @@ impl Program {
         &self,
         r: &tsox_frontend::ast::node_source_file::FileReference,
         source_file: &Arc<SourceFile>,
-    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode {
+    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode { ::tsox_core::fntrace::enter("get_mode_for_type_reference_directive_in_file"); 
         if r.resolution_mode != tsox_core::core::compiler_options_kinds::ResolutionMode::None {
             return r.resolution_mode;
         }
@@ -173,7 +173,7 @@ impl Program {
         &self,
         c: &tsox_checker::checker::Checker,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> {
+    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> { ::tsox_core::fntrace::enter("get_semantic_diagnostics_with_checker"); 
         let mut result = super::m4w_4::filter_no_emit_semantic_diagnostics(
             self.get_bind_and_check_diagnostics_with_checker(c, source_file),
             &self.options(),
@@ -186,7 +186,7 @@ impl Program {
         &self,
         file_checker: &tsox_checker::checker::Checker,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> {
+    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> { ::tsox_core::fntrace::enter("get_bind_and_check_diagnostics_with_checker"); 
         let compiler_options = self.options();
         if self.skip_type_checking(source_file, false) {
             return Vec::new();
@@ -245,7 +245,7 @@ impl Program {
     ) -> (
         Vec<Arc<tsox_frontend::ast::Diagnostic>>,
         std::collections::HashMap<usize, tsox_frontend::scanner::CommentDirective>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("get_diagnostics_with_preceding_directives"); 
         let mut directives_by_line = std::collections::HashMap::new();
         if source_file.comment_directives.is_empty() {
             return (diags, directives_by_line);
@@ -291,7 +291,7 @@ impl Program {
     pub fn get_declaration_diagnostics_for_file(
         self: &Arc<Self>,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> {
+    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> { ::tsox_core::fntrace::enter("get_declaration_diagnostics_for_file"); 
         if source_file.is_declaration_file {
             return Vec::new();
         }
@@ -306,7 +306,7 @@ impl Program {
         &self,
         file_checker: &tsox_checker::checker::Checker,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> {
+    ) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> { ::tsox_core::fntrace::enter("get_suggestion_diagnostics_with_checker"); 
         if self.skip_type_checking(source_file, false) {
             return Vec::new();
         }
@@ -322,7 +322,7 @@ impl Program {
 pub fn apply_content_mapper_diagnostic_directives(
     source_file: &Arc<SourceFile>,
     diags: Vec<Arc<tsox_frontend::ast::Diagnostic>>,
-) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> {
+) -> Vec<Arc<tsox_frontend::ast::Diagnostic>> { ::tsox_core::fntrace::enter("apply_content_mapper_diagnostic_directives"); 
     let directives = tsox_frontend::ast::mig::m3b_2::diagnostic_directives(source_file);
     if directives.is_empty() {
         return diags;
@@ -364,7 +364,7 @@ pub fn apply_content_mapper_diagnostic_directives(
     filtered
 }
 
-pub fn is_comment_or_blank_line(text: &str, pos: usize) -> bool {
+pub fn is_comment_or_blank_line(text: &str, pos: usize) -> bool { ::tsox_core::fntrace::enter("is_comment_or_blank_line"); 
     let bytes = text.as_bytes();
     let mut pos = pos;
     while pos < bytes.len() && (bytes[pos] == b' ' || bytes[pos] == b'\t') {
@@ -468,6 +468,6 @@ static PLAIN_JS_ERRORS: &[tsox_core::diagnostics::Message] = &[
     tsox_core::diagnostics::messages_generated::X_WITH_STATEMENTS_ARE_NOT_ALLOWED_IN_STRICT_MODE,
 ];
 
-pub(crate) fn plain_js_errors_has(code: i32) -> bool {
+pub(crate) fn plain_js_errors_has(code: i32) -> bool { ::tsox_core::fntrace::enter("plain_js_errors_has"); 
     PLAIN_JS_ERRORS.iter().any(|m| m.code == code)
 }

@@ -8,7 +8,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_related_to_inner"); 
         if relation == RelationKind::Comparable
             && !target.flags.contains(TypeFlags::Never)
             && self.is_simple_type_related_to(target, source, relation)
@@ -743,7 +743,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         source_is_primitive: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_array_type_related_to"); 
         let source_args = self.get_type_arguments(source);
         let target_args = self.get_type_arguments(target);
 
@@ -786,7 +786,7 @@ impl Checker {
     pub(crate) fn normalize_readonly_array_instance(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("normalize_readonly_array_instance"); 
         if !t.flags.contains(TypeFlags::Object) {
             return None;
         }
@@ -816,7 +816,7 @@ impl Checker {
     }
 }
 
-fn some_type_is_type_parameter(t: &Arc<Type>) -> bool {
+fn some_type_is_type_parameter(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("some_type_is_type_parameter"); 
     if let TypeData::Union(u) = &t.data {
         return u
             .union_or_intersection

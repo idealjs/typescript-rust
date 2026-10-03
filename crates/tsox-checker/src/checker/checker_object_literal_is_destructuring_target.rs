@@ -2,7 +2,7 @@
 
 use crate::checker::checker::*;
 
-pub(crate) fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> bool {
+pub(crate) fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("object_literal_is_destructuring_target"); 
     let Some(parent) = literal.parent() else {
         return false;
     };
@@ -23,7 +23,7 @@ pub(crate) fn object_literal_is_destructuring_target(literal: &Arc<Node>) -> boo
     }
 }
 
-pub(crate) fn array_literal_is_destructuring_target(literal: &Arc<Node>) -> bool {
+pub(crate) fn array_literal_is_destructuring_target(literal: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("array_literal_is_destructuring_target"); 
     let Some(parent) = literal.parent() else {
         return false;
     };
@@ -44,7 +44,7 @@ pub(crate) fn array_literal_is_destructuring_target(literal: &Arc<Node>) -> bool
     }
 }
 
-fn property_assignment_in_target_pattern(pa: &Arc<Node>) -> bool {
+fn property_assignment_in_target_pattern(pa: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("property_assignment_in_target_pattern"); 
     let Some(lit) = pa.parent() else {
         return false;
     };
@@ -55,7 +55,7 @@ fn property_assignment_in_target_pattern(pa: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_assignment_target(node: &Arc<Node>) -> bool {
+pub(crate) fn is_assignment_target(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_assignment_target"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -130,7 +130,7 @@ pub(crate) fn is_assignment_target(node: &Arc<Node>) -> bool {
     )
 }
 
-pub(crate) fn is_let_or_const_declaration(declaration: &Arc<Node>) -> bool {
+pub(crate) fn is_let_or_const_declaration(declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_let_or_const_declaration"); 
     if let Some(parent) = declaration.parent().as_ref() {
         if parent.kind == SyntaxKind::VariableDeclarationList {
             return parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
@@ -140,7 +140,7 @@ pub(crate) fn is_let_or_const_declaration(declaration: &Arc<Node>) -> bool {
     true
 }
 
-pub(crate) fn type_contains_undefined(t: &Arc<Type>) -> bool {
+pub(crate) fn type_contains_undefined(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_contains_undefined"); 
     if t.flags.contains(TypeFlags::Undefined) {
         return true;
     }
@@ -156,7 +156,7 @@ pub(crate) fn type_contains_undefined(t: &Arc<Type>) -> bool {
     false
 }
 
-pub(crate) fn type_is_possibly_undefined(t: &Arc<Type>) -> bool {
+pub(crate) fn type_is_possibly_undefined(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_possibly_undefined"); 
     if t.flags.intersects(TypeFlags::Undefined | TypeFlags::Null) {
         return true;
     }
@@ -172,7 +172,7 @@ pub(crate) fn type_is_possibly_undefined(t: &Arc<Type>) -> bool {
     false
 }
 
-pub(crate) fn type_includes_undefined_only(t: &Arc<Type>) -> bool {
+pub(crate) fn type_includes_undefined_only(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_includes_undefined_only"); 
     if t.flags.contains(TypeFlags::Undefined) {
         return true;
     }
@@ -188,7 +188,7 @@ pub(crate) fn type_includes_undefined_only(t: &Arc<Type>) -> bool {
     false
 }
 
-pub(crate) fn type_includes_null_only(t: &Arc<Type>) -> bool {
+pub(crate) fn type_includes_null_only(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_includes_null_only"); 
     if t.flags.contains(TypeFlags::Null) {
         return true;
     }
@@ -204,7 +204,7 @@ pub(crate) fn type_includes_null_only(t: &Arc<Type>) -> bool {
     false
 }
 
-pub(crate) fn is_entity_name_expression(node: &Arc<Node>) -> bool {
+pub(crate) fn is_entity_name_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression"); 
     match node.kind {
         SyntaxKind::Identifier => true,
         SyntaxKind::PropertyAccessExpression => match &node.data {
@@ -217,7 +217,7 @@ pub(crate) fn is_entity_name_expression(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_compound_or_simple_assignment(kind: SyntaxKind) -> bool {
+pub(crate) fn is_compound_or_simple_assignment(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_compound_or_simple_assignment"); 
     use SyntaxKind::*;
     matches!(
         kind,
@@ -240,7 +240,7 @@ pub(crate) fn is_compound_or_simple_assignment(kind: SyntaxKind) -> bool {
     )
 }
 
-pub(crate) fn flatten_union_leaves<'a>(t: &'a Arc<Type>, leaves: &mut Vec<&'a Arc<Type>>) {
+pub(crate) fn flatten_union_leaves<'a>(t: &'a Arc<Type>, leaves: &mut Vec<&'a Arc<Type>>) { ::tsox_core::fntrace::enter("flatten_union_leaves"); 
     match t.as_union_or_intersection() {
         Some(u) => {
             for m in &u.types {
@@ -251,7 +251,7 @@ pub(crate) fn flatten_union_leaves<'a>(t: &'a Arc<Type>, leaves: &mut Vec<&'a Ar
     }
 }
 
-pub(crate) fn class_declaration_name(class: &Arc<Node>) -> Option<String> {
+pub(crate) fn class_declaration_name(class: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("class_declaration_name"); 
     if let tsox_frontend::ast::NodeData::ClassDeclaration(d) = &class.data {
         return d.name.as_ref().map(|n| n.text().to_string());
     }
@@ -267,7 +267,7 @@ pub(crate) enum ModuleMemberLookup {
 }
 
 #[allow(dead_code)]
-pub(crate) fn body_assigns_this_property(n: &Arc<Node>, name: &str) -> bool {
+pub(crate) fn body_assigns_this_property(n: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("body_assigns_this_property"); 
     match &n.data {
         tsox_frontend::ast::NodeData::BinaryExpression(b)
             if b.operator_token.kind == SyntaxKind::EqualsToken =>
@@ -299,7 +299,7 @@ pub(crate) fn body_assigns_this_property(n: &Arc<Node>, name: &str) -> bool {
 }
 
 impl std::fmt::Debug for Checker {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         f.debug_struct("Checker")
             .field("id", &self.id)
             .field("type_count", &self.type_count)
@@ -314,7 +314,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         args: Vec<Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("attach_explicit_type_arguments_cached"); 
         let mut key = Vec::with_capacity(args.len() + 1);
         key.push(t.id as usize);
         key.extend(args.iter().map(|a| a.id as usize));

@@ -7,15 +7,15 @@ impl Checker {
         &self,
         _location: &Arc<Node>,
         _meaning: SymbolFlags,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbols_in_scope"); 
         Vec::new()
     }
 
-    pub fn get_exports_of_module(&self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> {
+    pub fn get_exports_of_module(&self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_exports_of_module"); 
         symbols_to_array(&self.get_exports_of_module_table(symbol))
     }
 
-    pub fn get_exports_of_module_table(&self, module_symbol: &Arc<Symbol>) -> SymbolTable {
+    pub fn get_exports_of_module_table(&self, module_symbol: &Arc<Symbol>) -> SymbolTable { ::tsox_core::fntrace::enter("get_exports_of_module_table"); 
         if let Some(links) = self.module_symbol_links.get(module_symbol) {
             if !links.resolved_exports.is_empty() {
                 return links.resolved_exports.clone();
@@ -29,7 +29,7 @@ impl Checker {
         &mut self,
         module_symbol: &Arc<Symbol>,
         cb: &mut dyn FnMut(&Arc<Symbol>, &str),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_export_and_property_of_module"); 
         for (key, exported_symbol) in self
             .get_exports_of_module_table(module_symbol)
             .entries
@@ -63,7 +63,7 @@ impl Checker {
         }
     }
 
-    pub fn is_valid_property_access(&mut self, node: &Arc<Node>, property_name: &str) -> bool {
+    pub fn is_valid_property_access(&mut self, node: &Arc<Node>, property_name: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_property_access"); 
         match node.kind {
             SyntaxKind::PropertyAccessExpression => {
                 let is_super = if let Some(expr) = node.expression() {
@@ -108,7 +108,7 @@ impl Checker {
         is_super: bool,
         property_name: &str,
         t: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_valid_property_access_with_type"); 
         if is_type_any(t) {
             return true;
         }
@@ -121,7 +121,7 @@ impl Checker {
         node: &Arc<Node>,
         t: &Arc<Type>,
         property: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_valid_property_access_for_completions"); 
         let is_super = node.kind == SyntaxKind::PropertyAccessExpression
             && node
                 .expression()
@@ -133,7 +133,7 @@ impl Checker {
     pub fn get_all_possible_properties_of_types(
         &mut self,
         types: &[Arc<Type>],
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_all_possible_properties_of_types"); 
         let union_type = self.get_union_type(types.to_vec());
         if !union_type.flags.contains(TypeFlags::Union) {
             return self.get_augmented_properties_of_type(&union_type);
@@ -152,40 +152,40 @@ impl Checker {
         props.into_values().collect()
     }
 
-    pub fn is_unknown_symbol(&self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_unknown_symbol(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_unknown_symbol"); 
         self.unknown_symbol
             .as_ref()
             .map(|s| Arc::ptr_eq(s, symbol))
             .unwrap_or(false)
     }
 
-    pub fn is_undefined_symbol(&self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_undefined_symbol(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_undefined_symbol"); 
         self.undefined_symbol
             .as_ref()
             .map(|s| Arc::ptr_eq(s, symbol))
             .unwrap_or(false)
     }
 
-    pub fn is_arguments_symbol(&self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_arguments_symbol(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_arguments_symbol"); 
         self.arguments_symbol
             .as_ref()
             .map(|s| Arc::ptr_eq(s, symbol))
             .unwrap_or(false)
     }
 
-    pub fn get_non_optional_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_non_optional_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_optional_type"); 
         self.remove_optional_type_marker(t)
     }
 
-    pub fn get_string_index_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_string_index_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_string_index_type"); 
         self.get_index_type_of_type(t, IndexKind::String)
     }
 
-    pub fn get_number_index_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_number_index_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_number_index_type"); 
         self.get_index_type_of_type(t, IndexKind::Number)
     }
 
-    pub fn get_element_type_of_array_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_element_type_of_array_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_element_type_of_array_type"); 
         let type_args = self.get_type_arguments(t);
         if let Some(elem) = type_args.first() {
             return Some(Arc::clone(elem));
@@ -193,19 +193,19 @@ impl Checker {
         None
     }
 
-    pub fn get_call_signatures(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> {
+    pub fn get_call_signatures(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_call_signatures"); 
         self.get_signatures_of_type(t, SignatureKind::Call)
     }
 
-    pub fn get_construct_signatures(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> {
+    pub fn get_construct_signatures(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_construct_signatures"); 
         self.get_signatures_of_type(t, SignatureKind::Construct)
     }
 
-    pub fn get_apparent_properties(&mut self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+    pub fn get_apparent_properties(&mut self, t: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_apparent_properties"); 
         self.get_augmented_properties_of_type(t)
     }
 
-    pub fn get_augmented_properties_of_type(&mut self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+    pub fn get_augmented_properties_of_type(&mut self, t: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_augmented_properties_of_type"); 
         let apparent = self.get_apparent_type(t);
         let props_list = self.get_properties_of_type(&apparent);
         let mut props_by_name: std::collections::HashMap<String, Arc<Symbol>> =
@@ -239,7 +239,7 @@ impl Checker {
         &mut self,
         member_name: &str,
         module_symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_get_member_in_module_exports_and_properties"); 
         if let Some(symbol) = self.try_get_member_in_module_exports(member_name, module_symbol) {
             return Some(symbol);
         }
@@ -260,7 +260,7 @@ impl Checker {
         &self,
         member_name: &str,
         module_symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_get_member_in_module_exports"); 
         let symbol_table = self.get_exports_of_module_table(module_symbol);
         symbol_table.get(member_name).cloned()
     }
@@ -268,7 +268,7 @@ impl Checker {
     pub fn should_treat_properties_of_external_module_as_exports(
         &self,
         resolved_external_module_type: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_treat_properties_of_external_module_as_exports"); 
         !resolved_external_module_type
             .flags
             .intersects(TYPE_FLAGS_PRIMITIVE)
@@ -283,7 +283,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_services"); 
         self.get_contextual_type(node, context_flags)
     }
 

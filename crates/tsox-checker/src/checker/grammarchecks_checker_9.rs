@@ -3,7 +3,7 @@
 use crate::checker::grammarchecks::*;
 
 impl Checker {
-    pub fn check_grammar_name_in_let_or_const_declarations(&mut self, name: &Arc<Node>) -> bool {
+    pub fn check_grammar_name_in_let_or_const_declarations(&mut self, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_name_in_let_or_const_declarations"); 
         if name.kind == SyntaxKind::Identifier {
             if name.text() == "let" {
                 return self.grammar_error_on_node(
@@ -27,7 +27,7 @@ impl Checker {
         &mut self,
         _postfix_token: &Arc<Node>,
         _message: &Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_invalid_question_mark"); 
         false
     }
 
@@ -35,7 +35,7 @@ impl Checker {
         &mut self,
         _postfix_token: &Arc<Node>,
         _message: &Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_invalid_exclamation_token"); 
         false
     }
 
@@ -43,11 +43,11 @@ impl Checker {
         &mut self,
         _node: &Arc<Node>,
         _in_destructuring: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_object_literal_expression"); 
         false
     }
 
-    pub fn check_grammar_for_in_or_for_of_statement(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_for_in_or_for_of_statement(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_in_or_for_of_statement"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let tsox_frontend::ast::NodeData::ForInOrOfStatement(data) = &node.data else {
             return false;
@@ -119,15 +119,15 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_accessor(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_accessor(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_accessor"); 
         false
     }
 
-    pub fn does_accessor_have_correct_parameter_count(&mut self, _accessor: &Arc<Node>) -> bool {
+    pub fn does_accessor_have_correct_parameter_count(&mut self, _accessor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("does_accessor_have_correct_parameter_count"); 
         true
     }
 
-    pub fn check_grammar_type_operator_node(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_type_operator_node(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_type_operator_node"); 
         false
     }
 
@@ -135,7 +135,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         message: &Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_invalid_dynamic_name"); 
         if !self.is_non_bindable_dynamic_name(node) {
             return false;
         }
@@ -155,12 +155,12 @@ impl Checker {
     }
 
     // Go isNonBindableDynamicName：动态名且不可迟绑定
-    pub fn is_non_bindable_dynamic_name(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_non_bindable_dynamic_name(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_non_bindable_dynamic_name"); 
         self.is_dynamic_name(node) && !self.is_late_bindable_name(node)
     }
 
     // Go IsDynamicName：计算名/元素访问，表达式非字面量且非有符号数字字面量
-    fn is_dynamic_name(&self, name: &Arc<Node>) -> bool {
+    fn is_dynamic_name(&self, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_dynamic_name"); 
         let expr = match &name.data {
             tsox_frontend::ast::NodeData::ComputedPropertyName(d) => Arc::clone(&d.expression),
             tsox_frontend::ast::NodeData::ElementAccessExpression(d) => {
@@ -174,7 +174,7 @@ impl Checker {
 
     // Go isLateBindableName：实体名表达式且其类型可作属性名
     //（字面量型或 unique symbol）
-    fn is_late_bindable_name(&mut self, node: &Arc<Node>) -> bool {
+    fn is_late_bindable_name(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_late_bindable_name"); 
         let expr = match &node.data {
             tsox_frontend::ast::NodeData::ComputedPropertyName(d) => Arc::clone(&d.expression),
             tsox_frontend::ast::NodeData::ElementAccessExpression(d) => {
@@ -193,33 +193,33 @@ impl Checker {
         crate::checker::utilities::is_type_usable_as_property_name(&t)
     }
 
-    pub fn check_grammar_method(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_method(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_method"); 
         false
     }
 
-    pub fn check_grammar_binding_element(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_binding_element(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_binding_element"); 
         false
     }
 
     pub fn check_grammar_for_es_module_marker_in_binding_name(
         &mut self,
         _name: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_es_module_marker_in_binding_name"); 
         false
     }
 
-    pub fn check_grammar_await_or_await_using(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_await_or_await_using(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_await_or_await_using"); 
         false
     }
 
-    pub fn check_grammar_yield_expression(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_yield_expression(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_yield_expression"); 
         false
     }
 
     pub fn check_grammar_for_disallowed_block_scoped_variable_statement(
         &mut self,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_disallowed_block_scoped_variable_statement"); 
         let Some(parent) = node.parent() else {
             return false;
         };
@@ -255,7 +255,7 @@ impl Checker {
         true
     }
 
-    pub fn container_allows_block_scoped_variable(&self, parent: &Arc<Node>) -> bool {
+    pub fn container_allows_block_scoped_variable(&self, parent: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("container_allows_block_scoped_variable"); 
         match parent.kind {
             SyntaxKind::IfStatement
             | SyntaxKind::DoStatement
@@ -272,33 +272,33 @@ impl Checker {
         }
     }
 
-    pub fn check_grammar_meta_property(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_meta_property(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_meta_property"); 
         false
     }
 
-    pub fn check_grammar_constructor_type_parameters(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_constructor_type_parameters(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_constructor_type_parameters"); 
         false
     }
 
-    pub fn check_grammar_constructor_type_annotation(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_constructor_type_annotation(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_constructor_type_annotation"); 
         false
     }
 
-    pub fn check_grammar_property(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_property(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_property"); 
         false
     }
 
-    pub fn check_ambient_initializer(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_ambient_initializer(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_ambient_initializer"); 
         false
     }
 
-    pub fn is_initializer_simple_literal_enum_reference(&mut self, _expr: &Arc<Node>) -> bool {
+    pub fn is_initializer_simple_literal_enum_reference(&mut self, _expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_initializer_simple_literal_enum_reference"); 
         false
     }
 
-    pub fn check_grammar_numeric_literal(&mut self, _node: &Arc<Node>) {}
+    pub fn check_grammar_numeric_literal(&mut self, _node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_grammar_numeric_literal"); }
 
-    pub fn check_grammar_big_int_literal(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_big_int_literal(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_big_int_literal"); 
         let literal_type = node.parent().is_some_and(|p| {
             tsox_frontend::ast::is_literal_type_node(&p)
                 || (tsox_frontend::ast::is_prefix_unary_expression(&p)
@@ -316,18 +316,18 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_import_clause(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_import_clause(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_import_clause"); 
         false
     }
 
     pub fn check_grammar_type_only_named_imports_or_exports(
         &mut self,
         _named_bindings: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_type_only_named_imports_or_exports"); 
         false
     }
 
-    pub fn check_grammar_import_call_expression(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_import_call_expression(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_import_call_expression"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let NodeData::CallExpression(data) = &node.data else {
             return false;
@@ -365,7 +365,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn is_comma_sequence(node: &Arc<Node>) -> bool {
+pub(crate) fn is_comma_sequence(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_comma_sequence"); 
     if node.kind != SyntaxKind::BinaryExpression {
         return false;
     }
@@ -376,7 +376,7 @@ pub(crate) fn is_comma_sequence(node: &Arc<Node>) -> bool {
 }
 
 // Go isSignedNumericLiteral：+/- 一元后随数字字面量
-fn is_signed_numeric_literal(node: &Arc<Node>) -> bool {
+fn is_signed_numeric_literal(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_signed_numeric_literal"); 
     matches!(
         &node.data,
         NodeData::PrefixUnaryExpression(p)

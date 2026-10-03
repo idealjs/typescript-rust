@@ -2,7 +2,7 @@
 
 use crate::emitter::commonjs::*;
 
-pub(crate) fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> {
+pub(crate) fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<String> { ::tsox_core::fntrace::enter("transform_commonjs_import"); 
     let import_data = match &stmt.data {
         NodeData::ImportDeclaration(d) => d,
         _ => return None,
@@ -77,7 +77,7 @@ pub(crate) fn transform_commonjs_import(stmt: &Node, source: &str) -> Option<Str
     ))
 }
 
-pub(crate) fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> {
+pub(crate) fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<String> { ::tsox_core::fntrace::enter("transform_commonjs_export"); 
     match &stmt.data {
         NodeData::ExportDeclaration(d) => {
             if d.is_type_only {
@@ -174,7 +174,7 @@ pub(crate) fn transform_commonjs_export(stmt: &Node, source: &str) -> Option<Str
     }
 }
 
-pub(crate) fn transform_commonjs_export_declaration(stmt: &Node, _source: &str) -> Option<String> {
+pub(crate) fn transform_commonjs_export_declaration(stmt: &Node, _source: &str) -> Option<String> { ::tsox_core::fntrace::enter("transform_commonjs_export_declaration"); 
     let modifiers = stmt.modifiers()?;
     if !modifiers.modifier_flags.contains(ModifierFlags::Export) {
         return None;
@@ -241,7 +241,7 @@ pub(crate) fn transform_commonjs_export_declaration(stmt: &Node, _source: &str) 
     }
 }
 
-pub(crate) fn is_type_only_statement(node: &Node) -> bool {
+pub(crate) fn is_type_only_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only_statement"); 
     match &node.data {
         NodeData::InterfaceDeclaration(_) => true,
         NodeData::TypeAliasDeclaration(_) => true,
@@ -253,7 +253,7 @@ pub(crate) fn is_type_only_statement(node: &Node) -> bool {
     }
 }
 
-pub(crate) fn is_type_only_import(d: &ImportDeclarationData) -> bool {
+pub(crate) fn is_type_only_import(d: &ImportDeclarationData) -> bool { ::tsox_core::fntrace::enter("is_type_only_import"); 
     let clause = match &d.import_clause {
         Some(c) => c,
         None => return false,
@@ -281,6 +281,6 @@ pub(crate) fn is_type_only_import(d: &ImportDeclarationData) -> bool {
     false
 }
 
-pub(crate) fn is_type_only_import_specifier(spec: &Node) -> bool {
+pub(crate) fn is_type_only_import_specifier(spec: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only_import_specifier"); 
     matches!(&spec.data, NodeData::ImportSpecifier(sd) if sd.is_type_only)
 }

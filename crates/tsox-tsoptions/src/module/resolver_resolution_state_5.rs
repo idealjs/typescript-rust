@@ -11,7 +11,7 @@ impl<'a> ResolutionState<'a> {
         compiler_options: &'a CompilerOptions,
         fs: &'a dyn FS,
         current_directory: &'a str,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         let extensions = if is_type_reference_directive {
             Extensions::DECLARATION
         } else if compiler_options.no_dts_resolution.is_true() {
@@ -77,7 +77,7 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    pub(crate) fn normalize_path_for_cjs_resolution(directory: &str, name: &str) -> String {
+    pub(crate) fn normalize_path_for_cjs_resolution(directory: &str, name: &str) -> String { ::tsox_core::fntrace::enter("normalize_path_for_cjs_resolution"); 
         let combined = tsox_core::tspath::combine_paths(directory, &[name]);
 
         let last_component = tsox_core::tspath::get_base_file_name(&combined);
@@ -94,7 +94,7 @@ impl<'a> ResolutionState<'a> {
         extensions: Extensions,
         candidate: &str,
         _consider_package_json: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("node_load_module_by_relative_name"); 
         if !tsox_core::tspath::has_trailing_directory_separator(candidate) {
             let parent_of_candidate = tsox_core::tspath::get_directory_path(candidate);
             // 根目录（无斜杠路径的父目录为空串）视作存在，允许根下文件解析
@@ -121,7 +121,7 @@ impl<'a> ResolutionState<'a> {
         &self,
         extensions: Extensions,
         candidate: &str,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_file"); 
         if let Some(resolved) =
             self.load_module_from_file_no_implicit_extensions(extensions, candidate)
         {
@@ -138,7 +138,7 @@ impl<'a> ResolutionState<'a> {
         &self,
         extensions: Extensions,
         candidate: &str,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_file_no_implicit_extensions"); 
         let base = tsox_core::tspath::get_base_file_name(candidate);
         if !base.contains('.') {
             return CONTINUE_SEARCHING;
@@ -156,7 +156,7 @@ impl<'a> ResolutionState<'a> {
         extensionless: &str,
         extensions: Extensions,
         original_extension: &str,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_adding_extensions"); 
         let directory = tsox_core::tspath::get_directory_path(extensionless);
         if !directory.is_empty() && !self.fs.directory_exists(&directory) {
             return CONTINUE_SEARCHING;
@@ -282,7 +282,7 @@ impl<'a> ResolutionState<'a> {
         }
     }
 
-    pub(crate) fn try_extension(&self, extension: &str, extensionless: &str) -> Option<Resolved> {
+    pub(crate) fn try_extension(&self, extension: &str, extensionless: &str) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_extension"); 
         let file_name = format!("{extensionless}{extension}");
         if let Some(path) = self.try_file(&file_name) {
             return Some(Resolved {

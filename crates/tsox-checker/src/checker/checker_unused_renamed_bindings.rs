@@ -1,6 +1,6 @@
 use crate::checker::checker_unused_diagnostics::*;
 
-fn containing_parameter(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn containing_parameter(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("containing_parameter"); 
     let mut current = node.parent();
     while let Some(c) = current {
         match c.kind {
@@ -16,7 +16,7 @@ fn containing_parameter(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-fn containing_function_body_missing(node: &Arc<Node>) -> bool {
+fn containing_function_body_missing(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("containing_function_body_missing"); 
     let mut current = node.parent();
     while let Some(c) = current {
         let body_missing = match &c.data {
@@ -60,7 +60,7 @@ fn containing_function_body_missing(node: &Arc<Node>) -> bool {
 }
 
 impl Checker {
-    pub(crate) fn check_unused_renamed_binding_elements(&mut self, file_node: &Arc<Node>) {
+    pub(crate) fn check_unused_renamed_binding_elements(&mut self, file_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_unused_renamed_binding_elements"); 
         let mut worklist = vec![Arc::clone(file_node)];
         while let Some(n) = worklist.pop() {
             if n.kind == SyntaxKind::BindingElement
@@ -86,7 +86,7 @@ impl Checker {
         node: &Arc<Node>,
         name: &Arc<Node>,
         prop_name: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_unused_renamed_binding_element"); 
         let Some(sym) = self.program.symbol_map().symbol_of(node) else {
             return;
         };

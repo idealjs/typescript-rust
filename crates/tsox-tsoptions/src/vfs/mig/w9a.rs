@@ -2,7 +2,7 @@
 
 //! w9a: osvfs 余量收尾批(w9)
 
-pub(crate) fn os_fs_realpath(path: &str) -> String {
+pub(crate) fn os_fs_realpath(path: &str) -> String { ::tsox_core::fntrace::enter("os_fs_realpath"); 
     let _ = tsox_core::tspath::get_encoded_root_length(path);
     let orig = path;
     let path = from_slash(path);
@@ -17,7 +17,7 @@ pub(crate) fn os_fs_realpath(path: &str) -> String {
     tsox_core::tspath::normalize_slashes(&path)
 }
 
-fn from_slash(path: &str) -> String {
+fn from_slash(path: &str) -> String { ::tsox_core::fntrace::enter("from_slash"); 
     if std::path::MAIN_SEPARATOR == '/' {
         path.to_string()
     } else {
@@ -25,7 +25,7 @@ fn from_slash(path: &str) -> String {
     }
 }
 
-fn abs(path: &str) -> std::io::Result<String> {
+fn abs(path: &str) -> std::io::Result<String> { ::tsox_core::fntrace::enter("abs"); 
     let p = std::path::Path::new(path);
     if p.is_absolute() {
         return Ok(path.to_string());

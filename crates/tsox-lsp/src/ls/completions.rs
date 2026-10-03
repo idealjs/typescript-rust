@@ -44,7 +44,7 @@ pub struct CompletionDataData {
 
 impl LanguageService {
     #[doc(hidden)]
-    pub fn debug_completion_labels(&self, file_name: &str, offset: usize) -> Vec<String> {
+    pub fn debug_completion_labels(&self, file_name: &str, offset: usize) -> Vec<String> { ::tsox_core::fntrace::enter("debug_completion_labels"); 
         let path = crate::fourslash::session::project_path(file_name);
         let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
         let (_, source_file) = self.get_program_and_file(&uri);
@@ -53,7 +53,7 @@ impl LanguageService {
     }
 
     #[doc(hidden)]
-    pub fn debug_quick_info(&self, file_name: &str, offset: usize) -> Option<String> {
+    pub fn debug_quick_info(&self, file_name: &str, offset: usize) -> Option<String> { ::tsox_core::fntrace::enter("debug_quick_info"); 
         let path = crate::fourslash::session::project_path(file_name);
         let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
         let (_, source_file) = self.get_program_and_file(&uri);
@@ -63,7 +63,7 @@ impl LanguageService {
     }
 
     #[doc(hidden)]
-    pub fn debug_contextual_type(&self, file_name: &str, offset: usize, ignore_node_inferences: bool) -> Option<String> {
+    pub fn debug_contextual_type(&self, file_name: &str, offset: usize, ignore_node_inferences: bool) -> Option<String> { ::tsox_core::fntrace::enter("debug_contextual_type"); 
         let path = crate::fourslash::session::project_path(file_name);
         let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
         let (program, source_file) = self.get_program_and_file(&uri);
@@ -78,7 +78,7 @@ impl LanguageService {
     }
 
     #[doc(hidden)]
-    pub fn debug_scan_tokens(&self, file_name: &str, from: usize, to: usize) -> Vec<(String, usize, usize)> {
+    pub fn debug_scan_tokens(&self, file_name: &str, from: usize, to: usize) -> Vec<(String, usize, usize)> { ::tsox_core::fntrace::enter("debug_scan_tokens"); 
         let path = crate::fourslash::session::project_path(file_name);
         let uri = crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"));
         let (_, source_file) = self.get_program_and_file(&uri);
@@ -93,7 +93,7 @@ impl LanguageService {
         document_uri: &DocumentUri,
         position: Position,
         _context: &CompletionContext,
-    ) -> CompletionList {
+    ) -> CompletionList { ::tsox_core::fntrace::enter("provide_completion"); 
         let (_program, source_file) = self.get_program_and_file(document_uri);
         let offset = lsp_position_to_offset(&source_file.line_map, &position);
         let result = self.get_completions_at_position(&source_file, offset, None, false);
@@ -117,7 +117,7 @@ impl LanguageService {
         position: usize,
         _trigger_character: Option<&str>,
         _include_symbols: bool,
-    ) -> Result<CompletionList, String> {
+    ) -> Result<CompletionList, String> { ::tsox_core::fntrace::enter("get_completions_at_position"); 
         let mut node = find_deepest_node(&file.node, position);
         // EOF 边界（未闭合串跨到文件尾）：offset==全部节点 end 时 deepest 退化
         // 为 SourceFile/EndOfFile；按 Go preceding-token 语义回看 offset-1 定位
@@ -566,12 +566,12 @@ impl LanguageService {
         _file: &Arc<SourceFile>,
         _position: usize,
         _name: &str,
-    ) -> Option<CompletionItem> {
+    ) -> Option<CompletionItem> { ::tsox_core::fntrace::enter("get_completion_entry_details"); 
         None
     }
 }
 
-pub fn ensure_item_data(file_name: &str, pos: usize, mut list: CompletionList) -> CompletionList {
+pub fn ensure_item_data(file_name: &str, pos: usize, mut list: CompletionList) -> CompletionList { ::tsox_core::fntrace::enter("ensure_item_data"); 
     for item in &mut list.items {
         if item.data.is_none() {
             item.data = Some(CompletionItemData {
@@ -586,7 +586,7 @@ pub fn ensure_item_data(file_name: &str, pos: usize, mut list: CompletionList) -
 
 // 以 position 结尾的正则字面量（含 flags）：补全侧裸扫描器不重扫 /…/，
 // 按 AST 判定（Go isCompletionListBlocker 的 IsRegularExpressionLiteral）
-fn regex_literal_ends_at(node: &std::sync::Arc<tsox_frontend::ast::Node>, position: usize) -> bool {
+fn regex_literal_ends_at(node: &std::sync::Arc<tsox_frontend::ast::Node>, position: usize) -> bool { ::tsox_core::fntrace::enter("regex_literal_ends_at"); 
     if node.end() != position {
         return false;
     }

@@ -30,26 +30,26 @@ pub trait ModuleSpecifierGenerationHost {
     fn get_default_resolution_mode_for_file(
         &self,
         _file: &dyn SourceFileForSpecifierGeneration,
-    ) -> ResolutionMode {
+    ) -> ResolutionMode { ::tsox_core::fntrace::enter("get_default_resolution_mode_for_file"); 
         ResolutionMode::None
     }
 
     fn get_project_reference_from_source(
         &self,
         _path: &Path,
-    ) -> Option<SourceOutputAndProjectReference> {
+    ) -> Option<SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_source"); 
         None
     }
 
-    fn get_redirect_targets(&self, _path: &Path) -> Vec<String> {
+    fn get_redirect_targets(&self, _path: &Path) -> Vec<String> { ::tsox_core::fntrace::enter("get_redirect_targets"); 
         Vec::new()
     }
 
-    fn get_symlink_cache(&self) -> Option<&KnownSymlinks> {
+    fn get_symlink_cache(&self) -> Option<&KnownSymlinks> { ::tsox_core::fntrace::enter("get_symlink_cache"); 
         None
     }
 
-    fn get_global_typings_cache_location(&self) -> String {
+    fn get_global_typings_cache_location(&self) -> String { ::tsox_core::fntrace::enter("get_global_typings_cache_location"); 
         String::new()
     }
 }
@@ -76,7 +76,7 @@ pub struct UserPreferences {
 }
 
 #[allow(unused_variables)]
-pub fn is_excluded_by_regex(module_specifier: &str, exclude_regexes: &[String]) -> bool {
+pub fn is_excluded_by_regex(module_specifier: &str, exclude_regexes: &[String]) -> bool { ::tsox_core::fntrace::enter("is_excluded_by_regex"); 
     false
 }
 
@@ -118,7 +118,7 @@ pub enum ModuleSpecifierEnding {
 }
 
 impl std::fmt::Display for ModuleSpecifierEnding {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { ::tsox_core::fntrace::enter("fmt"); 
         write!(f, "{}", *self as u8)
     }
 }
@@ -133,7 +133,7 @@ pub trait SourceFileForSpecifierGeneration {
     fn file_name(&self) -> &str;
     fn is_js(&self) -> bool;
 
-    fn imports(&self) -> &[Arc<Node>] {
+    fn imports(&self) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("imports"); 
         &[]
     }
 }

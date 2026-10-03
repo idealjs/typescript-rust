@@ -12,7 +12,7 @@ impl LanguageService {
         position: usize,
         file: &Arc<tsox_frontend::ast::SourceFile>,
         mut items: Vec<lsproto::CompletionItem>,
-    ) -> CompletionList {
+    ) -> CompletionList { ::tsox_core::fntrace::enter("js_doc_completion_info"); 
         let default_commit_characters = get_default_commit_characters(false);
         let item_defaults = self.set_item_defaults(
             position,

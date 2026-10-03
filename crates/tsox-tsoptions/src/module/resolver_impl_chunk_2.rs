@@ -8,7 +8,7 @@ impl Resolver {
         compiler_options: Arc<CompilerOptions>,
         typings_location: String,
         project_name: String,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         Resolver {
             module_cache: ModuleResolutionCache::new(),
             type_ref_cache: TypeRefDirectiveResolutionCache::new(),
@@ -19,11 +19,11 @@ impl Resolver {
         }
     }
 
-    pub fn host(&self) -> &dyn ResolutionHost {
+    pub fn host(&self) -> &dyn ResolutionHost { ::tsox_core::fntrace::enter("host"); 
         self.host.as_ref()
     }
 
-    pub fn compiler_options(&self) -> &CompilerOptions {
+    pub fn compiler_options(&self) -> &CompilerOptions { ::tsox_core::fntrace::enter("compiler_options"); 
         &self.compiler_options
     }
 
@@ -33,7 +33,7 @@ impl Resolver {
         containing_file: &str,
         resolution_mode: ResolutionMode,
         _redirected_reference: Option<&str>,
-    ) -> (Option<ResolvedModule>, Vec<DiagAndArgs>) {
+    ) -> (Option<ResolvedModule>, Vec<DiagAndArgs>) { ::tsox_core::fntrace::enter("resolve_module_name"); 
         let containing_directory = tsox_core::tspath::get_directory_path(containing_file);
         let cache_key = ModuleResolutionCacheKey {
             containing_directory: containing_directory.to_string(),
@@ -76,7 +76,7 @@ impl Resolver {
         containing_file: &str,
         resolution_mode: ResolutionMode,
         _redirected_reference: Option<&str>,
-    ) -> (Option<ResolvedTypeReferenceDirective>, Vec<DiagAndArgs>) {
+    ) -> (Option<ResolvedTypeReferenceDirective>, Vec<DiagAndArgs>) { ::tsox_core::fntrace::enter("resolve_type_reference_directive"); 
         let containing_directory = tsox_core::tspath::get_directory_path(containing_file);
         let from_inferred_types_containing_file =
             containing_file.ends_with(crate::module::INFERRED_TYPES_CONTAINING_FILE);
@@ -126,7 +126,7 @@ pub(crate) fn default_resolution_mode(
     options: &CompilerOptions,
     containing_file: &str,
     fs: &dyn FS,
-) -> ResolutionMode {
+) -> ResolutionMode { ::tsox_core::fntrace::enter("default_resolution_mode"); 
     if resolution_mode != ResolutionMode::None {
         return resolution_mode;
     }
@@ -141,7 +141,7 @@ pub(crate) fn default_resolution_mode(
 pub fn get_effective_type_roots(
     options: &CompilerOptions,
     current_directory: &str,
-) -> (Vec<String>, bool) {
+) -> (Vec<String>, bool) { ::tsox_core::fntrace::enter("get_effective_type_roots"); 
     if !options.type_roots.is_empty() {
         return (options.type_roots.clone(), true);
     }

@@ -18,7 +18,7 @@ use tsox_frontend::ast::{self, Node, SourceFile, Symbol};
 use tsox_frontend::astnav;
 use tsox_frontend::scanner;
 
-fn m5q_m5u_converters() -> crate::mig::m5u_conv::M5uConverters {
+fn m5q_m5u_converters() -> crate::mig::m5u_conv::M5uConverters { ::tsox_core::fntrace::enter("m5q_m5u_converters"); 
     crate::mig::m5u_conv::new_converters(
         crate::ls::lsconv_converters::PositionEncodingKind::Utf16,
         Box::new(crate::ls::lsconv_linemap::compute_lsp_line_starts),
@@ -27,7 +27,7 @@ fn m5q_m5u_converters() -> crate::mig::m5u_conv::M5uConverters {
 
 pub const IMPORT_FIX_ID: &str = "fixMissingImport";
 
-pub fn import_fix_error_codes() -> Vec<i32> {
+pub fn import_fix_error_codes() -> Vec<i32> { ::tsox_core::fntrace::enter("import_fix_error_codes"); 
     vec![
         diagnostics::CANNOT_FIND_NAME_0.code(),
         diagnostics::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1.code(),
@@ -61,7 +61,7 @@ pub struct FixInfo {
     pub is_jsx_namespace_fix: bool,
 }
 
-pub fn is_fixable_diagnostic(diag: &ast::Diagnostic, error_codes: &[i32]) -> bool {
+pub fn is_fixable_diagnostic(diag: &ast::Diagnostic, error_codes: &[i32]) -> bool { ::tsox_core::fntrace::enter("is_fixable_diagnostic"); 
     error_codes.contains(&diag.code())
 }
 
@@ -69,7 +69,7 @@ pub fn add_import_from_diagnostic(
     import_adder: &mut ImportAdder,
     diag: &ast::Diagnostic,
     fix_context: &CodeFixContext,
-) -> Result<(), String> {
+) -> Result<(), String> { ::tsox_core::fntrace::enter("add_import_from_diagnostic"); 
     let diag_fix_context = CodeFixContext {
         source_file: fix_context.source_file,
         span: TextRange::new(diag.pos().max(0) as usize, diag.end().max(0) as usize),
@@ -91,7 +91,7 @@ pub fn get_fix_infos(
     fix_context: &CodeFixContext,
     error_code: i32,
     pos: i32,
-) -> Result<Vec<FixInfo>, String> {
+) -> Result<Vec<FixInfo>, String> { ::tsox_core::fntrace::enter("get_fix_infos"); 
     if tsox_core::tspath::is_dynamic_file_name(&fix_context.source_file.file_name) {
         return Ok(Vec::new());
     }
@@ -175,7 +175,7 @@ pub fn get_fixes_info_for_umd_import(
     fix_context: &CodeFixContext,
     token: &Arc<Node>,
     view: &View,
-) -> Vec<FixInfo> {
+) -> Vec<FixInfo> { ::tsox_core::fntrace::enter("get_fixes_info_for_umd_import"); 
     let ch = fix_context.program.get_type_checker();
 
     let umd_symbol = get_umd_symbol(token, &ch);
@@ -208,7 +208,7 @@ pub fn get_fixes_info_for_umd_import(
     result
 }
 
-pub fn get_umd_symbol(token: &Arc<Node>, ch: &Checker) -> Option<Arc<Symbol>> {
+pub fn get_umd_symbol(token: &Arc<Node>, ch: &Checker) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_umd_symbol"); 
     let mut umd_symbol: Option<Arc<Symbol>> = None;
     if ast::is_identifier(token) {
         umd_symbol = ch.get_resolved_symbol(token);
@@ -241,7 +241,7 @@ pub fn get_umd_symbol(token: &Arc<Node>, ch: &Checker) -> Option<Arc<Symbol>> {
     None
 }
 
-pub fn is_umd_export_symbol(symbol: Option<&Symbol>) -> bool {
+pub fn is_umd_export_symbol(symbol: Option<&Symbol>) -> bool { ::tsox_core::fntrace::enter("is_umd_export_symbol"); 
     match symbol {
         Some(symbol) => {
             !symbol.declarations.is_empty()
@@ -255,7 +255,7 @@ pub fn get_fixes_info_for_non_umd_import(
     fix_context: &CodeFixContext,
     symbol_token: &Arc<Node>,
     view: &View,
-) -> Vec<FixInfo> {
+) -> Vec<FixInfo> { ::tsox_core::fntrace::enter("get_fixes_info_for_non_umd_import"); 
     let ch = fix_context.program.get_type_checker();
     let compiler_options = fix_context.program.options();
 
@@ -327,7 +327,7 @@ pub fn get_type_only_promotion_fix(
     symbol_token: &Arc<Node>,
     symbol_name: &str,
     program: &Program,
-) -> Option<Fix> {
+) -> Option<Fix> { ::tsox_core::fntrace::enter("get_type_only_promotion_fix"); 
     let ch = program.get_type_checker();
 
     let symbol = ch.resolve_name(symbol_name, symbol_token, ast::SymbolFlags::VALUE, true)?;
@@ -358,7 +358,7 @@ pub fn get_symbol_names_to_import(
     ch: &Checker,
     symbol_token: &Arc<Node>,
     compiler_options: &tsox_core::core::compiler_options::CompilerOptions,
-) -> Vec<SymbolNameInfo> {
+) -> Vec<SymbolNameInfo> { ::tsox_core::fntrace::enter("get_symbol_names_to_import"); 
     if let Some(parent) = symbol_token.parent() {
     if (tsox_frontend::ast::mig::m3g::is_jsx_opening_like_element(&parent) || ast::is_jsx_closing_element(&parent))
         && Arc::ptr_eq(tsox_frontend::ast::mig::m3c::tag_name(&parent), symbol_token)
@@ -411,7 +411,7 @@ pub fn get_symbol_names_to_import(
     }]
 }
 
-pub fn needs_jsx_namespace_fix(jsx_namespace: &str, symbol_token: &Arc<Node>, ch: &Checker) -> bool {
+pub fn needs_jsx_namespace_fix(jsx_namespace: &str, symbol_token: &Arc<Node>, ch: &Checker) -> bool { ::tsox_core::fntrace::enter("needs_jsx_namespace_fix"); 
     if tsox_frontend::scanner::mig::m3i::is_intrinsic_jsx_name(&symbol_token.text()) {
         return true;
     }
@@ -434,7 +434,7 @@ pub fn needs_jsx_namespace_fix(jsx_namespace: &str, symbol_token: &Arc<Node>, ch
 
 pub fn jsx_mode_needs_explicit_import(
     jsx: tsox_core::core::compiler_options_kinds::JsxEmit,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("jsx_mode_needs_explicit_import"); 
     jsx == tsox_core::core::compiler_options_kinds::JsxEmit::React
         || jsx == tsox_core::core::compiler_options_kinds::JsxEmit::ReactNative
 }
@@ -443,7 +443,7 @@ pub fn sort_fix_info(
     mut fixes: Vec<FixInfo>,
     fix_context: &CodeFixContext,
     view: Option<&View>,
-) -> Vec<FixInfo> {
+) -> Vec<FixInfo> { ::tsox_core::fntrace::enter("sort_fix_info"); 
     if fixes.is_empty() {
         return fixes;
     }

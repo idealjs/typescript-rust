@@ -22,7 +22,7 @@ impl NodeFactoryExt29 for tsox_frontend::ast::mig::m3c::NodeFactory {
         _type_node: &Arc<Type>,
         is_spread: bool,
         tuple_name_source: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_synthetic_expression"); 
         Arc::new(Node::new(
             SyntaxKind::SyntheticExpression,
             NodeData::SyntheticExpression(SyntheticExpressionData {

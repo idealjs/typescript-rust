@@ -5,7 +5,7 @@ use crate::checker::mig::m1b::parse_pseudo_big_int;
 use tsox_core::diagnostics::messages_generated::OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1;
 
 impl Checker {
-    pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_node"); 
         if node.kind == SyntaxKind::ThisKeyword {
             return self.compute_type_of_node(node);
         }
@@ -29,7 +29,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node"); 
         // Go getTypeOfNode：类型节点整体委托 getTypeFromTypeNode（含 NamedTupleMember 等）
         if tsox_frontend::ast::is_type_node(node) {
             return self.get_type_from_type_node(node);
@@ -311,7 +311,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_identifier"); 
         if let Some(symbol) = self.resolve_identifier(node) {
             let module_without_value = if symbol.flags.intersects(SymbolFlags::Alias) {
                 let effective = self.resolve_alias_base(Arc::clone(&symbol));
@@ -377,7 +377,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_evolving_array_operation_target(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_evolving_array_operation_target(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_evolving_array_operation_target"); 
         let root = self.get_reference_root(node);
         let Some(parent) = root.parent() else {
             return false;
@@ -415,7 +415,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn get_reference_root(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn get_reference_root(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_reference_root"); 
         let Some(parent) = node.parent() else {
             return Arc::clone(node);
         };
@@ -438,7 +438,7 @@ impl Checker {
 
 impl Checker {
     // Go removeSubtypes 的受限版：structured/instantiable 成员若可赋给另一成员则移除
-    pub(crate) fn remove_subtype_redundant_members(&mut self, types: Vec<Arc<Type>>) -> Vec<Arc<Type>> {
+    pub(crate) fn remove_subtype_redundant_members(&mut self, types: Vec<Arc<Type>>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("remove_subtype_redundant_members"); 
         if types.len() < 2 {
             return types;
         }

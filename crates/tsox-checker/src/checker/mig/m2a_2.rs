@@ -19,7 +19,7 @@ use tsox_frontend::ast::{self, Node, Symbol, SyntaxKind};
 pub(crate) mod r28k5_defs;
 
 impl Checker {
-    pub fn is_parameter_of_context_sensitive_signature(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_parameter_of_context_sensitive_signature(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_parameter_of_context_sensitive_signature"); 
         let Some(mut decl) = symbol.value_declaration.clone() else {
             return false;
         };
@@ -40,7 +40,7 @@ impl Checker {
         &mut self,
         decorator: &Arc<Node>,
         signatures: &[Arc<Signature>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_potentially_uncalled_decorator"); 
         !signatures.is_empty()
             && signatures.iter().all(|sig| {
                 sig.min_argument_count == 0
@@ -49,7 +49,7 @@ impl Checker {
             })
     }
 
-    pub fn is_promise_resolve_arity_error(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_promise_resolve_arity_error(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_promise_resolve_arity_error"); 
         let expr = node.expression();
         if !ast::is_call_expression(node) || !expr.as_ref().is_some_and(|e| ast::is_identifier(e)) {
             return false;
@@ -88,7 +88,7 @@ impl Checker {
         &mut self,
         source_prop: &Arc<Symbol>,
         target_prop: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_identical_to"); 
         self.compare_properties(
             source_prop,
             target_prop,
@@ -102,7 +102,7 @@ impl Checker {
         &mut self,
         prop: &Arc<Symbol>,
         base_class: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_in_class_derived_from"); 
         self.for_each_property(prop, &mut |c: &mut Checker, sp: &Arc<Symbol>| {
             if let Some(source_class) = c.get_declaring_class(sp) {
                 return c.has_base_type(&source_class, base_class);
@@ -111,7 +111,7 @@ impl Checker {
         })
     }
 
-    pub fn is_readonly_array_symbol(&mut self, symbol: Option<&Arc<Symbol>>) -> bool {
+    pub fn is_readonly_array_symbol(&mut self, symbol: Option<&Arc<Symbol>>) -> bool { ::tsox_core::fntrace::enter("is_readonly_array_symbol"); 
         let Some(symbol) = symbol else {
             return false;
         };
@@ -122,14 +122,14 @@ impl Checker {
             .is_some()
     }
 
-    pub fn is_readonly_array_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_readonly_array_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_readonly_array_type"); 
         self.global_readonly_array_type.get().is_some_and(|global| {
             t.object_flags.intersects(ObjectFlags::Reference)
                 && t.target().is_some_and(|target| Arc::ptr_eq(target, global))
         })
     }
 
-    pub fn is_readonly_assignment_declaration(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_readonly_assignment_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_readonly_assignment_declaration"); 
         if !ast::is_call_expression(node) {
             return false;
         }
@@ -169,12 +169,12 @@ impl Checker {
     }
 
 
-    pub fn is_readonly_type_operator(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_readonly_type_operator(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_readonly_type_operator"); 
         ast::is_type_operator_node(node)
             && node.as_type_operator_node().operator == SyntaxKind::ReadonlyKeyword
     }
 
-    pub fn is_reducible_intersection(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_reducible_intersection(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_reducible_intersection"); 
         if let Some(d) = t.as_intersection_type() {
             if d.unique_literal_filled_instantiation.get().is_none() {
                 let mapper = self.unique_literal_mapper();
@@ -192,18 +192,18 @@ impl Checker {
         false
     }
 
-    pub fn is_reference_to_some_type(&mut self, t: &Arc<Type>, targets: &[Arc<Type>]) -> bool {
+    pub fn is_reference_to_some_type(&mut self, t: &Arc<Type>, targets: &[Arc<Type>]) -> bool { ::tsox_core::fntrace::enter("is_reference_to_some_type"); 
         t.object_flags.intersects(ObjectFlags::Reference)
             && t.target()
                 .is_some_and(|target| targets.iter().any(|x| Arc::ptr_eq(x, &target)))
     }
 
-    pub fn is_reference_to_type(&mut self, t: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub fn is_reference_to_type(&mut self, t: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_reference_to_type"); 
         t.object_flags.intersects(ObjectFlags::Reference)
             && t.target().is_some_and(|x| Arc::ptr_eq(&x, target))
     }
 
-    pub fn is_referenced(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_referenced(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_referenced"); 
         !self
             .symbol_reference_links
             .get(symbol)
@@ -211,7 +211,7 @@ impl Checker {
             .unwrap_or(true)
     }
 
-    pub fn is_resolved_by_type_alias(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_resolved_by_type_alias(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_resolved_by_type_alias"); 
         if let Some(parent) = node.parent() {
             match parent.kind {
                 SyntaxKind::ParenthesizedType
@@ -233,11 +233,11 @@ impl Checker {
         false
     }
 
-    pub fn is_return_iterator_result(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_return_iterator_result(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_return_iterator_result"); 
         crate::checker::mig::m1c::r25k9_defs::Checker::is_iterator_result(self, t, IterationTypeKind::RETURN)
     }
 
-    pub fn is_yield_iterator_result(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_yield_iterator_result(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_yield_iterator_result"); 
         crate::checker::mig::m1c::r25k9_defs::Checker::is_iterator_result(self, t, IterationTypeKind::YIELD)
     }
 
@@ -245,7 +245,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         declaration: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_same_scoped_binding_element"); 
         if ast::is_binding_element(declaration) {
             return ast::find_ancestor(node, ast::is_binding_element).is_some_and(|be| {
                 let a = ast::get_root_declaration(&be);
@@ -256,7 +256,7 @@ impl Checker {
         false
     }
 
-    pub fn is_side_effect_free(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_side_effect_free(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_side_effect_free"); 
         let node = ast::skip_parentheses(node);
         match node.kind {
             SyntaxKind::Identifier
@@ -304,14 +304,14 @@ impl Checker {
     }
 
 
-    pub fn is_some_symbol_assigned(&mut self, root_declaration: &Arc<Node>) -> bool {
+    pub fn is_some_symbol_assigned(&mut self, root_declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_some_symbol_assigned"); 
         let Some(name) = root_declaration.name() else {
             return false;
         };
         self.is_some_symbol_assigned_worker(&name)
     }
 
-    pub fn is_some_symbol_assigned_worker(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_some_symbol_assigned_worker(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_some_symbol_assigned_worker"); 
         if node.kind == SyntaxKind::Identifier {
             let parent = node.parent().unwrap();
             return self
@@ -328,7 +328,7 @@ impl Checker {
             .unwrap_or(false)
     }
 
-    pub fn is_string_index_signature_only_type_worker(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_string_index_signature_only_type_worker(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_string_index_signature_only_type_worker"); 
         if t.flags.contains(TypeFlags::Object)
             && !self.is_generic_mapped_type(t)
             && self.get_properties_of_type(t).is_empty()
@@ -349,7 +349,7 @@ impl Checker {
         &mut self,
         child: &Arc<Node>,
         tested_symbol: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("symbol_used_in_binary_chain_visit"); 
         if ast::is_identifier(child) {
             if let Some(symbol) = self.get_symbol_at_location(child) {
                 if Arc::ptr_eq(&symbol, tested_symbol) {
@@ -371,7 +371,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         tested_symbol: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_symbol_used_in_binary_expression_chain"); 
         let mut current = Some(Arc::clone(node));
         while let Some(n) = current {
             if !ast::is_binary_expression(&n)
@@ -389,7 +389,7 @@ impl Checker {
         false
     }
 
-    pub fn is_symbol_with_computed_name(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_symbol_with_computed_name(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_symbol_with_computed_name"); 
         if !symbol.declarations.is_empty() {
             return symbol.declarations[0]
                 .name()
@@ -398,7 +398,7 @@ impl Checker {
         false
     }
 
-    pub fn is_symbol_with_numeric_name(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_symbol_with_numeric_name(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_symbol_with_numeric_name"); 
         if is_numeric_literal_name(&symbol.name) {
             return true;
         }
@@ -410,7 +410,7 @@ impl Checker {
         false
     }
 
-    pub fn is_symbol_with_symbol_name(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_symbol_with_symbol_name(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_symbol_with_symbol_name"); 
         if is_known_symbol(symbol) {
             return true;
         }
@@ -425,7 +425,7 @@ impl Checker {
         false
     }
 
-    pub fn is_template_literal_context(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_template_literal_context(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_template_literal_context"); 
         node.parent().is_some_and(|parent| {
             (ast::is_parenthesized_expression(&parent) && self.is_template_literal_context(&parent))
                 || (ast::is_element_access_expression(&parent)
@@ -433,7 +433,7 @@ impl Checker {
         })
     }
 
-    pub fn is_template_literal_contextual_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_template_literal_contextual_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_template_literal_contextual_type"); 
         t.flags
             .intersects(TYPE_FLAGS_STRING_LITERAL | TYPE_FLAGS_TEMPLATE_LITERAL)
             || (t.flags.intersects(TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE) && {

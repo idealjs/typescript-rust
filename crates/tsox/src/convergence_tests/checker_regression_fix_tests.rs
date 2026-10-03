@@ -5,7 +5,7 @@ use tsox_core::core::compiler_options::CompilerOptions;
 
 use tsox_frontend::diagnosticwriter::format_diagnostic_compact;
 
-fn rendered_with_chain(checker: &Checker) -> Vec<String> {
+fn rendered_with_chain(checker: &Checker) -> Vec<String> { ::tsox_core::fntrace::enter("rendered_with_chain"); 
     checker
         .diagnostics
         .get_all()
@@ -31,7 +31,7 @@ fn rendered_with_chain(checker: &Checker) -> Vec<String> {
 }
 
 #[test]
-fn invocation_error_chain_names_apparent_wrapper_type() {
+fn invocation_error_chain_names_apparent_wrapper_type() { ::tsox_core::fntrace::enter("invocation_error_chain_names_apparent_wrapper_type"); 
     let (program, mut checker) =
         crate::convergence_tests::checker_convergence_tests::build_program_and_checker(
             "declare const s: string;\ns();",
@@ -54,7 +54,7 @@ fn invocation_error_chain_names_apparent_wrapper_type() {
 }
 
 #[test]
-fn never_intersection_callee_renders_never_in_chain() {
+fn never_intersection_callee_renders_never_in_chain() { ::tsox_core::fntrace::enter("never_intersection_callee_renders_never_in_chain"); 
     let (program, mut checker) =
         crate::convergence_tests::checker_convergence_tests::build_program_and_checker(
             "declare const f: { (x: string): number, a: \"\" } & { a: number };\nf();",
@@ -77,7 +77,7 @@ fn never_intersection_callee_renders_never_in_chain() {
 }
 
 #[test]
-fn union_target_failure_keeps_constituent_head_line() {
+fn union_target_failure_keeps_constituent_head_line() { ::tsox_core::fntrace::enter("union_target_failure_keeps_constituent_head_line"); 
     let source = "var a0: (n: number, s: string) => number\n\
                       var a1: typeof a0 | ((n: number, s: string) => string);\n\
                       a1 = (foo, bar) => { return true; }";
@@ -104,7 +104,7 @@ fn union_target_failure_keeps_constituent_head_line() {
 }
 
 #[test]
-fn equality_discriminant_keeps_undefined_member_under_non_strict() {
+fn equality_discriminant_keeps_undefined_member_under_non_strict() { ::tsox_core::fntrace::enter("equality_discriminant_keeps_undefined_member_under_non_strict"); 
     let source = "type Foo2 = { kind?: 'a', a: number } | { kind?: 'b' } | { kind?: never };\n\
                       function f2(foo: Foo2) {\n\
                           if (foo.kind === 'a') {\n\
@@ -128,7 +128,7 @@ fn equality_discriminant_keeps_undefined_member_under_non_strict() {
 }
 
 #[test]
-fn optional_member_stays_t_when_strict_null_checks_off() {
+fn optional_member_stays_t_when_strict_null_checks_off() { ::tsox_core::fntrace::enter("optional_member_stays_t_when_strict_null_checks_off"); 
     let lines: Vec<Vec<i32>> = [false, true]
         .iter()
         .map(|strict| {
@@ -152,7 +152,7 @@ fn optional_member_stays_t_when_strict_null_checks_off() {
 }
 
 #[test]
-fn indexed_access_tp_target_carries_instantiation_note() {
+fn indexed_access_tp_target_carries_instantiation_note() { ::tsox_core::fntrace::enter("indexed_access_tp_target_carries_instantiation_note"); 
     let (program, mut checker) =
         crate::convergence_tests::checker_convergence_tests::build_program_and_checker(
             "function f<T extends object, P extends keyof T>(s: string, tp: T[P]): void {\n    tp = s;\n}",
@@ -173,7 +173,7 @@ fn indexed_access_tp_target_carries_instantiation_note() {
 }
 
 #[test]
-fn record_element_access_assigns_object() {
+fn record_element_access_assigns_object() { ::tsox_core::fntrace::enter("record_element_access_assigns_object"); 
     let (program, mut checker) =
         crate::convergence_tests::checker_convergence_tests::build_program_and_checker(
             "declare const row: string;\n\
@@ -189,7 +189,7 @@ fn record_element_access_assigns_object() {
 }
 
 #[test]
-fn node10_program_reports_deprecation_and_alternate_result() {
+fn node10_program_reports_deprecation_and_alternate_result() { ::tsox_core::fntrace::enter("node10_program_reports_deprecation_and_alternate_result"); 
     use tsox_checker::bundled::BundledFS;
     use tsox_compile::compiler::CompilerHost;
     use tsox_compile::compiler::CompilerHostImpl;
@@ -257,7 +257,7 @@ fn node10_program_reports_deprecation_and_alternate_result() {
 }
 
 #[test]
-fn per_file_jsx_pragma_overrides_option_factory_for_2874() {
+fn per_file_jsx_pragma_overrides_option_factory_for_2874() { ::tsox_core::fntrace::enter("per_file_jsx_pragma_overrides_option_factory_for_2874"); 
     let files: Vec<(&str, &str)> = vec![
         (
             "renderer.d.ts",

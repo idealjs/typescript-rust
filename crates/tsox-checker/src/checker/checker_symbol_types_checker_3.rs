@@ -3,7 +3,7 @@
 use crate::checker::checker_symbol_types::*;
 
 impl Checker {
-    pub(crate) fn get_value_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn get_value_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_value_type_of_symbol"); 
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(ref t) = links.resolved_type {
                 return Arc::clone(t);
@@ -54,7 +54,7 @@ impl Checker {
         self.get_any_type()
     }
 
-    pub(crate) fn resolve_enum_value_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn resolve_enum_value_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_enum_value_type"); 
         if let Some(links) = self.value_symbol_links.get(symbol) {
             if let Some(ref t) = links.resolved_type {
                 return Arc::clone(t);
@@ -104,7 +104,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn get_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_function_like"); 
         // Go getReturnTypeOfSignature：有体签名的返回型推断进 type resolution 栈，
         // 同签名重入即环（重入静默 any），pop 失败报 TS2577/TS7023；
         // 无体声明只解析注解（Go 同位返回惰性签名型，无返回型查询）
@@ -121,7 +121,7 @@ impl Checker {
         result
     }
 
-    fn get_type_of_function_like_inner(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    fn get_type_of_function_like_inner(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_function_like_inner"); 
         let (parameters, body, type_node) = match &node.data {
             tsox_frontend::ast::NodeData::FunctionExpression(data) => {
                 (&data.parameters, Some(&data.body), data.type_node.as_ref())
@@ -210,7 +210,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         contextual: Option<&Arc<Signature>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("record_annotated_param_inferences"); 
         let Some(contextual) = contextual else {
             return;
         };
@@ -279,7 +279,7 @@ impl Checker {
     pub(crate) fn build_overload_function_type(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("build_overload_function_type"); 
         let fn_decls: Vec<Arc<Node>> = symbol
             .declarations
             .iter()
@@ -330,7 +330,7 @@ impl Checker {
     pub(crate) fn type_of_function_symbol_for_type_query(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_function_symbol_for_type_query"); 
         let sym_key = Arc::as_ptr(symbol) as usize;
         if let Some(shell) = self.fn_typequery_shells.get(&sym_key) {
             return Arc::clone(shell);
@@ -384,7 +384,7 @@ impl Checker {
         shell
     }
 
-    pub fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_type_of_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_class_declaration"); 
         let members = match &node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => Arc::clone(&data.members),
             tsox_frontend::ast::NodeData::ClassExpression(data) => Arc::clone(&data.members),

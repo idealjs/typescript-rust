@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-fn main() {
+fn main() { ::tsox_core::fntrace::enter("main"); 
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let local = manifest_dir.join("testdata/baselines/local");
     let reference = manifest_dir.join("testdata/baselines/reference");
@@ -23,7 +23,7 @@ fn main() {
     );
 }
 
-fn copy_dir_recursive(src: &std::path::Path, dst: &std::path::Path) -> usize {
+fn copy_dir_recursive(src: &std::path::Path, dst: &std::path::Path) -> usize { ::tsox_core::fntrace::enter("copy_dir_recursive"); 
     let mut count = 0;
     if let Ok(entries) = fs::read_dir(src) {
         for entry in entries.flatten() {

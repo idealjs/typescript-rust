@@ -23,23 +23,23 @@ use tsox_lsp::ls::lsconv_linemap::{compute_lsp_line_starts, LspLineMap};
 use tsox_lsp::project::project::Project;
 use tsox_lsp::project::snapshot::Snapshot;
 
-fn symbol_handle(symbol: &AstSymbol) -> SymbolID {
+fn symbol_handle(symbol: &AstSymbol) -> SymbolID { ::tsox_core::fntrace::enter("symbol_handle"); 
     symbol.id() as u32
 }
 
-fn type_handle(t: &CheckerType) -> TypeID {
+fn type_handle(t: &CheckerType) -> TypeID { ::tsox_core::fntrace::enter("type_handle"); 
     t.id
 }
 
-fn signature_handle(sig: &CheckerSignature) -> SignatureID {
+fn signature_handle(sig: &CheckerSignature) -> SignatureID { ::tsox_core::fntrace::enter("signature_handle"); 
     sig.id
 }
 
-fn node_kind_string(node: &Node) -> String {
+fn node_kind_string(node: &Node) -> String { ::tsox_core::fntrace::enter("node_kind_string"); 
     ast_mig::m3b::kind_string(node)
 }
 
-fn escape_symbol_name(name: &str) -> String {
+fn escape_symbol_name(name: &str) -> String { ::tsox_core::fntrace::enter("escape_symbol_name"); 
     ast_mig::m3e_3::escape_symbol_name(name)
 }
 
@@ -57,7 +57,7 @@ pub struct ProjectRegistryData {
 }
 
 impl ProjectRegistryData {
-    fn new() -> Self {
+    fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         ProjectRegistryData {
             type_registry: RwLock::new(HashMap::new()),
             signature_registry: RwLock::new(HashMap::new()),
@@ -66,7 +66,7 @@ impl ProjectRegistryData {
 }
 
 impl SnapshotData {
-    pub fn get_project(&self, project_handle: &ProjectID) -> Result<&Project, String> {
+    pub fn get_project(&self, project_handle: &ProjectID) -> Result<&Project, String> { ::tsox_core::fntrace::enter("get_project"); 
         let project_name = tsox_core::tspath::Path(project_handle.clone());
         let proj = self
             .snapshot
@@ -81,7 +81,7 @@ impl SnapshotData {
         }
     }
 
-    pub fn get_program(&self, project_handle: &ProjectID) -> Result<&Arc<Program>, String> {
+    pub fn get_program(&self, project_handle: &ProjectID) -> Result<&Arc<Program>, String> { ::tsox_core::fntrace::enter("get_program"); 
         let proj = self.get_project(project_handle)?;
         match proj.get_program() {
             Some(program) => Ok(program),
@@ -89,7 +89,7 @@ impl SnapshotData {
         }
     }
 
-    pub fn node_handle_from(&self, node: &Arc<Node>) -> NodeHandle {
+    pub fn node_handle_from(&self, node: &Arc<Node>) -> NodeHandle { ::tsox_core::fntrace::enter("node_handle_from"); 
         let _ = node;
         unimplemented!("node handle 需 Node→SourceFile 回指与全局索引表,待 encoder 接线")
     }
@@ -98,7 +98,7 @@ impl SnapshotData {
         &self,
         symbol: Option<&Arc<AstSymbol>>,
         canonical_project: ProjectID,
-    ) -> Option<SymbolResponse> {
+    ) -> Option<SymbolResponse> { ::tsox_core::fntrace::enter("new_symbol_response"); 
         let symbol = symbol?;
         let (id, project) = self.register_symbol(Some(symbol), canonical_project.clone());
         let mut resp = SymbolResponse {
@@ -135,7 +135,7 @@ impl SnapshotData {
         &self,
         symbol: Option<&Arc<AstSymbol>>,
         canonical_project: ProjectID,
-    ) -> (SymbolID, ProjectID) {
+    ) -> (SymbolID, ProjectID) { ::tsox_core::fntrace::enter("register_symbol"); 
         let symbol = match symbol {
             Some(symbol) => symbol,
             None => return (0, String::new()),
@@ -174,7 +174,7 @@ impl SnapshotData {
         &self,
         project_id: ProjectID,
         t: Option<&Arc<CheckerType>>,
-    ) -> Option<TypeResponse> {
+    ) -> Option<TypeResponse> { ::tsox_core::fntrace::enter("new_type_response"); 
         let t = t?;
         let mut resp = super::m5k_4::new_type_response(t, self.register_type(project_id.clone(), Some(t)));
         if is_tuple_type_target(t) {
@@ -194,7 +194,7 @@ impl SnapshotData {
         Some(resp)
     }
 
-    pub fn register_type(&self, project_id: ProjectID, t: Option<&Arc<CheckerType>>) -> TypeID {
+    pub fn register_type(&self, project_id: ProjectID, t: Option<&Arc<CheckerType>>) -> TypeID { ::tsox_core::fntrace::enter("register_type"); 
         let t = match t {
             Some(t) => t,
             None => return 0,
@@ -214,7 +214,7 @@ impl SnapshotData {
         id
     }
 
-    pub fn resolve_symbol_handle(&self, handle: SymbolID) -> Result<*const Arc<AstSymbol>, String> {
+    pub fn resolve_symbol_handle(&self, handle: SymbolID) -> Result<*const Arc<AstSymbol>, String> { ::tsox_core::fntrace::enter("resolve_symbol_handle"); 
         if handle == 0 {
             return Err(err_client_error("empty symbol handle"));
         }
@@ -231,7 +231,7 @@ impl SnapshotData {
         &self,
         project_id: &ProjectID,
         handle: TypeID,
-    ) -> Result<*const Arc<CheckerType>, String> {
+    ) -> Result<*const Arc<CheckerType>, String> { ::tsox_core::fntrace::enter("resolve_type_handle"); 
         if handle == 0 {
             return Err(err_client_error("empty type handle"));
         }
@@ -262,7 +262,7 @@ impl SnapshotData {
         &self,
         project_id: &ProjectID,
         handle: SignatureID,
-    ) -> Result<*const Arc<CheckerSignature>, String> {
+    ) -> Result<*const Arc<CheckerSignature>, String> { ::tsox_core::fntrace::enter("resolve_signature_handle"); 
         if handle == 0 {
             return Err(err_client_error("empty signature handle"));
         }
@@ -293,7 +293,7 @@ impl SnapshotData {
         &self,
         project_id: ProjectID,
         sig: Option<&Arc<CheckerSignature>>,
-    ) -> Option<SignatureResponse> {
+    ) -> Option<SignatureResponse> { ::tsox_core::fntrace::enter("new_signature_response"); 
         let sig = sig?;
         let mut resp = SignatureResponse {
             id: self.register_signature(project_id, Some(sig)),
@@ -326,7 +326,7 @@ impl SnapshotData {
         &self,
         project_id: ProjectID,
         sig: Option<&Arc<CheckerSignature>>,
-    ) -> SignatureID {
+    ) -> SignatureID { ::tsox_core::fntrace::enter("register_signature"); 
         let sig = match sig {
             Some(sig) => sig,
             None => return 0,
@@ -350,7 +350,7 @@ impl SnapshotData {
         &self,
         program: &Program,
         handle: NodeHandle,
-    ) -> Result<*const Node, String> {
+    ) -> Result<*const Node, String> { ::tsox_core::fntrace::enter("resolve_node_handle"); 
         let s = handle.as_str();
         let first_dot = match s.find('.') {
             Some(index) => index,
@@ -383,11 +383,11 @@ impl SnapshotData {
     }
 }
 
-pub fn snapshot_handle(snapshot: &Snapshot) -> SnapshotID {
+pub fn snapshot_handle(snapshot: &Snapshot) -> SnapshotID { ::tsox_core::fntrace::enter("snapshot_handle"); 
     snapshot.id()
 }
 
-pub fn non_nil_diagnostics(diags: &[tsox_frontend::ast::Diagnostic]) -> Vec<DiagnosticResponse> {
+pub fn non_nil_diagnostics(diags: &[tsox_frontend::ast::Diagnostic]) -> Vec<DiagnosticResponse> { ::tsox_core::fntrace::enter("non_nil_diagnostics"); 
     new_diagnostic_responses(diags).unwrap_or_default()
 }
 
@@ -395,7 +395,7 @@ pub fn original_text_offset(
     line_map: &LspLineMap,
     position: &Position,
     text_length: usize,
-) -> Option<usize> {
+) -> Option<usize> { ::tsox_core::fntrace::enter("original_text_offset"); 
     let line = position.line as usize;
     if line >= line_map.line_starts.len() {
         return None;
@@ -410,7 +410,7 @@ pub fn original_text_offset(
 pub fn to_api_text_edits(
     source_file: &SourceFile,
     edits: &[tsox_lsp::lsp::lsproto_lsp::TextEdit],
-) -> Option<Vec<TextEdit>> {
+) -> Option<Vec<TextEdit>> { ::tsox_core::fntrace::enter("to_api_text_edits"); 
     let original_text = source_file.text.clone();
     let line_map = compute_lsp_line_starts(&original_text);
     let position_map = compute_position_map(&original_text);
@@ -444,7 +444,7 @@ pub fn transpile_output(
     input: &str,
     options: TranspileOptions,
     declaration: bool,
-) -> Result<TranspileOutputResponse, String> {
+) -> Result<TranspileOutputResponse, String> { ::tsox_core::fntrace::enter("transpile_output"); 
     let transpile_options = tsox_compile::transpile::TranspileOptions {
         compiler_options: options.compiler_options,
         file_name: options.file_name,
@@ -470,34 +470,34 @@ pub struct CheckerSetup<'a> {
 }
 
 impl<'a> CheckerSetup<'a> {
-    pub fn new_type_response(&self, t: Option<&Arc<CheckerType>>) -> Option<TypeResponse> {
+    pub fn new_type_response(&self, t: Option<&Arc<CheckerType>>) -> Option<TypeResponse> { ::tsox_core::fntrace::enter("new_type_response"); 
         self.sd.new_type_response(self.project_id.clone(), t)
     }
 
-    pub fn new_symbol_response(&self, sym: Option<&Arc<AstSymbol>>) -> Option<SymbolResponse> {
+    pub fn new_symbol_response(&self, sym: Option<&Arc<AstSymbol>>) -> Option<SymbolResponse> { ::tsox_core::fntrace::enter("new_symbol_response"); 
         self.sd.new_symbol_response(sym, self.project_id.clone())
     }
 
     pub fn new_signature_response(
         &self,
         sig: Option<&Arc<CheckerSignature>>,
-    ) -> Option<SignatureResponse> {
+    ) -> Option<SignatureResponse> { ::tsox_core::fntrace::enter("new_signature_response"); 
         self.sd
             .new_signature_response(self.project_id.clone(), sig)
     }
 
-    pub fn resolve_type_handle(&self, id: TypeID) -> Result<*const Arc<CheckerType>, String> {
+    pub fn resolve_type_handle(&self, id: TypeID) -> Result<*const Arc<CheckerType>, String> { ::tsox_core::fntrace::enter("resolve_type_handle"); 
         self.sd.resolve_type_handle(&self.project_id, id)
     }
 
-    pub fn resolve_symbol_handle(&self, id: SymbolID) -> Result<*const Arc<AstSymbol>, String> {
+    pub fn resolve_symbol_handle(&self, id: SymbolID) -> Result<*const Arc<AstSymbol>, String> { ::tsox_core::fntrace::enter("resolve_symbol_handle"); 
         self.sd.resolve_symbol_handle(id)
     }
 
     pub fn resolve_signature_handle(
         &self,
         id: SignatureID,
-    ) -> Result<*const Arc<CheckerSignature>, String> {
+    ) -> Result<*const Arc<CheckerSignature>, String> { ::tsox_core::fntrace::enter("resolve_signature_handle"); 
         self.sd.resolve_signature_handle(&self.project_id, id)
     }
 }

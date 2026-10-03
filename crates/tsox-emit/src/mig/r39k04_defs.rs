@@ -26,7 +26,7 @@ pub struct TextWriter39k04 {
 }
 
 impl Default for TextWriter39k04 {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             text: String::new(),
             indent: 0,
@@ -39,7 +39,7 @@ impl Default for TextWriter39k04 {
 }
 
 impl TextWriter39k04 {
-    fn raw_write_str(&mut self, s: &str) {
+    fn raw_write_str(&mut self, s: &str) { ::tsox_core::fntrace::enter("raw_write_str"); 
         for ch in s.chars() {
             if ch == '\n' {
                 self.line += 1;
@@ -56,7 +56,7 @@ impl TextWriter39k04 {
 }
 
 impl EmitTextWriter for TextWriter39k04 {
-    fn write(&mut self, s: &str) {
+    fn write(&mut self, s: &str) { ::tsox_core::fntrace::enter("write"); 
         if self.at_start_of_line && self.indent > 0 {
             let indent_string = self.indent_string.clone();
             self.raw_write_str(&indent_string);
@@ -64,112 +64,112 @@ impl EmitTextWriter for TextWriter39k04 {
         self.raw_write_str(s);
     }
 
-    fn write_trailing_semicolon(&mut self, text: &str) {
+    fn write_trailing_semicolon(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_trailing_semicolon"); 
         self.write(text);
     }
 
-    fn write_comment(&mut self, text: &str) {
+    fn write_comment(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_comment"); 
         self.write(text);
     }
 
-    fn write_keyword(&mut self, text: &str) {
+    fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         self.write(text);
     }
 
-    fn write_operator(&mut self, text: &str) {
+    fn write_operator(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_operator"); 
         self.write(text);
     }
 
-    fn write_punctuation(&mut self, text: &str) {
+    fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         self.write(text);
     }
 
-    fn write_space(&mut self, text: &str) {
+    fn write_space(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_space"); 
         self.write(text);
     }
 
-    fn write_string_literal(&mut self, text: &str) {
+    fn write_string_literal(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_string_literal"); 
         self.write(text);
     }
 
-    fn write_parameter(&mut self, text: &str) {
+    fn write_parameter(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_parameter"); 
         self.write(text);
     }
 
-    fn write_property(&mut self, text: &str) {
+    fn write_property(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_property"); 
         self.write(text);
     }
 
-    fn write_symbol(&mut self, text: &str, _symbol: &Arc<tsox_frontend::ast::Symbol>) {
+    fn write_symbol(&mut self, text: &str, _symbol: &Arc<tsox_frontend::ast::Symbol>) { ::tsox_core::fntrace::enter("write_symbol"); 
         self.write(text);
     }
 
-    fn write_line(&mut self) {
+    fn write_line(&mut self) { ::tsox_core::fntrace::enter("write_line"); 
         if !self.at_start_of_line {
             self.raw_write_str(NEW_LINE);
         }
     }
 
-    fn write_line_force(&mut self, force: bool) {
+    fn write_line_force(&mut self, force: bool) { ::tsox_core::fntrace::enter("write_line_force"); 
         if force || !self.at_start_of_line {
             self.raw_write_str(NEW_LINE);
         }
     }
 
-    fn increase_indent(&mut self) {
+    fn increase_indent(&mut self) { ::tsox_core::fntrace::enter("increase_indent"); 
         self.indent += 1;
         self.indent_string = "    ".repeat(self.indent);
     }
 
-    fn decrease_indent(&mut self) {
+    fn decrease_indent(&mut self) { ::tsox_core::fntrace::enter("decrease_indent"); 
         self.indent = self.indent.saturating_sub(1);
         self.indent_string = "    ".repeat(self.indent);
     }
 
-    fn clear(&mut self) {
+    fn clear(&mut self) { ::tsox_core::fntrace::enter("clear"); 
         self.text.clear();
         self.line = 0;
         self.column = 0;
         self.at_start_of_line = true;
     }
 
-    fn string(&self) -> String {
+    fn string(&self) -> String { ::tsox_core::fntrace::enter("string"); 
         self.text.clone()
     }
 
-    fn raw_write(&mut self, s: &str) {
+    fn raw_write(&mut self, s: &str) { ::tsox_core::fntrace::enter("raw_write"); 
         self.raw_write_str(s);
     }
 
-    fn write_literal(&mut self, s: &str) {
+    fn write_literal(&mut self, s: &str) { ::tsox_core::fntrace::enter("write_literal"); 
         self.write(s);
     }
 
-    fn get_text_pos(&self) -> i32 {
+    fn get_text_pos(&self) -> i32 { ::tsox_core::fntrace::enter("get_text_pos"); 
         self.text.len() as i32
     }
 
-    fn get_line(&self) -> i32 {
+    fn get_line(&self) -> i32 { ::tsox_core::fntrace::enter("get_line"); 
         self.line
     }
 
-    fn get_column(&self) -> i32 {
+    fn get_column(&self) -> i32 { ::tsox_core::fntrace::enter("get_column"); 
         self.column
     }
 
-    fn get_indent(&self) -> i32 {
+    fn get_indent(&self) -> i32 { ::tsox_core::fntrace::enter("get_indent"); 
         self.indent as i32
     }
 
-    fn is_at_start_of_line(&self) -> bool {
+    fn is_at_start_of_line(&self) -> bool { ::tsox_core::fntrace::enter("is_at_start_of_line"); 
         self.at_start_of_line
     }
 
-    fn has_trailing_comment(&self) -> bool {
+    fn has_trailing_comment(&self) -> bool { ::tsox_core::fntrace::enter("has_trailing_comment"); 
         false
     }
 
-    fn has_trailing_whitespace(&self) -> bool {
+    fn has_trailing_whitespace(&self) -> bool { ::tsox_core::fntrace::enter("has_trailing_whitespace"); 
         self.at_start_of_line
             || self
                 .text
@@ -185,13 +185,13 @@ pub struct LineCharCache39k04 {
 }
 
 impl LineCharCache39k04 {
-    pub fn new(source: &Arc<SourceFile>) -> Self {
+    pub fn new(source: &Arc<SourceFile>) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             source: Arc::clone(source),
         }
     }
 
-    pub fn get_line_and_character(&self, pos: usize) -> (i32, i32) {
+    pub fn get_line_and_character(&self, pos: usize) -> (i32, i32) { ::tsox_core::fntrace::enter("get_line_and_character"); 
         let (line, character) = get_line_and_character_of_position(&self.source, pos);
         (line as i32, character as i32)
     }
@@ -210,7 +210,7 @@ pub struct PrinterEmitState39k04 {
 }
 
 impl Default for PrinterEmitState39k04 {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             writer: Box::new(TextWriter39k04::default()),
             source_maps_disabled: false,
@@ -230,41 +230,41 @@ thread_local! {
 }
 
 impl Printer {
-    pub(crate) fn emit_state39k04<R>(&self, f: impl FnOnce(&PrinterEmitState39k04) -> R) -> R {
+    pub(crate) fn emit_state39k04<R>(&self, f: impl FnOnce(&PrinterEmitState39k04) -> R) -> R { ::tsox_core::fntrace::enter("emit_state39k04"); 
         PRINTER_EMIT_STATE_39K04.with(|state| f(&state.borrow()))
     }
 
     pub(crate) fn emit_state39k04_mut<R>(
         &self,
         f: impl FnOnce(&mut PrinterEmitState39k04) -> R,
-    ) -> R {
+    ) -> R { ::tsox_core::fntrace::enter("emit_state39k04_mut"); 
         PRINTER_EMIT_STATE_39K04.with(|state| f(&mut state.borrow_mut()))
     }
 
-    pub(crate) fn set_writer39k04(&mut self, writer: Box<dyn EmitTextWriter>) {
+    pub(crate) fn set_writer39k04(&mut self, writer: Box<dyn EmitTextWriter>) { ::tsox_core::fntrace::enter("set_writer39k04"); 
         self.emit_state39k04_mut(|state| state.writer = writer);
     }
 
-    pub(crate) fn set_source_map_generator39k04(&mut self, generator: Generator) {
+    pub(crate) fn set_source_map_generator39k04(&mut self, generator: Generator) { ::tsox_core::fntrace::enter("set_source_map_generator39k04"); 
         self.emit_state39k04_mut(|state| state.source_map_generator = Some(generator));
     }
 
     pub(crate) fn set_map_source_position39k04(
         &mut self,
         map_source_position: Box<dyn FnMut(&Arc<SourceFile>, usize) -> Option<(Arc<SourceFile>, usize)>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_map_source_position39k04"); 
         self.emit_state39k04_mut(|state| state.map_source_position = Some(map_source_position));
     }
 
-    pub(crate) fn write_line(&mut self) {
+    pub(crate) fn write_line(&mut self) { ::tsox_core::fntrace::enter("write_line"); 
         self.emit_state39k04_mut(|state| state.writer.write_line());
     }
 
-    pub(crate) fn write_space(&mut self) {
+    pub(crate) fn write_space(&mut self) { ::tsox_core::fntrace::enter("write_space"); 
         self.emit_state39k04_mut(|state| state.writer.write_space(" "));
     }
 
-    pub(crate) fn should_write_comment(&self, comment: &CommentRange) -> bool {
+    pub(crate) fn should_write_comment(&self, comment: &CommentRange) -> bool { ::tsox_core::fntrace::enter("should_write_comment"); 
         if !self.options.only_print_jsdoc_style {
             return true;
         }
@@ -275,7 +275,7 @@ impl Printer {
         is_jsdoc_like_text(text, comment) || text[comment.pos..comment.end].starts_with("/*!")
     }
 
-    pub(crate) fn emit_comment(&mut self, comment: &CommentRange) {
+    pub(crate) fn emit_comment(&mut self, comment: &CommentRange) { ::tsox_core::fntrace::enter("emit_comment"); 
         let Some(source_file) = self.current_source_file.clone() else {
             return;
         };
@@ -283,7 +283,7 @@ impl Printer {
         self.emit_state39k04_mut(|state| state.writer.write_comment(&text));
     }
 
-    pub(crate) fn emit_comments(&mut self, comments: &[CommentRange], separator: CommentSeparator) {
+    pub(crate) fn emit_comments(&mut self, comments: &[CommentRange], separator: CommentSeparator) { ::tsox_core::fntrace::enter("emit_comments"); 
         for (index, comment) in comments.iter().enumerate() {
             if index > 0 && separator == CommentSeparator::After {
                 self.write_space();
@@ -299,7 +299,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn set_source_map_source(&mut self, source: &Arc<SourceFile>) {
+    pub(crate) fn set_source_map_source(&mut self, source: &Arc<SourceFile>) { ::tsox_core::fntrace::enter("set_source_map_source"); 
         if self.emit_state39k04(|state| state.source_maps_disabled) {
             return;
         }
@@ -335,7 +335,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn should_emit_source_maps(&self, node: &Node) -> bool {
+    pub(crate) fn should_emit_source_maps(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_source_maps"); 
         self.emit_state39k04(|state| {
             !state.source_maps_disabled
                 && state.source_map_source.is_some()
@@ -350,7 +350,7 @@ impl Printer {
         _pos: usize,
         context_node: &Node,
         flags: TokenEmitFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_emit_token_source_maps"); 
         flags.0 & TokenEmitFlags::NO_SOURCE_MAPS.0 == 0
             && self.should_emit_source_maps(context_node)
             && !self.options.omit_brace_source_map_positions

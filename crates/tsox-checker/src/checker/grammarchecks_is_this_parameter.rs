@@ -2,7 +2,7 @@
 
 use crate::checker::grammarchecks::*;
 
-pub(crate) fn is_this_parameter(node: &Arc<Node>) -> bool {
+pub(crate) fn is_this_parameter(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_this_parameter"); 
     if node.kind != SyntaxKind::Parameter {
         return false;
     }
@@ -14,25 +14,25 @@ pub(crate) fn is_this_parameter(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_variable_statement(node: &Arc<Node>) -> bool {
+pub(crate) fn is_variable_statement(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_statement"); 
     node.kind == SyntaxKind::VariableStatement
 }
 
-pub(crate) fn is_parent_module_block_or_source_file(node: &Arc<Node>) -> bool {
+pub(crate) fn is_parent_module_block_or_source_file(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_parent_module_block_or_source_file"); 
     match &node.parent {
         Some(parent) => is_module_block(parent) || is_source_file(parent),
         None => false,
     }
 }
 
-pub(crate) fn is_parent_class_like(node: &Arc<Node>) -> bool {
+pub(crate) fn is_parent_class_like(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_parent_class_like"); 
     match &node.parent {
         Some(parent) => is_class_declaration(parent) || is_class_expression(parent),
         None => false,
     }
 }
 
-pub(crate) fn is_iteration_statement(node: &Arc<Node>, look_in_labeled: bool) -> bool {
+pub(crate) fn is_iteration_statement(node: &Arc<Node>, look_in_labeled: bool) -> bool { ::tsox_core::fntrace::enter("is_iteration_statement"); 
     match node.kind {
         SyntaxKind::ForStatement
         | SyntaxKind::ForInStatement
@@ -50,7 +50,7 @@ pub(crate) fn is_iteration_statement(node: &Arc<Node>, look_in_labeled: bool) ->
     }
 }
 
-pub(crate) fn is_function_like_or_class_static_block(node: &Arc<Node>) -> bool {
+pub(crate) fn is_function_like_or_class_static_block(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_function_like_or_class_static_block"); 
     matches!(
         node.kind,
         SyntaxKind::FunctionDeclaration
@@ -64,7 +64,7 @@ pub(crate) fn is_function_like_or_class_static_block(node: &Arc<Node>) -> bool {
     )
 }
 
-pub(crate) fn is_optional_declaration(node: &Arc<Node>) -> bool {
+pub(crate) fn is_optional_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_optional_declaration"); 
     if node.kind != SyntaxKind::Parameter {
         return false;
     }
@@ -76,14 +76,14 @@ pub(crate) fn is_optional_declaration(node: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn is_binding_pattern(node: &Arc<Node>) -> bool {
+pub(crate) fn is_binding_pattern(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_binding_pattern"); 
     matches!(
         node.kind,
         SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
     )
 }
 
-pub(crate) fn visibility_to_string(kind: SyntaxKind) -> &'static str {
+pub(crate) fn visibility_to_string(kind: SyntaxKind) -> &'static str { ::tsox_core::fntrace::enter("visibility_to_string"); 
     match kind {
         SyntaxKind::PublicKeyword => "public",
         SyntaxKind::ProtectedKeyword => "protected",
@@ -92,7 +92,7 @@ pub(crate) fn visibility_to_string(kind: SyntaxKind) -> &'static str {
     }
 }
 
-pub(crate) fn modifier_to_flag(kind: SyntaxKind) -> ModifierFlags {
+pub(crate) fn modifier_to_flag(kind: SyntaxKind) -> ModifierFlags { ::tsox_core::fntrace::enter("modifier_to_flag"); 
     match kind {
         SyntaxKind::PublicKeyword => ModifierFlags::Public,
         SyntaxKind::ProtectedKeyword => ModifierFlags::Protected,

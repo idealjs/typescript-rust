@@ -10,7 +10,7 @@ impl Checker {
         _t: &Arc<Type>,
         structured: &StructuredTypeData,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("object_literal_to_string"); 
         let mut parts: Vec<String> = Vec::new();
 
         for sig in structured.call_signatures() {
@@ -245,7 +245,7 @@ impl Checker {
 
     // Go getSymbolChain 的别名感知限定：命名空间父级链显示时，
     // 遇显示上下文文件内解析到该命名空间的别名用别名名；到 enclosing 文件自身模块不加前缀
-    pub(crate) fn namespace_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+    pub(crate) fn namespace_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> { ::tsox_core::fntrace::enter("namespace_qualifier_of"); 
         let mut parts: Vec<String> = Vec::new();
         let mut cur = symbol
             .parent()
@@ -324,7 +324,7 @@ impl Checker {
     // 类型成员限定名：只收集命名空间段（ValueModule 且非文件模块），不使用 alias 前缀
     // （tsc getSymbolChain：外部模块 root 的链段被跳过；值成员才经 alias 显示）
     #[allow(dead_code)]
-    pub(crate) fn namespace_only_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+    pub(crate) fn namespace_only_qualifier_of(&mut self, symbol: &Arc<Symbol>) -> Option<String> { ::tsox_core::fntrace::enter("namespace_only_qualifier_of"); 
         let mut parts: Vec<String> = Vec::new();
         let mut cur = symbol.parent().clone();
         while let Some(ns) = cur {
@@ -350,7 +350,7 @@ impl Checker {
 
     // 符号的命名空间限定显示名：export= 符号退化为限定名（隔代自身），
     // 否则 限定名.符号名（Go getSymbolChain + getAliasForSymbolInContainer）
-    pub(crate) fn namespace_qualified_display_name(&mut self, sym: &Arc<Symbol>) -> String {
+    pub(crate) fn namespace_qualified_display_name(&mut self, sym: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("namespace_qualified_display_name"); 
         let export_eq_container = sym
             .parent()
             .or_else(|| self.namespace_container_from_declarations(sym));
@@ -378,7 +378,7 @@ impl Checker {
     }
 
     // import X = A.B.C 形式别名：解析实体名链
-    fn resolve_import_equals_entity(&mut self, alias: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    fn resolve_import_equals_entity(&mut self, alias: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_equals_entity"); 
         let decl = alias
             .declarations
             .iter()
@@ -432,7 +432,7 @@ impl Checker {
         Some(resolved)
     }
 
-    fn module_specifier_of_require(&self, module_reference: &Arc<Node>) -> Option<String> {
+    fn module_specifier_of_require(&self, module_reference: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("module_specifier_of_require"); 
         let tsox_frontend::ast::NodeData::ExternalModuleReference(emr) = &module_reference.data
         else {
             return None;
@@ -448,7 +448,7 @@ impl Checker {
         &self,
         name: &str,
         file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("symbol_by_name_in_file_scope"); 
         let symbol_map = self.program.symbol_map();
         if let Some(locals) = symbol_map.locals.get(&file.node.id())
             && let Some(sym) = locals.get(name)
@@ -466,7 +466,7 @@ impl Checker {
         None
     }
 
-    fn node_within(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
+    fn node_within(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_within"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             if Arc::ptr_eq(&n, ancestor) {
@@ -480,7 +480,7 @@ impl Checker {
     pub(crate) fn namespace_container_from_declarations(
         &self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("namespace_container_from_declarations"); 
         let symbol_map = self.program.symbol_map();
         symbol.declarations.first().and_then(|decl| {
             let mut cur = decl.parent();
@@ -500,7 +500,7 @@ impl Checker {
         &mut self,
         ns: &Arc<Symbol>,
         file: &Arc<tsox_frontend::ast::SourceFile>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("alias_name_of_namespace_in_file"); 
         let symbol_map = self.program.symbol_map();
         let mut tables: Vec<tsox_frontend::ast::SymbolTable> = Vec::new();
         if let Some(locals) = symbol_map.locals.get(&file.node.id()) {
@@ -533,7 +533,7 @@ impl Checker {
         t: &Arc<Type>,
         sym: &Arc<Symbol>,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("symbol_type_to_string"); 
         if sym.flags.intersects(SymbolFlags::ENUM) {
             if matches!(&t.data, TypeData::Object(_) | TypeData::Interface(_)) {
                 return format!("typeof {}", self.namespace_qualified_name(sym));
@@ -670,7 +670,7 @@ impl Checker {
         )
     }
 
-    fn declared_type_param_suffix(&self, t: &Arc<Type>, sym: &Arc<Symbol>) -> String {
+    fn declared_type_param_suffix(&self, t: &Arc<Type>, sym: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("declared_type_param_suffix"); 
         let empty_args = match &t.data {
             TypeData::Object(o) => o.type_arguments.is_empty(),
             TypeData::Interface(i) => i.object.type_arguments.is_empty(),
@@ -705,7 +705,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn internal_symbol_written_name(&self, sym: &Arc<Symbol>) -> Option<String> {
+    pub(crate) fn internal_symbol_written_name(&self, sym: &Arc<Symbol>) -> Option<String> { ::tsox_core::fntrace::enter("internal_symbol_written_name"); 
         if !sym.name.starts_with('\u{FE}') {
             return None;
         }
@@ -719,12 +719,12 @@ impl Checker {
         }
     }
 
-    pub(crate) fn symbol_display_name_for_print(&mut self, sym: &Arc<Symbol>) -> String {
+    pub(crate) fn symbol_display_name_for_print(&mut self, sym: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("symbol_display_name_for_print"); 
         self.internal_symbol_written_name(sym)
             .unwrap_or_else(|| self.namespace_qualified_name(sym))
     }
 
-    pub(crate) fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String {        if sym
+    pub(crate) fn namespace_qualified_name(&mut self, sym: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("namespace_qualified_name");         if sym
             .parent()
             .as_ref()
             .is_some_and(|p| p.flags.contains(SymbolFlags::ValueModule))
@@ -736,7 +736,7 @@ impl Checker {
         sym.name.clone()
     }
 
-    pub(crate) fn needs_parens_in_union(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn needs_parens_in_union(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("needs_parens_in_union"); 
         if let Some(structured) = t.as_structured()
             && !self.symbol_type_printed_by_name(t)
             && structured.signatures.len() == 1
@@ -749,7 +749,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn needs_parens_as_array_element(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn needs_parens_as_array_element(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("needs_parens_as_array_element"); 
         if t.is_union() || t.is_intersection() {
             return true;
         }
@@ -772,7 +772,7 @@ impl Checker {
         &mut self,
         elem: &Arc<Type>,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("maybe_parenthesize_array_element_ex"); 
         let s = self.type_to_string_ex(elem, flags);
         if self.needs_parens_as_array_element(elem) {
             format!("({})", s)
@@ -781,7 +781,7 @@ impl Checker {
         }
     }
 
-    pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_to_type_node"); 
         self.type_to_type_node_worker(t)
     }
 
@@ -792,7 +792,7 @@ impl Checker {
         prop: &Arc<Symbol>,
         prop_type: &Arc<Type>,
         flags: TypeFormatFlags,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("method_form_suffix"); 
         if !prop.declarations.iter().any(|d| {
             matches!(
                 d.kind,
@@ -843,7 +843,7 @@ impl Checker {
 
     /// Go utilities.go compareSymbols：声明位置优先（跨文件按程序内文件序），
     /// 无声明回退名字
-    fn compare_symbols_for_display(&self, a: &Arc<Symbol>, b: &Arc<Symbol>) -> std::cmp::Ordering {
+    fn compare_symbols_for_display(&self, a: &Arc<Symbol>, b: &Arc<Symbol>) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_symbols_for_display"); 
         match (a.declarations.first(), b.declarations.first()) {
             (Some(da), Some(db)) => self
                 .compare_nodes_for_display(da, db)
@@ -854,7 +854,7 @@ impl Checker {
         }
     }
 
-    fn compare_nodes_for_display(&self, a: &Arc<Node>, b: &Arc<Node>) -> std::cmp::Ordering {
+    fn compare_nodes_for_display(&self, a: &Arc<Node>, b: &Arc<Node>) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_nodes_for_display"); 
         let fa = self.get_source_file_of_node(a);
         let fb = self.get_source_file_of_node(b);
         if let (Some(fa), Some(fb)) = (&fa, &fb) {

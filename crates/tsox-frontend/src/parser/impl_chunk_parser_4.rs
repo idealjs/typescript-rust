@@ -3,7 +3,7 @@
 use crate::parser::impl_chunk::*;
 
 impl Parser {
-    pub(crate) fn is_list_element(&self, context: ParsingContext, in_error_recovery: bool) -> bool {
+    pub(crate) fn is_list_element(&self, context: ParsingContext, in_error_recovery: bool) -> bool { ::tsox_core::fntrace::enter("is_list_element"); 
         match context {
             ParsingContext::SourceElements
             | ParsingContext::BlockStatements
@@ -105,7 +105,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_in_some_parsing_context(&self) -> bool {
+    pub(crate) fn is_in_some_parsing_context(&self) -> bool { ::tsox_core::fntrace::enter("is_in_some_parsing_context"); 
         const CONTEXTS: [ParsingContext; 26] = [
             ParsingContext::SourceElements,
             ParsingContext::BlockStatements,
@@ -144,7 +144,7 @@ impl Parser {
         false
     }
 
-    pub(crate) fn is_start_of_statement(&self) -> bool {
+    pub(crate) fn is_start_of_statement(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_statement"); 
         match self.token {
             SyntaxKind::AtToken
             | SyntaxKind::SemicolonToken
@@ -197,14 +197,14 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_next_token_open_paren_or_less_than_or_dot(&self) -> bool {
+    pub(crate) fn is_next_token_open_paren_or_less_than_or_dot(&self) -> bool { ::tsox_core::fntrace::enter("is_next_token_open_paren_or_less_than_or_dot"); 
         matches!(
             self.look_ahead_token(),
             SyntaxKind::OpenParenToken | SyntaxKind::LessThanToken | SyntaxKind::DotToken
         )
     }
 
-    pub(crate) fn is_start_of_expression(&self) -> bool {
+    pub(crate) fn is_start_of_expression(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_expression"); 
         if self.is_start_of_left_hand_side_expression() {
             return true;
         }
@@ -227,7 +227,7 @@ impl Parser {
         ) || self.is_identifier()
     }
 
-    pub(crate) fn is_start_of_left_hand_side_expression(&self) -> bool {
+    pub(crate) fn is_start_of_left_hand_side_expression(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_left_hand_side_expression"); 
         matches!(
             self.token,
             SyntaxKind::ThisKeyword
@@ -254,7 +254,7 @@ impl Parser {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn is_literal(&self) -> bool {
+    pub(crate) fn is_literal(&self) -> bool { ::tsox_core::fntrace::enter("is_literal"); 
         matches!(
             self.token,
             SyntaxKind::NumericLiteral
@@ -265,7 +265,7 @@ impl Parser {
         )
     }
 
-    pub(crate) fn is_let_declaration(&self) -> bool {
+    pub(crate) fn is_let_declaration(&self) -> bool { ::tsox_core::fntrace::enter("is_let_declaration"); 
         let mut s = self.scanner.clone();
         s.scan();
         let t = s.token();
@@ -274,7 +274,7 @@ impl Parser {
             || t == SyntaxKind::OpenBracketToken
     }
 
-    pub(crate) fn is_using_declaration(&self) -> bool {
+    pub(crate) fn is_using_declaration(&self) -> bool { ::tsox_core::fntrace::enter("is_using_declaration"); 
         let mut scanner = self.scanner.clone();
         scanner.scan();
         let next = scanner.token();
@@ -283,7 +283,7 @@ impl Parser {
             && no_line_break
     }
 
-    pub(crate) fn is_await_using_declaration(&self) -> bool {
+    pub(crate) fn is_await_using_declaration(&self) -> bool { ::tsox_core::fntrace::enter("is_await_using_declaration"); 
         let mut scanner = self.scanner.clone();
         scanner.scan();
         if scanner.token() != SyntaxKind::UsingKeyword {
@@ -298,11 +298,11 @@ impl Parser {
             && no_line_break_2
     }
 
-    pub(crate) fn is_binding_identifier_token(token: SyntaxKind) -> bool {
+    pub(crate) fn is_binding_identifier_token(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_binding_identifier_token"); 
         token == SyntaxKind::Identifier || (token as i16) > (SyntaxKind::WithKeyword as i16)
     }
 
-    pub(crate) fn clone_state(&self) -> Parser {
+    pub(crate) fn clone_state(&self) -> Parser { ::tsox_core::fntrace::enter("clone_state"); 
         Parser {
             scanner: self.scanner.clone(),
             token: self.token,
@@ -319,7 +319,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_start_of_declaration(&self) -> bool {
+    pub(crate) fn is_start_of_declaration(&self) -> bool { ::tsox_core::fntrace::enter("is_start_of_declaration"); 
         let mut p = self.clone_state();
         p.scan_start_of_declaration()
     }

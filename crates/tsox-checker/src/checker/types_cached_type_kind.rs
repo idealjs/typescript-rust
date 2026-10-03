@@ -51,7 +51,7 @@ pub struct CacheHashKey {
 }
 
 impl CacheHashKey {
-    pub fn new(hi: u64, lo: u64) -> Self {
+    pub fn new(hi: u64, lo: u64) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { hi, lo }
     }
 }

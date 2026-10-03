@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use tsox_frontend::ast::{self, Node, SourceFile, SyntaxKind};
 
-pub fn is_type_reference(node: &Arc<Node>) -> bool {
+pub fn is_type_reference(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_reference"); 
     let mut node = Arc::clone(node);
     if ast::mig::m3g_2::is_right_side_of_qualified_name_or_property_access(&node) {
         let Some(parent) = node.parent() else { return false };
@@ -25,7 +25,7 @@ pub fn is_type_reference(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn get_meaning_from_location(node: &Arc<Node>) -> ast::mig::m3e_4::SemanticMeaning {
+pub fn get_meaning_from_location(node: &Arc<Node>) -> ast::mig::m3e_4::SemanticMeaning { ::tsox_core::fntrace::enter("get_meaning_from_location"); 
     let node = get_adjusted_location(node, false, None);
     let Some(parent) = node.parent() else {
         return ast::mig::m3e_4::SemanticMeaning::VALUE;
@@ -87,7 +87,7 @@ pub fn get_meaning_from_location(node: &Arc<Node>) -> ast::mig::m3e_4::SemanticM
     ast::mig::m3e_4::SemanticMeaning::VALUE
 }
 
-pub fn is_export_specifier_alias(reference_location: &Arc<Node>, export_specifier: &Arc<Node>) -> bool {
+pub fn is_export_specifier_alias(reference_location: &Arc<Node>, export_specifier: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_export_specifier_alias"); 
     let property_name = crate::ls::mig::m5x_3::export_specifier_property_name(export_specifier);
     if let Some(property_name) = property_name {
         Arc::ptr_eq(&property_name, reference_location)
@@ -105,7 +105,7 @@ pub fn get_adjusted_location(
     node: &Arc<Node>,
     for_rename: bool,
     source_file: Option<Arc<SourceFile>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_adjusted_location"); 
     let parent = node.parent();
     let is_modifier = |node: &Arc<Node>, parent: &Option<Arc<Node>>| -> bool {
         if let Some(parent) = parent {
@@ -203,7 +203,7 @@ pub fn get_adjusted_location_for_declaration(
     node: &Arc<Node>,
     for_rename: bool,
     has_source_file: bool,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_adjusted_location_for_declaration"); 
     if let Some(name) = ast::get_name_of_declaration(node) {
         return Some(name);
     }
@@ -230,7 +230,7 @@ pub fn get_adjusted_location_for_declaration(
 pub fn get_adjusted_location_for_import_declaration(
     node: &Arc<Node>,
     for_rename: bool,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_adjusted_location_for_import_declaration"); 
     let import_clause = crate::ls::mig::m5x_3::import_declaration_import_clause(node)?;
     if let Some(name) = crate::ls::mig::m5x_3::import_clause_name(&import_clause) {
         if crate::ls::mig::m5x_3::import_clause_named_bindings(&import_clause).is_some() {
@@ -262,7 +262,7 @@ pub fn get_adjusted_location_for_import_declaration(
 pub fn get_adjusted_location_for_export_declaration(
     node: &Arc<Node>,
     for_rename: bool,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_adjusted_location_for_export_declaration"); 
     let export_clause = crate::ls::mig::m5x_3::export_declaration_export_clause(node)?;
     match export_clause.kind {
         SyntaxKind::NamedExports => {
@@ -287,7 +287,7 @@ pub fn get_contextual_type_from_parent(
     node: &Arc<Node>,
     type_checker: &mut tsox_checker::checker::Checker,
     context_flags: tsox_checker::checker::ContextFlags,
-) -> Option<Arc<tsox_checker::checker::types::Type>> {
+) -> Option<Arc<tsox_checker::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_type_from_parent"); 
     let parent = node
         .parent()
         .map(|p| crate::ls::mig::m5x::walk_up_parenthesized_expressions(&p))?;
@@ -319,7 +319,7 @@ pub fn get_contextual_type_from_parent(
 pub fn get_contextual_type_from_parent_or_ancestor_type_node(
     node: &Arc<Node>,
     type_checker: &mut tsox_checker::checker::Checker,
-) -> Option<Arc<tsox_checker::checker::types::Type>> {
+) -> Option<Arc<tsox_checker::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_type_from_parent_or_ancestor_type_node"); 
     if node.flags.contains(ast::NodeFlags::JSDoc)
         && !node.flags.contains(ast::NodeFlags::JavaScriptFile)
     {
@@ -336,7 +336,7 @@ pub fn get_contextual_type_from_parent_or_ancestor_type_node(
     None
 }
 
-pub fn get_ancestor_type_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_ancestor_type_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_ancestor_type_node"); 
     let mut last_type_node: Option<Arc<Node>> = None;
     let mut current = node.parent();
     while let Some(n) = current {
@@ -354,7 +354,7 @@ pub fn get_ancestor_type_node(node: &Arc<Node>) -> Option<Arc<Node>> {
     last_type_node
 }
 
-pub fn is_source_file_with_global_exports(node: &Arc<Node>) -> bool {
+pub fn is_source_file_with_global_exports(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_source_file_with_global_exports"); 
     ast::is_source_file(node)
         && matches!(
             &node.data,

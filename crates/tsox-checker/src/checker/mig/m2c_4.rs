@@ -13,7 +13,7 @@ use crate::checker::Checker;
 use super::wc2_2::get_mapped_type_modifiers;
 
 impl Checker {
-    pub fn resolve_mapped_type_members(&mut self, t: &Arc<Type>) {
+    pub fn resolve_mapped_type_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_mapped_type_members"); 
         let mut members = SymbolTable::new();
         let mut index_infos: Vec<Arc<IndexInfo>> = Vec::new();
         self.set_structured_type_members(t, None, Vec::new(), Vec::new(), Vec::new());

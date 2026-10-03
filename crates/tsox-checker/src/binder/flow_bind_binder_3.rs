@@ -3,7 +3,7 @@
 use crate::binder::flow_bind::*;
 
 impl Binder {
-    pub(crate) fn bind_switch_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_switch_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_switch_statement"); 
         let mut post_switch_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 
         let (expression, case_block) = match &node.data {
@@ -114,7 +114,7 @@ impl Binder {
         &mut self,
         clause: &Arc<Node>,
         entry_flow: &Option<Arc<FlowNode>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_case_clause"); 
         let NodeData::CaseOrDefaultClause(data) = &clause.data else {
             return;
         };
@@ -129,7 +129,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn is_narrowing_expression(&self, expr: &Arc<Node>) -> bool {
+    pub(crate) fn is_narrowing_expression(&self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_narrowing_expression"); 
         match expr.kind {
             SyntaxKind::Identifier | SyntaxKind::ThisKeyword => true,
             SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression => {
@@ -164,7 +164,7 @@ impl Binder {
         left: &Arc<Node>,
         operator: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_narrowing_binary_expression"); 
         match operator.kind {
             SyntaxKind::EqualsToken
             | SyntaxKind::BarBarEqualsToken
@@ -188,14 +188,14 @@ impl Binder {
         }
     }
 
-    pub(crate) fn is_boolean_literal(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_boolean_literal(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_boolean_literal"); 
         matches!(
             node.kind,
             SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword
         )
     }
 
-    pub(crate) fn is_narrowable_operand(&self, expr: &Arc<Node>) -> bool {
+    pub(crate) fn is_narrowable_operand(&self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_narrowable_operand"); 
         match expr.kind {
             SyntaxKind::ParenthesizedExpression => expr
                 .expression()
@@ -219,7 +219,7 @@ impl Binder {
         &self,
         expr1: &Arc<Node>,
         expr2: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_narrowing_typeof_operands"); 
         expr1.kind == SyntaxKind::TypeOfExpression
             && expr1
                 .expression()
@@ -231,7 +231,7 @@ impl Binder {
             )
     }
 
-    pub(crate) fn contains_narrowable_reference(&self, expr: &Arc<Node>) -> bool {
+    pub(crate) fn contains_narrowable_reference(&self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("contains_narrowable_reference"); 
         if self.is_narrowable_reference(expr) {
             return true;
         }
@@ -251,7 +251,7 @@ impl Binder {
         false
     }
 
-    pub(crate) fn is_narrowable_reference(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_narrowable_reference(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_narrowable_reference"); 
         match node.kind {
             SyntaxKind::Identifier
             | SyntaxKind::ThisKeyword
@@ -284,7 +284,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn has_narrowable_argument(&self, expr: &Arc<Node>) -> bool {
+    pub(crate) fn has_narrowable_argument(&self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_narrowable_argument"); 
         let NodeData::CallExpression(call) = &expr.data else {
             return false;
         };
@@ -294,7 +294,7 @@ impl Binder {
             .any(|arg| self.contains_narrowable_reference(arg))
     }
 
-    pub(crate) fn bind_return_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_return_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_return_statement"); 
         if let NodeData::ReturnStatement(data) = &node.data {
             if let Some(expr) = &data.expression {
                 self.bind(expr);

@@ -12,11 +12,11 @@ pub struct TypedNode21<'a> {
 }
 
 impl<'a> TypedNode21<'a> {
-    pub fn as_node(&self) -> &'a Node {
+    pub fn as_node(&self) -> &'a Node { ::tsox_core::fntrace::enter("as_node"); 
         self.node
     }
 
-    pub fn head(&self) -> &'a Node {
+    pub fn head(&self) -> &'a Node { ::tsox_core::fntrace::enter("head"); 
         match &self.node.data {
             NodeData::TemplateExpression(d) => &d.head,
             NodeData::TemplateLiteralTypeNode(d) => &d.head,
@@ -24,7 +24,7 @@ impl<'a> TypedNode21<'a> {
         }
     }
 
-    pub fn template_spans(&self) -> &'a NodeList {
+    pub fn template_spans(&self) -> &'a NodeList { ::tsox_core::fntrace::enter("template_spans"); 
         match &self.node.data {
             NodeData::TemplateExpression(d) => &d.template_spans,
             NodeData::TemplateLiteralTypeNode(d) => &d.template_spans,
@@ -32,7 +32,7 @@ impl<'a> TypedNode21<'a> {
         }
     }
 
-    pub fn expression(&self) -> &'a Node {
+    pub fn expression(&self) -> &'a Node { ::tsox_core::fntrace::enter("expression"); 
         match &self.node.data {
             NodeData::TemplateSpan(d) => &d.expression,
             NodeData::ThrowStatement(d) => &d.expression,
@@ -42,7 +42,7 @@ impl<'a> TypedNode21<'a> {
         }
     }
 
-    pub fn literal(&self) -> &'a Node {
+    pub fn literal(&self) -> &'a Node { ::tsox_core::fntrace::enter("literal"); 
         match &self.node.data {
             NodeData::TemplateSpan(d) => &d.literal,
             NodeData::TemplateLiteralTypeSpan(d) => &d.literal,
@@ -50,49 +50,49 @@ impl<'a> TypedNode21<'a> {
         }
     }
 
-    pub fn type_(&self) -> &'a Node {
+    pub fn type_(&self) -> &'a Node { ::tsox_core::fntrace::enter("type_"); 
         match &self.node.data {
             NodeData::TemplateLiteralTypeSpan(d) => &d.type_node,
             _ => panic!("type() on {:?}", self.node.kind),
         }
     }
 
-    pub fn tag(&self) -> &'a Node {
+    pub fn tag(&self) -> &'a Node { ::tsox_core::fntrace::enter("tag"); 
         match &self.node.data {
             NodeData::TaggedTemplateExpression(d) => &d.tag,
             _ => panic!("tag() on {:?}", self.node.kind),
         }
     }
 
-    pub fn template(&self) -> &'a Node {
+    pub fn template(&self) -> &'a Node { ::tsox_core::fntrace::enter("template"); 
         match &self.node.data {
             NodeData::TaggedTemplateExpression(d) => &d.template,
             _ => panic!("template() on {:?}", self.node.kind),
         }
     }
 
-    pub fn type_arguments(&self) -> Option<&'a NodeList> {
+    pub fn type_arguments(&self) -> Option<&'a NodeList> { ::tsox_core::fntrace::enter("type_arguments"); 
         match &self.node.data {
             NodeData::TaggedTemplateExpression(d) => d.type_arguments.as_deref(),
             _ => panic!("typeArguments() on {:?}", self.node.kind),
         }
     }
 
-    pub fn case_block(&self) -> &'a Node {
+    pub fn case_block(&self) -> &'a Node { ::tsox_core::fntrace::enter("case_block"); 
         match &self.node.data {
             NodeData::SwitchStatement(d) => &d.case_block,
             _ => panic!("caseBlock() on {:?}", self.node.kind),
         }
     }
 
-    pub fn clauses(&self) -> &'a NodeList {
+    pub fn clauses(&self) -> &'a NodeList { ::tsox_core::fntrace::enter("clauses"); 
         match &self.node.data {
             NodeData::CaseBlock(d) => &d.clauses,
             _ => panic!("clauses() on {:?}", self.node.kind),
         }
     }
 
-    pub fn name(&self) -> &'a Node {
+    pub fn name(&self) -> &'a Node { ::tsox_core::fntrace::enter("name"); 
         match &self.node.data {
             NodeData::VariableDeclaration(d) => &d.name,
             NodeData::ParameterDeclaration(d) => &d.name,
@@ -104,7 +104,7 @@ impl<'a> TypedNode21<'a> {
 pub trait NodeAsExt21 {
     fn as_typed21(&self) -> TypedNode21<'_>;
 
-    fn assert_kind21(&self, kind: SyntaxKind) -> &Self {
+    fn assert_kind21(&self, kind: SyntaxKind) -> &Self { ::tsox_core::fntrace::enter("assert_kind21"); 
         if self.as_node().kind != kind {
             panic!("expected {:?}, got {:?}", kind, self.as_node().kind);
         }
@@ -113,92 +113,92 @@ pub trait NodeAsExt21 {
 
     fn as_node(&self) -> &Node;
 
-    fn as_template_expression(&self) -> TypedNode21<'_> {
+    fn as_template_expression(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_template_expression"); 
         self.assert_kind21(SyntaxKind::TemplateExpression);
         self.as_typed21()
     }
 
-    fn as_template_span(&self) -> TypedNode21<'_> {
+    fn as_template_span(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_template_span"); 
         self.assert_kind21(SyntaxKind::TemplateSpan);
         self.as_typed21()
     }
 
-    fn as_template_literal_type_node(&self) -> TypedNode21<'_> {
+    fn as_template_literal_type_node(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_template_literal_type_node"); 
         self.assert_kind21(SyntaxKind::TemplateLiteralType);
         self.as_typed21()
     }
 
-    fn as_template_literal_type_span(&self) -> &Node {
+    fn as_template_literal_type_span(&self) -> &Node { ::tsox_core::fntrace::enter("as_template_literal_type_span"); 
         self.assert_kind21(SyntaxKind::TemplateLiteralTypeSpan);
         self.as_node()
     }
 
-    fn as_tagged_template_expression(&self) -> TypedNode21<'_> {
+    fn as_tagged_template_expression(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_tagged_template_expression"); 
         self.assert_kind21(SyntaxKind::TaggedTemplateExpression);
         self.as_typed21()
     }
 
-    fn as_switch_statement(&self) -> TypedNode21<'_> {
+    fn as_switch_statement(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_switch_statement"); 
         self.assert_kind21(SyntaxKind::SwitchStatement);
         self.as_typed21()
     }
 
-    fn as_throw_statement(&self) -> TypedNode21<'_> {
+    fn as_throw_statement(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_throw_statement"); 
         self.assert_kind21(SyntaxKind::ThrowStatement);
         self.as_typed21()
     }
 
-    fn as_property_access_expression(&self) -> TypedNode21<'_> {
+    fn as_property_access_expression(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_property_access_expression"); 
         self.assert_kind21(SyntaxKind::PropertyAccessExpression);
         self.as_typed21()
     }
 
-    fn as_template_head(&self) -> &Node {
+    fn as_template_head(&self) -> &Node { ::tsox_core::fntrace::enter("as_template_head"); 
         self.assert_kind21(SyntaxKind::TemplateHead);
         self.as_node()
     }
 
-    fn as_template_middle(&self) -> &Node {
+    fn as_template_middle(&self) -> &Node { ::tsox_core::fntrace::enter("as_template_middle"); 
         self.assert_kind21(SyntaxKind::TemplateMiddle);
         self.as_node()
     }
 
-    fn as_template_tail(&self) -> &Node {
+    fn as_template_tail(&self) -> &Node { ::tsox_core::fntrace::enter("as_template_tail"); 
         self.assert_kind21(SyntaxKind::TemplateTail);
         self.as_node()
     }
 
-    fn as_case_block(&self) -> &Node {
+    fn as_case_block(&self) -> &Node { ::tsox_core::fntrace::enter("as_case_block"); 
         self.assert_kind21(SyntaxKind::CaseBlock);
         self.as_node()
     }
 
-    fn as_syntax_list(&self) -> &tsox_frontend::ast::node_data_generated::SyntaxListData {
+    fn as_syntax_list(&self) -> &tsox_frontend::ast::node_data_generated::SyntaxListData { ::tsox_core::fntrace::enter("as_syntax_list"); 
         match &self.as_node().data {
             NodeData::SyntaxList(d) => d,
             _ => panic!("AsSyntaxList on wrong node kind"),
         }
     }
 
-    fn as_catch_clause(&self) -> &tsox_frontend::ast::node_data_generated::CatchClauseData {
+    fn as_catch_clause(&self) -> &tsox_frontend::ast::node_data_generated::CatchClauseData { ::tsox_core::fntrace::enter("as_catch_clause"); 
         match &self.as_node().data {
             NodeData::CatchClause(d) => d,
             _ => panic!("AsCatchClause on wrong node kind"),
         }
     }
 
-    fn as_variable_declaration(&self) -> TypedNode21<'_> {
+    fn as_variable_declaration(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_variable_declaration"); 
         self.assert_kind21(SyntaxKind::VariableDeclaration);
         self.as_typed21()
     }
 }
 
 impl NodeAsExt21 for Node {
-    fn as_typed21(&self) -> TypedNode21<'_> {
+    fn as_typed21(&self) -> TypedNode21<'_> { ::tsox_core::fntrace::enter("as_typed21"); 
         TypedNode21 { node: self }
     }
 
-    fn as_node(&self) -> &Node {
+    fn as_node(&self) -> &Node { ::tsox_core::fntrace::enter("as_node"); 
         self
     }
 }

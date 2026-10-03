@@ -29,7 +29,7 @@ use super::m4q::r33k12_defs::{ListFlags, PrinterState, TokenEmitFlags, WriteKind
 use self::r36k15_defs::NodeDataExt15;
 
 impl Printer {
-    pub(crate) fn emit_partially_emitted_expression(&mut self, node: &Node) {
+    pub(crate) fn emit_partially_emitted_expression(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_partially_emitted_expression"); 
         let mut node = node;
         let mut stack: Vec<(&Node, PrinterState)> = Vec::new();
         loop {
@@ -63,7 +63,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_postfix_unary_expression(&mut self, node: &Node) {
+    pub(crate) fn emit_postfix_unary_expression(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_postfix_unary_expression"); 
         let state = self.enter_node(node);
         let unary = node.as_postfix_unary_expression();
         self.emit_expression(&unary.operand, OperatorPrecedence::LeftHandSide);
@@ -71,7 +71,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_prefix_unary_expression(&mut self, node: &Node) {
+    pub(crate) fn emit_prefix_unary_expression(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_prefix_unary_expression"); 
         let state = self.enter_node(node);
         let unary = node.as_prefix_unary_expression();
         let operator = unary.operator;
@@ -91,14 +91,14 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_private_identifier(&mut self, node: &Node) {
+    pub(crate) fn emit_private_identifier(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_private_identifier"); 
         let state = self.enter_node(node);
         let text = self.get_text_of_node(node, false);
         self.write(&text);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_property_assignment(&mut self, node: &Node) {
+    pub(crate) fn emit_property_assignment(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_property_assignment"); 
         let state = self.enter_node(node);
         let assignment = node.as_property_assignment();
         self.emit_property_name(Some(&assignment.name));
@@ -113,7 +113,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_property_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_property_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_property_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_property_declaration();
         self.emit_modifier_list(node, declaration.modifiers.as_deref(), true);
@@ -131,7 +131,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_property_name(&mut self, node: Option<&Node>) {
+    pub(crate) fn emit_property_name(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_property_name"); 
         let Some(node) = node else { return };
         let saved_write_kind = self.write_kind;
         self.write_kind = WriteKind::Property;
@@ -152,7 +152,7 @@ impl Printer {
         self.write_kind = saved_write_kind;
     }
 
-    pub(crate) fn emit_property_signature(&mut self, node: &Node) {
+    pub(crate) fn emit_property_signature(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_property_signature"); 
         let state = self.enter_node(node);
         let signature = node.as_property_signature_declaration();
         self.emit_modifier_list(node, signature.modifiers.as_deref(), false);
@@ -163,18 +163,18 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_punctuation_node(&mut self, node: Option<&Node>) {
+    pub(crate) fn emit_punctuation_node(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_punctuation_node"); 
         self.emit_punctuation_node_ex(node, TokenEmitFlags::NONE);
     }
 
-    pub(crate) fn emit_punctuation_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) {
+    pub(crate) fn emit_punctuation_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) { ::tsox_core::fntrace::enter("emit_punctuation_node_ex"); 
         let Some(node) = node else { return };
         let state = self.enter_token_node(node, flags);
         self.write_token_text(node.kind, WriteKind::Punctuation, node.pos());
         self.exit_token_node(node, state);
     }
 
-    pub(crate) fn emit_qualified_name(&mut self, node: &Node) {
+    pub(crate) fn emit_qualified_name(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_qualified_name"); 
         let state = self.enter_node(node);
         let qualified = node.as_qualified_name();
         self.emit_entity_name(&qualified.left);
@@ -183,13 +183,13 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_regular_expression_literal(&mut self, node: &Node) {
+    pub(crate) fn emit_regular_expression_literal(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_regular_expression_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GetLiteralTextFlags::NONE);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_rest_type(&mut self, node: &Node) {
+    pub(crate) fn emit_rest_type(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_rest_type"); 
         let state = self.enter_node(node);
         let rest = node.as_rest_type_node();
         self.write_punctuation("...");
@@ -197,7 +197,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_return_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_return_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_return_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_return_statement();
         self.emit_token(SyntaxKind::ReturnKeyword, node.pos(), WriteKind::Keyword, node);
@@ -209,7 +209,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_return_type(&mut self, node: Option<&Node>) {
+    pub(crate) fn emit_return_type(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_return_type"); 
         let Some(node) = node else { return };
         self.write_punctuation("=>");
         self.writer.write_space(" ");
@@ -227,7 +227,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_satisfies_expression(&mut self, node: &Node) {
+    pub(crate) fn emit_satisfies_expression(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_satisfies_expression"); 
         let state = self.enter_node(node);
         let satisfies = node.as_satisfies_expression();
         self.emit_expression(&satisfies.expression, OperatorPrecedence::Relational);
@@ -238,17 +238,17 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_semicolon_class_element(&mut self, node: &Node) {
+    pub(crate) fn emit_semicolon_class_element(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_semicolon_class_element"); 
         let state = self.enter_node(node);
         self.write_trailing_semicolon();
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_set_accessor_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_set_accessor_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_set_accessor_declaration"); 
         self.emit_accessor_declaration(SyntaxKind::SetKeyword, node);
     }
 
-    pub(crate) fn emit_shebang_if_needed(&mut self, node: &SourceFile) {
+    pub(crate) fn emit_shebang_if_needed(&mut self, node: &SourceFile) { ::tsox_core::fntrace::enter("emit_shebang_if_needed"); 
         if node_is_synthesized(&node.node) {
             return;
         }
@@ -259,7 +259,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_short_circuit_expression(&mut self, node: &Node) {
+    pub(crate) fn emit_short_circuit_expression(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_short_circuit_expression"); 
         if is_binary_operation07(skip_partially_emitted_expressions07(node), SyntaxKind::QuestionQuestionToken) {
             self.emit_expression(node, OPERATOR_PRECEDENCE_COALESCE);
         } else {
@@ -267,7 +267,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_shorthand_property_assignment(&mut self, node: &Node) {
+    pub(crate) fn emit_shorthand_property_assignment(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_shorthand_property_assignment"); 
         let state = self.enter_node(node);
         let assignment = node.as_shorthand_property_assignment();
         self.emit_property_name(Some(&assignment.name));
@@ -280,7 +280,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_signature(&mut self, node: &Node) {
+    pub(crate) fn emit_signature(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_signature"); 
         let (type_parameters, parameters, type_node) = match &node.data {
             NodeData::MethodDeclaration(d) => {
                 (d.type_parameters.as_deref(), &d.parameters, d.type_node.as_deref())
@@ -304,7 +304,7 @@ impl Printer {
         self.emit_type_annotation(type_node);
     }
 
-    pub(crate) fn emit_snippet_node(&mut self, node: &Node, snippet_element: &SnippetElement) {
+    pub(crate) fn emit_snippet_node(&mut self, node: &Node, snippet_element: &SnippetElement) { ::tsox_core::fntrace::enter("emit_snippet_node"); 
         if snippet_element.kind == SnippetKind::TabStop as u32 {
             self.emit_tab_stop(node, snippet_element);
         } else {
@@ -312,7 +312,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_spread_assignment(&mut self, node: &Node) {
+    pub(crate) fn emit_spread_assignment(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_spread_assignment"); 
         let state = self.enter_node(node);
         let assignment = node.as_spread_assignment();
         self.emit_token(SyntaxKind::DotDotDotToken, node.pos(), WriteKind::Punctuation, node);
@@ -320,7 +320,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_spread_element(&mut self, node: &Node) {
+    pub(crate) fn emit_spread_element(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_spread_element"); 
         let state = self.enter_node(node);
         let spread = node.as_spread_element();
         self.emit_token(SyntaxKind::DotDotDotToken, node.pos(), WriteKind::Punctuation, node);
@@ -328,13 +328,13 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_string_literal(&mut self, node: &Node) {
+    pub(crate) fn emit_string_literal(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_string_literal"); 
         let state = self.enter_node(node);
         self.emit_literal(node, GetLiteralTextFlags::NONE);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_tab_stop(&mut self, node: &Node, snippet_element: &SnippetElement) {
+    pub(crate) fn emit_tab_stop(&mut self, node: &Node, snippet_element: &SnippetElement) { ::tsox_core::fntrace::enter("emit_tab_stop"); 
         debug_assert!(
             node.kind == SyntaxKind::EmptyStatement,
             "Snippet tab stops can only be emitted on empty statements"

@@ -20,7 +20,7 @@ impl Program {
         changed_file_path: &str,
         new_host: Arc<dyn crate::compiler::CompilerHost>,
         create_checker_pool: Option<crate::compiler::CreateCheckerPoolFn>,
-    ) -> (Option<Arc<Program>>, Option<Arc<SourceFile>>, bool) {
+    ) -> (Option<Arc<Program>>, Option<Arc<SourceFile>>, bool) { ::tsox_core::fntrace::enter("reuse_program"); 
         let mut new_opts = self.opts.clone();
         new_opts.host = new_host;
         if let Some(create_checker_pool) = create_checker_pool {
@@ -200,7 +200,7 @@ impl Program {
 pub fn equal_module_specifiers(
     n1: &Arc<tsox_frontend::ast::Node>,
     n2: &Arc<tsox_frontend::ast::Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("equal_module_specifiers"); 
     n1.kind == n2.kind
         && (!tsox_frontend::ast::is_string_literal(n1) || n1.text() == n2.text())
 }
@@ -208,11 +208,11 @@ pub fn equal_module_specifiers(
 pub fn equal_module_augmentation_names(
     n1: &Arc<tsox_frontend::ast::Node>,
     n2: &Arc<tsox_frontend::ast::Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("equal_module_augmentation_names"); 
     n1.kind == n2.kind && n1.text() == n2.text()
 }
 
-pub fn equal_file_references(f1: &FileReference, f2: &FileReference) -> bool {
+pub fn equal_file_references(f1: &FileReference, f2: &FileReference) -> bool { ::tsox_core::fntrace::enter("equal_file_references"); 
     f1.file_name == f2.file_name
         && f1.resolution_mode == f2.resolution_mode
         && f1.preserve == f2.preserve
@@ -221,7 +221,7 @@ pub fn equal_file_references(f1: &FileReference, f2: &FileReference) -> bool {
 pub fn equal_check_js_directives(
     d1: &Option<CheckJsDirective>,
     d2: &Option<CheckJsDirective>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("equal_check_js_directives"); 
     match (d1, d2) {
         (None, None) => true,
         (Some(d1), Some(d2)) => d1.enabled == d2.enabled,
@@ -229,7 +229,7 @@ pub fn equal_check_js_directives(
     }
 }
 
-fn zip_all_eq<T, F: Fn(&T, &T) -> bool>(a: &[T], b: &[T], eq: F) -> bool {
+fn zip_all_eq<T, F: Fn(&T, &T) -> bool>(a: &[T], b: &[T], eq: F) -> bool { ::tsox_core::fntrace::enter("zip_all_eq"); 
     a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| eq(x, y))
 }
 

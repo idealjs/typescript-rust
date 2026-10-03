@@ -15,7 +15,7 @@ impl Checker {
         targets: &[Arc<Type>],
         variances: &[VarianceFlags],
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("type_arguments_related_to"); 
         if sources.len() != targets.len() && relation == RelationKind::Identity {
             return Ternary::False;
         }
@@ -100,7 +100,7 @@ impl Checker {
         &mut self,
         source_params: &[Arc<Type>],
         target_params: &[Arc<Type>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("compare_type_parameters_identical"); 
         if source_params.len() != target_params.len() {
             return false;
         }
@@ -127,7 +127,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> Option<Ternary> {
+    ) -> Option<Ternary> { ::tsox_core::fntrace::enter("generic_type_reference_related_to"); 
         if !source.flags.contains(TypeFlags::Object) || !target.flags.contains(TypeFlags::Object) {
             return None;
         }
@@ -241,7 +241,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         symbol: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_class_ctor_vs_instance_pair"); 
         if source.object_flags.contains(ObjectFlags::Reference)
             && target.object_flags.contains(ObjectFlags::Reference)
         {
@@ -251,7 +251,7 @@ impl Checker {
         Arc::ptr_eq(&declared, source) != Arc::ptr_eq(&declared, target)
     }
 
-    pub fn bare_generic_type_parameters(&mut self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+    pub fn bare_generic_type_parameters(&mut self, t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("bare_generic_type_parameters"); 
         let Some(symbol) = t.symbol.as_ref() else {
             return Vec::new();
         };
@@ -264,7 +264,7 @@ impl Checker {
         self.declared_type_parameter_types(symbol)
     }
 
-    pub fn get_variances(&mut self, target: &Arc<Type>) -> Vec<VarianceFlags> {
+    pub fn get_variances(&mut self, target: &Arc<Type>) -> Vec<VarianceFlags> { ::tsox_core::fntrace::enter("get_variances"); 
         let Some(symbol) = target.symbol.clone() else {
             return Vec::new();
         };
@@ -272,7 +272,7 @@ impl Checker {
         self.get_variances_worker(&symbol, &type_parameters)
     }
 
-    pub fn measure_variances_from_symbol(&mut self, t: &Arc<Type>) -> Option<Vec<VarianceFlags>> {
+    pub fn measure_variances_from_symbol(&mut self, t: &Arc<Type>) -> Option<Vec<VarianceFlags>> { ::tsox_core::fntrace::enter("measure_variances_from_symbol"); 
         let symbol = t.symbol.as_ref()?;
         if !symbol.flags.intersects(
             tsox_frontend::ast::SymbolFlags::Interface
@@ -287,14 +287,14 @@ impl Checker {
         Some(self.get_variances_worker(symbol, &type_parameters))
     }
 
-    pub fn is_marker_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_marker_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_marker_type"); 
         self.marker_types.contains(&t.id)
     }
 
     /// Go isGenericMappedType（checker.go:25259）：mapped 且惰性约束解析后
     /// 是泛型索引（nameType/as 子句路径不在本域）。实例化壳经
     /// target+mapper 链取约束
-    pub fn is_generic_mapped_type_relater(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_mapped_type_relater(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_mapped_type_relater"); 
         t.object_flags.contains(ObjectFlags::Mapped)
             && self
                 .get_constraint_type_from_mapped_type(t)
@@ -309,7 +309,7 @@ impl Checker {
         targets: &[Arc<Type>],
         variances: &[VarianceFlags],
         relation: RelationKind,
-    ) -> Option<bool> {
+    ) -> Option<bool> { ::tsox_core::fntrace::enter("relate_alias_variances"); 
         let chain_len = self.relater_error_chain.len();
         if !self
             .type_arguments_related_to(sources, targets, variances, relation)
@@ -344,14 +344,14 @@ impl Checker {
         None
     }
 
-    pub fn is_empty_array_literal_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_empty_array_literal_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_empty_array_literal_type"); 
         self.is_array_type(t)
             && self
                 .get_element_type_of_array_type(t)
                 .is_some_and(|element_type| self.is_empty_literal_type(&element_type))
     }
 
-    fn take_variance_chain(&mut self, chain_len: usize) -> (Vec<RelaterChainEntry>, bool) {
+    fn take_variance_chain(&mut self, chain_len: usize) -> (Vec<RelaterChainEntry>, bool) { ::tsox_core::fntrace::enter("take_variance_chain"); 
         if self.relater_error_chain.len() >= chain_len {
             (self.relater_error_chain.split_off(chain_len), true)
         } else {
@@ -364,7 +364,7 @@ impl Checker {
         chain_len: usize,
         variance_chain: Vec<RelaterChainEntry>,
         prefix_kept: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("restore_variance_chain"); 
         if prefix_kept {
             let keep = chain_len.min(self.relater_error_chain.len());
             self.relater_error_chain.truncate(keep);

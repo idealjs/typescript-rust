@@ -3,7 +3,7 @@
 use crate::checker::services::*;
 
 impl Checker {
-    pub fn is_lib_symbol_for_hover_verbosity(&self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_lib_symbol_for_hover_verbosity(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_lib_symbol_for_hover_verbosity"); 
         for decl in &symbol.declarations {
             if let Some(sf) = self.get_source_file_of_node(decl) {
                 if self.program.is_source_file_default_library(&sf.file_name) {
@@ -14,7 +14,7 @@ impl Checker {
         false
     }
 
-    pub fn is_lib_type_for_hover_verbosity(&self, t: &Arc<Type>) -> bool {
+    pub fn is_lib_type_for_hover_verbosity(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_lib_type_for_hover_verbosity"); 
         let symbol = if t.object_flags.contains(ObjectFlags::Reference) {
             t.target().and_then(|target| target.symbol.clone())
         } else {
@@ -32,18 +32,18 @@ impl Checker {
         &self,
         module_symbol: &Arc<Symbol>,
         _dont_resolve_alias: bool,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_external_module_symbol"); 
         if let Some(export_equals) = module_symbol.exports.get("export=") {
             return Arc::clone(export_equals);
         }
         Arc::clone(module_symbol)
     }
 
-    pub fn get_members_of_symbol(&self, symbol: &Arc<Symbol>) -> SymbolTable {
+    pub fn get_members_of_symbol(&self, symbol: &Arc<Symbol>) -> SymbolTable { ::tsox_core::fntrace::enter("get_members_of_symbol"); 
         symbol.members.clone()
     }
 
-    pub fn remove_optional_type_marker(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn remove_optional_type_marker(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_optional_type_marker"); 
         Arc::clone(t)
     }
 
@@ -51,7 +51,7 @@ impl Checker {
         &self,
         t: &Arc<Type>,
         _index_kind: IndexKind,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_index_type_of_type"); 
         if let Some(structured) = t.as_structured() {
             for info in &structured.index_infos {
                 if let Some(ref key_type) = info.key_type {
@@ -68,7 +68,7 @@ impl Checker {
         None
     }
 
-    pub fn get_apparent_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_apparent_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_apparent_type"); 
         let original_type = Arc::clone(t);
         let mut t = Arc::clone(t);
         if t.flags.intersects(TYPE_FLAGS_INSTANTIABLE) {
@@ -112,24 +112,24 @@ impl Checker {
         t
     }
 
-    pub fn get_reduced_apparent_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_reduced_apparent_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_reduced_apparent_type"); 
         let reduced = self.get_reduced_type(t);
         let apparent = self.get_apparent_type(&reduced);
         self.get_reduced_type(&apparent)
     }
 
-    pub fn resolve_structured_type_members(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn resolve_structured_type_members(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_structured_type_members"); 
         Arc::clone(t)
     }
 
-    pub fn is_named_member(&self, _symbol: &Arc<Symbol>, _name: &str) -> bool {
+    pub fn is_named_member(&self, _symbol: &Arc<Symbol>, _name: &str) -> bool { ::tsox_core::fntrace::enter("is_named_member"); 
         !is_reserved_member_name(_name)
     }
 
     pub fn get_named_members(
         &self,
         props_by_name: &std::collections::HashMap<String, Arc<Symbol>>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_named_members"); 
         props_by_name
             .values()
             .filter(|s| !is_reserved_member_name(&s.name))
@@ -144,16 +144,16 @@ impl Checker {
         _is_write: bool,
         _t: &Arc<Type>,
         _property: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_accessible"); 
         true
     }
 
-    pub(crate) fn get_widened_type_of_expression(&mut self, expr: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_widened_type_of_expression(&mut self, expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_type_of_expression"); 
         let t = self.get_type_of_node(expr);
         self.get_widened_type(&t)
     }
 
-    pub fn get_type_of_property_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
+    pub fn get_type_of_property_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_of_type"); 
         if let Some(prop) = self.get_property_of_type(t, name) {
             return Some(self.get_type_of_symbol(&prop));
         }
@@ -163,7 +163,7 @@ impl Checker {
     pub fn get_literal_type_from_property_name(
         &mut self,
         property_name: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_literal_type_from_property_name"); 
         match property_name.kind {
             SyntaxKind::PrivateIdentifier => Some(self.never_type()),
             SyntaxKind::NumericLiteral => {
@@ -197,7 +197,7 @@ impl Checker {
         }
     }
 
-    pub fn is_this_type_parameter(&self, t: &Arc<Type>) -> bool {
+    pub fn is_this_type_parameter(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_this_type_parameter"); 
         if !t.flags.contains(TypeFlags::TypeParameter) {
             return false;
         }
@@ -215,7 +215,7 @@ impl Checker {
         _length: Option<usize>,
         first_spread_index: i32,
         _last_spread_index: i32,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_element_expression"); 
         let constituents: Vec<Arc<Type>> = if let crate::checker::types::TypeData::Union(u) =
             &contextual_type.data
         {
@@ -243,7 +243,7 @@ impl Checker {
         t: &Arc<Type>,
         element_index: usize,
         first_spread_index: i32,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("element_contextual_constituent"); 
         if let crate::checker::types::TypeData::Tuple(tuple) = &t.data {
             if (first_spread_index < 0 || (element_index as i32) < first_spread_index)
                 && element_index < tuple.fixed_length
@@ -285,7 +285,7 @@ impl Checker {
         )
     }
 
-    pub(crate) fn remove_missing_type(&mut self, t: Arc<Type>, is_optional: bool) -> Arc<Type> {
+    pub(crate) fn remove_missing_type(&mut self, t: Arc<Type>, is_optional: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_missing_type"); 
         if !is_optional {
             return t;
         }
@@ -311,12 +311,12 @@ impl Checker {
         t
     }
 
-    pub(crate) fn global_function_type_of(&mut self, name: &str) -> Option<Arc<Type>> {
+    pub(crate) fn global_function_type_of(&mut self, name: &str) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("global_function_type_of"); 
         let sym = self.globals.get(name).cloned()?;
         Some(self.get_declared_type_of_symbol(&sym))
     }
 
-    pub(crate) fn global_callable_function_type(&mut self) -> Option<Arc<Type>> {
+    pub(crate) fn global_callable_function_type(&mut self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("global_callable_function_type"); 
         if self.strict_bind_call_apply {
             self.global_function_type_of("CallableFunction")
         } else {
@@ -324,7 +324,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn global_newable_function_type(&mut self) -> Option<Arc<Type>> {
+    pub(crate) fn global_newable_function_type(&mut self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("global_newable_function_type"); 
         if self.strict_bind_call_apply {
             self.global_function_type_of("NewableFunction")
         } else {
@@ -336,11 +336,11 @@ impl Checker {
         &self,
         _name: &str,
         _location: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_jsx_type_symbol"); 
         None
     }
 
-    pub fn get_source_file_of_node(&self, node: &Arc<Node>) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file_of_node(&self, node: &Arc<Node>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_of_node"); 
         let mut current = Arc::clone(node);
         loop {
             if current.kind == SyntaxKind::SourceFile {
@@ -361,7 +361,7 @@ pub(crate) fn get_possible_symbol_reference_nodes(
     source_file: &Arc<SourceFile>,
     symbol_name: &str,
     container: Option<&Arc<Node>>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_possible_symbol_reference_nodes"); 
     let positions = get_possible_symbol_reference_positions(source_file, symbol_name, container);
     let mut result = Vec::new();
     for pos in positions {
@@ -376,7 +376,7 @@ pub(crate) fn get_possible_symbol_reference_positions(
     source_file: &Arc<SourceFile>,
     symbol_name: &str,
     container: Option<&Arc<Node>>,
-) -> Vec<usize> {
+) -> Vec<usize> { ::tsox_core::fntrace::enter("get_possible_symbol_reference_positions"); 
     let mut positions = Vec::new();
 
     if symbol_name.is_empty() {
@@ -416,19 +416,19 @@ pub(crate) fn get_possible_symbol_reference_positions(
     positions
 }
 
-pub(crate) fn is_identifier_part_byte(b: u8) -> bool {
+pub(crate) fn is_identifier_part_byte(b: u8) -> bool { ::tsox_core::fntrace::enter("is_identifier_part_byte"); 
     b.is_ascii_alphanumeric() || b == b'$' || b == b'_'
 }
 
 pub(crate) fn find_identifier_at_pos(
     source_file: &Arc<SourceFile>,
     pos: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_identifier_at_pos"); 
     let file_node = &source_file.node;
     find_node_at_pos(file_node, pos)
 }
 
-pub(crate) fn find_node_at_pos(node: &Arc<Node>, pos: usize) -> Option<Arc<Node>> {
+pub(crate) fn find_node_at_pos(node: &Arc<Node>, pos: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_node_at_pos"); 
     if node.pos() <= pos && pos < node.end() {
         if node.kind == SyntaxKind::Identifier && node.pos() == pos {
             return Some(Arc::clone(node));
@@ -449,7 +449,7 @@ pub(crate) fn find_node_at_pos(node: &Arc<Node>, pos: usize) -> Option<Arc<Node>
     None
 }
 
-pub(crate) fn is_array_literal_or_object_literal_destructuring_pattern(node: &Arc<Node>) -> bool {
+pub(crate) fn is_array_literal_or_object_literal_destructuring_pattern(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_array_literal_or_object_literal_destructuring_pattern"); 
     matches!(
         node.kind,
         SyntaxKind::ArrayLiteralExpression | SyntaxKind::ObjectLiteralExpression

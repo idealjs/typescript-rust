@@ -10,7 +10,7 @@ use super::m5a_4::{Colors, create_colors};
 use super::m5a_6::{generate_option_output, get_display_name_text_of_option};
 use crate::execute::System;
 
-pub fn print_version(sys: &dyn System, locale: &Locale) {
+pub fn print_version(sys: &dyn System, locale: &Locale) { ::tsox_core::fntrace::enter("print_version"); 
     let mut writer = sys.writer();
     let _ = writeln!(
         writer,
@@ -19,7 +19,7 @@ pub fn print_version(sys: &dyn System, locale: &Locale) {
     );
 }
 
-pub fn get_options_for_help(all: bool) -> Vec<&'static OptionDecl> {
+pub fn get_options_for_help(all: bool) -> Vec<&'static OptionDecl> { ::tsox_core::fntrace::enter("get_options_for_help"); 
     let mut opts: Vec<&'static OptionDecl> = OPTIONS.iter().chain(BUILD_OPTIONS.iter()).collect();
     if all {
         opts.sort_by_key(|o| o.name.to_lowercase());
@@ -29,7 +29,7 @@ pub fn get_options_for_help(all: bool) -> Vec<&'static OptionDecl> {
     }
 }
 
-pub fn get_header(sys: &dyn System, colors: &Colors, message: &str) -> Vec<String> {
+pub fn get_header(sys: &dyn System, colors: &Colors, message: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_header"); 
     let mut header: Vec<String> = Vec::with_capacity(3);
     let terminal_width = sys.width_of_terminal();
     const TS_ICON: &str = "     ";
@@ -55,7 +55,7 @@ pub fn get_header(sys: &dyn System, colors: &Colors, message: &str) -> Vec<Strin
     header
 }
 
-pub fn print_easy_help(sys: &dyn System, locale: &Locale, simple_options: &[&OptionDecl]) {
+pub fn print_easy_help(sys: &dyn System, locale: &Locale, simple_options: &[&OptionDecl]) { ::tsox_core::fntrace::enter("print_easy_help"); 
     let colors = create_colors(sys);
     let mut output: Vec<String> = Vec::new();
 
@@ -127,7 +127,7 @@ pub fn print_easy_help(sys: &dyn System, locale: &Locale, simple_options: &[&Opt
     }
 }
 
-pub fn print_all_help(sys: &dyn System, locale: &Locale, options: &[&OptionDecl]) {
+pub fn print_all_help(sys: &dyn System, locale: &Locale, options: &[&OptionDecl]) { ::tsox_core::fntrace::enter("print_all_help"); 
     let mut output: Vec<String> = Vec::new();
     let msg = format!(
         "{} - {}",
@@ -167,7 +167,7 @@ pub fn print_all_help(sys: &dyn System, locale: &Locale, options: &[&OptionDecl]
     }
 }
 
-pub fn print_build_help(sys: &dyn System, locale: &Locale, build_options: &[&OptionDecl]) {
+pub fn print_build_help(sys: &dyn System, locale: &Locale, build_options: &[&OptionDecl]) { ::tsox_core::fntrace::enter("print_build_help"); 
     let mut output: Vec<String> = Vec::new();
     let msg = format!(
         "{} - {}",
@@ -197,7 +197,7 @@ pub fn generate_section_options_output(
     sub_category: bool,
     before_options_description: Option<&str>,
     after_options_description: Option<&str>,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("generate_section_options_output"); 
     let mut output = vec![
         create_colors(sys).bold(section_name),
         "\n".to_string(),
@@ -230,7 +230,7 @@ pub fn generate_group_option_output(
     sys: &dyn System,
     locale: &Locale,
     options_list: &[&OptionDecl],
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("generate_group_option_output"); 
     let max_length = options_list
         .iter()
         .map(|o| get_display_name_text_of_option(o).len())

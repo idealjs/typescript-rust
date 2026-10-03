@@ -3,7 +3,7 @@
 use crate::checker::emitresolver::*;
 
 impl Checker {
-    pub(crate) fn resolve_name_in_file_scope(&self, name: &str) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_name_in_file_scope(&self, name: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_name_in_file_scope"); 
         let symbol_map = self.program.symbol_map();
         let file_id = self.current_file_id;
         if let Some(file_sym) = symbol_map.symbols.get(&file_id) {
@@ -27,7 +27,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn is_common_js_module_exports(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_common_js_module_exports(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_common_js_module_exports"); 
         if node.kind != SyntaxKind::BinaryExpression {
             return false;
         }
@@ -47,7 +47,7 @@ impl Checker {
         left_is_module_exports || left_is_exports_dot
     }
 
-    pub(crate) fn export_specifier_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn export_specifier_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("export_specifier_name"); 
         let NodeData::ExportSpecifier(d) = &node.data else {
             return None;
         };
@@ -58,7 +58,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn first_identifier_of(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn first_identifier_of(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("first_identifier_of"); 
         let mut current = Arc::clone(node);
         loop {
             match &current.data {
@@ -74,7 +74,7 @@ impl Checker {
         &mut self,
         entity_name: &Arc<Node>,
         enclosing_declaration: &Arc<Node>,
-    ) -> SymbolAccessibilityResult {
+    ) -> SymbolAccessibilityResult { ::tsox_core::fntrace::enter("is_entity_name_visible"); 
         let meaning = Self::meaning_of_entity_name_reference(entity_name);
         let first_identifier =
             Self::first_identifier_of(entity_name).unwrap_or_else(|| Arc::clone(entity_name));
@@ -120,7 +120,7 @@ impl Checker {
         enclosing_declaration: &Arc<Node>,
         name: &str,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_name_in_enclosure"); 
         let symbol_map = self.program.symbol_map();
 
         let mut current: Option<Arc<Node>> = Some(Arc::clone(enclosing_declaration));
@@ -152,7 +152,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn meaning_of_entity_name_reference(entity_name: &Arc<Node>) -> SymbolFlags {
+    pub(crate) fn meaning_of_entity_name_reference(entity_name: &Arc<Node>) -> SymbolFlags { ::tsox_core::fntrace::enter("meaning_of_entity_name_reference"); 
         let parent = match entity_name.parent() {
             Some(p) => p,
             None => return SymbolFlags::TYPE,
@@ -188,7 +188,7 @@ impl Checker {
     pub fn has_visible_declarations(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<SymbolAccessibilityResult> {
+    ) -> Option<SymbolAccessibilityResult> { ::tsox_core::fntrace::enter("has_visible_declarations"); 
         let declarations = symbol.declarations.clone();
         for declaration in declarations.iter() {
             if declaration.kind == SyntaxKind::Identifier {
@@ -253,7 +253,7 @@ impl Checker {
         })
     }
 
-    pub fn get_enum_member_value_string(&mut self, node: &Arc<Node>) -> Option<String> {
+    pub fn get_enum_member_value_string(&mut self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("get_enum_member_value_string"); 
         let NodeData::EnumMember(data) = &node.data else {
             return None;
         };

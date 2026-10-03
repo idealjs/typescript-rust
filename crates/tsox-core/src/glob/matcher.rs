@@ -1,6 +1,6 @@
 use super::element::Element;
 
-pub(super) fn match_elements(elems: &[Element], input: &str) -> bool {
+pub(super) fn match_elements(elems: &[Element], input: &str) -> bool { crate::fntrace::enter("match_elements"); 
     let mut elems = elems.to_vec();
     let mut input = input.to_string();
 
@@ -104,7 +104,7 @@ pub(super) fn match_elements(elems: &[Element], input: &str) -> bool {
     input.is_empty()
 }
 
-fn split(input: &str) -> (&str, &str) {
+fn split(input: &str) -> (&str, &str) { crate::fntrace::enter("split"); 
     match input.find('/') {
         None => (input, ""),
         Some(i) => {

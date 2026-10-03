@@ -9,7 +9,7 @@ impl Checker {
         target: &Arc<Signature>,
         check_mode: SignatureCheckMode,
         relation: RelationKind,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_signatures_related"); 
         if Arc::ptr_eq(source, target) {
             return Ternary::True;
         }

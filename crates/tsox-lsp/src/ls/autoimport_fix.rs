@@ -22,7 +22,7 @@ pub struct NewImportBinding {
 }
 
 impl Default for NewImportBinding {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         NewImportBinding {
             kind: ImportKind::Named,
             property_name: String::new(),
@@ -55,7 +55,7 @@ impl Fix {
         _compiler_options: &CompilerOptions,
         _format_options: &FormatCodeSettings,
         _preferences: &UserPreferences,
-    ) -> (Vec<TextEdit>, String) {
+    ) -> (Vec<TextEdit>, String) { ::tsox_core::fntrace::enter("edits"); 
         todo!("Fix::edits requires change.Tracker and diagnostics infrastructure")
     }
 }
@@ -68,12 +68,12 @@ pub enum FileSyntaxKind {
 }
 
 impl Default for FileSyntaxKind {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         FileSyntaxKind::Ambiguous
     }
 }
 
-pub fn detect_syntax(_file: &SourceFile, _options: &CompilerOptions) -> FileSyntaxKind {
+pub fn detect_syntax(_file: &SourceFile, _options: &CompilerOptions) -> FileSyntaxKind { ::tsox_core::fntrace::enter("detect_syntax"); 
     todo!("detect_syntax requires file.ExternalModuleIndicator and file.CommonJSModuleIndicator")
 }
 
@@ -81,7 +81,7 @@ pub fn get_import_kind(
     _importing_file: &SourceFile,
     _export: &Export,
     _program: &tsox_compile::compiler::Program,
-) -> ImportKind {
+) -> ImportKind { ::tsox_core::fntrace::enter("get_import_kind"); 
     todo!("get_import_kind requires program.Options() and program.GetEmitModuleFormatOfFile")
 }
 
@@ -89,7 +89,7 @@ pub fn get_add_as_type_only(
     is_valid_type_only_use_site: bool,
     export_: &Export,
     _compiler_options: &CompilerOptions,
-) -> AddAsTypeOnly {
+) -> AddAsTypeOnly { ::tsox_core::fntrace::enter("get_add_as_type_only"); 
     if !is_valid_type_only_use_site {
         return AddAsTypeOnly::NotAllowed;
     }
@@ -98,11 +98,11 @@ pub fn get_add_as_type_only(
     AddAsTypeOnly::Allowed
 }
 
-pub fn get_namespace_like_import_text(_declaration: &Node) -> String {
+pub fn get_namespace_like_import_text(_declaration: &Node) -> String { ::tsox_core::fntrace::enter("get_namespace_like_import_text"); 
     todo!("get_namespace_like_import_text requires ast node inspection")
 }
 
-pub fn is_fix_possibly_re_exporting_importing_file(fix: &Fix, importing_file_name: &str) -> bool {
+pub fn is_fix_possibly_re_exporting_importing_file(fix: &Fix, importing_file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_fix_possibly_re_exporting_importing_file"); 
     if fix.is_re_export && is_index_file_name(&fix.module_file_name) {
         let re_export_dir = tsox_core::tspath::get_directory_path(&fix.module_file_name);
         importing_file_name.starts_with(&re_export_dir)
@@ -111,7 +111,7 @@ pub fn is_fix_possibly_re_exporting_importing_file(fix: &Fix, importing_file_nam
     }
 }
 
-pub fn is_index_file_name(file_name: &str) -> bool {
+pub fn is_index_file_name(file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_index_file_name"); 
     let last_slash = match file_name.rfind('/') {
         Some(i) => i,
         None => return false,
@@ -126,18 +126,18 @@ pub fn is_index_file_name(file_name: &str) -> bool {
     )
 }
 
-pub fn needs_type_only(add_as_type_only: AddAsTypeOnly) -> bool {
+pub fn needs_type_only(add_as_type_only: AddAsTypeOnly) -> bool { ::tsox_core::fntrace::enter("needs_type_only"); 
     add_as_type_only == AddAsTypeOnly::Required
 }
 
 pub fn should_use_type_only(
     add_as_type_only: AddAsTypeOnly,
     _preferences: &UserPreferences,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_use_type_only"); 
     needs_type_only(add_as_type_only)
 }
 
-pub fn compare_fix_kinds(a: AutoImportFixKind, b: AutoImportFixKind) -> std::cmp::Ordering {
+pub fn compare_fix_kinds(a: AutoImportFixKind, b: AutoImportFixKind) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_fix_kinds"); 
     (a as u8).cmp(&(b as u8))
 }
 
@@ -145,6 +145,6 @@ pub fn compare_module_specifier_relativity(
     _a: &Fix,
     _b: &Fix,
     _preferences: &tsox_tsoptions::modulespecifiers::UserPreferences,
-) -> std::cmp::Ordering {
+) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_module_specifier_relativity"); 
     std::cmp::Ordering::Equal
 }

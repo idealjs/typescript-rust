@@ -18,11 +18,11 @@ pub fn compute_fn<T, F>(f: F) -> impl Fn(&CompilerOptions) -> Value
 where
     F: Fn(&CompilerOptions) -> T,
     T: serde::Serialize,
-{
+{ ::tsox_core::fntrace::enter("compute_fn"); 
     move |options| serde_json::to_value(f(options)).unwrap_or(Value::Null)
 }
 
-pub fn filter_same_as_default_include(specs: &[String]) -> Vec<String> {
+pub fn filter_same_as_default_include(specs: &[String]) -> Vec<String> { ::tsox_core::fntrace::enter("filter_same_as_default_include"); 
     let mut result = Vec::new();
     for spec in specs {
         let without_prefix = spec
@@ -37,12 +37,12 @@ pub fn filter_same_as_default_include(specs: &[String]) -> Vec<String> {
     result
 }
 
-pub fn get_name_of_compiler_option_value(value: &Value, enum_map: &[&str]) -> String {
+pub fn get_name_of_compiler_option_value(value: &Value, enum_map: &[&str]) -> String { ::tsox_core::fntrace::enter("get_name_of_compiler_option_value"); 
     let _ = enum_map;
     value.as_str().unwrap_or("").to_string()
 }
 
-pub fn serialize_enum_value(value: &Value, enum_map: &[&str]) -> String {
+pub fn serialize_enum_value(value: &Value, enum_map: &[&str]) -> String { ::tsox_core::fntrace::enter("serialize_enum_value"); 
     if let Some(name) = value.as_str() {
         return name.to_string();
     }
@@ -54,14 +54,14 @@ pub fn serialize_enum_value(value: &Value, enum_map: &[&str]) -> String {
     String::new()
 }
 
-pub fn any_dependency_provided(dependencies: &[&str], provided: &HashMap<String, bool>) -> bool {
+pub fn any_dependency_provided(dependencies: &[&str], provided: &HashMap<String, bool>) -> bool { ::tsox_core::fntrace::enter("any_dependency_provided"); 
     dependencies.iter().any(|d| provided.get(*d).copied().unwrap_or(false))
 }
 
 pub fn serialize_implied_option_value(
     option_decl: &OptionDecl,
     value: Value,
-) -> Value {
+) -> Value { ::tsox_core::fntrace::enter("serialize_implied_option_value"); 
     match option_decl.kind {
         OptionKind::Enum => match value.as_str() {
             Some(name) => Value::String(name.to_string()),
@@ -79,7 +79,7 @@ pub fn add_implied_options(
     config_file_path: &str,
     compare_paths_options: (&str, bool),
     preserve_default_value_map: &HashMap<String, bool>,
-) {
+) { ::tsox_core::fntrace::enter("add_implied_options"); 
     let _ = compare_paths_options;
     for (name, value) in value_table {
         let decl = match option_decls_by_json_name.get(name) {
@@ -109,7 +109,7 @@ pub fn serialize_compiler_options(
     value_table: &HashMap<String, Value>,
     config_file_path: &str,
     compare_paths_options: (&str, bool),
-) -> serde_json::Map<String, Value> {
+) -> serde_json::Map<String, Value> { ::tsox_core::fntrace::enter("serialize_compiler_options"); 
     let _ = compare_paths_options;
     let mut result = serde_json::Map::new();
     for (name, value) in value_table {
@@ -130,7 +130,7 @@ pub struct CommandLineOptionNameMap {
 }
 
 impl CommandLineOptionNameMap {
-    pub fn from_decls(decls: &'static [OptionDecl]) -> Self {
+    pub fn from_decls(decls: &'static [OptionDecl]) -> Self { ::tsox_core::fntrace::enter("from_decls"); 
         let mut map: HashMap<String, &'static OptionDecl> =
             HashMap::with_capacity(decls.len() * 2);
         for decl in decls {
@@ -140,31 +140,31 @@ impl CommandLineOptionNameMap {
         CommandLineOptionNameMap { map }
     }
 
-    pub fn get(&self, name: &str) -> Option<&'static OptionDecl> {
+    pub fn get(&self, name: &str) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("get"); 
         self.map.get(name).copied()
     }
 
-    pub fn values(&self) -> impl Iterator<Item = &'static OptionDecl> + '_ {
+    pub fn values(&self) -> impl Iterator<Item = &'static OptionDecl> + '_ { ::tsox_core::fntrace::enter("values"); 
         self.map.values().copied()
     }
 }
 
-pub fn command_line_options_to_map(options: &'static [OptionDecl]) -> CommandLineOptionNameMap {
+pub fn command_line_options_to_map(options: &'static [OptionDecl]) -> CommandLineOptionNameMap { ::tsox_core::fntrace::enter("command_line_options_to_map"); 
     CommandLineOptionNameMap::from_decls(options)
 }
 
-pub fn can_json_report_no_input_files(raw_config: &serde_json::Map<String, Value>) -> bool {
+pub fn can_json_report_no_input_files(raw_config: &serde_json::Map<String, Value>) -> bool { ::tsox_core::fntrace::enter("can_json_report_no_input_files"); 
     ["files", "include", "exclude"]
         .iter()
         .any(|key| raw_config.contains_key(*key))
 }
 
-pub fn directory_of_combined_path(file_name: &str, base_path: &str) -> String {
+pub fn directory_of_combined_path(file_name: &str, base_path: &str) -> String { ::tsox_core::fntrace::enter("directory_of_combined_path"); 
     let combined = tsox_core::tspath::combine_paths(file_name, &[base_path]);
     tsox_core::tspath::get_directory_path(&combined)
 }
 
-pub fn get_default_compiler_options(config_file_name: &str) -> Option<CompilerOptions> {
+pub fn get_default_compiler_options(config_file_name: &str) -> Option<CompilerOptions> { ::tsox_core::fntrace::enter("get_default_compiler_options"); 
     if tsox_core::tspath::file_extension_is(config_file_name, tsox_core::tspath::EXTENSION_JSON) {
         let mut options = CompilerOptions::default();
         options.config_file_path = config_file_name.to_string();
@@ -173,7 +173,7 @@ pub fn get_default_compiler_options(config_file_name: &str) -> Option<CompilerOp
     None
 }
 
-pub fn get_default_type_acquisition(config_file_name: &str) -> Option<tsox_core::core::mig::m3k::TypeAcquisition> {
+pub fn get_default_type_acquisition(config_file_name: &str) -> Option<tsox_core::core::mig::m3k::TypeAcquisition> { ::tsox_core::fntrace::enter("get_default_type_acquisition"); 
     if tsox_core::tspath::file_extension_is(config_file_name, tsox_core::tspath::EXTENSION_JSON) {
         let mut type_acquisition = tsox_core::core::mig::m3k::TypeAcquisition::default();
         type_acquisition.enable = Tristate::False;
@@ -185,7 +185,7 @@ pub fn get_default_type_acquisition(config_file_name: &str) -> Option<tsox_core:
 pub fn get_supported_extensions(
     compiler_options: &CompilerOptions,
     extra_extensions: &[&str],
-) -> Vec<Vec<String>> {
+) -> Vec<Vec<String>> { ::tsox_core::fntrace::enter("get_supported_extensions"); 
     let mut extensions: Vec<Vec<String>> = vec![
         [".ts", ".tsx", ".d.ts"].iter().map(|s| s.to_string()).collect(),
         [".js", ".jsx"].iter().map(|s| s.to_string()).collect(),
@@ -203,7 +203,7 @@ pub fn get_supported_extensions(
 pub fn get_supported_extensions_with_json_if_resolve_json_module(
     compiler_options: &CompilerOptions,
     supported_extensions: &[Vec<String>],
-) -> Vec<Vec<String>> {
+) -> Vec<Vec<String>> { ::tsox_core::fntrace::enter("get_supported_extensions_with_json_if_resolve_json_module"); 
     let json_extension = vec![".json".to_string()];
     if compiler_options.resolve_json_module.is_true()
         && !supported_extensions.iter().any(|exts| exts == &json_extension)

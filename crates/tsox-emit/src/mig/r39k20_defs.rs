@@ -12,11 +12,11 @@ use tsox_frontend::ast::visitor::NodeVisitor;
 use crate::mig::m4k_2::Transformer;
 use crate::printer::NodeFactory;
 
-pub fn type_eraser_visit_entry(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+pub fn type_eraser_visit_entry(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("type_eraser_visit_entry"); 
     Some(node)
 }
 
-pub fn metadata_transformer_visit_entry(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+pub fn metadata_transformer_visit_entry(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("metadata_transformer_visit_entry"); 
     Some(node)
 }
 
@@ -26,7 +26,7 @@ pub trait R39K20NodeVisitorExt {
 }
 
 impl R39K20NodeVisitorExt for NodeVisitor {
-    fn visit_nodes(&mut self, nodes: Option<&Arc<NodeList>>) -> Option<NodeList> {
+    fn visit_nodes(&mut self, nodes: Option<&Arc<NodeList>>) -> Option<NodeList> { ::tsox_core::fntrace::enter("visit_nodes"); 
         nodes.map(|list| {
             let mut new_list = NodeList::new(list.nodes.clone());
             new_list.loc = list.loc;
@@ -34,7 +34,7 @@ impl R39K20NodeVisitorExt for NodeVisitor {
         })
     }
 
-    fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> Vec<Arc<Node>> {
+    fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("visit_slice"); 
         nodes.to_vec()
     }
 }
@@ -80,14 +80,14 @@ pub trait R39K20NodeFactoryExt {
 }
 
 impl R39K20NodeFactoryExt for NodeFactory<'_> {
-    fn new_decorator(&self, expression: Arc<Node>) -> Arc<Node> {
+    fn new_decorator(&self, expression: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_decorator"); 
         Arc::new(Node::new(
             SyntaxKind::Decorator,
             NodeData::Decorator(ndg::DecoratorData { expression }),
         ))
     }
 
-    fn new_metadata_helper(&self, metadata_key: &str, metadata_value: &Arc<Node>) -> Arc<Node> {
+    fn new_metadata_helper(&self, metadata_key: &str, metadata_value: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_metadata_helper"); 
         tsox_frontend::format::mig::m4o::new_node_factory(Default::default())
             .new_metadata_helper(metadata_key, metadata_value)
     }
@@ -97,12 +97,12 @@ impl R39K20NodeFactoryExt for NodeFactory<'_> {
         expression: &Arc<Node>,
         parameter_offset: usize,
         location: tsox_core::core::text::TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_param_helper"); 
         tsox_frontend::format::mig::m4o::new_node_factory(Default::default())
             .new_param_helper(expression, parameter_offset, location)
     }
 
-    fn new_generated_name_node(&self, node: &Arc<Node>) -> Arc<Node> {
+    fn new_generated_name_node(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_generated_name_node"); 
         let generated = self.new_generated_name_for_node(node);
         self.new_identifier(&generated.text)
     }
@@ -115,7 +115,7 @@ impl R39K20NodeFactoryExt for NodeFactory<'_> {
         postfix_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("r39k20_update_property_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::PropertyDeclaration,
             NodeData::PropertyDeclaration(ndg::PropertyDeclarationData {
@@ -140,7 +140,7 @@ impl R39K20NodeFactoryExt for NodeFactory<'_> {
         question_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("r39k20_update_parameter_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ndg::ParameterDeclarationData {
@@ -165,7 +165,7 @@ impl R39K20NodeFactoryExt for NodeFactory<'_> {
         question_dot_token: Option<Arc<Node>>,
         template: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("r39k20_update_tagged_template_expression"); 
         let mut updated = Node::new(
             SyntaxKind::TaggedTemplateExpression,
             NodeData::TaggedTemplateExpression(ndg::TaggedTemplateExpressionData {

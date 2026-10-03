@@ -11,7 +11,7 @@ use tsox_frontend::ast::visitor::NodeVisitor;
 pub fn convert_class_declaration_to_class_expression(
     emit_context: &EmitContext,
     node: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_class_declaration_to_class_expression"); 
     let data = node.as_class_declaration();
         let updated = emit_context.factory().new_class_expression(
             extract_modifiers(
@@ -38,7 +38,7 @@ pub fn create_not_null_condition(
     left: Arc<Node>,
     right: Arc<Node>,
     invert: bool,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_not_null_condition"); 
     let (token, op) = if invert {
         (SyntaxKind::EqualsEqualsEqualsToken, SyntaxKind::BarBarToken)
     } else {

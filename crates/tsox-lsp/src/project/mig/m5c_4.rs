@@ -52,11 +52,11 @@ pub struct SyncMapEntryShared<K: Clone + Eq + std::hash::Hash, V> {
 }
 
 impl<K: Clone + Eq + std::hash::Hash, V> SyncMapEntryShared<K, V> {
-    pub fn key(&self) -> &K {
+    pub fn key(&self) -> &K { ::tsox_core::fntrace::enter("key"); 
         &self.key
     }
 
-    pub fn value(&self) -> std::sync::RwLockReadGuard<'_, V> {
+    pub fn value(&self) -> std::sync::RwLockReadGuard<'_, V> { ::tsox_core::fntrace::enter("value"); 
         self.value.read().unwrap()
     }
 
@@ -64,7 +64,7 @@ impl<K: Clone + Eq + std::hash::Hash, V> SyncMapEntryShared<K, V> {
     where
         C: FnMut(&V) -> bool,
         A: FnMut(&mut V),
-    {
+    { ::tsox_core::fntrace::enter("change_if"); 
         let mut value = self.value.write().unwrap();
         if !cond(&value) {
             return false;
@@ -73,7 +73,7 @@ impl<K: Clone + Eq + std::hash::Hash, V> SyncMapEntryShared<K, V> {
         true
     }
 
-    pub fn change<A: FnMut(&mut V)>(&self, mut apply: A) {
+    pub fn change<A: FnMut(&mut V)>(&self, mut apply: A) { ::tsox_core::fntrace::enter("change"); 
         let mut value = self.value.write().unwrap();
         apply(&mut value);
     }
@@ -84,7 +84,7 @@ pub struct DirtySyncMap<K: Clone + Eq + std::hash::Hash, V> {
 }
 
 impl<K: Clone + Eq + std::hash::Hash, V> DirtySyncMap<K, V> {
-    pub fn new(base: HashMap<K, V>) -> Self {
+    pub fn new(base: HashMap<K, V>) -> Self { ::tsox_core::fntrace::enter("new"); 
         let mut entries = HashMap::new();
         for (key, value) in base {
             entries.insert(
@@ -100,11 +100,11 @@ impl<K: Clone + Eq + std::hash::Hash, V> DirtySyncMap<K, V> {
         }
     }
 
-    pub fn load(&self, key: &K) -> Option<Arc<SyncMapEntryShared<K, V>>> {
+    pub fn load(&self, key: &K) -> Option<Arc<SyncMapEntryShared<K, V>>> { ::tsox_core::fntrace::enter("load"); 
         self.entries.read().unwrap().get(key).cloned()
     }
 
-    pub fn load_or_store(&self, key: K, value: V) -> (Arc<SyncMapEntryShared<K, V>>, bool) {
+    pub fn load_or_store(&self, key: K, value: V) -> (Arc<SyncMapEntryShared<K, V>>, bool) { ::tsox_core::fntrace::enter("load_or_store"); 
         let mut entries = self.entries.write().unwrap();
         if let Some(existing) = entries.get(&key) {
             return (existing.clone(), true);
@@ -117,7 +117,7 @@ impl<K: Clone + Eq + std::hash::Hash, V> DirtySyncMap<K, V> {
         (entry, false)
     }
 
-    pub fn range(&self, mut f: impl FnMut(&Arc<SyncMapEntryShared<K, V>>) -> bool) {
+    pub fn range(&self, mut f: impl FnMut(&Arc<SyncMapEntryShared<K, V>>) -> bool) { ::tsox_core::fntrace::enter("range"); 
         for entry in self.entries.read().unwrap().values() {
             if !f(entry) {
                 break;
@@ -125,12 +125,12 @@ impl<K: Clone + Eq + std::hash::Hash, V> DirtySyncMap<K, V> {
         }
     }
 
-    pub fn delete(&self, key: &K) {
+    pub fn delete(&self, key: &K) { ::tsox_core::fntrace::enter("delete"); 
         self.entries.write().unwrap().remove(key);
     }
 }
 
-fn contains_path(parent: &str, target: &str, options: &ComparePathsOptions) -> bool {
+fn contains_path(parent: &str, target: &str, options: &ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("contains_path"); 
     let parent = combine_paths(&options.current_directory, &[parent]);
     let target = combine_paths(&options.current_directory, &[target]);
     if parent.is_empty() || target.is_empty() {
@@ -180,7 +180,7 @@ pub struct ConfigFileRegistryBuilderFull {
 pub type ConfigFileEntryShared = Arc<ConfigFileEntryFull>;
 pub type ConfigFileNamesShared = Arc<ConfigFileNamesFull>;
 
-fn convert_config_file_entry(entry: &ConfigFileEntry) -> ConfigFileEntryFull {
+fn convert_config_file_entry(entry: &ConfigFileEntry) -> ConfigFileEntryFull { ::tsox_core::fntrace::enter("convert_config_file_entry"); 
     ConfigFileEntryFull {
         file_name: entry.file_name.clone(),
         pending_reload: entry.pending_reload,
@@ -192,7 +192,7 @@ fn convert_config_file_entry(entry: &ConfigFileEntry) -> ConfigFileEntryFull {
     }
 }
 
-fn convert_config_file_names(names: &ConfigFileNames) -> ConfigFileNamesFull {
+fn convert_config_file_names(names: &ConfigFileNames) -> ConfigFileNamesFull { ::tsox_core::fntrace::enter("convert_config_file_names"); 
     ConfigFileNamesFull {
         nearest_config_file_name: names.nearest_config_file_name.clone(),
         ancestors: names.ancestors.clone(),
@@ -207,7 +207,7 @@ pub fn new_config_file_registry_builder(
     snapshot_id: u64,
     session_options: SessionOptions,
     custom_config_file_name: String,
-) -> ConfigFileRegistryBuilderFull {
+) -> ConfigFileRegistryBuilderFull { ::tsox_core::fntrace::enter("new_config_file_registry_builder"); 
     let open_files: HashSet<Path> = fs.overlays.keys().cloned().collect();
     let configs: HashMap<Path, ConfigFileEntryFull> = old_config_file_registry
         .configs
@@ -238,15 +238,15 @@ pub fn new_config_file_registry_builder(
 }
 
 impl ConfigFileRegistryBuilderFull {
-    pub fn fs_handle(&self) -> &dyn FS {
+    pub fn fs_handle(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs_handle"); 
         self.fs.as_ref()
     }
 
-    pub fn get_current_directory(&self) -> &str {
+    pub fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.session_options.current_directory
     }
 
-    pub fn parse_config_host(&self) -> ParseConfigHost {
+    pub fn parse_config_host(&self) -> ParseConfigHost { ::tsox_core::fntrace::enter("parse_config_host"); 
         ParseConfigHost {
             fs: self.fs.clone(),
             current_directory: self.session_options.current_directory.clone(),
@@ -259,7 +259,7 @@ impl ConfigFileRegistryBuilderFull {
         path: &Path,
         resolution_stack: Vec<Path>,
         host: &ParseConfigHost,
-    ) -> ExtendedConfigCacheEntry {
+    ) -> ExtendedConfigCacheEntry { ::tsox_core::fntrace::enter("get_extended_config"); 
         let content = self
             .fs
             .read_file(file_name)
@@ -299,7 +299,7 @@ impl ConfigFileRegistryBuilderFull {
             })
     }
 
-    pub fn content_mappers(&self) -> ConfiguredContentMappers {
+    pub fn content_mappers(&self) -> ConfiguredContentMappers { ::tsox_core::fntrace::enter("content_mappers"); 
         let _guard = self.content_mappers_mu.lock().unwrap();
         let mut cached = self.all_configured_content_mappers.lock().unwrap();
         if let Some(all) = cached.as_ref() {
@@ -318,7 +318,7 @@ impl ConfigFileRegistryBuilderFull {
         all
     }
 
-    pub fn invalidate_content_mappers(&self) {
+    pub fn invalidate_content_mappers(&self) { ::tsox_core::fntrace::enter("invalidate_content_mappers"); 
         let _guard = self.content_mappers_mu.lock().unwrap();
         *self.all_configured_content_mappers.lock().unwrap() = None;
     }
@@ -330,7 +330,7 @@ impl ConfigFileRegistryBuilderFull {
         file_path: &Path,
         load_kind: ProjectLoadKind,
         logger: &dyn Logger,
-    ) -> Option<ParsedCommandLine> {
+    ) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("find_or_acquire_config_for_file"); 
         match load_kind {
             ProjectLoadKind::Find => self
                 .configs
@@ -351,7 +351,7 @@ impl ConfigFileRegistryBuilderFull {
         file_name: &str,
         path: &Path,
         logger: &dyn Logger,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("reload_if_needed"); 
         let old_command_line = entry.command_line.clone();
         match entry.pending_reload {
             PendingReload::FileNames => {
@@ -388,7 +388,7 @@ impl ConfigFileRegistryBuilderFull {
         extending_config_path: &Path,
         new_command_line: &Option<ParsedCommandLine>,
         old_command_line: &Option<ParsedCommandLine>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("update_extending_configs"); 
         let mut new_extended_config_paths = HashSet::new();
         if let Some(new_command_line) = new_command_line {
             for extended_config in new_command_line.extended_source_files() {
@@ -431,12 +431,12 @@ impl ConfigFileRegistryBuilderFull {
         }
     }
 
-    fn to_path_fn(&self) -> impl Fn(&str) -> Path + '_ {
+    fn to_path_fn(&self) -> impl Fn(&str) -> Path + '_ { ::tsox_core::fntrace::enter("to_path_fn"); 
         let current_directory = self.session_options.current_directory.clone();
         move |name: &str| Path(tspath::combine_paths(&current_directory, &[name]))
     }
 
-    pub fn update_root_files_watch(&self, file_name: &str, entry: &mut ConfigFileEntryFull) {
+    pub fn update_root_files_watch(&self, file_name: &str, entry: &mut ConfigFileEntryFull) { ::tsox_core::fntrace::enter("update_root_files_watch"); 
         let Some(_watch) = entry.root_files_watch.as_ref() else {
             return;
         };
@@ -523,7 +523,7 @@ impl ConfigFileRegistryBuilderFull {
         path: &Path,
         project: &Project,
         logger: &dyn Logger,
-    ) -> Option<ParsedCommandLine> {
+    ) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("acquire_config_for_project"); 
         let (entry, _) = self.configs.load_or_store(
             path.clone(),
             convert_config_file_entry(&new_config_file_entry(
@@ -560,7 +560,7 @@ impl ConfigFileRegistryBuilderFull {
         config_file_path: &Path,
         file_path: &Path,
         logger: &dyn Logger,
-    ) -> ParsedCommandLine {
+    ) -> ParsedCommandLine { ::tsox_core::fntrace::enter("acquire_config_for_file"); 
         let (entry, _) = self.configs.load_or_store(
             config_file_path.clone(),
             convert_config_file_entry(&new_config_file_entry(
@@ -588,7 +588,7 @@ impl ConfigFileRegistryBuilderFull {
         entry.value().command_line.clone().expect("command line")
     }
 
-    pub fn release_config_for_project(&self, config_file_path: &Path, project_path: &Path) {
+    pub fn release_config_for_project(&self, config_file_path: &Path, project_path: &Path) { ::tsox_core::fntrace::enter("release_config_for_project"); 
         if let Some(entry) = self.configs.load(config_file_path) {
             entry.change_if(
                 |config| config.retaining_projects.contains_key(project_path),
@@ -599,7 +599,7 @@ impl ConfigFileRegistryBuilderFull {
         }
     }
 
-    pub fn retain_config_for_project(&self, config_file_path: &Path, project_path: &Path) {
+    pub fn retain_config_for_project(&self, config_file_path: &Path, project_path: &Path) { ::tsox_core::fntrace::enter("retain_config_for_project"); 
         if let Some(entry) = self.configs.load(config_file_path) {
             entry.change_if(
                 |config| !config.retaining_projects.contains_key(project_path),
@@ -612,7 +612,7 @@ impl ConfigFileRegistryBuilderFull {
         }
     }
 
-    pub fn did_close_file(&self, path: &Path) {
+    pub fn did_close_file(&self, path: &Path) { ::tsox_core::fntrace::enter("did_close_file"); 
         if tspath::is_dynamic_file_name(&path.0) {
             return;
         }
@@ -632,7 +632,7 @@ impl ConfigFileRegistryBuilderFull {
         &self,
         entry: &SyncMapEntryShared<Path, ConfigFileEntryFull>,
         logger: &dyn Logger,
-    ) -> HashMap<Path, ()> {
+    ) -> HashMap<Path, ()> { ::tsox_core::fntrace::enter("handle_config_change"); 
         let mut affected_projects = HashMap::new();
         let changed = entry.change_if(
             |config| config.pending_reload != PendingReload::Full,
@@ -645,7 +645,7 @@ impl ConfigFileRegistryBuilderFull {
         affected_projects
     }
 
-    pub fn invalidate_cache(&self, logger: &dyn Logger) -> ChangeFileResultFull {
+    pub fn invalidate_cache(&self, logger: &dyn Logger) -> ChangeFileResultFull { ::tsox_core::fntrace::enter("invalidate_cache"); 
         let mut affected_projects: HashMap<Path, ()> = HashMap::new();
         let mut affected_files: HashMap<Path, ()> = HashMap::new();
         logger.log("Too many files changed; marking all configs for reload");
@@ -693,7 +693,7 @@ pub fn content_mapper_manifest_path(
     command_line: Option<&ParsedCommandLine>,
     to_path: &dyn Fn(&str) -> Path,
     path: &Path,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("content_mapper_manifest_path"); 
     let Some(command_line) = command_line else {
         return false;
     };
@@ -715,7 +715,7 @@ impl ConfigFileRegistryBuilderFull {
         file_name: &str,
         skip_search_in_directory_of_file: bool,
         logger: &dyn Logger,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("compute_config_file_name"); 
         let search_path = get_directory_path(file_name);
         if !self.custom_config_file_name.is_empty() {
             let mut skip = skip_search_in_directory_of_file;
@@ -784,7 +784,7 @@ impl ConfigFileRegistryBuilderFull {
         file_name: &str,
         path: &Path,
         logger: &dyn Logger,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_config_file_name_for_file"); 
         if tspath::is_dynamic_file_name(file_name) {
             return String::new();
         }
@@ -804,7 +804,7 @@ impl ConfigFileRegistryBuilderFull {
         config_name
     }
 
-    pub fn for_each_config_file_name_for(&self, path: &Path, mut cb: impl FnMut(&str)) {
+    pub fn for_each_config_file_name_for(&self, path: &Path, mut cb: impl FnMut(&str)) { ::tsox_core::fntrace::enter("for_each_config_file_name_for"); 
         if tspath::is_dynamic_file_name(&path.0) {
             return;
         }

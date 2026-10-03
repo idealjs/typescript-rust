@@ -1,7 +1,7 @@
 use crate::ast::*;
 use std::sync::Arc;
 
-pub fn is_void_zero(node: &Node) -> bool {
+pub fn is_void_zero(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_void_zero"); 
     if !is_void_expression(node) {
         return false;
     }
@@ -11,22 +11,22 @@ pub fn is_void_zero(node: &Node) -> bool {
     }
 }
 
-pub fn is_exports_identifier(node: &Node) -> bool {
+pub fn is_exports_identifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_exports_identifier"); 
     is_identifier(node) && node.text() == "exports"
 }
 
-pub fn is_module_identifier(node: &Node) -> bool {
+pub fn is_module_identifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_identifier"); 
     is_identifier(node) && node.text() == "module"
 }
 
-pub fn is_this_identifier(node: Option<&Node>) -> bool {
+pub fn is_this_identifier(node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_this_identifier"); 
     match node {
         Some(n) => is_identifier(n) && n.text() == "this",
         None => false,
     }
 }
 
-pub fn is_super_call(node: &Node) -> bool {
+pub fn is_super_call(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_super_call"); 
     if !is_call_expression(node) {
         return false;
     }
@@ -36,7 +36,7 @@ pub fn is_super_call(node: &Node) -> bool {
     }
 }
 
-pub fn is_import_call(node: &Node) -> bool {
+pub fn is_import_call(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_call"); 
     if !is_call_expression(node) {
         return false;
     }
@@ -46,18 +46,18 @@ pub fn is_import_call(node: &Node) -> bool {
     }
 }
 
-pub fn is_instance_of_expression(node: &Node) -> bool {
+pub fn is_instance_of_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_instance_of_expression"); 
     if let NodeData::BinaryExpression(d) = &node.data {
         return d.operator_token.kind == SyntaxKind::InstanceOfKeyword;
     }
     false
 }
 
-pub fn is_any_import_or_re_export(node: &Node) -> bool {
+pub fn is_any_import_or_re_export(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_any_import_or_re_export"); 
     is_import_node(node) || is_export_declaration(node)
 }
 
-pub fn is_import_node(node: &Node) -> bool {
+pub fn is_import_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_node"); 
     matches!(
         node.kind,
         SyntaxKind::ImportDeclaration
@@ -66,21 +66,21 @@ pub fn is_import_node(node: &Node) -> bool {
     )
 }
 
-pub fn is_any_import_syntax(node: &Node) -> bool {
+pub fn is_any_import_syntax(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_any_import_syntax"); 
     matches!(
         node.kind,
         SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration
     )
 }
 
-pub fn is_question_token(node: Option<&Node>) -> bool {
+pub fn is_question_token(node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_question_token"); 
     match node {
         Some(n) => n.kind == SyntaxKind::QuestionToken,
         None => false,
     }
 }
 
-pub fn is_jsx_tag_name(node: &Arc<Node>) -> bool {
+pub fn is_jsx_tag_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_tag_name"); 
     let Some(parent) = node.parent() else {
         return false;
     };

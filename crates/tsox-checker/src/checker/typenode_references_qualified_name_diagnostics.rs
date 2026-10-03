@@ -8,7 +8,7 @@ impl Checker {
     pub(crate) fn try_get_qualified_name_as_value(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_get_qualified_name_as_value"); 
         let id = crate::checker::checker::base_identifier_of(node);
         let mut symbol = self.resolve_identifier_with_meaning(&id, SymbolFlags::VALUE)?;
         let mut n = id;
@@ -32,7 +32,7 @@ impl Checker {
         segment: &Arc<Node>,
         ns_path: String,
         member: String,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_qualified_name_resolution_failure"); 
         let attributed_file = self
             .get_source_file_of_node(type_name)
             .or_else(|| self.current_file.clone());

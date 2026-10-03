@@ -33,7 +33,7 @@ mod lsproto {
         pub const SourceRemoveUnusedImportsTs: CodeActionKind = CodeActionKind("source.removeUnusedImports.ts");
         pub const SourceSortImportsTs: CodeActionKind = CodeActionKind("source.sortImports.ts");
 
-        pub fn contains(&self, other: &CodeActionKind) -> bool {
+        pub fn contains(&self, other: &CodeActionKind) -> bool { ::tsox_core::fntrace::enter("contains"); 
             *self == *other
                 || *self == Self::Empty
                 || (other.0.len() > self.0.len()
@@ -71,7 +71,7 @@ mod lsproto {
     }
 }
 
-pub fn code_action_compare(a: &CodeAction, b: &CodeAction) -> Ordering {
+pub fn code_action_compare(a: &CodeAction, b: &CodeAction) -> Ordering { ::tsox_core::fntrace::enter("code_action_compare"); 
     let c = a.description.cmp(&b.description);
     if c != Ordering::Equal {
         return c;
@@ -89,7 +89,7 @@ pub fn code_action_compare(a: &CodeAction, b: &CodeAction) -> Ordering {
     Ordering::Equal
 }
 
-pub fn compare_text_edits(a: &lsproto::TextEdit, b: &lsproto::TextEdit) -> Ordering {
+pub fn compare_text_edits(a: &lsproto::TextEdit, b: &lsproto::TextEdit) -> Ordering { ::tsox_core::fntrace::enter("compare_text_edits"); 
     let c = crate::lsp::lsproto_util::compare_ranges(&a.range, &b.range);
     if c != Ordering::Equal {
         return c;
@@ -97,7 +97,7 @@ pub fn compare_text_edits(a: &lsproto::TextEdit, b: &lsproto::TextEdit) -> Order
     a.new_text.cmp(&b.new_text)
 }
 
-pub fn code_fix_provider_matches_lsp_diagnostic(provider: &CodeFixProvider, diagnostic: &lsproto::Diagnostic) -> bool {
+pub fn code_fix_provider_matches_lsp_diagnostic(provider: &CodeFixProvider, diagnostic: &lsproto::Diagnostic) -> bool { ::tsox_core::fntrace::enter("code_fix_provider_matches_lsp_diagnostic"); 
     if let Some(source) = &diagnostic.source {
         if source != "ts" {
             return false;
@@ -111,11 +111,11 @@ pub fn code_fix_provider_matches_lsp_diagnostic(provider: &CodeFixProvider, diag
         .unwrap_or(false)
 }
 
-pub fn contains_error_code(codes: &[i32], code: i32) -> bool {
+pub fn contains_error_code(codes: &[i32], code: i32) -> bool { ::tsox_core::fntrace::enter("contains_error_code"); 
     codes.contains(&code)
 }
 
-pub fn convert_to_lsp_code_action(action: &CodeAction, diag: &lsproto::Diagnostic, uri: &lsproto::DocumentUri) -> lsproto::CommandOrCodeAction {
+pub fn convert_to_lsp_code_action(action: &CodeAction, diag: &lsproto::Diagnostic, uri: &lsproto::DocumentUri) -> lsproto::CommandOrCodeAction { ::tsox_core::fntrace::enter("convert_to_lsp_code_action"); 
     let kind = lsproto::CodeActionKind::QuickFix;
     let mut changes: HashMap<lsproto::DocumentUri, Vec<lsproto::TextEdit>> = HashMap::new();
     changes.insert(uri.clone(), action.changes.clone());
@@ -138,7 +138,7 @@ pub fn get_fix_all_quick_fixes(
     file: &Arc<SourceFile>,
     uri: &lsproto::DocumentUri,
     fix_id_seen: &HashMap<String, Arc<CodeFixProvider>>,
-) -> Result<Vec<lsproto::CommandOrCodeAction>, LspError> {
+) -> Result<Vec<lsproto::CommandOrCodeAction>, LspError> { ::tsox_core::fntrace::enter("get_fix_all_quick_fixes"); 
     let mut actions: Vec<lsproto::CommandOrCodeAction> = Vec::new();
     let mut seen: tsox_core::collections::set::Set<usize> = Default::default();
     for provider in fix_id_seen.values() {
@@ -183,7 +183,7 @@ pub fn has_multiple_fixable_diagnostics(
     program: &Arc<tsox_compile::compiler::Program>,
     file: &Arc<SourceFile>,
     error_codes: &[i32],
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_multiple_fixable_diagnostics"); 
     let all_diags = crate::ls::diagnostics::get_all_diagnostics(program, file);
     let mut count = 0;
     for d in &all_diags {
@@ -197,15 +197,15 @@ pub fn has_multiple_fixable_diagnostics(
     false
 }
 
-pub fn is_fixable_diagnostic(diagnostic: &Diagnostic, error_codes: &[i32]) -> bool {
+pub fn is_fixable_diagnostic(diagnostic: &Diagnostic, error_codes: &[i32]) -> bool { ::tsox_core::fntrace::enter("is_fixable_diagnostic"); 
     diagnostic.source().is_empty() && contains_error_code(error_codes, diagnostic.code())
 }
 
-pub fn is_fix_all_kind(kind: &lsproto::CodeActionKind) -> bool {
+pub fn is_fix_all_kind(kind: &lsproto::CodeActionKind) -> bool { ::tsox_core::fntrace::enter("is_fix_all_kind"); 
     kind.contains(&lsproto::CodeActionKind::SourceFixAllTs)
 }
 
-pub fn wants_quick_fixes(only: Option<&Vec<lsproto::CodeActionKind>>) -> bool {
+pub fn wants_quick_fixes(only: Option<&Vec<lsproto::CodeActionKind>>) -> bool { ::tsox_core::fntrace::enter("wants_quick_fixes"); 
     let Some(only) = only else { return true };
     if only.is_empty() {
         return true;
@@ -213,7 +213,7 @@ pub fn wants_quick_fixes(only: Option<&Vec<lsproto::CodeActionKind>>) -> bool {
     only.iter().any(|kind| kind.contains(&lsproto::CodeActionKind::QuickFix))
 }
 
-pub fn get_organize_imports_action_title(kind: &lsproto::CodeActionKind) -> String {
+pub fn get_organize_imports_action_title(kind: &lsproto::CodeActionKind) -> String { ::tsox_core::fntrace::enter("get_organize_imports_action_title"); 
     if *kind == lsproto::CodeActionKind::SourceRemoveUnusedImportsTs {
         tsox_core::diagnostics::REMOVE_UNUSED_IMPORTS.text.to_string()
     } else if *kind == lsproto::CodeActionKind::SourceSortImportsTs {
@@ -223,7 +223,7 @@ pub fn get_organize_imports_action_title(kind: &lsproto::CodeActionKind) -> Stri
     }
 }
 
-pub fn get_organize_imports_actions_for_kind(requested_kind: &lsproto::CodeActionKind) -> Vec<lsproto::CodeActionKind> {
+pub fn get_organize_imports_actions_for_kind(requested_kind: &lsproto::CodeActionKind) -> Vec<lsproto::CodeActionKind> { ::tsox_core::fntrace::enter("get_organize_imports_actions_for_kind"); 
     let organize_imports_kinds = [
         lsproto::CodeActionKind::SourceOrganizeImportsTs,
         lsproto::CodeActionKind::SourceRemoveUnusedImportsTs,
@@ -247,7 +247,7 @@ impl LanguageService {
         program: &Arc<tsox_compile::compiler::Program>,
         file: &Arc<SourceFile>,
         uri: &lsproto::DocumentUri,
-    ) -> Result<Option<lsproto::CommandOrCodeAction>, LspError> {
+    ) -> Result<Option<lsproto::CommandOrCodeAction>, LspError> { ::tsox_core::fntrace::enter("mig_create_fix_all_action"); 
         let kind = lsproto::CodeActionKind::SourceFixAllTs;
         let mut lsp_changes: HashMap<lsproto::DocumentUri, Vec<lsproto::TextEdit>> = HashMap::new();
 
@@ -290,7 +290,7 @@ impl LanguageService {
         program: &Arc<tsox_compile::compiler::Program>,
         file: &Arc<SourceFile>,
         kind: &lsproto::CodeActionKind,
-    ) -> lsproto::CommandOrCodeAction {
+    ) -> lsproto::CommandOrCodeAction { ::tsox_core::fntrace::enter("mig_create_organize_imports_action"); 
         let title = get_organize_imports_action_title(kind);
         let changes = self.organize_imports(file, program, kind.0);
         if changes.is_empty() {

@@ -8,7 +8,7 @@ impl Checker {
     pub(crate) fn resolve_default_export_target_for(
         &mut self,
         module_sym: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_default_export_target_for"); 
         let mut target = self.resolve_module_member_symbol(module_sym, "default", 8);
         if target.is_none() {
             // Go getTargetOfModuleDefault：无合成 default 的模块不走 export= 回落
@@ -50,7 +50,7 @@ impl Checker {
         module_sym: &Arc<Symbol>,
         name: &str,
         depth: usize,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_module_member_symbol"); 
         if depth == 0 {
             return None;
         }
@@ -162,7 +162,7 @@ impl Checker {
         &self,
         base_module: &Arc<Symbol>,
         specifier: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_module_spec_from"); 
         // tspath isExternalModuleNameRelative 语义：仅 ./ ../ 开头是相对路径，
         // `.prisma/client` 这类点前缀包名走 node_modules 解析
         let base_file = base_module
@@ -205,7 +205,7 @@ impl Checker {
         &self,
         containing_file: &str,
         spec: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_package_symbol_from"); 
         if let Some(path) = self.program.resolve_external_module_path(
             spec,
             containing_file,
@@ -252,7 +252,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn type_of_dynamic_import(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn type_of_dynamic_import(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_of_dynamic_import"); 
         let spec = self.spec_of_dynamic_import_call(node)?;
         if spec.is_empty() {
             return None;
@@ -274,7 +274,7 @@ impl Checker {
         Some(self.resolve_namespace_type(&module_sym))
     }
 
-    pub(crate) fn spec_of_dynamic_import_call(&self, node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn spec_of_dynamic_import_call(&self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("spec_of_dynamic_import_call"); 
         if node.kind != SyntaxKind::CallExpression {
             return None;
         }

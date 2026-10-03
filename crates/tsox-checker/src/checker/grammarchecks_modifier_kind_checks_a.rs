@@ -10,7 +10,7 @@ impl Checker {
         flags: &mut ModifierFlags,
         last_static: &mut Option<Arc<Node>>,
         last_override: &mut Option<Arc<Node>>,
-    ) -> Option<bool> {
+    ) -> Option<bool> { ::tsox_core::fntrace::enter("check_modifier_kind_a"); 
         match modifier.kind {
             SyntaxKind::ConstKeyword => {
                 if node.kind != SyntaxKind::EnumDeclaration

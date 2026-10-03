@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_of_contextual_type"); 
         use crate::checker::types::TypeData;
 
 
@@ -208,7 +208,7 @@ impl Checker {
     // Go getBaseConstraintOrType (checker.go:27779)：instantiable/联合/交
     // 集/模板字面量/字符串映射/索引型走 getResolvedBaseConstraint，无基
     // 约束（noConstraint/circular）时原样返回
-    fn base_constraint_or_type_for_contextual_gate(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn base_constraint_or_type_for_contextual_gate(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("base_constraint_or_type_for_contextual_gate"); 
         let mask = TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE
             | TYPE_FLAGS_UNION_OR_INTERSECTION
             | TypeFlags::TemplateLiteral
@@ -229,7 +229,7 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type"); 
         if let Some((id, t)) = self.active_inferential_contextual.as_ref() {
             if *id == node.id() {
                 return Some(Arc::clone(t));
@@ -335,7 +335,7 @@ impl Checker {
     pub fn get_contextual_signature(
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_contextual_signature"); 
         let t = self.get_contextual_type(node, ContextFlags::Signature)?;
         if let TypeData::Union(u) = &t.data {
             let mut first: Option<Arc<Signature>> = None;
@@ -361,7 +361,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_contextual_call_signature"); 
         let signatures = self.get_signatures_of_type(t, SignatureKind::Call);
         let applicable: Vec<Arc<Signature>> = signatures
             .into_iter()
@@ -377,7 +377,7 @@ impl Checker {
         &self,
         signature: &Arc<Signature>,
         target: &Arc<tsox_frontend::ast::Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_arity_smaller"); 
         let Some(parameters) = function_like_parameters(target) else {
             return false;
         };
@@ -406,7 +406,7 @@ impl Checker {
     }
 
     /// 在类型中找指定名字的类型参数实例（多副本符号按名容错）
-    pub(crate) fn find_tp_instance_by_name(t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
+    pub(crate) fn find_tp_instance_by_name(t: &Arc<Type>, name: &str) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("find_tp_instance_by_name"); 
         if let TypeData::TypeParameter(_) = &t.data
             && t.symbol.as_ref().is_some_and(|s| s.name == name)
         {

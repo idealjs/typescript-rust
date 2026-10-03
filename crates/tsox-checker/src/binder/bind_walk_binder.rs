@@ -4,7 +4,7 @@ use crate::binder::bind_walk::*;
 use tsox_frontend::ast::mig::m3g_2::is_object_literal_or_class_expression_method_or_accessor;
 
 impl Binder {
-    pub(crate) fn bind(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind"); 
         // Go bindChildren 前奏：flow 已不可达时节点打 Unreachable 旗标
         //（子嗣仍走 bind 声明符号；kind 专属 flow 管理在其后，见各 arm）
         if self.current_flow.as_ref().zip(self.unreachable_flow.as_ref()).is_some_and(
@@ -509,7 +509,7 @@ impl Binder {
 
 /// Go IsVariableDeclarationInitializedToRequire：JS 文件、无类型注解、
 /// 非 export、初始化式为 require(string-like) 调用
-fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool {
+fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_initialized_to_require"); 
     let NodeData::VariableDeclaration(d) = &node.data else {
         return false;
     };
@@ -540,7 +540,7 @@ fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool {
 fn strict_mode_eval_or_arguments_message(
     node: &Arc<Node>,
     file: Option<&Arc<tsox_frontend::ast::SourceFile>>,
-) -> tsox_core::diagnostics::Message {
+) -> tsox_core::diagnostics::Message { ::tsox_core::fntrace::enter("strict_mode_eval_or_arguments_message"); 
     if tsox_frontend::ast::utilities::get_containing_class(node).is_some() {
         tsox_core::diagnostics::messages_generated::CODE_CONTAINED_IN_A_CLASS_IS_EVALUATED_IN_JAVASCRIPT_S_STRICT_MODE_WHICH_DOES_NOT_ALLOW_THIS_USE_OF_0_FOR_MORE_INFORMATION_SEE_HTTPS_COLON_SLASH_SLASHDEVELOPER_MOZILLA_ORG_SLASHEN_US_SLASHDOCS_SLASHWEB_SLASHJAVASCRIPT_SLASHREFERENCE_SLASHSTRICT_MODE
     } else if file.is_some_and(|f| f.external_module_indicator.is_some()) {

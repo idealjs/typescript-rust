@@ -6,7 +6,7 @@ pub enum ReadRangeRuneError {
     InvalidUtf8,
 }
 
-fn read_range_rune(input: &str) -> (char, usize, Option<ReadRangeRuneError>) {
+fn read_range_rune(input: &str) -> (char, usize, Option<ReadRangeRuneError>) { crate::fntrace::enter("read_range_rune"); 
     match input.chars().next() {
         Some(c) => (c, c.len_utf8(), None),
         None => ('\0', 0, Some(ReadRangeRuneError::BadRange)),

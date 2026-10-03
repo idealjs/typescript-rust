@@ -33,7 +33,7 @@ pub struct IgnoreOption {
 }
 
 impl IgnoreOption {
-    pub fn apply_watch_option(&self, opts: &mut WatchOptions) {
+    pub fn apply_watch_option(&self, opts: &mut WatchOptions) { crate::fntrace::enter("apply_watch_option"); 
         opts.ignore = Some(Arc::clone(&self.fn_));
     }
 }
@@ -42,7 +42,7 @@ impl IgnoreOption {
 pub struct RecursiveOption;
 
 impl RecursiveOption {
-    pub fn apply_watch_option(&self, opts: &mut WatchOptions) {
+    pub fn apply_watch_option(&self, opts: &mut WatchOptions) { crate::fntrace::enter("apply_watch_option"); 
         opts.recursive = true;
     }
 }
@@ -54,7 +54,7 @@ pub enum WatchOption {
 }
 
 impl WatchOption {
-    pub fn apply_watch_option(&self, opts: &mut WatchOptions) {
+    pub fn apply_watch_option(&self, opts: &mut WatchOptions) { crate::fntrace::enter("apply_watch_option"); 
         match self {
             WatchOption::Ignore(o) => o.apply_watch_option(opts),
             WatchOption::Recursive(o) => o.apply_watch_option(opts),
@@ -62,11 +62,11 @@ impl WatchOption {
     }
 }
 
-pub fn with_ignore(fn_: IgnoreFn) -> WatchOption {
+pub fn with_ignore(fn_: IgnoreFn) -> WatchOption { crate::fntrace::enter("with_ignore"); 
     WatchOption::Ignore(IgnoreOption { fn_ })
 }
 
-pub fn with_recursive() -> WatchOption {
+pub fn with_recursive() -> WatchOption { crate::fntrace::enter("with_recursive"); 
     WatchOption::Recursive(RecursiveOption)
 }
 
@@ -127,7 +127,7 @@ pub struct Callback {
 }
 
 impl Callback {
-    pub fn map_event(&self, mut e: Event) -> Event {
+    pub fn map_event(&self, mut e: Event) -> Event { crate::fntrace::enter("map_event"); 
         if !self.physical_dir.is_empty() && self.physical_dir != self.dir {
             let physical_path = self.event_physical_path(&e.path);
             if is_in_directory_or_self(&self.physical_dir, &physical_path) {
@@ -137,7 +137,7 @@ impl Callback {
         e
     }
 
-    pub fn event_physical_path(&self, path: &str) -> String {
+    pub fn event_physical_path(&self, path: &str) -> String { crate::fntrace::enter("event_physical_path"); 
         if !self.watch_physical_dir.is_empty()
             && !self.watch_dir.is_empty()
             && self.watch_physical_dir != self.watch_dir
@@ -155,22 +155,22 @@ pub struct DirWatchError {
 }
 
 impl fmt::Display for DirWatchError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         f.write_str(&self.err)
     }
 }
 
 impl DirWatchError {
-    pub fn unwrap(&self) -> &FswatchError {
+    pub fn unwrap(&self) -> &FswatchError { crate::fntrace::enter("unwrap"); 
         &self.err
     }
 }
 
-pub fn is_fswatch_err(err: &FswatchError, target: &str) -> bool {
+pub fn is_fswatch_err(err: &FswatchError, target: &str) -> bool { crate::fntrace::enter("is_fswatch_err"); 
     err == target || err.contains(target)
 }
 
-pub fn is_in_directory_or_self(dir: &str, path: &str) -> bool {
+pub fn is_in_directory_or_self(dir: &str, path: &str) -> bool { crate::fntrace::enter("is_in_directory_or_self"); 
     if dir.is_empty() {
         return false;
     }
@@ -190,7 +190,7 @@ pub fn is_in_directory_or_self(dir: &str, path: &str) -> bool {
     std::path::is_separator(rest.as_bytes()[0] as char)
 }
 
-pub fn is_direct_child(dir: &str, path: &str) -> bool {
+pub fn is_direct_child(dir: &str, path: &str) -> bool { crate::fntrace::enter("is_direct_child"); 
     if !path.starts_with(dir) {
         return false;
     }
@@ -205,7 +205,7 @@ pub fn is_direct_child(dir: &str, path: &str) -> bool {
     !rest.is_empty() && !rest.chars().any(std::path::is_separator)
 }
 
-pub fn rebase_path(path: &str, from: &str, to: &str) -> String {
+pub fn rebase_path(path: &str, from: &str, to: &str) -> String { crate::fntrace::enter("rebase_path"); 
     if from == to {
         return path.to_string();
     }
@@ -225,7 +225,7 @@ pub fn rebase_path(path: &str, from: &str, to: &str) -> String {
     join_path_suffix(to, suffix)
 }
 
-pub fn join_path_suffix(root: &str, suffix: &str) -> String {
+pub fn join_path_suffix(root: &str, suffix: &str) -> String { crate::fntrace::enter("join_path_suffix"); 
     if suffix.is_empty() {
         return root.to_string();
     }
@@ -243,7 +243,7 @@ pub fn join_path_suffix(root: &str, suffix: &str) -> String {
     format!("{}{}{}", root, std::path::MAIN_SEPARATOR, suffix)
 }
 
-pub fn file_callback(target: &str, fn_: WatchCallback) -> WatchCallback {
+pub fn file_callback(target: &str, fn_: WatchCallback) -> WatchCallback { crate::fntrace::enter("file_callback"); 
     let target = target.to_string();
     Arc::new(move |events: &[Event], err: Option<&FswatchError>| {
         let filtered: Vec<Event> = events
@@ -257,7 +257,7 @@ pub fn file_callback(target: &str, fn_: WatchCallback) -> WatchCallback {
     })
 }
 
-pub fn physical_dir_for(dir: &str) -> String {
+pub fn physical_dir_for(dir: &str) -> String { crate::fntrace::enter("physical_dir_for"); 
     match crate::nativepath::mig::m6a::realpath(dir) {
         Ok(realpath) => {
             if realpath == dir {
@@ -269,7 +269,7 @@ pub fn physical_dir_for(dir: &str) -> String {
     }
 }
 
-pub fn validate_watch_directory(dir: &str) -> Result<(), FswatchError> {
+pub fn validate_watch_directory(dir: &str) -> Result<(), FswatchError> { crate::fntrace::enter("validate_watch_directory"); 
     match std::fs::metadata(dir) {
         Ok(info) => {
             if !info.is_dir() {

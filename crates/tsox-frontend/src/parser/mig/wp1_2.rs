@@ -22,7 +22,7 @@ pub struct Pragma {
     pub args: Vec<PragmaArgument>,
 }
 
-pub(crate) fn extract_name(text: &str, mut pos: usize) -> String {
+pub(crate) fn extract_name(text: &str, mut pos: usize) -> String { ::tsox_core::fntrace::enter("extract_name"); 
     let start = pos;
     let bytes = text.as_bytes();
     while pos < bytes.len()
@@ -33,7 +33,7 @@ pub(crate) fn extract_name(text: &str, mut pos: usize) -> String {
     text[start..pos].to_ascii_lowercase()
 }
 
-pub(crate) fn extract_quoted_string(text: &str, mut pos: usize) -> Option<String> {
+pub(crate) fn extract_quoted_string(text: &str, mut pos: usize) -> Option<String> { ::tsox_core::fntrace::enter("extract_quoted_string"); 
     let bytes = text.as_bytes();
     if pos == bytes.len() {
         return None;
@@ -53,7 +53,7 @@ pub(crate) fn extract_quoted_string(text: &str, mut pos: usize) -> Option<String
     Some(text[start..pos].to_string())
 }
 
-pub(crate) fn get_comment_pragmas(source_text: &str) -> Vec<Pragma> {
+pub(crate) fn get_comment_pragmas(source_text: &str) -> Vec<Pragma> { ::tsox_core::fntrace::enter("get_comment_pragmas"); 
     let mut pragmas = Vec::new();
     for comment_range in get_leading_comment_ranges(source_text, 0) {
         let comment = &source_text[comment_range.pos..comment_range.end];
@@ -62,7 +62,7 @@ pub(crate) fn get_comment_pragmas(source_text: &str) -> Vec<Pragma> {
     pragmas
 }
 
-pub(crate) fn extract_pragmas(comment_range: CommentRange, text: &str) -> Vec<Pragma> {
+pub(crate) fn extract_pragmas(comment_range: CommentRange, text: &str) -> Vec<Pragma> { ::tsox_core::fntrace::enter("extract_pragmas"); 
     if comment_range.kind != CommentRangeKind::SingleLine {
         return Vec::new();
     }
@@ -113,7 +113,7 @@ pub(crate) fn extract_pragmas(comment_range: CommentRange, text: &str) -> Vec<Pr
     }]
 }
 
-pub(crate) fn skip_blanks(text: &str, mut pos: usize) -> usize {
+pub(crate) fn skip_blanks(text: &str, mut pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_blanks"); 
     let bytes = text.as_bytes();
     while pos < bytes.len() && (bytes[pos] == b' ' || bytes[pos] == b'\t') {
         pos += 1;
@@ -121,7 +121,7 @@ pub(crate) fn skip_blanks(text: &str, mut pos: usize) -> usize {
     pos
 }
 
-pub(crate) fn get_error_span_for_node(source_text: &str, node: &Node) -> TextRange {
+pub(crate) fn get_error_span_for_node(source_text: &str, node: &Node) -> TextRange { ::tsox_core::fntrace::enter("get_error_span_for_node"); 
     let mut pos = node.pos();
     if !(node.pos() == node.end() && (node.pos() as i32) >= 0 && node.kind != SyntaxKind::EndOfFile) {
         pos = crate::scanner::skip_trivia(source_text, pos);
@@ -129,7 +129,7 @@ pub(crate) fn get_error_span_for_node(source_text: &str, node: &Node) -> TextRan
     TextRange::new(pos, node.end())
 }
 
-pub(crate) fn get_space_suggestion(expression_text: &str) -> String {
+pub(crate) fn get_space_suggestion(expression_text: &str) -> String { ::tsox_core::fntrace::enter("get_space_suggestion"); 
     for keyword in VIABLE_KEYWORD_SUGGESTIONS {
         if expression_text.len() > keyword.len() + 2 && expression_text.starts_with(keyword) {
             return format!("{} {}", keyword, &expression_text[keyword.len()..]);

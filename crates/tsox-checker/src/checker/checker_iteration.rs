@@ -10,7 +10,7 @@ pub(crate) struct IterationTypes {
 }
 
 impl IterationTypes {
-    pub(crate) fn has_types(&self) -> bool {
+    pub(crate) fn has_types(&self) -> bool { ::tsox_core::fntrace::enter("has_types"); 
         self.yield_type.is_some() || self.return_type.is_some() || self.next_type.is_some()
     }
 }
@@ -26,7 +26,7 @@ pub(crate) enum IterationUse {
 }
 
 impl IterationUse {
-    fn allows_async_iterables(self) -> bool {
+    fn allows_async_iterables(self) -> bool { ::tsox_core::fntrace::enter("allows_async_iterables"); 
         matches!(
             self,
             IterationUse::ForOf { for_await: true }
@@ -35,7 +35,7 @@ impl IterationUse {
         )
     }
 
-    fn allows_string_input(self) -> bool {
+    fn allows_string_input(self) -> bool { ::tsox_core::fntrace::enter("allows_string_input"); 
         matches!(self, IterationUse::ForOf { .. })
     }
 }
@@ -53,7 +53,7 @@ impl Checker {
         use_: IterationUse,
         input: &Arc<Type>,
         error_node: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("check_iterated_type_or_element_type"); 
         if input.flags.contains(TypeFlags::Any) {
             return Arc::clone(input);
         }
@@ -66,7 +66,7 @@ impl Checker {
         use_: IterationUse,
         input: &Arc<Type>,
         error_node: Option<&Arc<Node>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_iterated_type_or_element_type"); 
         if input.flags.contains(TypeFlags::Never) {
             self.report_type_not_iterable_error(error_node, input, use_.allows_async_iterables());
             return None;
@@ -89,7 +89,7 @@ impl Checker {
         use_: IterationUse,
         input: &Arc<Type>,
         error_node: Option<&Arc<Node>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_array_like_element_type"); 
         let mut array_type = Arc::clone(input);
         let mut has_string_constituent = false;
         if use_.allows_string_input() {
@@ -160,7 +160,7 @@ impl Checker {
         error_node: Option<&Arc<Node>>,
         t: &Arc<Type>,
         allow_async: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_type_not_iterable_error"); 
         let Some(node) = error_node else { return };
         let type_str = self.type_to_string(t);
         let message = if allow_async {
@@ -183,7 +183,7 @@ impl Checker {
         use_: IterationUse,
         t: &Arc<Type>,
         error_node: Option<&Arc<Node>>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("iteration_types_of_iterable"); 
         if t.flags.contains(TypeFlags::Any) {
             let any = self.get_any_type();
             return IterationTypes {
@@ -213,7 +213,7 @@ impl Checker {
         use_: IterationUse,
         t: &Arc<Type>,
         error_node: Option<&Arc<Node>>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("iteration_types_of_iterable_worker"); 
         if t
             .flags
             .intersects(TypeFlags::String | TypeFlags::StringLiteral)
@@ -288,7 +288,7 @@ impl Checker {
         fast_path_globals: &[&str],
         error_node: Option<&Arc<Node>>,
         is_async: bool,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("iteration_types_from_property"); 
         let fast = self.iteration_types_from_reference(t, fast_path_globals);
         if fast.has_types() {
             return fast;
@@ -356,7 +356,7 @@ impl Checker {
         error_node: Option<&Arc<Node>>,
         is_async: bool,
         pending: &mut Vec<tsox_frontend::ast::Diagnostic>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("iteration_types_of_iterator"); 
         if t.flags.contains(TypeFlags::Any) {
             let any = self.get_any_type();
             return IterationTypes {
@@ -392,7 +392,7 @@ impl Checker {
         error_node: Option<&Arc<Node>>,
         is_async: bool,
         pending: &mut Vec<tsox_frontend::ast::Diagnostic>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("iteration_types_of_method"); 
         let method = self.get_property_of_type(t, method_name);
         if method.is_none() && method_name != "next" {
             return IterationTypes::default();
@@ -505,7 +505,7 @@ impl Checker {
     pub(crate) fn iteration_types_of_iterator_result(
         &mut self,
         t: &Arc<Type>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("iteration_types_of_iterator_result"); 
         if t.flags.contains(TypeFlags::Any) {
             let any = self.get_any_type();
             return IterationTypes {
@@ -538,7 +538,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         kind: IterationResultKind,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("filter_iterator_result"); 
         if let Some(constituents) = t.types().filter(|_| t.is_union()) {
             let kept: Vec<Arc<Type>> = constituents
                 .iter()
@@ -556,7 +556,7 @@ impl Checker {
         None
     }
 
-    fn is_iterator_result_kind(&mut self, t: &Arc<Type>, kind: IterationResultKind) -> bool {
+    fn is_iterator_result_kind(&mut self, t: &Arc<Type>, kind: IterationResultKind) -> bool { ::tsox_core::fntrace::enter("is_iterator_result_kind"); 
         let done_type = match self.get_property_of_type(t, "done") {
             Some(done) => self.get_type_of_symbol(&done),
             None => self.false_type(),
@@ -572,7 +572,7 @@ impl Checker {
         &self,
         t: &Arc<Type>,
         global_names: &[&str],
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("iteration_types_from_reference"); 
         let target_symbol = t
             .target()
             .and_then(|target| target.symbol.clone())
@@ -594,7 +594,7 @@ impl Checker {
         }
     }
 
-    fn combine_iteration_types(&mut self, parts: Vec<IterationTypes>) -> IterationTypes {
+    fn combine_iteration_types(&mut self, parts: Vec<IterationTypes>) -> IterationTypes { ::tsox_core::fntrace::enter("combine_iteration_types"); 
         let union_of = |parts: &[IterationTypes],
                         pick: &dyn Fn(&IterationTypes) -> Option<&Arc<Type>>|
          -> Option<Vec<Arc<Type>>> {
@@ -618,7 +618,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn global_type_declares_members(&self, name: &str) -> bool {
+    pub(crate) fn global_type_declares_members(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("global_type_declares_members"); 
         self.globals.get(name).is_some_and(|sym| {
             sym.flags.contains(SymbolFlags::Interface)
                 || sym
@@ -631,7 +631,7 @@ impl Checker {
     pub(crate) fn check_right_hand_side_of_for_of(
         &mut self,
         statement: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("check_right_hand_side_of_for_of"); 
         let NodeData::ForInOrOfStatement(data) = &statement.data else {
             return None;
         };
@@ -659,7 +659,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn check_for_of_reference_expression(&mut self, var_expr: &Arc<Node>) {
+    pub(crate) fn check_for_of_reference_expression(&mut self, var_expr: &Arc<Node>) { ::tsox_core::fntrace::enter("check_for_of_reference_expression"); 
         let mut node = Arc::clone(var_expr);
         while node.kind == SyntaxKind::ParenthesizedExpression
             && let Some(inner) = node.expression()

@@ -3,7 +3,7 @@
 use crate::binder::flow_bind::*;
 
 impl Binder {
-    pub(crate) fn bind_assignment_target_flow(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_assignment_target_flow(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_assignment_target_flow"); 
         match &node.data {
             NodeData::ArrayLiteralExpression(arr) => {
                 for e in &arr.elements.nodes {
@@ -55,7 +55,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_destructuring_target_flow(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_destructuring_target_flow(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_destructuring_target_flow"); 
         if let NodeData::BinaryExpression(bin) = &node.data {
             if bin.operator_token.kind == SyntaxKind::EqualsToken {
                 self.bind_assignment_target_flow(&bin.left);
@@ -65,7 +65,7 @@ impl Binder {
         self.bind_assignment_target_flow(node);
     }
 
-    pub(crate) fn bind_initialized_variable_flow(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_initialized_variable_flow(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_initialized_variable_flow"); 
         let name = match &node.data {
             NodeData::VariableDeclaration(d) => Some(Arc::clone(&d.name)),
             NodeData::BindingElement(d) => d.name.clone(),
@@ -91,7 +91,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_contextual_identifier(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_contextual_identifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_contextual_identifier"); 
         let Some(file) = self.current_source_file.clone() else {
             return;
         };

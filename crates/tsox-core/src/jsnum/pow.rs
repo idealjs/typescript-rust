@@ -1,6 +1,6 @@
 use super::number::Number;
 
-fn big_mul(a: &[u32], b: &[u32]) -> Vec<u32> {
+fn big_mul(a: &[u32], b: &[u32]) -> Vec<u32> { crate::fntrace::enter("big_mul"); 
     if a.iter().all(|&x| x == 0) || b.iter().all(|&x| x == 0) {
         return vec![0];
     }
@@ -23,7 +23,7 @@ fn big_mul(a: &[u32], b: &[u32]) -> Vec<u32> {
     result
 }
 
-fn big_to_f64(limbs: &[u32]) -> f64 {
+fn big_to_f64(limbs: &[u32]) -> f64 { crate::fntrace::enter("big_to_f64"); 
     let n = limbs.iter().rposition(|&x| x != 0).map_or(0, |i| i + 1);
     if n == 0 {
         return 0.0;
@@ -75,7 +75,7 @@ fn big_to_f64(limbs: &[u32]) -> f64 {
     f64::from_bits(exponent << 52 | mantissa)
 }
 
-fn pow_exact_f64(base: u64, exp: u32) -> f64 {
+fn pow_exact_f64(base: u64, exp: u32) -> f64 { crate::fntrace::enter("pow_exact_f64"); 
     if exp == 0 {
         return 1.0;
     }
@@ -105,7 +105,7 @@ fn pow_exact_f64(base: u64, exp: u32) -> f64 {
 }
 
 impl Number {
-    pub fn exponentiate(self, exponent: Number) -> Number {
+    pub fn exponentiate(self, exponent: Number) -> Number { crate::fntrace::enter("exponentiate"); 
         let b = self.0;
         let e = exponent.0;
         if (b == 1.0 || b == -1.0) && e.is_infinite() {

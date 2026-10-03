@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         member: &Arc<Node>,
         index_infos: &mut Vec<Arc<crate::checker::IndexInfo>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_index_signature_member"); 
         let NodeData::IndexSignatureDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -50,7 +50,7 @@ impl Checker {
     pub(crate) fn resolve_accessor_pair_type(
         &mut self,
         accessor: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_accessor_pair_type"); 
         self.push_scope(accessor);
         let result = self.resolve_accessor_pair_type_worker(accessor);
         self.pop_scope();
@@ -60,7 +60,7 @@ impl Checker {
     fn resolve_accessor_pair_type_worker(
         &mut self,
         accessor: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_accessor_pair_type_worker"); 
         let class = accessor.parent();
         let getter = class.as_ref().and_then(|cls| {
             Self::class_members_of(cls).iter().find(|m| {
@@ -103,7 +103,7 @@ impl Checker {
     }
 
     /// Go 判定同一成员：标识符按文本、well-known 计算名按内部名
-    fn member_names_match(a: &Arc<Node>, b: &Arc<Node>) -> bool {
+    fn member_names_match(a: &Arc<Node>, b: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("member_names_match"); 
         let key = |n: &Arc<Node>| -> Option<String> {
             let name = n.name()?;
             match name.kind {
@@ -132,7 +132,7 @@ impl Checker {
         symbol_table: &mut SymbolTable,
         props: &mut Vec<Arc<Symbol>>,
         deferred: &mut Vec<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_get_accessor_member"); 
         let NodeData::GetAccessorDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -176,7 +176,7 @@ impl Checker {
         symbol_table: &mut SymbolTable,
         props: &mut Vec<Arc<Symbol>>,
         deferred: &mut Vec<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_set_accessor_member"); 
         let NodeData::SetAccessorDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -220,7 +220,7 @@ impl Checker {
         &mut self,
         deferred: &[Arc<Node>],
         symbol_table: &SymbolTable,
-    ) {
+    ) { ::tsox_core::fntrace::enter("resolve_deferred_accessor_member_types"); 
         for member in deferred {
             let name = match &member.data {
                 NodeData::GetAccessorDeclaration(d) => self.member_declaration_name(&d.name),
@@ -259,7 +259,7 @@ impl Checker {
         member: &Arc<Node>,
         name: &str,
         in_type_literal: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("accessor_member_prop_type"); 
         if in_type_literal {
             self.type_literal_accessor_member_type(member, name)
         } else {
@@ -271,7 +271,7 @@ impl Checker {
         &mut self,
         member: &Arc<Node>,
         call_signatures: &mut Vec<Arc<Signature>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_call_signature_member"); 
         let NodeData::CallSignatureDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -306,7 +306,7 @@ impl Checker {
         &mut self,
         member: &Arc<Node>,
         construct_signatures: &mut Vec<Arc<Signature>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_construct_signature_member"); 
         let NodeData::ConstructSignatureDeclaration(data) = &member.data else {
             unreachable!()
         };
@@ -342,7 +342,7 @@ impl Checker {
         member: &Arc<Node>,
         symbol_table: &mut SymbolTable,
         props: &mut Vec<Arc<Symbol>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_constructor_properties"); 
         let NodeData::ConstructorDeclaration(data) = &member.data else {
             unreachable!()
         };

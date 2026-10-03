@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
-    pub fn boolean_type(&self) -> Arc<Type> {
+    pub fn boolean_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("boolean_type"); 
         self.boolean_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -16,7 +16,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn es_symbol_type(&self) -> Arc<Type> {
+    pub fn es_symbol_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("es_symbol_type"); 
         self.es_symbol_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -29,7 +29,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn void_type(&self) -> Arc<Type> {
+    pub fn void_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("void_type"); 
         self.void_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -42,7 +42,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn never_type(&self) -> Arc<Type> {
+    pub fn never_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("never_type"); 
         self.never_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -55,7 +55,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn auto_type(&self) -> Arc<Type> {
+    pub fn auto_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("auto_type"); 
         self.auto_type
             .get_or_init(|| {
                 Arc::new(Type {
@@ -72,7 +72,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn auto_array_type(&mut self) -> Arc<Type> {
+    pub fn auto_array_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("auto_array_type"); 
         if let Some(t) = self.auto_array_type.get() {
             return Arc::clone(t);
         }
@@ -86,7 +86,7 @@ impl Checker {
             .unwrap_or_else(|| self.auto_array_type.get().cloned().unwrap_or(arr))
     }
 
-    pub fn get_evolving_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
+    pub fn get_evolving_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_evolving_array_type"); 
         Arc::new(Type {
             flags: TypeFlags::Object,
             object_flags: ObjectFlags::EvolvingArray,
@@ -105,7 +105,7 @@ impl Checker {
         &mut self,
         evolving_type: &Arc<Type>,
         new_element_type: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("add_evolving_array_element_type"); 
         let current_element = match &evolving_type.data {
             TypeData::EvolvingArray(ea) => ea.element_type.clone(),
             _ => return Arc::clone(evolving_type),
@@ -122,7 +122,7 @@ impl Checker {
         }
     }
 
-    pub fn finalize_evolving_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn finalize_evolving_array_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("finalize_evolving_array_type"); 
         if !t.object_flags.contains(ObjectFlags::EvolvingArray) {
             return Arc::clone(t);
         }
@@ -149,7 +149,7 @@ impl Checker {
         }
     }
 
-    pub fn is_type_subset_of(&mut self, a: &Arc<Type>, b: &Arc<Type>) -> bool {
+    pub fn is_type_subset_of(&mut self, a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_subset_of"); 
         if Arc::ptr_eq(a, b) || self.types_are_equal(a, b) {
             return true;
         }
@@ -163,7 +163,7 @@ impl Checker {
         self.is_type_assignable_to(a, b)
     }
 
-    pub fn any_function_type(&self) -> Arc<Type> {
+    pub fn any_function_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("any_function_type"); 
         self.any_function_type
             .get_or_init(|| {
                 Arc::new(Type {
@@ -178,7 +178,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn non_primitive_type(&self) -> Arc<Type> {
+    pub fn non_primitive_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("non_primitive_type"); 
         self.non_primitive_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -191,7 +191,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn true_type(&self) -> Arc<Type> {
+    pub fn true_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("true_type"); 
         self.true_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -206,7 +206,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn false_type(&self) -> Arc<Type> {
+    pub fn false_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("false_type"); 
         self.false_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -221,7 +221,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn error_type(&self) -> Arc<Type> {
+    pub fn error_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("error_type"); 
         self.error_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -234,7 +234,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn unresolved_type(&self) -> Arc<Type> {
+    pub fn unresolved_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("unresolved_type"); 
         self.unresolved_type
             .get_or_init(|| {
                 Arc::new(Type::new(
@@ -247,7 +247,7 @@ impl Checker {
             .clone()
     }
 
-    pub fn global_regexp_type(&mut self) -> Arc<Type> {
+    pub fn global_regexp_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("global_regexp_type"); 
         if let Some(t) = self.global_reg_exp_type.get() {
             return Arc::clone(t);
         }
@@ -261,7 +261,7 @@ impl Checker {
         t
     }
 
-    pub fn get_string_literal_type(&mut self, value: &str) -> Arc<Type> {
+    pub fn get_string_literal_type(&mut self, value: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("get_string_literal_type"); 
         if let Some(t) = self.string_literal_types.get(value) {
             return Arc::clone(t);
         }
@@ -278,7 +278,7 @@ impl Checker {
         t
     }
 
-    pub fn typeof_type(&mut self) -> Arc<Type> {
+    pub fn typeof_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("typeof_type"); 
         if let Some(t) = self.typeof_type.get() {
             return Arc::clone(t);
         }
@@ -300,7 +300,7 @@ impl Checker {
         t
     }
 
-    pub fn get_number_literal_type(&mut self, value: tsox_core::jsnum::Number) -> Arc<Type> {
+    pub fn get_number_literal_type(&mut self, value: tsox_core::jsnum::Number) -> Arc<Type> { ::tsox_core::fntrace::enter("get_number_literal_type"); 
         if let Some(t) = self.number_literal_types.get(&value) {
             return Arc::clone(t);
         }

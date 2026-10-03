@@ -43,7 +43,7 @@ impl OuterExpressionKinds {
     );
 }
 
-pub fn is_outer_expression(node: &Node, kinds: OuterExpressionKinds) -> bool {
+pub fn is_outer_expression(node: &Node, kinds: OuterExpressionKinds) -> bool { ::tsox_core::fntrace::enter("is_outer_expression"); 
     match node.kind {
         SyntaxKind::ParenthesizedExpression => {
             kinds.intersects(OuterExpressionKinds::PARENS)
@@ -75,7 +75,7 @@ pub fn is_outer_expression(node: &Node, kinds: OuterExpressionKinds) -> bool {
     }
 }
 
-pub fn skip_outer_expressions(node: &Arc<Node>, kinds: OuterExpressionKinds) -> Arc<Node> {
+pub fn skip_outer_expressions(node: &Arc<Node>, kinds: OuterExpressionKinds) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_outer_expressions"); 
     let mut node = node.clone();
     while is_outer_expression(&node, kinds) {
         if is_binary_expression(&node) {
@@ -93,11 +93,11 @@ pub fn skip_outer_expressions(node: &Arc<Node>, kinds: OuterExpressionKinds) -> 
     node
 }
 
-pub fn skip_parentheses(node: &Arc<Node>) -> Arc<Node> {
+pub fn skip_parentheses(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_parentheses"); 
     skip_outer_expressions(node, OuterExpressionKinds::PARENS)
 }
 
-pub fn skip_type_parentheses(node: &Arc<Node>) -> Arc<Node> {
+pub fn skip_type_parentheses(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_type_parentheses"); 
     let mut node = node.clone();
     while is_parenthesized_type_node(&node) {
         match node.type_node() {
@@ -115,7 +115,7 @@ pub enum FindAncestorResult {
     Quit,
 }
 
-pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult {
+pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult { ::tsox_core::fntrace::enter("to_find_ancestor_result"); 
     if b {
         FindAncestorResult::True
     } else {
@@ -123,11 +123,11 @@ pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult {
     }
 }
 
-pub fn node_kind_is(node: &Node, kinds: &[SyntaxKind]) -> bool {
+pub fn node_kind_is(node: &Node, kinds: &[SyntaxKind]) -> bool { ::tsox_core::fntrace::enter("node_kind_is"); 
     kinds.contains(&node.kind)
 }
 
-pub fn node_has_kind(node: Option<&Node>, kind: SyntaxKind) -> bool {
+pub fn node_has_kind(node: Option<&Node>, kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("node_has_kind"); 
     match node {
         Some(node) => node.kind == kind,
         None => false,
@@ -136,7 +136,7 @@ pub fn node_has_kind(node: Option<&Node>, kind: SyntaxKind) -> bool {
 
 use crate::scanner::TOKEN_FLAGS_UNTERMINATED;
 
-pub fn is_unterminated_literal(node: &Node) -> bool {
+pub fn is_unterminated_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_unterminated_literal"); 
     match &node.data {
         NodeData::StringLiteral(d) => d.token_flags & TOKEN_FLAGS_UNTERMINATED != 0,
         NodeData::NumericLiteral(d) => d.token_flags & TOKEN_FLAGS_UNTERMINATED != 0,
@@ -149,7 +149,7 @@ pub fn is_unterminated_literal(node: &Node) -> bool {
     }
 }
 
-pub fn is_valid_type_only_alias_use_site(use_site: &Arc<Node>) -> bool {
+pub fn is_valid_type_only_alias_use_site(use_site: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_valid_type_only_alias_use_site"); 
     use_site.flags.intersects(NodeFlags::Ambient | NodeFlags::JSDoc)
         || is_part_of_type_query(use_site)
         || is_identifier_in_non_emitting_heritage_clause(use_site)
@@ -157,15 +157,15 @@ pub fn is_valid_type_only_alias_use_site(use_site: &Arc<Node>) -> bool {
         || !(is_expression_node(use_site) || is_shorthand_property_name_use_site(use_site))
 }
 
-pub fn is_var_await_using(node: &Arc<Node>) -> bool {
+pub fn is_var_await_using(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_await_using"); 
     get_combined_node_flags(node).intersection(NodeFlags::BlockScoped) == NodeFlags::AwaitUsing
 }
 
-pub fn is_var_const(node: &Arc<Node>) -> bool {
+pub fn is_var_const(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_const"); 
     get_combined_node_flags(node).intersection(NodeFlags::BlockScoped) == NodeFlags::Const
 }
 
-pub fn is_var_const_like(node: &Arc<Node>) -> bool {
+pub fn is_var_const_like(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_const_like"); 
     let scoped = get_combined_node_flags(node).intersection(NodeFlags::BlockScoped);
     matches!(
         scoped,
@@ -173,18 +173,18 @@ pub fn is_var_const_like(node: &Arc<Node>) -> bool {
     )
 }
 
-pub fn is_var_let(node: &Arc<Node>) -> bool {
+pub fn is_var_let(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_let"); 
     get_combined_node_flags(node).intersection(NodeFlags::BlockScoped) == NodeFlags::Let
 }
 
-pub fn is_var_using(node: &Arc<Node>) -> bool {
+pub fn is_var_using(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_using"); 
     get_combined_node_flags(node).intersection(NodeFlags::BlockScoped) == NodeFlags::Using
 }
 
 fn is_variable_declaration_initialized_with_require_helper(
     node: &Arc<Node>,
     allow_accessed_require: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_initialized_with_require_helper"); 
     if !is_in_js_file(node) {
         return false;
     }
@@ -213,7 +213,7 @@ fn is_variable_declaration_initialized_with_require_helper(
         && is_require_call(&initializer, true)
 }
 
-pub fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool {
+pub fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_initialized_to_require"); 
     let mut node = node.clone();
     if node.kind == SyntaxKind::BindingElement {
         match node.parent().and_then(|p| p.parent()) {
@@ -224,11 +224,11 @@ pub fn is_variable_declaration_initialized_to_require(node: &Arc<Node>) -> bool 
     is_variable_declaration_initialized_with_require_helper(&node, false)
 }
 
-pub fn is_variable_declaration_initialized_to_bare_or_accessed_require(node: &Arc<Node>) -> bool {
+pub fn is_variable_declaration_initialized_to_bare_or_accessed_require(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_initialized_to_bare_or_accessed_require"); 
     is_variable_declaration_initialized_with_require_helper(node, true)
 }
 
-pub fn is_variable_like(node: &Node) -> bool {
+pub fn is_variable_like(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_variable_like"); 
     matches!(
         node.kind,
         SyntaxKind::BindingElement
@@ -242,7 +242,7 @@ pub fn is_variable_like(node: &Node) -> bool {
     )
 }
 
-pub fn is_variable_parameter_or_property(node: &Node) -> bool {
+pub fn is_variable_parameter_or_property(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_variable_parameter_or_property"); 
     matches!(
         node.kind,
         SyntaxKind::VariableDeclaration
@@ -252,7 +252,7 @@ pub fn is_variable_parameter_or_property(node: &Node) -> bool {
     )
 }
 
-pub fn module_export_name_is_default(node: &Node) -> bool {
+pub fn module_export_name_is_default(node: &Node) -> bool { ::tsox_core::fntrace::enter("module_export_name_is_default"); 
     node.text() == INTERNAL_SYMBOL_NAME_DEFAULT
 }
 
@@ -261,16 +261,16 @@ pub struct HasFileNameImpl {
     path: TsPath,
 }
 
-pub fn new_has_file_name(file_name: String, path: TsPath) -> HasFileNameImpl {
+pub fn new_has_file_name(file_name: String, path: TsPath) -> HasFileNameImpl { ::tsox_core::fntrace::enter("new_has_file_name"); 
     HasFileNameImpl { file_name, path }
 }
 
 impl HasFileNameImpl {
-    pub fn file_name(&self) -> &str {
+    pub fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    pub fn path(&self) -> &TsPath {
+    pub fn path(&self) -> &TsPath { ::tsox_core::fntrace::enter("path"); 
         &self.path
     }
 }
@@ -280,7 +280,7 @@ pub fn node_can_be_decorated(
     node: &Arc<Node>,
     parent: Option<&Arc<Node>>,
     grandparent: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("node_can_be_decorated"); 
     if use_legacy_decorators
         && node.name().is_some_and(|n| is_private_identifier(n))
     {
@@ -341,7 +341,7 @@ pub fn node_is_decorated(
     node: &Arc<Node>,
     parent: Option<&Arc<Node>>,
     grandparent: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("node_is_decorated"); 
     has_decorators(node)
         && node_can_be_decorated(use_legacy_decorators, node, parent, grandparent)
 }
@@ -351,7 +351,7 @@ pub fn node_or_child_is_decorated(
     node: &Arc<Node>,
     parent: Option<&Arc<Node>>,
     grandparent: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("node_or_child_is_decorated"); 
     node_is_decorated(use_legacy_decorators, node, parent, grandparent)
         || child_is_decorated(use_legacy_decorators, node, parent)
 }
@@ -360,7 +360,7 @@ fn child_is_decorated(
     use_legacy_decorators: bool,
     node: &Arc<Node>,
     parent: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("child_is_decorated"); 
     match node.kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
             node_members(node).iter().any(|m| {
@@ -382,7 +382,7 @@ pub fn should_transform_import_call(
     file_name: &str,
     options: &CompilerOptions,
     implied_node_format_for_emit: ModuleKind,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_transform_import_call"); 
     let module_kind = options.get_emit_module_kind();
     if (ModuleKind::Node16 <= module_kind && module_kind <= ModuleKind::NodeNext)
         || module_kind == ModuleKind::Preserve
@@ -392,7 +392,7 @@ pub fn should_transform_import_call(
     implied_node_format_for_emit < ModuleKind::ES2015
 }
 
-pub fn tag_names_are_equivalent(lhs: &Node, rhs: &Node) -> bool {
+pub fn tag_names_are_equivalent(lhs: &Node, rhs: &Node) -> bool { ::tsox_core::fntrace::enter("tag_names_are_equivalent"); 
     if lhs.kind != rhs.kind {
         return false;
     }
@@ -423,7 +423,7 @@ pub fn tag_names_are_equivalent(lhs: &Node, rhs: &Node) -> bool {
     }
 }
 
-pub fn try_get_ambient_module_name_from_symbol_name(s: &str) -> Option<String> {
+pub fn try_get_ambient_module_name_from_symbol_name(s: &str) -> Option<String> { ::tsox_core::fntrace::enter("try_get_ambient_module_name_from_symbol_name"); 
     if s.starts_with('"') && s.ends_with('"') && s.len() >= 2 {
         return Some(s[1..s.len() - 1].to_string());
     }
@@ -441,7 +441,7 @@ pub fn try_get_ambient_module_name_from_symbol_name(s: &str) -> Option<String> {
 
 pub fn try_get_class_extending_expression_with_type_arguments(
     node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_class_extending_expression_with_type_arguments"); 
     if !is_expression_with_type_arguments(node) {
         return None;
     }
@@ -453,7 +453,7 @@ pub fn try_get_class_extending_expression_with_type_arguments(
 
 pub fn try_get_class_implementing_or_extending_heritage_clause_element(
     node: &Arc<Node>,
-) -> Option<(Arc<Node>, bool)> {
+) -> Option<(Arc<Node>, bool)> { ::tsox_core::fntrace::enter("try_get_class_implementing_or_extending_heritage_clause_element"); 
     let parent = node.parent()?;
     if !(is_expression_with_type_arguments(node) || is_type_reference_node(node)) {
         return None;
@@ -472,7 +472,7 @@ pub fn try_get_class_implementing_or_extending_heritage_clause_element(
     Some((grandparent, is_implements))
 }
 
-pub fn try_get_import_from_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn try_get_import_from_module_specifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_import_from_module_specifier"); 
     let parent = node.parent()?;
     match parent.kind {
         SyntaxKind::ImportDeclaration
@@ -503,7 +503,7 @@ pub fn try_get_import_from_module_specifier(node: &Arc<Node>) -> Option<Arc<Node
 
 pub fn try_get_property_name_of_binding_or_assignment_element(
     binding_element: &Node,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_property_name_of_binding_or_assignment_element"); 
     match binding_element.kind {
         SyntaxKind::BindingElement => match &binding_element.data {
             NodeData::BindingElement(d) => {
@@ -523,7 +523,7 @@ pub fn try_get_property_name_of_binding_or_assignment_element(
     }
 }
 
-fn try_get_property_name_of_property_name(property_name: &Arc<Node>) -> Option<Arc<Node>> {
+fn try_get_property_name_of_property_name(property_name: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_property_name_of_property_name"); 
     match &property_name.data {
         NodeData::ComputedPropertyName(d)
             if is_string_or_numeric_literal_like(&d.expression) =>
@@ -534,7 +534,7 @@ fn try_get_property_name_of_property_name(property_name: &Arc<Node>) -> Option<A
     }
 }
 
-pub fn set_parent_in_children(node: &Arc<Node>) {
+pub fn set_parent_in_children(node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_parent_in_children"); 
     for_each_child(node, &mut |child: &Arc<Node>| {
         child.set_parent(node);
         set_parent_in_children(child);
@@ -542,11 +542,11 @@ pub fn set_parent_in_children(node: &Arc<Node>) {
     });
 }
 
-pub fn set_imports_of_source_file(node: &mut SourceFile, imports: Vec<Arc<Node>>) {
+pub fn set_imports_of_source_file(node: &mut SourceFile, imports: Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("set_imports_of_source_file"); 
     node.imports = imports;
 }
 
-fn is_part_of_type_expression_with_type_arguments(node: &Arc<Node>) -> bool {
+fn is_part_of_type_expression_with_type_arguments(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_expression_with_type_arguments"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -559,7 +559,7 @@ fn is_part_of_type_expression_with_type_arguments(node: &Arc<Node>) -> bool {
     heritage || is_jsdoc_implements_tag(&parent) || is_jsdoc_augments_tag(&parent)
 }
 
-fn is_part_of_type_node_in_parent(node: &Arc<Node>) -> bool {
+fn is_part_of_type_node_in_parent(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_node_in_parent"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -611,7 +611,7 @@ fn is_part_of_type_node_in_parent(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_part_of_type_node(node: &Arc<Node>) -> bool {
+pub fn is_part_of_type_node(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_node"); 
     let kind = node.kind;
     if (kind as i16) >= (SyntaxKind::TypeReference as i16)
         && (kind as i16) <= (SyntaxKind::ImportType as i16)
@@ -658,22 +658,22 @@ pub fn is_part_of_type_node(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_part_of_type_only_import_or_export_declaration(node: &Arc<Node>) -> bool {
+pub fn is_part_of_type_only_import_or_export_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_only_import_or_export_declaration"); 
     find_ancestor(node, |ancestor| {
         is_type_only_import_or_export_declaration(ancestor)
     })
     .is_some()
 }
 
-fn node_modifier_flags(node: &Node) -> ModifierFlags {
+fn node_modifier_flags(node: &Node) -> ModifierFlags { ::tsox_core::fntrace::enter("node_modifier_flags"); 
     node.syntactic_modifier_flags()
 }
 
-fn has_decorators(node: &Node) -> bool {
+fn has_decorators(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_decorators"); 
     has_syntactic_modifier(node, ModifierFlags::Decorator)
 }
 
-pub fn is_expression_node(node: &Node) -> bool {
+pub fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_node"); 
     match node.kind {
         SyntaxKind::SuperKeyword
         | SyntaxKind::NullKeyword
@@ -720,7 +720,7 @@ pub fn is_expression_node(node: &Node) -> bool {
     }
 }
 
-fn node_body(node: &Node) -> Option<Arc<Node>> {
+fn node_body(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_body"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.body.clone(),
         NodeData::FunctionExpression(d) => Some(d.body.clone()),
@@ -733,7 +733,7 @@ fn node_body(node: &Node) -> Option<Arc<Node>> {
     }
 }
 
-fn node_members(node: &Node) -> &[Arc<Node>] {
+fn node_members(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("node_members"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => &d.members.nodes,
         NodeData::ClassExpression(d) => &d.members.nodes,
@@ -745,7 +745,7 @@ fn node_members(node: &Node) -> &[Arc<Node>] {
     }
 }
 
-fn get_this_parameter(signature: &Node) -> Option<Arc<Node>> {
+fn get_this_parameter(signature: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_this_parameter"); 
     let parameters = node_parameters(signature)?;
     let first = parameters.nodes.first()?;
     is_this_parameter(first).then(|| Arc::clone(first))
@@ -760,7 +760,7 @@ impl NodeFactory {
         constraint: Option<Arc<Node>>,
         expression: Option<Arc<Node>>,
         default_type: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_type_parameter_declaration"); 
         let _ = self;
         Arc::new(Node::new(
             SyntaxKind::TypeParameter,
@@ -785,7 +785,7 @@ impl NodeFactory {
         question_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parameter_declaration"); 
         let _ = self;
         Arc::new(Node::new(
             SyntaxKind::Parameter,
@@ -810,7 +810,7 @@ impl NodeFactory {
         postfix_token: Option<Arc<Node>>,
         type_node: Option<Arc<Node>>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_signature_declaration"); 
         let _ = self;
         Arc::new(Node::new(
             SyntaxKind::PropertySignature,
@@ -830,7 +830,7 @@ impl NodeFactory {
         &self,
         node: &Arc<Node>,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_declaration_modifiers"); 
         let cloned = crate::ast::deep_clone_node(node);
         let Ok(mut owned) = Arc::try_unwrap(cloned) else {
             return Arc::clone(node);
@@ -866,7 +866,7 @@ pub fn replace_modifiers(
     factory: &NodeFactory,
     node: &Arc<Node>,
     modifier_array: Option<Arc<ModifierList>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("replace_modifiers"); 
     match node.kind {
         SyntaxKind::TypeParameter => match &node.data {
             NodeData::TypeParameterDeclaration(d) => factory.update_type_parameter_declaration(

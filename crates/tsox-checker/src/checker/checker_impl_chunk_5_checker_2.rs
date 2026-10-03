@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk_5::*;
 
 impl Checker {
-    pub(crate) fn widen_object_literal_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn widen_object_literal_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("widen_object_literal_type"); 
         let structured = match t.as_structured() {
             Some(s) => s,
             None => return Arc::clone(t),
@@ -60,7 +60,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn build_union_from_types(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn build_union_from_types(&self, types: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_union_from_types"); 
         if types.is_empty() {
             return self.never_type();
         }
@@ -110,21 +110,21 @@ impl Checker {
         Arc::new(union)
     }
 
-    pub fn get_constraint_of_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_constraint_of_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_of_type_parameter"); 
         if let TypeData::TypeParameter(tp) = &t.data {
             return tp.constraint.clone();
         }
         None
     }
 
-    pub fn get_default_from_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_default_from_type_parameter(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_default_from_type_parameter"); 
         if let TypeData::TypeParameter(tp) = &t.data {
             return tp.resolved_default_type.get().cloned();
         }
         None
     }
 
-    pub fn get_resolved_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_resolved_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_resolved_type_of_conditional_type"); 
         if let TypeData::Conditional(ct) = &t.data {
             if let Some(rt) = ct.resolved_true_type.get() {
                 return Some(rt.clone());
@@ -136,7 +136,7 @@ impl Checker {
         None
     }
 
-    pub fn get_constraint_of_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_constraint_of_mapped_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_of_mapped_type"); 
         if let TypeData::Mapped(mt) = &t.data {
             return mt.constraint_type.clone();
         }
@@ -146,35 +146,35 @@ impl Checker {
         None
     }
 
-    pub fn get_true_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_true_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_true_type_of_conditional_type"); 
         if let TypeData::Conditional(ct) = &t.data {
             return ct.resolved_true_type.get().cloned();
         }
         None
     }
 
-    pub fn get_false_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_false_type_of_conditional_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_false_type_of_conditional_type"); 
         if let TypeData::Conditional(ct) = &t.data {
             return ct.resolved_false_type.get().cloned();
         }
         None
     }
 
-    pub fn get_return_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+    pub fn get_return_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_of_signature"); 
         sig.resolved_return_type.get().cloned()
     }
 
     pub fn get_type_predicate_of_signature<'a>(
         &self,
         sig: &'a Arc<Signature>,
-    ) -> Option<&'a TypePredicate> {
+    ) -> Option<&'a TypePredicate> { ::tsox_core::fntrace::enter("get_type_predicate_of_signature"); 
         sig.resolved_type_predicate.as_deref()
     }
 
     pub fn compute_type_predicate_of_signature(
         &mut self,
         sig: &Arc<Signature>,
-    ) -> Option<TypePredicate> {
+    ) -> Option<TypePredicate> { ::tsox_core::fntrace::enter("compute_type_predicate_of_signature"); 
         if let Some(pred) = sig.resolved_type_predicate.as_deref() {
             if pred.parameter_name == "<<unresolved>>" {
                 return None;
@@ -248,7 +248,7 @@ impl Checker {
         })
     }
 
-    pub fn get_base_constraint_of_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_base_constraint_of_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_base_constraint_of_type"); 
         match &t.data {
             TypeData::TypeParameter(tp) => tp
                 .constrained
@@ -263,18 +263,18 @@ impl Checker {
         }
     }
 
-    pub fn get_type_arguments(&self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+    pub fn get_type_arguments(&self, t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_arguments"); 
         if let TypeData::Object(obj) = &t.data {
             return obj.type_arguments.clone();
         }
         Vec::new()
     }
 
-    pub fn get_unique_symbol_type(&self, _name: &str) -> Option<Arc<Type>> {
+    pub fn get_unique_symbol_type(&self, _name: &str) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_unique_symbol_type"); 
         None
     }
 
-    pub fn was_canceled(&self) -> bool {
+    pub fn was_canceled(&self) -> bool { ::tsox_core::fntrace::enter("was_canceled"); 
         false
     }
 }
@@ -286,7 +286,7 @@ impl Checker {
         &mut self,
         decl: &Arc<Node>,
         sig: &Arc<Signature>,
-    ) -> Option<TypePredicate> {
+    ) -> Option<TypePredicate> { ::tsox_core::fntrace::enter("infer_type_predicate_from_body"); 
         let body = match &decl.data {
             NodeData::FunctionDeclaration(d) => d.body.as_ref(),
             _ => None,

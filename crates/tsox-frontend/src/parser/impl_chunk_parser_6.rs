@@ -8,7 +8,7 @@ impl Parser {
     pub(crate) fn declaration_start(
         modifiers: &Option<Arc<ModifierList>>,
         keyword_pos: usize,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("declaration_start"); 
         modifiers
             .as_ref()
             .and_then(|m| m.nodes.first().map(|n| n.pos()))
@@ -18,7 +18,7 @@ impl Parser {
     pub(crate) fn make_modifier_list(
         &self,
         modifiers: Vec<(SyntaxKind, usize, usize)>,
-    ) -> Arc<ModifierList> {
+    ) -> Arc<ModifierList> { ::tsox_core::fntrace::enter("make_modifier_list"); 
         let mut flags = ModifierFlags::empty();
         let nodes = modifiers
             .into_iter()
@@ -37,7 +37,7 @@ impl Parser {
     pub(crate) fn make_optional_modifier_list(
         &self,
         modifiers: &[(SyntaxKind, usize, usize)],
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("make_optional_modifier_list"); 
         if modifiers.is_empty() {
             None
         } else {
@@ -49,7 +49,7 @@ impl Parser {
         &self,
         modifiers: Vec<(SyntaxKind, usize, usize)>,
         decorators: Vec<Arc<Node>>,
-    ) -> Arc<ModifierList> {
+    ) -> Arc<ModifierList> { ::tsox_core::fntrace::enter("make_modifier_list_with_decorators"); 
         let mut flags = ModifierFlags::empty();
         let mut nodes: Vec<Arc<Node>> = Vec::with_capacity(modifiers.len() + decorators.len());
         for (kind, pos, end) in modifiers {
@@ -67,7 +67,7 @@ impl Parser {
         Arc::new(ModifierList::new(nodes, flags))
     }
 
-    pub(crate) fn parse_decorator(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_decorator(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_decorator"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::AtToken);
         // Go doInContext(NodeFlagsDecoratorContext)：装饰器表达式内不算元素访问

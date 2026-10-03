@@ -5,13 +5,13 @@ use std::sync::Arc;
 use super::m5u_3::{is_only_single_line_whitespace, is_only_spaces_or_tabs, skip_single_line_whitespace, trim_right_single_line_whitespace};
 use tsox_frontend::ast::{self, *};
 
-pub fn is_expando_property_declaration_for_fix(node: Option<&Node>) -> bool {
+pub fn is_expando_property_declaration_for_fix(node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_expando_property_declaration_for_fix"); 
     node.is_some_and(|n| {
         is_property_access_expression(n) || is_element_access_expression(n) || is_binary_expression(n)
     })
 }
 
-pub fn is_named_declaration_kind(node: &Node) -> bool {
+pub fn is_named_declaration_kind(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_named_declaration_kind"); 
     matches!(
         node.kind,
         SyntaxKind::ArrowFunction
@@ -53,11 +53,11 @@ pub fn is_named_declaration_kind(node: &Node) -> bool {
     )
 }
 
-pub fn is_infinity_or_nan_string(text: &str) -> bool {
+pub fn is_infinity_or_nan_string(text: &str) -> bool { ::tsox_core::fntrace::enter("is_infinity_or_nan_string"); 
     text == "Infinity" || text == "NaN"
 }
 
-pub fn is_non_empty_jsdoc(jsdoc: Option<&Node>) -> bool {
+pub fn is_non_empty_jsdoc(jsdoc: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_non_empty_jsdoc"); 
     let Some(jsdoc) = jsdoc else {
         return false;
     };
@@ -70,7 +70,7 @@ pub fn is_non_empty_jsdoc(jsdoc: Option<&Node>) -> bool {
     }
 }
 
-pub fn is_jsdoc_snippet_prefix(prefix: &str) -> bool {
+pub fn is_jsdoc_snippet_prefix(prefix: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_snippet_prefix"); 
     let trimmed = trim_right_single_line_whitespace(prefix);
     if trimmed.ends_with("/**") {
         return true;
@@ -90,7 +90,7 @@ pub fn is_jsdoc_snippet_prefix(prefix: &str) -> bool {
     trimmed.len() - start >= 3
 }
 
-pub fn is_jsdoc_snippet_suffix(suffix: &str) -> bool {
+pub fn is_jsdoc_snippet_suffix(suffix: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_snippet_suffix"); 
     let start = skip_single_line_whitespace(suffix, 0);
     let trimmed = trim_right_single_line_whitespace(&suffix[start..]);
     if trimmed.is_empty() {

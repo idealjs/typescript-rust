@@ -47,7 +47,7 @@ pub mod r39k04_defs;
 
 use super::m4q;
 
-fn source_file_statements(node: &SourceFile) -> &NodeList {
+fn source_file_statements(node: &SourceFile) -> &NodeList { ::tsox_core::fntrace::enter("source_file_statements"); 
     match &node.node.data {
         NodeData::SourceFile(d) => &d.statements,
         _ => panic!("unhandled node data: {:?}", node.node.kind),
@@ -66,12 +66,12 @@ thread_local! {
         RefCell::new(Vec::new());
 }
 
-fn registered_emit_helpers_42k03() -> Vec<Arc<EmitHelper>> {
+fn registered_emit_helpers_42k03() -> Vec<Arc<EmitHelper>> { ::tsox_core::fntrace::enter("registered_emit_helpers_42k03"); 
     REGISTERED_EMIT_HELPERS_42K03.with(|helpers| helpers.borrow().clone())
 }
 
 impl Printer {
-    pub(crate) fn emit_triple_slash_directives(&mut self, node: &Arc<SourceFile>) {
+    pub(crate) fn emit_triple_slash_directives(&mut self, node: &Arc<SourceFile>) { ::tsox_core::fntrace::enter("emit_triple_slash_directives"); 
         self.emit_directive("path", &node.referenced_files);
         self.emit_directive("types", &node.type_reference_directives);
         self.emit_directive("lib", &node.lib_reference_directives);
@@ -81,7 +81,7 @@ impl Printer {
         &mut self,
         kind: &str,
         refs: &[tsox_frontend::ast::node_source_file::FileReference],
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_directive"); 
         use tsox_core::core::compiler_options_kinds::ResolutionMode;
         for r in refs {
             let resolution_mode = if r.resolution_mode != ResolutionMode::None {
@@ -101,7 +101,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_statement"); 
         if let Some(snippet_element) = self.emit_context.snippet_element(node) {
             self.emit_snippet_node(node, &snippet_element);
             return;
@@ -153,7 +153,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_source_file(&mut self, node: &Arc<SourceFile>) {
+    pub(crate) fn emit_source_file(&mut self, node: &Arc<SourceFile>) { ::tsox_core::fntrace::enter("emit_source_file"); 
         let saved_current_source_file = self.current_source_file.take();
         let saved_comments_disabled = self.comments_disabled;
         self.current_source_file = Some(Arc::clone(node));
@@ -194,7 +194,7 @@ impl Printer {
         self.comments_disabled = saved_comments_disabled;
     }
 
-    pub(crate) fn emit_pos(&mut self, pos: usize) {
+    pub(crate) fn emit_pos(&mut self, pos: usize) { ::tsox_core::fntrace::enter("emit_pos"); 
         if self.emit_state39k04(|state| {
             state.source_maps_disabled
                 || state.source_map_source.is_none()
@@ -270,7 +270,7 @@ impl Printer {
         });
     }
 
-    pub(crate) fn emit_source_pos(&mut self, source: &Arc<SourceFile>, pos: usize) {
+    pub(crate) fn emit_source_pos(&mut self, source: &Arc<SourceFile>, pos: usize) { ::tsox_core::fntrace::enter("emit_source_pos"); 
         let same_source = self.emit_state39k04(|state| {
             state.source_map_source.as_ref().is_some_and(|s| Arc::ptr_eq(s, source))
         });
@@ -294,7 +294,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_source_maps_before_node(&mut self, node: &Node) -> Option<SourceMapStateSnapshot> {
+    pub(crate) fn emit_source_maps_before_node(&mut self, node: &Node) -> Option<SourceMapStateSnapshot> { ::tsox_core::fntrace::enter("emit_source_maps_before_node"); 
         if !self.should_emit_source_maps(node) {
             return None;
         }
@@ -322,7 +322,7 @@ impl Printer {
         Some(SourceMapStateSnapshot::new(emit_flags, loc, false))
     }
 
-    pub(crate) fn emit_source_maps_after_node(&mut self, node: &Node, previous_state: Option<SourceMapStateSnapshot>) {
+    pub(crate) fn emit_source_maps_after_node(&mut self, node: &Node, previous_state: Option<SourceMapStateSnapshot>) { ::tsox_core::fntrace::enter("emit_source_maps_after_node"); 
         let Some(previous_state) = previous_state else { return };
 
         let emit_flags = previous_state.emit_flags;
@@ -347,7 +347,7 @@ impl Printer {
         mut pos: usize,
         context_node: &Node,
         flags: TokenEmitFlags,
-    ) -> Option<SourceMapStateSnapshot> {
+    ) -> Option<SourceMapStateSnapshot> { ::tsox_core::fntrace::enter("emit_source_maps_before_token"); 
         if !self.should_emit_token_source_maps(token, pos, context_node, flags) {
             return None;
         }
@@ -374,7 +374,7 @@ impl Printer {
         pos: usize,
         context_node: &Node,
         previous_state: Option<SourceMapStateSnapshot>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_source_maps_after_token"); 
         let Some(previous_state) = previous_state else { return };
 
         let emit_flags = previous_state.emit_flags;
@@ -389,7 +389,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_trailing_comments(&mut self, pos: usize, comment_separator: CommentSeparator) {
+    pub(crate) fn emit_trailing_comments(&mut self, pos: usize, comment_separator: CommentSeparator) { ::tsox_core::fntrace::enter("emit_trailing_comments"); 
         if self.comments_disabled {
             return;
         }
@@ -418,7 +418,7 @@ impl Printer {
         container_pos: usize,
         container_end: usize,
         declaration_list_container_end: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_trailing_comments_of_node"); 
         let pos = comment_range.pos();
         let end = comment_range.end();
         let skip_trailing_comments =
@@ -434,7 +434,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_trailing_comments_of_position(&mut self, pos: usize, prefix_space: bool, force_no_newline: bool) {
+    pub(crate) fn emit_trailing_comments_of_position(&mut self, pos: usize, prefix_space: bool, force_no_newline: bool) { ::tsox_core::fntrace::enter("emit_trailing_comments_of_position"); 
         if self.comments_disabled || self.current_source_file.is_none() {
             return;
         }
@@ -472,7 +472,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_block(&mut self, node: &Node) {
+    pub(crate) fn emit_block(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_block"); 
         let state = self.enter_node(node);
         let block = node.as_block();
         self.generate_names(Some(node));
@@ -501,7 +501,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_variable_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_variable_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_variable_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_variable_statement();
         self.emit_modifier_list(node, statement.modifiers.as_deref(), false);
@@ -510,7 +510,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_variable_declaration_list(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_variable_declaration_list(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_variable_declaration_list"); 
         let state = self.enter_node(node);
         let list = match &node.data {
             NodeData::VariableDeclarationList(d) => d,
@@ -539,11 +539,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_variable_declaration_node(&mut self, node: &Node) {
+    pub(crate) fn emit_variable_declaration_node(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_variable_declaration_node"); 
         self.emit_variable_declaration(node);
     }
 
-    pub(crate) fn emit_variable_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_variable_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_variable_declaration"); 
         let state = self.enter_node(node);
         let declaration = match &node.data {
             NodeData::VariableDeclaration(d) => d,
@@ -560,7 +560,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_empty_statement(&mut self, node: &Node, is_embedded_statement: bool) {
+    pub(crate) fn emit_empty_statement(&mut self, node: &Node, is_embedded_statement: bool) { ::tsox_core::fntrace::enter("emit_empty_statement"); 
         let state = self.enter_node(node);
 
         if is_embedded_statement {
@@ -571,7 +571,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_expression_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_expression_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_expression_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_expression_statement();
 
@@ -605,7 +605,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_iife_with_parenthesized_callee(&mut self, node: &Node) {
+    pub(crate) fn emit_iife_with_parenthesized_callee(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_iife_with_parenthesized_callee"); 
         let call = skip_partially_emitted_expressions07(node);
         let state = self.enter_node(call);
         let call_expression = match &call.data {
@@ -626,7 +626,7 @@ impl Printer {
         self.exit_node(call, state);
     }
 
-    pub(crate) fn emit_if_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_if_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_if_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_if_statement();
         let pos = self.emit_token(SyntaxKind::IfKeyword, node.pos(), WriteKind::Keyword, node);
@@ -658,7 +658,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_while_clause(&mut self, node: &Node, expression: &Node, start_pos: usize) {
+    pub(crate) fn emit_while_clause(&mut self, node: &Node, expression: &Node, start_pos: usize) { ::tsox_core::fntrace::enter("emit_while_clause"); 
         let pos = self.emit_token(SyntaxKind::WhileKeyword, start_pos, WriteKind::Keyword, node);
         self.write_space();
         self.emit_token(SyntaxKind::OpenParenToken, pos, WriteKind::Punctuation, node);
@@ -671,7 +671,7 @@ impl Printer {
         );
     }
 
-    pub(crate) fn emit_do_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_do_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_do_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_do_statement();
         self.emit_token(SyntaxKind::DoKeyword, node.pos(), WriteKind::Keyword, node);
@@ -687,7 +687,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_while_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_while_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_while_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_while_statement();
         self.emit_while_clause(node, &statement.expression, node.pos());
@@ -695,7 +695,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_for_initializer(&mut self, node: &Arc<Node>) {
+    pub(crate) fn emit_for_initializer(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_for_initializer"); 
         if node.kind == SyntaxKind::VariableDeclarationList {
             self.emit_variable_declaration_list(node);
         } else {
@@ -703,7 +703,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_for_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_for_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_for_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_for_statement();
         let mut pos = self.emit_token(SyntaxKind::ForKeyword, node.pos(), WriteKind::Keyword, node);
@@ -730,7 +730,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_for_in_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_for_in_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_for_in_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_for_in_or_of_statement();
         let pos = self.emit_token(SyntaxKind::ForKeyword, node.pos(), WriteKind::Keyword, node);
@@ -756,7 +756,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_for_of_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_for_of_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_for_of_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_for_in_or_of_statement();
         let open_paren_pos = self.emit_token(SyntaxKind::ForKeyword, node.pos(), WriteKind::Keyword, node);
@@ -786,7 +786,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_continue_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_continue_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_continue_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_continue_statement();
         self.emit_token(SyntaxKind::ContinueKeyword, node.pos(), WriteKind::Keyword, node);
@@ -798,7 +798,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_break_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_break_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_break_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_break_statement();
         self.emit_token(SyntaxKind::BreakKeyword, node.pos(), WriteKind::Keyword, node);
@@ -810,13 +810,13 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_label_identifier(&mut self, node: &Node) {
+    pub(crate) fn emit_label_identifier(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_label_identifier"); 
         let state = self.enter_node(node);
         self.emit_identifier_text(node);
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_with_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_with_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_with_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_with_statement();
         let pos = self.emit_token(SyntaxKind::WithKeyword, node.pos(), WriteKind::Keyword, node);
@@ -833,7 +833,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_labeled_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_labeled_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_labeled_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_labeled_statement();
         self.emit_label_identifier(&statement.label);
@@ -848,7 +848,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_try_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_try_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_try_statement"); 
         let state = self.enter_node(node);
         let statement = node.as_try_statement();
         self.emit_token(SyntaxKind::TryKeyword, node.pos(), WriteKind::Keyword, node);
@@ -868,7 +868,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_catch_clause(&mut self, node: &Node) {
+    pub(crate) fn emit_catch_clause(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_catch_clause"); 
         let state = self.enter_node(node);
         let clause = match &node.data {
             NodeData::CatchClause(d) => d,
@@ -893,14 +893,14 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_debugger_statement(&mut self, node: &Node) {
+    pub(crate) fn emit_debugger_statement(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_debugger_statement"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::DebuggerKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_trailing_semicolon();
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_embedded_statement(&mut self, parent_node: &Node, node: &Node) {
+    pub(crate) fn emit_embedded_statement(&mut self, parent_node: &Node, node: &Node) { ::tsox_core::fntrace::enter("emit_embedded_statement"); 
         if is_block(node)
             || self.should_emit_on_single_line(parent_node)
             || self.options.preserve_source_newlines
@@ -920,7 +920,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_function_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_function_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_function_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_function_declaration();
         self.generate_name_if_needed(declaration.name.as_ref());
@@ -941,7 +941,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_class_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_class_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_class_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_class_declaration();
         self.generate_name_if_needed(declaration.name.as_ref());
@@ -973,7 +973,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_interface_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_interface_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_interface_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_interface_declaration();
         self.emit_modifier_list(node, declaration.modifiers.as_deref(), false);
@@ -999,7 +999,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_type_alias_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_type_alias_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_type_alias_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_type_alias_declaration();
         self.emit_modifier_list(node, declaration.modifiers.as_deref(), false);
@@ -1015,7 +1015,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_enum_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_enum_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_enum_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_enum_declaration();
         self.emit_modifier_list(node, declaration.modifiers.as_deref(), false);
@@ -1029,11 +1029,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_enum_member_node(&mut self, node: &Node) {
+    pub(crate) fn emit_enum_member_node(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_enum_member_node"); 
         self.emit_enum_member(node);
     }
 
-    pub(crate) fn emit_enum_member(&mut self, node: &Node) {
+    pub(crate) fn emit_enum_member(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_enum_member"); 
         let state = self.enter_node(node);
         let member = match &node.data {
             NodeData::EnumMember(d) => d,
@@ -1044,7 +1044,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_import_equals_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_import_equals_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_import_equals_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_import_equals_declaration();
         let modifier_pos = self.emit_modifier_list(node, declaration.modifiers.as_deref(), false);
@@ -1068,7 +1068,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_import_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_import_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_import_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_import_declaration();
         let modifier_pos = self.emit_modifier_list(node, declaration.modifiers.as_deref(), false);
@@ -1089,7 +1089,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_import_clause(&mut self, node: &Node) {
+    pub(crate) fn emit_import_clause(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_import_clause"); 
         let state = self.enter_node(node);
         let clause = match &node.data {
             NodeData::ImportClause(d) => d,
@@ -1110,7 +1110,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_import_attributes(&mut self, node: &Node) {
+    pub(crate) fn emit_import_attributes(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_import_attributes"); 
         let state = self.enter_node(node);
         let attributes = match &node.data {
             NodeData::ImportAttributes(d) => d,
@@ -1127,7 +1127,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_export_assignment(&mut self, node: &Node) {
+    pub(crate) fn emit_export_assignment(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_export_assignment"); 
         let state = self.enter_node(node);
         let assignment = node.as_export_assignment();
         let next_pos = self.emit_token(SyntaxKind::ExportKeyword, node.pos(), WriteKind::Keyword, node);
@@ -1152,7 +1152,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_export_declaration(&mut self, node: &Node) {
+    pub(crate) fn emit_export_declaration(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_export_declaration"); 
         let state = self.enter_node(node);
         let declaration = node.as_export_declaration();
         self.emit_modifier_list(node, declaration.modifiers.as_deref(), false);
@@ -1186,11 +1186,11 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub(crate) fn emit_heritage_clause_node(&mut self, node: &Node) {
+    pub(crate) fn emit_heritage_clause_node(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_heritage_clause_node"); 
         self.emit_heritage_clause(node);
     }
 
-    pub(crate) fn emit_heritage_clause_element(&mut self, node: &Node) {
+    pub(crate) fn emit_heritage_clause_element(&mut self, node: &Node) { ::tsox_core::fntrace::enter("emit_heritage_clause_element"); 
         match node.kind {
             SyntaxKind::ExpressionWithTypeArguments => self.emit_expression_with_type_arguments(node),
             SyntaxKind::TypeReference => self.emit_type_reference(node),
@@ -1198,7 +1198,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn write_line_or_space(&mut self, parent_node: &Node, prev_child_node: &Node, next_child_node: &Node) {
+    pub(crate) fn write_line_or_space(&mut self, parent_node: &Node, prev_child_node: &Node, next_child_node: &Node) { ::tsox_core::fntrace::enter("write_line_or_space"); 
         if self.should_emit_on_single_line(parent_node) {
             self.write_space();
         } else if self.options.preserve_source_newlines {
@@ -1213,7 +1213,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn write_lines(&mut self, text: &str) {
+    pub(crate) fn write_lines(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_lines"); 
         let lines = split_lines(text);
         let indentation = guess_indentation(&lines);
         for line in &lines {
@@ -1225,7 +1225,7 @@ impl Printer {
         }
     }
 
-    pub(crate) fn emit_helpers(&mut self, node: &Node) -> bool {
+    pub(crate) fn emit_helpers(&mut self, node: &Node) -> bool { ::tsox_core::fntrace::enter("emit_helpers"); 
         let mut helpers_emitted = false;
         let should_skip = self.options.no_emit_helpers;
         let helpers = registered_emit_helpers_42k03();
@@ -1250,7 +1250,7 @@ impl Printer {
         helpers_emitted
     }
 
-    pub(crate) fn should_emit_detached_comments(&self, node: &Node) -> bool {
+    pub(crate) fn should_emit_detached_comments(&self, node: &Node) -> bool { ::tsox_core::fntrace::enter("should_emit_detached_comments"); 
         if node.kind != SyntaxKind::SourceFile {
             return true;
         }
@@ -1263,7 +1263,7 @@ impl Printer {
             || node_is_synthesized(&statements.nodes[0])
     }
 
-    pub(crate) fn emit_detached_comments_and_update_comments_info(&mut self, text_range: TextRange) {
+    pub(crate) fn emit_detached_comments_and_update_comments_info(&mut self, text_range: TextRange) { ::tsox_core::fntrace::enter("emit_detached_comments_and_update_comments_info"); 
         if self.current_source_file.is_none() {
             return;
         }
@@ -1272,7 +1272,7 @@ impl Printer {
         }
     }
 
-    fn emit_detached_comments(&mut self, text_range: TextRange) -> Option<DetachedCommentsInfo42k03> {
+    fn emit_detached_comments(&mut self, text_range: TextRange) -> Option<DetachedCommentsInfo42k03> { ::tsox_core::fntrace::enter("emit_detached_comments"); 
         let source_file = self.current_source_file.clone()?;
         let text = source_file.text.clone();
 
@@ -1350,7 +1350,7 @@ impl Printer {
         &mut self,
         node: &Node,
         detached_range: &TextRange,
-    ) -> Option<usize> {
+    ) -> Option<usize> { ::tsox_core::fntrace::enter("emit_detached_comments_before_statement_list"); 
         if !self.should_emit_detached_comments(node) {
             return None;
         }
@@ -1375,7 +1375,7 @@ impl Printer {
         node: &Node,
         detached_range: &TextRange,
         state: Option<usize>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_detached_comments_after_statement_list"); 
         let Some(emit_flags) = state else {
             return;
         };
@@ -1397,7 +1397,7 @@ impl Printer {
         &self,
         pos: usize,
         comment_pos: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_emit_new_line_before_leading_comment_of_position"); 
         let Some(source_file) = self.current_source_file.as_ref() else {
             return false;
         };

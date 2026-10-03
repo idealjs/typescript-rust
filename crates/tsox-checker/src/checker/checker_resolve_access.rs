@@ -10,7 +10,7 @@ pub(crate) enum AccessKind {
     ReadWrite,
 }
 
-pub(crate) fn access_kind(node: &Arc<Node>) -> AccessKind {
+pub(crate) fn access_kind(node: &Arc<Node>) -> AccessKind { ::tsox_core::fntrace::enter("access_kind"); 
     let Some(parent) = node.parent() else {
         return AccessKind::Read;
     };
@@ -108,7 +108,7 @@ pub(crate) fn access_kind(node: &Arc<Node>) -> AccessKind {
     }
 }
 
-pub(crate) fn reverse_access_kind(kind: AccessKind) -> AccessKind {
+pub(crate) fn reverse_access_kind(kind: AccessKind) -> AccessKind { ::tsox_core::fntrace::enter("reverse_access_kind"); 
     match kind {
         AccessKind::Read => AccessKind::Write,
         AccessKind::Write => AccessKind::Read,
@@ -116,6 +116,6 @@ pub(crate) fn reverse_access_kind(kind: AccessKind) -> AccessKind {
     }
 }
 
-pub(crate) fn is_write_only_access(node: &Arc<Node>) -> bool {
+pub(crate) fn is_write_only_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_write_only_access"); 
     access_kind(node) == AccessKind::Write
 }

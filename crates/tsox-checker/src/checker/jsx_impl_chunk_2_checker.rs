@@ -3,7 +3,7 @@
 use crate::checker::jsx_impl_chunk_2::*;
 
 impl Checker {
-    pub fn get_jsx_namespace(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    pub fn get_jsx_namespace(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_namespace"); 
         let file_id = self.current_file_id as usize;
         if let Some(cached) = self.jsx_implicit_namespace.get(&file_id)
             && let Some(ns) = cached
@@ -13,7 +13,7 @@ impl Checker {
         self.globals.get(JsxNames::JSX).cloned()
     }
 
-    pub fn get_jsx_type(&self, name: &str) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    pub fn get_jsx_type(&self, name: &str) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_type"); 
         let ns = self.get_jsx_namespace()?;
         ns.members
             .get(name)
@@ -22,25 +22,25 @@ impl Checker {
             .or_else(|| self.ambient_namespace_local(&ns, name))
     }
 
-    pub fn get_jsx_element_type(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    pub fn get_jsx_element_type(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_element_type"); 
         self.get_jsx_type(JsxNames::ELEMENT)
     }
 
-    pub fn get_jsx_intrinsic_elements(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    pub fn get_jsx_intrinsic_elements(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_intrinsic_elements"); 
         self.get_jsx_type(JsxNames::INTRINSIC_ELEMENTS)
     }
 
-    pub fn is_jsx_enabled(&self) -> bool {
+    pub fn is_jsx_enabled(&self) -> bool { ::tsox_core::fntrace::enter("is_jsx_enabled"); 
         self.compiler_options.jsx != tsox_core::core::compiler_options::JsxEmit::None
     }
 
-    pub fn check_jsx_preconditions(&mut self, error_node: &Arc<Node>) {
+    pub fn check_jsx_preconditions(&mut self, error_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_preconditions"); 
         if !self.is_jsx_enabled() {
             self.grammar_error_on_node(error_node, &CANNOT_USE_JSX_UNLESS_THE_JSX_FLAG_IS_PROVIDED);
         }
     }
 
-    pub(crate) fn ensure_jsx_implicit_container(&mut self, error_node: &Arc<Node>) {
+    pub(crate) fn ensure_jsx_implicit_container(&mut self, error_node: &Arc<Node>) { ::tsox_core::fntrace::enter("ensure_jsx_implicit_container"); 
         use tsox_core::core::compiler_options::JsxEmit;
         let file_id = self.current_file_id as usize;
         if self.jsx_implicit_namespace.contains_key(&file_id) {
@@ -116,7 +116,7 @@ impl Checker {
     fn jsx_namespace_container_symbol(
         &mut self,
         name: &str,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("jsx_namespace_container_symbol"); 
         let symbol_map = self.program.symbol_map();
         for &container_id in self.scope_stack.iter().rev() {
             let found = symbol_map
@@ -140,7 +140,7 @@ impl Checker {
     pub(crate) fn resolve_jsx_runtime_by_path(
         &self,
         module_ref: &str,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("resolve_jsx_runtime_by_path"); 
         let containing = self
             .current_file
             .as_ref()
@@ -157,7 +157,7 @@ impl Checker {
         self.program.symbol_map().symbol_of(&sf.node).cloned()
     }
 
-    pub fn check_jsx_intrinsic_element(&mut self, opening: &Arc<Node>) {
+    pub fn check_jsx_intrinsic_element(&mut self, opening: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_intrinsic_element"); 
         let tag_name = match jsx_tag_name(opening) {
             Some(t) => t,
             None => return,
@@ -212,7 +212,7 @@ impl Checker {
         }
     }
 
-    pub fn check_jsx_component(&mut self, opening: &Arc<Node>) {
+    pub fn check_jsx_component(&mut self, opening: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_component"); 
         let tag_name = match jsx_tag_name(opening) {
             Some(t) => t,
             None => return,
@@ -243,11 +243,11 @@ impl Checker {
         }
     }
 
-    pub(crate) fn jsx_factory_namespace_in_scope(&self, name: &str) -> bool {
+    pub(crate) fn jsx_factory_namespace_in_scope(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("jsx_factory_namespace_in_scope"); 
         self.jsx_factory_namespace_symbol(name).is_some()
     }
 
-    pub(crate) fn local_jsx_pragma_factory(&self, pragma: &str) -> Option<String> {
+    pub(crate) fn local_jsx_pragma_factory(&self, pragma: &str) -> Option<String> { ::tsox_core::fntrace::enter("local_jsx_pragma_factory"); 
         let file = self.current_file.as_ref()?;
         let ranges = tsox_frontend::scanner::get_leading_comment_ranges(&file.text, 0);
         let mut result = None;

@@ -8,7 +8,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         data: &tsox_frontend::ast::node_data_generated::BinaryExpressionData,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_assignment_compat"); 
         use tsox_frontend::ast::SyntaxKind::*;
 
         if data.operator_token.kind == EqualsToken
@@ -191,7 +191,7 @@ impl Checker {
         &mut self,
         target: &Arc<Node>,
         right_type: &Arc<Type>,
-    ) -> Option<tsox_core::diagnostics::Message> {
+    ) -> Option<tsox_core::diagnostics::Message> { ::tsox_core::fntrace::enter("exact_optional_mismatch_head_message"); 
         if !self.exact_optional_property_types {
             return None;
         }
@@ -216,7 +216,7 @@ impl Checker {
         &mut self,
         owner: Option<&Arc<Type>>,
         prop: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("write_type_of_property_symbol"); 
         let mut t = None;
         if prop.flags.contains(SymbolFlags::SetAccessor)
             && let Some(setter) = prop
@@ -259,7 +259,7 @@ impl Checker {
 
     // setter 目标的赋值报错文案：联合写类型去掉 undefined 成员
     // （Go getFlowTypeOfAccessExpression 对确定性写路径的 removeMissingType）
-    fn assignment_report_type(&mut self, target: &Arc<Node>, write_type: &Arc<Type>) -> Arc<Type> {
+    fn assignment_report_type(&mut self, target: &Arc<Node>, write_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("assignment_report_type"); 
         let has_setter = match &target.data {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
                 let obj_type = self.get_type_of_node(&pa.expression);
@@ -293,7 +293,7 @@ impl Checker {
         Arc::clone(write_type)
     }
 
-    pub(crate) fn assignment_target_type(&mut self, target: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn assignment_target_type(&mut self, target: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("assignment_target_type"); 
         match &target.data {
             tsox_frontend::ast::NodeData::Identifier(_) => {
                 let sym = self.resolve_identifier(target)?;
@@ -329,7 +329,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn assignment_target_is_readonly(&mut self, target: &Arc<Node>) -> bool {
+    pub(crate) fn assignment_target_is_readonly(&mut self, target: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("assignment_target_is_readonly"); 
         match &target.data {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
                 let obj_type = self.get_type_of_node(&pa.expression);
@@ -359,7 +359,7 @@ impl Checker {
     }
 
     /// 元素访问的属性键：字符串/数字字面量按文本，`Symbol.<well-known>` 按内部名
-    fn element_access_property_key(arg: &Arc<Node>) -> Option<String> {
+    fn element_access_property_key(arg: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("element_access_property_key"); 
         match arg.kind {
             SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
                 Some(arg.text().to_string())
@@ -372,7 +372,7 @@ impl Checker {
         &mut self,
         obj_expr: &Arc<Node>,
         name: &str,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("namespace_const_member"); 
         if obj_expr.kind != SyntaxKind::Identifier {
             return None;
         }

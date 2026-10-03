@@ -1,4 +1,4 @@
-pub fn is_symlink_or_reparse_point(path: &str) -> bool {
+pub fn is_symlink_or_reparse_point(path: &str) -> bool { crate::fntrace::enter("is_symlink_or_reparse_point"); 
     #[cfg(unix)]
     {
         match std::fs::symlink_metadata(path) {

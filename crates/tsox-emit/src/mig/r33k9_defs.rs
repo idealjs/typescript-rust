@@ -21,7 +21,7 @@ pub const OUTER_EXPRESSION_KINDS_ALL_EXCEPT_ASSERTIONS_OR_EXPRESSIONS_WITH_TYPE_
     )
     .difference(OuterExpressionKinds::EXPRESSIONS_WITH_TYPE_ARGUMENTS);
 
-pub fn is_static(node: &Node) -> bool {
+pub fn is_static(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_static"); 
     is_class_element(node) && has_static_modifier(node) || is_class_static_block_declaration(node)
 }
 
@@ -29,7 +29,7 @@ pub fn child_is_decorated(
     use_legacy_decorators: bool,
     node: &Arc<Node>,
     parent: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("child_is_decorated"); 
     match node.kind {
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => members(node)
             .iter()
@@ -47,7 +47,7 @@ pub fn class_element_or_class_element_parameter_is_decorated(
     use_legacy_decorators: bool,
     node: &Arc<Node>,
     parent: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("class_element_or_class_element_parameter_is_decorated"); 
     let mut parameter_list: Option<&[Arc<Node>]> = None;
     let decls;
     if is_accessor(node) {
@@ -90,7 +90,7 @@ pub fn class_element_or_class_element_parameter_is_decorated(
 
 pub fn get_innermost_module_declaration_from_dotted_module(
     module_declaration: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_innermost_module_declaration_from_dotted_module"); 
     let mut current = Arc::clone(module_declaration);
     loop {
         let next = match &current.data {

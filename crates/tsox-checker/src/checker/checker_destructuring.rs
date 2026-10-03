@@ -8,7 +8,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         source_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_destructuring_assignment"); 
         self.check_destructuring_assignment_ex(node, source_type, false);
     }
 
@@ -17,7 +17,7 @@ impl Checker {
         node: &Arc<Node>,
         source_type: &Arc<Type>,
         right_is_this: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_destructuring_assignment_ex"); 
         let mut target = Arc::clone(node);
         let mut source_type = Arc::clone(source_type);
         let mut shorthand_initializer: Option<Arc<Node>> = None;
@@ -85,7 +85,7 @@ impl Checker {
         node: &Arc<Node>,
         source_type: &Arc<Type>,
         right_is_this: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_object_literal_assignment"); 
         let NodeData::ObjectLiteralExpression(data) = &node.data else {
             return;
         };
@@ -148,7 +148,7 @@ impl Checker {
         node: &Arc<Node>,
         source_type: &Arc<Type>,
         _check_mode: crate::checker::types_alias_symbol_links::CheckMode,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_array_literal_assignment"); 
         let NodeData::ArrayLiteralExpression(data) = &node.data else {
             return;
         };
@@ -174,7 +174,7 @@ impl Checker {
         source_type: &Arc<Type>,
         element_index: usize,
         element_type: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_array_literal_destructuring_element"); 
         let NodeData::ArrayLiteralExpression(data) = &node.data else {
             return;
         };
@@ -241,7 +241,7 @@ impl Checker {
         target: &Arc<Node>,
         source_type: &Arc<Type>,
         _check_mode: crate::checker::types_alias_symbol_links::CheckMode,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_reference_assignment"); 
         self.check_expression(target);
         let mut node = Arc::clone(target);
         while node.kind == SyntaxKind::ParenthesizedExpression
@@ -270,7 +270,7 @@ impl Checker {
         );
     }
 
-    fn property_assignment_name(&self, name: &Arc<Node>) -> String {
+    fn property_assignment_name(&self, name: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("property_assignment_name"); 
         match &name.data {
             NodeData::StringLiteral(s) => s.text.clone(),
             NodeData::NumericLiteral(n) => n.text.clone(),
@@ -278,12 +278,12 @@ impl Checker {
         }
     }
 
-    fn element_has_default_value(&self, element: &Arc<Node>) -> bool {
+    fn element_has_default_value(&self, element: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("element_has_default_value"); 
         matches!(&element.data, NodeData::BinaryExpression(bin)
             if bin.operator_token.kind == SyntaxKind::EqualsToken)
     }
 
-    fn type_is_or_contains_undefined(&self, t: &Arc<Type>) -> bool {
+    fn type_is_or_contains_undefined(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_or_contains_undefined"); 
         if t.flags.contains(TypeFlags::Undefined) {
             return true;
         }
@@ -293,7 +293,7 @@ impl Checker {
             })
     }
 
-    pub(crate) fn remove_undefined_from_union(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn remove_undefined_from_union(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_undefined_from_union"); 
         if !t.is_union() {
             return Arc::clone(t);
         }

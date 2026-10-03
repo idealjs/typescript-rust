@@ -7,7 +7,7 @@ use tsox_tsoptions::module::Resolver;
 // lib.dom.d.ts -> @typescript/lib-dom
 // lib.dom.iterable.d.ts -> @typescript/lib-dom/iterable
 // lib.es2015.symbol.wellknown.d.ts -> @typescript/lib-es2015/symbol-wellknown
-pub(crate) fn library_name_from_lib_file_name(lib_file_name: &str) -> String {
+pub(crate) fn library_name_from_lib_file_name(lib_file_name: &str) -> String { ::tsox_core::fntrace::enter("library_name_from_lib_file_name"); 
     let components: Vec<&str> = lib_file_name.split('.').collect();
     let mut path = String::from("@typescript/lib-");
     if components.len() > 1 {
@@ -27,7 +27,7 @@ pub(crate) fn library_name_from_lib_file_name(lib_file_name: &str) -> String {
 }
 
 // Go fileloader getInferredLibraryNameResolveFrom
-fn inferred_library_name_resolve_from(options: &CompilerOptions, host: &dyn CompilerHost, lib_file_name: &str) -> String {
+fn inferred_library_name_resolve_from(options: &CompilerOptions, host: &dyn CompilerHost, lib_file_name: &str) -> String { ::tsox_core::fntrace::enter("inferred_library_name_resolve_from"); 
     let containing_directory = if !options.config_file_path.is_empty() {
         tsox_core::tspath::get_directory_path(&options.config_file_path)
     } else {
@@ -43,7 +43,7 @@ pub(crate) fn resolve_lib_file_path(
     options: &CompilerOptions,
     resolver: &Resolver,
     host: &dyn CompilerHost,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("resolve_lib_file_path"); 
     let mut path = tsox_core::tspath::combine_paths(host.default_library_path(), &[lib_name]);
     if options.lib_replacement.is_true() && lib_name != "lib.d.ts" {
         let library_name = library_name_from_lib_file_name(lib_name);

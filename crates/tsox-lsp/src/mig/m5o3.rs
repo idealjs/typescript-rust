@@ -38,12 +38,12 @@ pub fn new_import_adder(
     format_options: FormatCodeSettings,
     converters: (),
     preferences: UserPreferences,
-) -> ImportAdder {
+) -> ImportAdder { ::tsox_core::fntrace::enter("new_import_adder"); 
     ImportAdder::new(program, checker, file, view, format_options, converters, preferences)
 }
 
 impl ImportAdder {
-    pub fn get_all_exports_for_symbol(&self, symbol: &Arc<Symbol>) -> Vec<Export> {
+    pub fn get_all_exports_for_symbol(&self, symbol: &Arc<Symbol>) -> Vec<Export> { ::tsox_core::fntrace::enter("get_all_exports_for_symbol"); 
         let ch = self.checker.as_ref().expect("import adder requires checker");
         let merged = ch.get_merged_symbol(&ch.skip_alias(symbol));
         if let Some(export) = crate::ls::autoimport_export::symbol_to_export(merged.as_ref(), ch) {
@@ -62,7 +62,7 @@ impl ImportAdder {
         file: &SourceFile,
         exports: &[Export],
         is_valid_type_only_use_site: bool,
-    ) -> Option<Fix> {
+    ) -> Option<Fix> { ::tsox_core::fntrace::enter("get_import_fix_for_symbol"); 
         let mut fixes: Vec<Fix> = exports
             .iter()
             .flat_map(|export| view.get_fixes(export, false, is_valid_type_only_use_site, None))
@@ -77,7 +77,7 @@ impl ImportAdder {
         import_kind: ImportKind,
         use_require: bool,
         add_as_type_only: AddAsTypeOnly,
-    ) -> &mut ImportsCollection {
+    ) -> &mut ImportsCollection { ::tsox_core::fntrace::enter("get_new_import_entry"); 
         let type_only_key = new_imports_key(module_specifier, true);
         let non_type_only_key = new_imports_key(module_specifier, false);
         let new_entry = ImportsCollection {
@@ -110,7 +110,7 @@ impl ImportAdder {
     }
 }
 
-pub fn import_symbols(import_adder: &mut dyn ImportAdderTrait, symbols: &[Arc<Symbol>]) {
+pub fn import_symbols(import_adder: &mut dyn ImportAdderTrait, symbols: &[Arc<Symbol>]) { ::tsox_core::fntrace::enter("import_symbols"); 
     for symbol in symbols {
         import_adder.add_import_from_exported_symbol(symbol, true);
     }
@@ -120,7 +120,7 @@ pub fn type_node_to_auto_importable_type_node(
     type_node: &Arc<Node>,
     import_adder: &mut dyn ImportAdderTrait,
     id_to_symbol: &HashMap<u64, Arc<Symbol>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("type_node_to_auto_importable_type_node"); 
     let (reference_type_node, importable_symbols) =
         try_get_auto_importable_reference_from_type_node(type_node, id_to_symbol);
     let mut result = type_node.clone();
@@ -134,14 +134,14 @@ pub fn type_node_to_auto_importable_type_node(
 pub fn try_get_auto_importable_reference_from_type_node(
     import_type_node: &Arc<Node>,
     id_to_symbol: &HashMap<u64, Arc<Symbol>>,
-) -> (Option<Arc<Node>>, Vec<Arc<Symbol>>) {
+) -> (Option<Arc<Node>>, Vec<Arc<Symbol>>) { ::tsox_core::fntrace::enter("try_get_auto_importable_reference_from_type_node"); 
     let factory = NodeFactoryStub;
     let mut symbols: Vec<Arc<Symbol>> = Vec::new();
     let type_node = visit_auto_import_node(import_type_node, &factory, id_to_symbol, &mut symbols);
     (Some(type_node), symbols)
 }
 
-fn is_literal_import_type_node(node: &Arc<Node>) -> bool {
+fn is_literal_import_type_node(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_literal_import_type_node"); 
     if node.kind != ast::SyntaxKind::ImportType {
         return false;
     }
@@ -160,7 +160,7 @@ fn visit_auto_import_node(
     _factory: &NodeFactoryStub,
     id_to_symbol: &HashMap<u64, Arc<Symbol>>,
     symbols: &mut Vec<Arc<Symbol>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_auto_import_node"); 
     let state = Rc::new(VisitAutoImportState {
         id_to_symbol: Arc::new(id_to_symbol.clone()),
         symbols: RefCell::new(Vec::new()),
@@ -175,7 +175,7 @@ struct VisitAutoImportState {
     symbols: RefCell<Vec<Arc<Symbol>>>,
 }
 
-fn visit_auto_import_with_state(node: &Arc<Node>, state: Rc<VisitAutoImportState>) -> Arc<Node> {
+fn visit_auto_import_with_state(node: &Arc<Node>, state: Rc<VisitAutoImportState>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_auto_import_with_state"); 
     if is_literal_import_type_node(node) {
         let tsox_frontend::ast::NodeData::ImportTypeNode(d) = &node.data else {
             unreachable!();
@@ -222,7 +222,7 @@ pub fn replace_first_identifier_of_entity_name(
     factory: &NodeFactoryStub,
     name: &Arc<Node>,
     new_identifier: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("replace_first_identifier_of_entity_name"); 
     if name.kind == ast::SyntaxKind::Identifier {
         return new_identifier.clone();
     }
@@ -237,7 +237,7 @@ pub fn replace_first_identifier_of_entity_name(
 
 pub fn sorted_named_imports(
     named_imports: &HashMap<String, crate::ls::autoimport_fix::NewImportBinding>,
-) -> Vec<crate::ls::autoimport_fix::NewImportBinding> {
+) -> Vec<crate::ls::autoimport_fix::NewImportBinding> { ::tsox_core::fntrace::enter("sorted_named_imports"); 
     let mut keys: Vec<&String> = named_imports.keys().collect();
     keys.sort();
     keys.into_iter()

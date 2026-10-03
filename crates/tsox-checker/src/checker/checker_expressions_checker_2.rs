@@ -3,7 +3,7 @@
 use crate::checker::checker_expressions::*;
 
 impl Checker {
-    pub(crate) fn collect_return_expressions(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) {
+    pub(crate) fn collect_return_expressions(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("collect_return_expressions"); 
         tsox_frontend::ast::node_data_generated::for_each_child(node, |child| match child.kind {
             SyntaxKind::ReturnStatement => {
                 if let tsox_frontend::ast::NodeData::ReturnStatement(r) = &child.data
@@ -26,9 +26,9 @@ impl Checker {
         });
     }
 
-    pub(crate) fn subtree_contains_this(node: &Arc<Node>) -> bool {
+    pub(crate) fn subtree_contains_this(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("subtree_contains_this"); 
         let mut found = false;
-        fn walk(root: &Arc<Node>, n: &Arc<Node>, found: &mut bool) {
+        fn walk(root: &Arc<Node>, n: &Arc<Node>, found: &mut bool) { ::tsox_core::fntrace::enter("walk"); 
             if *found {
                 return;
             }
@@ -65,7 +65,7 @@ impl Checker {
         found
     }
 
-    pub(crate) fn getter_return_reaches_this(&mut self, accessor: &Arc<Node>) -> bool {
+    pub(crate) fn getter_return_reaches_this(&mut self, accessor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("getter_return_reaches_this"); 
         let tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) = &accessor.data else {
             return false;
         };
@@ -121,9 +121,9 @@ impl Checker {
         node: &Arc<Node>,
         aliases: &[String],
         own_name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("subtree_reads_member_from_this"); 
         let mut found = false;
-        fn walk(n: &Arc<Node>, aliases: &[String], own_name: &str, found: &mut bool) {
+        fn walk(n: &Arc<Node>, aliases: &[String], own_name: &str, found: &mut bool) { ::tsox_core::fntrace::enter("walk"); 
             if *found {
                 return;
             }
@@ -149,7 +149,7 @@ impl Checker {
         &self,
         t: &Arc<Type>,
         depth: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("this_type_marker_argument"); 
         if depth > 4 {
             return None;
         }
@@ -171,7 +171,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn build_object_literal_this_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn build_object_literal_this_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_object_literal_this_type"); 
         let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &node.data else {
             return self.get_any_type();
         };
@@ -256,7 +256,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn check_object_literal_element(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_object_literal_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_object_literal_element"); 
         if let Some(name) = node.name()
             && name.kind == SyntaxKind::PrivateIdentifier
         {

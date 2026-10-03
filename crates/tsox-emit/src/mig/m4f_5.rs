@@ -34,7 +34,7 @@ use crate::mig::m4m_2::is_simple_inlineable_expression;
 use crate::printer::{AutoGenerateOptions, NodeFactory};
 
 impl ClassFieldsTransformer<'_> {
-    pub fn visit_method_or_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_method_or_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_method_or_accessor_declaration"); 
         debug_assert!(!has_decorators(node));
 
         if !is_private_identifier_class_element_declaration(node)
@@ -88,7 +88,7 @@ impl ClassFieldsTransformer<'_> {
         None
     }
 
-    pub fn get_hoisted_function_name(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_hoisted_function_name(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_hoisted_function_name"); 
         let name = node.name();
         debug_assert!(name.is_some() && is_private_identifier(name.unwrap()));
         let info = self.access_private_identifier(name?)?;
@@ -110,7 +110,7 @@ impl ClassFieldsTransformer<'_> {
     fn extract_modifiers_excluding_static_and_accessor(
         &self,
         node: &Arc<Node>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("extract_modifiers_excluding_static_and_accessor"); 
         let ec = Arc::new(self.emit_context.clone());
         extract_modifiers(
             &ec,
@@ -120,7 +120,7 @@ impl ClassFieldsTransformer<'_> {
         .map(Arc::new)
     }
 
-    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_property_declaration"); 
         if is_auto_accessor_property_declaration(node)
             && (self.should_transform_auto_accessors_in_current_class()
                 || has_static_modifier(node)
@@ -131,7 +131,7 @@ impl ClassFieldsTransformer<'_> {
         self.transform_field_initializer(node)
     }
 
-    pub fn transform_auto_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_auto_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_auto_accessor"); 
         let comment_range = self.emit_context.comment_range(node);
         let source_map_range = self.emit_context.source_map_range(node);
 

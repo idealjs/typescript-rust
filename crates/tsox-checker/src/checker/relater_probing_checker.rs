@@ -3,7 +3,7 @@
 use crate::checker::relater_probing::*;
 
 impl Checker {
-    pub fn resolve_conditional_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn resolve_conditional_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolve_conditional_type"); 
         let ct = match &t.data {
             TypeData::Conditional(ct) => ct,
             _ => return None,
@@ -58,7 +58,7 @@ impl Checker {
         t: &Arc<Type>,
         check_override: Option<Arc<Type>>,
         extends_override: Option<Arc<Type>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolve_conditional_type_with_check"); 
         let ct = match &t.data {
             TypeData::Conditional(ct) => ct,
             _ => return None,

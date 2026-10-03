@@ -7,12 +7,12 @@ use tsox_core::core::text::TextRange;
 use crate::parser::Parser;
 use crate::parser::reparser::*;
 
-pub(crate) fn parse_source(text: &str) -> (Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>) {
+pub(crate) fn parse_source(text: &str) -> (Arc<SourceFile>, Vec<crate::parser::ParserDiagnostic>) { ::tsox_core::fntrace::enter("parse_source"); 
     let result = Parser::parse_source_file_text_with_diagnostics("test.ts", text.to_string());
     (Arc::new(result.0), result.1)
 }
 
-pub(crate) fn get_first_statement_jsdoc(file: &SourceFile) -> Vec<Arc<Node>> {
+pub(crate) fn get_first_statement_jsdoc(file: &SourceFile) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_first_statement_jsdoc"); 
     let statements = match &file.node.data {
         NodeData::SourceFile(d) => &d.statements.nodes,
         _ => return Vec::new(),
@@ -26,7 +26,7 @@ pub(crate) fn get_first_statement_jsdoc(file: &SourceFile) -> Vec<Arc<Node>> {
 }
 
 #[test]
-pub(crate) fn test_typedef_simple() {
+pub(crate) fn test_typedef_simple() { ::tsox_core::fntrace::enter("test_typedef_simple"); 
     let text = r#"
 /**
  * @typedef {string} MyString
@@ -64,7 +64,7 @@ let x;
 }
 
 #[test]
-pub(crate) fn test_typedef_object_literal() {
+pub(crate) fn test_typedef_object_literal() { ::tsox_core::fntrace::enter("test_typedef_object_literal"); 
     let text = r#"
 /**
  * @typedef {Object} Point
@@ -97,7 +97,7 @@ let p;
 }
 
 #[test]
-pub(crate) fn test_typedef_namespace() {
+pub(crate) fn test_typedef_namespace() { ::tsox_core::fntrace::enter("test_typedef_namespace"); 
     let text = r#"
 /**
  * @typedef {string} Foo.Bar
@@ -135,7 +135,7 @@ let x;
 }
 
 #[test]
-pub(crate) fn test_callback_tag() {
+pub(crate) fn test_callback_tag() { ::tsox_core::fntrace::enter("test_callback_tag"); 
     let text = r#"
 /**
  * @callback MyCallback
@@ -173,7 +173,7 @@ let x;
 }
 
 #[test]
-pub(crate) fn test_import_tag() {
+pub(crate) fn test_import_tag() { ::tsox_core::fntrace::enter("test_import_tag"); 
     let text = r#"
 /**
  * @import { Foo } from "bar"
@@ -194,7 +194,7 @@ let x;
 }
 
 #[test]
-pub(crate) fn test_overload_tag_function() {
+pub(crate) fn test_overload_tag_function() { ::tsox_core::fntrace::enter("test_overload_tag_function"); 
     let text = r#"
 /**
  * @overload
@@ -215,7 +215,7 @@ function foo(x) { return x; }
 }
 
 #[test]
-pub(crate) fn test_no_unhosted_tags() {
+pub(crate) fn test_no_unhosted_tags() { ::tsox_core::fntrace::enter("test_no_unhosted_tags"); 
     let text = r#"
 /**
  * @param {string} x
@@ -238,7 +238,7 @@ function foo(x) { return 42; }
 }
 
 #[test]
-pub(crate) fn test_get_innermost_name_simple() {
+pub(crate) fn test_get_innermost_name_simple() { ::tsox_core::fntrace::enter("test_get_innermost_name_simple"); 
     let ident = Arc::new(Node::with_loc(
         SyntaxKind::Identifier,
         NodeData::Identifier(IdentifierData {
@@ -252,7 +252,7 @@ pub(crate) fn test_get_innermost_name_simple() {
 }
 
 #[test]
-pub(crate) fn test_get_innermost_name_namespace() {
+pub(crate) fn test_get_innermost_name_namespace() { ::tsox_core::fntrace::enter("test_get_innermost_name_namespace"); 
     let c = Arc::new(Node::with_loc(
         SyntaxKind::Identifier,
         NodeData::Identifier(IdentifierData {
@@ -300,7 +300,7 @@ pub(crate) fn test_get_innermost_name_namespace() {
 }
 
 #[test]
-pub(crate) fn test_wrap_in_jsdoc_namespace_simple() {
+pub(crate) fn test_wrap_in_jsdoc_namespace_simple() { ::tsox_core::fntrace::enter("test_wrap_in_jsdoc_namespace_simple"); 
     let statement = Arc::new(Node::with_loc(
         SyntaxKind::TypeAliasDeclaration,
         NodeData::TypeAliasDeclaration(TypeAliasDeclarationData {
@@ -327,7 +327,7 @@ pub(crate) fn test_wrap_in_jsdoc_namespace_simple() {
 }
 
 #[test]
-pub(crate) fn test_integration_typedef_prepended_to_statements() {
+pub(crate) fn test_integration_typedef_prepended_to_statements() { ::tsox_core::fntrace::enter("test_integration_typedef_prepended_to_statements"); 
     let text = r#"
 /**
  * @typedef {string} MyString
@@ -354,7 +354,7 @@ let x;
 }
 
 #[test]
-pub(crate) fn test_integration_typedef_namespace_prepended() {
+pub(crate) fn test_integration_typedef_namespace_prepended() { ::tsox_core::fntrace::enter("test_integration_typedef_namespace_prepended"); 
     let text = r#"
 /**
  * @typedef {string} Foo.Bar
@@ -373,7 +373,7 @@ let x;
 }
 
 #[test]
-pub(crate) fn test_integration_overload_prepended_to_function() {
+pub(crate) fn test_integration_overload_prepended_to_function() { ::tsox_core::fntrace::enter("test_integration_overload_prepended_to_function"); 
     let text = r#"
 /**
  * @overload
@@ -402,7 +402,7 @@ function foo(x) { return x; }
 }
 
 #[test]
-pub(crate) fn test_integration_no_jsdoc_unchanged() {
+pub(crate) fn test_integration_no_jsdoc_unchanged() { ::tsox_core::fntrace::enter("test_integration_no_jsdoc_unchanged"); 
     let text = "let x = 1;\nlet y = 2;\n";
     let (file, _diags) = parse_source(text);
     let statements = match &file.node.data {
@@ -413,7 +413,7 @@ pub(crate) fn test_integration_no_jsdoc_unchanged() {
 }
 
 #[test]
-pub(crate) fn test_integration_hosted_tags_only_unchanged() {
+pub(crate) fn test_integration_hosted_tags_only_unchanged() { ::tsox_core::fntrace::enter("test_integration_hosted_tags_only_unchanged"); 
     let text = r#"
 /**
  * @param {string} x

@@ -6,18 +6,18 @@ use tsox_core::tspath::get_base_file_name;
 
 use crate::scanner::is_jsx_line_break::CommentRangeKind;
 
-fn decode_rune(text: &str, pos: usize) -> (char, usize) {
+fn decode_rune(text: &str, pos: usize) -> (char, usize) { ::tsox_core::fntrace::enter("decode_rune"); 
     match text[pos..].chars().next() {
         Some(ch) => (ch, ch.len_utf8()),
         None => ('\u{FFFD}', 0),
     }
 }
 
-pub fn has_leading_hash(text: &str) -> bool {
+pub fn has_leading_hash(text: &str) -> bool { ::tsox_core::fntrace::enter("has_leading_hash"); 
     !text.is_empty() && text.as_bytes()[0] == b'#'
 }
 
-pub fn remove_leading_hash(text: &str) -> &str {
+pub fn remove_leading_hash(text: &str) -> &str { ::tsox_core::fntrace::enter("remove_leading_hash"); 
     if has_leading_hash(text) {
         &text[1..]
     } else {
@@ -25,7 +25,7 @@ pub fn remove_leading_hash(text: &str) -> &str {
     }
 }
 
-pub fn ensure_leading_hash(text: &str) -> String {
+pub fn ensure_leading_hash(text: &str) -> String { ::tsox_core::fntrace::enter("ensure_leading_hash"); 
     if has_leading_hash(text) {
         text.to_string()
     } else {
@@ -33,7 +33,7 @@ pub fn ensure_leading_hash(text: &str) -> String {
     }
 }
 
-pub fn format_generated_name(private_name: bool, prefix: &str, base: &str, suffix: &str) -> String {
+pub fn format_generated_name(private_name: bool, prefix: &str, base: &str, suffix: &str) -> String { ::tsox_core::fntrace::enter("format_generated_name"); 
     let name = format!(
         "{}{}{}",
         remove_leading_hash(prefix),
@@ -46,11 +46,11 @@ pub fn format_generated_name(private_name: bool, prefix: &str, base: &str, suffi
     name
 }
 
-pub fn is_ascii_word_character(ch: char) -> bool {
+pub fn is_ascii_word_character(ch: char) -> bool { ::tsox_core::fntrace::enter("is_ascii_word_character"); 
     is_ascii_letter(ch) || is_digit(ch) || ch == '_'
 }
 
-pub fn make_identifier_from_module_name(module_name: &str) -> String {
+pub fn make_identifier_from_module_name(module_name: &str) -> String { ::tsox_core::fntrace::enter("make_identifier_from_module_name"); 
     let module_name = get_base_file_name(module_name);
     let mut builder = String::new();
     let mut start = 0;
@@ -80,7 +80,7 @@ pub fn find_span_end_with_emit_context<T>(
     array: &[T],
     test: impl Fn(&EmitContext, &T) -> bool,
     start: usize,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("find_span_end_with_emit_context"); 
     let mut i = start;
     while i < array.len() && test(c, &array[i]) {
         i += 1;
@@ -88,7 +88,7 @@ pub fn find_span_end_with_emit_context<T>(
     i
 }
 
-pub fn find_span_end<T>(array: &[T], test: impl Fn(&T) -> bool, start: usize) -> usize {
+pub fn find_span_end<T>(array: &[T], test: impl Fn(&T) -> bool, start: usize) -> usize { ::tsox_core::fntrace::enter("find_span_end"); 
     let mut i = start;
     while i < array.len() && test(&array[i]) {
         i += 1;
@@ -96,7 +96,7 @@ pub fn find_span_end<T>(array: &[T], test: impl Fn(&T) -> bool, start: usize) ->
     i
 }
 
-pub fn skip_white_space_single_line(text: &str, pos: &mut usize) {
+pub fn skip_white_space_single_line(text: &str, pos: &mut usize) { ::tsox_core::fntrace::enter("skip_white_space_single_line"); 
     while *pos < text.len() {
         let (ch, size) = decode_rune(text, *pos);
         if !is_white_space_single_line(ch) {
@@ -106,13 +106,13 @@ pub fn skip_white_space_single_line(text: &str, pos: &mut usize) {
     }
 }
 
-pub fn match_white_space_single_line(text: &str, pos: &mut usize) -> bool {
+pub fn match_white_space_single_line(text: &str, pos: &mut usize) -> bool { ::tsox_core::fntrace::enter("match_white_space_single_line"); 
     let start_pos = *pos;
     skip_white_space_single_line(text, pos);
     *pos != start_pos
 }
 
-pub fn match_rune(text: &str, pos: &mut usize, expected: char) -> bool {
+pub fn match_rune(text: &str, pos: &mut usize, expected: char) -> bool { ::tsox_core::fntrace::enter("match_rune"); 
     let (ch, size) = decode_rune(text, *pos);
     if ch == expected {
         *pos += size;
@@ -121,7 +121,7 @@ pub fn match_rune(text: &str, pos: &mut usize, expected: char) -> bool {
     false
 }
 
-pub fn match_string(text: &str, pos: &mut usize, expected: &str) -> bool {
+pub fn match_string(text: &str, pos: &mut usize, expected: &str) -> bool { ::tsox_core::fntrace::enter("match_string"); 
     let mut text_pos = *pos;
     let mut expected_pos = 0;
     let expected_bytes = expected.as_bytes();
@@ -142,7 +142,7 @@ pub fn match_string(text: &str, pos: &mut usize, expected: &str) -> bool {
     true
 }
 
-pub fn match_quoted_string(text: &str, pos: &mut usize) -> bool {
+pub fn match_quoted_string(text: &str, pos: &mut usize) -> bool { ::tsox_core::fntrace::enter("match_quoted_string"); 
     let mut text_pos = *pos;
     let quote_char;
     if match_rune(text, &mut text_pos, '\'') {
@@ -163,7 +163,7 @@ pub fn match_quoted_string(text: &str, pos: &mut usize) -> bool {
     false
 }
 
-pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRange) -> bool {
+pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRange) -> bool { ::tsox_core::fntrace::enter("is_recognized_triple_slash_comment"); 
     if comment_range.kind == CommentRangeKind::SingleLine
         && comment_range.end - comment_range.pos > 2
         && text.as_bytes()[comment_range.pos + 1] == b'/'
@@ -220,20 +220,20 @@ pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRan
     false
 }
 
-pub fn is_jsdoc_like_text(text: &str, comment: &CommentRange) -> bool {
+pub fn is_jsdoc_like_text(text: &str, comment: &CommentRange) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_like_text"); 
     comment.kind == CommentRangeKind::MultiLine
         && comment.end - comment.pos >= 5
         && text.as_bytes()[comment.pos + 2] == b'*'
         && text.as_bytes()[comment.pos + 3] != b'/'
 }
 
-pub fn is_pinned_comment(text: &str, comment: &CommentRange) -> bool {
+pub fn is_pinned_comment(text: &str, comment: &CommentRange) -> bool { ::tsox_core::fntrace::enter("is_pinned_comment"); 
     comment.kind == CommentRangeKind::MultiLine
         && comment.end - comment.pos > 5
         && text.as_bytes()[comment.pos + 2] == b'!'
 }
 
-pub fn calculate_indent(text: &str, pos: usize, end: usize) -> i64 {
+pub fn calculate_indent(text: &str, pos: usize, end: usize) -> i64 { ::tsox_core::fntrace::enter("calculate_indent"); 
     let mut current_line_indent: i64 = 0;
     let indent_size = get_default_indent_size() as i64;
     let mut pos = pos;

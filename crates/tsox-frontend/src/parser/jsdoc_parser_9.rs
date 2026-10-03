@@ -3,7 +3,7 @@
 use crate::parser::jsdoc::*;
 
 impl crate::parser::Parser {
-    pub(crate) fn skip_whitespace(&mut self) {
+    pub(crate) fn skip_whitespace(&mut self) { ::tsox_core::fntrace::enter("skip_whitespace"); 
         if self.token == SyntaxKind::WhitespaceTrivia || self.token == SyntaxKind::NewLineTrivia {
             if self.is_next_nonwhitespace_token_eof() {
                 return;
@@ -15,7 +15,7 @@ impl crate::parser::Parser {
         }
     }
 
-    pub(crate) fn is_next_nonwhitespace_token_eof(&mut self) -> bool {
+    pub(crate) fn is_next_nonwhitespace_token_eof(&mut self) -> bool { ::tsox_core::fntrace::enter("is_next_nonwhitespace_token_eof"); 
         loop {
             self.next_token_jsdoc();
             if self.token == SyntaxKind::EndOfFile {
@@ -28,7 +28,7 @@ impl crate::parser::Parser {
         }
     }
 
-    pub(crate) fn skip_whitespace_or_asterisk(&mut self) -> String {
+    pub(crate) fn skip_whitespace_or_asterisk(&mut self) -> String { ::tsox_core::fntrace::enter("skip_whitespace_or_asterisk"); 
         let mut indents = String::new();
         let mut preceding_line_break = self.scanner.has_preceding_line_break();
         let mut seen_line_break = false;
@@ -69,15 +69,15 @@ impl crate::parser::Parser {
     }
 }
 
-pub(crate) fn is_jsdoc_like_text(text: &str) -> bool {
+pub(crate) fn is_jsdoc_like_text(text: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_like_text"); 
     text.starts_with("/**") && !text.starts_with("/**/")
 }
 
-pub(crate) fn is_jsdoc_link_tag(kind: &str) -> bool {
+pub(crate) fn is_jsdoc_link_tag(kind: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_link_tag"); 
     matches!(kind, "link" | "linkcode" | "linkplain")
 }
 
-pub(crate) fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool {
+pub(crate) fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_identifier_or_keyword_token"); 
     token == SyntaxKind::Identifier || crate::ast::is_keyword_kind(token)
 }
 
@@ -86,7 +86,7 @@ pub(crate) fn push_comment(
     indent: &mut usize,
     margin: &mut i32,
     text: &str,
-) {
+) { ::tsox_core::fntrace::enter("push_comment"); 
     if *margin == -1 {
         *margin = *indent as i32;
     }
@@ -94,7 +94,7 @@ pub(crate) fn push_comment(
     *indent += text.len();
 }
 
-pub(crate) fn remove_leading_newlines(mut comments: Vec<String>) -> Vec<String> {
+pub(crate) fn remove_leading_newlines(mut comments: Vec<String>) -> Vec<String> { ::tsox_core::fntrace::enter("remove_leading_newlines"); 
     let mut i = 0;
     while i < comments.len()
         && comments[i]
@@ -107,12 +107,12 @@ pub(crate) fn remove_leading_newlines(mut comments: Vec<String>) -> Vec<String> 
     comments
 }
 
-pub(crate) fn trim_end(s: &str) -> String {
+pub(crate) fn trim_end(s: &str) -> String { ::tsox_core::fntrace::enter("trim_end"); 
     s.trim_end_matches(|c: char| c.is_whitespace() || c == '\u{2028}' || c == '\u{2029}')
         .to_string()
 }
 
-pub(crate) fn remove_trailing_whitespace(mut comments: Vec<String>) -> Vec<String> {
+pub(crate) fn remove_trailing_whitespace(mut comments: Vec<String>) -> Vec<String> { ::tsox_core::fntrace::enter("remove_trailing_whitespace"); 
     let mut end = comments.len();
     for i in (0..comments.len()).rev() {
         let trimmed = trim_end(&comments[i]);
@@ -127,7 +127,7 @@ pub(crate) fn remove_trailing_whitespace(mut comments: Vec<String>) -> Vec<Strin
     comments
 }
 
-pub fn get_jsdoc_comment_ranges(text: &str, node: &Node) -> Vec<crate::scanner::CommentRange> {
+pub fn get_jsdoc_comment_ranges(text: &str, node: &Node) -> Vec<crate::scanner::CommentRange> { ::tsox_core::fntrace::enter("get_jsdoc_comment_ranges"); 
     use crate::ast::SyntaxKind as SK;
     use crate::scanner::{get_leading_comment_ranges, get_trailing_comment_ranges};
 
@@ -163,7 +163,7 @@ pub fn get_jsdoc_comment_ranges(text: &str, node: &Node) -> Vec<crate::scanner::
     ranges
 }
 
-pub(crate) fn find_full_start(text: &str, token_pos: usize) -> usize {
+pub(crate) fn find_full_start(text: &str, token_pos: usize) -> usize { ::tsox_core::fntrace::enter("find_full_start"); 
     let bytes = text.as_bytes();
     let mut i = token_pos;
 
@@ -205,7 +205,7 @@ thread_local! {
         const { std::cell::RefCell::new(None) };
 }
 
-pub(crate) fn fnv1a(bytes: &[u8], seed: u64) -> u64 {
+pub(crate) fn fnv1a(bytes: &[u8], seed: u64) -> u64 { ::tsox_core::fntrace::enter("fnv1a"); 
     let mut hash = 0xcbf29ce484222325u64 ^ seed;
     for &byte in bytes {
         hash ^= byte as u64;
@@ -214,7 +214,7 @@ pub(crate) fn fnv1a(bytes: &[u8], seed: u64) -> u64 {
     hash
 }
 
-pub(crate) fn jsdoc_parser_key(file_name: &str, text: &str) -> (u64, u64, u64) {
+pub(crate) fn jsdoc_parser_key(file_name: &str, text: &str) -> (u64, u64, u64) { ::tsox_core::fntrace::enter("jsdoc_parser_key"); 
     let bytes = text.as_bytes();
     let head = fnv1a(&bytes[..bytes.len().min(64)], 0x9e3779b9);
     let tail = fnv1a(&bytes[bytes.len().saturating_sub(64)..], 0x85ebca6b);
@@ -230,7 +230,7 @@ pub fn parse_jsdoc_comment_range(
     source_file: &crate::ast::SourceFile,
     pos: usize,
     end: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_jsdoc_comment_range"); 
     let text = &source_file.text;
     let key = jsdoc_parser_key(&source_file.file_name, text);
     JSDOC_PARSER.with(|cell| {
@@ -243,7 +243,7 @@ pub fn parse_jsdoc_comment_range(
     })
 }
 
-pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -> Vec<Arc<Node>> {
+pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("parse_jsdoc_for_node"); 
     let text = &source_file.text;
     let ranges = get_jsdoc_comment_ranges(text, node);
     if ranges.is_empty() {

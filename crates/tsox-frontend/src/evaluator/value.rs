@@ -19,7 +19,7 @@ impl EvalResult {
         is_syntactically_string: bool,
         resolved_other_files: bool,
         has_external_references: bool,
-    ) -> EvalResult {
+    ) -> EvalResult { ::tsox_core::fntrace::enter("new"); 
         EvalResult {
             value,
             is_syntactically_string,
@@ -28,7 +28,7 @@ impl EvalResult {
         }
     }
 
-    pub fn none() -> EvalResult {
+    pub fn none() -> EvalResult { ::tsox_core::fntrace::enter("none"); 
         EvalResult {
             value: None,
             is_syntactically_string: false,
@@ -47,7 +47,7 @@ pub enum EvalValue {
 }
 
 impl EvalValue {
-    pub fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String { ::tsox_core::fntrace::enter("to_string"); 
         match self {
             EvalValue::String(s) => s.clone(),
             EvalValue::Number(n) => n.to_string(),
@@ -62,7 +62,7 @@ impl EvalValue {
         }
     }
 
-    pub fn is_truthy(&self) -> bool {
+    pub fn is_truthy(&self) -> bool { ::tsox_core::fntrace::enter("is_truthy"); 
         match self {
             EvalValue::String(s) => !s.is_empty(),
             EvalValue::Number(n) => n.0 != 0.0 && !n.is_nan(),

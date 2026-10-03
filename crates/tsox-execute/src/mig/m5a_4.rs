@@ -20,7 +20,7 @@ pub use tsox_frontend::diagnosticwriter::mig::m5z::FormattingOptions;
 pub fn get_format_opts_of_sys(
     sys: &dyn System,
     locale: &tsox_core::locale::Locale,
-) -> FormattingOptions {
+) -> FormattingOptions { ::tsox_core::fntrace::enter("get_format_opts_of_sys"); 
     FormattingOptions {
         locale: locale.clone(),
         compare_paths_options: tsox_core::tspath::ComparePathsOptions {
@@ -31,14 +31,14 @@ pub fn get_format_opts_of_sys(
     }
 }
 
-pub fn quiet_diagnostic_reporter(_diagnostic: &Diagnostic) {}
+pub fn quiet_diagnostic_reporter(_diagnostic: &Diagnostic) { ::tsox_core::fntrace::enter("quiet_diagnostic_reporter"); }
 
 pub fn create_diagnostic_reporter(
     sys: &dyn System,
     mut w: Box<dyn Write + Send + Sync>,
     locale: &tsox_core::locale::Locale,
     options: &CompilerOptions,
-) -> DiagnosticReporter {
+) -> DiagnosticReporter { ::tsox_core::fntrace::enter("create_diagnostic_reporter"); 
     if options.quiet.is_true() {
         return Box::new(quiet_diagnostic_reporter);
     }
@@ -70,7 +70,7 @@ pub struct Colors {
     supports_richer_colors: bool,
 }
 
-pub fn create_colors(sys: &dyn System) -> Colors {
+pub fn create_colors(sys: &dyn System) -> Colors { ::tsox_core::fntrace::enter("create_colors"); 
     if !crate::execute::perform_compilation::default_is_pretty(sys) {
         return Colors {
             show_colors: false,
@@ -96,14 +96,14 @@ pub fn create_colors(sys: &dyn System) -> Colors {
 }
 
 impl Colors {
-    pub fn bold(&self, s: &str) -> String {
+    pub fn bold(&self, s: &str) -> String { ::tsox_core::fntrace::enter("bold"); 
         if !self.show_colors {
             return s.to_string();
         }
         format!("\x1b[1m{s}\x1b[22m")
     }
 
-    pub fn blue(&self, s: &str) -> String {
+    pub fn blue(&self, s: &str) -> String { ::tsox_core::fntrace::enter("blue"); 
         if !self.show_colors {
             return s.to_string();
         }
@@ -113,7 +113,7 @@ impl Colors {
         format!("\x1b[94m{s}\x1b[39m")
     }
 
-    pub fn blue_background(&self, s: &str) -> String {
+    pub fn blue_background(&self, s: &str) -> String { ::tsox_core::fntrace::enter("blue_background"); 
         if !self.show_colors {
             return s.to_string();
         }
@@ -124,7 +124,7 @@ impl Colors {
         }
     }
 
-    pub fn bright_white(&self, s: &str) -> String {
+    pub fn bright_white(&self, s: &str) -> String { ::tsox_core::fntrace::enter("bright_white"); 
         if !self.show_colors {
             return s.to_string();
         }
@@ -132,13 +132,13 @@ impl Colors {
     }
 }
 
-pub fn quiet_diagnostics_reporter(_diagnostics: &[Arc<Diagnostic>]) {}
+pub fn quiet_diagnostics_reporter(_diagnostics: &[Arc<Diagnostic>]) { ::tsox_core::fntrace::enter("quiet_diagnostics_reporter"); }
 
 pub fn create_report_error_summary(
     sys: &dyn System,
     locale: &tsox_core::locale::Locale,
     options: &CompilerOptions,
-) -> DiagnosticsReporter {
+) -> DiagnosticsReporter { ::tsox_core::fntrace::enter("create_report_error_summary"); 
     if crate::execute::perform_compilation::should_be_pretty(sys, options) {
         let format_opts = get_format_opts_of_sys(sys, locale);
         let writer = Mutex::new(sys.writer());
@@ -158,7 +158,7 @@ pub fn create_builder_status_reporter(
     locale: &tsox_core::locale::Locale,
     options: &CompilerOptions,
     testing: Option<Arc<dyn CommandLineTesting>>,
-) -> DiagnosticReporter {
+) -> DiagnosticReporter { ::tsox_core::fntrace::enter("create_builder_status_reporter"); 
     if options.quiet.is_true() {
         return Box::new(quiet_diagnostic_reporter);
     }
@@ -183,7 +183,7 @@ pub fn create_watch_status_reporter(
     locale: &tsox_core::locale::Locale,
     options: &CompilerOptions,
     testing: Option<Arc<dyn CommandLineTesting>>,
-) -> DiagnosticReporter {
+) -> DiagnosticReporter { ::tsox_core::fntrace::enter("create_watch_status_reporter"); 
     let format_opts = get_format_opts_of_sys(sys, locale);
     let options = options.clone();
     let writer = Mutex::new(sys.writer());
@@ -206,7 +206,7 @@ pub fn create_watch_status_reporter(
     })
 }
 
-fn format_time_of_now() -> String {
+fn format_time_of_now() -> String { ::tsox_core::fntrace::enter("format_time_of_now"); 
     let secs = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs())

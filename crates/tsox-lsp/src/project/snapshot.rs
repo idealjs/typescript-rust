@@ -46,18 +46,18 @@ pub struct ProjectTreeRequest {
 }
 
 impl ProjectTreeRequest {
-    pub fn is_all_projects(&self) -> bool {
+    pub fn is_all_projects(&self) -> bool { ::tsox_core::fntrace::enter("is_all_projects"); 
         self.referenced_projects.is_none()
     }
 
-    pub fn is_project_referenced(&self, project_id: &Path) -> bool {
+    pub fn is_project_referenced(&self, project_id: &Path) -> bool { ::tsox_core::fntrace::enter("is_project_referenced"); 
         self.referenced_projects
             .as_ref()
             .map(|s| s.contains(project_id))
             .unwrap_or(false)
     }
 
-    pub fn projects(&self) -> Vec<Path> {
+    pub fn projects(&self) -> Vec<Path> { ::tsox_core::fntrace::enter("projects"); 
         self.referenced_projects
             .as_ref()
             .map(|s| s.iter().cloned().collect())
@@ -97,7 +97,7 @@ pub struct Snapshot {
 }
 
 impl Snapshot {
-    pub fn new(id: u64) -> Self {
+    pub fn new(id: u64) -> Self { ::tsox_core::fntrace::enter("new"); 
         let s = Snapshot {
             id,
             parent_id: 0,
@@ -119,25 +119,25 @@ impl Snapshot {
         s
     }
 
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> u64 { ::tsox_core::fntrace::enter("id"); 
         self.id
     }
 
-    pub fn builder_logs_string(&self) -> String {
+    pub fn builder_logs_string(&self) -> String { ::tsox_core::fntrace::enter("builder_logs_string"); 
         self.builder_logs
             .as_deref()
             .map_or(String::new(), |l| l.to_string())
     }
 
-    pub fn get_default_project(&self, _uri: &lsproto::DocumentUri) -> Option<&Project> {
+    pub fn get_default_project(&self, _uri: &lsproto::DocumentUri) -> Option<&Project> { ::tsox_core::fntrace::enter("get_default_project"); 
         todo!("Snapshot::get_default_project requires full integration")
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         true
     }
 
-    pub fn read_file(&self, _file_name: &str) -> Option<String> {
+    pub fn read_file(&self, _file_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         todo!("Snapshot::read_file requires fs integration")
     }
 
@@ -151,7 +151,7 @@ impl Snapshot {
         }
     }
 
-    pub fn try_ref(&self) -> bool {
+    pub fn try_ref(&self) -> bool { ::tsox_core::fntrace::enter("try_ref"); 
         loop {
             let rc = self.ref_count.load(Ordering::SeqCst);
             if rc <= 0 {
@@ -167,7 +167,7 @@ impl Snapshot {
         }
     }
 
-    pub fn deref_snapshot(&self) {
+    pub fn deref_snapshot(&self) { ::tsox_core::fntrace::enter("deref_snapshot"); 
         let rc = self.ref_count.fetch_sub(1, Ordering::SeqCst) - 1;
         if rc < 0 {
             panic!(
@@ -180,7 +180,7 @@ impl Snapshot {
         }
     }
 
-    fn dispose(&self) {}
+    fn dispose(&self) { ::tsox_core::fntrace::enter("dispose"); }
 }
 
 #[derive(Default, Clone)]

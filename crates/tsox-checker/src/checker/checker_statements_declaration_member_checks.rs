@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub fn check_class_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_class_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_declaration"); 
         self.check_grammar_modifiers(node);
         self.check_grammar_class_declaration_heritage_clauses(node);
         self.check_exports_on_merged_declarations(node);
@@ -111,7 +111,7 @@ impl Checker {
         }
     }
 
-    pub fn check_enum_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_enum_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_enum_declaration"); 
         self.check_grammar_modifiers(node);
         self.check_exports_on_merged_declarations(node);
         // Go checkEnumDeclaration：非 ambient 枚举在 erasableSyntaxOnly 下报

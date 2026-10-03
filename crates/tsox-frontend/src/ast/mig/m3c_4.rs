@@ -7,7 +7,7 @@ use crate::scanner::error_callback::TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
 
 use super::m3c_2::modifier_flags_of;
 
-pub fn compute_subtree_facts_keyword_expression(kind: SyntaxKind) -> SubtreeFacts {
+pub fn compute_subtree_facts_keyword_expression(kind: SyntaxKind) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_keyword_expression"); 
     match kind {
         SyntaxKind::ThisKeyword => SubtreeContainsLexicalThis,
         SyntaxKind::SuperKeyword => SubtreeContainsLexicalSuper,
@@ -17,13 +17,13 @@ pub fn compute_subtree_facts_keyword_expression(kind: SyntaxKind) -> SubtreeFact
 
 pub fn compute_subtree_facts_meta_property(
     d: &crate::ast::node_data_generated::MetaPropertyData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_meta_property"); 
     propagate_subtree_facts(Some(&d.name)) & !SubtreeContainsIdentifier
 }
 
 pub fn compute_subtree_facts_method_declaration(
     d: &crate::ast::node_data_generated::MethodDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_method_declaration"); 
     if d.body.is_none() {
         return SubtreeContainsTypeScript;
     }
@@ -54,7 +54,7 @@ pub fn compute_subtree_facts_method_declaration(
 
 pub fn compute_subtree_facts_module_declaration(
     d: &crate::ast::node_data_generated::ModuleDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_module_declaration"); 
     if modifier_flags_of(&d.modifiers).contains(ModifierFlags::Ambient) {
         return SubtreeContainsTypeScript;
     }
@@ -66,7 +66,7 @@ pub fn compute_subtree_facts_module_declaration(
 
 pub fn compute_subtree_facts_new_expression(
     d: &crate::ast::node_data_generated::NewExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_new_expression"); 
     propagate_subtree_facts(Some(&d.expression))
         | propagate_eraseable_syntax_list_subtree_facts(d.type_arguments.as_deref())
         | propagate_node_list_subtree_facts(d.arguments.as_deref(), |child| {
@@ -76,7 +76,7 @@ pub fn compute_subtree_facts_new_expression(
 
 pub fn compute_subtree_facts_no_substitution_template_literal(
     d: &crate::ast::node_data_generated::NoSubstitutionTemplateLiteralData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_no_substitution_template_literal"); 
     if d.template_flags & TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE != 0 {
         return SubtreeContainsInvalidTemplateEscape;
     }
@@ -85,13 +85,13 @@ pub fn compute_subtree_facts_no_substitution_template_literal(
 
 pub fn compute_subtree_facts_non_null_expression(
     d: &crate::ast::node_data_generated::NonNullExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_non_null_expression"); 
     propagate_subtree_facts(Some(&d.expression)) | SubtreeContainsTypeScript
 }
 
 pub fn compute_subtree_facts_parameter_declaration(
     d: &crate::ast::node_data_generated::ParameterDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_parameter_declaration"); 
     if is_this_identifier(Some(&*d.name)) {
         return SubtreeContainsTypeScript;
     }
@@ -104,7 +104,7 @@ pub fn compute_subtree_facts_parameter_declaration(
 
 pub fn compute_subtree_facts_property_access_expression(
     d: &crate::ast::node_data_generated::PropertyAccessExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_property_access_expression"); 
     let private_name = if !is_identifier(&d.name) {
         SubtreeContainsPrivateIdentifierInExpression
     } else {
@@ -118,7 +118,7 @@ pub fn compute_subtree_facts_property_access_expression(
 
 pub fn compute_subtree_facts_property_assignment(
     d: &crate::ast::node_data_generated::PropertyAssignmentData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_property_assignment"); 
     propagate_subtree_facts(Some(&d.name))
         | propagate_subtree_facts(Some(&d.type_node))
         | propagate_subtree_facts(Some(&d.initializer))
@@ -126,7 +126,7 @@ pub fn compute_subtree_facts_property_assignment(
 
 pub fn compute_subtree_facts_property_declaration(
     d: &crate::ast::node_data_generated::PropertyDeclarationData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_property_declaration"); 
     propagate_modifier_list_subtree_facts(d.modifiers.as_deref())
         | propagate_subtree_facts(Some(&d.name))
         | propagate_eraseable_syntax_subtree_facts(d.postfix_token.as_ref())
@@ -137,19 +137,19 @@ pub fn compute_subtree_facts_property_declaration(
 
 pub fn compute_subtree_facts_return_statement(
     d: &crate::ast::node_data_generated::ReturnStatementData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_return_statement"); 
     propagate_subtree_facts(d.expression.as_ref()) | SubtreeContainsForAwaitOrAsyncGenerator
 }
 
 pub fn compute_subtree_facts_satisfies_expression(
     d: &crate::ast::node_data_generated::SatisfiesExpressionData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_satisfies_expression"); 
     propagate_subtree_facts(Some(&d.expression)) | SubtreeContainsTypeScript
 }
 
 pub fn compute_subtree_facts_shorthand_property_assignment(
     d: &crate::ast::node_data_generated::ShorthandPropertyAssignmentData,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("compute_subtree_facts_shorthand_property_assignment"); 
     propagate_subtree_facts(Some(&d.name))
         | propagate_subtree_facts(Some(&d.type_node))
         | propagate_subtree_facts(d.object_assignment_initializer.as_ref())

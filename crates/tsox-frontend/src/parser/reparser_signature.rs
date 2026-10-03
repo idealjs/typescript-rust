@@ -14,7 +14,7 @@ pub(super) fn reparse_jsdoc_signature(
     js_doc: &Arc<Node>,
     tag: &Arc<Node>,
     modifiers: Option<Arc<ModifierList>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("reparse_jsdoc_signature"); 
     let loc = if tag.kind == SyntaxKind::JSDocOverloadTag {
         tag_name_loc(tag).unwrap_or(tag.loc)
     } else {
@@ -118,7 +118,7 @@ pub(super) fn reparse_jsdoc_signature(
     }
 }
 
-fn extract_jsdoc_signature_data(js_signature: &Arc<Node>) -> (Vec<Arc<Node>>, Option<Arc<Node>>) {
+fn extract_jsdoc_signature_data(js_signature: &Arc<Node>) -> (Vec<Arc<Node>>, Option<Arc<Node>>) { ::tsox_core::fntrace::enter("extract_jsdoc_signature_data"); 
     match &js_signature.data {
         NodeData::JSDocSignature(d) => {
             let params: Vec<Arc<Node>> = d
@@ -142,7 +142,7 @@ fn extract_jsdoc_signature_data(js_signature: &Arc<Node>) -> (Vec<Arc<Node>>, Op
     }
 }
 
-fn reparse_parameter_from_jsdoc(param: &Arc<Node>) -> Option<Arc<Node>> {
+fn reparse_parameter_from_jsdoc(param: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("reparse_parameter_from_jsdoc"); 
     match param.kind {
         SyntaxKind::JSDocThisTag => {
             let (tag_name, type_expression) = match &param.data {

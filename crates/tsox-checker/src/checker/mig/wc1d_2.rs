@@ -35,7 +35,7 @@ impl Checker {
         property_index: usize,
         all_properties: Option<&NodeList>,
         right_is_this: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("check_object_literal_destructuring_property_assignment"); 
         let properties: &NodeList = match &node.data {
             NodeData::ObjectLiteralExpression(d) => &d.properties,
             _ => return None,
@@ -133,7 +133,7 @@ impl Checker {
         None
     }
 
-    pub fn check_object_literal(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_object_literal(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_object_literal"); 
         let properties = match &node.data {
             NodeData::ObjectLiteralExpression(d) => Arc::clone(&d.properties),
             _ => return self.error_type(),
@@ -523,7 +523,7 @@ impl Checker {
         pattern_with_computed_properties: &mut bool,
         in_destructuring_pattern: bool,
         checker: &mut Checker,
-    ) {
+    ) { ::tsox_core::fntrace::enter("record_member"); 
         let is_non_literal_computed = computed_name_type
             .is_some_and(|ct| !ct.flags.contains(TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE));
         if is_non_literal_computed {

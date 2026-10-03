@@ -20,7 +20,7 @@ pub struct FileLoader {
 }
 
 impl FileLoader {
-    pub fn to_path(&self, path: &str) -> Path {
+    pub fn to_path(&self, path: &str) -> Path { ::tsox_core::fntrace::enter("to_path"); 
         tspath::to_path(
             path,
             self.opts.host.current_directory(),
@@ -43,7 +43,7 @@ pub struct ProjectReferenceFileMapper {
 }
 
 impl ProjectReferenceFileMapper {
-    pub fn new(opts: &ProgramOptions) -> Self {
+    pub fn new(opts: &ProgramOptions) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             opts: opts.clone(),
             host: None,
@@ -56,15 +56,15 @@ impl ProjectReferenceFileMapper {
         }
     }
 
-    pub fn host_compiler_host(&self) -> Arc<dyn crate::compiler::CompilerHost> {
+    pub fn host_compiler_host(&self) -> Arc<dyn crate::compiler::CompilerHost> { ::tsox_core::fntrace::enter("host_compiler_host"); 
         self.opts.host.clone()
     }
 
-    pub fn can_use_project_reference_source(&self) -> bool {
+    pub fn can_use_project_reference_source(&self) -> bool { ::tsox_core::fntrace::enter("can_use_project_reference_source"); 
         self.opts.can_use_project_reference_source()
     }
 
-    pub fn root_config_path(&self) -> Path {
+    pub fn root_config_path(&self) -> Path { ::tsox_core::fntrace::enter("root_config_path"); 
         match self.opts.config.config_file.as_ref() {
             None => Path(String::new()),
             Some(config_file) => Path(tsox_frontend::ast::mig::m3b_2::path(
@@ -73,7 +73,7 @@ impl ProjectReferenceFileMapper {
         }
     }
 
-    pub fn get_parse_file_redirect(&self, file: &dyn HasFileName) -> String {
+    pub fn get_parse_file_redirect(&self, file: &dyn HasFileName) -> String { ::tsox_core::fntrace::enter("get_parse_file_redirect"); 
         if self.can_use_project_reference_source() {
             let mut source = self.get_project_reference_from_output_dts(&Path(file.path()));
             if source.is_none() {
@@ -93,7 +93,7 @@ impl ProjectReferenceFileMapper {
         String::new()
     }
 
-    pub fn get_resolved_project_references(&self) -> Vec<Option<Arc<ParsedCommandLine>>> {
+    pub fn get_resolved_project_references(&self) -> Vec<Option<Arc<ParsedCommandLine>>> { ::tsox_core::fntrace::enter("get_resolved_project_references"); 
         let mut result = Vec::new();
         if let Some(refs) = self.references_in_config_file.get(&self.root_config_path()) {
             result.reserve(refs.len());
@@ -112,7 +112,7 @@ impl ProjectReferenceFileMapper {
     pub fn get_project_reference_from_source(
         &self,
         path: &Path,
-    ) -> Option<SourceOutputAndProjectReference> {
+    ) -> Option<SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_source"); 
         self.source_to_project_reference
             .get(path)
             .cloned()
@@ -122,14 +122,14 @@ impl ProjectReferenceFileMapper {
     pub fn get_project_reference_from_output_dts(
         &self,
         path: &Path,
-    ) -> Option<SourceOutputAndProjectReference> {
+    ) -> Option<SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_project_reference_from_output_dts"); 
         self.output_dts_to_project_reference
             .get(path)
             .cloned()
             .flatten()
     }
 
-    pub fn is_source_from_project_reference(&self, path: &Path) -> bool {
+    pub fn is_source_from_project_reference(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("is_source_from_project_reference"); 
         self.can_use_project_reference_source()
             && self.get_project_reference_from_source(path).is_some()
     }
@@ -137,7 +137,7 @@ impl ProjectReferenceFileMapper {
     pub fn get_compiler_options_for_file(
         &self,
         file: &dyn HasFileName,
-    ) -> tsox_core::core::compiler_options::CompilerOptions {
+    ) -> tsox_core::core::compiler_options::CompilerOptions { ::tsox_core::fntrace::enter("get_compiler_options_for_file"); 
         let redirect = self.get_redirect_parsed_command_line_for_resolution(file);
         get_compiler_options_with_redirect(
             &self.opts.config.compiler_options(),
@@ -149,14 +149,14 @@ impl ProjectReferenceFileMapper {
     pub fn get_redirect_parsed_command_line_for_resolution(
         &self,
         file: &dyn HasFileName,
-    ) -> Option<Arc<ParsedCommandLine>> {
+    ) -> Option<Arc<ParsedCommandLine>> { ::tsox_core::fntrace::enter("get_redirect_parsed_command_line_for_resolution"); 
         self.get_redirect_for_resolution(file).0
     }
 
     pub fn get_redirect_for_resolution(
         &self,
         file: &dyn HasFileName,
-    ) -> (Option<Arc<ParsedCommandLine>>, String) {
+    ) -> (Option<Arc<ParsedCommandLine>>, String) { ::tsox_core::fntrace::enter("get_redirect_for_resolution"); 
         let path = Path(file.path());
         let output = self.get_project_reference_from_source(&path);
         if let Some(output) = output {
@@ -180,7 +180,7 @@ impl ProjectReferenceFileMapper {
     pub fn get_resolved_reference_for(
         &self,
         path: &Path,
-    ) -> (Option<Arc<ParsedCommandLine>>, bool) {
+    ) -> (Option<Arc<ParsedCommandLine>>, bool) { ::tsox_core::fntrace::enter("get_resolved_reference_for"); 
         match self.config_to_project_reference.get(path) {
             Some(config) => (config.clone(), true),
             None => (None, false),
@@ -190,7 +190,7 @@ impl ProjectReferenceFileMapper {
     pub fn range_resolved_project_reference(
         &self,
         f: &mut dyn FnMut(&Path, Option<&Arc<ParsedCommandLine>>, Option<&Arc<ParsedCommandLine>>, usize) -> bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("range_resolved_project_reference"); 
         if self.opts.config.project_references().is_empty() {
             return false;
         }
@@ -211,7 +211,7 @@ impl ProjectReferenceFileMapper {
         f: &mut dyn FnMut(&Path, Option<&Arc<ParsedCommandLine>>, Option<&Arc<ParsedCommandLine>>, usize) -> bool,
         parent: Option<&Arc<ParsedCommandLine>>,
         seen_ref: &mut Set<Path>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("range_resolved_reference_worker"); 
         for (index, path) in references.iter().enumerate() {
             if !seen_ref.add_if_absent(path.clone()) {
                 continue;
@@ -240,7 +240,7 @@ impl ProjectReferenceFileMapper {
         &self,
         child_config: Option<&Arc<ParsedCommandLine>>,
         f: &mut dyn FnMut(&Path, Option<&Arc<ParsedCommandLine>>, Option<&Arc<ParsedCommandLine>>, usize) -> bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("range_resolved_project_reference_in_child_config"); 
         let child_config = match child_config {
             None => return false,
             Some(child_config) => child_config,
@@ -261,14 +261,14 @@ impl ProjectReferenceFileMapper {
         self.range_resolved_reference_worker(&refs, f, Some(&self.config()), &mut seen_ref)
     }
 
-    fn config(&self) -> Arc<ParsedCommandLine> {
+    fn config(&self) -> Arc<ParsedCommandLine> { ::tsox_core::fntrace::enter("config"); 
         Arc::new(self.opts.config.clone())
     }
 
     pub fn get_source_to_dts_if_symlink(
         &self,
         file: &dyn HasFileName,
-    ) -> Option<SourceOutputAndProjectReference> {
+    ) -> Option<SourceOutputAndProjectReference> { ::tsox_core::fntrace::enter("get_source_to_dts_if_symlink"); 
         let path = Path(file.path());
         if let Some(realpath_dts_to_source) = self.realpath_dts_to_source.load(&path) {
             return realpath_dts_to_source;
@@ -300,11 +300,11 @@ impl ProjectReferenceFileMapper {
         None
     }
 
-    fn host_fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> {
+    fn host_fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> { ::tsox_core::fntrace::enter("host_fs"); 
         self.opts.host.fs_arc()
     }
 
-    fn loader_to_path(&self, path: &str) -> Path {
+    fn loader_to_path(&self, path: &str) -> Path { ::tsox_core::fntrace::enter("loader_to_path"); 
         tspath::to_path(path, self.opts.host.current_directory(), true)
     }
 }
@@ -315,11 +315,11 @@ pub trait HasFileName {
 }
 
 impl HasFileName for tsox_frontend::ast::SourceFile {
-    fn path(&self) -> String {
+    fn path(&self) -> String { ::tsox_core::fntrace::enter("path"); 
         tsox_frontend::ast::mig::m3b_2::path(self)
     }
 
-    fn file_name(&self) -> String {
+    fn file_name(&self) -> String { ::tsox_core::fntrace::enter("file_name"); 
         self.file_name.clone()
     }
 }
@@ -327,7 +327,7 @@ impl HasFileName for tsox_frontend::ast::SourceFile {
 pub fn get_compiler_options_with_redirect<'a>(
     compiler_options: &'a tsox_core::core::compiler_options::CompilerOptions,
     redirect: Option<&'a ParsedCommandLine>,
-) -> &'a tsox_core::core::compiler_options::CompilerOptions {
+) -> &'a tsox_core::core::compiler_options::CompilerOptions { ::tsox_core::fntrace::enter("get_compiler_options_with_redirect"); 
     match redirect {
         None => compiler_options,
         Some(parsed) => parsed.compiler_options(),

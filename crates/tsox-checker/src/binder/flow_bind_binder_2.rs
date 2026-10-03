@@ -3,7 +3,7 @@
 use crate::binder::flow_bind::*;
 
 impl Binder {
-    pub(crate) fn bind_do_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_do_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_do_statement"); 
         let mut pre_do_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut pre_condition_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
         let mut post_do_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -57,7 +57,7 @@ impl Binder {
         self.current_flow = Some(post_do_label.finish(self.unreachable_flow.as_ref().unwrap()));
     }
 
-    pub(crate) fn bind_for_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_for_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_for_statement"); 
         let mut pre_loop_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut pre_body_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
         let mut pre_incr_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -146,7 +146,7 @@ impl Binder {
         self.parent_symbol = prev_parent;
     }
 
-    pub(crate) fn bind_for_in_or_of_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_for_in_or_of_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_for_in_or_of_statement"); 
         let mut pre_loop_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut post_loop_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
 

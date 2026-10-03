@@ -71,7 +71,7 @@ impl NodeAccessExtR19k3 for Node {
     r19k3_as_data!(as_js_doc, JSDoc, tsox_frontend::ast::node_data_generated::JSDocData);
 }
 
-pub(crate) fn any_to_string(v: &LiteralValue) -> String {
+pub(crate) fn any_to_string(v: &LiteralValue) -> String { ::tsox_core::fntrace::enter("any_to_string"); 
     match v {
         LiteralValue::String(s) => s.clone(),
         LiteralValue::Number(n) => n.to_string(),
@@ -81,7 +81,7 @@ pub(crate) fn any_to_string(v: &LiteralValue) -> String {
     }
 }
 
-pub(crate) fn has_only_expression_initializer(node: &Node) -> bool {
+pub(crate) fn has_only_expression_initializer(node: &Node) -> bool { ::tsox_core::fntrace::enter("has_only_expression_initializer"); 
     matches!(
         node.kind,
         SyntaxKind::VariableDeclaration
@@ -94,7 +94,7 @@ pub(crate) fn has_only_expression_initializer(node: &Node) -> bool {
     )
 }
 
-pub(crate) fn try_get_text_of_property_name(name: &Arc<Node>) -> Option<String> {
+pub(crate) fn try_get_text_of_property_name(name: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("try_get_text_of_property_name"); 
     match name.kind {
         SyntaxKind::Identifier
         | SyntaxKind::PrivateIdentifier
@@ -114,7 +114,7 @@ pub(crate) fn try_get_text_of_property_name(name: &Arc<Node>) -> Option<String> 
 
 pub(crate) fn get_candidate_variable_declaration_initializer(
     declaration: Option<&Arc<Node>>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_candidate_variable_declaration_initializer"); 
     let declaration = declaration?;
     let parent = declaration.parent()?;
     if parent.kind != SyntaxKind::VariableDeclarationList {
@@ -123,13 +123,13 @@ pub(crate) fn get_candidate_variable_declaration_initializer(
     declaration.initializer().cloned()
 }
 
-pub(crate) fn non_dotted_name_cache_key() -> crate::checker::types_cached_type_kind::CacheHashKey {
+pub(crate) fn non_dotted_name_cache_key() -> crate::checker::types_cached_type_kind::CacheHashKey { ::tsox_core::fntrace::enter("non_dotted_name_cache_key"); 
     static KEY: OnceLock<crate::checker::types_cached_type_kind::CacheHashKey> = OnceLock::new();
     *KEY.get_or_init(|| crate::checker::types_cached_type_kind::CacheHashKey::new(u64::MAX, u64::MAX))
 }
 
 impl Checker {
-    pub(crate) fn get_type_of_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_expression"); 
         self.check_expression_ex(node, CheckMode::Normal)
     }
 
@@ -138,7 +138,7 @@ impl Checker {
         t: &Arc<Type>,
         access: &Arc<Node>,
         narrow_type: &dyn Fn(&mut Checker, &Arc<Type>) -> Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_discriminant"); 
         let Some(prop_name) = self.get_accessed_property_name(access) else {
             return Arc::clone(t);
         };
@@ -181,7 +181,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_with_default_opt"); 
         if let Some(initializer) = initializer {
             let non_undefined = self.get_non_undefined_type(t);
             let default_type = self.get_type_of_expression(initializer);
@@ -190,7 +190,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub(crate) fn create_final_array_type(&mut self, element_type: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn create_final_array_type(&mut self, element_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_final_array_type"); 
         if element_type.flags.contains(TypeFlags::Never) {
             return self.auto_array_type();
         }
@@ -205,7 +205,7 @@ impl Checker {
         self.create_array_type(Arc::clone(element_type))
     }
 
-    pub(crate) fn get_type_of_initializer(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_initializer(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_initializer"); 
         if let Some(t) = self.type_node_links.get(node).and_then(|l| l.resolved_type.clone()) {
             return t;
         }
@@ -213,7 +213,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn resolving_explicit_type_of_symbol_add_if_absent(symbol: &Arc<Symbol>) -> bool {
+pub(crate) fn resolving_explicit_type_of_symbol_add_if_absent(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("resolving_explicit_type_of_symbol_add_if_absent"); 
     use std::cell::RefCell;
     use std::collections::HashSet;
     thread_local! {
@@ -226,7 +226,7 @@ pub(crate) fn resolving_explicit_type_of_symbol_add_if_absent(symbol: &Arc<Symbo
     })
 }
 
-pub(crate) fn resolving_explicit_type_of_symbol_remove(symbol: &Arc<Symbol>) {
+pub(crate) fn resolving_explicit_type_of_symbol_remove(symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("resolving_explicit_type_of_symbol_remove"); 
     use std::cell::RefCell;
     use std::collections::HashSet;
     thread_local! {
@@ -243,7 +243,7 @@ impl Checker {
         &mut self,
         diag: &tsox_frontend::ast::Diagnostic,
         output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_diagnostic"); 
         if let Some(output) = output {
             output.push(diag.clone());
         } else {
@@ -252,7 +252,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn has_type_parameter_default(t: &Arc<Type>) -> bool {
+pub(crate) fn has_type_parameter_default(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_type_parameter_default"); 
     use tsox_frontend::ast::node_data_generated::is_type_parameter_declaration;
     let Some(symbol) = &t.symbol else {
         return false;

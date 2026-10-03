@@ -2,7 +2,7 @@
 
 use tsox_core::core::text::TextPos;
 
-pub fn compute_line_of_position(line_starts: &[TextPos], pos: i32) -> usize {
+pub fn compute_line_of_position(line_starts: &[TextPos], pos: i32) -> usize { ::tsox_core::fntrace::enter("compute_line_of_position"); 
     let mut low: isize = 0;
     let mut high: isize = line_starts.len() as isize - 1;
     while low <= high {

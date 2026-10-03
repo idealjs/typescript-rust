@@ -3,7 +3,7 @@
 use crate::parser::types::*;
 
 impl Parser {
-    pub(crate) fn parse_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type"); 
         let pos = self.token_pos();
         let mut type_node = self.parse_union_type_or_higher();
         if self.parse_optional(SyntaxKind::ExtendsKeyword) {
@@ -27,7 +27,7 @@ impl Parser {
         type_node
     }
 
-    pub(crate) fn parse_type_or_type_predicate(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_or_type_predicate(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_or_type_predicate"); 
         if self.token == SyntaxKind::Identifier
             || self.token == SyntaxKind::ObjectKeyword
             || self.token == SyntaxKind::ThisKeyword
@@ -66,7 +66,7 @@ impl Parser {
         self.parse_type()
     }
 
-    pub(crate) fn parse_union_type_or_higher(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_union_type_or_higher(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_union_type_or_higher"); 
         self.parse_union_or_intersection_type(
             SyntaxKind::BarToken,
             SyntaxKind::UnionType,
@@ -74,7 +74,7 @@ impl Parser {
         )
     }
 
-    pub(crate) fn parse_intersection_type_or_higher(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_intersection_type_or_higher(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_intersection_type_or_higher"); 
         self.parse_union_or_intersection_type(
             SyntaxKind::AmpersandToken,
             SyntaxKind::IntersectionType,
@@ -87,7 +87,7 @@ impl Parser {
         operator: SyntaxKind,
         node_kind: SyntaxKind,
         parse_constituent: fn(&mut Self) -> Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_union_or_intersection_type"); 
         let pos = self.token_pos();
         let is_union_type = operator == SyntaxKind::BarToken;
         let has_leading_operator = self.parse_optional(operator);
@@ -118,7 +118,7 @@ impl Parser {
         Arc::new(Node::with_loc(node_kind, data, TextRange::new(pos, end)))
     }
 
-    pub(crate) fn parse_type_operator_or_higher(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_operator_or_higher(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_operator_or_higher"); 
         match self.token {
             SyntaxKind::KeyOfKeyword | SyntaxKind::UniqueKeyword | SyntaxKind::ReadonlyKeyword => {
                 let pos = self.token_pos();
@@ -139,7 +139,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_non_array_type(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_non_array_type(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_non_array_type"); 
         match self.token {
             SyntaxKind::AnyKeyword
             | SyntaxKind::UnknownKeyword
@@ -231,11 +231,11 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_literal_type_node(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_literal_type_node(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_literal_type_node"); 
         self.parse_literal_type_node_with_negative(false)
     }
 
-    pub(crate) fn parse_literal_type_node_with_negative(&mut self, negative: bool) -> Arc<Node> {
+    pub(crate) fn parse_literal_type_node_with_negative(&mut self, negative: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_literal_type_node_with_negative"); 
         let pos = self.token_pos();
         if negative {
             self.next_token();
@@ -266,7 +266,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_type_reference(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_reference(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_reference"); 
         let pos = self.token_pos();
         let type_name = self.parse_entity_name();
         let type_arguments = if !self.has_preceding_line_break() {

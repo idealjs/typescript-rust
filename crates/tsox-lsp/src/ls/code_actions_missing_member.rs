@@ -39,7 +39,7 @@ impl<'a> MissingMemberFixer<'a> {
         type_checker: &'a mut Checker,
         program: &'a Program,
         preferences: &'a UserPreferences,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         MissingMemberFixer {
             type_checker,
             program,
@@ -56,7 +56,7 @@ impl<'a> MissingMemberFixer<'a> {
         _enclosing_declaration: &Arc<Node>,
         _source_file: &Arc<tsox_frontend::ast::SourceFile>,
         _preserve_optional: u32,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("create_member_from_symbol"); 
         Vec::new()
     }
 }
@@ -66,7 +66,7 @@ impl LanguageService {
         &'a self,
         _program: &'a Program,
         _type_checker: &'a mut Checker,
-    ) -> MissingMemberFixer<'a> {
+    ) -> MissingMemberFixer<'a> { ::tsox_core::fntrace::enter("new_missing_member_fixer"); 
         MissingMemberFixer::new(_type_checker, _program, self.user_preferences())
     }
 }

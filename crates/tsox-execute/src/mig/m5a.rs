@@ -32,22 +32,22 @@ pub struct ContentMapperHost {
 }
 
 impl MapperHost for ContentMapperHost {
-    fn timings(&self) -> Timings {
+    fn timings(&self) -> Timings { ::tsox_core::fntrace::enter("timings"); 
         Timings {
             mappers: Default::default(),
             request_wait: std::time::Duration::from_secs_f64(self.timings.request_wait.max(0.0)),
         }
     }
 
-    fn project(&self, _spec: &ProjectSpec) -> Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>> {
+    fn project(&self, _spec: &ProjectSpec) -> Option<Arc<dyn tsox_compile::mig::m3l_cm_2::Project>> { ::tsox_core::fntrace::enter("project"); 
         None
     }
 
-    fn acquire(&self, _mappers: &[Arc<Mapper>]) -> Box<dyn FnOnce()> {
+    fn acquire(&self, _mappers: &[Arc<Mapper>]) -> Box<dyn FnOnce()> { ::tsox_core::fntrace::enter("acquire"); 
         Box::new(|| {})
     }
 
-    fn set_locale(&self, locale: tsox_core::locale::Locale) {
+    fn set_locale(&self, locale: tsox_core::locale::Locale) { ::tsox_core::fntrace::enter("set_locale"); 
         *self.locale.lock().unwrap() = Some(locale);
     }
 
@@ -55,20 +55,20 @@ impl MapperHost for ContentMapperHost {
         &self,
         _mapper: &Mapper,
         _request: &tsox_compile::mig::m3l_cm_2::Request,
-    ) -> Result<TransformOutcome, tsox_compile::mig::m3l_cm::TransformError> {
+    ) -> Result<TransformOutcome, tsox_compile::mig::m3l_cm::TransformError> { ::tsox_core::fntrace::enter("transform"); 
         Err(tsox_compile::mig::m3l_cm::new_transform_error(
             tsox_compile::mig::m3l_cm::TransformErrorKind::Project,
             Box::new(tsox_compile::mig::m3l_cm::ProjectError::default()),
         ))
     }
 
-    fn close(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    fn close(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> { ::tsox_core::fntrace::enter("close"); 
         Ok(())
     }
 }
 
 impl ContentMapperHost {
-    pub fn timings(&self) -> &ContentMapperTimings {
+    pub fn timings(&self) -> &ContentMapperTimings { ::tsox_core::fntrace::enter("timings"); 
         &self.timings
     }
 }
@@ -90,7 +90,7 @@ pub struct ContentMapperTiming {
 
 pub type ContentMapperLogger = Arc<dyn Fn(&str) + Send + Sync>;
 
-pub fn new_content_mapper_logger(sys: &dyn System) -> Option<ContentMapperLogger> {
+pub fn new_content_mapper_logger(sys: &dyn System) -> Option<ContentMapperLogger> { ::tsox_core::fntrace::enter("new_content_mapper_logger"); 
     if sys.environment_variable("TS_CONTENT_MAPPER_DEBUG").unwrap_or_default().is_empty() {
         return None;
     }
@@ -104,14 +104,14 @@ pub fn new_content_mapper_logger(sys: &dyn System) -> Option<ContentMapperLogger
 pub fn new_content_mapper_host(
     sys: &dyn System,
     options: &CompilerOptions,
-) -> Option<Arc<dyn MapperHost>> {
+) -> Option<Arc<dyn MapperHost>> { ::tsox_core::fntrace::enter("new_content_mapper_host"); 
     new_content_mapper_host_concrete(sys, options).map(|h| h as Arc<dyn MapperHost>)
 }
 
 pub fn new_content_mapper_host_concrete(
     sys: &dyn System,
     options: &CompilerOptions,
-) -> Option<Arc<ContentMapperHost>> {
+) -> Option<Arc<ContentMapperHost>> { ::tsox_core::fntrace::enter("new_content_mapper_host_concrete"); 
     if !options.run_external_code.is_true() {
         return None;
     }
@@ -126,7 +126,7 @@ pub fn get_trace_from_sys(
     sys: &dyn System,
     locale: Option<tsox_core::locale::Locale>,
     testing: Option<&dyn CommandLineTesting>,
-) -> TraceFn {
+) -> TraceFn { ::tsox_core::fntrace::enter("get_trace_from_sys"); 
     match testing {
         None => {
             let writer = Mutex::new(sys.writer());
@@ -152,7 +152,7 @@ pub trait CommandLineTesting: Send + Sync {
     fn on_watch_status_report_end(&self);
     fn get_trace(&self, sys: &dyn System) -> TraceFn;
     fn on_program(&self, program: &IncrementalProgram);
-    fn watch_backend(&self) -> Option<Arc<dyn super::m5b_4::WatchBackend>> {
+    fn watch_backend(&self) -> Option<Arc<dyn super::m5b_4::WatchBackend>> { ::tsox_core::fntrace::enter("watch_backend"); 
         None
     }
 }
@@ -172,16 +172,16 @@ pub struct Tracing {
 struct TracingFs(Arc<dyn FS>);
 
 impl Tracing {
-    pub fn stop_tracing(&self) -> Result<(), String> {
+    pub fn stop_tracing(&self) -> Result<(), String> { ::tsox_core::fntrace::enter("stop_tracing"); 
         Ok(())
     }
 }
 
 impl tsox_core::tracing::mig::x11a::FS for TracingFs {
-    fn write_file(&self, path: &str, contents: &str) -> Result<(), String> {
+    fn write_file(&self, path: &str, contents: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("write_file"); 
         self.0.write_file(path, contents).map_err(|e| e.to_string())
     }
-    fn append_file(&self, path: &str, contents: &str) -> Result<(), String> {
+    fn append_file(&self, path: &str, contents: &str) -> Result<(), String> { ::tsox_core::fntrace::enter("append_file"); 
         self.0.append_file(path, contents).map_err(|e| e.to_string())
     }
 }
@@ -190,7 +190,7 @@ pub fn start_tracing_if_needed(
     sys: &dyn System,
     config: &ParsedCommandLine,
     testing: Option<&dyn CommandLineTesting>,
-) -> Option<Tracing> {
+) -> Option<Tracing> { ::tsox_core::fntrace::enter("start_tracing_if_needed"); 
     let trace_dir = config.compiler_options.generate_trace.clone();
     if trace_dir.is_empty() {
         return None;
@@ -213,7 +213,7 @@ pub fn start_tracing_if_needed(
     }
 }
 
-pub fn stop_tracing(sys: &dyn System, tr: Option<&Tracing>) {
+pub fn stop_tracing(sys: &dyn System, tr: Option<&Tracing>) { ::tsox_core::fntrace::enter("stop_tracing"); 
     let Some(tr) = tr else { return };
     if let Err(err) = tr.stop_tracing() {
         let mut writer = sys.writer();
@@ -229,7 +229,7 @@ pub fn perform_incremental_compilation(
     extended_config_cache: &ExtendedConfigCache,
     compile_times: &mut CompileTimes,
     testing: Option<&dyn CommandLineTesting>,
-) -> CommandLineResult {
+) -> CommandLineResult { ::tsox_core::fntrace::enter("perform_incremental_compilation"); 
     let content_mapper_host = new_content_mapper_host_concrete(sys, &config.compiler_options);
     let _content_mapper_project = get_content_mapper_project(
         content_mapper_host.as_ref().map(Arc::as_ref),
@@ -312,7 +312,7 @@ pub fn perform_incremental_compilation(
 pub fn get_content_mapper_project(
     host: Option<&ContentMapperHost>,
     config: &ParsedCommandLine,
-) -> Option<ContentMapperProject> {
+) -> Option<ContentMapperProject> { ::tsox_core::fntrace::enter("get_content_mapper_project"); 
     let _ = (host, config);
     None
 }
@@ -320,7 +320,7 @@ pub fn get_content_mapper_project(
 pub struct ContentMapperProject;
 
 impl ContentMapperProject {
-    pub fn close(&mut self) {}
+    pub fn close(&mut self) { ::tsox_core::fntrace::enter("close"); }
 }
 
 use std::io::Write as _;

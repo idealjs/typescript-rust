@@ -3,7 +3,7 @@
 use crate::checker::flow_union_ops::*;
 
 impl Checker {
-    pub(crate) fn is_matching_reference(&self, source: &Arc<Node>, target: &Arc<Node>) -> bool {
+    pub(crate) fn is_matching_reference(&self, source: &Arc<Node>, target: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_matching_reference"); 
         match &target.data {
             NodeData::ParenthesizedExpression(p) => {
                 return self.is_matching_reference(source, &p.expression);
@@ -163,7 +163,7 @@ impl Checker {
         &self,
         source: &Arc<Node>,
         target: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("contains_matching_reference"); 
         let mut source = Arc::clone(source);
         while matches!(
             source.kind,
@@ -180,7 +180,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn get_accessed_property_name(&self, access: &Arc<Node>) -> Option<String> {
+    pub(crate) fn get_accessed_property_name(&self, access: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("get_accessed_property_name"); 
         match &access.data {
             NodeData::PropertyAccessExpression(pa) => Some(pa.name.text().to_string()),
             NodeData::ElementAccessExpression(ea) => match &ea.argument_expression.data {
@@ -194,7 +194,7 @@ impl Checker {
 
     // Go tryGetElementAccessExpressionName → tryGetNameFromEntityNameExpression：
     // 枚举成员实参（E.A）取成员声明名，使 m[E.A] 的窄化引用可配对
-    fn enum_member_argument_name(&self, arg: &Arc<Node>) -> Option<String> {
+    fn enum_member_argument_name(&self, arg: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("enum_member_argument_name"); 
         let NodeData::PropertyAccessExpression(pae) = &arg.data else {
             return None;
         };
@@ -220,7 +220,7 @@ impl Checker {
         Some(data.name.text().to_string())
     }
 
-    fn resolve_entity_name_chain(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn resolve_entity_name_chain(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_entity_name_chain"); 
         match &node.data {
             NodeData::Identifier(_) => self.resolve_identifier(node),
             NodeData::PropertyAccessExpression(pae) => {
@@ -231,13 +231,13 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_parameter_or_mutable_local(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_parameter_or_mutable_local(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_parameter_or_mutable_local"); 
         symbol
             .flags
             .intersects(SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable)
     }
 
-    pub(crate) fn symbol_is_assigned(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn symbol_is_assigned(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_assigned"); 
         let Some(decl) = symbol.value_declaration.as_ref() else {
             return true;
         };
@@ -249,7 +249,7 @@ impl Checker {
         assigned
     }
 
-    pub(crate) fn enclosing_function_or_source_file(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn enclosing_function_or_source_file(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("enclosing_function_or_source_file"); 
         let mut current = Arc::clone(node);
         loop {
             if matches!(
@@ -269,7 +269,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn scan_assignment_targets(node: &Arc<Node>, name: &str, assigned: &mut bool) {
+    pub(crate) fn scan_assignment_targets(node: &Arc<Node>, name: &str, assigned: &mut bool) { ::tsox_core::fntrace::enter("scan_assignment_targets"); 
         if *assigned {
             return;
         }

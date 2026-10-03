@@ -53,11 +53,11 @@ pub(crate) const LANGUAGE_FEATURE_MINIMUM_TARGET_FOR_AWAIT_OF: tsox_core::core::
 pub(crate) const LANGUAGE_FEATURE_MINIMUM_TARGET_ASYNC_GENERATORS: tsox_core::core::compiler_options::ScriptTarget = tsox_core::core::compiler_options::ScriptTarget::ES2018;
 pub(crate) const LANGUAGE_FEATURE_MINIMUM_TARGET_ASYNC_FUNCTIONS: tsox_core::core::compiler_options::ScriptTarget = tsox_core::core::compiler_options::ScriptTarget::ES2017;
 
-pub(crate) fn is_global_source_file(node: &Node) -> bool {
+pub(crate) fn is_global_source_file(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_global_source_file"); 
     node.kind == SyntaxKind::SourceFile
 }
 
-pub(crate) fn is_node_descendant_of(node: &Node, ancestor: &Node) -> bool {
+pub(crate) fn is_node_descendant_of(node: &Node, ancestor: &Node) -> bool { ::tsox_core::fntrace::enter("is_node_descendant_of"); 
     let mut current = node.parent();
     while let Some(n) = current {
         if std::ptr::eq(std::sync::Arc::as_ptr(&n) as *const Node, ancestor) {
@@ -70,7 +70,7 @@ pub(crate) fn is_node_descendant_of(node: &Node, ancestor: &Node) -> bool {
 
 impl Checker {
 
-    pub fn check_export_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_export_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_export_declaration"); 
         let diagnostic = if tsox_frontend::ast::is_in_js_file(node) {
             AN_EXPORT_DECLARATION_CAN_ONLY_BE_USED_AT_THE_TOP_LEVEL_OF_A_MODULE
         } else {
@@ -175,7 +175,7 @@ impl Checker {
         self.check_import_attributes(node);
     }
 
-    pub fn check_export_specifier(&mut self, node: &Arc<Node>) {
+    pub fn check_export_specifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_export_specifier"); 
         self.check_alias_symbol(node);
         let has_module_specifier = node
             .parent()
@@ -229,11 +229,11 @@ impl Checker {
         }
     }
 
-    pub fn check_expression_cached(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_expression_cached(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_expression_cached"); 
         self.check_expression_cached_ex(node, CheckMode::Normal)
     }
 
-    pub fn check_expression_cached_ex(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_expression_cached_ex(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_expression_cached_ex"); 
         if check_mode != CheckMode::Normal {
             return self.check_expression_ex(node, check_mode);
         }
@@ -249,7 +249,7 @@ impl Checker {
         self.type_node_links.get(node).and_then(|l| l.resolved_type.clone()).unwrap()
     }
 
-    pub fn check_expression_ex(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_expression_ex(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_expression_ex"); 
         let save_current_node = self.current_node.clone();
         self.current_node = Some(Arc::clone(node));
         self.instantiation_count = 0;
@@ -262,7 +262,7 @@ impl Checker {
         t
     }
 
-    pub fn check_expression_for_mutable_location(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_expression_for_mutable_location(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_expression_for_mutable_location"); 
         let t = self.check_expression_ex(node, check_mode);
         if self.is_const_context(node) {
             self.get_regular_type_of_literal_type(&t)
@@ -275,14 +275,14 @@ impl Checker {
         }
     }
 
-    pub fn check_expression_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_expression_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_expression_statement"); 
         self.check_grammar_statement_in_ambient_context(node);
         if let NodeData::ExpressionStatement(data) = &node.data {
             self.check_expression(&data.expression);
         }
     }
 
-    pub fn check_expression_with_contextual_type(&mut self, node: &Arc<Node>, contextual_type: &Arc<Type>, inference_context: Option<&Arc<InferenceContext>>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_expression_with_contextual_type(&mut self, node: &Arc<Node>, contextual_type: &Arc<Type>, inference_context: Option<&Arc<InferenceContext>>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_expression_with_contextual_type"); 
         let context_node = self.get_context_node(node);
         self.push_contextual_type(&context_node, contextual_type, false);
         if let Some(ctx) = inference_context {
@@ -305,7 +305,7 @@ impl Checker {
         t
     }
 
-    pub fn check_expression_with_type_arguments(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_expression_with_type_arguments(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_expression_with_type_arguments"); 
         self.check_grammar_expression_with_type_arguments(node);
         if let Some(type_arguments) = node.type_arguments() {
             self.check_source_elements_from_list(&type_arguments.nodes);
@@ -338,13 +338,13 @@ impl Checker {
         self.get_instantiation_expression_type(&expr_type, node)
     }
 
-    pub fn is_skip_direct_inference_node(&self, node: &Arc<Node>) -> bool {
+    pub fn is_skip_direct_inference_node(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_skip_direct_inference_node"); 
         crate::checker::mig::m2h::r21k10_defs::skip_direct_inference_nodes_has(
             Arc::as_ptr(node) as *const () as usize,
         )
     }
 
-    pub fn check_indexed_access(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_indexed_access(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_indexed_access"); 
         if node.flags.contains(NodeFlags::OptionalChain) {
             return self.check_element_access_chain(node, check_mode);
         }
@@ -353,7 +353,7 @@ impl Checker {
         self.check_element_access_expression(node, &expr_type, check_mode)
     }
 
-    pub fn check_expression_worker(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_expression_worker(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_expression_worker"); 
         match node.kind {
             SyntaxKind::Identifier => self.check_identifier(node, check_mode),
             SyntaxKind::PrivateIdentifier => {
@@ -439,7 +439,7 @@ impl Checker {
         }
     }
 
-    pub fn check_for_in_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_for_in_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_for_in_statement"); 
         let data = match &node.data {
             NodeData::ForInOrOfStatement(data) => data.clone(),
             _ => return,
@@ -488,7 +488,7 @@ impl Checker {
         }
     }
 
-    pub fn check_for_of_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_for_of_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_for_of_statement"); 
         let data = match &node.data {
             NodeData::ForInOrOfStatement(data) => data.clone(),
             _ => return,
@@ -535,7 +535,7 @@ impl Checker {
         }
     }
 
-    pub fn check_for_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_for_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_for_statement"); 
         if !self.check_grammar_statement_in_ambient_context(node) {
             if let Some(init) = node.initializer() {
                 if init.kind == SyntaxKind::VariableDeclarationList {
@@ -566,7 +566,7 @@ impl Checker {
         }
     }
 
-    pub fn check_function_expression_or_object_literal_method(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_function_expression_or_object_literal_method(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_function_expression_or_object_literal_method"); 
         self.check_node_deferred(node);
         if tsox_frontend::ast::is_function_expression(node) {
             self.check_collisions_for_declaration_name(node, node.name());
@@ -625,7 +625,7 @@ impl Checker {
         self.get_type_of_symbol(&symbol)
     }
 
-    pub fn check_function_expression_or_object_literal_method_deferred(&mut self, node: &Arc<Node>) {
+    pub fn check_function_expression_or_object_literal_method_deferred(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_function_expression_or_object_literal_method_deferred"); 
         let function_flags = get_function_flags(Some(node));
         let return_type = self.get_return_type_from_annotation(node);
         self.check_all_code_paths_in_non_void_function_return_or_throw(node, Some(&return_type));
@@ -656,30 +656,30 @@ impl PredicateSemantics {
     pub(crate) const Never: PredicateSemantics = PredicateSemantics(1 << 1);
     pub(crate) const Sometimes: PredicateSemantics = PredicateSemantics(PredicateSemantics::Always.0 | PredicateSemantics::Never.0);
 
-    pub(crate) fn intersects(self, other: PredicateSemantics) -> bool {
+    pub(crate) fn intersects(self, other: PredicateSemantics) -> bool { ::tsox_core::fntrace::enter("intersects"); 
         (self.0 & other.0) != 0
     }
 }
 
 impl std::ops::BitAnd for PredicateSemantics {
     type Output = PredicateSemantics;
-    fn bitand(self, rhs: PredicateSemantics) -> PredicateSemantics {
+    fn bitand(self, rhs: PredicateSemantics) -> PredicateSemantics { ::tsox_core::fntrace::enter("bitand"); 
         PredicateSemantics(self.0 & rhs.0)
     }
 }
 
 impl std::ops::BitOr for PredicateSemantics {
     type Output = PredicateSemantics;
-    fn bitor(self, rhs: PredicateSemantics) -> PredicateSemantics {
+    fn bitor(self, rhs: PredicateSemantics) -> PredicateSemantics { ::tsox_core::fntrace::enter("bitor"); 
         PredicateSemantics(self.0 | rhs.0)
     }
 }
 
-pub(crate) fn is_default_clause(node: &Node) -> bool {
+pub(crate) fn is_default_clause(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_default_clause"); 
     node.kind == SyntaxKind::DefaultClause
 }
 
-pub(crate) fn is_string_literal_like(node: &Node) -> bool {
+pub(crate) fn is_string_literal_like(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_string_literal_like"); 
     node.kind == SyntaxKind::StringLiteral
         || matches!(
             node.kind,
@@ -691,15 +691,15 @@ pub(crate) fn is_string_literal_like(node: &Node) -> bool {
         )
 }
 
-pub(crate) fn jsnum_from_string(text: &str) -> tsox_core::jsnum::Number {
+pub(crate) fn jsnum_from_string(text: &str) -> tsox_core::jsnum::Number { ::tsox_core::fntrace::enter("jsnum_from_string"); 
     tsox_core::jsnum::Number::from_string(text)
 }
 
-pub(crate) fn parse_pseudo_big_int(text: &str) -> tsox_core::jsnum::PseudoBigInt {
+pub(crate) fn parse_pseudo_big_int(text: &str) -> tsox_core::jsnum::PseudoBigInt { ::tsox_core::fntrace::enter("parse_pseudo_big_int"); 
     tsox_core::jsnum::PseudoBigInt::parse(text)
 }
 
-pub(crate) fn find_ancestor_node(node: &Node, predicate: impl Fn(&Arc<Node>) -> bool) -> Option<Arc<Node>> {
+pub(crate) fn find_ancestor_node(node: &Node, predicate: impl Fn(&Arc<Node>) -> bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_node"); 
     let mut current = node.parent();
     while let Some(n) = current {
         if predicate(&n) {
@@ -710,7 +710,7 @@ pub(crate) fn find_ancestor_node(node: &Node, predicate: impl Fn(&Arc<Node>) -> 
     None
 }
 
-pub(crate) fn function_like_data_full_signature(node: &Node) -> Option<Arc<Node>> {
+pub(crate) fn function_like_data_full_signature(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("function_like_data_full_signature"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.full_signature.clone(),
         NodeData::MethodDeclaration(d) => d.full_signature.clone(),
@@ -723,28 +723,28 @@ pub(crate) fn function_like_data_full_signature(node: &Node) -> Option<Arc<Node>
     }
 }
 
-pub(crate) fn variable_declaration_exclamation_token(node: &Node) -> Option<Arc<Node>> {
+pub(crate) fn variable_declaration_exclamation_token(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("variable_declaration_exclamation_token"); 
     match &node.data {
         NodeData::VariableDeclaration(d) => d.exclamation_token.clone(),
         _ => None,
     }
 }
 
-pub(crate) fn import_attributes_list(node: &Node) -> Vec<Arc<Node>> {
+pub(crate) fn import_attributes_list(node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("import_attributes_list"); 
     match &node.data {
         NodeData::ImportAttributes(d) => d.attributes.nodes.clone(),
         _ => Vec::new(),
     }
 }
 
-pub(crate) fn import_attribute_value(node: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn import_attribute_value(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("import_attribute_value"); 
     match &node.data {
         NodeData::ImportAttribute(d) => Arc::clone(&d.value),
         _ => Arc::clone(node),
     }
 }
 
-pub(crate) fn object_literal_properties(node: &Node) -> Vec<Arc<Node>> {
+pub(crate) fn object_literal_properties(node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("object_literal_properties"); 
     match &node.data {
         NodeData::ObjectLiteralExpression(d) => d.properties.nodes.clone(),
         _ => Vec::new(),
@@ -758,7 +758,7 @@ impl InternalSymbolName {
     pub(crate) const ImportAttributes: &'static str = "@@importAttributes";
 }
 
-pub(crate) fn get_external_module_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_external_module_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_name"); 
     match &node.data {
         NodeData::ImportDeclaration(d) => Some(d.module_specifier.clone()),
         NodeData::ExportDeclaration(d) => d.module_specifier.clone(),

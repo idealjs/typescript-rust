@@ -9,7 +9,7 @@ impl Checker {
         &mut self,
         pattern: &Arc<Node>,
         init: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_binding_pattern_initializer_excess"); 
         let NodeData::ObjectLiteralExpression(ol) = &init.data else {
             return;
         };

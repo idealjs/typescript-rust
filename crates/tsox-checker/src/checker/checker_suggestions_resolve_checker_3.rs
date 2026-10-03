@@ -10,7 +10,7 @@ impl Checker {
         &self,
         symbol: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("global_this_export"); 
         let merged_view = |s: &Arc<Symbol>| self.get_merged_symbol(s);
         if self
             .global_this_symbol
@@ -27,12 +27,12 @@ impl Checker {
         &self,
         t: &Arc<crate::checker::types::Type>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("global_this_export_of_type"); 
         let symbol = t.symbol.as_ref()?;
         self.global_this_export(symbol, name)
     }
 
-    pub(crate) fn ambient_namespace_locals_visible(&self, ns: &Arc<Symbol>) -> bool {
+    pub(crate) fn ambient_namespace_locals_visible(&self, ns: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("ambient_namespace_locals_visible"); 
         if std::env::var_os("TSOX_NO_AMBIENT").is_some() {
             return false;
         }
@@ -51,7 +51,7 @@ impl Checker {
         &self,
         ns: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("ambient_namespace_local"); 
         if !self.ambient_namespace_locals_visible(ns) {
             return None;
         }
@@ -68,7 +68,7 @@ impl Checker {
             })
     }
 
-    pub(crate) fn resolve_alias_target(&mut self, symbol: Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_alias_target(&mut self, symbol: Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_alias_target"); 
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return Some(symbol);
         }
@@ -343,7 +343,7 @@ impl Checker {
         Some(symbol)
     }
 
-    pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_module_file_symbol(&self, specifier: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_module_file_symbol"); 
         // 同 isExternalModuleNameRelative 语义：`.prisma/client` 是包名，不是相对路径
         if !specifier.starts_with("./") && !specifier.starts_with("../") {
             for file in self.program.source_files() {
@@ -415,7 +415,7 @@ impl Checker {
         &self,
         dir: &str,
         specifier: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_module_file_symbol_in"); 
         let raw = specifier.strip_prefix("./").unwrap_or(specifier);
 
         let stripped = raw
@@ -470,7 +470,7 @@ impl Checker {
         &self,
         module_symbol: &Arc<Symbol>,
         mut f: impl FnMut(&Arc<Node>) -> bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_module_statement"); 
         use tsox_frontend::ast::NodeData;
         for decl in &module_symbol.declarations {
             let statements: Option<&Arc<tsox_frontend::ast::NodeList>> = match &decl.data {
@@ -494,7 +494,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn class_name_text(class: &Arc<Node>) -> String {
+    pub(crate) fn class_name_text(class: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("class_name_text"); 
         match &class.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => d
                 .name
@@ -514,7 +514,7 @@ impl Checker {
         &self,
         name: &str,
         type_parameters: Option<&Arc<tsox_frontend::ast::NodeList>>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("generic_display_name"); 
         let Some(tps) = type_parameters else {
             return name.to_string();
         };
@@ -538,7 +538,7 @@ impl Checker {
     pub(crate) fn extends_heritage_expr_of(
         &self,
         class_node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("extends_heritage_expr_of"); 
         let heritage = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
             tsox_frontend::ast::NodeData::ClassExpression(data) => data.heritage_clauses.clone(),
@@ -558,7 +558,7 @@ impl Checker {
         &self,
         class: &Arc<Node>,
         name: &str,
-    ) -> Option<bool> {
+    ) -> Option<bool> { ::tsox_core::fntrace::enter("class_member_static_by_name"); 
         let members = match &class.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.members,
             tsox_frontend::ast::NodeData::ClassExpression(d) => &d.members,

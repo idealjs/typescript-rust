@@ -12,7 +12,7 @@ impl Generator {
         &self,
         generated_line: i32,
         generated_character: i32,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_new_generated_position"); 
         !self.has_pending
             || self.pending_generated_line != generated_line
             || self.pending_generated_character != generated_character
@@ -23,7 +23,7 @@ impl Generator {
         source_index: SourceIndex,
         source_line: i32,
         source_character: i32,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_backtracking_source_position"); 
         source_index != SOURCE_INDEX_NOT_SET
             && source_line != NOT_SET
             && source_character != NOT_SET_UTF16
@@ -33,7 +33,7 @@ impl Generator {
                     && self.pending_source_character > source_character))
     }
 
-    pub(super) fn should_commit_mapping(&self) -> bool {
+    pub(super) fn should_commit_mapping(&self) -> bool { ::tsox_core::fntrace::enter("should_commit_mapping"); 
         if !self.has_pending {
             return false;
         }
@@ -48,7 +48,7 @@ impl Generator {
             || self.last_name_index != self.pending_name_index
     }
 
-    fn append_base64_vlq(&mut self, in_value: i32) {
+    fn append_base64_vlq(&mut self, in_value: i32) { ::tsox_core::fntrace::enter("append_base64_vlq"); 
         let mut in_value = if in_value < 0 {
             ((-in_value) << 1) + 1
         } else {
@@ -69,7 +69,7 @@ impl Generator {
         }
     }
 
-    pub(super) fn commit_pending_mapping(&mut self) {
+    pub(super) fn commit_pending_mapping(&mut self) { ::tsox_core::fntrace::enter("commit_pending_mapping"); 
         if !self.should_commit_mapping() {
             return;
         }
@@ -123,7 +123,7 @@ impl Generator {
         source_line: i32,
         source_character: i32,
         name_index: NameIndex,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_mapping"); 
         if self.is_new_generated_position(generated_line, generated_character)
             || self.is_backtracking_source_position(source_index, source_line, source_character)
         {
@@ -154,7 +154,7 @@ impl Generator {
         &mut self,
         generated_line: i32,
         generated_character: i32,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("add_generated_mapping"); 
         if generated_line < self.pending_generated_line {
             return Err("generatedLine cannot backtrack".to_string());
         }
@@ -179,7 +179,7 @@ impl Generator {
         source_index: SourceIndex,
         source_line: i32,
         source_character: i32,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("add_source_mapping"); 
         if generated_line < self.pending_generated_line {
             return Err("generatedLine cannot backtrack".to_string());
         }
@@ -214,7 +214,7 @@ impl Generator {
         source_line: i32,
         source_character: i32,
         name_index: NameIndex,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("add_named_source_mapping"); 
         if generated_line < self.pending_generated_line {
             return Err("generatedLine cannot backtrack".to_string());
         }

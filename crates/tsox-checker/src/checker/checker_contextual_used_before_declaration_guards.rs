@@ -3,7 +3,7 @@
 use crate::checker::checker_contextual::*;
 
 impl Checker {
-    pub(crate) fn is_declared_as_plain_var(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_declared_as_plain_var(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_declared_as_plain_var"); 
         let decl = symbol
             .value_declaration
             .as_ref()
@@ -38,7 +38,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn has_const_enum_declarations(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn has_const_enum_declarations(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("has_const_enum_declarations"); 
         let mut enum_decl_count = 0;
         let is_const_enum = symbol
             .declarations
@@ -71,7 +71,7 @@ impl Checker {
             && !self.compiler_options.verbatim_module_syntax.is_true()
     }
 
-    pub(crate) fn is_used_in_type_position(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_used_in_type_position(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_used_in_type_position"); 
         let in_tp_default = {
             let mut cur = node.parent();
             let mut hit = false;

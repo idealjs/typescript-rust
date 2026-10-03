@@ -24,11 +24,11 @@ pub struct SessionOptions {
 
 static SESSION_ID_COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
-fn next_session_id() -> u64 {
+fn next_session_id() -> u64 { ::tsox_core::fntrace::enter("next_session_id"); 
     std::sync::atomic::AtomicU64::fetch_add(&SESSION_ID_COUNTER, 1, std::sync::atomic::Ordering::Relaxed) + 1
 }
 
-pub fn format_session_id(id: u64) -> String {
+pub fn format_session_id(id: u64) -> String { ::tsox_core::fntrace::enter("format_session_id"); 
     format!("api-session-{}", id)
 }
 
@@ -36,7 +36,7 @@ impl Session {
     pub fn new_session(
         project_session: Arc<ProjectSession>,
         options: Option<&SessionOptions>,
-    ) -> Session {
+    ) -> Session { ::tsox_core::fntrace::enter("new_session"); 
         let id = next_session_id();
         let mut session = Session {
             id: format_session_id(id),
@@ -51,19 +51,19 @@ impl Session {
         session
     }
 
-    pub fn id(&self) -> String {
+    pub fn id(&self) -> String { ::tsox_core::fntrace::enter("id"); 
         self.id.clone()
     }
 
-    pub fn project_session(&self) -> Arc<ProjectSession> {
+    pub fn project_session(&self) -> Arc<ProjectSession> { ::tsox_core::fntrace::enter("project_session"); 
         self.project_session.clone()
     }
 
-    pub fn handle_notification(&self, _method: &str, _params: &JsonValue) -> Result<(), String> {
+    pub fn handle_notification(&self, _method: &str, _params: &JsonValue) -> Result<(), String> { ::tsox_core::fntrace::enter("handle_notification"); 
         Ok(())
     }
 
-    pub fn handle_request(&self, method: &str, params: &JsonValue) -> Result<JsonValue, String> {
+    pub fn handle_request(&self, method: &str, params: &JsonValue) -> Result<JsonValue, String> { ::tsox_core::fntrace::enter("handle_request"); 
         match method {
             "echo" => {
                 if self.use_binary_responses {
@@ -560,7 +560,7 @@ struct UpdateTrackingState {
     latest_snapshot: SnapshotId,
 }
 
-fn take_update_state(session_id: &str) -> UpdateTrackingState {
+fn take_update_state(session_id: &str) -> UpdateTrackingState { ::tsox_core::fntrace::enter("take_update_state"); 
     static STATES: std::sync::Mutex<
         Option<std::collections::HashMap<String, UpdateTrackingState>>,
     > = std::sync::Mutex::new(None);
@@ -571,7 +571,7 @@ fn take_update_state(session_id: &str) -> UpdateTrackingState {
         .unwrap_or_default()
 }
 
-fn put_update_state(session_id: &str, state: UpdateTrackingState) {
+fn put_update_state(session_id: &str, state: UpdateTrackingState) { ::tsox_core::fntrace::enter("put_update_state"); 
     static STATES: std::sync::Mutex<
         Option<std::collections::HashMap<String, UpdateTrackingState>>,
     > = std::sync::Mutex::new(None);
@@ -581,7 +581,7 @@ fn put_update_state(session_id: &str, state: UpdateTrackingState) {
         .insert(session_id.to_string(), state);
 }
 
-fn snapshot_handle(snapshot: &ProjectSnapshot) -> SnapshotId {
+fn snapshot_handle(snapshot: &ProjectSnapshot) -> SnapshotId { ::tsox_core::fntrace::enter("snapshot_handle"); 
     snapshot.id()
 }
 
@@ -589,7 +589,7 @@ impl Session {
     pub fn handle_update_snapshot(
         &self,
         params: &UpdateSnapshotParams,
-    ) -> Result<UpdateSnapshotResponse, String> {
+    ) -> Result<UpdateSnapshotResponse, String> { ::tsox_core::fntrace::enter("handle_update_snapshot"); 
         let cwd = self.project_session.get_current_directory();
         let file_changes = self.to_file_change_summary(params.file_changes.as_ref());
         let mut api_request = tsox_lsp::project::snapshot::APISnapshotRequest::default();
@@ -722,7 +722,7 @@ impl Session {
     pub fn handle_update_temporary_snapshot(
         &self,
         params: &UpdateTemporarySnapshotParams,
-    ) -> Result<UpdateSnapshotResponse, String> {
+    ) -> Result<UpdateSnapshotResponse, String> { ::tsox_core::fntrace::enter("handle_update_temporary_snapshot"); 
         let base_snapshot = self.get_snapshot_data(params.snapshot)?.snapshot;
         let uri = tsox_lsp::lsp::lsproto::DocumentUri(
             params
@@ -776,7 +776,7 @@ impl Session {
         &self,
         params: &TranspileParams,
         declaration: bool,
-    ) -> Result<TranspileOutputResponse, String> {
+    ) -> Result<TranspileOutputResponse, String> { ::tsox_core::fntrace::enter("handle_transpile"); 
         transpile_output_response(&params.input, params.options.clone(), declaration)
     }
 
@@ -784,7 +784,7 @@ impl Session {
         &self,
         params: &TranspileFromFileParams,
         declaration: bool,
-    ) -> Result<TranspileOutputResponse, String> {
+    ) -> Result<TranspileOutputResponse, String> { ::tsox_core::fntrace::enter("handle_transpile_from_file"); 
         let file_name = tsox_core::tspath::get_normalized_absolute_path(
             &params.file_name,
             &self.project_session.get_current_directory(),
@@ -803,7 +803,7 @@ impl Session {
     pub fn handle_type_to_type_node(
         &self,
         params: &TypeToTypeNodeParams,
-    ) -> Result<Option<SourceFileResponse>, String> {
+    ) -> Result<Option<SourceFileResponse>, String> { ::tsox_core::fntrace::enter("handle_type_to_type_node"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let _ = &params.location;
@@ -823,7 +823,7 @@ impl Session {
     pub fn handle_type_to_string(
         &self,
         params: &TypeToTypeNodeParams,
-    ) -> Result<String, String> {
+    ) -> Result<String, String> { ::tsox_core::fntrace::enter("handle_type_to_string"); 
         let mut setup = self.setup_checker(params.snapshot, &params.project)?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let _ = &params.location;
@@ -844,7 +844,7 @@ fn transpile_output_response(
     input: &str,
     options: TranspileRequestOptions,
     declaration: bool,
-) -> Result<TranspileOutputResponse, String> {
+) -> Result<TranspileOutputResponse, String> { ::tsox_core::fntrace::enter("transpile_output_response"); 
     let transpile_options = tsox_compile::transpile::TranspileOptions {
         compiler_options: options.compiler_options,
         file_name: options.file_name,
@@ -863,11 +863,11 @@ fn transpile_output_response(
     })
 }
 
-fn to_response<T: serde::Serialize>(value: T) -> Result<JsonValue, String> {
+fn to_response<T: serde::Serialize>(value: T) -> Result<JsonValue, String> { ::tsox_core::fntrace::enter("to_response"); 
     serde_json::to_value(value).map_err(|e| e.to_string())
 }
 
-fn parse_params<T: serde::de::DeserializeOwned>(parsed: &JsonValue) -> Result<T, String> {
+fn parse_params<T: serde::de::DeserializeOwned>(parsed: &JsonValue) -> Result<T, String> { ::tsox_core::fntrace::enter("parse_params"); 
     serde_json::from_value(parsed.clone()).map_err(|e| format!("invalid request: {}", e))
 }
 
@@ -898,7 +898,7 @@ impl Session {
     pub fn handle_batch_requests(
         &self,
         params: &BatchRequestsParams,
-    ) -> Result<BatchRequestsResponse, String> {
+    ) -> Result<BatchRequestsResponse, String> { ::tsox_core::fntrace::enter("handle_batch_requests"); 
         let responses = params
             .requests
             .iter()
@@ -907,7 +907,7 @@ impl Session {
         Ok(BatchRequestsResponse { responses })
     }
 
-    pub fn handle_batch_request(&self, request: &BatchRequest) -> BatchResponse {
+    pub fn handle_batch_request(&self, request: &BatchRequest) -> BatchResponse { ::tsox_core::fntrace::enter("handle_batch_request"); 
         let mut response = BatchResponse {
             method: request.method.clone(),
             result: JsonValue::Null,
@@ -925,7 +925,7 @@ impl SnapshotData {
     pub fn get_project(
         &self,
         project_handle: &ProjectId,
-    ) -> Result<tsox_lsp::project::project::Project, String> {
+    ) -> Result<tsox_lsp::project::project::Project, String> { ::tsox_core::fntrace::enter("get_project"); 
         let project_name = parse_project_handle(project_handle);
         let collection = self
             .snapshot
@@ -938,7 +938,7 @@ impl SnapshotData {
         Ok(proj.clone_shallow())
     }
 
-    pub fn get_or_create_project_registry(&self, project_id: &ProjectId) -> ProjectRegistryData {
+    pub fn get_or_create_project_registry(&self, project_id: &ProjectId) -> ProjectRegistryData { ::tsox_core::fntrace::enter("get_or_create_project_registry"); 
         if project_id.is_empty() {
             panic!("getOrCreateProjectRegistry: empty project ID");
         }
@@ -975,7 +975,7 @@ pub struct SnapshotChanges {
 pub fn compute_snapshot_changes(
     prev: &tsox_lsp::project::snapshot::Snapshot,
     next: &tsox_lsp::project::snapshot::Snapshot,
-) -> SnapshotChanges {
+) -> SnapshotChanges { ::tsox_core::fntrace::enter("compute_snapshot_changes"); 
     let changes = std::cell::RefCell::new(SnapshotChanges::default());
     let prev_projects = prev
         .project_collection
@@ -1035,7 +1035,7 @@ pub fn compute_snapshot_changes(
 fn diff_project_files(
     old_proj: &tsox_lsp::project::project::Project,
     new_proj: &tsox_lsp::project::project::Project,
-) -> ProjectFileChanges {
+) -> ProjectFileChanges { ::tsox_core::fntrace::enter("diff_project_files"); 
     let _ = (old_proj, new_proj);
     ProjectFileChanges {
         changed_files: Vec::new(),

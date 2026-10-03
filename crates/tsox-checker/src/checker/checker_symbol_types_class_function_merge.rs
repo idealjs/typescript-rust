@@ -6,7 +6,7 @@ impl Checker {
     pub(crate) fn merged_class_function_symbol_type(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("merged_class_function_symbol_type"); 
         let class_decl = symbol
             .declarations
             .iter()

@@ -28,7 +28,7 @@ impl Checker {
         n: &mut InferenceContext,
         node: &Arc<Node>,
         t: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_intra_expression_inference_site"); 
         add_intra_expression_inference_site_to(n, Arc::clone(node), Arc::clone(t));
     }
 
@@ -37,7 +37,7 @@ impl Checker {
         source: &Arc<Signature>,
         target: &Arc<Signature>,
         callback: &mut dyn FnMut(&Arc<Type>, &Arc<Type>),
-    ) {
+    ) { ::tsox_core::fntrace::enter("apply_to_parameter_types"); 
         let source_count = self.get_parameter_count(source);
         let target_count = self.get_parameter_count(target);
         let source_rest_type = self.get_effective_rest_type(source);
@@ -76,7 +76,7 @@ impl Checker {
         source: &Arc<Signature>,
         target: &Arc<Signature>,
         callback: &mut dyn FnMut(&Arc<Type>, &Arc<Type>),
-    ) {
+    ) { ::tsox_core::fntrace::enter("apply_to_return_types"); 
         let target_type_predicate = self.get_type_predicate_of_signature(target);
         if let Some(target_type_predicate) = target_type_predicate {
             if let Some(source_type_predicate) = self.get_type_predicate_of_signature(source) {
@@ -103,13 +103,13 @@ impl Checker {
         &mut self,
         n: Option<&InferenceContext>,
         extra_flags: InferenceFlags,
-    ) -> Option<Box<InferenceContext>> {
+    ) -> Option<Box<InferenceContext>> { ::tsox_core::fntrace::enter("clone_inference_context"); 
         let n = n?;
         let inferences = n.inferences.iter().map(clone_inference_info).collect();
         Some(self.new_inference_context_worker(inferences, n.signature.clone(), n.flags | extra_flags))
     }
 
-    pub(crate) fn clone_inferred_part_of_context(&mut self, n: &InferenceContext) -> Option<Box<InferenceContext>> {
+    pub(crate) fn clone_inferred_part_of_context(&mut self, n: &InferenceContext) -> Option<Box<InferenceContext>> { ::tsox_core::fntrace::enter("clone_inferred_part_of_context"); 
         let inferences: Vec<InferenceInfo> =
             n.inferences.iter().filter(|info| has_inference_candidates(info)).cloned().collect();
         if inferences.is_empty() {
@@ -118,7 +118,7 @@ impl Checker {
         Some(self.new_inference_context_worker(inferences, n.signature.clone(), n.flags))
     }
 
-    pub(crate) fn create_empty_object_type_from_string_literal(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn create_empty_object_type_from_string_literal(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_empty_object_type_from_string_literal"); 
         let mut members = SymbolTable::new();
         for dt in t.distributed() {
             if !dt.flags.contains(TypeFlags::STRING_LITERAL) {
@@ -154,7 +154,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn create_outer_return_mapper(&mut self, context: &mut InferenceContext) -> Option<Arc<TypeMapper>> {
+    pub(crate) fn create_outer_return_mapper(&mut self, context: &mut InferenceContext) -> Option<Arc<TypeMapper>> { ::tsox_core::fntrace::enter("create_outer_return_mapper"); 
         if context.outer_return_mapper.is_none() {
             let cloned = self.clone_inference_context(Some(context), InferenceFlags::None)?;
             let mut mapper = cloned.mapper.clone();
@@ -166,7 +166,7 @@ impl Checker {
         context.outer_return_mapper.clone()
     }
 
-    pub(crate) fn get_limited_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn get_limited_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_limited_constraint"); 
         let reverse_mapped = t.as_reverse_mapped_type()?;
         let constraint = self.get_constraint_type_from_mapped_type(reverse_mapped.mapped_type.as_ref()?)?;
         if !(constraint.flags.contains(TypeFlags::Union) || constraint.flags.contains(TypeFlags::Intersection)) {
@@ -195,11 +195,11 @@ impl Checker {
         None
     }
 
-    pub(crate) fn get_mapper_from_context(&self, n: Option<&InferenceContext>) -> Option<Arc<TypeMapper>> {
+    pub(crate) fn get_mapper_from_context(&self, n: Option<&InferenceContext>) -> Option<Arc<TypeMapper>> { ::tsox_core::fntrace::enter("get_mapper_from_context"); 
         n?.mapper.clone()
     }
 
-    pub(crate) fn get_type_of_reverse_mapped_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn get_type_of_reverse_mapped_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_reverse_mapped_symbol"); 
         let resolved = self.value_symbol_links.get(symbol).and_then(|l| l.resolved_type.clone());
         if resolved.is_none() {
             let Some(reverse_links) = self.reverse_mapped_symbol_links.get(symbol) else {
@@ -221,7 +221,7 @@ impl Checker {
         resolved.unwrap()
     }
 
-    pub(crate) fn infer_from_contravariant_types(&mut self, n: &mut InferenceState, source: &Arc<Type>, target: &Arc<Type>) {
+    pub(crate) fn infer_from_contravariant_types(&mut self, n: &mut InferenceState, source: &Arc<Type>, target: &Arc<Type>) { ::tsox_core::fntrace::enter("infer_from_contravariant_types"); 
         n.contravariant = !n.contravariant;
         self.infer_from_types(n, source, target);
         n.contravariant = !n.contravariant;
@@ -232,7 +232,7 @@ impl Checker {
         n: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_contravariant_types_if_strict_function_types"); 
         if self.strict_function_types || n.priority.contains(InferencePriority::AlwaysStrict) {
             self.infer_from_contravariant_types(n, source, target);
         } else {
@@ -246,14 +246,14 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         new_priority: InferencePriority,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_contravariant_types_with_priority"); 
         let save_priority = n.priority;
         n.priority |= new_priority;
         self.infer_from_contravariant_types(n, source, target);
         n.priority = save_priority;
     }
 
-    pub(crate) fn infer_from_intra_expression_sites(&mut self, n: &mut InferenceContext) {
+    pub(crate) fn infer_from_intra_expression_sites(&mut self, n: &mut InferenceContext) { ::tsox_core::fntrace::enter("infer_from_intra_expression_sites"); 
         let sites = take_intra_expression_inference_sites(n);
         for site in &sites {
             let contextual_type = if site.node.kind == SyntaxKind::MethodDeclaration {
@@ -280,7 +280,7 @@ impl Checker {
         targets: &[Arc<Type>],
         target_flags: TypeFlags,
         new_priority: InferencePriority,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_to_multiple_types_with_priority"); 
         let save_priority = n.priority;
         n.priority |= new_priority;
         if target_flags.contains(TypeFlags::Union) || target_flags.contains(TypeFlags::Enum) {
@@ -291,7 +291,7 @@ impl Checker {
         n.priority = save_priority;
     }
 
-    pub(crate) fn is_partially_inferable_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_partially_inferable_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_partially_inferable_type"); 
         !t.object_flags.contains(ObjectFlags::NonInferrableType)
             || is_object_literal_type(t) && self.get_properties_of_type(t).iter().any(|prop| {
                 let prop_type = self.get_type_of_symbol(prop);
@@ -300,7 +300,7 @@ impl Checker {
             || is_tuple_type(t) && self.get_element_types(t).iter().any(|e| self.is_partially_inferable_type(e))
     }
 
-    pub(crate) fn merge_inferences(&mut self, target: &mut [InferenceInfo], source: &[InferenceInfo]) {
+    pub(crate) fn merge_inferences(&mut self, target: &mut [InferenceInfo], source: &[InferenceInfo]) { ::tsox_core::fntrace::enter("merge_inferences"); 
         for i in 0..target.len() {
             if !has_inference_candidates(&target[i]) && has_inference_candidates(&source[i]) {
                 target[i] = source[i].clone();
@@ -314,7 +314,7 @@ impl Checker {
         signature: Option<Arc<Signature>>,
         flags: InferenceFlags,
         _compare_types: Option<TypeComparer>,
-    ) -> Box<InferenceContext> {
+    ) -> Box<InferenceContext> { ::tsox_core::fntrace::enter("new_inference_context"); 
         let inferences = type_parameters.iter().map(|tp| new_inference_info(tp)).collect();
         self.new_inference_context_worker(inferences, signature, flags)
     }
@@ -324,7 +324,7 @@ impl Checker {
         inferences: Vec<InferenceInfo>,
         signature: Option<Arc<Signature>>,
         flags: InferenceFlags,
-    ) -> Box<InferenceContext> {
+    ) -> Box<InferenceContext> { ::tsox_core::fntrace::enter("new_inference_context_worker"); 
         let mut n = Box::new(InferenceContext {
             inferences,
             signature,
@@ -345,7 +345,7 @@ impl Checker {
         instantiable: &Arc<Type>,
         t: &Arc<Type>,
         replacement: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("replace_indexed_access"); 
         let Some(indexed_access) = t.as_indexed_access_type() else {
             return Arc::clone(instantiable);
         };
@@ -364,7 +364,7 @@ impl Checker {
         self.instantiate_type(instantiable, Some(&mapper))
     }
 
-    pub(crate) fn types_definitely_unrelated(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub(crate) fn types_definitely_unrelated(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("types_definitely_unrelated"); 
         if is_tuple_type(source) && is_tuple_type(target) {
             return tuple_types_definitely_unrelated(source, target);
         }
@@ -372,7 +372,7 @@ impl Checker {
             && self.get_unmatched_property(target, source, false, false).is_some()
     }
 
-    pub(crate) fn any_constituent_is_mutable_array_like(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn any_constituent_is_mutable_array_like(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("any_constituent_is_mutable_array_like"); 
         if t.flags.intersects(TypeFlags::Union) {
             if let Some(types) = t.types() {
                 return types.iter().any(|t| self.is_mutable_array_like_type(t));
@@ -383,7 +383,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn clear_cached_inferences(inferences: &mut [InferenceInfo]) {
+pub(crate) fn clear_cached_inferences(inferences: &mut [InferenceInfo]) { ::tsox_core::fntrace::enter("clear_cached_inferences"); 
     for inference in inferences {
         if !inference.is_fixed {
             inference.inferred_type = None;
@@ -391,7 +391,7 @@ pub(crate) fn clear_cached_inferences(inferences: &mut [InferenceInfo]) {
     }
 }
 
-pub(crate) fn clone_inference_info(info: &InferenceInfo) -> InferenceInfo {
+pub(crate) fn clone_inference_info(info: &InferenceInfo) -> InferenceInfo { ::tsox_core::fntrace::enter("clone_inference_info"); 
     InferenceInfo {
         type_parameter: Arc::clone(&info.type_parameter),
         candidates: info.candidates.clone(),
@@ -405,7 +405,7 @@ pub(crate) fn clone_inference_info(info: &InferenceInfo) -> InferenceInfo {
     }
 }
 
-pub(crate) fn get_inference_info_for_type<'a>(n: &'a InferenceState, t: &Arc<Type>) -> Option<&'a InferenceInfo> {
+pub(crate) fn get_inference_info_for_type<'a>(n: &'a InferenceState, t: &Arc<Type>) -> Option<&'a InferenceInfo> { ::tsox_core::fntrace::enter("get_inference_info_for_type"); 
     if t.flags.contains(TypeFlags::TYPE_VARIABLE) {
         for inference in n.inferences.iter() {
             if Arc::ptr_eq(t, &inference.type_parameter) {
@@ -419,7 +419,7 @@ pub(crate) fn get_inference_info_for_type<'a>(n: &'a InferenceState, t: &Arc<Typ
 pub(crate) fn get_single_type_variable_from_intersection_types(
     n: &InferenceState,
     types: &[Arc<Type>],
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_single_type_variable_from_intersection_types"); 
     let mut type_variable: Option<Arc<Type>> = None;
     for t in types {
         if !t.flags.contains(TypeFlags::INTERSECTION) {
@@ -437,15 +437,15 @@ pub(crate) fn get_single_type_variable_from_intersection_types(
     type_variable
 }
 
-pub(crate) fn has_inference_candidates(info: &InferenceInfo) -> bool {
+pub(crate) fn has_inference_candidates(info: &InferenceInfo) -> bool { ::tsox_core::fntrace::enter("has_inference_candidates"); 
     !info.candidates.is_empty() || !info.contra_candidates.is_empty()
 }
 
-pub(crate) fn has_inference_candidates_or_default(info: &InferenceInfo) -> bool {
+pub(crate) fn has_inference_candidates_or_default(info: &InferenceInfo) -> bool { ::tsox_core::fntrace::enter("has_inference_candidates_or_default"); 
     has_inference_candidates(info) || has_type_parameter_default(&info.type_parameter)
 }
 
-pub(crate) fn has_overlapping_inferences(a: &[InferenceInfo], b: &[InferenceInfo]) -> bool {
+pub(crate) fn has_overlapping_inferences(a: &[InferenceInfo], b: &[InferenceInfo]) -> bool { ::tsox_core::fntrace::enter("has_overlapping_inferences"); 
     for i in 0..a.len() {
         if has_inference_candidates(&a[i]) && has_inference_candidates(&b[i]) {
             return true;
@@ -454,11 +454,11 @@ pub(crate) fn has_overlapping_inferences(a: &[InferenceInfo], b: &[InferenceInfo
     false
 }
 
-pub(crate) fn new_inference_info(type_parameter: &Arc<Type>) -> InferenceInfo {
+pub(crate) fn new_inference_info(type_parameter: &Arc<Type>) -> InferenceInfo { ::tsox_core::fntrace::enter("new_inference_info"); 
     InferenceInfo::new(Arc::clone(type_parameter))
 }
 
-pub(crate) fn tuple_types_definitely_unrelated(source: &Arc<Type>, target: &Arc<Type>) -> bool {
+pub(crate) fn tuple_types_definitely_unrelated(source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("tuple_types_definitely_unrelated"); 
     let (Some(s), Some(t)) = (source.target_tuple_type(), target.target_tuple_type()) else {
         return false;
     };

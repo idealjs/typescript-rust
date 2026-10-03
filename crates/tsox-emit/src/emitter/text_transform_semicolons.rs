@@ -4,7 +4,7 @@ use crate::emitter::text_transform_fold_untracked::fold_expression_newlines;
 use crate::emitter::text_transform_reindent::reindent_and_dedup;
 use crate::emitter::text_transform_reindent::reindent_and_dedup_tracked;
 
-pub(crate) fn add_implicit_semicolons(text: &str) -> String {
+pub(crate) fn add_implicit_semicolons(text: &str) -> String { ::tsox_core::fntrace::enter("add_implicit_semicolons"); 
     let mut result = String::with_capacity(text.len());
     for line in text.lines() {
         let trimmed = line.trim_end();
@@ -38,7 +38,7 @@ pub(crate) fn add_implicit_semicolons(text: &str) -> String {
 }
 
 #[allow(dead_code)]
-pub(crate) fn normalize_js_output(text: &str) -> String {
+pub(crate) fn normalize_js_output(text: &str) -> String { ::tsox_core::fntrace::enter("normalize_js_output"); 
     let folded = fold_expression_newlines(text);
     let reindented = reindent_and_dedup(&folded);
     add_implicit_semicolons(&reindented)
@@ -47,7 +47,7 @@ pub(crate) fn normalize_js_output(text: &str) -> String {
 pub(crate) fn add_implicit_semicolons_tracked(
     text: &str,
     src_offsets: &[u32],
-) -> (String, Vec<u32>) {
+) -> (String, Vec<u32>) { ::tsox_core::fntrace::enter("add_implicit_semicolons_tracked"); 
     let chars: Vec<char> = text.chars().collect();
     let n = chars.len();
     let mut out_text = String::with_capacity(text.len());
@@ -116,7 +116,7 @@ pub(crate) fn add_implicit_semicolons_tracked(
     (out_text, out_offsets)
 }
 
-pub(crate) fn normalize_js_output_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
+pub(crate) fn normalize_js_output_tracked(text: &str, src_offsets: &[u32]) -> (String, Vec<u32>) { ::tsox_core::fntrace::enter("normalize_js_output_tracked"); 
     let (text, offsets) = fold_expression_newlines_tracked(text, src_offsets);
     let (text, offsets) = reindent_and_dedup_tracked(&text, &offsets);
     add_implicit_semicolons_tracked(&text, &offsets)

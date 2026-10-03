@@ -33,7 +33,7 @@ struct OptionDiagCtx<'a> {
 }
 
 impl<'a> OptionDiagCtx<'a> {
-    fn new(program: &'a mut Program) -> Self {
+    fn new(program: &'a mut Program) -> Self { ::tsox_core::fntrace::enter("new"); 
         let source_file = program
             .opts
             .config
@@ -51,11 +51,11 @@ impl<'a> OptionDiagCtx<'a> {
         }
     }
 
-    fn get_compiler_options_property_syntax(&self) -> Option<&Node> {
+    fn get_compiler_options_property_syntax(&self) -> Option<&Node> { ::tsox_core::fntrace::enter("get_compiler_options_property_syntax"); 
         compiler_options_property_initializer(self.source_file.as_deref())
     }
 
-    fn get_compiler_options_object_literal_syntax(&self) -> Option<&Node> {
+    fn get_compiler_options_object_literal_syntax(&self) -> Option<&Node> { ::tsox_core::fntrace::enter("get_compiler_options_object_literal_syntax"); 
         config_property_object_literal(self.source_file.as_deref(), "compilerOptions")
     }
 
@@ -63,7 +63,7 @@ impl<'a> OptionDiagCtx<'a> {
         &mut self,
         message: Message,
         args: Vec<String>,
-    ) -> Arc<Diagnostic> {
+    ) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("create_compiler_options_diagnostic"); 
         let diag = match self.get_compiler_options_property_syntax() {
             Some(property) => match &property.data {
                 NodeData::PropertyAssignment(d) => Arc::new(
@@ -88,7 +88,7 @@ impl<'a> OptionDiagCtx<'a> {
         option2: &str,
         message: Message,
         args: &[String],
-    ) -> Arc<Diagnostic> {
+    ) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("create_diagnostic_for_option"); 
         let source_file = self.source_file.as_deref();
         let object_literal = config_property_object_literal(source_file, "compilerOptions");
         let program = &mut *self.program;
@@ -117,7 +117,7 @@ impl<'a> OptionDiagCtx<'a> {
         key2: &str,
         message: Message,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("create_option_diagnostic_in_object_literal_syntax"); 
         let diag = for_each_property_assignment(
             object_literal,
             key1,
@@ -152,7 +152,7 @@ impl<'a> OptionDiagCtx<'a> {
         option1: &str,
         option2: &str,
         args: &[String],
-    ) {
+    ) { ::tsox_core::fntrace::enter("create_diagnostic_for_option_name"); 
         let mut new_args = vec![option1.to_string(), option2.to_string()];
         new_args.extend_from_slice(args);
         let diag = self.create_diagnostic_for_option(true, option1, option2, message, &new_args);
@@ -164,7 +164,7 @@ impl<'a> OptionDiagCtx<'a> {
         option1: &str,
         message: Message,
         args: &[String],
-    ) {
+    ) { ::tsox_core::fntrace::enter("create_option_value_diagnostic"); 
         let diag = self.create_diagnostic_for_option(false, option1, "", message, args);
         self.program.program_diagnostics.push(diag);
     }
@@ -175,7 +175,7 @@ impl<'a> OptionDiagCtx<'a> {
         key: &str,
         message: Message,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("create_diagnostic_for_option_paths"); 
         let source_file = self.source_file.as_deref();
         let paths_object = config_property_object_literal(source_file, "paths");
         let diag = Self::create_option_diagnostic_in_object_literal_syntax(
@@ -202,7 +202,7 @@ impl<'a> OptionDiagCtx<'a> {
         value_index: usize,
         message: Message,
         args: &[String],
-    ) -> Option<Arc<Diagnostic>> {
+    ) -> Option<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("create_diagnostic_for_option_path_key_value"); 
         let source_file = self.source_file.clone();
         let paths_object = config_property_object_literal(source_file.as_deref(), "paths");
         let mut anchored: Option<Arc<Diagnostic>> = None;
@@ -237,7 +237,7 @@ impl<'a> OptionDiagCtx<'a> {
         }
     }
 
-    fn create_removed_option_diagnostic(&mut self, name: &str, value: &str, use_instead: &str) {
+    fn create_removed_option_diagnostic(&mut self, name: &str, value: &str, use_instead: &str) { ::tsox_core::fntrace::enter("create_removed_option_diagnostic"); 
         let (message, args): (Message, Vec<String>) = if value.is_empty() {
             (
                 dg::OPTION_0_HAS_BEEN_REMOVED_PLEASE_REMOVE_IT_FROM_YOUR_CONFIGURATION,
@@ -265,14 +265,14 @@ impl<'a> OptionDiagCtx<'a> {
 
 fn compiler_options_property_initializer<'a>(
     source_file: Option<&'a SourceFile>,
-) -> Option<&'a Node> {
+) -> Option<&'a Node> { ::tsox_core::fntrace::enter("compiler_options_property_initializer"); 
     config_property_initializer_of(
         tsox_tsoptions::mig::m5j::get_ts_config_object_literal_expression(source_file)?,
         "compilerOptions",
     )
 }
 
-fn config_property_initializer_of<'a>(object_literal: &'a Node, key: &str) -> Option<&'a Node> {
+fn config_property_initializer_of<'a>(object_literal: &'a Node, key: &str) -> Option<&'a Node> { ::tsox_core::fntrace::enter("config_property_initializer_of"); 
     let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &object_literal.data else {
         return None;
     };
@@ -291,7 +291,7 @@ fn config_property_initializer_of<'a>(object_literal: &'a Node, key: &str) -> Op
 fn config_property_object_literal<'a>(
     source_file: Option<&'a SourceFile>,
     key: &str,
-) -> Option<&'a Node> {
+) -> Option<&'a Node> { ::tsox_core::fntrace::enter("config_property_object_literal"); 
     let initializer = config_property_initializer_of(
         tsox_tsoptions::mig::m5j::get_ts_config_object_literal_expression(source_file)?,
         key,
@@ -304,7 +304,7 @@ fn config_property_object_literal<'a>(
 }
 
 impl Program {
-    pub fn verify_project_references(&mut self) {
+    pub fn verify_project_references(&mut self) { ::tsox_core::fntrace::enter("verify_project_references"); 
         let build_info_file_name = if self.options().suppress_output_path_check != Tristate::True {
             self.opts.config.get_build_info_file_name()
         } else {
@@ -370,7 +370,7 @@ impl Program {
         self.has_emit_blocking_diagnostics = has_emit_blocking;
     }
 
-    pub fn verify_compiler_options(&mut self) {
+    pub fn verify_compiler_options(&mut self) { ::tsox_core::fntrace::enter("verify_compiler_options"); 
         let mut ctx = OptionDiagCtx::new(self);
         let options = ctx.program.options().clone();
 
@@ -953,12 +953,12 @@ impl Program {
 
 fn emit_module_kind_is_non_node_esm(
     module_kind: ModuleKind,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("emit_module_kind_is_non_node_esm"); 
     module_kind >= ModuleKind::ES2015
         && module_kind <= ModuleKind::ESNext
 }
 
-fn emit_module_kind_name(module_kind: ModuleKind) -> String {
+fn emit_module_kind_name(module_kind: ModuleKind) -> String { ::tsox_core::fntrace::enter("emit_module_kind_name"); 
     match module_kind {
         ModuleKind::Node18 => "node18".to_string(),
         ModuleKind::Node20 => "node20".to_string(),
@@ -967,7 +967,7 @@ fn emit_module_kind_name(module_kind: ModuleKind) -> String {
     }
 }
 
-fn module_resolution_kind_name(module_resolution: ModuleResolutionKind) -> String {
+fn module_resolution_kind_name(module_resolution: ModuleResolutionKind) -> String { ::tsox_core::fntrace::enter("module_resolution_kind_name"); 
     if module_resolution == ModuleResolutionKind::NodeNext {
         "NodeNext".to_string()
     } else {
@@ -980,7 +980,7 @@ fn create_diagnostic_at_reference_syntax(
     index: usize,
     message: Message,
     args: &[String],
-) -> Arc<Diagnostic> {
+) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("create_diagnostic_at_reference_syntax"); 
     let fallback = || Arc::new(new_compiler_diagnostic(message, args.to_vec()));
     let Some(config_file) = &config.config_file else {
         return fallback();
@@ -1017,7 +1017,7 @@ fn processing_diagnostic_explaining_file_include(
     file: Path,
     message: Message,
     args: Vec<String>,
-) -> Arc<ProcessingDiagnostic> {
+) -> Arc<ProcessingDiagnostic> { ::tsox_core::fntrace::enter("processing_diagnostic_explaining_file_include"); 
     Arc::new(ProcessingDiagnostic {
         kind: ProcessingDiagnosticKind::ExplainingFileInclude,
         data: ProcessingDiagnosticData::IncludeExplainingDiagnostic(Box::new(
@@ -1032,7 +1032,7 @@ fn processing_diagnostic_explaining_file_include(
     })
 }
 
-fn output_extension(file_name: &str) -> &'static str {
+fn output_extension(file_name: &str) -> &'static str { ::tsox_core::fntrace::enter("output_extension"); 
     if tspath::file_extension_is(file_name, ".json") {
         return ".json";
     }
@@ -1045,7 +1045,7 @@ fn output_extension(file_name: &str) -> &'static str {
     ".js"
 }
 
-fn declaration_extension(file_name: &str) -> &'static str {
+fn declaration_extension(file_name: &str) -> &'static str { ::tsox_core::fntrace::enter("declaration_extension"); 
     if tspath::file_extension_is_one_of(file_name, &[".mts", ".mjs"]) {
         return ".d.mts";
     }
@@ -1061,7 +1061,7 @@ fn emitted_output_file_names(
     common_source_directory: &str,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("emitted_output_file_names"); 
     if !options.out_file.is_empty() {
         let out_file = &options.out_file;
         let js_path = if tspath::file_extension_is(out_file, ".js") {
@@ -1129,7 +1129,7 @@ fn compute_common_source_directory_of_filenames(
     file_names: &[String],
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("compute_common_source_directory_of_filenames"); 
     let mut common_path_components: Option<Vec<String>> = None;
     for source_file in file_names {
         let absolute = tspath::get_normalized_absolute_path(source_file, current_directory);
@@ -1175,7 +1175,7 @@ fn get_computed_common_source_directory(
     emitted_files: &[String],
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_computed_common_source_directory"); 
     let common_source_directory = compute_common_source_directory_of_filenames(
         emitted_files,
         current_directory,

@@ -4,7 +4,7 @@ use crate::checker::typenode_import_query::*;
 
 use tsox_frontend::ast::SymbolFlags;
 
-fn import_type_argument_text(argument: &Arc<Node>) -> Option<String> {
+fn import_type_argument_text(argument: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("import_type_argument_text"); 
     let NodeData::LiteralTypeNode(lt) = &argument.data else {
         return None;
     };
@@ -14,7 +14,7 @@ fn import_type_argument_text(argument: &Arc<Node>) -> Option<String> {
     Some(lt.literal.text().trim_matches(['"', '\'']).to_string())
 }
 
-fn identifier_chain(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn identifier_chain(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("identifier_chain"); 
     match &node.data {
         NodeData::Identifier(_) => vec![Arc::clone(node)],
         NodeData::QualifiedName(d) => {
@@ -26,7 +26,7 @@ fn identifier_chain(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-fn chain_contains(chain: &[Arc<Node>], target: &Arc<Node>) -> bool {
+fn chain_contains(chain: &[Arc<Node>], target: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("chain_contains"); 
     chain.iter().any(|n| Arc::ptr_eq(n, target))
 }
 
@@ -36,7 +36,7 @@ impl Checker {
     pub(crate) fn resolve_external_module_symbol_go(
         &self,
         module_symbol: &Arc<Symbol>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_external_module_symbol_go"); 
         if let Some(ee) = module_symbol
             .exports
             .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
@@ -62,7 +62,7 @@ impl Checker {
     pub(crate) fn resolve_external_module_symbol_go_mut(
         &mut self,
         module_symbol: &Arc<Symbol>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_external_module_symbol_go_mut"); 
         if let Some(ee) = module_symbol
             .exports
             .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
@@ -76,7 +76,7 @@ impl Checker {
         Arc::clone(module_symbol)
     }
 
-    fn resolve_entity_symbol_in(&self, expr: &Arc<Node>, module_symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    fn resolve_entity_symbol_in(&self, expr: &Arc<Node>, module_symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_entity_symbol_in"); 
         if expr.kind != SyntaxKind::Identifier {
             return None;
         }
@@ -89,7 +89,7 @@ impl Checker {
             .or_else(|| module_symbol.members.entries.get(&name).cloned())
     }
 
-    pub(crate) fn resolve_export_assignment_target(&self, ee: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_export_assignment_target(&self, ee: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_export_assignment_target"); 
         let decl = ee
             .declarations
             .iter()
@@ -141,7 +141,7 @@ impl Checker {
         &self,
         expr: &Arc<Node>,
         scope_decl: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_entity_segments_in_scope"); 
         let mut segments: Vec<String> = Vec::new();
         let mut cur = Arc::clone(expr);
         loop {
@@ -198,7 +198,7 @@ impl Checker {
     }
 
     /// Go getTypeFromImportTypeNode：import("./m") / import("./m").Q 的类型解析
-    pub(crate) fn get_type_from_import_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_import_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_import_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -313,7 +313,7 @@ impl Checker {
         node: &Arc<Node>,
         type_args: &Arc<tsox_frontend::ast::NodeList>,
         symbol: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_type_reference_argument_constraints_on"); 
         let params: Vec<Arc<Node>> = symbol
             .declarations
             .iter()
@@ -394,7 +394,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolve_import_symbol_type"); 
         if meaning == SymbolFlags::VALUE {
             if symbol.flags.intersects(SymbolFlags::Class)
                 && let Some(decl) = symbol
@@ -419,7 +419,7 @@ impl Checker {
         specifier: &str,
         location: &Arc<Node>,
         resolution_mode: tsox_core::core::compiler_options::ModuleKind,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_type_module"); 
         let program_symbol = |containing: &str| -> Option<Arc<Symbol>> {
             self.program
                 .resolve_external_module_path(specifier, containing, resolution_mode)
@@ -454,7 +454,7 @@ impl Checker {
         is_type_of: bool,
         target_meaning: SymbolFlags,
         upto: Option<&Arc<Node>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_type_chain"); 
         let mut current_namespace = Arc::clone(module_symbol);
         let n = chain.len();
         for (i, segment) in chain.iter().enumerate() {
@@ -537,7 +537,7 @@ impl Checker {
     pub fn resolve_import_type_member_base(
         &mut self,
         receiver: &Arc<Node>,
-    ) -> Option<(Arc<Symbol>, bool)> {
+    ) -> Option<(Arc<Symbol>, bool)> { ::tsox_core::fntrace::enter("resolve_import_type_member_base"); 
         let (import_node, upto, is_qualifier_segment) = match &receiver.data {
             NodeData::ImportTypeNode(_) => (Arc::clone(receiver), None, false),
             NodeData::Identifier(_) | NodeData::QualifiedName(_) => {

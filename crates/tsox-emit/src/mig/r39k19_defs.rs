@@ -17,20 +17,20 @@ pub trait R39K19NodeVisitorExt {
 }
 
 impl R39K19NodeVisitorExt for NodeVisitor {
-    fn visit_embedded_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_embedded_statement(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_embedded_statement"); 
         self.visit_node_opt(Some(node))
     }
 }
 
 impl AsyncTransformer {
-    pub fn init_super_access_visitor(&mut self) {
+    pub fn init_super_access_visitor(&mut self) { ::tsox_core::fntrace::enter("init_super_access_visitor"); 
         self.super_access_visitor = Some(
             self.emit_context()
                 .new_node_visitor(|tx: &mut AsyncTransformer, node: Arc<Node>| tx.visit_super_access_node(&node)),
         );
     }
 
-    pub fn visit_super_access_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_super_access_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_super_access_node"); 
         let mut visitor = self.super_access_visitor.take().unwrap();
         let result = self.visit_super_access_node_with(node, &mut visitor);
         self.super_access_visitor = Some(visitor);
@@ -41,7 +41,7 @@ impl AsyncTransformer {
         &mut self,
         node: &Arc<Node>,
         visitor: &mut NodeVisitor,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_super_access_node_with"); 
         match node.kind {
             SyntaxKind::CallExpression => {
                 let expression = node.expression().unwrap();
@@ -94,7 +94,7 @@ impl AsyncTransformer {
         &mut self,
         call: &Arc<Node>,
         visitor: &mut NodeVisitor,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("substitute_call_expression_with_super_access"); 
         let expression = call.expression().unwrap();
         let target = if expression.kind == SyntaxKind::PropertyAccessExpression {
             let f = self.factory();
@@ -144,7 +144,7 @@ impl AsyncTransformer {
         Some(result)
     }
 
-    fn create_super_element_access_in_async_method(&mut self, argument_expression: &Arc<Node>) -> Arc<Node> {
+    fn create_super_element_access_in_async_method(&mut self, argument_expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_super_element_access_in_async_method"); 
         let super_index_binding = self.super_access.super_index_binding.clone().unwrap();
         let has_super_property_assignment = self.super_access.has_super_property_assignment;
         let f = self.factory();
@@ -167,7 +167,7 @@ impl AsyncTransformer {
     }
 }
 
-fn r39k19_is_super_property(node: &Arc<Node>) -> bool {
+fn r39k19_is_super_property(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("r39k19_is_super_property"); 
     matches!(
         node.kind,
         SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
@@ -177,13 +177,13 @@ fn r39k19_is_super_property(node: &Arc<Node>) -> bool {
         .unwrap_or(false)
 }
 
-pub fn async_transformer_visit_entry(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+pub fn async_transformer_visit_entry(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("async_transformer_visit_entry"); 
     Some(node)
 }
 
 pub fn class_fields_transformer_visit_entry(
     _tx: &mut Transformer,
     node: Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_fields_transformer_visit_entry"); 
     Some(node)
 }

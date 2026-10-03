@@ -2,20 +2,20 @@ use crate::fourslash::session::Session;
 
 pub use crate::fourslash::api_completions::*;
 
-pub fn go_to_marker(s: &mut Session, name: &str) {
+pub fn go_to_marker(s: &mut Session, name: &str) { ::tsox_core::fntrace::enter("go_to_marker"); 
     let m = s.marker(name).clone();
     s.active_file = m.file_name.clone();
     s.cursor = Some(m.position);
 }
 
-pub fn go_to_file(s: &mut Session, name: &str) {
+pub fn go_to_file(s: &mut Session, name: &str) { ::tsox_core::fntrace::enter("go_to_file"); 
     s.file_content(name); // 校验存在
     s.active_file = name.to_string();
 }
 
 /// Go typeText：逐字符插入；每敲一个字符按 Go 语义发送 OnTypeFormatting
 /// 并应用返回的编辑（光标与 marker 随编辑平移）。
-pub fn insert(s: &mut Session, text: &str) {
+pub fn insert(s: &mut Session, text: &str) { ::tsox_core::fntrace::enter("insert"); 
     for ch in text.chars() {
         let pos = s
             .cursor
@@ -35,7 +35,7 @@ pub fn insert(s: &mut Session, text: &str) {
     }
 }
 
-fn apply_text_edits_lsp(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) {
+fn apply_text_edits_lsp(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) { ::tsox_core::fntrace::enter("apply_text_edits_lsp"); 
     if edits.is_empty() {
         return;
     }
@@ -43,18 +43,18 @@ fn apply_text_edits_lsp(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextE
 }
 
 /// Go GoToBOF
-pub fn go_to_bof(s: &mut Session) {
+pub fn go_to_bof(s: &mut Session) { ::tsox_core::fntrace::enter("go_to_bof"); 
     s.cursor = Some(0);
 }
 
 /// Go InsertLine：在光标处输入文本 + 换行（逐字符触发 on-type 格式化）
-pub fn insert_line(s: &mut Session, text: &str) {
+pub fn insert_line(s: &mut Session, text: &str) { ::tsox_core::fntrace::enter("insert_line"); 
     let combined = format!("{text}\n");
     insert(s, &combined);
 }
 
 /// Go Configure：覆盖 FormatCodeSettings 后重建服务
-pub fn configure_format_settings(s: &mut Session, settings: &[(&str, &str)]) {
+pub fn configure_format_settings(s: &mut Session, settings: &[(&str, &str)]) { ::tsox_core::fntrace::enter("configure_format_settings"); 
     {
         let mut prefs = s.prefs.lock().unwrap();
         for (name, value) in settings {
@@ -65,7 +65,7 @@ pub fn configure_format_settings(s: &mut Session, settings: &[(&str, &str)]) {
     s.rebuild_service(file_names);
 }
 
-fn apply_format_setting(settings: &mut crate::ls::lsutil::FormatCodeSettings, name: &str, value: &str) {
+fn apply_format_setting(settings: &mut crate::ls::lsutil::FormatCodeSettings, name: &str, value: &str) { ::tsox_core::fntrace::enter("apply_format_setting"); 
     let tristate = match value {
         "true" => tsox_core::core::tristate::Tristate::True,
         "false" => tsox_core::core::tristate::Tristate::False,
@@ -75,7 +75,7 @@ fn apply_format_setting(settings: &mut crate::ls::lsutil::FormatCodeSettings, na
 }
 
 /// Go Paste：文本以粘贴方式进入，随后对粘贴范围做 range formatting。
-pub fn paste(s: &mut Session, text: &str) {
+pub fn paste(s: &mut Session, text: &str) { ::tsox_core::fntrace::enter("paste"); 
     let pos = s
         .cursor
         .unwrap_or_else(|| panic!("paste 前无光标（go_to_marker）"));
@@ -93,13 +93,13 @@ pub fn paste(s: &mut Session, text: &str) {
 }
 
 /// Go GoToEOF
-pub fn go_to_eof(s: &mut Session) {
+pub fn go_to_eof(s: &mut Session) { ::tsox_core::fntrace::enter("go_to_eof"); 
     let content = s.file_content(&s.active_file);
     s.cursor = Some(content.chars().count());
 }
 
 /// Go SetPreference：按原始键名改写用户偏好
-pub fn set_user_preference(s: &mut Session, name: &str, value: &str) {
+pub fn set_user_preference(s: &mut Session, name: &str, value: &str) { ::tsox_core::fntrace::enter("set_user_preference"); 
     {
         let mut prefs = s.prefs.lock().unwrap();
         crate::ls::lsutil_user_preferences::set_user_preference_raw(&mut prefs, name, value);
@@ -114,12 +114,12 @@ pub fn set_user_preference(s: &mut Session, name: &str, value: &str) {
 }
 
 /// Go GoToPosition：光标移到活动文件绝对偏移处
-pub fn go_to_position(s: &mut Session, offset: usize) {
+pub fn go_to_position(s: &mut Session, offset: usize) { ::tsox_core::fntrace::enter("go_to_position"); 
     s.cursor = Some(offset);
 }
 
 /// Go DeleteAtCaret：在光标处向后删除 count 个字符（光标不动）
-pub fn delete_at_caret(s: &mut Session, count: usize) {
+pub fn delete_at_caret(s: &mut Session, count: usize) { ::tsox_core::fntrace::enter("delete_at_caret"); 
     for _ in 0..count {
         let pos = s
             .cursor
@@ -129,7 +129,7 @@ pub fn delete_at_caret(s: &mut Session, count: usize) {
 }
 
 /// Go Backspace：删除光标前一字符并回退光标
-pub fn backspace(s: &mut Session, count: usize) {
+pub fn backspace(s: &mut Session, count: usize) { ::tsox_core::fntrace::enter("backspace"); 
     for _ in 0..count {
         let pos = s
             .cursor
@@ -142,7 +142,7 @@ pub fn backspace(s: &mut Session, count: usize) {
 }
 
 /// Go ReplaceLine：选中整行（不含换行符）后键入 text 替换
-pub fn replace_line(s: &mut Session, line_index: usize, text: &str) {
+pub fn replace_line(s: &mut Session, line_index: usize, text: &str) { ::tsox_core::fntrace::enter("replace_line"); 
     let content = s.file_content(&s.active_file).to_string();
     let mut line_starts: Vec<usize> = vec![0];
     for (i, ch) in content.chars().enumerate() {
@@ -161,7 +161,7 @@ pub fn replace_line(s: &mut Session, line_index: usize, text: &str) {
     s.cursor = Some(start + text.chars().count());
 }
 
-fn edit_script(s: &mut Session, start: usize, end: usize, new_text: &str) {
+fn edit_script(s: &mut Session, start: usize, end: usize, new_text: &str) { ::tsox_core::fntrace::enter("edit_script"); 
     let file = s.active_file.clone();
     let content = s.file_content(&file).to_string();
     let b_start = byte_index_of_char(&content, start);
@@ -176,7 +176,7 @@ fn edit_script(s: &mut Session, start: usize, end: usize, new_text: &str) {
 
 /// Go updatePosition：<= start 不动；在编辑区间内置 1（无效）；
 /// 之后平移 len(new_text)-(end-start)
-fn shift_positions(s: &mut Session, file: &str, start: usize, end: usize, new_text: &str) {
+fn shift_positions(s: &mut Session, file: &str, start: usize, end: usize, new_text: &str) { ::tsox_core::fntrace::enter("shift_positions"); 
     let new_len: usize = new_text.chars().count();
     let delta = new_len as isize - (end as isize - start as isize);
     let shift = |p: &mut usize| {
@@ -210,7 +210,7 @@ fn shift_positions(s: &mut Session, file: &str, start: usize, end: usize, new_te
 
 /// Go applyTextEdits：按起点升序排序后逆序应用，同步光标；
 /// 返回净偏移（带符号，删除多于插入可为负）。
-fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) -> isize {
+fn apply_text_edits(s: &mut Session, edits: &[crate::lsp::lsproto_lsp::TextEdit]) -> isize { ::tsox_core::fntrace::enter("apply_text_edits"); 
     let file = s.active_file.clone();
     let content = s.file_content(&file).to_string();
     let mut starts: Vec<(usize, usize, &str)> = edits
@@ -269,7 +269,7 @@ fn on_type_formatting(
     s: &mut Session,
     offset: usize,
     ch: &str,
-) -> Vec<crate::lsp::lsproto_lsp::TextEdit> {
+) -> Vec<crate::lsp::lsproto_lsp::TextEdit> { ::tsox_core::fntrace::enter("on_type_formatting"); 
     let uri = uri_of(s, &s.active_file);
     let service = match s.service.as_ref() {
         Some(service) => service,
@@ -290,7 +290,7 @@ fn range_formatting(
     s: &mut Session,
     start: usize,
     end: usize,
-) -> Vec<crate::lsp::lsproto_lsp::TextEdit> {
+) -> Vec<crate::lsp::lsproto_lsp::TextEdit> { ::tsox_core::fntrace::enter("range_formatting"); 
     let uri = uri_of(s, &s.active_file);
     let service = match s.service.as_ref() {
         Some(service) => service,
@@ -310,34 +310,34 @@ fn range_formatting(
     )
 }
 
-fn char_index_of_byte(text: &str, byte: usize) -> usize {
+fn char_index_of_byte(text: &str, byte: usize) -> usize { ::tsox_core::fntrace::enter("char_index_of_byte"); 
     text[..byte.min(text.len())].chars().count()
 }
 
-pub fn verify_current_line_content(s: &Session, expected: &str) {
+pub fn verify_current_line_content(s: &Session, expected: &str) { ::tsox_core::fntrace::enter("verify_current_line_content"); 
     let content = s.file_content(&s.active_file);
     let line = current_line(content, s.cursor);
     assert_eq!(line, expected, "行内容不符（{}）", s.active_file);
 }
 
-pub fn verify_current_file_content(s: &Session, expected: &str) {
+pub fn verify_current_file_content(s: &Session, expected: &str) { ::tsox_core::fntrace::enter("verify_current_file_content"); 
     let content = s.file_content(&s.active_file);
     assert_eq!(content, expected, "文件内容不符（{}）", s.active_file);
 }
 
 /// 未实现的框架操作（生成器标记对应用例 #[ignore]）
-pub fn unsupported(method: &str) {
+pub fn unsupported(method: &str) { ::tsox_core::fntrace::enter("unsupported"); 
     panic!("fourslash 方法未实现: {method}");
 }
 
-fn byte_index_of_char(text: &str, char_index: usize) -> usize {
+fn byte_index_of_char(text: &str, char_index: usize) -> usize { ::tsox_core::fntrace::enter("byte_index_of_char"); 
     text.char_indices()
         .nth(char_index)
         .map(|(b, _)| b)
         .unwrap_or(text.len())
 }
 
-fn current_line(text: &str, cursor: Option<usize>) -> &str {
+fn current_line(text: &str, cursor: Option<usize>) -> &str { ::tsox_core::fntrace::enter("current_line"); 
     let pos = cursor.unwrap_or(0);
     let byte = byte_index_of_char(text, pos);
     let start = text[..byte].rfind('\n').map(|i| i + 1).unwrap_or(0);
@@ -350,7 +350,7 @@ fn current_line(text: &str, cursor: Option<usize>) -> &str {
 
 // ---- B1 会话查询 ----
 
-pub fn ranges(s: &Session) -> Vec<(String, usize, usize)> {
+pub fn ranges(s: &Session) -> Vec<(String, usize, usize)> { ::tsox_core::fntrace::enter("ranges"); 
     s.data
         .ranges
         .iter()
@@ -358,7 +358,7 @@ pub fn ranges(s: &Session) -> Vec<(String, usize, usize)> {
         .collect()
 }
 
-pub fn markers(s: &Session) -> Vec<(String, usize)> {
+pub fn markers(s: &Session) -> Vec<(String, usize)> { ::tsox_core::fntrace::enter("markers"); 
     s.data
         .markers
         .iter()
@@ -368,12 +368,12 @@ pub fn markers(s: &Session) -> Vec<(String, usize)> {
 
 // ---- B2 诊断 ----
 
-fn diagnostics_of(s: &Session, file: &str) -> Vec<crate::ls::types::Diagnostic> {
+fn diagnostics_of(s: &Session, file: &str) -> Vec<crate::ls::types::Diagnostic> { ::tsox_core::fntrace::enter("diagnostics_of"); 
     let service = s.service.as_ref().expect("无 LanguageService");
     service.provide_diagnostics(&uri_of(s, file))
 }
 
-pub fn verify_no_errors(s: &Session) {
+pub fn verify_no_errors(s: &Session) { ::tsox_core::fntrace::enter("verify_no_errors"); 
     for f in &s.data.files {
         for d in diagnostics_of(s, &f.file_name) {
             if d.severity.unwrap_or(0) == 1 {
@@ -396,7 +396,7 @@ pub fn verify_no_errors(s: &Session) {
     }
 }
 
-pub fn list_diagnostics(s: &Session, file: &str) -> Vec<String> {
+pub fn list_diagnostics(s: &Session, file: &str) -> Vec<String> { ::tsox_core::fntrace::enter("list_diagnostics"); 
     diagnostics_of(s, file)
         .into_iter()
         .map(|d| {
@@ -413,7 +413,7 @@ pub fn list_diagnostics(s: &Session, file: &str) -> Vec<String> {
         .collect()
 }
 
-pub fn verify_number_of_errors_in_current_file(s: &Session, expected: usize) {
+pub fn verify_number_of_errors_in_current_file(s: &Session, expected: usize) { ::tsox_core::fntrace::enter("verify_number_of_errors_in_current_file"); 
     let all = diagnostics_of(s, &s.active_file);
     let n = all.iter().filter(|d| d.severity.unwrap_or(0) == 1).count();
     if n != expected {
@@ -426,7 +426,7 @@ pub fn verify_number_of_errors_in_current_file(s: &Session, expected: usize) {
 }
 
 // ---- B4 补全校验（见 api_completions.rs） ----
-pub fn verify_quick_info_at(s: &Session, marker: &str, expected: &str, expected_doc: &str) {    let m = s.marker(marker).clone();
+pub fn verify_quick_info_at(s: &Session, marker: &str, expected: &str, expected_doc: &str) { ::tsox_core::fntrace::enter("verify_quick_info_at");     let m = s.marker(marker).clone();
     let content = s.file_content(&m.file_name).to_string();
     let (line, character) = line_and_character(&content, m.position);
     let service = s.service.as_ref().expect("无 LanguageService");
@@ -463,7 +463,7 @@ pub fn verify_quick_info_at(s: &Session, marker: &str, expected: &str, expected_
     }
 }
 
-pub(super) fn line_and_character(text: &str, offset: usize) -> (u32, u32) {
+pub(super) fn line_and_character(text: &str, offset: usize) -> (u32, u32) { ::tsox_core::fntrace::enter("line_and_character"); 
     let chars: Vec<char> = text.chars().collect();
     let off = offset.min(chars.len());
     let mut line = 0u32;
@@ -477,12 +477,12 @@ pub(super) fn line_and_character(text: &str, offset: usize) -> (u32, u32) {
     (line, (off - start) as u32)
 }
 
-pub(super) fn uri_of(_s: &Session, file: &str) -> crate::lsp::lsproto_lsp_uri::DocumentUri {
+pub(super) fn uri_of(_s: &Session, file: &str) -> crate::lsp::lsproto_lsp_uri::DocumentUri { ::tsox_core::fntrace::enter("uri_of"); 
     let path = super::session::project_path(file);
     crate::lsp::lsproto_lsp_uri::DocumentUri(format!("file://{path}"))
 }
 
-fn strip_code_fence(text: &str) -> String {
+fn strip_code_fence(text: &str) -> String { ::tsox_core::fntrace::enter("strip_code_fence"); 
     let t = text.trim();
     if let Some(rest) = t.strip_prefix("```") {
         if let Some(end) = rest.rfind("```") {
@@ -496,7 +496,7 @@ fn strip_code_fence(text: &str) -> String {
 
 /// Go f.FormatDocument：请求格式化并把 TextEdits 应用到文件内容
 /// （TextEdits 按 range 从后往前应用，避免偏移漂移）
-pub fn format_document(s: &mut Session, filename: &str) {
+pub fn format_document(s: &mut Session, filename: &str) { ::tsox_core::fntrace::enter("format_document"); 
     let file = if filename.is_empty() { s.active_file.clone() } else { filename.to_string() };
     let uri = uri_of(s, &file);
     let service = s.service.as_ref().expect("无 LanguageService");
@@ -506,7 +506,7 @@ pub fn format_document(s: &mut Session, filename: &str) {
 }
 
 /// Go f.FormatSelection：对选区（起止 marker 名）做格式化
-pub fn format_selection(s: &mut Session, start_marker: &str, end_marker: &str) {
+pub fn format_selection(s: &mut Session, start_marker: &str, end_marker: &str) { ::tsox_core::fntrace::enter("format_selection"); 
     let file = s.active_file.clone();
     let start = s.marker(start_marker).position;
     let end = s.marker(end_marker).position;
@@ -524,7 +524,7 @@ pub fn format_selection(s: &mut Session, start_marker: &str, end_marker: &str) {
 }
 
 #[allow(dead_code)]
-fn apply_edits(s: &mut Session, file: &str, edits: &[crate::lsp::lsproto_lsp::TextEdit]) {
+fn apply_edits(s: &mut Session, file: &str, edits: &[crate::lsp::lsproto_lsp::TextEdit]) { ::tsox_core::fntrace::enter("apply_edits"); 
     if edits.is_empty() {
         return;
     }
@@ -548,7 +548,7 @@ fn apply_edits(s: &mut Session, file: &str, edits: &[crate::lsp::lsproto_lsp::Te
     s.set_file_content(file, next);
 }
 
-fn line_col_to_offset(text: &str, line: usize, character: usize) -> usize {
+fn line_col_to_offset(text: &str, line: usize, character: usize) -> usize { ::tsox_core::fntrace::enter("line_col_to_offset"); 
     let mut cur_line = 0usize;
     for (i, b) in text.as_bytes().iter().enumerate() {
         if cur_line == line {
@@ -563,7 +563,7 @@ fn line_col_to_offset(text: &str, line: usize, character: usize) -> usize {
 }
 
 #[doc(hidden)]
-pub fn debug_dump_diagnostics(s: &Session, file: &str) {
+pub fn debug_dump_diagnostics(s: &Session, file: &str) { ::tsox_core::fntrace::enter("debug_dump_diagnostics"); 
     let ds = diagnostics_of_pub(s, file);
     for d in &ds {
         eprintln!("diag sev={:?} msg={}", d.severity, d.message);
@@ -571,6 +571,6 @@ pub fn debug_dump_diagnostics(s: &Session, file: &str) {
     eprintln!("count={}", ds.len());
 }
 
-fn diagnostics_of_pub(s: &Session, file: &str) -> Vec<crate::ls::types::Diagnostic> {
+fn diagnostics_of_pub(s: &Session, file: &str) -> Vec<crate::ls::types::Diagnostic> { ::tsox_core::fntrace::enter("diagnostics_of_pub"); 
     diagnostics_of(s, file)
 }

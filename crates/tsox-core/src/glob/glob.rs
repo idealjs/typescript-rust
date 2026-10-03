@@ -6,18 +6,18 @@ pub struct Glob {
 }
 
 impl Glob {
-    pub fn parse(pattern: &str) -> Result<Glob, String> {
+    pub fn parse(pattern: &str) -> Result<Glob, String> { crate::fntrace::enter("parse"); 
         let (g, _rest) = parse::parse_inner(pattern, false)?;
         Ok(g)
     }
 
-    pub fn is_match(&self, input: &str) -> bool {
+    pub fn is_match(&self, input: &str) -> bool { crate::fntrace::enter("is_match"); 
         matcher::match_elements(&self.elems, input)
     }
 }
 
 impl std::fmt::Display for Glob {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { crate::fntrace::enter("fmt"); 
         for e in &self.elems {
             match e {
                 Element::Slash => write!(f, "/")?,

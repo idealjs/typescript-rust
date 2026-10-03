@@ -1,7 +1,7 @@
 use crate::core::tristate::*;
 
 #[test]
-fn tristate_basics() {
+fn tristate_basics() { crate::fntrace::enter("tristate_basics"); 
     assert!(Tristate::True.is_true());
     assert!(Tristate::False.is_false());
     assert!(Tristate::Unknown.is_unknown());
@@ -11,7 +11,7 @@ fn tristate_basics() {
 }
 
 #[test]
-fn default_if_unknown() {
+fn default_if_unknown() { crate::fntrace::enter("default_if_unknown"); 
     assert_eq!(
         Tristate::Unknown.default_if_unknown(Tristate::True),
         Tristate::True

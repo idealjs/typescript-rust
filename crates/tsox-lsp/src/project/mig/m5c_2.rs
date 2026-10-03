@@ -23,7 +23,7 @@ pub fn new_checker_pool(
     mut opts: CheckerPoolOptions,
     program: Option<Arc<Program>>,
     log: Option<Box<dyn Fn(&str) + Send + Sync>>,
-) -> CheckerPool {
+) -> CheckerPool { ::tsox_core::fntrace::enter("new_checker_pool"); 
     if opts.max_checkers == 0 {
         opts.max_checkers = 4;
     } else if opts.max_checkers < 2 {
@@ -51,9 +51,9 @@ pub fn new_checker_pool(
     pool
 }
 
-pub fn noop() {}
+pub fn noop() { ::tsox_core::fntrace::enter("noop"); }
 
-pub fn hold_tag_or_anonymous(request_id: &str) -> String {
+pub fn hold_tag_or_anonymous(request_id: &str) -> String { ::tsox_core::fntrace::enter("hold_tag_or_anonymous"); 
     if request_id.is_empty() {
         CHECKER_HELD_ANONYMOUS.to_string()
     } else {
@@ -61,15 +61,15 @@ pub fn hold_tag_or_anonymous(request_id: &str) -> String {
     }
 }
 
-fn max_checkers_of(pool: &CheckerPool) -> usize {
+fn max_checkers_of(pool: &CheckerPool) -> usize { ::tsox_core::fntrace::enter("max_checkers_of"); 
     pool.max_checkers()
 }
 
-fn request_context_can_be_canceled(ctx: &RequestContext) -> bool {
+fn request_context_can_be_canceled(ctx: &RequestContext) -> bool { ::tsox_core::fntrace::enter("request_context_can_be_canceled"); 
     !get_request_id(ctx).is_empty()
 }
 
-fn new_checker_for(program: Option<Arc<Program>>) -> Arc<Checker> {
+fn new_checker_for(program: Option<Arc<Program>>) -> Arc<Checker> { ::tsox_core::fntrace::enter("new_checker_for"); 
     let program = program.expect("checker pool requires a program to create checkers");
     let program: Arc<dyn tsox_checker::checker::Program> = program;
     let (checker, _guard) = m1a::new_checker(program, Arc::new(Tracer::new()));
@@ -81,7 +81,7 @@ impl CheckerPool {
         self: &Arc<Self>,
         ctx: &RequestContext,
         file: Option<Arc<SourceFile>>,
-    ) -> (Arc<Checker>, ReleaseFn) {
+    ) -> (Arc<Checker>, ReleaseFn) { ::tsox_core::fntrace::enter("get_checker"); 
         let lifetime = get_checker_lifetime(ctx);
         let mut request_id = get_request_id(ctx);
         if !request_context_can_be_canceled(ctx) {
@@ -99,7 +99,7 @@ impl CheckerPool {
         request_id: &str,
         sem: &Semaphore,
         is_diag: bool,
-    ) -> Option<(Arc<Checker>, ReleaseFn)> {
+    ) -> Option<(Arc<Checker>, ReleaseFn)> { ::tsox_core::fntrace::enter("try_reacquire_for_request"); 
         if request_id.is_empty() {
             sem.acquire();
             return None;
@@ -153,7 +153,7 @@ impl CheckerPool {
         self: &Arc<Self>,
         ctx: &RequestContext,
         request_id: &str,
-    ) -> (Arc<Checker>, ReleaseFn) {
+    ) -> (Arc<Checker>, ReleaseFn) { ::tsox_core::fntrace::enter("get_diagnostics_checker"); 
         const DIAG_INDEX: usize = 0;
         if let Some(result) = self.try_reacquire_for_request(request_id, &self.diag_sem(), true) {
             return result;
@@ -186,7 +186,7 @@ impl CheckerPool {
         ctx: &RequestContext,
         request_id: &str,
         file: Option<Arc<SourceFile>>,
-    ) -> (Arc<Checker>, ReleaseFn) {
+    ) -> (Arc<Checker>, ReleaseFn) { ::tsox_core::fntrace::enter("get_query_checker"); 
         if let Some(result) = self.try_reacquire_for_request(request_id, &self.query_sem(), false) {
             return result;
         }
@@ -237,7 +237,7 @@ impl CheckerPool {
         (c, release)
     }
 
-    fn get_persistent_checker(self: &Arc<Self>) -> (Arc<Checker>, ReleaseFn) {
+    fn get_persistent_checker(self: &Arc<Self>) -> (Arc<Checker>, ReleaseFn) { ::tsox_core::fntrace::enter("get_persistent_checker"); 
         self.persistent_sem().acquire();
         let mut state = self.lock_state();
         if state.persistent_checker.is_none() {
@@ -279,7 +279,7 @@ impl CheckerPool {
         request_id: String,
         index: usize,
         c: Arc<Checker>,
-    ) -> ReleaseFn {
+    ) -> ReleaseFn { ::tsox_core::fntrace::enter("create_release"); 
         let pool = self.clone();
         let once = Arc::new(Once::new());
         let c = SendChecker(c);
@@ -312,7 +312,7 @@ impl CheckerPool {
         })
     }
 
-    fn register_request_cleanup(self: &Arc<Self>, ctx: &RequestContext, request_id: &str) {
+    fn register_request_cleanup(self: &Arc<Self>, ctx: &RequestContext, request_id: &str) { ::tsox_core::fntrace::enter("register_request_cleanup"); 
         let pool = Arc::clone(self);
         let request_id = request_id.to_string();
         ctx.after_func(Box::new(move || {
@@ -321,12 +321,12 @@ impl CheckerPool {
         }));
     }
 
-    pub fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+    pub fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_global_diagnostics"); 
         let state = self.lock_state();
         state.global_diag_accumulated.clone()
     }
 
-    pub fn cleanup_idle_checkers(self: &Arc<Self>) {
+    pub fn cleanup_idle_checkers(self: &Arc<Self>) { ::tsox_core::fntrace::enter("cleanup_idle_checkers"); 
         let mut state = self.lock_state();
         if state.discarded {
             return;
@@ -355,7 +355,7 @@ impl CheckerPool {
     }
 }
 
-fn boxed_noop() -> ReleaseFn {
+fn boxed_noop() -> ReleaseFn { ::tsox_core::fntrace::enter("boxed_noop"); 
     Box::new(noop)
 }
 
@@ -363,7 +363,7 @@ fn find_or_create_query_checker_locked(
     state: &mut CheckerPoolState,
     program: Option<Arc<Program>>,
     log: &dyn Fn(&str),
-) -> (Arc<Checker>, usize) {
+) -> (Arc<Checker>, usize) { ::tsox_core::fntrace::enter("find_or_create_query_checker_locked"); 
     for i in 1..state.checkers.len() {
         if let Some(c) = &state.checkers[i] {
             if state.held_by[i].is_empty() {
@@ -382,7 +382,7 @@ fn find_or_create_query_checker_locked(
     panic!("checkerpool: no available query slot despite holding semaphore token");
 }
 
-pub fn schedule_cleanup_locked(state: &mut CheckerPoolState, pool: &Arc<CheckerPool>) {
+pub fn schedule_cleanup_locked(state: &mut CheckerPoolState, pool: &Arc<CheckerPool>) { ::tsox_core::fntrace::enter("schedule_cleanup_locked"); 
     let mut earliest_deadline: Option<Instant> = None;
     for i in 0..state.checkers.len() {
         if state.checkers[i].is_none() || !state.held_by[i].is_empty() {
@@ -418,7 +418,7 @@ pub fn schedule_cleanup_locked(state: &mut CheckerPoolState, pool: &Arc<CheckerP
     }
 }
 
-pub fn dispose_checker_locked(state: &mut CheckerPoolState, index: usize, c: &Arc<Checker>) {
+pub fn dispose_checker_locked(state: &mut CheckerPoolState, index: usize, c: &Arc<Checker>) { ::tsox_core::fntrace::enter("dispose_checker_locked"); 
     let same = state.checkers[index]
         .as_ref()
         .map(|existing| Arc::ptr_eq(existing, c))
@@ -436,7 +436,7 @@ pub fn merge_global_diagnostics_from_checker_locked(
     state: &mut CheckerPoolState,
     index: usize,
     c: &Checker,
-) {
+) { ::tsox_core::fntrace::enter("merge_global_diagnostics_from_checker_locked"); 
     let globals = c.diagnostics.get_global_diagnostics();
     if globals.len() == state.global_diag_checker_count[index] {
         return;

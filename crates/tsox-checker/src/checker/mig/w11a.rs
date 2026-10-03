@@ -4,14 +4,14 @@
 use std::sync::Arc;
 use crate::checker::types::{Type, TypeFlags};
 
-pub(crate) fn substitution_base_type(t: &Type) -> Option<Arc<Type>> {
+pub(crate) fn substitution_base_type(t: &Type) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("substitution_base_type"); 
     if !t.flags.intersects(TypeFlags::Substitution) {
         return None;
     }
     t.as_substitution_type()?.base_type.clone()
 }
 
-pub(crate) fn substitution_constraint_type(t: &Type) -> Option<Arc<Type>> {
+pub(crate) fn substitution_constraint_type(t: &Type) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("substitution_constraint_type"); 
     if !t.flags.intersects(TypeFlags::Substitution) {
         return None;
     }

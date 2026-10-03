@@ -9,21 +9,21 @@ pub enum NameValidationResult {
 }
 
 impl Default for NameValidationResult {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         NameValidationResult::NameOk
     }
 }
 
 pub(crate) const MAX_PACKAGE_NAME_LENGTH: usize = 214;
 
-pub fn validate_package_name(package_name: &str) -> (NameValidationResult, String, bool) {
+pub fn validate_package_name(package_name: &str) -> (NameValidationResult, String, bool) { ::tsox_core::fntrace::enter("validate_package_name"); 
     validate_package_name_worker(package_name, true)
 }
 
 pub(crate) fn validate_package_name_worker(
     package_name: &str,
     support_scoped_package: bool,
-) -> (NameValidationResult, String, bool) {
+) -> (NameValidationResult, String, bool) { ::tsox_core::fntrace::enter("validate_package_name_worker"); 
     let package_name_len = package_name.len();
     if package_name_len == 0 {
         return (NameValidationResult::EmptyName, String::new(), false);
@@ -84,7 +84,7 @@ pub fn render_package_name_validation_failure(
     result: NameValidationResult,
     name: &str,
     is_scope_name: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("render_package_name_validation_failure"); 
     let kind = if is_scope_name { "Scope" } else { "Package" };
     let name = if name.is_empty() { typing } else { name };
     match result {
@@ -113,7 +113,7 @@ pub fn render_package_name_validation_failure(
     }
 }
 
-pub(crate) fn query_escape(s: &str) -> String {
+pub(crate) fn query_escape(s: &str) -> String { ::tsox_core::fntrace::enter("query_escape"); 
     let mut result = String::with_capacity(s.len());
     for c in s.chars() {
         if c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | '~') {

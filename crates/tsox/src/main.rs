@@ -4,7 +4,7 @@ use std::thread;
 use tsox_execute::execute::OsSystem;
 use tsox_execute::execute::command_line;
 
-fn main() -> ExitCode {
+fn main() -> ExitCode { ::tsox_core::fntrace::enter("main"); 
     let result = thread::Builder::new()
         .stack_size(256 * 1024 * 1024)
         .spawn(main_inner)
@@ -14,7 +14,7 @@ fn main() -> ExitCode {
     result
 }
 
-fn main_inner() -> ExitCode {
+fn main_inner() -> ExitCode { ::tsox_core::fntrace::enter("main_inner"); 
     let args: Vec<String> = std::env::args().skip(1).collect();
 
     if let Some(first) = args.first() {

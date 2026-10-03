@@ -30,7 +30,7 @@ pub struct WatcherImpl {
 }
 
 impl WatcherImpl {
-    pub fn new(name: &str) -> WatcherImpl {
+    pub fn new(name: &str) -> WatcherImpl { crate::fntrace::enter("new"); 
         WatcherImpl {
             name: name.to_string(),
             mu: Mutex::new(WatcherMu {
@@ -43,11 +43,11 @@ impl WatcherImpl {
         }
     }
 
-    pub fn can_share_recursive_dir_watches(&self) -> bool {
+    pub fn can_share_recursive_dir_watches(&self) -> bool { crate::fntrace::enter("can_share_recursive_dir_watches"); 
         self.name == "fsevents"
     }
 
-    pub fn get_impl(&self) -> Result<Arc<dyn WatcherBackend>, FswatchError> {
+    pub fn get_impl(&self) -> Result<Arc<dyn WatcherBackend>, FswatchError> { crate::fntrace::enter("get_impl"); 
         {
             let mu = self.mu.lock().unwrap();
             if let Some(backend) = &mu.backend {
@@ -72,7 +72,7 @@ impl WatcherImpl {
         Ok(backend)
     }
 
-    pub fn key_for_dir_watch(&self, dir: &str, recursive: bool) -> String {
+    pub fn key_for_dir_watch(&self, dir: &str, recursive: bool) -> String { crate::fntrace::enter("key_for_dir_watch"); 
         if recursive {
             format!("{}\x00recursive", dir)
         } else {
@@ -85,7 +85,7 @@ impl WatcherImpl {
         mu: &WatcherMu,
         dir: &str,
         physical_dir: &str,
-    ) -> Option<Arc<DirWatch>> {
+    ) -> Option<Arc<DirWatch>> { crate::fntrace::enter("find_covering_recursive_watch_locked"); 
         let mut best: Option<Arc<DirWatch>> = None;
         for dw in mu.dir_watches.values() {
             if !dw.recursive_value()
@@ -110,7 +110,7 @@ impl WatcherImpl {
         mu: &WatcherMu,
         dir: &str,
         physical_dir: &str,
-    ) -> String {
+    ) -> String { crate::fntrace::enter("find_consolidation_dir_locked"); 
         if !self.can_share_recursive_dir_watches() {
             return String::new();
         }
@@ -150,7 +150,7 @@ impl WatcherImpl {
         dir: &str,
         physical_dir: &str,
         recursive: bool,
-    ) -> Arc<DirWatch> {
+    ) -> Arc<DirWatch> { crate::fntrace::enter("get_or_create_dir_watch"); 
         let mut mu = self.mu.lock().unwrap();
         if mu.debounce.is_none() {
             mu.debounce = Some(new_debounce());
@@ -185,7 +185,7 @@ impl WatcherImpl {
         dw
     }
 
-    pub fn remove_dir_watch(&self, dw: &Arc<DirWatch>) {
+    pub fn remove_dir_watch(&self, dw: &Arc<DirWatch>) { crate::fntrace::enter("remove_dir_watch"); 
         let mut mu = self.mu.lock().unwrap();
         let key = self.key_for_dir_watch(&dw.dir, dw.recursive_value());
         if let Some(existing) = mu.dir_watches.get(&key) {
@@ -196,7 +196,7 @@ impl WatcherImpl {
         }
     }
 
-    pub fn rollback_prepared(&self, prepared: &[PreparedWatch]) {
+    pub fn rollback_prepared(&self, prepared: &[PreparedWatch]) { crate::fntrace::enter("rollback_prepared"); 
         for p in prepared.iter().rev() {
             p.dw.unwatch(p.id);
             p.dw.unref(self);
@@ -205,7 +205,7 @@ impl WatcherImpl {
 }
 
 impl fmt::Display for WatcherImpl {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result { crate::fntrace::enter("fmt"); 
         f.write_str(&self.name)
     }
 }

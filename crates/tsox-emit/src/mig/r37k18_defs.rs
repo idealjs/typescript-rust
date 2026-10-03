@@ -10,12 +10,12 @@ pub trait R37K18NodeVisitorExt {
 }
 
 impl R37K18NodeVisitorExt for NodeVisitor {
-    fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         tsox_frontend::ast::mig::m3c::visit_each_child(node, &mut r37k18_m3c_visitor())
     }
 }
 
-fn r37k18_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor {
+fn r37k18_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor { ::tsox_core::fntrace::enter("r37k18_m3c_visitor"); 
     tsox_frontend::ast::mig::m3c::NodeVisitor {
         factory: tsox_frontend::ast::mig::m3c::NodeFactory {
             hooks: tsox_frontend::ast::mig::m3c::NodeFactoryHooks::default(),
@@ -31,7 +31,7 @@ impl<'a> NodeFactory<'a> {
         global_object_name: &str,
         method_name: &str,
         arguments_list: &[Arc<Node>],
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_global_method_call"); 
         self.new_method_call(
             &self.new_identifier(global_object_name),
             &self.new_identifier(method_name),
@@ -39,7 +39,7 @@ impl<'a> NodeFactory<'a> {
         )
     }
 
-    pub fn new_big_int_literal(&self, text: &str, token_flags: i32) -> Arc<Node> {
+    pub fn new_big_int_literal(&self, text: &str, token_flags: i32) -> Arc<Node> { ::tsox_core::fntrace::enter("new_big_int_literal"); 
         Arc::new(Node::new(
             tsox_frontend::ast::SyntaxKind::BigIntLiteral,
             tsox_frontend::ast::NodeData::BigIntLiteral(

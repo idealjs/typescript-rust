@@ -1,61 +1,61 @@
 pub(crate) use std::cmp::Ordering;
 
-pub fn filter<T: Clone>(slice: &[T], f: impl Fn(&T) -> bool) -> Vec<T> {
+pub fn filter<T: Clone>(slice: &[T], f: impl Fn(&T) -> bool) -> Vec<T> { crate::fntrace::enter("filter"); 
     slice.iter().filter(|x| f(x)).cloned().collect()
 }
 
-pub fn map<T, U>(slice: &[T], f: impl Fn(&T) -> U) -> Vec<U> {
+pub fn map<T, U>(slice: &[T], f: impl Fn(&T) -> U) -> Vec<U> { crate::fntrace::enter("map"); 
     slice.iter().map(|x| f(x)).collect()
 }
 
-pub fn map_index<T, U>(slice: &[T], f: impl Fn(&T, usize) -> U) -> Vec<U> {
+pub fn map_index<T, U>(slice: &[T], f: impl Fn(&T, usize) -> U) -> Vec<U> { crate::fntrace::enter("map_index"); 
     slice.iter().enumerate().map(|(i, x)| f(x, i)).collect()
 }
 
-pub fn map_filtered<T, U>(slice: &[T], f: impl Fn(&T) -> Option<U>) -> Vec<U> {
+pub fn map_filtered<T, U>(slice: &[T], f: impl Fn(&T) -> Option<U>) -> Vec<U> { crate::fntrace::enter("map_filtered"); 
     slice.iter().filter_map(|x| f(x)).collect()
 }
 
-pub fn flat_map<T, U: Clone>(slice: &[T], f: impl Fn(&T) -> &[U]) -> Vec<U> {
+pub fn flat_map<T, U: Clone>(slice: &[T], f: impl Fn(&T) -> &[U]) -> Vec<U> { crate::fntrace::enter("flat_map"); 
     slice.iter().flat_map(|x| f(x)).cloned().collect()
 }
 
-pub fn some<T>(slice: &[T], f: impl Fn(&T) -> bool) -> bool {
+pub fn some<T>(slice: &[T], f: impl Fn(&T) -> bool) -> bool { crate::fntrace::enter("some"); 
     slice.iter().any(|x| f(x))
 }
 
-pub fn every<T>(slice: &[T], f: impl Fn(&T) -> bool) -> bool {
+pub fn every<T>(slice: &[T], f: impl Fn(&T) -> bool) -> bool { crate::fntrace::enter("every"); 
     slice.iter().all(|x| f(x))
 }
 
-pub fn find<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<&T> {
+pub fn find<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<&T> { crate::fntrace::enter("find"); 
     slice.iter().find(|x| f(x))
 }
 
-pub fn find_last<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<&T> {
+pub fn find_last<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<&T> { crate::fntrace::enter("find_last"); 
     slice.iter().rfind(|x| f(x))
 }
 
-pub fn find_index<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<usize> {
+pub fn find_index<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<usize> { crate::fntrace::enter("find_index"); 
     slice.iter().position(|x| f(x))
 }
 
-pub fn find_last_index<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<usize> {
+pub fn find_last_index<T>(slice: &[T], f: impl Fn(&T) -> bool) -> Option<usize> { crate::fntrace::enter("find_last_index"); 
     slice.iter().rposition(|x| f(x))
 }
 
-pub fn count_where<T>(slice: &[T], f: impl Fn(&T) -> bool) -> usize {
+pub fn count_where<T>(slice: &[T], f: impl Fn(&T) -> bool) -> usize { crate::fntrace::enter("count_where"); 
     slice.iter().filter(|x| f(x)).count()
 }
 
-pub fn concatenate<T: Clone>(s1: &[T], s2: &[T]) -> Vec<T> {
+pub fn concatenate<T: Clone>(s1: &[T], s2: &[T]) -> Vec<T> { crate::fntrace::enter("concatenate"); 
     let mut v = Vec::with_capacity(s1.len() + s2.len());
     v.extend_from_slice(s1);
     v.extend_from_slice(s2);
     v
 }
 
-pub fn splice<T: Clone>(slice: &[T], start: isize, delete_count: usize, items: &[T]) -> Vec<T> {
+pub fn splice<T: Clone>(slice: &[T], start: isize, delete_count: usize, items: &[T]) -> Vec<T> { crate::fntrace::enter("splice"); 
     let len = slice.len() as isize;
     let mut start = start;
     if start < 0 {
@@ -77,7 +77,7 @@ pub fn splice<T: Clone>(slice: &[T], start: isize, delete_count: usize, items: &
     result
 }
 
-pub fn replace_element<T: Clone>(slice: &[T], i: usize, t: T) -> Vec<T> {
+pub fn replace_element<T: Clone>(slice: &[T], i: usize, t: T) -> Vec<T> { crate::fntrace::enter("replace_element"); 
     let mut result = slice.to_vec();
     if i < result.len() {
         result[i] = t;
@@ -89,7 +89,7 @@ pub fn insert_sorted<T: Clone>(
     slice: &[T],
     element: &T,
     cmp: impl Fn(&T, &T) -> Ordering,
-) -> Vec<T> {
+) -> Vec<T> { crate::fntrace::enter("insert_sorted"); 
     let i = slice
         .binary_search_by(|probe| cmp(probe, element))
         .unwrap_or_else(|e| e);
@@ -100,7 +100,7 @@ pub fn insert_sorted<T: Clone>(
     result
 }
 
-pub fn min_all_func<T: Clone>(xs: &[T], cmp: impl Fn(&T, &T) -> Ordering) -> Vec<T> {
+pub fn min_all_func<T: Clone>(xs: &[T], cmp: impl Fn(&T, &T) -> Ordering) -> Vec<T> { crate::fntrace::enter("min_all_func"); 
     if xs.is_empty() {
         return Vec::new();
     }
@@ -118,7 +118,7 @@ pub fn min_all_func<T: Clone>(xs: &[T], cmp: impl Fn(&T, &T) -> Ordering) -> Vec
     mins
 }
 
-pub fn append_if_unique<T: Clone + PartialEq>(slice: &[T], element: &T) -> Vec<T> {
+pub fn append_if_unique<T: Clone + PartialEq>(slice: &[T], element: &T) -> Vec<T> { crate::fntrace::enter("append_if_unique"); 
     if slice.iter().any(|x| x == element) {
         return slice.to_vec();
     }
@@ -129,7 +129,7 @@ pub fn append_if_unique<T: Clone + PartialEq>(slice: &[T], element: &T) -> Vec<T
 
 pub fn memoize<T: Clone + Send + Sync + 'static>(
     create: impl FnOnce() -> T + Send + 'static,
-) -> impl Fn() -> T {
+) -> impl Fn() -> T { crate::fntrace::enter("memoize"); 
     let cell: std::sync::OnceLock<T> = std::sync::OnceLock::new();
     let create = std::sync::Mutex::new(Some(create));
     move || {
@@ -145,7 +145,7 @@ pub fn memoize<T: Clone + Send + Sync + 'static>(
     }
 }
 
-pub fn first_non_zero<T: Default + PartialEq + Clone>(values: &[T]) -> T {
+pub fn first_non_zero<T: Default + PartialEq + Clone>(values: &[T]) -> T { crate::fntrace::enter("first_non_zero"); 
     let zero = T::default();
     for v in values {
         if v != &zero {
@@ -161,7 +161,7 @@ pub struct Pattern {
     pub star_index: isize,
 }
 
-pub fn try_parse_pattern(pattern: &str) -> Pattern {
+pub fn try_parse_pattern(pattern: &str) -> Pattern { crate::fntrace::enter("try_parse_pattern"); 
     match pattern.find('*') {
         None => Pattern {
             text: pattern.to_string(),
@@ -181,11 +181,11 @@ pub fn try_parse_pattern(pattern: &str) -> Pattern {
 }
 
 impl Pattern {
-    pub fn is_valid(&self) -> bool {
+    pub fn is_valid(&self) -> bool { crate::fntrace::enter("is_valid"); 
         self.star_index == -1 || self.star_index < self.text.len() as isize
     }
 
-    pub fn matches(&self, candidate: &str) -> bool {
+    pub fn matches(&self, candidate: &str) -> bool { crate::fntrace::enter("matches"); 
         if self.star_index == -1 {
             return self.text == candidate;
         }
@@ -197,7 +197,7 @@ impl Pattern {
             && candidate.ends_with(suffix)
     }
 
-    pub fn matched_text<'a>(&self, candidate: &'a str) -> &'a str {
+    pub fn matched_text<'a>(&self, candidate: &'a str) -> &'a str { crate::fntrace::enter("matched_text"); 
         if !self.matches(candidate) {
             panic!("candidate does not match pattern");
         }

@@ -4,7 +4,7 @@ pub fn compute_position_of_line_and_byte_offset(
     line_starts: &[TextPos],
     line: usize,
     byte_offset: usize,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("compute_position_of_line_and_byte_offset"); 
     if line >= line_starts.len() {
         panic!(
             "Bad line number. Line: {}, lineStarts.length: {}.",
@@ -21,7 +21,7 @@ pub fn compute_position_of_line_and_utf16_character(
     character: usize,
     text: &str,
     allow_edits: bool,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("compute_position_of_line_and_utf16_character"); 
     let mut line = line;
     if line >= line_starts.len() {
         if allow_edits {
@@ -75,7 +75,7 @@ pub fn compute_position_of_line_and_utf16_character(
     res
 }
 
-pub fn default_scanner() -> crate::scanner::token_to_string::Scanner {
+pub fn default_scanner() -> crate::scanner::token_to_string::Scanner { ::tsox_core::fntrace::enter("default_scanner"); 
     let mut scanner = crate::scanner::token_to_string::Scanner::new("");
     scanner.set_skip_trivia(true);
     scanner

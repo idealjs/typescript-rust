@@ -17,7 +17,7 @@ pub struct CheckerPoolOptions {
 }
 
 impl Default for CheckerPoolOptions {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         CheckerPoolOptions {
             max_checkers: 4,
             idle_timeout: Duration::from_secs(30),
@@ -31,14 +31,14 @@ pub struct Semaphore {
 }
 
 impl Semaphore {
-    pub fn new(permits: usize) -> Self {
+    pub fn new(permits: usize) -> Self { ::tsox_core::fntrace::enter("new"); 
         Semaphore {
             permits: Mutex::new(permits),
             cond: Condvar::new(),
         }
     }
 
-    pub fn acquire(&self) {
+    pub fn acquire(&self) { ::tsox_core::fntrace::enter("acquire"); 
         let mut n = self.permits.lock().unwrap();
         while *n == 0 {
             n = self.cond.wait(n).unwrap();
@@ -46,7 +46,7 @@ impl Semaphore {
         *n -= 1;
     }
 
-    pub fn release(&self) {
+    pub fn release(&self) { ::tsox_core::fntrace::enter("release"); 
         let mut n = self.permits.lock().unwrap();
         *n += 1;
         self.cond.notify_one();
@@ -79,7 +79,7 @@ pub struct CleanupTimer {
 }
 
 impl CleanupTimer {
-    pub fn starting(pool: Arc<CheckerPool>, delay: Duration) -> Self {
+    pub fn starting(pool: Arc<CheckerPool>, delay: Duration) -> Self { ::tsox_core::fntrace::enter("starting"); 
         let mut timer = CleanupTimer {
             stop_flag: Arc::new(Mutex::new(false)),
             handle: None,
@@ -88,12 +88,12 @@ impl CleanupTimer {
         timer
     }
 
-    pub fn stop(&mut self) {
+    pub fn stop(&mut self) { ::tsox_core::fntrace::enter("stop"); 
         *self.stop_flag.lock().unwrap() = true;
         self.handle = None;
     }
 
-    pub fn reset(&mut self, pool: Arc<CheckerPool>, delay: Duration) {
+    pub fn reset(&mut self, pool: Arc<CheckerPool>, delay: Duration) { ::tsox_core::fntrace::enter("reset"); 
         self.stop();
         let stop_flag = Arc::new(Mutex::new(false));
         self.stop_flag = stop_flag.clone();
@@ -127,7 +127,7 @@ unsafe impl Send for CheckerPool {}
 unsafe impl Sync for CheckerPool {}
 
 impl CheckerPool {
-    pub fn new(opts: CheckerPoolOptions, program: Option<Arc<Program>>) -> Self {
+    pub fn new(opts: CheckerPoolOptions, program: Option<Arc<Program>>) -> Self { ::tsox_core::fntrace::enter("new"); 
         let max = if opts.max_checkers <= 0 {
             4
         } else if opts.max_checkers < 2 {
@@ -164,46 +164,46 @@ impl CheckerPool {
         }
     }
 
-    pub fn init_state(&self, mut state: CheckerPoolState) {
+    pub fn init_state(&self, mut state: CheckerPoolState) { ::tsox_core::fntrace::enter("init_state"); 
         *self.log.lock().unwrap() = state.log.take();
         *self.state.lock().unwrap() = state;
     }
 
-    pub fn lock_state(&self) -> MutexGuard<'_, CheckerPoolState> {
+    pub fn lock_state(&self) -> MutexGuard<'_, CheckerPoolState> { ::tsox_core::fntrace::enter("lock_state"); 
         self.state.lock().unwrap()
     }
 
-    pub fn diag_sem(&self) -> &Semaphore {
+    pub fn diag_sem(&self) -> &Semaphore { ::tsox_core::fntrace::enter("diag_sem"); 
         &self.diag_sem
     }
 
-    pub fn query_sem(&self) -> &Semaphore {
+    pub fn query_sem(&self) -> &Semaphore { ::tsox_core::fntrace::enter("query_sem"); 
         &self.query_sem
     }
 
-    pub fn persistent_sem(&self) -> &Semaphore {
+    pub fn persistent_sem(&self) -> &Semaphore { ::tsox_core::fntrace::enter("persistent_sem"); 
         &self.persistent_sem
     }
 
-    pub fn log_msg(&self, msg: &str) {
+    pub fn log_msg(&self, msg: &str) { ::tsox_core::fntrace::enter("log_msg"); 
         if let Some(log) = self.log.lock().unwrap().as_ref() {
             log(msg);
         }
     }
 
-    pub fn program(&self) -> Option<Arc<Program>> {
+    pub fn program(&self) -> Option<Arc<Program>> { ::tsox_core::fntrace::enter("program"); 
         self.program.clone()
     }
 
-    pub fn max_checkers(&self) -> usize {
+    pub fn max_checkers(&self) -> usize { ::tsox_core::fntrace::enter("max_checkers"); 
         self.opts.max_checkers
     }
 
-    pub fn idle_timeout(&self) -> Duration {
+    pub fn idle_timeout(&self) -> Duration { ::tsox_core::fntrace::enter("idle_timeout"); 
         self.opts.idle_timeout
     }
 
-    pub fn discard(&self) {
+    pub fn discard(&self) { ::tsox_core::fntrace::enter("discard"); 
         let mut state = self.lock_state();
         if state.discarded {
             return;
@@ -215,11 +215,11 @@ impl CheckerPool {
         state.discarded = true;
     }
 
-    pub fn get_global_diagnostics_count(&self) -> usize {
+    pub fn get_global_diagnostics_count(&self) -> usize { ::tsox_core::fntrace::enter("get_global_diagnostics_count"); 
         self.lock_state().global_diag_accumulated.len()
     }
 
-    pub fn take_new_global_diagnostics(&self) -> bool {
+    pub fn take_new_global_diagnostics(&self) -> bool { ::tsox_core::fntrace::enter("take_new_global_diagnostics"); 
         let mut state = self.lock_state();
         let changed = state.global_diag_changed;
         state.global_diag_changed = false;
@@ -227,7 +227,7 @@ impl CheckerPool {
     }
 }
 
-fn hold_tag(request_id: &str) -> String {
+fn hold_tag(request_id: &str) -> String { ::tsox_core::fntrace::enter("hold_tag"); 
     if request_id.is_empty() {
         CHECKER_HELD_ANONYMOUS.to_string()
     } else {

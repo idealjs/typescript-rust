@@ -3,7 +3,7 @@
 use crate::parser::expressions::*;
 
 impl Parser {
-    pub(crate) fn is_yield_expression(&self) -> bool {
+    pub(crate) fn is_yield_expression(&self) -> bool { ::tsox_core::fntrace::enter("is_yield_expression"); 
         if self.token != SyntaxKind::YieldKeyword {
             return false;
         }
@@ -19,7 +19,7 @@ impl Parser {
         !p.has_preceding_line_break() && p.is_start_of_expression()
     }
 
-    pub(crate) fn is_await_expression(&self) -> bool {
+    pub(crate) fn is_await_expression(&self) -> bool { ::tsox_core::fntrace::enter("is_await_expression"); 
         if self.token != SyntaxKind::AwaitKeyword {
             return false;
         }
@@ -37,7 +37,7 @@ impl Parser {
         candidate && !p.has_preceding_line_break()
     }
 
-    pub(crate) fn parse_yield_expression(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_yield_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_yield_expression"); 
         let pos = self.token_pos();
         self.next_token();
         let (asterisk_token, expression) = if !self.has_preceding_line_break()
@@ -66,7 +66,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn is_parenthesized_arrow_function(&self) -> bool {
+    pub(crate) fn is_parenthesized_arrow_function(&self) -> bool { ::tsox_core::fntrace::enter("is_parenthesized_arrow_function"); 
         let mut scanner = self.scanner.clone();
         let second = scanner.scan();
         // Go nextIsParenthesizedArrowFunctionExpression：`(xxx` 的 xxx 既非
@@ -136,7 +136,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn token_is_identifier_in_context(&self, token: SyntaxKind) -> bool {
+    pub(crate) fn token_is_identifier_in_context(&self, token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("token_is_identifier_in_context"); 
         if token == SyntaxKind::YieldKeyword && self.yield_context {
             return false;
         }
@@ -149,7 +149,7 @@ impl Parser {
         token == SyntaxKind::Identifier || crate::parser::binary_precedence::is_keyword(token)
     }
 
-    pub(crate) fn scanner_reaches_arrow_before_line_end(scanner: &mut Scanner) -> bool {
+    pub(crate) fn scanner_reaches_arrow_before_line_end(scanner: &mut Scanner) -> bool { ::tsox_core::fntrace::enter("scanner_reaches_arrow_before_line_end"); 
         let mut depth = 0usize;
         loop {
             let token = scanner.scan();
@@ -176,7 +176,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_async_arrow_function(&self) -> bool {
+    pub(crate) fn is_async_arrow_function(&self) -> bool { ::tsox_core::fntrace::enter("is_async_arrow_function"); 
         let mut scanner = self.scanner.clone();
         let next = scanner.scan();
         if scanner.has_preceding_line_break() {
@@ -228,7 +228,7 @@ impl Parser {
     pub(crate) fn make_async_modifier_list(
         &self,
         async_modifier: Arc<Node>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("make_async_modifier_list"); 
         Some(Arc::new(ModifierList::new(
             vec![async_modifier],
             ModifierFlags::Async,
@@ -238,7 +238,7 @@ impl Parser {
     pub(crate) fn parse_parenthesized_arrow_function_with_async(
         &mut self,
         async_modifier: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parenthesized_arrow_function_with_async"); 
         let modifiers = self.make_async_modifier_list(async_modifier);
         let pos = self.token_pos();
         let parameters = self.parse_parameter_list();

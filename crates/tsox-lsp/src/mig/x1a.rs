@@ -1,7 +1,7 @@
 use crate::lsp::lsproto::{Diagnostic, IntegerOrString};
 
 impl IntegerOrString {
-    pub fn as_string(&self) -> String {
+    pub fn as_string(&self) -> String { ::tsox_core::fntrace::enter("as_string"); 
         if let Some(s) = &self.string {
             return s.clone();
         }
@@ -13,7 +13,7 @@ impl IntegerOrString {
 }
 
 impl Diagnostic {
-    pub fn code_string(&self) -> String {
+    pub fn code_string(&self) -> String { ::tsox_core::fntrace::enter("code_string"); 
         match &self.code {
             Some(serde_json::Value::String(s)) => s.clone(),
             Some(v) => v.to_string(),
@@ -21,11 +21,11 @@ impl Diagnostic {
         }
     }
 
-    pub fn code_as_string(&self) -> String {
+    pub fn code_as_string(&self) -> String { ::tsox_core::fntrace::enter("code_as_string"); 
         format!("Code({})", self.code_string())
     }
 
-    pub fn as_string(&self) -> String {
+    pub fn as_string(&self) -> String { ::tsox_core::fntrace::enter("as_string"); 
         format!(
             "{} ({}:{}-{}:{}): {}",
             self.code_string(),

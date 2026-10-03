@@ -9,7 +9,7 @@ pub(crate) enum RecursionIdentity {
 }
 
 impl Checker {
-    fn get_recursion_identity_target(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn get_recursion_identity_target(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_recursion_identity_target"); 
         let mut cur = Arc::clone(t);
         loop {
             if let TypeData::IndexedAccess(ia) = &cur.data {
@@ -40,7 +40,7 @@ impl Checker {
         }
     }
 
-    fn recursion_identity_from_target(&self, t: &Arc<Type>) -> RecursionIdentity {
+    fn recursion_identity_from_target(&self, t: &Arc<Type>) -> RecursionIdentity { ::tsox_core::fntrace::enter("recursion_identity_from_target"); 
         if t.flags.contains(TypeFlags::Object) && !is_object_or_array_literal_type(t) {
             if let Some(sym) = t.symbol.as_ref()
                 && !(t.object_flags.contains(ObjectFlags::Anonymous)
@@ -74,7 +74,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         identity: RecursionIdentity,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("stack_entry_matches_identity"); 
         if t.flags.contains(TypeFlags::Intersection) {
             if let Some(constituents) = t.types() {
                 return constituents
@@ -92,7 +92,7 @@ impl Checker {
         t: &Arc<Type>,
         stack: &[Arc<Type>],
         max_depth: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("inference_is_deeply_nested_type"); 
         if stack.len() < max_depth {
             return false;
         }
@@ -129,7 +129,7 @@ impl Checker {
         t: &Arc<Type>,
         stack: &[Arc<Type>],
         max_depth: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("relater_is_deeply_nested_type"); 
         if stack.len() < max_depth {
             return false;
         }

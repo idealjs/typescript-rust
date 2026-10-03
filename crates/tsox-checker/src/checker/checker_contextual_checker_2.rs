@@ -3,7 +3,7 @@
 use crate::checker::checker_contextual::*;
 
 impl Checker {
-    pub(crate) fn is_valid_const_assertion_argument(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_valid_const_assertion_argument(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_valid_const_assertion_argument"); 
         match node.kind {
             SyntaxKind::StringLiteral
             | SyntaxKind::NoSubstitutionTemplateLiteral
@@ -64,11 +64,11 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_const_type_node(type_node: &Arc<Node>) -> bool {
+    pub(crate) fn is_const_type_node(type_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_const_type_node"); 
         type_node.kind == SyntaxKind::ConstKeyword
     }
 
-    pub(crate) fn check_delete_operand(&mut self, operand: &Arc<Node>) {
+    pub(crate) fn check_delete_operand(&mut self, operand: &Arc<Node>) { ::tsox_core::fntrace::enter("check_delete_operand"); 
         let mut target = operand;
         while target.kind == SyntaxKind::ParenthesizedExpression {
             let inner = match &target.data {
@@ -231,7 +231,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_const_assignment_target(&mut self, operand: &Arc<Node>) {
+    pub(crate) fn check_const_assignment_target(&mut self, operand: &Arc<Node>) { ::tsox_core::fntrace::enter("check_const_assignment_target"); 
         let mut target = operand;
         loop {
             target = match &target.data {

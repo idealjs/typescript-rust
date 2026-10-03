@@ -55,42 +55,42 @@ pub struct CommonJSModuleTransformer<'a> {
 }
 
 impl<'a> CommonJSModuleTransformer<'a> {
-    pub(crate) fn factory(&self) -> NodeFactory<'_> {
+    pub(crate) fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub(crate) fn visitor(&self) -> Visitor {
+    pub(crate) fn visitor(&self) -> Visitor { ::tsox_core::fntrace::enter("visitor"); 
         Visitor
     }
 
-    pub(crate) fn discarded_value_visitor(&self) -> NodeVisitor {
+    pub(crate) fn discarded_value_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("discarded_value_visitor"); 
         NodeVisitor::default()
     }
 
-    pub(crate) fn top_level_nested_visitor(&self) -> NodeVisitor {
+    pub(crate) fn top_level_nested_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("top_level_nested_visitor"); 
         self.emit_context.new_node_visitor(Self::visit_top_level_nested)
     }
 
-    pub(crate) fn push_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn push_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("push_node"); 
         let grandparent_node = self.parent_node.take();
         self.parent_node = self.current_node.take();
         self.current_node = Some(node);
         grandparent_node
     }
 
-    pub(crate) fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) {
+    pub(crate) fn pop_node(&mut self, grandparent_node: Option<Arc<Node>>) { ::tsox_core::fntrace::enter("pop_node"); 
         self.current_node = self.parent_node.take();
         self.parent_node = grandparent_node;
     }
 
-    pub fn visit_top_level(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_top_level(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level"); 
         let grandparent_node = self.push_node(node.clone());
         let result = self.visit_top_level_inner(node);
         self.pop_node(grandparent_node);
         result
     }
 
-    fn visit_top_level_inner(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_top_level_inner(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_inner"); 
         match node.kind {
             SyntaxKind::ImportDeclaration => self.visit_top_level_import_declaration(node),
             SyntaxKind::ImportEqualsDeclaration => {
@@ -105,14 +105,14 @@ impl<'a> CommonJSModuleTransformer<'a> {
         }
     }
 
-    pub fn visit_top_level_nested(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_top_level_nested(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested"); 
         let grandparent_node = self.push_node(node.clone());
         let result = self.visit_top_level_nested_no_stack(node);
         self.pop_node(grandparent_node);
         result
     }
 
-    pub fn visit_top_level_nested_no_stack(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_top_level_nested_no_stack(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_no_stack"); 
         match node.kind {
             SyntaxKind::VariableStatement => self.visit_top_level_variable_statement(node),
             SyntaxKind::ForStatement => self.visit_top_level_nested_for_statement(node),
@@ -136,7 +136,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         }
     }
 
-    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_source_file(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_source_file"); 
         if node.is_declaration_file_node()
             || !(node.is_effective_external_module_node(self.compiler_options)
                 || node.subtree_facts().intersects(SubtreeFacts::DynamicImport))
@@ -160,7 +160,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_import_declaration(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_import_declaration"); 
         let import_clause = node.as_import_declaration().import_clause.clone();
         if import_clause.is_none() {
             let require_call = self.create_require_call(node.clone());
@@ -232,7 +232,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_import_equals_declaration(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_import_equals_declaration"); 
         if !is_external_module_import_equals_declaration(&node) {
             panic!("import= for internal module references should be handled in an earlier transformer.");
         }
@@ -275,7 +275,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_export_declaration(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_export_declaration"); 
         let export_clause = node.as_export_declaration().export_clause.clone();
         if node.as_export_declaration().module_specifier.is_none() {
             return None;
@@ -389,7 +389,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_export_assignment(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_export_assignment"); 
         if node.as_export_assignment().is_export_equals {
             return None;
         }
@@ -409,7 +409,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_function_declaration(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_function_declaration"); 
         if has_syntactic_modifier(&node, ModifierFlags::Export) {
             let func = node.as_function_declaration();
             let modifiers = self.visitor().visit_modifiers(extract_modifiers(
@@ -439,7 +439,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
         }
     }
 
-    pub fn visit_top_level_class_declaration(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_top_level_class_declaration(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_class_declaration"); 
         let mut statements: Vec<Arc<Node>> = Vec::new();
         if has_syntactic_modifier(&node, ModifierFlags::Export) {
             let cls = node.as_class_declaration();
@@ -474,7 +474,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_variable_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_variable_statement"); 
         let mut statements: Vec<Arc<Node>> = Vec::new();
         if has_syntactic_modifier(&node, ModifierFlags::Export) {
             let mut variables: Vec<Arc<Node>> = Vec::new();
@@ -618,7 +618,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_variable_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_variable_statement"); 
         let mut statements: Vec<Arc<Node>> = Vec::new();
         statements.push(self.visitor().visit_each_child(node.clone())?);
         statements = self.append_exports_of_variable_statement(statements, &node);
@@ -628,7 +628,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_for_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_for_statement"); 
         let for_stmt = node.as_for_statement();
         let initializer = for_stmt.initializer.clone();
         if initializer.is_some()
@@ -696,7 +696,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_for_in_or_of_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_for_in_or_of_statement"); 
         let for_stmt = node.as_for_in_or_of_statement_r39k02();
         let initializer = for_stmt.initializer.clone();
         if is_variable_declaration_list(&initializer)
@@ -767,7 +767,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_do_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_do_statement"); 
         let do_stmt = node.as_do_statement();
         let mut visitor = self.top_level_nested_visitor();
         let body = Arc::get_mut(&mut self.emit_context)
@@ -781,7 +781,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_while_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_while_statement"); 
         let while_stmt = node.as_while_statement();
         let expression = self
             .visitor()
@@ -800,7 +800,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_labeled_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_labeled_statement"); 
         let mut statement = self.top_level_nested_visitor().visit_embedded_statement(
             node.as_labeled_statement().statement.clone(),
         );
@@ -818,7 +818,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_with_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_with_statement"); 
         let with_stmt = node.as_with_statement();
         let expression = self.visitor().visit_node(with_stmt.expression.clone()).unwrap();
         let statement = self
@@ -833,7 +833,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_if_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_if_statement"); 
         let if_stmt = node.as_if_statement();
         let expression = self.visitor().visit_node(if_stmt.expression.clone()).unwrap();
         let mut then_statement = self
@@ -860,7 +860,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_switch_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_switch_statement"); 
         let switch_stmt = node.as_switch_statement_r39k02();
         let expression = self
             .visitor()
@@ -877,14 +877,14 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_case_block(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_case_block"); 
         self.top_level_nested_visitor().visit_each_child(node)
     }
 
     pub fn visit_top_level_nested_case_or_default_clause(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_case_or_default_clause"); 
         let clause = node.as_case_or_default_clause_r39k02();
         let expression = if clause.expression.kind == SyntaxKind::Unknown {
             None
@@ -906,14 +906,14 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_top_level_nested_try_statement(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_try_statement"); 
         self.top_level_nested_visitor().visit_each_child(node)
     }
 
     pub fn visit_top_level_nested_catch_clause(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_catch_clause"); 
         let catch_clause = node.as_catch_clause();
         let variable_declaration = catch_clause.variable_declaration.clone();
         let block = self
@@ -926,18 +926,18 @@ impl<'a> CommonJSModuleTransformer<'a> {
         ))
     }
 
-    pub fn visit_top_level_nested_block(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_top_level_nested_block(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_top_level_nested_block"); 
         self.top_level_nested_visitor().visit_each_child(node)
     }
 
-    pub fn visit_void_expression(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_void_expression(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_void_expression"); 
         self.discarded_value_visitor().visit_each_child(node)
     }
 
     pub fn visit_tagged_template_expression(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_tagged_template_expression"); 
         let tagged = node.as_tagged_template_expression_r39k02();
         let tag = tagged.tag.clone();
         if is_identifier(&tag) {
@@ -967,7 +967,7 @@ impl<'a> CommonJSModuleTransformer<'a> {
     pub fn visit_shorthand_property_assignment(
         &mut self,
         node: Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_shorthand_property_assignment"); 
         let shorthand = node.as_shorthand_property_assignment();
         let name = shorthand.name.clone();
         let exported_or_imported_name = self.visit_expression_identifier(name.clone());

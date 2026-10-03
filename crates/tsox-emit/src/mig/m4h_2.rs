@@ -13,7 +13,7 @@ use tsox_frontend::ast::utilities::get_heritage_clauses as heritage_clauses;
 
 pub type AnonymousFunctionDefinition = Arc<Node>;
 
-pub fn is_class_named_evaluation_helper_block(emit_context: &EmitContext, node: &Arc<Node>) -> bool {
+pub fn is_class_named_evaluation_helper_block(emit_context: &EmitContext, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_class_named_evaluation_helper_block"); 
     let body_statements = match &node.data {
         NodeData::ClassStaticBlockDeclaration(d) => block_statements(&d.body),
         _ => return false,
@@ -38,7 +38,7 @@ pub fn is_class_named_evaluation_helper_block(emit_context: &EmitContext, node: 
     false
 }
 
-pub fn class_has_explicitly_assigned_name(emit_context: &EmitContext, node: &Arc<Node>) -> bool {
+pub fn class_has_explicitly_assigned_name(emit_context: &EmitContext, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_has_explicitly_assigned_name"); 
     if emit_context.assigned_name(node).is_some() {
         for member in members(node) {
             if is_class_named_evaluation_helper_block(emit_context, member) {
@@ -49,7 +49,7 @@ pub fn class_has_explicitly_assigned_name(emit_context: &EmitContext, node: &Arc
     false
 }
 
-pub fn class_has_declared_or_explicitly_assigned_name(emit_context: &EmitContext, node: &Arc<Node>) -> bool {
+pub fn class_has_declared_or_explicitly_assigned_name(emit_context: &EmitContext, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_has_declared_or_explicitly_assigned_name"); 
     node.name().is_some() || class_has_explicitly_assigned_name(emit_context, node)
 }
 
@@ -57,7 +57,7 @@ pub fn is_anonymous_function_definition(
     emit_context: &EmitContext,
     node: &Arc<Node>,
     cb: Option<&dyn Fn(&AnonymousFunctionDefinition) -> bool>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_anonymous_function_definition"); 
     let node = skip_outer_expressions(node, OuterExpressionKinds::ALL);
     match node.kind {
         SyntaxKind::ClassExpression => {
@@ -79,7 +79,7 @@ pub fn is_anonymous_function_definition(
     true
 }
 
-pub fn is_named_evaluation(emit_context: &EmitContext, node: &Arc<Node>) -> bool {
+pub fn is_named_evaluation(emit_context: &EmitContext, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_named_evaluation"); 
     is_named_evaluation_and(emit_context, node, None)
 }
 
@@ -87,7 +87,7 @@ pub fn is_named_evaluation_and(
     emit_context: &EmitContext,
     node: &Arc<Node>,
     cb: Option<&dyn Fn(&AnonymousFunctionDefinition) -> bool>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_named_evaluation_and"); 
     if !is_named_evaluation_source(node) {
         return false;
     }
@@ -112,7 +112,7 @@ pub fn get_assigned_name_of_identifier(
     emit_context: &EmitContext,
     name: &Arc<Node>,
     expression: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_assigned_name_of_identifier"); 
     let factory = &emit_context.factory();
     let original = emit_context.most_original(&skip_outer_expressions(expression, OuterExpressionKinds::ALL));
     if (is_class_declaration(&original) || is_function_declaration(&original))
@@ -128,7 +128,7 @@ pub fn get_assigned_name_of_property_name(
     emit_context: &EmitContext,
     name: &Arc<Node>,
     assigned_name_text: &str,
-) -> (Arc<Node>, Arc<Node>) {
+) -> (Arc<Node>, Arc<Node>) { ::tsox_core::fntrace::enter("get_assigned_name_of_property_name"); 
     let factory = &emit_context.factory();
     if !assigned_name_text.is_empty() {
         let assigned_name = factory.new_string_literal(assigned_name_text, 0);
@@ -161,7 +161,7 @@ pub fn create_class_named_evaluation_helper_block(
     emit_context: &EmitContext,
     assigned_name: &Arc<Node>,
     this_expression: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("create_class_named_evaluation_helper_block"); 
     let factory = &emit_context.factory();
     let this_expression: Arc<Node> = match this_expression {
         Some(expr) => expr.clone(),
@@ -182,7 +182,7 @@ pub fn inject_class_named_evaluation_helper_block_if_missing(
     node: &Arc<Node>,
     assigned_name: &Arc<Node>,
     this_expression: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("inject_class_named_evaluation_helper_block_if_missing"); 
     if class_has_explicitly_assigned_name(emit_context, node) {
         return node.clone();
     }
@@ -248,7 +248,7 @@ pub fn finish_transform_named_evaluation(
     expression: &Arc<Node>,
     assigned_name: &Arc<Node>,
     ignore_empty_string_literal: bool,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("finish_transform_named_evaluation"); 
     if ignore_empty_string_literal
         && is_string_literal(assigned_name)
         && string_literal_text(assigned_name).is_empty()
@@ -278,7 +278,7 @@ pub fn transform_named_evaluation(
     node: &Arc<Node>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation"); 
     let factory = &emit_context.factory();
     match &node.data {
         NodeData::PropertyAssignment(d) => {
@@ -401,7 +401,7 @@ pub fn transform_named_evaluation_of_assignment_expression(
     node: &Arc<Node>,
     ignore_empty_string_literal: bool,
     assigned_name_text: &str,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_named_evaluation_of_assignment_expression"); 
     let factory = &emit_context.factory();
     let (left, right, operator_token) = match &node.data {
         NodeData::BinaryExpression(d) => (d.left.clone(), d.right.clone(), d.operator_token.clone()),
@@ -416,14 +416,14 @@ pub fn transform_named_evaluation_of_assignment_expression(
     factory.update_binary_expression_r39k13(node, &left, &operator_token, &right)
 }
 
-fn block_statements(body: &Arc<Node>) -> Vec<Arc<Node>> {
+fn block_statements(body: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("block_statements"); 
     match &body.data {
         NodeData::Block(d) => d.statements.nodes.clone(),
         _ => vec![],
     }
 }
 
-fn block_body(block: &Arc<Node>) -> Arc<Node> {
+fn block_body(block: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("block_body"); 
     match &block.data {
         NodeData::ClassStaticBlockDeclaration(d) => d.body.clone(),
         _ => panic!("block_body: not a class static block declaration"),
@@ -434,15 +434,15 @@ fn r39k05_set_function_name_helper(
     factory: &crate::printer::NodeFactory<'_>,
     fn_expr: &Arc<Node>,
     name: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("r39k05_set_function_name_helper"); 
     crate::mig::wt1b::r39k05_defs::new_set_function_name_helper_r39k05(factory, fn_expr, name, None)
 }
 
-fn emit_context_mut(emit_context: &EmitContext) -> &mut EmitContext {
+fn emit_context_mut(emit_context: &EmitContext) -> &mut EmitContext { ::tsox_core::fntrace::enter("emit_context_mut"); 
     unsafe { &mut *(emit_context as *const EmitContext as *mut EmitContext) }
 }
 
-fn string_literal_text(node: &Arc<Node>) -> &str {
+fn string_literal_text(node: &Arc<Node>) -> &str { ::tsox_core::fntrace::enter("string_literal_text"); 
     match &node.data {
         NodeData::StringLiteral(d) => &d.text,
         _ => "",

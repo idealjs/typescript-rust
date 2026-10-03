@@ -8,7 +8,7 @@ impl Checker {
         _t: &Arc<Type>,
         structured: &StructuredTypeData,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("object_literal_to_string"); 
         let mut parts: Vec<String> = Vec::new();
 
         for sig in structured.call_signatures() {
@@ -189,7 +189,7 @@ impl Checker {
         t: &Arc<Type>,
         sym: &Arc<Symbol>,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("symbol_type_to_string"); 
         if sym.flags.contains(SymbolFlags::ENUM) {
             return sym.name.clone();
         }
@@ -264,7 +264,7 @@ impl Checker {
         sym.name.clone()
     }
 
-    pub(crate) fn needs_parens_in_union(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn needs_parens_in_union(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("needs_parens_in_union"); 
         if let Some(structured) = t.as_structured() {
             if structured.call_signature_count > 0 && t.symbol.is_none() {
                 return true;
@@ -274,7 +274,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn needs_parens_as_array_element(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn needs_parens_as_array_element(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("needs_parens_as_array_element"); 
         if t.is_union() || t.is_intersection() {
             return true;
         }
@@ -288,7 +288,7 @@ impl Checker {
         &mut self,
         elem: &Arc<Type>,
         flags: TypeFormatFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("maybe_parenthesize_array_element_ex"); 
         let s = self.type_to_string_ex(elem, flags);
         if self.needs_parens_as_array_element(elem) {
             format!("({})", s)
@@ -297,7 +297,7 @@ impl Checker {
         }
     }
 
-    pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub fn type_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_to_type_node"); 
         self.type_to_type_node_worker(t)
     }
 

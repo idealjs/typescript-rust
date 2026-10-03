@@ -11,7 +11,7 @@ impl Checker {
         &mut self,
         expr: &Arc<Node>,
         location: Option<&Arc<Node>>,
-    ) -> EvalResult {
+    ) -> EvalResult { ::tsox_core::fntrace::enter("evaluate_entity"); 
         match expr.kind {
             SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression => {
                 let Some(mut symbol) = self.resolve_entity_for_enum(expr) else {
@@ -136,7 +136,7 @@ impl Checker {
         }
     }
 
-    fn resolve_entity_for_enum(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn resolve_entity_for_enum(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_entity_for_enum"); 
         match expr.kind {
             SyntaxKind::Identifier => {
                 let name = expr.text();
@@ -166,7 +166,7 @@ impl Checker {
         &self,
         enum_symbol: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("member_of_enum_symbol"); 
         enum_symbol
             .members
             .get(name)
@@ -181,7 +181,7 @@ impl Checker {
         expr: &Arc<Node>,
         symbol: &Arc<Symbol>,
         location: &Arc<Node>,
-    ) -> EvalResult {
+    ) -> EvalResult { ::tsox_core::fntrace::enter("evaluate_enum_member"); 
         let Some(declaration) = symbol.value_declaration.clone() else {
             self.report_used_before_assignment(expr, symbol);
             return EvalResult::none();
@@ -217,7 +217,7 @@ impl Checker {
         value
     }
 
-    fn report_used_before_assignment(&mut self, expr: &Arc<Node>, symbol: &Arc<Symbol>) {
+    fn report_used_before_assignment(&mut self, expr: &Arc<Node>, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("report_used_before_assignment"); 
         let file = self.get_source_file_of_node(expr).or_else(|| self.current_file.clone());
         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
             file,
@@ -227,7 +227,7 @@ impl Checker {
         ));
     }
 
-    pub(crate) fn is_constant_variable(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_constant_variable(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_constant_variable"); 
         symbol.flags.intersects(SymbolFlags::VARIABLE)
             && symbol
                 .value_declaration
@@ -239,7 +239,7 @@ impl Checker {
     }
 
     // Go getDeclarationNodeFlagsFromSymbol：根声明（VariableStatement）的标志
-    fn root_declaration_flags(&self, declaration: &Arc<Node>) -> tsox_frontend::ast::NodeFlags {
+    fn root_declaration_flags(&self, declaration: &Arc<Node>) -> tsox_frontend::ast::NodeFlags { ::tsox_core::fntrace::enter("root_declaration_flags"); 
         let mut root = Arc::clone(declaration);
         while let Some(parent) = root.parent() {
             match parent.kind {
@@ -258,7 +258,7 @@ impl Checker {
         &self,
         declaration: &Arc<Node>,
         usage: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_block_scoped_name_declared_before_use"); 
         let decl_file = self.get_source_file_of_node(declaration);
         let use_file = self.get_source_file_of_node(usage);
         match (decl_file, use_file) {
@@ -268,11 +268,11 @@ impl Checker {
     }
 }
 
-fn is_infinity_or_nan_text(text: &str) -> bool {
+fn is_infinity_or_nan_text(text: &str) -> bool { ::tsox_core::fntrace::enter("is_infinity_or_nan_text"); 
     matches!(text, "Infinity" | "-Infinity" | "NaN")
 }
 
-fn is_entity_name_expression(node: &Arc<Node>) -> bool {
+fn is_entity_name_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression"); 
     match node.kind {
         SyntaxKind::Identifier => true,
         SyntaxKind::PropertyAccessExpression => {
@@ -282,7 +282,7 @@ fn is_entity_name_expression(node: &Arc<Node>) -> bool {
     }
 }
 
-fn is_string_literal_like(node: &Arc<Node>) -> bool {
+fn is_string_literal_like(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_string_literal_like"); 
     matches!(
         node.kind,
         SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral

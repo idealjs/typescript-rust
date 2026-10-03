@@ -2,7 +2,7 @@
 
 use tsox_frontend::scanner::{CommentRange, CommentRangeKind};
 
-pub fn is_jsdoc_like_text(text: &str, comment: &CommentRange) -> bool {
+pub fn is_jsdoc_like_text(text: &str, comment: &CommentRange) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_like_text"); 
     let b = text.as_bytes();
     comment.kind == CommentRangeKind::MultiLine
         && comment.end - comment.pos >= 5

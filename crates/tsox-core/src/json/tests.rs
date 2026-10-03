@@ -8,7 +8,7 @@ struct Point {
 }
 
 #[test]
-fn marshal_and_unmarshal() {
+fn marshal_and_unmarshal() { crate::fntrace::enter("marshal_and_unmarshal"); 
     let p = Point { x: 1, y: 2 };
     let json = marshal(&p).unwrap();
     assert_eq!(json, r#"{"x":1,"y":2}"#);
@@ -17,7 +17,7 @@ fn marshal_and_unmarshal() {
 }
 
 #[test]
-fn marshal_indent_works() {
+fn marshal_indent_works() { crate::fntrace::enter("marshal_indent_works"); 
     let p = Point { x: 1, y: 2 };
     let json = marshal_indent(&p, "  ").unwrap();
     assert!(json.contains("\n"));

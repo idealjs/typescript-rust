@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn compute_common_source_directory(options: &CompilerOptions) -> String {
+pub(crate) fn compute_common_source_directory(options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("compute_common_source_directory"); 
     let common_dir = if !options.root_dir.is_empty() {
         options.root_dir.clone()
     } else if !options.config_file_path.is_empty() {
@@ -17,7 +17,7 @@ pub(crate) fn get_source_file_path_in_new_dir(
     file_name: &str,
     new_dir_path: &str,
     common_source_directory: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_source_file_path_in_new_dir"); 
     if common_source_directory.is_empty() {
         return tsox_core::tspath::combine_paths(
             new_dir_path,
@@ -49,7 +49,7 @@ pub(crate) fn get_source_file_path_in_new_dir(
     )
 }
 
-pub(crate) fn get_output_extension(file_name: &str) -> &'static str {
+pub(crate) fn get_output_extension(file_name: &str) -> &'static str { ::tsox_core::fntrace::enter("get_output_extension"); 
     if tsox_core::tspath::file_extension_is(file_name, ".json") {
         return ".json";
     }
@@ -62,7 +62,7 @@ pub(crate) fn get_output_extension(file_name: &str) -> &'static str {
     ".js"
 }
 
-pub(crate) fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String {
+pub(crate) fn emit_js_text(source_file: &SourceFile, options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("emit_js_text"); 
     let mut output = String::new();
     emit_js_text_inner(source_file, options, &mut output);
 
@@ -83,7 +83,7 @@ pub(crate) fn emit_js_text_tracked(
     options: &CompilerOptions,
     generator: &mut Generator,
     source_index: SourceIndex,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("emit_js_text_tracked"); 
     let source = &source_file.text;
     let source_line_starts = compute_line_starts(source);
 
@@ -111,7 +111,7 @@ pub(crate) fn emit_js_text_inner<S: EmitSink>(
     source_file: &SourceFile,
     options: &CompilerOptions,
     sink: &mut S,
-) {
+) { ::tsox_core::fntrace::enter("emit_js_text_inner"); 
     let source = &source_file.text;
     let statements = match &source_file.node.data {
         NodeData::SourceFile(d) => &d.statements,
@@ -248,7 +248,7 @@ pub(crate) fn generate_element_call(
     children: Option<&Arc<NodeList>>,
     source: &str,
     usage: &mut JsxRuntimeUsage,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("generate_element_call"); 
     let tag_str = tag_name_to_string(tag_name, source);
 
     let (props, key_arg) = attributes_to_props(attributes, source, usage);

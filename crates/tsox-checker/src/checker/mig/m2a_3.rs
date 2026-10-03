@@ -31,7 +31,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         prop: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_this_property_access_in_constructor"); 
         let mut constructor: Option<Arc<Node>> = None;
         let (kind, location) = self.is_constructor_declared_this_property(prop);
         if kind == ThisAssignmentDeclarationKind::Constructor {
@@ -43,7 +43,7 @@ impl Checker {
         constructor.is_some_and(|ctor| Arc::ptr_eq(&container, &ctor))
     }
 
-    pub fn is_this_property_and_this_typed(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_this_property_and_this_typed(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_this_property_and_this_typed"); 
         if node
             .expression()
             .is_some_and(|e| e.kind == SyntaxKind::ThisKeyword)
@@ -64,7 +64,7 @@ impl Checker {
         false
     }
 
-    pub fn is_thisless_interface(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_thisless_interface(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_thisless_interface"); 
         for declaration in &symbol.declarations {
             if ast::is_interface_declaration(declaration) {
                 if declaration.flags.intersects(NODE_FLAGS_CONTAINS_THIS) {
@@ -98,7 +98,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         template: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_matched_by_template_literal_or_string_mapping"); 
         if template.flags.contains(TypeFlags::TemplateLiteral) {
             return self.is_type_matched_by_template_literal_type(
                 t,
@@ -108,12 +108,12 @@ impl Checker {
         self.is_member_of_string_mapping(t, template)
     }
 
-    pub fn is_type_usable_as_index_signature_declaration(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_type_usable_as_index_signature_declaration(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_usable_as_index_signature_declaration"); 
         let string_number_symbol_type = self.string_number_symbol_type.clone();
         self.is_type_assignable_to(t, &string_number_symbol_type)
     }
 
-    pub fn is_uncalled_function_reference(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_uncalled_function_reference(&mut self, node: &Arc<Node>, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_uncalled_function_reference"); 
         if symbol
             .flags
             .intersects(SymbolFlags::Function | SymbolFlags::Method)
@@ -138,7 +138,7 @@ impl Checker {
         true
     }
 
-    pub fn is_uniform_union_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_uniform_union_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_uniform_union_type"); 
         if t.object_flags.intersects(ObjectFlags::PrimitiveUnion) {
             if !t
                 .object_flags
@@ -159,7 +159,7 @@ impl Checker {
         false
     }
 
-    pub fn is_unit_like_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_unit_like_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_unit_like_type"); 
         let t = self.get_base_constraint_or_type(t);
         if t.flags.contains(TypeFlags::Intersection) {
             return t
@@ -179,7 +179,7 @@ impl Checker {
         apparent_func_type: &Arc<Type>,
         num_call_signatures: usize,
         num_construct_signatures: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_untyped_function_call"); 
         is_type_any(func_type)
             || (is_type_any(apparent_func_type)
                 && func_type.flags.contains(TypeFlags::TypeParameter))
@@ -200,7 +200,7 @@ impl Checker {
         &mut self,
         fn_: &Arc<Node>,
         return_type: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_unwrapped_return_type_undefined_void_or_any"); 
         let t = self.unwrap_return_type(return_type, get_function_flags(Some(fn_)));
         t.as_ref().is_some_and(|t| {
             self.maybe_type_of_kind(t, TYPE_FLAGS_VOID)
@@ -208,7 +208,7 @@ impl Checker {
         })
     }
 
-    pub fn is_valid_base_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_valid_base_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_valid_base_type"); 
         if t.flags.contains(TypeFlags::TypeParameter) {
             if let Some(constraint) = self.get_base_constraint_of_type(t) {
                 return self.is_valid_base_type(&constraint);
@@ -223,7 +223,7 @@ impl Checker {
                     .all(|x| self.is_valid_base_type(x)))
     }
 
-    pub fn is_valid_index_key_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_valid_index_key_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_valid_index_key_type"); 
         t.flags
             .intersects(TYPE_FLAGS_STRING | TypeFlags::Number | TypeFlags::ESSymbol)
             || self.is_pattern_literal_type(t)
@@ -235,7 +235,7 @@ impl Checker {
                     .any(|x| self.is_valid_index_key_type(x)))
     }
 
-    pub fn is_valid_override_of(&mut self, source_prop: &Arc<Symbol>, target_prop: &Arc<Symbol>) -> bool {
+    pub fn is_valid_override_of(&mut self, source_prop: &Arc<Symbol>, target_prop: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_valid_override_of"); 
         !self.for_each_property(target_prop, &mut |c: &mut Checker, tp: &Arc<Symbol>| {
             if get_declaration_modifier_flags_from_symbol(tp).intersects(MODIFIER_FLAGS_PROTECTED) {
                 let base_class = c.get_declaring_class(tp).unwrap();
@@ -245,7 +245,7 @@ impl Checker {
         })
     }
 
-    pub fn is_var_const_like(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_var_const_like(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_const_like"); 
         let block_scope_kind = self.get_combined_node_flags_cached(node) & NODE_FLAGS_BLOCK_SCOPED;
         block_scope_kind == NODE_FLAGS_CONST
             || block_scope_kind == NODE_FLAGS_USING
@@ -257,7 +257,7 @@ impl Checker {
         location: &Arc<Node>,
         message: &tsox_core::diagnostics::Message,
         args: &[Box<dyn std::fmt::Display>],
-    ) -> Option<ast::Diagnostic> {
+    ) -> Option<ast::Diagnostic> { ::tsox_core::fntrace::enter("lookup_or_issue_error"); 
         Some(self.add_diagnostic(new_diagnostic_for_node(
             Some(location),
             message.clone(),
@@ -269,7 +269,7 @@ impl Checker {
         &mut self,
         prop_name: &str,
         location: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup_symbol_for_private_identifier_declaration"); 
         let mut containing_class = get_containing_class_excluding_class_decorators(location);
         while let Some(class) = containing_class {
             let Some(symbol) = self.get_symbol_of_declaration(&class) else {
@@ -288,7 +288,7 @@ impl Checker {
         None
     }
 
-    pub fn map_type(&mut self, t: &Arc<Type>, f: &mut dyn FnMut(&Arc<Type>) -> Option<Arc<Type>>) -> Option<Arc<Type>> {
+    pub fn map_type(&mut self, t: &Arc<Type>, f: &mut dyn FnMut(&Arc<Type>) -> Option<Arc<Type>>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type"); 
         self.map_type_ex(t, f, false)
     }
 
@@ -297,7 +297,7 @@ impl Checker {
         t: &Arc<Type>,
         f: &mut dyn FnMut(&Arc<Type>) -> Option<Arc<Type>>,
         alias: Option<&TypeAlias>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type_with_alias"); 
         if t.flags.contains(TypeFlags::Union) && alias.is_some() {
             let mapped = t
                 .types()
@@ -315,7 +315,7 @@ impl Checker {
         t: &Arc<Type>,
         f: &mut dyn FnMut(&Arc<Type>) -> Option<Arc<Type>>,
         no_reductions: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type_ex"); 
         if t.flags.contains(TypeFlags::Never) {
             return Some(Arc::clone(t));
         }
@@ -360,7 +360,7 @@ impl Checker {
         Some(Arc::clone(t))
     }
 
-    pub fn mark_alias_referenced(&mut self, symbol: &Arc<Symbol>, location: &Arc<Node>) {
+    pub fn mark_alias_referenced(&mut self, symbol: &Arc<Symbol>, location: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_alias_referenced"); 
         if !self.can_collect_symbol_alias_accessibility_data {
             return;
         }
@@ -384,7 +384,7 @@ impl Checker {
         }
     }
 
-    pub fn mark_alias_symbol_as_referenced(&mut self, symbol: &Arc<Symbol>) {
+    pub fn mark_alias_symbol_as_referenced(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("mark_alias_symbol_as_referenced"); 
         let already_referenced = self
             .alias_symbol_links
             .get_mut(symbol)
@@ -412,7 +412,7 @@ impl Checker {
         }
     }
 
-    pub fn mark_decorator_medata_data_type_node_as_referenced(&mut self, node: &Arc<Node>) {
+    pub fn mark_decorator_medata_data_type_node_as_referenced(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_decorator_medata_data_type_node_as_referenced"); 
         if let Some(entity_name) = self.get_entity_name_for_decorator_metadata(Some(node)) {
             if ast::is_entity_name(&entity_name) {
                 self.mark_entity_name_or_entity_expression_as_reference(&entity_name, true);
@@ -420,7 +420,7 @@ impl Checker {
         }
     }
 
-    pub fn mark_export_as_referenced(&mut self, node: &Arc<Node>) {
+    pub fn mark_export_as_referenced(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_export_as_referenced"); 
         let symbol = self.get_symbol_of_declaration(node);
         if let Some(symbol) = symbol {
             let target = self.resolve_alias(&symbol);
@@ -438,7 +438,7 @@ impl Checker {
         }
     }
 
-    pub fn mark_export_assignment_alias_referenced(&mut self, location: &Arc<Node>) {
+    pub fn mark_export_assignment_alias_referenced(&mut self, location: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_export_assignment_alias_referenced"); 
         let id = location.expression();
         if let Some(id) = id {
             if ast::is_identifier(&id) {
@@ -451,13 +451,13 @@ impl Checker {
         }
     }
 
-    pub fn mark_import_equals_alias_referenced(&mut self, location: &Arc<Node>) {
+    pub fn mark_import_equals_alias_referenced(&mut self, location: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_import_equals_alias_referenced"); 
         if ast::has_syntactic_modifier(location, MODIFIER_FLAGS_EXPORT) {
             self.mark_export_as_referenced(location);
         }
     }
 
-    pub fn mark_identifier_alias_referenced(&mut self, location: &Arc<Node>) {
+    pub fn mark_identifier_alias_referenced(&mut self, location: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_identifier_alias_referenced"); 
         if ast::is_this_in_type_query(location) {
             return;
         }
@@ -477,6 +477,6 @@ impl Checker {
     }
 }
 
-pub fn object_literal_discriminator_len(d: &ObjectLiteralDiscriminator) -> usize {
+pub fn object_literal_discriminator_len(d: &ObjectLiteralDiscriminator) -> usize { ::tsox_core::fntrace::enter("object_literal_discriminator_len"); 
     d.props.len() + d.members.len()
 }

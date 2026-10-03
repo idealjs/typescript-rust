@@ -2,16 +2,16 @@ use super::*;
 
 const MAX_MANTISSA: u64 = (1 << 53) - 1;
 
-fn num_from_bits(b: u64) -> Number {
+fn num_from_bits(b: u64) -> Number { crate::fntrace::enter("num_from_bits"); 
     Number(f64::from_bits(b))
 }
 
-fn ieee_parts_2_double(sign: bool, ieee_exponent: u32, ieee_mantissa: u64) -> Number {
+fn ieee_parts_2_double(sign: bool, ieee_exponent: u32, ieee_mantissa: u64) -> Number { crate::fntrace::enter("ieee_parts_2_double"); 
     let sign_bit: u64 = if sign { 1 } else { 0 };
     num_from_bits((sign_bit << 63) | (u64::from(ieee_exponent) << 52) | ieee_mantissa)
 }
 
-fn assert_equal_number(got: Number, want: Number) {
+fn assert_equal_number(got: Number, want: Number) { crate::fntrace::enter("assert_equal_number"); 
     if got.is_nan() || want.is_nan() {
         assert_eq!(got.is_nan(), want.is_nan(), "got: {}, want: {}", got, want);
     } else {
@@ -19,7 +19,7 @@ fn assert_equal_number(got: Number, want: Number) {
     }
 }
 
-fn string_tests() -> Vec<(Number, &'static str)> {
+fn string_tests() -> Vec<(Number, &'static str)> { crate::fntrace::enter("string_tests"); 
     vec![
         (Number::nan(), "NaN"),
         (Number::inf(1), "Infinity"),
@@ -179,7 +179,7 @@ fn string_tests() -> Vec<(Number, &'static str)> {
     ]
 }
 
-fn string_tests_display_divergent() -> Vec<(Number, &'static str)> {
+fn string_tests_display_divergent() -> Vec<(Number, &'static str)> { crate::fntrace::enter("string_tests_display_divergent"); 
     vec![
         (Number(19686109595169230000.0), "19686109595169230000"),
         (Number(1e20), "100000000000000000000"),
@@ -196,7 +196,7 @@ fn string_tests_display_divergent() -> Vec<(Number, &'static str)> {
     ]
 }
 
-fn from_string_tests() -> Vec<(Number, &'static str)> {
+fn from_string_tests() -> Vec<(Number, &'static str)> { crate::fntrace::enter("from_string_tests"); 
     vec![
         (Number::nan(), "    NaN"),
         (Number::inf(1), "Infinity    "),
@@ -301,7 +301,7 @@ fn from_string_tests() -> Vec<(Number, &'static str)> {
 }
 
 #[test]
-fn test_parse_pseudo_bigint() {
+fn test_parse_pseudo_bigint() { crate::fntrace::enter("test_parse_pseudo_bigint"); 
     let mut test_numbers: Vec<Number> = Vec::new();
     for i in 0..1000_i64 {
         test_numbers.push(Number(i as f64));
@@ -366,7 +366,7 @@ fn test_parse_pseudo_bigint() {
 }
 
 #[test]
-fn test_parse_pseudo_bigint_underscores() {
+fn test_parse_pseudo_bigint_underscores() { crate::fntrace::enter("test_parse_pseudo_bigint_underscores"); 
     let cases: &[(&str, &str)] = &[
         ("0b1010_0101n", "165"),
         ("0o7_5_5n", "493"),
@@ -383,7 +383,7 @@ fn test_parse_pseudo_bigint_underscores() {
 }
 
 #[test]
-fn test_to_int32() {
+fn test_to_int32() { crate::fntrace::enter("test_to_int32"); 
     let cases: &[(Number, i32)] = &[
         (Number(0.0), 0),
         (Number(-0.0), 0),
@@ -436,7 +436,7 @@ fn test_to_int32() {
 }
 
 #[test]
-fn test_bitwise_not() {
+fn test_bitwise_not() { crate::fntrace::enter("test_bitwise_not"); 
     let cases: &[(Number, Number)] = &[
         (Number(-2147483649.0), Number(-2147483648.0)),
         (Number(2147483647.0), Number(-2147483648.0)),
@@ -452,7 +452,7 @@ fn test_bitwise_not() {
 }
 
 #[test]
-fn test_bitwise_and() {
+fn test_bitwise_and() { crate::fntrace::enter("test_bitwise_and"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number(0.0), Number(0.0), Number(0.0)),
         (Number(0.0), Number(1.0), Number(0.0)),
@@ -465,7 +465,7 @@ fn test_bitwise_and() {
 }
 
 #[test]
-fn test_bitwise_or() {
+fn test_bitwise_or() { crate::fntrace::enter("test_bitwise_or"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number(0.0), Number(0.0), Number(0.0)),
         (Number(0.0), Number(1.0), Number(1.0)),
@@ -478,7 +478,7 @@ fn test_bitwise_or() {
 }
 
 #[test]
-fn test_bitwise_xor() {
+fn test_bitwise_xor() { crate::fntrace::enter("test_bitwise_xor"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number(0.0), Number(0.0), Number(0.0)),
         (Number(0.0), Number(1.0), Number(1.0)),
@@ -491,7 +491,7 @@ fn test_bitwise_xor() {
 }
 
 #[test]
-fn test_signed_right_shift() {
+fn test_signed_right_shift() { crate::fntrace::enter("test_signed_right_shift"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number(1.0), Number(0.0), Number(1.0)),
         (Number(1.0), Number(1.0), Number(0.0)),
@@ -513,7 +513,7 @@ fn test_signed_right_shift() {
 }
 
 #[test]
-fn test_unsigned_right_shift() {
+fn test_unsigned_right_shift() { crate::fntrace::enter("test_unsigned_right_shift"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number(1.0), Number(0.0), Number(1.0)),
         (Number(1.0), Number(1.0), Number(0.0)),
@@ -535,7 +535,7 @@ fn test_unsigned_right_shift() {
 }
 
 #[test]
-fn test_left_shift() {
+fn test_left_shift() { crate::fntrace::enter("test_left_shift"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number(1.0), Number(0.0), Number(1.0)),
         (Number(1.0), Number(1.0), Number(2.0)),
@@ -555,7 +555,7 @@ fn test_left_shift() {
 }
 
 #[test]
-fn test_remainder() {
+fn test_remainder() { crate::fntrace::enter("test_remainder"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number::nan(), Number(1.0), Number::nan()),
         (Number(1.0), Number::nan(), Number::nan()),
@@ -588,7 +588,7 @@ fn test_remainder() {
 }
 
 #[test]
-fn test_exponentiate() {
+fn test_exponentiate() { crate::fntrace::enter("test_exponentiate"); 
     let cases: &[(Number, Number, Number)] = &[
         (Number(2.0), Number(3.0), Number(8.0)),
         (Number::inf(1), Number(3.0), Number::inf(1)),
@@ -630,7 +630,7 @@ fn test_exponentiate() {
 }
 
 #[test]
-fn test_exponentiate_ulp_divergence() {
+fn test_exponentiate_ulp_divergence() { crate::fntrace::enter("test_exponentiate_ulp_divergence"); 
     assert_equal_number(
         Number(5.0).exponentiate(Number(210.0)),
         num_from_bits(0x5e68557f31326bbb),
@@ -638,21 +638,21 @@ fn test_exponentiate_ulp_divergence() {
 }
 
 #[test]
-fn test_string() {
+fn test_string() { crate::fntrace::enter("test_string"); 
     for (number, s) in string_tests() {
         assert_eq!(number.to_string(), s, "String({})", number);
     }
 }
 
 #[test]
-fn test_string_display_divergent() {
+fn test_string_display_divergent() { crate::fntrace::enter("test_string_display_divergent"); 
     for (number, s) in string_tests_display_divergent() {
         assert_eq!(number.to_string(), s, "String({})", number);
     }
 }
 
 #[test]
-fn test_from_string() {
+fn test_from_string() { crate::fntrace::enter("test_from_string"); 
     for (number, s) in string_tests() {
         assert_equal_number(Number::from_string(s), number);
         assert_equal_number(Number::from_string(&format!("{} ", s)), number);
@@ -670,7 +670,7 @@ fn test_from_string() {
 }
 
 #[test]
-fn test_from_string_hex_overflow() {
+fn test_from_string_hex_overflow() { crate::fntrace::enter("test_from_string_hex_overflow"); 
     let cases: &[(Number, &str)] = &[
         (Number(18446744073709552000.0), "0X10000000000000000"),
         (Number(18446744073709597000.0), "0X1000000000000A801"),
@@ -681,14 +681,14 @@ fn test_from_string_hex_overflow() {
 }
 
 #[test]
-fn test_string_roundtrip() {
+fn test_string_roundtrip() { crate::fntrace::enter("test_string_roundtrip"); 
     for (_, s) in string_tests() {
         assert_eq!(Number::from_string(s).to_string(), s, "roundtrip {:?}", s);
     }
 }
 
 #[test]
-fn test_string_js() {
+fn test_string_js() { crate::fntrace::enter("test_string_js"); 
     let cases: &[(Number, &str)] = &[
         (Number(0.0), "0"),
         (Number(-0.0), "0"),

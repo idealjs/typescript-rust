@@ -68,7 +68,7 @@ mod core {
     pub use tsox_core::core::mig::m3j_3::get_new_line_kind;
     pub use tsox_frontend::ast::node_source_file::LanguageVariant;
 
-    pub fn stringify_json<T: serde::Serialize>(value: &T) -> String {
+    pub fn stringify_json<T: serde::Serialize>(value: &T) -> String { ::tsox_core::fntrace::enter("stringify_json"); 
         tsox_core::core::mig::m3j::stringify_json(value, "", "").unwrap_or_default()
     }
 }
@@ -79,7 +79,7 @@ mod scanner {
     };
     pub use tsox_frontend::scanner::{string_to_token, token_to_string};
 
-    pub fn get_ecma_line_of_position(file: &tsox_frontend::ast::SourceFile, position: usize) -> usize {
+    pub fn get_ecma_line_of_position(file: &tsox_frontend::ast::SourceFile, position: usize) -> usize { ::tsox_core::fntrace::enter("get_ecma_line_of_position"); 
         tsox_emit::mig::m4m_2::get_ecma_line_of_position(file, position)
     }
 }
@@ -88,7 +88,7 @@ pub const SORT_TEXT_AUTO_IMPORT_SUGGESTIONS: &str = "16";
 pub const SORT_TEXT_JAVASCRIPT_IDENTIFIERS: &str = "18";
 
 impl Clone for LiteralValue {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         match self {
             LiteralValue::String(s) => LiteralValue::String(s.clone()),
             LiteralValue::Number(n) => LiteralValue::Number(*n),
@@ -98,7 +98,7 @@ impl Clone for LiteralValue {
 }
 
 impl Default for KeywordCompletionFilters {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         KeywordCompletionFilters::None
     }
 }
@@ -179,7 +179,7 @@ pub struct CodeLensKey {
     pub end_character: u32,
 }
 
-pub fn key_for_code_lens(code_lens: &lsproto::CodeLens) -> CodeLensKey {
+pub fn key_for_code_lens(code_lens: &lsproto::CodeLens) -> CodeLensKey { ::tsox_core::fntrace::enter("key_for_code_lens"); 
     CodeLensKey {
         kind: code_lens.data.unwrap_or(lsproto::CodeLensKind::QuickFix),
         start_line: code_lens.range.start.line,
@@ -189,7 +189,7 @@ pub fn key_for_code_lens(code_lens: &lsproto::CodeLens) -> CodeLensKey {
     }
 }
 
-pub fn get_line_of_position(file: &Arc<SourceFile>, pos: usize) -> usize {
+pub fn get_line_of_position(file: &Arc<SourceFile>, pos: usize) -> usize { ::tsox_core::fntrace::enter("get_line_of_position"); 
     scanner::get_ecma_line_of_position(file, pos)
 }
 
@@ -197,14 +197,14 @@ static KEYWORD_COMPLETIONS_CACHE: std::sync::OnceLock<
     std::sync::Mutex<HashMap<u32, Vec<lsproto::CompletionItem>>>,
 > = std::sync::OnceLock::new();
 
-fn cache() -> &'static std::sync::Mutex<HashMap<u32, Vec<lsproto::CompletionItem>>> {
+fn cache() -> &'static std::sync::Mutex<HashMap<u32, Vec<lsproto::CompletionItem>>> { ::tsox_core::fntrace::enter("cache"); 
     KEYWORD_COMPLETIONS_CACHE.get_or_init(|| std::sync::Mutex::new(HashMap::new()))
 }
 
 pub fn get_keyword_completions(
     keyword_filter: KeywordCompletionFilters,
     filter_out_ts_only_keywords: bool,
-) -> Vec<lsproto::CompletionItem> {
+) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_keyword_completions"); 
     if !filter_out_ts_only_keywords {
         return get_typescript_keyword_completions_cached(keyword_filter);
     }
@@ -227,7 +227,7 @@ pub fn get_keyword_completions(
 
 fn get_typescript_keyword_completions_cached(
     keyword_filter: KeywordCompletionFilters,
-) -> Vec<lsproto::CompletionItem> {
+) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_typescript_keyword_completions_cached"); 
     {
         let guard = cache().lock().unwrap();
         if let Some(cached) = guard.get(&(keyword_filter as u32)) {
@@ -243,7 +243,7 @@ pub fn get_contextual_keywords(
     file: &Arc<SourceFile>,
     context_token: Option<&Arc<Node>>,
     position: usize,
-) -> Vec<lsproto::CompletionItem> {
+) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_contextual_keywords"); 
     let mut entries = Vec::new();
     let Some(context_token) = context_token else {
         return entries;
@@ -275,7 +275,7 @@ pub fn get_js_completion_entries(
     position: usize,
     unique_names: &mut HashSet<String>,
     mut sorted_entries: Vec<lsproto::CompletionItem>,
-) -> Vec<lsproto::CompletionItem> {
+) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_js_completion_entries"); 
     let name_table = get_name_table(file);
     for (name, pos) in name_table.iter() {
         if *pos == position as i64 {
@@ -301,7 +301,7 @@ pub fn get_filter_text(
     label: &str,
     word_start: char,
     dot_accessor: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_filter_text"); 
     // Private field completion, e.g. label `#bar`.
     if let Some(after) = label.strip_prefix('#') {
         if !insert_text.is_empty() {
@@ -357,7 +357,7 @@ pub fn get_completion_entry_display_name_for_symbol(
     origin: Option<&SymbolOriginInfo>,
     completion_kind: CompletionKind,
     is_jsx_identifier_expected: bool,
-) -> (String, bool) {
+) -> (String, bool) { ::tsox_core::fntrace::enter("get_completion_entry_display_name_for_symbol"); 
     if super::m5r::origin_is_ignore(origin) {
         return (String::new(), false);
     }
@@ -419,7 +419,7 @@ pub fn get_contextual_type(
     position: usize,
     file: &Arc<SourceFile>,
     type_checker: &mut Checker,
-) -> Option<Arc<tsox_checker::checker::types::Type>> {
+) -> Option<Arc<tsox_checker::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_type"); 
     use tsox_checker::checker::types::ContextFlags;
     let Some(parent) = previous_token.parent() else {
         return None;
@@ -548,7 +548,7 @@ fn get_contextual_type_from_parent(
     node: &Arc<Node>,
     type_checker: &mut Checker,
     context_flags: tsox_checker::checker::types::ContextFlags,
-) -> Option<Arc<tsox_checker::checker::types::Type>> {
+) -> Option<Arc<tsox_checker::checker::types::Type>> { ::tsox_core::fntrace::enter("get_contextual_type_from_parent"); 
     super::m5x_6::get_contextual_type_from_parent(node, type_checker, context_flags)
 }
 
@@ -556,7 +556,7 @@ pub fn compute_commit_characters_and_is_new_identifier(
     context_token: Option<&Arc<Node>>,
     file: &Arc<SourceFile>,
     position: usize,
-) -> (bool, Vec<String>) {
+) -> (bool, Vec<String>) { ::tsox_core::fntrace::enter("compute_commit_characters_and_is_new_identifier"); 
     let Some(context_token) = context_token else {
         return (false, super::m5q_3::all_commit_characters().to_vec());
     };
@@ -676,15 +676,15 @@ pub fn compute_commit_characters_and_is_new_identifier(
     }
 }
 
-pub fn no_comma_commit_characters() -> Vec<String> {
+pub fn no_comma_commit_characters() -> Vec<String> { ::tsox_core::fntrace::enter("no_comma_commit_characters"); 
     vec![",".to_string()]
 }
 
-pub fn empty_commit_characters() -> Vec<String> {
+pub fn empty_commit_characters() -> Vec<String> { ::tsox_core::fntrace::enter("empty_commit_characters"); 
     Vec::new()
 }
 
-pub fn keyword_for_node(node: &Arc<Node>) -> SyntaxKind {
+pub fn keyword_for_node(node: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("keyword_for_node"); 
     if ast::is_identifier(node) {
         return scanner::identifier_to_keyword_kind(node);
     }
@@ -697,7 +697,7 @@ pub fn filter_class_members_list(
     class_element_modifier_flags: ast::ModifierFlags,
     file: &Arc<SourceFile>,
     position: usize,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("filter_class_members_list"); 
     let mut existing_member_names: HashSet<String> = HashSet::new();
     for member in existing_members {
         // Ignore omitted expressions for missing members.
@@ -746,7 +746,7 @@ pub fn filter_class_members_list(
         .collect()
 }
 
-pub fn get_jsdoc_tag_at_position(node: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+pub fn get_jsdoc_tag_at_position(node: &Arc<Node>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_jsdoc_tag_at_position"); 
     let mut current = Some(Arc::clone(node));
     while let Some(n) = current {
         if ast::is_jsdoc_tag(&n) && n.loc.contains_inclusive(position) {
@@ -760,7 +760,7 @@ pub fn get_jsdoc_tag_at_position(node: &Arc<Node>, position: usize) -> Option<Ar
     None
 }
 
-pub fn get_jsdoc_param_name_with_initializer(param_name: &str, initializer: &Arc<Node>) -> String {
+pub fn get_jsdoc_param_name_with_initializer(param_name: &str, initializer: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_jsdoc_param_name_with_initializer"); 
     let initializer_text = scanner::get_text_of_node(initializer).trim().to_string();
     if initializer_text.contains('\n') || initializer_text.len() > 80 {
         return format!("[{}]", param_name);
@@ -778,7 +778,7 @@ pub fn generate_jsdoc_param_tags_for_destructuring(
     type_checker: &mut Checker,
     options: &core::CompilerOptions,
     preferences: &UserPreferences,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("generate_jsdoc_param_tags_for_destructuring"); 
     let mut tabstop_counter = 1;
     if !is_js {
         return vec![get_jsdoc_param_annotation(
@@ -819,7 +819,7 @@ pub fn jsdoc_param_pattern_worker(
     options: &core::CompilerOptions,
     preferences: &UserPreferences,
     counter: &mut i32,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("jsdoc_param_pattern_worker"); 
     if ast::is_object_binding_pattern(pattern) && dot_dot_dot_token.is_none() {
         let mut child_counter = *counter;
         let root_param = get_jsdoc_param_annotation(
@@ -887,7 +887,7 @@ pub fn jsdoc_param_element_worker(
     options: &core::CompilerOptions,
     preferences: &UserPreferences,
     counter: &mut i32,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("jsdoc_param_element_worker"); 
     if element.name().is_some_and(|n| ast::is_identifier(n)) {
         // `{ b }` or `{ b: newB }`
         let property_name = if let Some(property_name) = m3b::property_name(element) {

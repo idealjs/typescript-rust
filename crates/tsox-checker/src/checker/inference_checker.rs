@@ -10,7 +10,7 @@ impl Checker {
         original_target: Option<Arc<Type>>,
         priority: InferencePriority,
         contravariant: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_types"); 
         let mut state = InferenceState {
             inferences,
             original_source: original_source.clone(),
@@ -34,7 +34,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_types"); 
         if !self.could_contain_type_variables(target) || self.is_no_infer_type(target) {
             return;
         }
@@ -53,7 +53,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_types_inner"); 
         if let (TypeData::Conditional(sc), TypeData::Conditional(tc)) = (&source.data, &target.data)
         {
             let same_root = match (
@@ -139,7 +139,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_types_union"); 
         let source_types = if source.flags.contains(TypeFlags::Union) {
             source.types().unwrap_or_default().to_vec()
         } else {
@@ -167,7 +167,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_from_types_intersection"); 
         let source_types = if source.flags.contains(TypeFlags::Intersection) {
             source.types().unwrap_or_default().to_vec()
         } else {
@@ -191,7 +191,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_to_type_variable"); 
         if self.is_from_inference_blocked_source(source) {
             return;
         }

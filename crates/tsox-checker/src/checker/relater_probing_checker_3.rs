@@ -8,7 +8,7 @@ impl Checker {
         o: &ObjectTypeData,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Option<(SymbolTable, Vec<Arc<Symbol>>)> {
+    ) -> Option<(SymbolTable, Vec<Arc<Symbol>>)> { ::tsox_core::fntrace::enter("substitute_reference_property_symbols"); 
         if self.infer_subst_ancestor_stack.len() > 4 || self.in_return_substitution {
             return None;
         }
@@ -54,7 +54,7 @@ impl Checker {
     fn resolved_property_type_for_substitution(
         &mut self,
         prop: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolved_property_type_for_substitution"); 
         if let Some(t) = self
             .value_symbol_links
             .get(prop)
@@ -89,7 +89,7 @@ impl Checker {
         t: &Arc<Type>,
         params: &[Arc<Type>],
         substitutions: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_object_properties_deep"); 
         let key = t.id;
         if let Some(cached) = self.subst_object_in_progress.get(&key) {
             return Arc::clone(cached);

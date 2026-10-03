@@ -16,7 +16,7 @@ pub trait R26K2FactoryExt {
 }
 
 impl R26K2FactoryExt for tsox_frontend::ast::mig::m3c::NodeFactory {
-    fn new_string_literal(&self, text: &str, _token_flags: i32) -> Arc<Node> {
+    fn new_string_literal(&self, text: &str, _token_flags: i32) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal"); 
         Arc::new(Node::new(
             SyntaxKind::StringLiteral,
             NodeData::StringLiteral(StringLiteralData {
@@ -26,7 +26,7 @@ impl R26K2FactoryExt for tsox_frontend::ast::mig::m3c::NodeFactory {
         ))
     }
 
-    fn new_parenthesized_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    fn new_parenthesized_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_parenthesized_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ParenthesizedExpression,
             NodeData::ParenthesizedExpression(ParenthesizedExpressionData {
@@ -39,7 +39,7 @@ impl R26K2FactoryExt for tsox_frontend::ast::mig::m3c::NodeFactory {
 pub(crate) fn with_object_type_structured_mut(
     t: &Arc<Type>,
     f: impl FnOnce(&mut StructuredTypeData),
-) {
+) { ::tsox_core::fntrace::enter("with_object_type_structured_mut"); 
     let mut t = Arc::clone(t);
     let Some(t) = Arc::get_mut(&mut t) else { return };
     let structured = match &mut t.data {
@@ -55,7 +55,7 @@ pub(crate) fn with_object_type_structured_mut(
     f(structured);
 }
 
-pub(crate) fn set_interface_resolved_base_types(t: &Arc<Type>, base_types: Vec<Arc<Type>>) {
+pub(crate) fn set_interface_resolved_base_types(t: &Arc<Type>, base_types: Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("set_interface_resolved_base_types"); 
     let mut t = Arc::clone(t);
     let Some(t) = Arc::get_mut(&mut t) else { return };
     match &mut t.data {
@@ -66,7 +66,7 @@ pub(crate) fn set_interface_resolved_base_types(t: &Arc<Type>, base_types: Vec<A
 }
 
 impl Checker {
-    pub(crate) fn set_mapped_type_contains_error(&self, t: &Arc<Type>, v: bool) {
+    pub(crate) fn set_mapped_type_contains_error(&self, t: &Arc<Type>, v: bool) { ::tsox_core::fntrace::enter("set_mapped_type_contains_error"); 
         if let TypeData::Mapped(d) = &t.data {
             d.contains_error.store(v, std::sync::atomic::Ordering::Relaxed);
         }

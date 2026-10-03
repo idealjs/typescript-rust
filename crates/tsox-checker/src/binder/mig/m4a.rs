@@ -18,7 +18,7 @@ use crate::checker::relater_relation::error_range_for_node;
 use tsox_frontend::ast::is_assignment_operator;
 
 impl Binder {
-    pub(crate) fn bind_source_file_as_external_module(&mut self) {
+    pub(crate) fn bind_source_file_as_external_module(&mut self) { ::tsox_core::fntrace::enter("bind_source_file_as_external_module"); 
         let file = self.current_source_file.clone().unwrap();
         let name = format!(
             "\"{}\"",
@@ -27,7 +27,7 @@ impl Binder {
         self.bind_anonymous_declaration(&file.node, SymbolFlags::ValueModule, &name);
     }
 
-    pub(crate) fn bind_source_file_if_external_module(&mut self) {
+    pub(crate) fn bind_source_file_if_external_module(&mut self) { ::tsox_core::fntrace::enter("bind_source_file_if_external_module"); 
         let file = self.current_source_file.clone().unwrap();
         let file_node = file.node.clone();
         self.set_export_context_flag(&file_node);
@@ -50,7 +50,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_variable_declaration_flow(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_variable_declaration_flow(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_variable_declaration_flow"); 
         self.bind_each_child(node);
         let grandparent_kind = node.parent().and_then(|p| p.parent()).map(|g| g.kind);
         let is_for_in_or_of = matches!(
@@ -62,7 +62,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_variable_declaration_or_binding_element(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_variable_declaration_or_binding_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_variable_declaration_or_binding_element"); 
         self.check_strict_mode_eval_or_arguments(node, node.name().as_deref());
         if let Some(name) = node.name()
             && !is_binding_pattern(&name)
@@ -95,7 +95,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_private_identifier(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_private_identifier(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_private_identifier"); 
         if node.text() == "#constructor"
             && self
                 .current_source_file
@@ -106,7 +106,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_strict_mode_binary_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_binary_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_binary_expression"); 
         if let NodeData::BinaryExpression(expr) = &node.data
             && is_left_hand_side_expression(&expr.left)
             && is_assignment_operator(expr.operator_token.kind)
@@ -115,7 +115,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_strict_mode_catch_clause(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_catch_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_catch_clause"); 
         if let NodeData::CatchClause(clause) = &node.data
             && let Some(var_decl) = &clause.variable_declaration
         {
@@ -123,7 +123,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_strict_mode_delete_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_delete_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_delete_expression"); 
         if let NodeData::DeleteExpression(expr) = &node.data
             && expr.expression.kind == SyntaxKind::Identifier
         {
@@ -139,7 +139,7 @@ impl Binder {
         &mut self,
         context_node: &Arc<Node>,
         name: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_strict_mode_eval_or_arguments"); 
         if let Some(name) = name
             && is_eval_or_arguments_identifier(name)
         {
@@ -148,13 +148,13 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_strict_mode_function_name(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_function_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_function_name"); 
         if !node.flags.contains(NodeFlags::Ambient) {
             self.check_strict_mode_eval_or_arguments(node, node.name().as_deref());
         }
     }
 
-    pub(crate) fn check_strict_mode_labeled_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_labeled_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_labeled_statement"); 
         if let NodeData::LabeledStatement(data) = &node.data
             && (is_declaration_statement(&data.statement) || is_variable_statement(&data.statement))
         {
@@ -162,13 +162,13 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_strict_mode_postfix_unary_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_postfix_unary_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_postfix_unary_expression"); 
         if let NodeData::PostfixUnaryExpression(expr) = &node.data {
             self.check_strict_mode_eval_or_arguments(node, Some(&expr.operand));
         }
     }
 
-    pub(crate) fn check_strict_mode_prefix_unary_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_prefix_unary_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_prefix_unary_expression"); 
         if let NodeData::PrefixUnaryExpression(expr) = &node.data
             && matches!(
                 expr.operator,
@@ -179,7 +179,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn check_strict_mode_with_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_strict_mode_with_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_strict_mode_with_statement"); 
         self.error_on_first_token(
             node,
             &msg::X_with_statements_are_not_allowed_in_strict_mode,
@@ -187,11 +187,11 @@ impl Binder {
         );
     }
 
-    pub(crate) fn create_branch_label(&mut self) -> FlowLabel {
+    pub(crate) fn create_branch_label(&mut self) -> FlowLabel { ::tsox_core::fntrace::enter("create_branch_label"); 
         FlowLabel::new(FlowFlags::BRANCH_LABEL)
     }
 
-    pub(crate) fn create_loop_label(&mut self) -> FlowLabel {
+    pub(crate) fn create_loop_label(&mut self) -> FlowLabel { ::tsox_core::fntrace::enter("create_loop_label"); 
         FlowLabel::new(FlowFlags::LOOP_LABEL)
     }
 
@@ -200,7 +200,7 @@ impl Binder {
         node: &Arc<Node>,
         message: &'static Message,
         args: &[String],
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_for_node"); 
         let file = self.current_source_file.clone();
         let span = error_range_for_node(node);
         Diagnostic::new(file, span, *message, args.to_vec())
@@ -211,7 +211,7 @@ impl Binder {
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
         symbol_excludes: SymbolFlags,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_class_member"); 
         let container = self.container.clone().unwrap();
         let class_symbol = self.symbol_map.symbol_of(&container).cloned().unwrap();
         if is_static(&container) {
@@ -236,7 +236,7 @@ impl Binder {
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
         symbol_excludes: SymbolFlags,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_module_member"); 
         let container = self.container.clone().unwrap();
         let has_export_modifier = get_combined_modifier_flags(node)
             .contains(ModifierFlags::Export)

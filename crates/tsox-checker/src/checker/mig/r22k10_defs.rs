@@ -22,7 +22,7 @@ pub trait R22K10FactoryExt {
 }
 
 impl R22K10FactoryExt for NodeFactory {
-    fn new_identifier(&self, text: &str) -> Arc<Node> {
+    fn new_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {
@@ -31,7 +31,7 @@ impl R22K10FactoryExt for NodeFactory {
         ))
     }
 
-    fn new_private_identifier(&self, text: &str) -> Arc<Node> {
+    fn new_private_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_private_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::PrivateIdentifier,
             NodeData::PrivateIdentifier(PrivateIdentifierData {
@@ -40,7 +40,7 @@ impl R22K10FactoryExt for NodeFactory {
         ))
     }
 
-    fn new_keyword_expression(&self, kind: SyntaxKind) -> Arc<Node> {
+    fn new_keyword_expression(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_keyword_expression"); 
         Arc::new(Node::new(kind, NodeData::KeywordExpression))
     }
 
@@ -50,7 +50,7 @@ impl R22K10FactoryExt for NodeFactory {
         question_dot_token: Option<&Arc<Node>>,
         name: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_access_expression"); 
         let mut node = Node::new(
             SyntaxKind::PropertyAccessExpression,
             NodeData::PropertyAccessExpression(PropertyAccessExpressionData {
@@ -64,7 +64,7 @@ impl R22K10FactoryExt for NodeFactory {
     }
 }
 
-pub fn is_access_expression(node: &Node) -> bool {
+pub fn is_access_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_access_expression"); 
     matches!(
         node.kind,
         SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
@@ -75,11 +75,11 @@ thread_local! {
     static NODE_FLOW_NODES: RefCell<HashMap<u64, Arc<FlowNode>>> = RefCell::new(HashMap::new());
 }
 
-pub fn flow_node_of(node: &Arc<Node>) -> Option<Arc<FlowNode>> {
+pub fn flow_node_of(node: &Arc<Node>) -> Option<Arc<FlowNode>> { ::tsox_core::fntrace::enter("flow_node_of"); 
     NODE_FLOW_NODES.with(|m| m.borrow().get(&node.id()).cloned())
 }
 
-pub fn set_flow_node_of(node: &Arc<Node>, flow: Option<Arc<FlowNode>>) {
+pub fn set_flow_node_of(node: &Arc<Node>, flow: Option<Arc<FlowNode>>) { ::tsox_core::fntrace::enter("set_flow_node_of"); 
     NODE_FLOW_NODES.with(|m| {
         let mut m = m.borrow_mut();
         match flow {

@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         members: &Arc<NodeList>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("build_type_of_class_declaration"); 
         self.push_scope(node);
 
         let instance_type = self.build_class_instance_type_with_base(node);
@@ -210,7 +210,7 @@ impl Checker {
     pub(crate) fn extends_base_class_node(
         &mut self,
         class_node: &Arc<Node>,
-    ) -> Option<(Arc<Node>, Arc<Symbol>, Arc<Node>)> {
+    ) -> Option<(Arc<Node>, Arc<Symbol>, Arc<Node>)> { ::tsox_core::fntrace::enter("extends_base_class_node"); 
         let heritage = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
             tsox_frontend::ast::NodeData::ClassExpression(data) => data.heritage_clauses.clone(),
@@ -254,7 +254,7 @@ impl Checker {
     pub(crate) fn extends_base_of(
         &self,
         class_node: &Arc<Node>,
-    ) -> Option<(Arc<Node>, Arc<Symbol>)> {
+    ) -> Option<(Arc<Node>, Arc<Symbol>)> { ::tsox_core::fntrace::enter("extends_base_of"); 
         let heritage = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),
             tsox_frontend::ast::NodeData::ClassExpression(data) => data.heritage_clauses.clone(),

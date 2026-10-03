@@ -25,7 +25,7 @@ pub struct Tracer {
 }
 
 impl Tracer {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             start: Instant::now(),
             events: Mutex::new(Vec::new()),
@@ -34,7 +34,7 @@ impl Tracer {
         }
     }
 
-    pub fn enabled() -> Self {
+    pub fn enabled() -> Self { ::tsox_core::fntrace::enter("enabled"); 
         Self {
             start: Instant::now(),
             events: Mutex::new(Vec::new()),
@@ -43,11 +43,11 @@ impl Tracer {
         }
     }
 
-    pub fn is_enabled(&self) -> bool {
+    pub fn is_enabled(&self) -> bool { ::tsox_core::fntrace::enter("is_enabled"); 
         self.enabled
     }
 
-    pub fn start(&self, name: &str) -> TraceSpan<'_> {
+    pub fn start(&self, name: &str) -> TraceSpan<'_> { ::tsox_core::fntrace::enter("start"); 
         if self.enabled {
             TraceSpan {
                 tracer: Some(self),
@@ -59,7 +59,7 @@ impl Tracer {
         }
     }
 
-    pub fn record_type(&self, type_id: u32, flag_names: Vec<String>, constructor_name: &str) {
+    pub fn record_type(&self, type_id: u32, flag_names: Vec<String>, constructor_name: &str) { ::tsox_core::fntrace::enter("record_type"); 
         if !self.enabled {
             return;
         }
@@ -73,21 +73,21 @@ impl Tracer {
             });
     }
 
-    fn elapsed_us(&self) -> u64 {
+    fn elapsed_us(&self) -> u64 { ::tsox_core::fntrace::enter("elapsed_us"); 
         self.start.elapsed().as_micros() as u64
     }
 
-    pub fn events(&self) -> Vec<TraceEvent> {
+    pub fn events(&self) -> Vec<TraceEvent> { ::tsox_core::fntrace::enter("events"); 
         self.events.lock().unwrap().clone()
     }
 
-    pub fn type_recordings(&self) -> Vec<TypeRecordingEntry> {
+    pub fn type_recordings(&self) -> Vec<TypeRecordingEntry> { ::tsox_core::fntrace::enter("type_recordings"); 
         self.type_recordings.lock().unwrap().clone()
     }
 }
 
 impl Default for Tracer {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
@@ -99,7 +99,7 @@ pub struct TraceSpan<'a> {
 }
 
 impl<'a> TraceSpan<'a> {
-    fn disabled() -> Self {
+    fn disabled() -> Self { ::tsox_core::fntrace::enter("disabled"); 
         Self {
             tracer: None,
             name: String::new(),
@@ -109,7 +109,7 @@ impl<'a> TraceSpan<'a> {
 }
 
 impl<'a> Drop for TraceSpan<'a> {
-    fn drop(&mut self) {
+    fn drop(&mut self) { ::tsox_core::fntrace::enter("drop"); 
         if let Some(tracer) = self.tracer {
             let duration = self.start.elapsed().as_micros() as u64;
             let timestamp = tracer.elapsed_us() - duration;

@@ -13,17 +13,17 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-fn iteration_types_cache_get(key: &(u32, u8)) -> Option<IterationTypes> {
+fn iteration_types_cache_get(key: &(u32, u8)) -> Option<IterationTypes> { ::tsox_core::fntrace::enter("iteration_types_cache_get"); 
     ITERATION_TYPES_CACHE.with(|c| c.borrow().get(key).cloned())
 }
 
-fn iteration_types_cache_insert(key: (u32, u8), result: IterationTypes) {
+fn iteration_types_cache_insert(key: (u32, u8), result: IterationTypes) { ::tsox_core::fntrace::enter("iteration_types_cache_insert"); 
     ITERATION_TYPES_CACHE.with(|c| {
         c.borrow_mut().insert(key, result);
     });
 }
 
-fn iteration_use_cache_discriminant(use_: IterationUse) -> u8 {
+fn iteration_use_cache_discriminant(use_: IterationUse) -> u8 { ::tsox_core::fntrace::enter("iteration_use_cache_discriminant"); 
     match use_ {
         IterationUse::ForOf { for_await } => {
             if for_await {
@@ -53,7 +53,7 @@ fn iteration_use_cache_discriminant(use_: IterationUse) -> u8 {
 }
 
 impl IterationTypes {
-    pub(crate) fn get_type(&self, type_kind: IterationTypeKind) -> Option<Arc<Type>> {
+    pub(crate) fn get_type(&self, type_kind: IterationTypeKind) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type"); 
         match type_kind {
             IterationTypeKind::YIELD => self.yield_type.clone(),
             IterationTypeKind::RETURN => self.return_type.clone(),
@@ -67,7 +67,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         is_async_generator: bool,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_generator_function_return_type"); 
         if t.flags.contains(TypeFlags::Any) {
             let any = self.get_any_type();
             return IterationTypes {
@@ -100,7 +100,7 @@ impl Checker {
         t: &Arc<Type>,
         use_: IterationUse,
         error_node: Option<&Node>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_iteration_types_of_iterable"); 
         let reduced = self.get_reduced_type(t);
         if reduced.flags.contains(TypeFlags::Any) {
             let any = self.get_any_type();
@@ -139,7 +139,7 @@ impl Checker {
         error_node: Option<&Node>,
         t: &Arc<Type>,
         allow_async: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_type_not_iterable_node"); 
         let Some(node) = error_node else { return };
         let type_str = self.type_to_string(t);
         let message = if allow_async {
@@ -158,7 +158,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn get_spread_symbol(c: &mut Checker, prop: &Arc<Symbol>, readonly: bool) -> Arc<Symbol> {
+pub(crate) fn get_spread_symbol(c: &mut Checker, prop: &Arc<Symbol>, readonly: bool) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_spread_symbol"); 
     let is_setonly_accessor = prop.flags.contains(SymbolFlags::SetAccessor)
         && !prop.flags.contains(SymbolFlags::GetAccessor);
     if !is_setonly_accessor && readonly == c.is_readonly_symbol_for_identity(prop) {

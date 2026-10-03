@@ -3,16 +3,16 @@
 use super::*;
 
 impl Default for NameGenerator {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
-pub(crate) fn has_leading_hash(text: &str) -> bool {
+pub(crate) fn has_leading_hash(text: &str) -> bool { ::tsox_core::fntrace::enter("has_leading_hash"); 
     text.starts_with('#')
 }
 
-pub(crate) fn remove_leading_hash(text: &str) -> &str {
+pub(crate) fn remove_leading_hash(text: &str) -> &str { ::tsox_core::fntrace::enter("remove_leading_hash"); 
     if has_leading_hash(text) {
         &text[1..]
     } else {
@@ -20,7 +20,7 @@ pub(crate) fn remove_leading_hash(text: &str) -> &str {
     }
 }
 
-pub(crate) fn ensure_leading_hash(text: &str) -> String {
+pub(crate) fn ensure_leading_hash(text: &str) -> String { ::tsox_core::fntrace::enter("ensure_leading_hash"); 
     if has_leading_hash(text) {
         text.to_string()
     } else {
@@ -33,7 +33,7 @@ pub(crate) fn format_generated_name(
     prefix: &str,
     base: &str,
     suffix: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("format_generated_name"); 
     let name = format!(
         "{}{}{}",
         remove_leading_hash(prefix),
@@ -47,7 +47,7 @@ pub(crate) fn format_generated_name(
     }
 }
 
-pub(crate) fn make_identifier_from_module_name(module_name: &str) -> String {
+pub(crate) fn make_identifier_from_module_name(module_name: &str) -> String { ::tsox_core::fntrace::enter("make_identifier_from_module_name"); 
     let base = tsox_core::tspath::get_base_file_name(module_name);
     let mut result = String::new();
     let bytes = base.as_bytes();
@@ -75,11 +75,11 @@ pub(crate) fn make_identifier_from_module_name(module_name: &str) -> String {
     result
 }
 
-pub(crate) fn is_ascii_word_character(ch: char) -> bool {
+pub(crate) fn is_ascii_word_character(ch: char) -> bool { ::tsox_core::fntrace::enter("is_ascii_word_character"); 
     ch.is_ascii_alphabetic() || ch.is_ascii_digit() || ch == '_'
 }
 
-pub(crate) fn get_external_module_name(node: &Arc<Node>) -> Option<String> {
+pub(crate) fn get_external_module_name(node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("get_external_module_name"); 
     match &node.data {
         tsox_frontend::ast::node_data_generated::NodeData::ImportDeclaration(d) => {
             Some(d.module_specifier.text().to_string())
@@ -99,7 +99,7 @@ pub enum QuoteChar {
 }
 
 impl QuoteChar {
-    pub(crate) fn as_char(self) -> char {
+    pub(crate) fn as_char(self) -> char { ::tsox_core::fntrace::enter("as_char"); 
         match self {
             QuoteChar::SingleQuote => '\'',
             QuoteChar::DoubleQuote => '"',
@@ -120,13 +120,13 @@ bitflags::bitflags! {
     }
 }
 
-pub(crate) fn encode_jsx_character_entity(b: &mut String, ch: char) {
+pub(crate) fn encode_jsx_character_entity(b: &mut String, ch: char) { ::tsox_core::fntrace::enter("encode_jsx_character_entity"); 
     b.push_str("&#x");
     b.push_str(&format!("{:X}", ch as u32));
     b.push(';');
 }
 
-pub(crate) fn encode_utf16_escape_sequence_u32(b: &mut String, code: u32) {
+pub(crate) fn encode_utf16_escape_sequence_u32(b: &mut String, code: u32) { ::tsox_core::fntrace::enter("encode_utf16_escape_sequence_u32"); 
     let hex = format!("{:X}", code);
     b.push_str("\\u");
     for _ in 0..(4 - hex.len()) {
@@ -135,11 +135,11 @@ pub(crate) fn encode_utf16_escape_sequence_u32(b: &mut String, code: u32) {
     b.push_str(&hex);
 }
 
-pub(crate) fn encode_utf16_escape_sequence(b: &mut String, ch: char) {
+pub(crate) fn encode_utf16_escape_sequence(b: &mut String, ch: char) { ::tsox_core::fntrace::enter("encode_utf16_escape_sequence"); 
     encode_utf16_escape_sequence_u32(b, ch as u32);
 }
 
-pub(crate) fn jsx_escaped_chars_map(code: u32) -> Option<&'static str> {
+pub(crate) fn jsx_escaped_chars_map(code: u32) -> Option<&'static str> { ::tsox_core::fntrace::enter("jsx_escaped_chars_map"); 
     match code {
         0x22 => Some("&quot;"),
         0x27 => Some("&apos;"),
@@ -147,7 +147,7 @@ pub(crate) fn jsx_escaped_chars_map(code: u32) -> Option<&'static str> {
     }
 }
 
-pub(crate) fn escaped_chars_map(code: u32) -> Option<&'static str> {
+pub(crate) fn escaped_chars_map(code: u32) -> Option<&'static str> { ::tsox_core::fntrace::enter("escaped_chars_map"); 
     match code {
         0x09 => Some("\\t"),
         0x0b => Some("\\v"),
@@ -172,7 +172,7 @@ pub(crate) fn escape_string_worker(
     quote_char: QuoteChar,
     flags: GetLiteralTextFlags,
     b: &mut String,
-) {
+) { ::tsox_core::fntrace::enter("escape_string_worker"); 
     let bytes = s.as_bytes();
     let mut pos = 0usize;
 
@@ -259,7 +259,7 @@ pub(crate) fn escape_string_worker(
     }
 }
 
-pub fn escape_string(s: &str, quote_char: QuoteChar) -> String {
+pub fn escape_string(s: &str, quote_char: QuoteChar) -> String { ::tsox_core::fntrace::enter("escape_string"); 
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(
         s,
@@ -270,13 +270,13 @@ pub fn escape_string(s: &str, quote_char: QuoteChar) -> String {
     b
 }
 
-pub fn escape_non_ascii_string(s: &str, quote_char: QuoteChar) -> String {
+pub fn escape_non_ascii_string(s: &str, quote_char: QuoteChar) -> String { ::tsox_core::fntrace::enter("escape_non_ascii_string"); 
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(s, quote_char, GetLiteralTextFlags::NONE, &mut b);
     b
 }
 
-pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String {
+pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String { ::tsox_core::fntrace::enter("escape_jsx_attribute_string"); 
     let mut b = String::with_capacity(s.len() + 2);
     escape_string_worker(
         s,
@@ -287,7 +287,7 @@ pub fn escape_jsx_attribute_string(s: &str, quote_char: QuoteChar) -> String {
     b
 }
 
-pub(crate) fn decode_char_at(text: &str, pos: usize) -> (char, usize) {
+pub(crate) fn decode_char_at(text: &str, pos: usize) -> (char, usize) { ::tsox_core::fntrace::enter("decode_char_at"); 
     let c = text[pos..].chars().next().unwrap();
     (c, c.len_utf8())
 }

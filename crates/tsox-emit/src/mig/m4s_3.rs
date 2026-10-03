@@ -23,7 +23,7 @@ pub struct SingleLineStringWriter {
     last_written: String,
 }
 
-pub fn get_single_line_string_writer() -> (SingleLineStringWriter, Box<dyn FnOnce()>) {
+pub fn get_single_line_string_writer() -> (SingleLineStringWriter, Box<dyn FnOnce()>) { ::tsox_core::fntrace::enter("get_single_line_string_writer"); 
     let mut w = SingleLineStringWriter {
         builder: String::new(),
         last_written: String::new(),
@@ -33,45 +33,45 @@ pub fn get_single_line_string_writer() -> (SingleLineStringWriter, Box<dyn FnOnc
 }
 
 impl SingleLineStringWriter {
-    fn append(&mut self, s: &str) {
+    fn append(&mut self, s: &str) { ::tsox_core::fntrace::enter("append"); 
         self.last_written = s.to_string();
         self.builder.push_str(s);
     }
 }
 
 impl EmitTextWriter for SingleLineStringWriter {
-    fn clear(&mut self) {
+    fn clear(&mut self) { ::tsox_core::fntrace::enter("clear"); 
         self.last_written = String::new();
         self.builder.clear();
     }
 
-    fn decrease_indent(&mut self) {}
+    fn decrease_indent(&mut self) { ::tsox_core::fntrace::enter("decrease_indent"); }
 
-    fn get_column(&self) -> usize {
+    fn get_column(&self) -> usize { ::tsox_core::fntrace::enter("get_column"); 
         0
     }
 
-    fn get_indent(&self) -> usize {
+    fn get_indent(&self) -> usize { ::tsox_core::fntrace::enter("get_indent"); 
         0
     }
 
-    fn get_line(&self) -> usize {
+    fn get_line(&self) -> usize { ::tsox_core::fntrace::enter("get_line"); 
         0
     }
 
-    fn string(&self) -> String {
+    fn string(&self) -> String { ::tsox_core::fntrace::enter("string"); 
         self.builder.clone()
     }
 
-    fn get_text_pos(&self) -> usize {
+    fn get_text_pos(&self) -> usize { ::tsox_core::fntrace::enter("get_text_pos"); 
         self.builder.len()
     }
 
-    fn has_trailing_comment(&self) -> bool {
+    fn has_trailing_comment(&self) -> bool { ::tsox_core::fntrace::enter("has_trailing_comment"); 
         false
     }
 
-    fn has_trailing_whitespace(&self) -> bool {
+    fn has_trailing_whitespace(&self) -> bool { ::tsox_core::fntrace::enter("has_trailing_whitespace"); 
         if self.builder.is_empty() {
             return false;
         }
@@ -81,69 +81,69 @@ impl EmitTextWriter for SingleLineStringWriter {
         }
     }
 
-    fn increase_indent(&mut self) {}
+    fn increase_indent(&mut self) { ::tsox_core::fntrace::enter("increase_indent"); }
 
-    fn is_at_start_of_line(&self) -> bool {
+    fn is_at_start_of_line(&self) -> bool { ::tsox_core::fntrace::enter("is_at_start_of_line"); 
         false
     }
 
-    fn raw_write(&mut self, s: &str) {
+    fn raw_write(&mut self, s: &str) { ::tsox_core::fntrace::enter("raw_write"); 
         self.append(s);
     }
 
-    fn write(&mut self, s: &str) {
+    fn write(&mut self, s: &str) { ::tsox_core::fntrace::enter("write"); 
         self.append(s);
     }
 
-    fn write_comment(&mut self, text: &str) {
+    fn write_comment(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_comment"); 
         self.append(text);
     }
 
-    fn write_keyword(&mut self, text: &str) {
+    fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         self.append(text);
     }
 
-    fn write_line(&mut self) {
+    fn write_line(&mut self) { ::tsox_core::fntrace::enter("write_line"); 
         self.append(" ");
     }
 
-    fn write_line_force(&mut self, _force: bool) {
+    fn write_line_force(&mut self, _force: bool) { ::tsox_core::fntrace::enter("write_line_force"); 
         self.append(" ");
     }
 
-    fn write_literal(&mut self, s: &str) {
+    fn write_literal(&mut self, s: &str) { ::tsox_core::fntrace::enter("write_literal"); 
         self.append(s);
     }
 
-    fn write_operator(&mut self, text: &str) {
+    fn write_operator(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_operator"); 
         self.append(text);
     }
 
-    fn write_parameter(&mut self, text: &str) {
+    fn write_parameter(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_parameter"); 
         self.append(text);
     }
 
-    fn write_property(&mut self, text: &str) {
+    fn write_property(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_property"); 
         self.append(text);
     }
 
-    fn write_punctuation(&mut self, text: &str) {
+    fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         self.append(text);
     }
 
-    fn write_space(&mut self, text: &str) {
+    fn write_space(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_space"); 
         self.append(text);
     }
 
-    fn write_string_literal(&mut self, text: &str) {
+    fn write_string_literal(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_string_literal"); 
         self.append(text);
     }
 
-    fn write_symbol(&mut self, text: &str, _symbol: Option<&Symbol>) {
+    fn write_symbol(&mut self, text: &str, _symbol: Option<&Symbol>) { ::tsox_core::fntrace::enter("write_symbol"); 
         self.append(text);
     }
 
-    fn write_trailing_semicolon(&mut self, text: &str) {
+    fn write_trailing_semicolon(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_trailing_semicolon"); 
         self.append(text);
     }
 }
@@ -155,7 +155,7 @@ pub fn print_and_position_node(
     new_line: &str,
     indent_size: usize,
     emit_context: &EmitContext,
-) -> (String, Arc<Node>) {
+) -> (String, Arc<Node>) { ::tsox_core::fntrace::enter("print_and_position_node"); 
     let mut writer = new_change_tracker_writer(new_line, indent_size as i32);
     let handlers = crate::mig::m4s_4::r39k17b_defs::change_tracker_print_handlers(&mut writer);
     let text_writer = m4o_2::new_text_writer(new_line.to_string(), indent_size);
@@ -195,7 +195,7 @@ pub fn create_synthetic_source_file(
     node: &Arc<Node>,
     text: &str,
     parse_options: m3b_2::SourceFileParseOptions,
-) -> SourceFile {
+) -> SourceFile { ::tsox_core::fntrace::enter("create_synthetic_source_file"); 
     let synthetic_file_name = parse_options.file_name.clone();
     let mut eof = factory.new_token(SyntaxKind::EndOfFile);
     Arc::get_mut(&mut eof).unwrap().loc = new_text_range(text.len(), text.len());

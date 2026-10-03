@@ -1,6 +1,6 @@
 #![allow(dead_code, unused_imports, unused_variables)]
 
-pub fn cut_any(s: &str, cutset: &str) -> (String, String, bool) {
+pub fn cut_any(s: &str, cutset: &str) -> (String, String, bool) { crate::fntrace::enter("cut_any"); 
     if let Some(i) = s.find(|c: char| cutset.contains(c)) {
         let before = &s[..i];
         let after_and_found = &s[i..];

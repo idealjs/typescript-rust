@@ -3,7 +3,7 @@
 use crate::parser::declarations::*;
 
 impl Parser {
-    pub(crate) fn parse_export_specifier(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_export_specifier(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_export_specifier"); 
         let pos = self.token_pos();
         let (is_type_only, property_name, name) = self.parse_import_or_export_specifier(false);
         self.parse_optional(SyntaxKind::CommaToken);
@@ -19,7 +19,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_enum_member(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_enum_member(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_enum_member"); 
         let pos = self.token_pos();
         let name = self.parse_property_name();
         let initializer = if self.token == SyntaxKind::EqualsToken {

@@ -13,7 +13,7 @@ use tsox_frontend::ast::SyntaxKind;
 use tsox_tsoptions::tsoptions::parse_command_line;
 use tsox_tsoptions::vfs::InMemoryFS;
 
-fn build_checker(source: &str) -> Checker {
+fn build_checker(source: &str) -> Checker { ::tsox_core::fntrace::enter("build_checker"); 
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
     fs.insert_file("/proj/entry.ts", source);
@@ -34,7 +34,7 @@ fn build_checker(source: &str) -> Checker {
     program.build_checker()
 }
 
-fn first_var_type_node(checker: &Checker) -> Arc<Node> {
+fn first_var_type_node(checker: &Checker) -> Arc<Node> { ::tsox_core::fntrace::enter("first_var_type_node"); 
     let file = checker
         .files
         .iter()
@@ -65,7 +65,7 @@ fn first_var_type_node(checker: &Checker) -> Arc<Node> {
     panic!("no variable declaration with type annotation found");
 }
 
-fn type_node_to_string(node: &Arc<Node>) -> String {
+fn type_node_to_string(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("type_node_to_string"); 
     match node.kind {
         SyntaxKind::AnyKeyword => "any".into(),
         SyntaxKind::UnknownKeyword => "unknown".into(),
@@ -245,7 +245,7 @@ fn type_node_to_string(node: &Arc<Node>) -> String {
     }
 }
 
-fn assert_var_type_round_trips(source: &str) {
+fn assert_var_type_round_trips(source: &str) { ::tsox_core::fntrace::enter("assert_var_type_round_trips"); 
     let mut checker = build_checker(source);
     let type_node = first_var_type_node(&checker);
     let t = checker.get_type_from_type_node(&type_node);
@@ -261,77 +261,77 @@ fn assert_var_type_round_trips(source: &str) {
 }
 
 #[test]
-fn type_to_type_node_number() {
+fn type_to_type_node_number() { ::tsox_core::fntrace::enter("type_to_type_node_number"); 
     assert_var_type_round_trips("let x: number = 0;");
 }
 
 #[test]
-fn type_to_type_node_string() {
+fn type_to_type_node_string() { ::tsox_core::fntrace::enter("type_to_type_node_string"); 
     assert_var_type_round_trips("let x: string = \"\";");
 }
 
 #[test]
-fn type_to_type_node_boolean() {
+fn type_to_type_node_boolean() { ::tsox_core::fntrace::enter("type_to_type_node_boolean"); 
     assert_var_type_round_trips("let x: boolean = true;");
 }
 
 #[test]
-fn type_to_type_node_void() {
+fn type_to_type_node_void() { ::tsox_core::fntrace::enter("type_to_type_node_void"); 
     assert_var_type_round_trips("let x: void = undefined;");
 }
 
 #[test]
-fn type_to_type_node_any() {
+fn type_to_type_node_any() { ::tsox_core::fntrace::enter("type_to_type_node_any"); 
     assert_var_type_round_trips("let x: any = 0;");
 }
 
 #[test]
-fn type_to_type_node_unknown() {
+fn type_to_type_node_unknown() { ::tsox_core::fntrace::enter("type_to_type_node_unknown"); 
     assert_var_type_round_trips("let x: unknown = 0;");
 }
 
 #[test]
-fn type_to_type_node_never() {
+fn type_to_type_node_never() { ::tsox_core::fntrace::enter("type_to_type_node_never"); 
     assert_var_type_round_trips("let x: never;");
 }
 
 #[test]
-fn type_to_type_node_null() {
+fn type_to_type_node_null() { ::tsox_core::fntrace::enter("type_to_type_node_null"); 
     assert_var_type_round_trips("let x: null = null;");
 }
 
 #[test]
-fn type_to_type_node_undefined() {
+fn type_to_type_node_undefined() { ::tsox_core::fntrace::enter("type_to_type_node_undefined"); 
     assert_var_type_round_trips("let x: undefined = undefined;");
 }
 
 #[test]
-fn type_to_type_node_array_of_number() {
+fn type_to_type_node_array_of_number() { ::tsox_core::fntrace::enter("type_to_type_node_array_of_number"); 
     assert_var_type_round_trips("let x: number[] = [];");
 }
 
 #[test]
-fn type_to_type_node_array_of_string() {
+fn type_to_type_node_array_of_string() { ::tsox_core::fntrace::enter("type_to_type_node_array_of_string"); 
     assert_var_type_round_trips("let x: string[] = [\"\"];");
 }
 
 #[test]
-fn type_to_type_node_tuple() {
+fn type_to_type_node_tuple() { ::tsox_core::fntrace::enter("type_to_type_node_tuple"); 
     assert_var_type_round_trips("let x: [number, string] = [0, \"\"];");
 }
 
 #[test]
-fn type_to_type_node_union_number_string() {
+fn type_to_type_node_union_number_string() { ::tsox_core::fntrace::enter("type_to_type_node_union_number_string"); 
     assert_var_type_round_trips("let x: number | string = 0;");
 }
 
 #[test]
-fn type_to_type_node_union_string_null() {
+fn type_to_type_node_union_string_null() { ::tsox_core::fntrace::enter("type_to_type_node_union_string_null"); 
     assert_var_type_round_trips("let x: string | null = null;");
 }
 
 #[test]
-fn type_to_type_node_intersection() {
+fn type_to_type_node_intersection() { ::tsox_core::fntrace::enter("type_to_type_node_intersection"); 
     assert_var_type_round_trips(
         "interface A { a: number }\n\
              interface B { b: string }\n\
@@ -340,7 +340,7 @@ fn type_to_type_node_intersection() {
 }
 
 #[test]
-fn type_to_type_node_generic_interface_reference() {
+fn type_to_type_node_generic_interface_reference() { ::tsox_core::fntrace::enter("type_to_type_node_generic_interface_reference"); 
     assert_var_type_round_trips(
         "interface Foo<T> { value: T }\n\
              let x: Foo<number> = { value: 1 };",
@@ -348,28 +348,28 @@ fn type_to_type_node_generic_interface_reference() {
 }
 
 #[test]
-fn type_to_type_node_function_type() {
+fn type_to_type_node_function_type() { ::tsox_core::fntrace::enter("type_to_type_node_function_type"); 
     assert_var_type_round_trips("let x: (a: number) => string = (a) => \"\";");
 }
 
 #[test]
-fn type_to_type_node_object_literal() {
+fn type_to_type_node_object_literal() { ::tsox_core::fntrace::enter("type_to_type_node_object_literal"); 
     assert_var_type_round_trips("let x: { a: number; b: string } = { a: 1, b: \"\" };");
 }
 
 #[test]
-fn type_to_type_node_string_literal_type() {
+fn type_to_type_node_string_literal_type() { ::tsox_core::fntrace::enter("type_to_type_node_string_literal_type"); 
     assert_var_type_round_trips("let x: \"hello\" = \"hello\";");
 }
 
 #[test]
-fn type_to_type_node_numeric_literal_type() {
+fn type_to_type_node_numeric_literal_type() { ::tsox_core::fntrace::enter("type_to_type_node_numeric_literal_type"); 
     assert_var_type_round_trips("let x: 42 = 42;");
 }
 
 use tsox_frontend::ast::node_data_generated::for_each_child;
 
-fn find_identifier(node: &Arc<Node>, name: &str) -> Option<Arc<Node>> {
+fn find_identifier(node: &Arc<Node>, name: &str) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_identifier"); 
     if node.kind == SyntaxKind::Identifier {
         if let NodeData::Identifier(id) = &node.data {
             if id.text == name {
@@ -387,7 +387,7 @@ fn find_identifier(node: &Arc<Node>, name: &str) -> Option<Arc<Node>> {
     found
 }
 
-fn display_parts_for(source: &str, name: &str) -> Vec<SymbolDisplayPart> {
+fn display_parts_for(source: &str, name: &str) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("display_parts_for"); 
     let mut checker = build_checker(source);
     let file = checker
         .files
@@ -399,12 +399,12 @@ fn display_parts_for(source: &str, name: &str) -> Vec<SymbolDisplayPart> {
     checker.get_quick_info_display_parts(&node)
 }
 
-fn parts_text(parts: &[SymbolDisplayPart]) -> String {
+fn parts_text(parts: &[SymbolDisplayPart]) -> String { ::tsox_core::fntrace::enter("parts_text"); 
     parts.iter().map(|p| p.text.as_str()).collect()
 }
 
 #[test]
-fn display_parts_function() {
+fn display_parts_function() { ::tsox_core::fntrace::enter("display_parts_function"); 
     let parts = display_parts_for("function foo(x: number): string { return \"\"; }", "foo");
 
     assert_eq!(parts_text(&parts), "function foo(x: number): string");
@@ -427,7 +427,7 @@ fn display_parts_function() {
 }
 
 #[test]
-fn display_parts_function_two_params() {
+fn display_parts_function_two_params() { ::tsox_core::fntrace::enter("display_parts_function_two_params"); 
     let parts = display_parts_for(
         "function f(a: string, b: number): boolean { return true; }",
         "f",
@@ -439,7 +439,7 @@ fn display_parts_function_two_params() {
 }
 
 #[test]
-fn display_parts_let_variable() {
+fn display_parts_let_variable() { ::tsox_core::fntrace::enter("display_parts_let_variable"); 
     let parts = display_parts_for("let x: number = 0;", "x");
     assert_eq!(parts_text(&parts), "let x: number");
     assert_eq!(
@@ -457,7 +457,7 @@ fn display_parts_let_variable() {
 }
 
 #[test]
-fn display_parts_const_variable() {
+fn display_parts_const_variable() { ::tsox_core::fntrace::enter("display_parts_const_variable"); 
     let parts = display_parts_for("const s: string = \"hi\";", "s");
     assert_eq!(parts_text(&parts), "const s: string");
     assert_eq!(
@@ -467,13 +467,13 @@ fn display_parts_const_variable() {
 }
 
 #[test]
-fn display_parts_var_variable() {
+fn display_parts_var_variable() { ::tsox_core::fntrace::enter("display_parts_var_variable"); 
     let parts = display_parts_for("var v: boolean = true;", "v");
     assert_eq!(parts_text(&parts), "var v: boolean");
 }
 
 #[test]
-fn display_parts_class() {
+fn display_parts_class() { ::tsox_core::fntrace::enter("display_parts_class"); 
     let parts = display_parts_for("class Foo<T, U> {}", "Foo");
     assert_eq!(parts_text(&parts), "class Foo<T, U>");
     assert_eq!(
@@ -496,7 +496,7 @@ fn display_parts_class() {
 }
 
 #[test]
-fn display_parts_interface() {
+fn display_parts_interface() { ::tsox_core::fntrace::enter("display_parts_interface"); 
     let parts = display_parts_for("interface Bar<T> { x: T; }", "Bar");
     assert_eq!(parts_text(&parts), "interface Bar<T>");
     assert_eq!(
@@ -510,7 +510,7 @@ fn display_parts_interface() {
 }
 
 #[test]
-fn display_parts_enum() {
+fn display_parts_enum() { ::tsox_core::fntrace::enter("display_parts_enum"); 
     let parts = display_parts_for("enum Color { Red, Green, Blue }", "Color");
     assert_eq!(parts_text(&parts), "enum Color");
     assert_eq!(
@@ -524,7 +524,7 @@ fn display_parts_enum() {
 }
 
 #[test]
-fn display_parts_type_alias() {
+fn display_parts_type_alias() { ::tsox_core::fntrace::enter("display_parts_type_alias"); 
     let parts = display_parts_for("type MyNumber = number;", "MyNumber");
     assert_eq!(parts_text(&parts), "type MyNumber = number");
     assert_eq!(
@@ -536,13 +536,13 @@ fn display_parts_type_alias() {
 }
 
 #[test]
-fn display_parts_type_alias_with_type_params() {
+fn display_parts_type_alias_with_type_params() { ::tsox_core::fntrace::enter("display_parts_type_alias_with_type_params"); 
     let parts = display_parts_for("type Id<T> = T;", "Id");
     assert!(parts_text(&parts).starts_with("type Id<T> = "));
 }
 
 #[test]
-fn display_parts_kind_round_trips_to_strings() {
+fn display_parts_kind_round_trips_to_strings() { ::tsox_core::fntrace::enter("display_parts_kind_round_trips_to_strings"); 
     assert_eq!(DisplayPartKind::Keyword.as_str(), "keyword");
     assert_eq!(DisplayPartKind::FunctionName.as_str(), "functionName");
     assert_eq!(DisplayPartKind::ClassName.as_str(), "className");
@@ -552,7 +552,7 @@ fn display_parts_kind_round_trips_to_strings() {
 }
 
 #[test]
-fn type_to_display_parts_intrinsic_keyword() {
+fn type_to_display_parts_intrinsic_keyword() { ::tsox_core::fntrace::enter("type_to_display_parts_intrinsic_keyword"); 
     let mut checker = build_checker("let x: number = 0;");
     let type_node = first_var_type_node(&checker);
     let t = checker.get_type_from_type_node(&type_node);
@@ -564,7 +564,7 @@ fn type_to_display_parts_intrinsic_keyword() {
 }
 
 #[test]
-fn type_to_display_parts_class_name() {
+fn type_to_display_parts_class_name() { ::tsox_core::fntrace::enter("type_to_display_parts_class_name"); 
     let mut checker = build_checker("class Foo {}\nlet x: Foo = new Foo();");
     let type_node = first_var_type_node(&checker);
     let t = checker.get_type_from_type_node(&type_node);

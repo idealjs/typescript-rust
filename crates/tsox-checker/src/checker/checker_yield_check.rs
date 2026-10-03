@@ -10,7 +10,7 @@ pub(crate) struct YieldContainer {
 }
 
 impl Checker {
-    pub(crate) fn yield_container_of(&self, node: &Arc<Node>) -> Option<YieldContainer> {
+    pub(crate) fn yield_container_of(&self, node: &Arc<Node>) -> Option<YieldContainer> { ::tsox_core::fntrace::enter("yield_container_of"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             let in_name_of_current = tsox_frontend::ast::node_data_generated::node_name(&n)
@@ -65,7 +65,7 @@ impl Checker {
 
     /// Go checkYieldExpression 的赋值检查段：yield/yield* 操作数须可赋给
     /// 生成器注解返回类型的 yield 迭代类型（裸 yield 的 undefined 同此检查）
-    pub(crate) fn check_yield_expression_assignability(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_yield_expression_assignability(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_yield_expression_assignability"); 
         let NodeData::YieldExpression(data) = &node.data else {
             return;
         };
@@ -141,7 +141,7 @@ impl Checker {
         &mut self,
         return_type: &Arc<Type>,
         is_async: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("unwrap_generator_return_type"); 
         let iteration_types = self.iteration_types_of_iterable(
             crate::checker::checker_iteration::IterationUse::GeneratorReturnType { is_async },
             return_type,
@@ -160,7 +160,7 @@ impl Checker {
         }
     }
 
-    fn generator_instantiation_assignable_to(&mut self) -> bool {
+    fn generator_instantiation_assignable_to(&mut self) -> bool { ::tsox_core::fntrace::enter("generator_instantiation_assignable_to"); 
         true
     }
 }
@@ -173,7 +173,7 @@ impl Checker {
     pub(crate) fn get_contextual_type_for_yield_operand(
         &mut self,
         yield_node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_yield_operand"); 
         let fn_node = self.yield_container_of(yield_node)?.fn_node;
         let fn_node = if fn_node.kind == SyntaxKind::PropertyDeclaration
             || fn_node.kind == SyntaxKind::ClassStaticBlockDeclaration
@@ -236,7 +236,7 @@ impl Checker {
         ret_type: &Arc<Type>,
         next_type: &Arc<Type>,
         is_async: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_generator_type_for_yield"); 
         let name = if is_async { "AsyncGenerator" } else { "Generator" };
         let Some(symbol) = self.globals.get(name).cloned() else {
             return self.get_any_type();
@@ -255,7 +255,7 @@ impl Checker {
         &mut self,
         body: &Arc<Node>,
         is_async: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_generator_return_type"); 
         let mut yielded: Vec<Arc<Type>> = Vec::new();
         self.collect_yielded_types(body, is_async, &mut yielded);
         let mut returned: Vec<Arc<Type>> = Vec::new();
@@ -324,7 +324,7 @@ impl Checker {
         node: &Arc<Node>,
         is_async: bool,
         out: &mut Vec<Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_yielded_types"); 
         use tsox_frontend::ast::node_data_generated::for_each_child;
         match node.kind {
             SyntaxKind::YieldExpression => {
@@ -377,7 +377,7 @@ impl Checker {
         node: &Arc<Node>,
         is_async: bool,
         out: &mut Vec<Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_generator_return_types"); 
         use tsox_frontend::ast::node_data_generated::for_each_child;
         match node.kind {
             SyntaxKind::ReturnStatement => {

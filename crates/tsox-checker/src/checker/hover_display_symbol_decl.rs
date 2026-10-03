@@ -12,7 +12,7 @@ impl Checker {
         b: &mut HoverPartsBuilder,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_class_or_interface"); 
         let is_class = symbol.flags.intersects(SymbolFlags::Class);
         // ThisKeyword/ThisType：符号为容器类/接口时只显示 this
         if node.kind == SyntaxKind::ThisKeyword || node.kind == SyntaxKind::ThisType {
@@ -111,7 +111,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn hover_write_enum(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) {
+    pub(crate) fn hover_write_enum(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("hover_write_enum"); 
         b.write_new_line();
         if symbol.declarations.iter().any(|d| {
             d.kind == SyntaxKind::EnumDeclaration
@@ -123,7 +123,7 @@ impl Checker {
         b.write_text(&symbol.name, DisplayPartKind::EnumName);
     }
 
-    pub(crate) fn hover_write_module(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) {
+    pub(crate) fn hover_write_module(&mut self, b: &mut HoverPartsBuilder, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("hover_write_module"); 
         b.write_new_line();
         let is_module = symbol
             .value_declaration

@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub fn token_to_string(token: SyntaxKind) -> &'static str {
+pub fn token_to_string(token: SyntaxKind) -> &'static str { ::tsox_core::fntrace::enter("token_to_string"); 
     TOKEN_TO_TEXT
         .get_or_init(|| {
             let mut m = HashMap::new();

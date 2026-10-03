@@ -8,7 +8,7 @@ use crate::checker::types::{
     TypeData, TypeFlags, UnionReduction,
 };
 
-pub(crate) fn is_spread_into_call_or_new(node: &Arc<Node>) -> bool {
+pub(crate) fn is_spread_into_call_or_new(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_spread_into_call_or_new"); 
     let Some(parent) = walk_up_parenthesized(node.parent()) else {
         return false;
     };
@@ -21,7 +21,7 @@ pub(crate) fn is_spread_into_call_or_new(node: &Arc<Node>) -> bool {
     )
 }
 
-fn walk_up_parenthesized(parent: Option<Arc<Node>>) -> Option<Arc<Node>> {
+fn walk_up_parenthesized(parent: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("walk_up_parenthesized"); 
     let mut current = parent?;
     while current.kind == SyntaxKind::ParenthesizedExpression {
         current = current.parent()?;
@@ -30,7 +30,7 @@ fn walk_up_parenthesized(parent: Option<Arc<Node>>) -> Option<Arc<Node>> {
 }
 
 impl Checker {
-    pub(crate) fn is_const_context(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn is_const_context(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_const_context"); 
         let Some(parent) = node.parent() else {
             return false;
         };
@@ -66,7 +66,7 @@ impl Checker {
             .is_some_and(|grandparent| self.is_const_context(&grandparent))
     }
 
-    pub(crate) fn is_tuple_like_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_tuple_like_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_tuple_like_type"); 
         if crate::checker::utilities::is_tuple_type(t) {
             return true;
         }
@@ -92,7 +92,7 @@ impl Checker {
         false
     }
 
-    fn contextual_member_is_tuple_like(&mut self, t: &Arc<Type>) -> bool {
+    fn contextual_member_is_tuple_like(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("contextual_member_is_tuple_like"); 
         if self.is_tuple_like_type(t) {
             return true;
         }
@@ -103,7 +103,7 @@ impl Checker {
                 }))
     }
 
-    fn some_contextual_member_tuple_like(&mut self, t: &Arc<Type>) -> bool {
+    fn some_contextual_member_tuple_like(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("some_contextual_member_tuple_like"); 
         match &t.data {
             TypeData::Union(u) => u
                 .union_or_intersection
@@ -114,7 +114,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn tuple_type_arguments(t: &Arc<Type>) -> Vec<Arc<Type>> {
+    pub(crate) fn tuple_type_arguments(t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("tuple_type_arguments"); 
         match &t.data {
             TypeData::Tuple(tuple) => tuple
                 .element_infos
@@ -126,7 +126,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn create_array_literal_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
+    pub(crate) fn create_array_literal_type(&mut self, element_type: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_array_literal_type"); 
         let Some(array_symbol) = self.globals.get("Array").cloned() else {
             return self.get_any_type();
         };
@@ -152,7 +152,7 @@ impl Checker {
         &mut self,
         elem: &Arc<Node>,
         in_const_context: bool,
-    ) -> (Arc<Type>, ElementFlags) {
+    ) -> (Arc<Type>, ElementFlags) { ::tsox_core::fntrace::enter("array_literal_element_type"); 
         if elem.kind == SyntaxKind::SpreadElement {
             let inner = match &elem.data {
                 NodeData::SpreadElement(s) => Arc::clone(&s.expression),
@@ -188,7 +188,7 @@ impl Checker {
         (widened, ElementFlags::Required)
     }
 
-    pub(crate) fn get_type_of_array_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_array_literal(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_array_literal"); 
         let elements = match &node.data {
             NodeData::ArrayLiteralExpression(data) => &data.elements,
             _ => return self.get_any_type(),
@@ -269,7 +269,7 @@ impl Checker {
         self.create_array_literal_type(elem_union)
     }
 
-    fn contextual_has_mutable_array_like(&mut self, contextual_type: &Option<Arc<Type>>) -> bool {
+    fn contextual_has_mutable_array_like(&mut self, contextual_type: &Option<Arc<Type>>) -> bool { ::tsox_core::fntrace::enter("contextual_has_mutable_array_like"); 
         contextual_type.as_ref().is_some_and(|ct| match &ct.data {
             TypeData::Union(u) => u
                 .union_or_intersection
@@ -280,7 +280,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn is_mutable_array_like_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_mutable_array_like_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_mutable_array_like_type"); 
         self.is_array_like_type(t)
             && !matches!(&t.data, TypeData::Tuple(tuple) if tuple.readonly)
     }

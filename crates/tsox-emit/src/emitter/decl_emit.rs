@@ -14,7 +14,7 @@ pub(crate) use tsox_frontend::ast::node_flags::ModifierFlags;
 pub(crate) fn emit_declaration_text(
     source_file: &SourceFile,
     _options: &CompilerOptions,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("emit_declaration_text"); 
     let source = &source_file.text;
     let statements = match &source_file.node.data {
         NodeData::SourceFile(d) => &d.statements,
@@ -83,7 +83,7 @@ pub(crate) fn emit_declaration_statement(
     source: &str,
     start: usize,
     output: &mut String,
-) {
+) { ::tsox_core::fntrace::enter("emit_declaration_statement"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => {
             if let Some(body) = &d.body {
@@ -154,7 +154,7 @@ pub(crate) fn emit_class_members(
     start: usize,
     end: usize,
     output: &mut String,
-) {
+) { ::tsox_core::fntrace::enter("emit_class_members"); 
     let mut ops: Vec<(usize, usize)> = Vec::new();
     let bytes = source.as_bytes();
     for member in members.iter() {
@@ -186,7 +186,7 @@ pub(crate) fn emit_with_cuts(
     end: usize,
     cuts: &[(usize, usize)],
     output: &mut String,
-) {
+) { ::tsox_core::fntrace::enter("emit_with_cuts"); 
     if cuts.is_empty() {
         output.push_str(&source[start..end]);
         return;

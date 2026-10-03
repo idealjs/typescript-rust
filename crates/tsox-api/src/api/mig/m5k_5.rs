@@ -12,7 +12,7 @@ pub const MESSAGE_TYPE_RESPONSE: u8 = 4;
 pub const MESSAGE_TYPE_ERROR: u8 = 5;
 pub const MESSAGE_TYPE_CALL: u8 = 6;
 
-pub fn message_type_is_valid(m: u8) -> bool {
+pub fn message_type_is_valid(m: u8) -> bool { ::tsox_core::fntrace::enter("message_type_is_valid"); 
     (MESSAGE_TYPE_REQUEST..=MESSAGE_TYPE_CALL).contains(&m)
 }
 
@@ -27,7 +27,7 @@ pub struct MessagePackProtocol<R: Read, W: Write> {
     w: BufWriter<W>,
 }
 
-pub fn new_message_pack_protocol<R: Read, W: Write>(rw: (R, W)) -> MessagePackProtocol<R, W> {
+pub fn new_message_pack_protocol<R: Read, W: Write>(rw: (R, W)) -> MessagePackProtocol<R, W> { ::tsox_core::fntrace::enter("new_message_pack_protocol"); 
     MessagePackProtocol {
         r: BufReader::new(rw.0),
         w: BufWriter::new(rw.1),
@@ -35,7 +35,7 @@ pub fn new_message_pack_protocol<R: Read, W: Write>(rw: (R, W)) -> MessagePackPr
 }
 
 impl<R: Read, W: Write> MessagePackProtocol<R, W> {
-    pub fn read_message(&mut self) -> Result<tsox_lsp::jsonrpc::jsonrpc::Message, String> {
+    pub fn read_message(&mut self) -> Result<tsox_lsp::jsonrpc::jsonrpc::Message, String> { ::tsox_core::fntrace::enter("read_message"); 
         let (msg_type, method, payload) = self.read_tuple()?;
         let mut msg = tsox_lsp::jsonrpc::jsonrpc::Message {
             jsonrpc: Default::default(),
@@ -78,12 +78,12 @@ impl<R: Read, W: Write> MessagePackProtocol<R, W> {
         _id: Option<&tsox_lsp::jsonrpc::jsonrpc::Id>,
         method: &str,
         params: &JsonValue,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("write_request"); 
         let payload = serde_json::to_vec(params).map_err(|e| e.to_string())?;
         self.write_tuple(MESSAGE_TYPE_CALL, method, &payload)
     }
 
-    pub fn write_notification(&mut self, method: &str, params: &JsonValue) -> Result<(), String> {
+    pub fn write_notification(&mut self, method: &str, params: &JsonValue) -> Result<(), String> { ::tsox_core::fntrace::enter("write_notification"); 
         self.write_request(None, method, params)
     }
 
@@ -91,7 +91,7 @@ impl<R: Read, W: Write> MessagePackProtocol<R, W> {
         &mut self,
         id: Option<&tsox_lsp::jsonrpc::jsonrpc::Id>,
         result: ProtocolResult,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("write_response"); 
         let method = match id {
             Some(id) => id_to_string_value(id),
             None => String::new(),
@@ -107,7 +107,7 @@ impl<R: Read, W: Write> MessagePackProtocol<R, W> {
         &mut self,
         id: Option<&tsox_lsp::jsonrpc::jsonrpc::Id>,
         resp_err: &tsox_lsp::jsonrpc::jsonrpc::ResponseError,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("write_error"); 
         let method = match id {
             Some(id) => id_to_string_value(id),
             None => String::new(),
@@ -115,7 +115,7 @@ impl<R: Read, W: Write> MessagePackProtocol<R, W> {
         self.write_tuple(MESSAGE_TYPE_ERROR, &method, resp_err.message.as_bytes())
     }
 
-    fn read_tuple(&mut self) -> Result<(u8, String, Vec<u8>), String> {
+    fn read_tuple(&mut self) -> Result<(u8, String, Vec<u8>), String> { ::tsox_core::fntrace::enter("read_tuple"); 
         let mut marker = [0u8; 1];
         self.r
             .read_exact(&mut marker)
@@ -151,7 +151,7 @@ impl<R: Read, W: Write> MessagePackProtocol<R, W> {
         Ok((raw_type, method, payload))
     }
 
-    fn read_bin(&mut self) -> Result<Vec<u8>, String> {
+    fn read_bin(&mut self) -> Result<Vec<u8>, String> { ::tsox_core::fntrace::enter("read_bin"); 
         let mut t = [0u8; 1];
         self.r.read_exact(&mut t).map_err(|e| e.to_string())?;
         let size: usize = match t[0] {
@@ -184,7 +184,7 @@ impl<R: Read, W: Write> MessagePackProtocol<R, W> {
         Ok(payload)
     }
 
-    fn write_tuple(&mut self, msg_type: u8, method: &str, payload: &[u8]) -> Result<(), String> {
+    fn write_tuple(&mut self, msg_type: u8, method: &str, payload: &[u8]) -> Result<(), String> { ::tsox_core::fntrace::enter("write_tuple"); 
         self.w
             .write_all(&[MSGPACK_FIXED_ARRAY_3])
             .map_err(|e| e.to_string())?;
@@ -194,7 +194,7 @@ impl<R: Read, W: Write> MessagePackProtocol<R, W> {
         self.w.flush().map_err(|e| e.to_string())
     }
 
-    fn write_bin(&mut self, data: &[u8]) -> Result<(), String> {
+    fn write_bin(&mut self, data: &[u8]) -> Result<(), String> { ::tsox_core::fntrace::enter("write_bin"); 
         let length = data.len();
         if length < 256 {
             self.w
@@ -228,11 +228,11 @@ pub type RawBinary = Vec<u8>;
 
 const ERR_INVALID_REQUEST: &str = "invalid request";
 
-fn new_id_string(method: &str) -> tsox_lsp::jsonrpc::jsonrpc::Id {
+fn new_id_string(method: &str) -> tsox_lsp::jsonrpc::jsonrpc::Id { ::tsox_core::fntrace::enter("new_id_string"); 
     tsox_lsp::jsonrpc::jsonrpc::Id::new_string(method)
 }
 
-fn id_to_string_value(id: &tsox_lsp::jsonrpc::jsonrpc::Id) -> String {
+fn id_to_string_value(id: &tsox_lsp::jsonrpc::jsonrpc::Id) -> String { ::tsox_core::fntrace::enter("id_to_string_value"); 
     match id {
         tsox_lsp::jsonrpc::jsonrpc::Id::Int(v) => v.to_string(),
         tsox_lsp::jsonrpc::jsonrpc::Id::Str(s) => s.clone(),
@@ -250,7 +250,7 @@ pub struct StdioServerOptions {
     pub output: std::process::Stdio,
 }
 
-pub fn new_stdio_server(options: StdioServerOptions) -> StdioServer {
+pub fn new_stdio_server(options: StdioServerOptions) -> StdioServer { ::tsox_core::fntrace::enter("new_stdio_server"); 
     if options.cwd.is_empty() {
         panic!("StdioServerOptions.Cwd is required");
     }

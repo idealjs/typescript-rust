@@ -14,7 +14,7 @@ use tsox_frontend::ast::get_root_declaration;
 use crate::checker::checker_ast_get_combined_modifier_flags::ast_get_combined_modifier_flags;
 use super::{find_ancestor_node, is_global_source_file};
 
-pub(crate) fn symbol_option_ptr_eq(a: &Option<Arc<Symbol>>, b: &Option<Arc<Symbol>>) -> bool {
+pub(crate) fn symbol_option_ptr_eq(a: &Option<Arc<Symbol>>, b: &Option<Arc<Symbol>>) -> bool { ::tsox_core::fntrace::enter("symbol_option_ptr_eq"); 
     match (a, b) {
         (Some(a), Some(b)) => Arc::ptr_eq(a, b),
         _ => false,
@@ -22,7 +22,7 @@ pub(crate) fn symbol_option_ptr_eq(a: &Option<Arc<Symbol>>, b: &Option<Arc<Symbo
 }
 
 impl Checker {
-    pub fn check_module_export_name(&mut self, name: &Arc<Node>, allow_string_literal: bool) {
+    pub fn check_module_export_name(&mut self, name: &Arc<Node>, allow_string_literal: bool) { ::tsox_core::fntrace::enter("check_module_export_name"); 
         if name.kind != SyntaxKind::StringLiteral {
             return;
         }
@@ -41,7 +41,7 @@ impl Checker {
         expr: &Arc<Node>,
         invalid_reference_message: tsox_core::diagnostics::Message,
         invalid_optional_chain_message: tsox_core::diagnostics::Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_reference_expression"); 
         let node = skip_outer_expressions(
             expr,
             OuterExpressionKinds::TYPE_ASSERTIONS | OuterExpressionKinds::SATISFIES | OuterExpressionKinds::PARENS,
@@ -57,7 +57,7 @@ impl Checker {
         true
     }
 
-    pub fn get_control_flow_container(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_control_flow_container(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_control_flow_container"); 
         let parent = node.parent().unwrap_or_else(|| Arc::clone(node));
         find_ancestor_node(&parent, |n| {
             (is_function_like(n) && get_immediately_invoked_function_expression(n).is_none())
@@ -68,20 +68,20 @@ impl Checker {
         .unwrap_or(parent)
     }
 
-    pub fn check_source_elements_from_list(&mut self, list: &[Arc<Node>]) {
+    pub fn check_source_elements_from_list(&mut self, list: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_source_elements_from_list"); 
         for node in list {
             self.check_source_element(node);
         }
     }
 
-    pub fn get_type_from_import_attributes_opt(&mut self, attributes: Option<&Arc<Node>>) -> Option<Arc<Type>> {
+    pub fn get_type_from_import_attributes_opt(&mut self, attributes: Option<&Arc<Node>>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_from_import_attributes_opt"); 
         match attributes {
             Some(attributes) => self.get_type_from_import_attributes(Some(attributes)),
             None => None,
         }
     }
 
-    pub fn is_parameter_or_mutable_local_variable(&self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_parameter_or_mutable_local_variable(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_parameter_or_mutable_local_variable"); 
         if let Some(value_declaration) = &symbol.value_declaration {
             let declaration = get_root_declaration(value_declaration);
             return declaration.kind == SyntaxKind::Parameter
@@ -92,7 +92,7 @@ impl Checker {
         false
     }
 
-    pub fn is_in_ambient_or_type_node(&self, node: &Arc<Node>) -> bool {
+    pub fn is_in_ambient_or_type_node(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_ambient_or_type_node"); 
         node.flags.contains(NodeFlags::Ambient)
             || self
                 .get_source_file_of_node(node)

@@ -19,7 +19,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         f: impl FnOnce(&mut Checker) -> T,
-    ) -> T {
+    ) -> T { ::tsox_core::fntrace::enter("run_with_inference_blocked_from_source_node"); 
         let containing_call = find_ancestor(node, is_call_like_expression);
         if let Some(containing_call) = containing_call {
             let mut to_mark_skip = Arc::clone(node);
@@ -44,7 +44,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         f: impl FnOnce(&mut Checker) -> T,
-    ) -> T {
+    ) -> T { ::tsox_core::fntrace::enter("run_without_resolved_signature_caching"); 
         let mut ancestor_node = find_ancestor(node, is_call_like_or_function_like_expression);
         if ancestor_node.is_some() {
             let mut cached_resolved_signatures: Vec<(Arc<Node>, Option<Arc<Signature>>)> =
@@ -88,7 +88,7 @@ impl Checker {
         reference_location: &Arc<Node>,
         reference_symbol: &Arc<Symbol>,
         export_specifier: &Arc<Node>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_local_symbol_for_export_specifier"); 
         if is_export_specifier_alias(reference_location, export_specifier) {
             if let Some(symbol) = self.get_export_specifier_local_target_symbol(export_specifier) {
                 return symbol;
@@ -97,7 +97,7 @@ impl Checker {
         Arc::clone(reference_symbol)
     }
 
-    pub fn get_uninstantiated_signatures(&mut self, node: &Arc<Node>) -> Vec<Arc<Signature>> {
+    pub fn get_uninstantiated_signatures(&mut self, node: &Arc<Node>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_uninstantiated_signatures"); 
         match node.kind {
             SyntaxKind::CallExpression | SyntaxKind::Decorator => {
                 let expression = node.expression().expect("call expression");
@@ -131,7 +131,7 @@ impl Checker {
         &mut self,
         signatures: &[Arc<Signature>],
         position: usize,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_parameter_constraint_for_position_across_signatures"); 
         let mut relevant_constraints: Vec<Arc<Type>> = Vec::new();
         for signature in signatures {
             if position >= signature.type_parameters.len() {
@@ -149,7 +149,7 @@ impl Checker {
 pub fn is_export_specifier_alias(
     reference_location: &Arc<Node>,
     export_specifier: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_export_specifier_alias"); 
     let property_name = export_specifier.as_export_specifier().property_name.clone();
     if let Some(property_name) = property_name {
         Arc::ptr_eq(&property_name, reference_location)
@@ -165,7 +165,7 @@ pub fn is_export_specifier_alias(
 pub fn new_symbol_tracker_impl(
     context: SharedNodeBuilderContext,
     tracker: Option<Box<dyn SymbolTracker>>,
-) -> SymbolTrackerImpl {
+) -> SymbolTrackerImpl { ::tsox_core::fntrace::enter("new_symbol_tracker_impl"); 
     let mut tracker = tracker;
     while let Some(mut current) = tracker {
         if current.as_any().is::<SymbolTrackerImpl>() {
@@ -186,7 +186,7 @@ pub fn new_symbol_tracker_impl(
 fn find_ancestor(
     start: &Arc<Node>,
     predicate: impl Fn(&Arc<Node>) -> bool,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor"); 
     let mut current = Some(Arc::clone(start));
     while let Some(node) = current {
         if predicate(&node) {

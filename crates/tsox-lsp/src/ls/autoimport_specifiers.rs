@@ -16,7 +16,7 @@ impl View {
         &self,
         _export: &Export,
         _user_preferences: &tsox_tsoptions::modulespecifiers::UserPreferences,
-    ) -> (String, ResultKind) {
+    ) -> (String, ResultKind) { ::tsox_core::fntrace::enter("get_module_specifier"); 
         todo!(
             "get_module_specifier requires registry entrypoints and modulespecifiers infrastructure"
         )

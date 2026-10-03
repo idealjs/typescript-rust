@@ -65,7 +65,7 @@ pub struct SemanticToken {
 }
 
 impl LanguageService {
-    pub fn provide_semantic_tokens(&self, document_uri: &DocumentUri) -> Option<SemanticTokens> {
+    pub fn provide_semantic_tokens(&self, document_uri: &DocumentUri) -> Option<SemanticTokens> { ::tsox_core::fntrace::enter("provide_semantic_tokens"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let checker = program.build_checker();
         let tokens = self.collect_semantic_tokens_in_range(
@@ -83,7 +83,7 @@ impl LanguageService {
         &self,
         document_uri: &DocumentUri,
         rng: Range,
-    ) -> Option<SemanticTokens> {
+    ) -> Option<SemanticTokens> { ::tsox_core::fntrace::enter("provide_semantic_tokens_range"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let start = lsp_position_to_offset(line_map, &rng.start);
@@ -102,7 +102,7 @@ impl LanguageService {
         _program: &Program,
         span_start: usize,
         span_end: usize,
-    ) -> Vec<SemanticToken> {
+    ) -> Vec<SemanticToken> { ::tsox_core::fntrace::enter("collect_semantic_tokens_in_range"); 
         let mut tokens = Vec::new();
         collect_tokens(checker, &file.node, span_start, span_end, &mut tokens);
 
@@ -111,7 +111,7 @@ impl LanguageService {
     }
 }
 
-pub(crate) fn encode_tokens(tokens: &[SemanticToken], line_map: &LineMap) -> Vec<u32> {
+pub(crate) fn encode_tokens(tokens: &[SemanticToken], line_map: &LineMap) -> Vec<u32> { ::tsox_core::fntrace::enter("encode_tokens"); 
     let mut data = Vec::with_capacity(tokens.len() * 5);
     let mut prev_line = 0u32;
     let mut prev_char = 0u32;
@@ -142,7 +142,7 @@ pub(crate) fn encode_tokens(tokens: &[SemanticToken], line_map: &LineMap) -> Vec
     data
 }
 
-pub(crate) fn offset_to_line_char(line_map: &LineMap, offset: usize) -> (u32, u32) {
+pub(crate) fn offset_to_line_char(line_map: &LineMap, offset: usize) -> (u32, u32) { ::tsox_core::fntrace::enter("offset_to_line_char"); 
     let line = match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),
@@ -154,7 +154,7 @@ pub(crate) fn offset_to_line_char(line_map: &LineMap, offset: usize) -> (u32, u3
 pub(crate) fn lsp_position_to_offset(
     line_map: &LineMap,
     position: &crate::lsp::lsproto_lsp::Position,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;

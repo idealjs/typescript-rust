@@ -17,7 +17,7 @@ impl Checker {
         tp_symbols: &[Arc<Symbol>],
         type_params: &[Arc<Type>],
         type_args: &[Arc<Type>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("mark_structured_members_instantiated"); 
         if type_params.is_empty() || type_params.len() != type_args.len() {
             return;
         }
@@ -66,7 +66,7 @@ impl Checker {
         &mut self,
         member: &Arc<Symbol>,
         tp_symbols: &[Arc<Symbol>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("member_declaration_touches_type_params"); 
         let touches = |node: &Arc<tsox_frontend::ast::Node>| {
             node_touches_type_param_symbols(node, tp_symbols)
         };
@@ -98,7 +98,7 @@ impl Checker {
         &mut self,
         member: &Arc<Symbol>,
         container: &Arc<Symbol>,
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("instantiated_member_container_args"); 
         if !member
             .check_flags
             .contains(CheckFlags::Instantiated)
@@ -128,7 +128,7 @@ impl Checker {
     pub(crate) fn class_type_parameter_types_of(
         &mut self,
         class_node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("class_type_parameter_types_of"); 
         let tps = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
             tsox_frontend::ast::NodeData::ClassExpression(d) => d.type_parameters.as_ref(),
@@ -152,7 +152,7 @@ impl Checker {
 
 fn member_type_node(
     decl: &Arc<tsox_frontend::ast::Node>,
-) -> Option<Arc<tsox_frontend::ast::Node>> {
+) -> Option<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("member_type_node"); 
     use tsox_frontend::ast::NodeData;
     match &decl.data {
         NodeData::PropertySignatureDeclaration(d) => Some(Arc::clone(&d.type_node)),
@@ -167,7 +167,7 @@ fn member_type_node(
 
 fn member_parameters(
     decl: &Arc<tsox_frontend::ast::Node>,
-) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("member_parameters"); 
     use tsox_frontend::ast::NodeData;
     match &decl.data {
         NodeData::MethodSignatureDeclaration(d) => Some(Arc::clone(&d.parameters)),
@@ -181,7 +181,7 @@ fn member_parameters(
 fn node_touches_type_param_symbols(
     node: &Arc<tsox_frontend::ast::Node>,
     tp_symbols: &[Arc<Symbol>],
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("node_touches_type_param_symbols"); 
     use tsox_frontend::ast::SyntaxKind;
     if node.kind == SyntaxKind::Identifier
         && tp_symbols.iter().any(|s| s.name == node.text())

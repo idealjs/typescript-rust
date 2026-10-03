@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn test_iofs() {
+fn test_iofs() { ::tsox_core::fntrace::enter("test_iofs"); 
     use std::path::PathBuf;
 
     let fs = OsFS;

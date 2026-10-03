@@ -19,25 +19,25 @@ pub trait FunctionFlagsExt {
 }
 
 impl FunctionFlagsExt for FunctionFlags {
-    fn intersects(self, other: FunctionFlags) -> bool {
+    fn intersects(self, other: FunctionFlags) -> bool { ::tsox_core::fntrace::enter("intersects"); 
         self.0 & other.0 != 0
     }
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn generated_name_node(&self, name: &GeneratedName) -> Arc<Node> {
+    pub fn generated_name_node(&self, name: &GeneratedName) -> Arc<Node> { ::tsox_core::fntrace::enter("generated_name_node"); 
         self.new_identifier(name.text())
     }
 
-    pub fn new_token(&self, kind: SyntaxKind) -> Arc<Node> {
+    pub fn new_token(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_token"); 
         Arc::new(Node::new(kind, NodeData::Token))
     }
 
-    pub fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> Arc<NodeList> {
+    pub fn new_node_list(&self, nodes: Vec<Arc<Node>>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("new_node_list"); 
         Arc::new(NodeList::new(nodes))
     }
 
-    pub fn new_identifier(&self, text: &str) -> Arc<Node> {
+    pub fn new_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {
@@ -46,11 +46,11 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_keyword_expression(&self, kind: SyntaxKind) -> Arc<Node> {
+    pub fn new_keyword_expression(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_keyword_expression"); 
         self.new_token(kind)
     }
 
-    pub fn new_expression_statement(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_expression_statement(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_expression_statement"); 
         Arc::new(Node::new(
             SyntaxKind::ExpressionStatement,
             NodeData::ExpressionStatement(ndg::ExpressionStatementData {
@@ -59,7 +59,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_block(&self, statements: &NodeList, multi_line: bool) -> Arc<Node> {
+    pub fn new_block(&self, statements: &NodeList, multi_line: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("new_block"); 
         Arc::new(Node::new(
             SyntaxKind::Block,
             NodeData::Block(ndg::BlockData {
@@ -69,7 +69,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn update_block(&self, node: &Arc<Node>, statements: &NodeList, multi_line: bool) -> Arc<Node> {
+    pub fn update_block(&self, node: &Arc<Node>, statements: &NodeList, multi_line: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("update_block"); 
         let mut updated = Node::new(
             SyntaxKind::Block,
             NodeData::Block(ndg::BlockData {
@@ -89,7 +89,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         operator_token: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_binary_expression"); 
         Arc::new(Node::new(
             SyntaxKind::BinaryExpression,
             NodeData::BinaryExpression(ndg::BinaryExpressionData {
@@ -108,7 +108,7 @@ impl<'a> NodeFactory<'a> {
         question_dot_token: Option<Arc<Node>>,
         name: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_access_expression"); 
         let mut node = Node::new(
             SyntaxKind::PropertyAccessExpression,
             NodeData::PropertyAccessExpression(
@@ -130,7 +130,7 @@ impl<'a> NodeFactory<'a> {
         type_arguments: Option<Arc<NodeList>>,
         arguments: Arc<NodeList>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_call_expression"); 
         let mut node = Node::new(
             SyntaxKind::CallExpression,
             NodeData::CallExpression(ndg::CallExpressionData {
@@ -144,7 +144,7 @@ impl<'a> NodeFactory<'a> {
         Arc::new(node)
     }
 
-    pub fn new_void_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_void_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_void_expression"); 
         Arc::new(Node::new(
             SyntaxKind::VoidExpression,
             NodeData::VoidExpression(ndg::VoidExpressionData {
@@ -153,7 +153,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_void_zero_expression(&self) -> Arc<Node> {
+    pub fn new_void_zero_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_void_zero_expression"); 
         self.new_void_expression(&Arc::new(Node::new(
             SyntaxKind::NumericLiteral,
             NodeData::NumericLiteral(ndg::NumericLiteralData {
@@ -167,7 +167,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         asterisk_token: Option<&Arc<Node>>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_yield_expression"); 
         Arc::new(Node::new(
             SyntaxKind::YieldExpression,
             NodeData::YieldExpression(ndg::YieldExpressionData {
@@ -177,7 +177,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_await_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_await_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_await_expression"); 
         Arc::new(Node::new(
             SyntaxKind::AwaitExpression,
             NodeData::AwaitExpression(ndg::AwaitExpressionData {
@@ -192,7 +192,7 @@ impl<'a> NodeFactory<'a> {
         exclamation_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_variable_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::VariableDeclaration,
             NodeData::VariableDeclaration(ndg::VariableDeclarationData {
@@ -208,7 +208,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         declarations: &NodeList,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_variable_declaration_list"); 
         let mut node = Node::new(
             SyntaxKind::VariableDeclarationList,
             NodeData::VariableDeclarationList(
@@ -221,7 +221,7 @@ impl<'a> NodeFactory<'a> {
         Arc::new(node)
     }
 
-    pub fn new_prefix_unary_expression(&self, operator: SyntaxKind, operand: &Arc<Node>) -> Arc<Node> {
+    pub fn new_prefix_unary_expression(&self, operator: SyntaxKind, operand: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_prefix_unary_expression"); 
         Arc::new(Node::new(
             SyntaxKind::PrefixUnaryExpression,
             NodeData::PrefixUnaryExpression(
@@ -239,7 +239,7 @@ impl<'a> NodeFactory<'a> {
         condition: Option<&Arc<Node>>,
         incrementor: Option<&Arc<Node>>,
         statement: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_for_statement"); 
         Arc::new(Node::new(
             SyntaxKind::ForStatement,
             NodeData::ForStatement(ndg::ForStatementData {
@@ -256,7 +256,7 @@ impl<'a> NodeFactory<'a> {
         expression: &Arc<Node>,
         then_statement: &Arc<Node>,
         else_statement: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_if_statement"); 
         Arc::new(Node::new(
             SyntaxKind::IfStatement,
             NodeData::IfStatement(ndg::IfStatementData {
@@ -267,7 +267,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_throw_statement(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_throw_statement(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_throw_statement"); 
         Arc::new(Node::new(
             SyntaxKind::ThrowStatement,
             NodeData::ThrowStatement(ndg::ThrowStatementData {
@@ -276,7 +276,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_return_statement(&self, expression: Option<&Arc<Node>>) -> Arc<Node> {
+    pub fn new_return_statement(&self, expression: Option<&Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_return_statement"); 
         Arc::new(Node::new(
             SyntaxKind::ReturnStatement,
             NodeData::ReturnStatement(ndg::ReturnStatementData {
@@ -290,7 +290,7 @@ impl<'a> NodeFactory<'a> {
         try_block: &Arc<Node>,
         catch_clause: Option<&Arc<Node>>,
         finally_block: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_try_statement"); 
         Arc::new(Node::new(
             SyntaxKind::TryStatement,
             NodeData::TryStatement(ndg::TryStatementData {
@@ -305,7 +305,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         variable_declaration: Option<&Arc<Node>>,
         block: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_catch_clause"); 
         Arc::new(Node::new(
             SyntaxKind::CatchClause,
             NodeData::CatchClause(ndg::CatchClauseData {
@@ -319,7 +319,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         properties: &NodeList,
         multi_line: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_object_literal_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ObjectLiteralExpression,
             NodeData::ObjectLiteralExpression(
@@ -339,7 +339,7 @@ impl<'a> NodeFactory<'a> {
         question_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_parameter_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::Parameter,
             NodeData::ParameterDeclaration(ndg::ParameterDeclarationData {
@@ -363,7 +363,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_function_expression"); 
         Arc::new(Node::new(
             SyntaxKind::FunctionExpression,
             NodeData::FunctionExpression(ndg::FunctionExpressionData {
@@ -419,7 +419,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_function_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::FunctionDeclaration,
             NodeData::FunctionDeclaration(ndg::FunctionDeclarationData {
@@ -446,7 +446,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_function_expression"); 
         Arc::new(Node::new(
             SyntaxKind::FunctionExpression,
             NodeData::FunctionExpression(ndg::FunctionExpressionData {
@@ -473,7 +473,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_constructor_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::Constructor,
             NodeData::ConstructorDeclaration(ndg::ConstructorDeclarationData {
@@ -497,7 +497,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_get_accessor_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::GetAccessor,
             NodeData::GetAccessorDeclaration(ndg::GetAccessorDeclarationData {
@@ -522,7 +522,7 @@ impl<'a> NodeFactory<'a> {
         type_node: Option<Arc<Node>>,
         full_signature: Option<Arc<Node>>,
         body: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_set_accessor_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::SetAccessor,
             NodeData::SetAccessorDeclaration(ndg::SetAccessorDeclarationData {
@@ -547,7 +547,7 @@ impl<'a> NodeFactory<'a> {
         full_signature: Option<Arc<Node>>,
         equals_greater_than_token: &Arc<Node>,
         body: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_arrow_function"); 
         Arc::new(Node::new(
             SyntaxKind::ArrowFunction,
             NodeData::ArrowFunction(ndg::ArrowFunctionData {
@@ -563,7 +563,7 @@ impl<'a> NodeFactory<'a> {
     }
 }
 
-pub fn cloned_node_list(list: &NodeList) -> NodeList {
+pub fn cloned_node_list(list: &NodeList) -> NodeList { ::tsox_core::fntrace::enter("cloned_node_list"); 
     NodeList {
         loc: list.loc,
         nodes: list.nodes.clone(),

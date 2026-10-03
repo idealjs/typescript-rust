@@ -22,37 +22,37 @@ pub struct ProjectReferenceDtsFakingHost {
 pub type CachedVfs = ProjectReferenceDtsFakingVfs;
 
 impl ResolutionHost for ProjectReferenceDtsFakingHost {
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         &self.fs
     }
 
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.host.current_directory()
     }
 }
 
 impl tsox_tsoptions::vfs::FS for ProjectReferenceDtsFakingVfs {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         ProjectReferenceDtsFakingVfs::use_case_sensitive_file_names(self)
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         ProjectReferenceDtsFakingVfs::file_exists(self, path)
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         ProjectReferenceDtsFakingVfs::read_file(self, path)
     }
 
-    fn write_file(&self, _path: &str, _data: &str) -> Result<(), std::io::Error> {
+    fn write_file(&self, _path: &str, _data: &str) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("write_file"); 
         panic!("should not be called by resolver")
     }
 
-    fn append_file(&self, _path: &str, _data: &str) -> Result<(), std::io::Error> {
+    fn append_file(&self, _path: &str, _data: &str) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("append_file"); 
         panic!("should not be called by resolver")
     }
 
-    fn remove(&self, _path: &str) -> Result<(), std::io::Error> {
+    fn remove(&self, _path: &str) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("remove"); 
         panic!("should not be called by resolver")
     }
 
@@ -61,23 +61,23 @@ impl tsox_tsoptions::vfs::FS for ProjectReferenceDtsFakingVfs {
         _path: &str,
         _a_time: std::time::SystemTime,
         _m_time: std::time::SystemTime,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("chtimes"); 
         panic!("should not be called by resolver")
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         ProjectReferenceDtsFakingVfs::directory_exists(self, path)
     }
 
-    fn get_accessible_entries(&self, _path: &str) -> tsox_tsoptions::vfs::Entries {
+    fn get_accessible_entries(&self, _path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         panic!("should not be called by resolver")
     }
 
-    fn stat(&self, _path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> {
+    fn stat(&self, _path: &str) -> Option<tsox_tsoptions::vfs::FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         panic!("should not be called by resolver")
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         ProjectReferenceDtsFakingVfs::realpath(self, path)
     }
 
@@ -85,7 +85,7 @@ impl tsox_tsoptions::vfs::FS for ProjectReferenceDtsFakingVfs {
         &self,
         _root: &str,
         _walk_fn: &mut dyn FnMut(&str, &tsox_tsoptions::vfs::FileInfo),
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("walk_dir"); 
         panic!("should not be called by resolver")
     }
 }
@@ -94,7 +94,7 @@ pub fn new_project_reference_dts_faking_host(
     host: Arc<dyn crate::compiler::CompilerHost>,
     project_reference_file_mapper: Weak<ProjectReferenceFileMapper>,
     dts_directories: Set<Path>,
-) -> ProjectReferenceDtsFakingHost {
+) -> ProjectReferenceDtsFakingHost { ::tsox_core::fntrace::enter("new_project_reference_dts_faking_host"); 
     ProjectReferenceDtsFakingHost {
         host: host.clone(),
         fs: ProjectReferenceDtsFakingVfs {
@@ -115,18 +115,18 @@ pub struct ProjectReferenceDtsFakingVfs {
 }
 
 impl ProjectReferenceDtsFakingVfs {
-    fn mapper_host(&self) -> Arc<dyn crate::compiler::CompilerHost> {
+    fn mapper_host(&self) -> Arc<dyn crate::compiler::CompilerHost> { ::tsox_core::fntrace::enter("mapper_host"); 
         self.project_reference_file_mapper
             .upgrade()
             .expect("project reference file mapper outlives its faking host")
             .host_compiler_host()
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.mapper_host().use_case_sensitive_file_names()
     }
 
-    pub fn file_exists(&self, path: &str) -> bool {
+    pub fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         if self.mapper_host().fs().file_exists(path) {
             return true;
         }
@@ -136,19 +136,19 @@ impl ProjectReferenceDtsFakingVfs {
         self.file_or_directory_exists_using_source(path, true)
     }
 
-    pub fn read_file(&self, path: &str) -> Option<String> {
+    pub fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.mapper_host().fs().read_file(path)
     }
 
-    pub fn write_file(&self, path: &str, data: &str) -> Result<(), std::io::Error> {
+    pub fn write_file(&self, path: &str, data: &str) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("write_file"); 
         panic!("should not be called by resolver")
     }
 
-    pub fn append_file(&self, path: &str, data: &str) -> Result<(), std::io::Error> {
+    pub fn append_file(&self, path: &str, data: &str) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("append_file"); 
         panic!("should not be called by resolver")
     }
 
-    pub fn remove(&self, path: &str) -> Result<(), std::io::Error> {
+    pub fn remove(&self, path: &str) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("remove"); 
         panic!("should not be called by resolver")
     }
 
@@ -157,11 +157,11 @@ impl ProjectReferenceDtsFakingVfs {
         path: &str,
         a_time: std::time::SystemTime,
         m_time: std::time::SystemTime,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("chtimes"); 
         panic!("should not be called by resolver")
     }
 
-    pub fn directory_exists(&self, path: &str) -> bool {
+    pub fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         if self.mapper_host().fs().directory_exists(path) {
             self.handle_directory_could_be_symlink(path);
             return true;
@@ -169,11 +169,11 @@ impl ProjectReferenceDtsFakingVfs {
         self.file_or_directory_exists_using_source(path, false)
     }
 
-    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries {
+    pub fn get_accessible_entries(&self, path: &str) -> tsox_tsoptions::vfs::Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         panic!("should not be called by resolver")
     }
 
-    pub fn stat(&self, path: &str) -> tsox_tsoptions::vfs::FileInfo {
+    pub fn stat(&self, path: &str) -> tsox_tsoptions::vfs::FileInfo { ::tsox_core::fntrace::enter("stat"); 
         panic!("should not be called by resolver")
     }
 
@@ -181,18 +181,18 @@ impl ProjectReferenceDtsFakingVfs {
         &self,
         root: &str,
         walk_fn: &mut dyn FnMut(&str, &tsox_tsoptions::vfs::Entries) -> Result<(), std::io::Error>,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), std::io::Error> { ::tsox_core::fntrace::enter("walk_dir"); 
         panic!("should not be called by resolver")
     }
 
-    pub fn realpath(&self, path: &str) -> String {
+    pub fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         if let Some(result) = self.known_symlinks.files().load(&self.to_path(path)) {
             return result;
         }
         self.mapper_host().fs().realpath(path)
     }
 
-    pub fn to_path(&self, path: &str) -> Path {
+    pub fn to_path(&self, path: &str) -> Path { ::tsox_core::fntrace::enter("to_path"); 
         tspath::to_path(
             path,
             self.mapper_host().current_directory(),
@@ -200,7 +200,7 @@ impl ProjectReferenceDtsFakingVfs {
         )
     }
 
-    pub fn handle_directory_could_be_symlink(&self, directory: &str) {
+    pub fn handle_directory_could_be_symlink(&self, directory: &str) { ::tsox_core::fntrace::enter("handle_directory_could_be_symlink"); 
         if tspath::contains_ignored_path(directory) {
             return;
         }
@@ -244,7 +244,7 @@ impl ProjectReferenceDtsFakingVfs {
         &self,
         file_or_directory: &str,
         is_file: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("file_or_directory_exists_using_source"); 
         let mut result = if is_file {
             self.file_exists_if_project_reference_dts(file_or_directory)
         } else {
@@ -310,7 +310,7 @@ impl ProjectReferenceDtsFakingVfs {
         exists
     }
 
-    pub fn file_exists_if_project_reference_dts(&self, file: &str) -> Tristate {
+    pub fn file_exists_if_project_reference_dts(&self, file: &str) -> Tristate { ::tsox_core::fntrace::enter("file_exists_if_project_reference_dts"); 
         let Some(mapper) = self.project_reference_file_mapper.upgrade() else {
             return Tristate::Unknown;
         };
@@ -329,7 +329,7 @@ impl ProjectReferenceDtsFakingVfs {
         Tristate::Unknown
     }
 
-    pub fn directory_exists_if_project_reference_decl_dir(&self, dir: &str) -> Tristate {
+    pub fn directory_exists_if_project_reference_decl_dir(&self, dir: &str) -> Tristate { ::tsox_core::fntrace::enter("directory_exists_if_project_reference_decl_dir"); 
         let dir_path = self.to_path(dir);
         for decl_dir_path in self.dts_directories.iter() {
             if dir_path.contains_path(decl_dir_path) || decl_dir_path.contains_path(&dir_path) {

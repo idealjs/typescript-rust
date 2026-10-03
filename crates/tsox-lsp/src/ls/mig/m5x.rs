@@ -12,10 +12,10 @@ pub struct M5xSourceFileScript {
 }
 
 impl crate::ls::lsconv_converters::Script for M5xSourceFileScript {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file.file_name
     }
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.file.text
     }
 }
@@ -55,7 +55,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         file: &Arc<SourceFile>,
         text_range: Option<TextRange>,
-    ) -> Option<Range> {
+    ) -> Option<Range> { ::tsox_core::fntrace::enter("path_completion_replacement_span"); 
         let text_range = text_range?;
         let (lsp_range, fidelity) = self.m5x_create_lsp_range_from_bounds(
             text_range.pos as usize,
@@ -70,18 +70,18 @@ impl crate::ls::language_service::LanguageService {
 
 }
 
-pub fn remove_leading_directory_separator(path: &str) -> String {
+pub fn remove_leading_directory_separator(path: &str) -> String { ::tsox_core::fntrace::enter("remove_leading_directory_separator"); 
     path.strip_prefix('/').unwrap_or(path).to_string()
 }
 
-fn has_index_signature(t: &Arc<tsox_checker::checker::Type>, type_checker: &mut tsox_checker::checker::Checker) -> bool {
+fn has_index_signature(t: &Arc<tsox_checker::checker::Type>, type_checker: &mut tsox_checker::checker::Checker) -> bool { ::tsox_core::fntrace::enter("has_index_signature"); 
     type_checker.get_string_index_type(t).is_some() || type_checker.get_number_index_type(t).is_some()
 }
 
 pub fn string_literal_completions_for_object_literal(
     type_checker: &mut tsox_checker::checker::Checker,
     object_literal_expression: &Arc<Node>,
-) -> Option<M5xCompletionsFromProperties> {
+) -> Option<M5xCompletionsFromProperties> { ::tsox_core::fntrace::enter("string_literal_completions_for_object_literal"); 
     let contextual_type = type_checker
         .get_contextual_type(object_literal_expression, tsox_checker::checker::ContextFlags::None)?;
     let completions_type = type_checker.get_contextual_type(
@@ -103,7 +103,7 @@ pub fn string_literal_completions_for_object_literal(
 pub fn string_literal_completions_from_properties(
     t: &Arc<tsox_checker::checker::Type>,
     type_checker: &mut tsox_checker::checker::Checker,
-) -> M5xCompletionsFromProperties {
+) -> M5xCompletionsFromProperties { ::tsox_core::fntrace::enter("string_literal_completions_from_properties"); 
     let symbols: Vec<SymbolRef> = type_checker
         .get_apparent_properties(t)
         .into_iter()
@@ -119,7 +119,7 @@ pub fn string_literal_completions_from_properties(
     }
 }
 
-pub fn to_completions_from_types(types: Vec<StringLiteralTypeRef>) -> Option<M5xCompletionsFromTypes> {
+pub fn to_completions_from_types(types: Vec<StringLiteralTypeRef>) -> Option<M5xCompletionsFromTypes> { ::tsox_core::fntrace::enter("to_completions_from_types"); 
     if types.is_empty() {
         return None;
     }
@@ -131,7 +131,7 @@ pub fn to_completions_from_types(types: Vec<StringLiteralTypeRef>) -> Option<M5x
 
 pub fn to_string_literal_completions_from_types(
     types: Vec<StringLiteralTypeRef>,
-) -> Option<M5xStringLiteralCompletions> {
+) -> Option<M5xStringLiteralCompletions> { ::tsox_core::fntrace::enter("to_string_literal_completions_from_types"); 
     let result = to_completions_from_types(types)?;
     Some(M5xStringLiteralCompletions {
         from_types: Some(result),
@@ -142,7 +142,7 @@ pub fn to_string_literal_completions_from_types(
 
 pub fn to_path_completions(
     names: Vec<ModuleCompletionNameAndKind>,
-) -> Vec<M5xPathCompletion> {
+) -> Vec<M5xPathCompletion> { ::tsox_core::fntrace::enter("to_path_completions"); 
     names
         .into_iter()
         .map(|name_and_kind| M5xPathCompletion {
@@ -159,7 +159,7 @@ const MODULE_COMPLETION_KIND_EXTERNAL_MODULE_NAME: u32 = 2;
 
 fn modulet_to_script_element_kind(
     kind: u32,
-) -> crate::ls::lsutil_symbol_display::ScriptElementKind {
+) -> crate::ls::lsutil_symbol_display::ScriptElementKind { ::tsox_core::fntrace::enter("modulet_to_script_element_kind"); 
     match kind {
         MODULE_COMPLETION_KIND_DIRECTORY => crate::ls::lsutil_symbol_display::ScriptElementKind::Directory,
         MODULE_COMPLETION_KIND_FILE => crate::ls::lsutil_symbol_display::ScriptElementKind::ScriptElement,
@@ -177,7 +177,7 @@ pub fn try_remove_directory_prefix(
     path: &str,
     prefix: &str,
     use_case_sensitive_file_names: bool,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("try_remove_directory_prefix"); 
     let (trimmed, had_prefix) = tsox_core::tspath::mig::m3j::trim_file_path_prefix(
         path,
         prefix,
@@ -194,7 +194,7 @@ pub fn try_remove_directory_prefix(
     Some(without_prefix)
 }
 
-pub fn walk_up_parentheses(node: &Arc<Node>) -> Arc<Node> {
+pub fn walk_up_parentheses(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("walk_up_parentheses"); 
     match node.kind {
         SyntaxKind::ParenthesizedType => walk_up_parenthesized_types(node),
         SyntaxKind::ParenthesizedExpression => walk_up_parenthesized_expressions(node),
@@ -202,7 +202,7 @@ pub fn walk_up_parentheses(node: &Arc<Node>) -> Arc<Node> {
     }
 }
 
-pub fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
+pub fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("walk_up_parenthesized_expressions"); 
     let mut current = Arc::clone(node);
     while ast::is_parenthesized_expression(&current) {
         let Some(parent) = current.parent() else {
@@ -213,7 +213,7 @@ pub fn walk_up_parenthesized_expressions(node: &Arc<Node>) -> Arc<Node> {
     current
 }
 
-pub fn walk_up_parenthesized_types(node: &Arc<Node>) -> Arc<Node> {
+pub fn walk_up_parenthesized_types(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("walk_up_parenthesized_types"); 
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::ParenthesizedType {
         let Some(parent) = current.parent() else {
@@ -224,7 +224,7 @@ pub fn walk_up_parenthesized_types(node: &Arc<Node>) -> Arc<Node> {
     current
 }
 
-pub fn without_start_and_end(s: &str, start: &str, end: &str) -> Option<String> {
+pub fn without_start_and_end(s: &str, start: &str, end: &str) -> Option<String> { ::tsox_core::fntrace::enter("without_start_and_end"); 
     if s.starts_with(start) && s.ends_with(end) && s.len() >= start.len() + end.len() {
         return Some(s[start.len()..s.len() - end.len()].to_string());
     }

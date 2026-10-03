@@ -2,7 +2,7 @@
 
 use crate::checker::checker_impl_chunk_5::*;
 
-fn intersection_properties(checker: &Checker, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+fn intersection_properties(checker: &Checker, t: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("intersection_properties"); 
     let Some(members) = t.types() else {
         return Vec::new();
     };
@@ -32,7 +32,7 @@ fn intersection_properties(checker: &Checker, t: &Arc<Type>) -> Vec<Arc<Symbol>>
         .collect()
 }
 
-fn merged_intersection_property(syms: &[Arc<Symbol>]) -> Arc<Symbol> {
+fn merged_intersection_property(syms: &[Arc<Symbol>]) -> Arc<Symbol> { ::tsox_core::fntrace::enter("merged_intersection_property"); 
     let first = &syms[0];
     let mut merged = Symbol::new(first.flags, first.name.clone());
     merged.check_flags = first.check_flags;
@@ -52,54 +52,54 @@ fn merged_intersection_property(syms: &[Arc<Symbol>]) -> Arc<Symbol> {
 }
 
 impl Checker {
-    pub fn get_string_type(&self) -> Arc<Type> {
+    pub fn get_string_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_string_type"); 
         self.string_type()
     }
-    pub fn get_number_type(&self) -> Arc<Type> {
+    pub fn get_number_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_number_type"); 
         self.number_type()
     }
-    pub fn get_boolean_type(&self) -> Arc<Type> {
+    pub fn get_boolean_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_boolean_type"); 
         self.boolean_type()
     }
-    pub fn get_void_type(&self) -> Arc<Type> {
+    pub fn get_void_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_void_type"); 
         self.void_type()
     }
-    pub fn get_undefined_type(&self) -> Arc<Type> {
+    pub fn get_undefined_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_undefined_type"); 
         self.undefined_type()
     }
-    pub fn get_null_type(&self) -> Arc<Type> {
+    pub fn get_null_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_null_type"); 
         self.null_type()
     }
-    pub fn get_any_type(&self) -> Arc<Type> {
+    pub fn get_any_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_any_type"); 
         self.any_type()
     }
-    pub fn get_error_type(&self) -> Arc<Type> {
+    pub fn get_error_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_error_type"); 
         self.error_type()
     }
-    pub fn get_never_type(&self) -> Arc<Type> {
+    pub fn get_never_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_never_type"); 
         self.never_type()
     }
-    pub fn get_unknown_type(&self) -> Arc<Type> {
+    pub fn get_unknown_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_unknown_type"); 
         self.unknown_type()
     }
-    pub fn get_bigint_type(&self) -> Arc<Type> {
+    pub fn get_bigint_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_bigint_type"); 
         self.bigint_type()
     }
-    pub fn get_es_symbol_type(&self) -> Arc<Type> {
+    pub fn get_es_symbol_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("get_es_symbol_type"); 
         self.es_symbol_type()
     }
 
-    pub fn get_unknown_symbol(&self) -> Option<Arc<Symbol>> {
+    pub fn get_unknown_symbol(&self) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_unknown_symbol"); 
         self.unknown_symbol.clone()
     }
-    pub fn get_undefined_symbol(&self) -> Option<Arc<Symbol>> {
+    pub fn get_undefined_symbol(&self) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_undefined_symbol"); 
         self.undefined_symbol.clone()
     }
-    pub fn get_arguments_symbol(&self) -> Option<Arc<Symbol>> {
+    pub fn get_arguments_symbol(&self) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_arguments_symbol"); 
         self.arguments_symbol.clone()
     }
 
-    pub fn get_properties_of_type(&self, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+    pub fn get_properties_of_type(&self, t: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_properties_of_type"); 
         let mut current = Arc::clone(t);
         for _ in 0..16 {
             let crate::checker::types::TypeData::TypeParameter(tp) = &current.data else {
@@ -183,7 +183,7 @@ impl Checker {
         &self,
         t: &Arc<Type>,
         kind: SignatureKind,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_signatures_of_type"); 
         if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
             && let Some(constraint) = &tp.constraint
         {
@@ -212,7 +212,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         kind: SignatureKind,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_signatures_of_type_reduced"); 
         let reduced = self.get_reduced_type(t);
         if reduced.is_intersection()
             && let Some(types) = reduced.types()
@@ -226,14 +226,14 @@ impl Checker {
         self.get_signatures_of_type(&reduced, kind)
     }
 
-    pub fn type_has_call_or_construct_signatures(&self, t: &Arc<Type>) -> bool {
+    pub fn type_has_call_or_construct_signatures(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_has_call_or_construct_signatures"); 
         if let Some(structured) = t.as_structured() {
             return !structured.signatures.is_empty();
         }
         false
     }
 
-    pub fn is_array_like_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_array_like_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_array_like_type"); 
         if t.flags.contains(TypeFlags::Object) {
             if let Some(structured) = t.as_structured() {
                 for info in &structured.index_infos {
@@ -253,7 +253,7 @@ impl Checker {
         false
     }
 
-    pub fn is_array_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_array_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_array_type"); 
         t.flags.contains(TypeFlags::Object)
             && t.object_flags.contains(ObjectFlags::Reference)
             && self
@@ -263,11 +263,11 @@ impl Checker {
                 .is_some_and(|(array_sym, sym)| Arc::ptr_eq(array_sym, sym))
     }
 
-    pub fn is_tuple_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_tuple_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_tuple_type"); 
         crate::checker::utilities::is_tuple_type(t)
     }
 
-    pub fn get_base_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_base_type_of_literal_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_base_type_of_literal_type"); 
         if t.flags.contains(TypeFlags::EnumLiteral) {
             if let Some(sym) = &t.symbol
                 && sym.flags.contains(SymbolFlags::EnumMember)
@@ -338,7 +338,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn get_widened_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_widened_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_type"); 
         if t.flags.intersects(TYPE_FLAGS_NULLABLE)
             && t.object_flags
                 .intersects(crate::checker::types::OBJECT_FLAGS_REQUIRES_WIDENING)
@@ -413,7 +413,7 @@ impl Checker {
     }
 
     // 逐属性 widen 对象字面量；无可 widen 属性时返回 None（保持原类型）
-    pub(crate) fn widen_object_literal_properties(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn widen_object_literal_properties(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("widen_object_literal_properties"); 
         let obj = match &t.data {
             TypeData::Object(o) => o,
             _ => return None,
@@ -516,7 +516,7 @@ impl Checker {
         }))
     }
 
-    pub(crate) fn regular_object_literal_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn regular_object_literal_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("regular_object_literal_type"); 
         let obj = match &t.data {
             TypeData::Object(o) => o,
             _ => return None,
@@ -545,7 +545,7 @@ impl Checker {
         }))
     }
 
-    pub fn get_regular_type_of_object_literal(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_regular_type_of_object_literal(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_regular_type_of_object_literal"); 
         if !(crate::checker::is_object_literal_type(t)
             && t.object_flags.contains(ObjectFlags::FreshLiteral))
         {
@@ -609,7 +609,7 @@ impl Checker {
         regular
     }
 
-    pub fn widen_initializer_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn widen_initializer_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("widen_initializer_type"); 
         if crate::checker::is_object_literal_type(t) {
             return self.widen_object_literal_type(t);
         }
@@ -625,7 +625,7 @@ impl Checker {
         self.get_widened_type(t)
     }
 
-    pub fn is_auto_array_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_auto_array_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_auto_array_type"); 
         if !t.flags.contains(TypeFlags::Object) || !t.object_flags.contains(ObjectFlags::Reference)
         {
             return false;

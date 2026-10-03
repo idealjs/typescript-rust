@@ -31,7 +31,7 @@ pub struct ChainedTransformer {
 }
 
 impl ChainedTransformer {
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if node.kind != SyntaxKind::SourceFile {
             panic!("Chained transform passed non-sourcefile initial node");
         }
@@ -45,11 +45,11 @@ impl ChainedTransformer {
     }
 }
 
-fn chained_transformer_visit(_transformer: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+fn chained_transformer_visit(_transformer: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("chained_transformer_visit"); 
     Some(node)
 }
 
-pub fn chain(transforms: Vec<TransformerFactory>) -> TransformerFactory {
+pub fn chain(transforms: Vec<TransformerFactory>) -> TransformerFactory { ::tsox_core::fntrace::enter("chain"); 
     if transforms.len() < 2 {
         if transforms.is_empty() {
             panic!("Expected some number of transforms to chain, but got none");
@@ -64,7 +64,7 @@ pub fn chain(transforms: Vec<TransformerFactory>) -> TransformerFactory {
     chained_transformer
 }
 
-fn chained_transformer(opt: &TransformOptions) -> Option<Box<Transformer>> {
+fn chained_transformer(opt: &TransformOptions) -> Option<Box<Transformer>> { ::tsox_core::fntrace::enter("chained_transformer"); 
     let factories = CHAIN_FACTORIES
         .with(|stack| stack.borrow_mut().pop())
         .expect("chained transformer invoked without chained factories");

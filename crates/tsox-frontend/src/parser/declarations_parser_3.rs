@@ -9,7 +9,7 @@ impl Parser {
         modifiers: Option<Arc<ModifierList>>,
         name: Arc<Node>,
         is_type_only: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_equals_tail"); 
         self.expect(SyntaxKind::EqualsToken);
         let module_reference = self.parse_module_reference();
         self.parse_semicolon();
@@ -26,7 +26,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_module_reference(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_module_reference(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_module_reference"); 
         if self.token == SyntaxKind::RequireKeyword
             && self.look_ahead_token() == SyntaxKind::OpenParenToken
         {
@@ -35,7 +35,7 @@ impl Parser {
         self.parse_entity_name()
     }
 
-    pub(crate) fn parse_external_module_reference(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_external_module_reference(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_external_module_reference"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::RequireKeyword);
         self.expect(SyntaxKind::OpenParenToken);
@@ -49,14 +49,14 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_module_specifier(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_module_specifier(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_module_specifier"); 
         if self.token == SyntaxKind::StringLiteral {
             return self.parse_string_literal_node();
         }
         self.parse_expression()
     }
 
-    pub(crate) fn try_parse_import_attributes(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn try_parse_import_attributes(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_import_attributes"); 
         if self.token == SyntaxKind::WithKeyword
             || (self.token == SyntaxKind::AssertKeyword && !self.has_preceding_line_break())
         {
@@ -77,7 +77,7 @@ impl Parser {
         &mut self,
         token: SyntaxKind,
         skip_keyword: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_attributes"); 
         let pos = self.token_pos();
         if !skip_keyword {
             self.next_token();
@@ -101,7 +101,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_import_attribute(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_import_attribute(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_attribute"); 
         let pos = self.token_pos();
         let name = if is_identifier_or_keyword(self.token) {
             self.parse_identifier_name_or_keyword()
@@ -126,7 +126,7 @@ impl Parser {
         identifier: Option<Arc<Node>>,
         pos: usize,
         phase_modifier: Option<SyntaxKind>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_import_clause"); 
         if identifier.is_some()
             || self.token == SyntaxKind::AsteriskToken
             || self.token == SyntaxKind::OpenBraceToken
@@ -144,7 +144,7 @@ impl Parser {
         identifier: Option<Arc<Node>>,
         pos: usize,
         phase_modifier: Option<SyntaxKind>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_clause"); 
         let mut named_bindings = None;
         if identifier.is_none() || self.parse_optional(SyntaxKind::CommaToken) {
             named_bindings = if self.token == SyntaxKind::AsteriskToken {
@@ -168,7 +168,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_namespace_import(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_namespace_import(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_namespace_import"); 
         let pos = self.token_pos();
         self.next_token();
         self.expect(SyntaxKind::AsKeyword);
@@ -181,7 +181,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_named_imports(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_named_imports(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_named_imports"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let elements = self.parse_list(
@@ -199,7 +199,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_import_specifier(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_import_specifier(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_specifier"); 
         let pos = self.token_pos();
         let (is_type_only, property_name, name) = self.parse_import_or_export_specifier(true);
 
@@ -236,7 +236,7 @@ impl Parser {
     pub(crate) fn parse_import_or_export_specifier(
         &mut self,
         is_import: bool,
-    ) -> (bool, Option<Arc<Node>>, Arc<Node>) {
+    ) -> (bool, Option<Arc<Node>>, Arc<Node>) { ::tsox_core::fntrace::enter("parse_import_or_export_specifier"); 
         let mut can_parse_as_keyword = true;
         let disallow_keywords = is_import;
         let (mut name, mut name_ok) = self.parse_module_export_name(disallow_keywords);

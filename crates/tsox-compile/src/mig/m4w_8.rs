@@ -13,7 +13,7 @@ pub fn handle_no_emit_options(
     program: &dyn ProgramLike,
     files: Option<&[Arc<SourceFile>]>,
     emit_build_info: Option<&dyn Fn() -> Option<tsox_emit::emitter::EmitResult>>,
-) -> Option<tsox_emit::emitter::EmitResult> {
+) -> Option<tsox_emit::emitter::EmitResult> { ::tsox_core::fntrace::enter("handle_no_emit_options"); 
     if !program.options().no_emit.is_true() {
         if !program.options().no_emit_on_error.is_true() {
             return None;
@@ -61,7 +61,7 @@ pub fn get_diagnostics_of_any_program(
     skip_no_emit_check_for_dts_diagnostics: bool,
     get_bind_diagnostics: &mut dyn FnMut(Option<&Arc<SourceFile>>) -> Vec<Arc<Diagnostic>>,
     get_semantic_diagnostics: &mut dyn FnMut(Option<&Arc<SourceFile>>) -> Vec<Arc<Diagnostic>>,
-) -> Vec<Arc<Diagnostic>> {
+) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_diagnostics_of_any_program"); 
     let mut all_diagnostics = program.get_config_file_parsing_diagnostics();
     let config_file_parsing_diagnostics_length = all_diagnostics.len();
 
@@ -123,7 +123,7 @@ pub fn get_diagnostics_of_any_program(
 
 pub fn emit_module_kind_is_non_node_esm(
     module_kind: tsox_core::core::compiler_options::ModuleKind,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("emit_module_kind_is_non_node_esm"); 
     module_kind >= tsox_core::core::compiler_options::ModuleKind::ES2015
         && module_kind <= tsox_core::core::compiler_options::ModuleKind::ESNext
 }
@@ -132,7 +132,7 @@ fn maps_equal_by<K: std::hash::Hash + Eq, V, F: Fn(&V, &V) -> bool>(
     a: &HashMap<K, V>,
     b: &HashMap<K, V>,
     eq: F,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("maps_equal_by"); 
     a.len() == b.len()
         && a.iter().all(|(k, va)| match b.get(k) {
             Some(vb) => eq(va, vb),
@@ -141,7 +141,7 @@ fn maps_equal_by<K: std::hash::Hash + Eq, V, F: Fn(&V, &V) -> bool>(
 }
 
 impl Program {
-    pub fn get_symlink_cache(&self) -> &tsox_core::symlinks::KnownSymlinks {
+    pub fn get_symlink_cache(&self) -> &tsox_core::symlinks::KnownSymlinks { ::tsox_core::fntrace::enter("get_symlink_cache"); 
         self.known_symlinks.get_value(|| {
             let known_symlinks = tsox_core::symlinks::KnownSymlinks::new(
                 self.get_current_directory(),
@@ -253,7 +253,7 @@ impl Program {
         module_name: &str,
         containing_file: &str,
         resolution_mode: tsox_core::core::compiler_options_kinds::ResolutionMode,
-    ) -> Option<tsox_tsoptions::module::ResolvedModule> {
+    ) -> Option<tsox_tsoptions::module::ResolvedModule> { ::tsox_core::fntrace::enter("resolve_module_name"); 
         let (resolved, _) = self
             .resolver
             .resolve_module_name(module_name, containing_file, resolution_mode, None);
@@ -269,7 +269,7 @@ impl Program {
             &str,
         ),
         file: Option<&Arc<SourceFile>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_resolved_module"); 
         for_each_resolution(&self.resolved_modules, callback, file);
     }
 
@@ -282,7 +282,7 @@ impl Program {
             &str,
         ),
         file: Option<&Arc<SourceFile>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_resolved_type_reference_directive"); 
         for_each_resolution(&self.type_resolutions_in_file, callback, file);
     }
 }
@@ -291,7 +291,7 @@ pub fn for_each_resolution<T>(
     resolution_cache: &HashMap<String, ModeAwareCache<T>>,
     callback: &mut dyn FnMut(&T, &str, tsox_core::core::compiler_options_kinds::ResolutionMode, &str),
     file: Option<&Arc<SourceFile>>,
-) {
+) { ::tsox_core::fntrace::enter("for_each_resolution"); 
     if let Some(file) = file {
         if let Some(resolutions) = resolution_cache.get(file.file_name.as_str()) {
             for (key, resolution) in resolutions {

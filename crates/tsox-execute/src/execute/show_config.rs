@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn show_config(sys: &dyn System, config: &ParsedCommandLine) {
+pub(crate) fn show_config(sys: &dyn System, config: &ParsedCommandLine) { ::tsox_core::fntrace::enter("show_config"); 
     use tsox_core::json::Value;
     use tsox_tsoptions::tsoptions as opts;
 

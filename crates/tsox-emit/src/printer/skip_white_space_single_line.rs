@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn skip_white_space_single_line(text: &str, pos: &mut usize) {
+pub(crate) fn skip_white_space_single_line(text: &str, pos: &mut usize) { ::tsox_core::fntrace::enter("skip_white_space_single_line"); 
     while *pos < text.len() {
         let (ch, size) = decode_char_at(text, *pos);
         if !tsox_core::stringutil::is_white_space_single_line(ch) {
@@ -12,13 +12,13 @@ pub(crate) fn skip_white_space_single_line(text: &str, pos: &mut usize) {
     }
 }
 
-pub(crate) fn match_white_space_single_line(text: &str, pos: &mut usize) -> bool {
+pub(crate) fn match_white_space_single_line(text: &str, pos: &mut usize) -> bool { ::tsox_core::fntrace::enter("match_white_space_single_line"); 
     let start = *pos;
     skip_white_space_single_line(text, pos);
     *pos != start
 }
 
-pub(crate) fn match_rune(text: &str, pos: &mut usize, expected: char) -> bool {
+pub(crate) fn match_rune(text: &str, pos: &mut usize, expected: char) -> bool { ::tsox_core::fntrace::enter("match_rune"); 
     if *pos < text.len() {
         let (ch, size) = decode_char_at(text, *pos);
         if ch == expected {
@@ -29,7 +29,7 @@ pub(crate) fn match_rune(text: &str, pos: &mut usize, expected: char) -> bool {
     false
 }
 
-pub(crate) fn match_string(text: &str, pos: &mut usize, expected: &str) -> bool {
+pub(crate) fn match_string(text: &str, pos: &mut usize, expected: &str) -> bool { ::tsox_core::fntrace::enter("match_string"); 
     let mut text_pos = *pos;
     for expected_ch in expected.chars() {
         if !match_rune(text, &mut text_pos, expected_ch) {
@@ -40,7 +40,7 @@ pub(crate) fn match_string(text: &str, pos: &mut usize, expected: &str) -> bool 
     true
 }
 
-pub(crate) fn match_quoted_string(text: &str, pos: &mut usize) -> bool {
+pub(crate) fn match_quoted_string(text: &str, pos: &mut usize) -> bool { ::tsox_core::fntrace::enter("match_quoted_string"); 
     let mut text_pos = *pos;
     let quote_char = if match_rune(text, &mut text_pos, '\'') {
         '\''
@@ -60,7 +60,7 @@ pub(crate) fn match_quoted_string(text: &str, pos: &mut usize) -> bool {
     false
 }
 
-pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRange) -> bool {
+pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRange) -> bool { ::tsox_core::fntrace::enter("is_recognized_triple_slash_comment"); 
     if comment_range.kind == CommentRangeKind::SingleLine
         && comment_range.end - comment_range.pos > 2
         && text.as_bytes()[comment_range.pos + 1] == b'/'
@@ -118,7 +118,7 @@ pub fn is_recognized_triple_slash_comment(text: &str, comment_range: &CommentRan
 }
 
 #[allow(dead_code)]
-pub(crate) fn get_module_block_statements(node: &Arc<Node>) -> Option<&[Arc<Node>]> {
+pub(crate) fn get_module_block_statements(node: &Arc<Node>) -> Option<&[Arc<Node>]> { ::tsox_core::fntrace::enter("get_module_block_statements"); 
     match &node.data {
         tsox_frontend::ast::node_data_generated::NodeData::ModuleBlock(d) => {
             Some(&d.statements.nodes)

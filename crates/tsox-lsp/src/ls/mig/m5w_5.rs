@@ -22,10 +22,10 @@ struct ProgramFsHost {
 }
 
 impl tsox_tsoptions::module::ResolutionHost for ProgramFsHost {
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }
@@ -42,7 +42,7 @@ pub struct SourceDefResolver {
 }
 
 impl SourceDefResolver {
-    fn ls(&self) -> &crate::ls::language_service::LanguageService {
+    fn ls(&self) -> &crate::ls::language_service::LanguageService { ::tsox_core::fntrace::enter("ls"); 
         unsafe { &*self.ls }
     }
 }
@@ -51,7 +51,7 @@ pub fn new_source_def_resolver(
     l: &crate::ls::language_service::LanguageService,
     program: &Arc<tsox_compile::compiler::Program>,
     resolve_from: &str,
-) -> SourceDefResolver {
+) -> SourceDefResolver { ::tsox_core::fntrace::enter("new_source_def_resolver"); 
     let options = program.options().clone();
     let mut no_dts_options = options.clone();
     no_dts_options.no_dts_resolution = tsox_core::core::tristate::Tristate::True;
@@ -86,7 +86,7 @@ impl crate::ls::language_service::LanguageService {
         file: &Arc<SourceFile>,
         text_pos: TextPos,
         client_supports_link: bool,
-    ) -> crate::ls::mig::m5s::DefinitionResponse {
+    ) -> crate::ls::mig::m5s::DefinitionResponse { ::tsox_core::fntrace::enter("provide_source_definition_at_position"); 
         let pos = text_pos as usize;
         let resolver = new_source_def_resolver(self, program, &file.file_name);
         let node = match tsox_frontend::astnav::get_touching_property_name(&file.node, pos) {
@@ -216,7 +216,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         node: &Arc<Node>,
         file: &Arc<SourceFile>,
-    ) -> crate::lsp::lsproto_lsp::Range {
+    ) -> crate::lsp::lsproto_lsp::Range { ::tsox_core::fntrace::enter("m5w_create_lsp_range_from_node"); 
         self.create_lsp_range_from_bounds(
             node.pos(),
             node.end(),
@@ -225,7 +225,7 @@ impl crate::ls::language_service::LanguageService {
     }
 }
 
-pub fn m5w_script_view_for_file(file: &Arc<SourceFile>) -> crate::mig::m5u_conv::SourceFileScriptView {
+pub fn m5w_script_view_for_file(file: &Arc<SourceFile>) -> crate::mig::m5u_conv::SourceFileScriptView { ::tsox_core::fntrace::enter("m5w_script_view_for_file"); 
     crate::mig::m5u_conv::SourceFileScriptView {
         file: Arc::clone(file),
     }
@@ -238,7 +238,7 @@ impl SourceDefResolver {
         resolved_impl_file: &str,
         checker_declarations: &[Arc<Node>],
         module_specifier: &str,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("resolve_from_checker_info"); 
         let mut resolved_impl_file = resolved_impl_file.to_string();
         if resolved_impl_file.is_empty() && !module_specifier.is_empty() {
             resolved_impl_file =
@@ -269,7 +269,7 @@ impl SourceDefResolver {
         file: &Arc<SourceFile>,
         pos: usize,
         program: &Arc<tsox_compile::compiler::Program>,
-    ) -> Option<(Vec<Arc<Node>>, Arc<tsox_frontend::ast::node_source_file::FileReference>)> {
+    ) -> Option<(Vec<Arc<Node>>, Arc<tsox_frontend::ast::node_source_file::FileReference>)> { ::tsox_core::fntrace::enter("resolve_triple_slash_reference"); 
         let reference = get_reference_at_position(file, pos, program)?;
         let reference_file = reference.file.as_ref()?;
         let reference_node = reference.reference.clone()?;
@@ -300,7 +300,7 @@ impl SourceDefResolver {
         original_node: &Arc<Node>,
         implementation_file: &str,
         names: &[String],
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("search_implementation_file"); 
         if implementation_file.is_empty() {
             return Vec::new();
         }
@@ -331,7 +331,7 @@ impl SourceDefResolver {
         original_node: &Arc<Node>,
         declaration: &Arc<Node>,
         resolved_impl_file: &str,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("map_declaration_to_source"); 
         let Some((file, start_pos)) = super::m5w_6::get_file_and_start_pos_from_declaration(
             &self.ls().get_program(),
             declaration,
@@ -374,7 +374,7 @@ impl SourceDefResolver {
         &self,
         dts_file_name: &str,
         preferred_mode: ResolutionMode,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("find_implementation_file_from_dts_file_name"); 
         let js_ext = tsox_tsoptions::module::mig::m3i::try_get_js_extension_for_file(
             dts_file_name,
             &self.options,
@@ -424,7 +424,7 @@ impl SourceDefResolver {
         &self,
         module_name: &str,
         preferred_mode: ResolutionMode,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("resolve_implementation"); 
         self.resolve_implementation_from(module_name, &self.resolve_from.clone(), preferred_mode)
     }
 
@@ -433,7 +433,7 @@ impl SourceDefResolver {
         module_name: &str,
         resolve_from_file: &str,
         preferred_mode: ResolutionMode,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("resolve_implementation_from"); 
         let mut modes = vec![preferred_mode];
         if preferred_mode != ResolutionMode::ESNext {
             modes.push(ResolutionMode::ESNext);
@@ -456,7 +456,7 @@ impl SourceDefResolver {
         String::new()
     }
 
-    pub fn get_or_parse_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> {
+    pub fn get_or_parse_source_file(&self, file_name: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_or_parse_source_file"); 
         if let Some(source_file) = (self.get_source_file)(file_name) {
             return Some(source_file);
         }
@@ -484,7 +484,7 @@ impl SourceDefResolver {
         source_file
     }
 
-    pub fn infer_implied_node_format(&self, file_name: &str) -> ResolutionMode {
+    pub fn infer_implied_node_format(&self, file_name: &str) -> ResolutionMode { ::tsox_core::fntrace::enter("infer_implied_node_format"); 
         let mut package_json_type: Option<String> = None;
         if let Some(scope) = self
             .resolver_get_package_scope_for_path(&tsox_core::tspath::get_directory_path(file_name))
@@ -505,7 +505,7 @@ impl SourceDefResolver {
     }
 }
 
-pub fn core_deduplicate_strings(files: &[String]) -> Vec<String> {
+pub fn core_deduplicate_strings(files: &[String]) -> Vec<String> { ::tsox_core::fntrace::enter("core_deduplicate_strings"); 
     let mut seen = HashSet::new();
     let mut result = Vec::with_capacity(files.len());
     for file in files {

@@ -11,7 +11,7 @@ use super::m5x_3::{is_right_side_of_property_access, range_contains_range};
 pub fn symbol_flags_have_meaning(
     flags: ast::SymbolFlags,
     meaning: ast::mig::m3e_4::SemanticMeaning,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("symbol_flags_have_meaning"); 
     if meaning == ast::mig::m3e_4::SemanticMeaning::ALL {
         return true;
     }
@@ -27,7 +27,7 @@ pub fn symbol_flags_have_meaning(
     false
 }
 
-pub fn get_meaning_from_declaration(node: &Arc<Node>) -> ast::mig::m3e_4::SemanticMeaning {
+pub fn get_meaning_from_declaration(node: &Arc<Node>) -> ast::mig::m3e_4::SemanticMeaning { ::tsox_core::fntrace::enter("get_meaning_from_declaration"); 
     match node.kind {
         SyntaxKind::VariableDeclaration
         | SyntaxKind::Parameter
@@ -82,7 +82,7 @@ pub fn get_intersecting_meaning_from_declarations(
     node: Option<&Arc<Node>>,
     symbol: &tsox_frontend::ast::Symbol,
     default_meaning: ast::mig::m3e_4::SemanticMeaning,
-) -> ast::mig::m3e_4::SemanticMeaning {
+) -> ast::mig::m3e_4::SemanticMeaning { ::tsox_core::fntrace::enter("get_intersecting_meaning_from_declarations"); 
     let Some(node) = node else {
         return default_meaning;
     };
@@ -107,7 +107,7 @@ pub fn get_intersecting_meaning_from_declarations(
     meaning
 }
 
-pub fn get_all_super_type_nodes(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn get_all_super_type_nodes(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_all_super_type_nodes"); 
     if ast::is_interface_declaration(node) {
         return ast::get_extends_heritage_clause_elements(node);
     }
@@ -126,7 +126,7 @@ pub fn get_parent_symbols_of_property_access(
     location: &Arc<Node>,
     symbol: &tsox_frontend::ast::Symbol,
     ch: &mut tsox_checker::checker::Checker,
-) -> Vec<Arc<tsox_frontend::ast::Symbol>> {
+) -> Vec<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_parent_symbols_of_property_access"); 
     if !is_right_side_of_property_access(location) {
         return Vec::new();
     }
@@ -170,14 +170,14 @@ pub fn get_property_symbols_from_base_types(
     property_name: &str,
     checker: &mut tsox_checker::checker::Checker,
     cb: &mut dyn FnMut(&Arc<tsox_frontend::ast::Symbol>) -> Option<Arc<tsox_frontend::ast::Symbol>>,
-) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_property_symbols_from_base_types"); 
     fn recur(
         symbol: &tsox_frontend::ast::Symbol,
         property_name: &str,
         checker: &mut tsox_checker::checker::Checker,
         cb: &mut dyn FnMut(&Arc<tsox_frontend::ast::Symbol>) -> Option<Arc<tsox_frontend::ast::Symbol>>,
         seen: &mut std::collections::HashSet<(u64, usize, usize)>,
-    ) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("recur"); 
         if !symbol
             .flags
             .intersects(ast::SymbolFlags::Class | ast::SymbolFlags::Interface)
@@ -227,7 +227,7 @@ pub fn get_property_symbols_from_base_types(
     )
 }
 
-fn symbol_key(symbol: &tsox_frontend::ast::Symbol) -> (u64, usize, usize) {
+fn symbol_key(symbol: &tsox_frontend::ast::Symbol) -> (u64, usize, usize) { ::tsox_core::fntrace::enter("symbol_key"); 
     (
         symbol
             .declarations
@@ -242,7 +242,7 @@ fn symbol_key(symbol: &tsox_frontend::ast::Symbol) -> (u64, usize, usize) {
 pub fn get_property_symbol_from_binding_element(
     checker: &mut tsox_checker::checker::Checker,
     binding_element: &Arc<Node>,
-) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_property_symbol_from_binding_element"); 
     let parent = binding_element.parent()?;
     let type_of_pattern = checker.get_type_at_location(&parent);
     if let Some(name) = crate::ls::mig::m5x_3::binding_element_name(binding_element) {
@@ -254,7 +254,7 @@ pub fn get_property_symbol_from_binding_element(
 pub fn get_property_symbol_of_object_binding_pattern_without_property_name(
     symbol: &tsox_frontend::ast::Symbol,
     checker: &mut tsox_checker::checker::Checker,
-) -> Option<Arc<tsox_frontend::ast::Symbol>> {
+) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_property_symbol_of_object_binding_pattern_without_property_name"); 
     let binding_element = ast::mig::m3e_4::get_declaration_of_kind(symbol, SyntaxKind::BindingElement)?;
     if is_object_binding_element_without_property_name(&binding_element) {
         return get_property_symbol_from_binding_element(checker, &binding_element);
@@ -265,7 +265,7 @@ pub fn get_property_symbol_of_object_binding_pattern_without_property_name(
 pub fn skip_constraint(
     t: &Arc<tsox_checker::checker::types::Type>,
     type_checker: &tsox_checker::checker::Checker,
-) -> Arc<tsox_checker::checker::types::Type> {
+) -> Arc<tsox_checker::checker::types::Type> { ::tsox_core::fntrace::enter("skip_constraint"); 
     if t.is_type_parameter() {
         if let Some(c) = type_checker.get_base_constraint_of_type(t) {
             return c;
@@ -278,7 +278,7 @@ pub fn get_possible_generic_signatures(
     called: &Arc<Node>,
     type_argument_count: usize,
     c: &mut tsox_checker::checker::Checker,
-) -> Vec<Arc<tsox_checker::checker::types::Signature>> {
+) -> Vec<Arc<tsox_checker::checker::types::Signature>> { ::tsox_core::fntrace::enter("get_possible_generic_signatures"); 
     let mut type_at_location = c.get_type_at_location(called);
     if let Some(parent) = called.parent() {
         if ast::is_optional_chain(&parent) {
@@ -309,7 +309,7 @@ pub fn remove_optionality(
     is_optional_expression: bool,
     is_optional_chain: bool,
     c: &mut tsox_checker::checker::Checker,
-) -> Arc<tsox_checker::checker::types::Type> {
+) -> Arc<tsox_checker::checker::types::Type> { ::tsox_core::fntrace::enter("remove_optionality"); 
     if is_optional_expression {
         return c.get_non_nullable_type(t);
     } else if is_optional_chain {
@@ -322,7 +322,7 @@ pub fn find_preceding_matching_token(
     token: &Arc<Node>,
     matching_token_kind: SyntaxKind,
     source_file: &Arc<SourceFile>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_preceding_matching_token"); 
     let close_token_text = tsox_frontend::scanner::token_to_string(token.kind);
     let matching_token_text = tsox_frontend::scanner::token_to_string(matching_token_kind);
     let text = &source_file.text;
@@ -360,7 +360,7 @@ pub fn find_preceding_matching_token(
 pub fn get_possible_type_arguments_info(
     token_in: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Option<M5xPossibleTypeArgumentInfo> {
+) -> Option<M5xPossibleTypeArgumentInfo> { ::tsox_core::fntrace::enter("get_possible_type_arguments_info"); 
     crate::ls::mig::m5x_7::get_possible_type_arguments_info_worker(token_in, source_file)
 }
 
@@ -374,7 +374,7 @@ pub fn get_local_symbol_for_export_specifier(
     reference_symbol: &Arc<tsox_frontend::ast::Symbol>,
     export_specifier: &Arc<Node>,
     ch: &mut tsox_checker::checker::Checker,
-) -> Arc<tsox_frontend::ast::Symbol> {
+) -> Arc<tsox_frontend::ast::Symbol> { ::tsox_core::fntrace::enter("get_local_symbol_for_export_specifier"); 
     if crate::ls::mig::m5x_6::is_export_specifier_alias(reference_location, export_specifier) {
         if let Some(symbol) =
             ch.get_export_specifier_local_target_symbol(export_specifier)
@@ -389,7 +389,7 @@ pub fn to_context_range(
     text_range: Option<TextRange>,
     context_file: &Arc<SourceFile>,
     context: Option<&Arc<Node>>,
-) -> Option<TextRange> {
+) -> Option<TextRange> { ::tsox_core::fntrace::enter("to_context_range"); 
     let text_range = text_range?;
     let Some(context) = context else {
         return Some(text_range);
@@ -405,7 +405,7 @@ pub fn get_reference_at_position_m5x(
     source_file: &Arc<SourceFile>,
     position: usize,
     program: &Arc<tsox_compile::compiler::Program>,
-) -> Option<M5xRefInfo> {
+) -> Option<M5xRefInfo> { ::tsox_core::fntrace::enter("get_reference_at_position_m5x"); 
     let referenced_files: Vec<Arc<ast::node_source_file::FileReference>> = source_file
         .referenced_files
         .iter()

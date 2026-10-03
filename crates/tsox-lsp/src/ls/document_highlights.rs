@@ -19,7 +19,7 @@ impl LanguageService {
         &self,
         document_uri: &DocumentUri,
         document_position: Position,
-    ) -> Vec<DocumentHighlight> {
+    ) -> Vec<DocumentHighlight> { ::tsox_core::fntrace::enter("provide_document_highlights"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let offset = lsp_position_to_offset(line_map, &document_position);
@@ -51,7 +51,7 @@ impl LanguageService {
         document_uri: &DocumentUri,
         document_position: Position,
         files_to_search: &[DocumentUri],
-    ) -> Vec<MultiDocumentHighlight> {
+    ) -> Vec<MultiDocumentHighlight> { ::tsox_core::fntrace::enter("provide_multi_document_highlights"); 
         let highlights = self.provide_document_highlights(document_uri, document_position.clone());
         let primary = MultiDocumentHighlight {
             uri: DocumentUri(document_uri.0.clone()),
@@ -82,7 +82,7 @@ impl LanguageService {
         node: &Arc<Node>,
         program: &Arc<Program>,
         source_files: &[Arc<SourceFile>],
-    ) -> Vec<MultiDocumentHighlight> {
+    ) -> Vec<MultiDocumentHighlight> { ::tsox_core::fntrace::enter("get_semantic_document_highlights"); 
         let mut checker = program.build_checker();
         let symbol = match checker.get_symbol_at_location(node) {
             Some(s) => s,
@@ -117,7 +117,7 @@ impl LanguageService {
         &self,
         node: &Arc<Node>,
         source_file: &Arc<SourceFile>,
-    ) -> Vec<DocumentHighlight> {
+    ) -> Vec<DocumentHighlight> { ::tsox_core::fntrace::enter("get_syntactic_document_highlights"); 
         let text = node.text();
         if text.is_empty() {
             return Vec::new();
@@ -134,7 +134,7 @@ impl LanguageService {
     }
 }
 
-fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -155,7 +155,7 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-fn collect_matching_identifiers(node: &Arc<Node>, name: &str, cb: &mut impl FnMut(&Arc<Node>)) {
+fn collect_matching_identifiers(node: &Arc<Node>, name: &str, cb: &mut impl FnMut(&Arc<Node>)) { ::tsox_core::fntrace::enter("collect_matching_identifiers"); 
     use tsox_frontend::ast::SyntaxKind;
     if node.kind == SyntaxKind::Identifier && node.text() == name {
         cb(node);
@@ -166,21 +166,21 @@ fn collect_matching_identifiers(node: &Arc<Node>, name: &str, cb: &mut impl FnMu
     });
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
 
-fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
+fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range { ::tsox_core::fntrace::enter("node_range_to_lsp_range"); 
     Range {
         start: offset_to_position(line_map, node.pos()),
         end: offset_to_position(line_map, node.end()),
     }
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -189,7 +189,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

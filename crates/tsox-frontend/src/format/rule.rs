@@ -27,10 +27,10 @@ impl RuleAction {
         Self(Self::DELETE_TOKEN.0 | Self::INSERT_TRAILING_SEMICOLON.0);
 
     #[allow(dead_code)]
-    pub(crate) fn contains(self, other: Self) -> bool {
+    pub(crate) fn contains(self, other: Self) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
-    pub(crate) fn intersects(self, other: Self) -> bool {
+    pub(crate) fn intersects(self, other: Self) -> bool { ::tsox_core::fntrace::enter("intersects"); 
         self.0 & other.0 != 0
     }
 }
@@ -60,7 +60,7 @@ pub(crate) struct TokenRange {
 
 impl TokenRange {
     #[allow(dead_code)]
-    pub(crate) fn contains(&self, kind: SyntaxKind) -> bool {
+    pub(crate) fn contains(&self, kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.tokens.contains(&kind)
     }
 }
@@ -86,7 +86,7 @@ impl RuleBuilder {
         context: Vec<ContextPredicate>,
         action: RuleAction,
         flags: RuleFlags,
-    ) -> RuleSpec {
+    ) -> RuleSpec { ::tsox_core::fntrace::enter("rule"); 
         RuleSpec {
             left_token_range: left,
             right_token_range: right,
@@ -100,19 +100,19 @@ impl RuleBuilder {
     }
 }
 
-pub(crate) fn r(name: &'static str) -> RuleBuilder {
+pub(crate) fn r(name: &'static str) -> RuleBuilder { ::tsox_core::fntrace::enter("r"); 
     RuleBuilder { debug_name: name }
 }
 
-pub(crate) fn kind_range(kind: SyntaxKind) -> TokenRange {
+pub(crate) fn kind_range(kind: SyntaxKind) -> TokenRange { ::tsox_core::fntrace::enter("kind_range"); 
     TokenRange { tokens: vec![kind], is_specific: true }
 }
 
-pub(crate) fn kinds_range(kinds: &[SyntaxKind]) -> TokenRange {
+pub(crate) fn kinds_range(kinds: &[SyntaxKind]) -> TokenRange { ::tsox_core::fntrace::enter("kinds_range"); 
     TokenRange { tokens: kinds.to_vec(), is_specific: true }
 }
 
 /// Go anyToken/anyTokenExcept：非 specific
-pub(crate) fn non_specific_range(tokens: Vec<SyntaxKind>) -> TokenRange {
+pub(crate) fn non_specific_range(tokens: Vec<SyntaxKind>) -> TokenRange { ::tsox_core::fntrace::enter("non_specific_range"); 
     TokenRange { tokens, is_specific: false }
 }

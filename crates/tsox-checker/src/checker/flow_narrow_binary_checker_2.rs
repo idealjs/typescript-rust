@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         value_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("replace_primitives_with_literals"); 
         let has_primitives = type_
             .flags
             .intersects(TypeFlags::String | TypeFlags::Number | TypeFlags::BigInt);
@@ -74,7 +74,7 @@ impl Checker {
         self.rebuild_union_or_never(type_, result)
     }
 
-    pub(crate) fn is_coercible_under_double_equals(source: &Arc<Type>, target: &Arc<Type>) -> bool {
+    pub(crate) fn is_coercible_under_double_equals(source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_coercible_under_double_equals"); 
         source
             .flags
             .intersects(TypeFlags::Number | TypeFlags::String | TypeFlags::BooleanLiteral)
@@ -90,7 +90,7 @@ impl Checker {
         right: &Arc<Node>,
         target: &FlowRef,
         kind: NarrowKind,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_instanceof"); 
         if !self.expr_matches_target(left, target) {
             return Arc::clone(type_);
         }
@@ -154,7 +154,7 @@ impl Checker {
         right: &Arc<Node>,
         target: &FlowRef,
         kind: NarrowKind,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_in_keyword"); 
         if type_.flags.contains(TypeFlags::Any) {
             return Arc::clone(type_);
         }

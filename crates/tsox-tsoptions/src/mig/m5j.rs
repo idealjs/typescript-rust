@@ -25,15 +25,15 @@ pub const NO_STRUCTURED_DATA: u32 = 0xFFFFFFFF;
 
 pub type JsonObject = Vec<(String, JsonValue)>;
 
-pub fn json_object_get<'a>(obj: &'a JsonObject, key: &str) -> Option<&'a JsonValue> {
+pub fn json_object_get<'a>(obj: &'a JsonObject, key: &str) -> Option<&'a JsonValue> { ::tsox_core::fntrace::enter("json_object_get"); 
     obj.iter().find(|(k, _)| k == key).map(|(_, v)| v)
 }
 
-pub fn json_object_has(obj: &JsonObject, key: &str) -> bool {
+pub fn json_object_has(obj: &JsonObject, key: &str) -> bool { ::tsox_core::fntrace::enter("json_object_has"); 
     json_object_get(obj, key).is_some()
 }
 
-pub fn json_object_set(obj: &mut JsonObject, key: &str, value: JsonValue) {
+pub fn json_object_set(obj: &mut JsonObject, key: &str, value: JsonValue) { ::tsox_core::fntrace::enter("json_object_set"); 
     if let Some(slot) = obj.iter_mut().find(|(k, _)| k == key) {
         slot.1 = value;
     } else {
@@ -41,7 +41,7 @@ pub fn json_object_set(obj: &mut JsonObject, key: &str, value: JsonValue) {
     }
 }
 
-pub fn tsconfig_to_source_file(tsconfig_source_file: Option<&TsConfigSourceFile>) -> Option<&SourceFile> {
+pub fn tsconfig_to_source_file(tsconfig_source_file: Option<&TsConfigSourceFile>) -> Option<&SourceFile> { ::tsox_core::fntrace::enter("tsconfig_to_source_file"); 
     tsconfig_source_file.map(|t| t.source_file.as_ref())
 }
 
@@ -66,7 +66,7 @@ pub struct ConfigFileSpecs {
 }
 
 impl ConfigFileSpecs {
-    pub fn matches_exclude(&self, file_name: &str, compare_paths_options: &tsox_core::tspath::ComparePathsOptions) -> bool {
+    pub fn matches_exclude(&self, file_name: &str, compare_paths_options: &tsox_core::tspath::ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("matches_exclude"); 
         if self.validated_exclude_specs.is_empty() {
             return false;
         }
@@ -90,7 +90,7 @@ impl ConfigFileSpecs {
         false
     }
 
-    pub fn get_matched_include_spec(&self, file_name: &str, compare_paths_options: &tsox_core::tspath::ComparePathsOptions) -> String {
+    pub fn get_matched_include_spec(&self, file_name: &str, compare_paths_options: &tsox_core::tspath::ComparePathsOptions) -> String { ::tsox_core::fntrace::enter("get_matched_include_spec"); 
         if self.validated_include_specs.is_empty() {
             return String::new();
         }
@@ -110,7 +110,7 @@ impl ConfigFileSpecs {
         String::new()
     }
 
-    pub fn get_matched_file_spec(&self, file_name: &str, compare_paths_options: &tsox_core::tspath::ComparePathsOptions) -> String {
+    pub fn get_matched_file_spec(&self, file_name: &str, compare_paths_options: &tsox_core::tspath::ComparePathsOptions) -> String { ::tsox_core::fntrace::enter("get_matched_file_spec"); 
         if self.validated_files_spec.is_empty() {
             return String::new();
         }
@@ -145,7 +145,7 @@ pub fn vfsmatch_new_spec_matcher(
     current_directory: &str,
     usage: vfsmatch::Usage,
     use_case_sensitive_file_names: bool,
-) -> Option<SpecMatcher> {
+) -> Option<SpecMatcher> { ::tsox_core::fntrace::enter("vfsmatch_new_spec_matcher"); 
     let _ = (specs, current_directory, usage, use_case_sensitive_file_names);
     None
 }
@@ -153,12 +153,12 @@ pub fn vfsmatch_new_spec_matcher(
 pub struct SpecMatcher;
 
 impl SpecMatcher {
-    pub fn match_string(&self, _path: &str) -> bool {
+    pub fn match_string(&self, _path: &str) -> bool { ::tsox_core::fntrace::enter("match_string"); 
         false
     }
 }
 
-pub fn is_compiler_options_value(option: Option<&OptionDecl>, value: &JsonValue) -> bool {
+pub fn is_compiler_options_value(option: Option<&OptionDecl>, value: &JsonValue) -> bool { ::tsox_core::fntrace::enter("is_compiler_options_value"); 
     let Some(option) = option else {
         return false;
     };
@@ -177,7 +177,7 @@ pub fn is_compiler_options_value(option: Option<&OptionDecl>, value: &JsonValue)
     }
 }
 
-fn option_disallow_null_or_undefined(_option: &OptionDecl) -> bool {
+fn option_disallow_null_or_undefined(_option: &OptionDecl) -> bool { ::tsox_core::fntrace::enter("option_disallow_null_or_undefined"); 
     false
 }
 
@@ -186,7 +186,7 @@ pub fn validate_json_option_value(
     val: &JsonValue,
     value_expression: Option<&Node>,
     source_file: Option<&SourceFile>,
-) -> (Option<JsonValue>, Vec<Diagnostic>) {
+) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("validate_json_option_value"); 
     if val.is_null() {
         return (None, Vec::new());
     }
@@ -210,14 +210,14 @@ pub fn validate_json_option_value(
     (Some(val.clone()), errors)
 }
 
-pub fn starts_with_config_dir_template(value: &JsonValue) -> bool {
+pub fn starts_with_config_dir_template(value: &JsonValue) -> bool { ::tsox_core::fntrace::enter("starts_with_config_dir_template"); 
     let Some(str) = value.as_str() else {
         return false;
     };
     str.to_lowercase().starts_with(&CONFIG_DIR_TEMPLATE.to_lowercase())
 }
 
-pub fn normalize_non_list_option_value(option: &OptionDecl, base_path: &str, value: JsonValue) -> JsonValue {
+pub fn normalize_non_list_option_value(option: &OptionDecl, base_path: &str, value: JsonValue) -> JsonValue { ::tsox_core::fntrace::enter("normalize_non_list_option_value"); 
     if option.is_file_path {
         let mut value_str = value.as_str().unwrap_or("").to_string();
         value_str = tspath::normalize_slashes(&value_str);
@@ -232,19 +232,19 @@ pub fn normalize_non_list_option_value(option: &OptionDecl, base_path: &str, val
     value
 }
 
-pub fn is_double_quoted_string(node: &Node) -> bool {
+pub fn is_double_quoted_string(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_double_quoted_string"); 
     ast_is_string_literal(node)
 }
 
-fn ast_is_string_literal(_node: &Node) -> bool {
+fn ast_is_string_literal(_node: &Node) -> bool { ::tsox_core::fntrace::enter("ast_is_string_literal"); 
     false
 }
 
-pub fn is_string_value(value: &JsonValue) -> bool {
+pub fn is_string_value(value: &JsonValue) -> bool { ::tsox_core::fntrace::enter("is_string_value"); 
     value.is_string()
 }
 
-pub fn normalize_json_value(value: &JsonValue) -> JsonValue {
+pub fn normalize_json_value(value: &JsonValue) -> JsonValue { ::tsox_core::fntrace::enter("normalize_json_value"); 
     match value {
         JsonValue::Object(map) => {
             let mut entries: Vec<(String, JsonValue)> = map
@@ -259,7 +259,7 @@ pub fn normalize_json_value(value: &JsonValue) -> JsonValue {
     }
 }
 
-fn entries_to_object(entries: Vec<(String, JsonValue)>) -> JsonValue {
+fn entries_to_object(entries: Vec<(String, JsonValue)>) -> JsonValue { ::tsox_core::fntrace::enter("entries_to_object"); 
     let map = entries.into_iter().collect::<serde_json::Map<String, JsonValue>>();
     JsonValue::Object(map)
 }
@@ -268,7 +268,7 @@ pub fn should_report_no_input_files(
     file_names: &[String],
     can_json_report_no_input: bool,
     resolution_stack: &[String],
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_report_no_input_files"); 
     file_names.is_empty() && can_json_report_no_input && resolution_stack.is_empty()
 }
 
@@ -277,7 +277,7 @@ pub fn validate_specs(
     disallow_trailing_recursion: bool,
     json_source_file: Option<&SourceFile>,
     spec_key: &str,
-) -> (Vec<String>, Vec<Diagnostic>) {
+) -> (Vec<String>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("validate_specs"); 
     let mut errors: Vec<Diagnostic> = Vec::new();
     let mut final_specs: Vec<String> = Vec::new();
     let Some(items) = specs.as_array() else {
@@ -302,7 +302,7 @@ pub fn validate_specs(
     (final_specs, errors)
 }
 
-pub fn spec_to_diagnostic(spec: &str, disallow_trailing_recursion: bool) -> Option<Message> {
+pub fn spec_to_diagnostic(spec: &str, disallow_trailing_recursion: bool) -> Option<Message> { ::tsox_core::fntrace::enter("spec_to_diagnostic"); 
     if disallow_trailing_recursion && invalid_trailing_recursion(spec) {
         return Some(tsox_core::diagnostics::FILE_SPECIFICATION_CANNOT_END_IN_A_RECURSIVE_DIRECTORY_WILDCARD_ASTERISK_ASTERISK_COLON_0);
     }
@@ -312,12 +312,12 @@ pub fn spec_to_diagnostic(spec: &str, disallow_trailing_recursion: bool) -> Opti
     None
 }
 
-pub fn invalid_trailing_recursion(spec: &str) -> bool {
+pub fn invalid_trailing_recursion(spec: &str) -> bool { ::tsox_core::fntrace::enter("invalid_trailing_recursion"); 
     let s = spec.strip_suffix('/').unwrap_or(spec);
     s == "**" || s.ends_with("/**")
 }
 
-pub fn invalid_dot_dot_after_recursive_wildcard(s: &str) -> bool {
+pub fn invalid_dot_dot_after_recursive_wildcard(s: &str) -> bool { ::tsox_core::fntrace::enter("invalid_dot_dot_after_recursive_wildcard"); 
     let wildcard_index = if let Some(rest) = s.strip_prefix("**/") {
         let _ = rest;
         Some(0usize)
@@ -342,7 +342,7 @@ pub fn get_ts_config_prop_array_element_value<'a>(
     ts_config_source_file: Option<&'a SourceFile>,
     prop_key: &str,
     element_value: &str,
-) -> Option<&'a Node> {
+) -> Option<&'a Node> { ::tsox_core::fntrace::enter("get_ts_config_prop_array_element_value"); 
     let _ = (ts_config_source_file, prop_key, element_value);
     None
 }
@@ -352,7 +352,7 @@ pub fn create_diagnostic_for_node_in_source_file_or_compiler_diagnostic(
     node: Option<&Node>,
     message: Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_for_node_in_source_file_or_compiler_diagnostic"); 
     let _ = (source_file, node);
     new_compiler_diagnostic(message, args)
 }
@@ -361,7 +361,7 @@ pub fn set_content_mapper_diagnostic_location(
     mut diagnostic: Diagnostic,
     source_file: Option<&Arc<SourceFile>>,
     node: Option<&Node>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("set_content_mapper_diagnostic_location"); 
     if let (Some(source_file), Some(node)) = (source_file, node) {
         diagnostic.file = Some(source_file.clone());
         diagnostic.loc = TextRange::new(
@@ -372,15 +372,15 @@ pub fn set_content_mapper_diagnostic_location(
     diagnostic
 }
 
-fn source_text(_source_file: &SourceFile) -> String {
+fn source_text(_source_file: &SourceFile) -> String { ::tsox_core::fntrace::enter("source_text"); 
     String::new()
 }
 
-fn scanner_skip_trivia(_text: &str, pos: usize) -> usize {
+fn scanner_skip_trivia(_text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("scanner_skip_trivia"); 
     pos
 }
 
-pub fn get_ts_config_object_literal_expression(ts_config_source_file: Option<&SourceFile>) -> Option<&Node> {
+pub fn get_ts_config_object_literal_expression(ts_config_source_file: Option<&SourceFile>) -> Option<&Node> { ::tsox_core::fntrace::enter("get_ts_config_object_literal_expression"); 
     let ts_config_source_file = ts_config_source_file?;
     let first = ts_config_source_file_statement_expression(ts_config_source_file)?;
     if ast_is_object_literal_expression(first) {
@@ -390,20 +390,20 @@ pub fn get_ts_config_object_literal_expression(ts_config_source_file: Option<&So
     }
 }
 
-fn ts_config_source_file_statement_expression<'a>(_source_file: &'a SourceFile) -> Option<&'a Node> {
+fn ts_config_source_file_statement_expression<'a>(_source_file: &'a SourceFile) -> Option<&'a Node> { ::tsox_core::fntrace::enter("ts_config_source_file_statement_expression"); 
     None
 }
 
-fn ast_is_object_literal_expression(_node: &Node) -> bool {
+fn ast_is_object_literal_expression(_node: &Node) -> bool { ::tsox_core::fntrace::enter("ast_is_object_literal_expression"); 
     false
 }
 
-pub fn get_substituted_path_with_config_dir_template(value: &str, base_path: &str) -> String {
+pub fn get_substituted_path_with_config_dir_template(value: &str, base_path: &str) -> String { ::tsox_core::fntrace::enter("get_substituted_path_with_config_dir_template"); 
     let substituted = value.replacen(CONFIG_DIR_TEMPLATE, "./", 1);
     tspath::get_normalized_absolute_path(&substituted, base_path)
 }
 
-pub fn get_substituted_string_array_with_config_dir_template(list: &[String], base_path: &str) -> Option<Vec<String>> {
+pub fn get_substituted_string_array_with_config_dir_template(list: &[String], base_path: &str) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("get_substituted_string_array_with_config_dir_template"); 
     let mut result: Option<Vec<String>> = None;
     for (i, element) in list.iter().enumerate() {
         if starts_with_config_dir_template(&JsonValue::String(element.clone())) {
@@ -418,7 +418,7 @@ pub fn get_substituted_string_array_with_config_dir_template(list: &[String], ba
     result
 }
 
-pub fn handle_option_config_dir_template_substitution(compiler_options: &mut CompilerOptions, base_path: &str) {
+pub fn handle_option_config_dir_template_substitution(compiler_options: &mut CompilerOptions, base_path: &str) { ::tsox_core::fntrace::enter("handle_option_config_dir_template_substitution"); 
     if let Some(paths) = compiler_options.paths.as_mut() {
         for (_, v) in paths.iter_mut() {
             if let Some(substitution) = get_substituted_string_array_with_config_dir_template(v, base_path) {
@@ -472,7 +472,7 @@ pub fn has_file_with_higher_priority_extension(
     file: &str,
     extensions: &[&[&str]],
     has_file: &dyn Fn(&str) -> bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_file_with_higher_priority_extension"); 
     let mut extension_group: Vec<&str> = Vec::new();
     for group in extensions {
         if tspath::file_extension_is_one_of(file, group) {
@@ -506,7 +506,7 @@ pub fn remove_wildcard_files_with_lower_priority_extension(
     wildcard_files: &mut Vec<(String, String)>,
     extensions: &[&[&str]],
     key_mapper: &dyn Fn(&str) -> String,
-) {
+) { ::tsox_core::fntrace::enter("remove_wildcard_files_with_lower_priority_extension"); 
     let mut extension_group: Vec<&str> = Vec::new();
     for group in extensions {
         if tspath::file_extension_is_one_of(file, group) {

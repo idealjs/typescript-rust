@@ -3,7 +3,7 @@
 use crate::checker::checker_expressions::*;
 
 impl Checker {
-    pub fn check_expression(&mut self, node: &Arc<Node>) {
+    pub fn check_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_expression"); 
         self.current_node = Some(Arc::clone(node));
 
         self.type_instantiation_count = 0;
@@ -458,7 +458,7 @@ impl Checker {
 impl Checker {
     /// Go checkQualifiedName（值位限定名）：限定链解析失败时在右段报
     /// TS2339（`new multiM.c()` 的 c 不存在于 multiM）
-    pub(crate) fn check_qualified_name_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_qualified_name_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_qualified_name_expression"); 
         if let Err((right, ns_path, text)) = self.resolve_qualified_symbol_traced(node) {
             let file = self.current_file.clone();
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
@@ -476,7 +476,7 @@ impl Checker {
     /// 才允许）
     /// Go checkGrammarAwaitOrAwaitUsing（await 表达式形态）：class static block
     /// 无条件禁用（先于 AwaitContext 检查）；非 await 上下文再走顶层/模块门槛
-    pub(crate) fn check_await_expression_grammar(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_await_expression_grammar(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_await_expression_grammar"); 
         let container = crate::checker::utilities_get_assignment_target::
             get_containing_function_or_class_static_block(node);
         if container.as_ref().is_some_and(|c| {
@@ -540,7 +540,7 @@ impl Checker {
         }
     }
 
-    fn is_within_function_like(&self, node: &Arc<Node>) -> bool {
+    fn is_within_function_like(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_within_function_like"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {

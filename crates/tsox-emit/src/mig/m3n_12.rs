@@ -7,7 +7,7 @@ use tsox_frontend::ast::node_flags::ModifierFlags;
 use tsox_frontend::ast::node_node::Node;
 use tsox_frontend::ast::{is_entity_name, is_entity_name_expression, NodeList, SyntaxKind};
 
-pub fn transform_subtree_kind(tx: &mut DeclarationTransformer, input: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn transform_subtree_kind(tx: &mut DeclarationTransformer, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_subtree_kind"); 
     match input.kind {
         SyntaxKind::PropertyDeclaration => tx.transform_property_declaration_subtree(input),
         SyntaxKind::PropertySignature => tx.transform_property_signature_subtree(input),
@@ -39,7 +39,7 @@ pub fn transform_subtree_kind(tx: &mut DeclarationTransformer, input: &Arc<Node>
     }
 }
 
-fn is_effectively_private(tx: &DeclarationTransformer, input: &Arc<Node>) -> bool {
+fn is_effectively_private(tx: &DeclarationTransformer, input: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_effectively_private"); 
     let parse_node = tx.emit_context().parse_node(input);
     parse_node
         .as_ref()
@@ -51,14 +51,14 @@ fn is_effectively_private(tx: &DeclarationTransformer, input: &Arc<Node>) -> boo
         .unwrap_or(false)
 }
 
-fn is_this_parameter(p: &Arc<Node>) -> bool {
+fn is_this_parameter(p: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_this_parameter"); 
     p.name()
         .map(|n| n.kind == SyntaxKind::Identifier && n.text() == "this")
         .unwrap_or(false)
 }
 
 impl DeclarationTransformer {
-    pub fn transform_property_declaration_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_property_declaration_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_declaration_subtree"); 
         if input.name().map(|n| n.kind == SyntaxKind::PrivateIdentifier).unwrap_or(false) {
             return None;
         }
@@ -80,7 +80,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_property_signature_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_property_signature_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_property_signature_subtree"); 
         if input.name().map(|n| n.kind == SyntaxKind::PrivateIdentifier).unwrap_or(false) {
             return None;
         }
@@ -100,7 +100,7 @@ impl DeclarationTransformer {
         Some(result)
     }
 
-    pub fn transform_method_declaration_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_method_declaration_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_method_declaration_subtree"); 
         if is_effectively_private(self, input) {
             return None;
         }
@@ -129,7 +129,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_method_signature_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_method_signature_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_method_signature_subtree"); 
         if is_effectively_private(self, input) {
             return None;
         }
@@ -155,7 +155,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_get_accessor_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_get_accessor_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_get_accessor_subtree"); 
         if input.name().map(|n| n.kind == SyntaxKind::PrivateIdentifier).unwrap_or(false) {
             return None;
         }
@@ -174,7 +174,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_set_accessor_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_set_accessor_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_set_accessor_subtree"); 
         if input.name().map(|n| n.kind == SyntaxKind::PrivateIdentifier).unwrap_or(false) {
             return None;
         }
@@ -192,7 +192,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    fn update_accessor_param_list_subtree(&mut self, input: &Arc<Node>, is_private: bool) -> Arc<NodeList> {
+    fn update_accessor_param_list_subtree(&mut self, input: &Arc<Node>, is_private: bool) -> Arc<NodeList> { ::tsox_core::fntrace::enter("update_accessor_param_list_subtree"); 
         let accessor_params: Arc<NodeList> = if input.kind == SyntaxKind::SetAccessor {
             input.as_set_accessor_declaration().parameters.clone()
         } else {
@@ -240,7 +240,7 @@ impl DeclarationTransformer {
         self.factory().new_node_list(new_params)
     }
 
-    pub fn transform_variable_declaration_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_variable_declaration_subtree(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_variable_declaration_subtree"); 
         let Some(name) = input.name() else {
             return self.visitor().visit_each_child(input);
         };

@@ -1,7 +1,7 @@
 use crate::core::text::*;
 
 #[test]
-fn range_basics() {
+fn range_basics() { crate::fntrace::enter("range_basics"); 
     let r = TextRange::new(5, 10);
     assert_eq!(r.pos(), 5);
     assert_eq!(r.end(), 10);
@@ -13,7 +13,7 @@ fn range_basics() {
 }
 
 #[test]
-fn range_overlap() {
+fn range_overlap() { crate::fntrace::enter("range_overlap"); 
     let a = TextRange::new(0, 5);
     let b = TextRange::new(5, 10);
     assert!(!a.overlaps(&b));

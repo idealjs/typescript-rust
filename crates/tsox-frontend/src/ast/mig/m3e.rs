@@ -22,27 +22,27 @@ pub struct RepopulateDiagnosticInfo {
 }
 
 impl Diagnostic {
-    pub fn set_repopulate_info(&mut self, info: Option<RepopulateDiagnosticInfo>) {
+    pub fn set_repopulate_info(&mut self, info: Option<RepopulateDiagnosticInfo>) { ::tsox_core::fntrace::enter("set_repopulate_info"); 
         let _ = info;
     }
 
-    pub fn set_skipped_on_no_emit(&mut self) {
+    pub fn set_skipped_on_no_emit(&mut self) { ::tsox_core::fntrace::enter("set_skipped_on_no_emit"); 
         self.skipped_on_no_emit = true;
     }
 
-    pub fn skipped_on_no_emit(&self) -> bool {
+    pub fn skipped_on_no_emit(&self) -> bool { ::tsox_core::fntrace::enter("skipped_on_no_emit"); 
         self.skipped_on_no_emit
     }
 
-    pub fn source(&self) -> &str {
+    pub fn source(&self) -> &str { ::tsox_core::fntrace::enter("source"); 
         ""
     }
 
-    pub fn message_text(&self) -> &str {
+    pub fn message_text(&self) -> &str { ::tsox_core::fntrace::enter("message_text"); 
         self.message_key
     }
 
-    pub fn display_string(&self) -> String {
+    pub fn display_string(&self) -> String { ::tsox_core::fntrace::enter("display_string"); 
         if self.message.is_none() && !self.message_text().is_empty() {
             return self.message_text().to_string();
         }
@@ -54,7 +54,7 @@ impl Diagnostic {
             .localize(&tsox_core::locale::Locale::default_locale(), &arg_refs)
     }
 
-    pub fn display_message_args(&self) -> Vec<String> {
+    pub fn display_message_args(&self) -> Vec<String> { ::tsox_core::fntrace::enter("display_message_args"); 
         let Some(_file) = &self.file else {
             return self.message_args.clone();
         };
@@ -72,7 +72,7 @@ pub struct DiagnosticLocationKey {
     pub code: i32,
 }
 
-pub fn get_diagnostic_location_key(diagnostic: &Diagnostic) -> DiagnosticLocationKey {
+pub fn get_diagnostic_location_key(diagnostic: &Diagnostic) -> DiagnosticLocationKey { ::tsox_core::fntrace::enter("get_diagnostic_location_key"); 
     let path = diagnostic
         .file
         .as_ref()
@@ -85,14 +85,14 @@ pub fn get_diagnostic_location_key(diagnostic: &Diagnostic) -> DiagnosticLocatio
     }
 }
 
-pub fn get_diagnostic_path(d: &Diagnostic) -> String {
+pub fn get_diagnostic_path(d: &Diagnostic) -> String { ::tsox_core::fntrace::enter("get_diagnostic_path"); 
     d.file
         .as_ref()
         .map(|f| f.file_name.clone())
         .unwrap_or_default()
 }
 
-pub fn get_diagnostic_message_identity(diagnostic: &Diagnostic) -> String {
+pub fn get_diagnostic_message_identity(diagnostic: &Diagnostic) -> String { ::tsox_core::fntrace::enter("get_diagnostic_message_identity"); 
     if !diagnostic.message_text().is_empty() {
         return diagnostic.message_text().to_string();
     }
@@ -104,7 +104,7 @@ pub fn get_diagnostic_message_identity(diagnostic: &Diagnostic) -> String {
     diagnostic.message_key.to_string()
 }
 
-pub fn equal_message_chain(c1: &Diagnostic, c2: &Diagnostic) -> bool {
+pub fn equal_message_chain(c1: &Diagnostic, c2: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("equal_message_chain"); 
     c1.code == c2.code
         && c1.message_args == c2.message_args
         && c1.message_chain.len() == c2.message_chain.len()
@@ -115,7 +115,7 @@ pub fn equal_message_chain(c1: &Diagnostic, c2: &Diagnostic) -> bool {
             .all(|(a, b)| equal_message_chain(a, b))
 }
 
-pub fn compare_message_chain_size(c1: &[Diagnostic], c2: &[Diagnostic]) -> Ordering {
+pub fn compare_message_chain_size(c1: &[Diagnostic], c2: &[Diagnostic]) -> Ordering { ::tsox_core::fntrace::enter("compare_message_chain_size"); 
     let mut c = c2.len().cmp(&c1.len());
     if c != Ordering::Equal {
         return c;
@@ -129,7 +129,7 @@ pub fn compare_message_chain_size(c1: &[Diagnostic], c2: &[Diagnostic]) -> Order
     Ordering::Equal
 }
 
-pub fn compare_message_chain_content(c1: &[Diagnostic], c2: &[Diagnostic]) -> Ordering {
+pub fn compare_message_chain_content(c1: &[Diagnostic], c2: &[Diagnostic]) -> Ordering { ::tsox_core::fntrace::enter("compare_message_chain_content"); 
     for i in 0..c1.len() {
         let mut c = compare_str_slices(&c1[i].message_args, &c2[i].message_args);
         if c != Ordering::Equal {
@@ -143,7 +143,7 @@ pub fn compare_message_chain_content(c1: &[Diagnostic], c2: &[Diagnostic]) -> Or
     Ordering::Equal
 }
 
-pub fn compare_related_info(r1: &[Diagnostic], r2: &[Diagnostic]) -> Ordering {
+pub fn compare_related_info(r1: &[Diagnostic], r2: &[Diagnostic]) -> Ordering { ::tsox_core::fntrace::enter("compare_related_info"); 
     let mut c = r2.len().cmp(&r1.len());
     if c != Ordering::Equal {
         return c;
@@ -157,7 +157,7 @@ pub fn compare_related_info(r1: &[Diagnostic], r2: &[Diagnostic]) -> Ordering {
     Ordering::Equal
 }
 
-fn compare_str_slices(a: &[String], b: &[String]) -> Ordering {
+fn compare_str_slices(a: &[String], b: &[String]) -> Ordering { ::tsox_core::fntrace::enter("compare_str_slices"); 
     for (x, y) in a.iter().zip(b.iter()) {
         let c = x.as_str().cmp(y.as_str());
         if c != Ordering::Equal {
@@ -167,7 +167,7 @@ fn compare_str_slices(a: &[String], b: &[String]) -> Ordering {
     a.len().cmp(&b.len())
 }
 
-pub fn compare_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> Ordering {
+pub fn compare_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> Ordering { ::tsox_core::fntrace::enter("compare_diagnostics"); 
     let c = get_diagnostic_path(d1).cmp(&get_diagnostic_path(d2));
     if c != Ordering::Equal {
         return c;
@@ -212,7 +212,7 @@ pub fn compare_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> Ordering {
 }
 
 impl DiagnosticsCollection {
-    pub fn get_global_diagnostics_locked(&mut self) -> Vec<Diagnostic> {
+    pub fn get_global_diagnostics_locked(&mut self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_global_diagnostics_locked"); 
         let inner = self.inner.get_mut().unwrap();
         if !inner.non_file_diagnostics_sorted {
             inner
@@ -223,7 +223,7 @@ impl DiagnosticsCollection {
         inner.non_file_diagnostics.clone()
     }
 
-    pub fn get_diagnostics_for_file_locked(&mut self, file: &crate::ast::node_source_file::SourceFile) -> Vec<Diagnostic> {
+    pub fn get_diagnostics_for_file_locked(&mut self, file: &crate::ast::node_source_file::SourceFile) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_diagnostics_for_file_locked"); 
         let inner = self.inner.get_mut().unwrap();
         if !inner.file_diagnostics_sorted.contains(&file.file_name) {
             if let Some(bucket) = inner.file_diagnostics.get_mut(&file.file_name) {
@@ -259,11 +259,11 @@ impl FlowFlags {
     pub const LABEL: FlowFlags = FlowFlags((1 << 2) | (1 << 3));
     pub const CONDITION: FlowFlags = FlowFlags((1 << 5) | (1 << 6));
 
-    pub fn contains(self, other: FlowFlags) -> bool {
+    pub fn contains(self, other: FlowFlags) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 
-    pub fn is_empty(self) -> bool {
+    pub fn is_empty(self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.0 == 0
     }
 }
@@ -280,7 +280,7 @@ impl FlowSwitchClauseData {
         switch_statement: Arc<Node>,
         clause_start: usize,
         clause_end: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_node"); 
         Arc::new(Node::new(
             SyntaxKind::Unknown,
             crate::ast::node_data_generated::NodeData::FlowSwitchClauseData(FlowSwitchClauseData {
@@ -291,7 +291,7 @@ impl FlowSwitchClauseData {
         ))
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.clause_start == self.clause_end
     }
 }
@@ -306,7 +306,7 @@ impl FlowReduceLabelData {
     pub fn new_node(
         target: Arc<crate::ast::symbol_flow::FlowLabel>,
         antecedents: Option<Vec<Arc<crate::ast::symbol_flow::FlowNode>>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_node"); 
         Arc::new(Node::new(
             SyntaxKind::Unknown,
             crate::ast::node_data_generated::NodeData::FlowReduceLabelData(FlowReduceLabelData {
@@ -327,12 +327,12 @@ impl FunctionFlags {
     pub const INVALID: FunctionFlags = FunctionFlags(1 << 2);
     pub const ASYNC_GENERATOR: FunctionFlags = FunctionFlags((1 << 1) | (1 << 0));
 
-    pub fn contains(self, other: FunctionFlags) -> bool {
+    pub fn contains(self, other: FunctionFlags) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 }
 
-pub fn get_function_flags(node: Option<&Arc<Node>>) -> FunctionFlags {
+pub fn get_function_flags(node: Option<&Arc<Node>>) -> FunctionFlags { ::tsox_core::fntrace::enter("get_function_flags"); 
     let Some(node) = node else {
         return FunctionFlags::INVALID;
     };

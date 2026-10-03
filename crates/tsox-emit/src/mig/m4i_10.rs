@@ -16,7 +16,7 @@ use crate::mig::m4m_2::{is_generated_identifier, is_local_name};
 use crate::mig::m4m_5::convert_binding_pattern_to_assignment_pattern;
 use crate::mig::m4e::r39k01_defs::R39K01DataExt;
 impl UsingDeclarationTransformer {
-    pub(crate) fn hoist_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn hoist_class_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("hoist_class_declaration"); 
         if node.name().is_none() && self.default_export_binding.is_some() {
             return node.clone();
         }
@@ -73,7 +73,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    pub(crate) fn hoist_variable_statement(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn hoist_variable_statement(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("hoist_variable_statement"); 
         let data = node.as_variable_statement();
         let mut expressions: Vec<Arc<Node>> = Vec::new();
         let is_exported = has_syntactic_modifier(&node, ModifierFlags::Export);
@@ -101,7 +101,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    fn hoist_initialized_variable(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    fn hoist_initialized_variable(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("hoist_initialized_variable"); 
         let initializer = node
             .initializer()
             .expect("Expected initializer")
@@ -131,7 +131,7 @@ impl UsingDeclarationTransformer {
         node: &Arc<Node>,
         is_exported_declaration: bool,
         original: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hoist_binding_element"); 
         if is_binding_pattern(node.name().unwrap()) {
             for element in &node.name().unwrap().as_binding_pattern().elements.nodes {
                 if element.name().is_some() {
@@ -151,7 +151,7 @@ impl UsingDeclarationTransformer {
         is_export: bool,
         export_alias: Option<Arc<Node>>,
         original: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hoist_binding_identifier"); 
         let mut name = node;
         if !is_generated_identifier(&self.emit_context, &name) {
             name = Arc::clone(&name);
@@ -182,7 +182,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    pub(crate) fn create_env_binding(&mut self) -> Arc<Node> {
+    pub(crate) fn create_env_binding(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_env_binding"); 
         self.factory().generated_name_node(&self.factory().new_unique_name("env"))
     }
 
@@ -193,7 +193,7 @@ impl UsingDeclarationTransformer {
         body_statements: Vec<Arc<Node>>,
         env_binding: &Arc<Node>,
         is_async: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("create_downlevel_using_statements"); 
         let f = self.factory();
         let mut statements: Vec<Arc<Node>> = Vec::with_capacity(2);
 

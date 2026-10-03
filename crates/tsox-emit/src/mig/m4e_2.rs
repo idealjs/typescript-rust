@@ -74,7 +74,7 @@ fn update_variable_declaration_node_unique(
     node: &Arc<Node>,
     name: &Arc<Node>,
     initializer: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_variable_declaration_node_unique"); 
     let mut updated = Node::new(
         SyntaxKind::VariableDeclaration,
         tsox_frontend::ast::node_data_generated::NodeData::VariableDeclaration(
@@ -90,14 +90,14 @@ fn update_variable_declaration_node_unique(
     Arc::new(updated)
 }
 
-pub fn needs_scope_marker(result: &Arc<Node>) -> bool {
+pub fn needs_scope_marker(result: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("needs_scope_marker"); 
     !is_any_import_or_re_export(result)
         && !is_export_assignment(result)
         && !has_syntactic_modifier(result, ModifierFlags::Export)
         && !is_ambient_module(result)
 }
 
-pub fn can_have_literal_initializer(host: &dyn DeclarationEmitHost, node: &Arc<Node>) -> bool {
+pub fn can_have_literal_initializer(host: &dyn DeclarationEmitHost, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("can_have_literal_initializer"); 
     match node.kind {
         SyntaxKind::PropertyDeclaration | SyntaxKind::PropertySignature => host
             .get_effective_declaration_flags(node, ModifierFlags::Private)
@@ -107,7 +107,7 @@ pub fn can_have_literal_initializer(host: &dyn DeclarationEmitHost, node: &Arc<N
     }
 }
 
-pub fn can_produce_diagnostics(node: &Arc<Node>) -> bool {
+pub fn can_produce_diagnostics(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("can_produce_diagnostics"); 
     is_variable_declaration(node)
         || is_property_declaration(node)
         || is_property_signature_declaration(node)
@@ -133,7 +133,7 @@ pub fn can_produce_diagnostics(node: &Arc<Node>) -> bool {
         || is_call_expression(node)
 }
 
-pub fn can_reuse_modifier_nodes(nodes: &[Arc<Node>]) -> bool {
+pub fn can_reuse_modifier_nodes(nodes: &[Arc<Node>]) -> bool { ::tsox_core::fntrace::enter("can_reuse_modifier_nodes"); 
     for node in nodes {
         if is_modifier(node) && node.flags & NodeFlags::Reparsed != NodeFlags::empty() {
             return false;
@@ -146,7 +146,7 @@ pub fn is_declaration_and_not_visible(
     emit_context: &EmitContext,
     resolver: &EmitResolver,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_declaration_and_not_visible"); 
     let Some(node) = emit_context.parse_node(node) else {
         return false;
     };
@@ -169,7 +169,7 @@ pub fn is_declaration_and_not_visible(
     }
 }
 
-pub fn get_binding_name_visible(resolver: &EmitResolver, elem: &Arc<Node>) -> bool {
+pub fn get_binding_name_visible(resolver: &EmitResolver, elem: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("get_binding_name_visible"); 
     if is_omitted_expression(elem) {
         return false;
     }
@@ -192,7 +192,7 @@ pub fn get_binding_name_visible(resolver: &EmitResolver, elem: &Arc<Node>) -> bo
     }
 }
 
-pub fn is_enclosing_declaration(node: &Arc<Node>) -> bool {
+pub fn is_enclosing_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_enclosing_declaration"); 
     is_source_file(node)
         || is_type_alias_declaration(node)
         || is_js_type_alias_declaration(node)
@@ -205,7 +205,7 @@ pub fn is_enclosing_declaration(node: &Arc<Node>) -> bool {
         || is_variable_declaration(node)
 }
 
-pub fn is_always_type(node: &Arc<Node>) -> bool {
+pub fn is_always_type(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_always_type"); 
     node.kind == SyntaxKind::InterfaceDeclaration
 }
 
@@ -213,7 +213,7 @@ pub fn mask_modifier_flags(
     node: &Arc<Node>,
     modifier_mask: ModifierFlags,
     modifier_additions: ModifierFlags,
-) -> ModifierFlags {
+) -> ModifierFlags { ::tsox_core::fntrace::enter("mask_modifier_flags"); 
     let mut flags = (get_combined_modifier_flags(node) & modifier_mask) | modifier_additions;
     if flags.contains(ModifierFlags::Default) && !flags.contains(ModifierFlags::Export) {
         flags.remove(ModifierFlags::Export);
@@ -224,7 +224,7 @@ pub fn mask_modifier_flags(
     flags
 }
 
-pub fn unwrap_parenthesized_expression(o: &Arc<Node>) -> &Arc<Node> {
+pub fn unwrap_parenthesized_expression(o: &Arc<Node>) -> &Arc<Node> { ::tsox_core::fntrace::enter("unwrap_parenthesized_expression"); 
     let mut o = o;
     while o.kind == SyntaxKind::ParenthesizedExpression {
         o = o.expression().expect("ParenthesizedExpression expression");
@@ -235,14 +235,14 @@ pub fn unwrap_parenthesized_expression(o: &Arc<Node>) -> &Arc<Node> {
 pub fn is_private_method_type_parameter(
     host: &dyn DeclarationEmitHost,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_private_method_type_parameter"); 
     let parent = node.parent().unwrap();
     parent.kind == SyntaxKind::MethodDeclaration
         && host.get_effective_declaration_flags(&parent, ModifierFlags::Private)
             != ModifierFlags::empty()
 }
 
-pub fn should_emit_function_properties(input: &Arc<Node>) -> bool {
+pub fn should_emit_function_properties(input: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_function_properties"); 
     if input.as_function_declaration().body.is_some() {
         return true;
     }
@@ -252,15 +252,15 @@ pub fn should_emit_function_properties(input: &Arc<Node>) -> bool {
         .all(|decl| !is_function_declaration(decl) || decl.as_function_declaration().body.is_none())
 }
 
-pub fn get_effective_base_type_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_effective_base_type_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_effective_base_type_node"); 
     get_class_extends_heritage_element(node)
 }
 
-pub fn is_scope_marker(node: &Arc<Node>) -> bool {
+pub fn is_scope_marker(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_scope_marker"); 
     is_export_assignment(node) || is_export_declaration(node)
 }
 
-pub fn has_scope_marker(statements: &Option<Arc<Node>>) -> bool {
+pub fn has_scope_marker(statements: &Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("has_scope_marker"); 
     match statements {
         None => false,
         Some(statements) => statements
@@ -286,7 +286,7 @@ pub fn flatten_destructuring_assignment(
     needs_value: bool,
     level: FlattenLevel,
     create_assignment_callback: Option<CreateAssignmentCallback>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_destructuring_assignment"); 
     let mut f = new_flattener(tx, level);
     f.create_assignment_callback = create_assignment_callback;
     f.hoist_temp_variables = true;
@@ -304,7 +304,7 @@ pub fn flatten_destructuring_binding(
     level: FlattenLevel,
     hoist_temp_variables: bool,
     skip_initializer: bool,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_destructuring_binding"); 
     let mut f = new_flattener(tx, level);
     f.hoist_temp_variables = hoist_temp_variables;
     f.emit_binding_or_assignment = k3_emit_binding_shim;
@@ -336,7 +336,7 @@ pub struct Flattener<'a> {
     pub create_array_binding_or_assignment_element: fn(&mut Flattener, Arc<Node>) -> Arc<Node>,
 }
 
-pub fn new_flattener<'a>(tx: &'a mut Transformer, level: FlattenLevel) -> Flattener<'a> {
+pub fn new_flattener<'a>(tx: &'a mut Transformer, level: FlattenLevel) -> Flattener<'a> { ::tsox_core::fntrace::enter("new_flattener"); 
     Flattener {
         tx,
         level,
@@ -358,7 +358,7 @@ fn k3_emit_assignment_shim(
     value: Option<Arc<Node>>,
     location: TextRange,
     original: Option<Arc<Node>>,
-) {
+) { ::tsox_core::fntrace::enter("k3_emit_assignment_shim"); 
     f.emit_assignment(target, value, location, original)
 }
 
@@ -368,57 +368,57 @@ fn k3_emit_binding_shim(
     value: Option<Arc<Node>>,
     location: TextRange,
     original: Option<Arc<Node>>,
-) {
+) { ::tsox_core::fntrace::enter("k3_emit_binding_shim"); 
     f.emit_binding(target, value, location, original)
 }
 
 fn k3_create_array_assignment_pattern_shim(
     f: &mut Flattener<'_>,
     elements: Vec<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("k3_create_array_assignment_pattern_shim"); 
     f.create_array_assignment_pattern(elements)
 }
 
 fn k3_create_object_assignment_pattern_shim(
     f: &mut Flattener<'_>,
     elements: Vec<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("k3_create_object_assignment_pattern_shim"); 
     f.create_object_assignment_pattern(elements)
 }
 
-fn k3_create_array_assignment_element_shim(f: &mut Flattener<'_>, expr: Arc<Node>) -> Arc<Node> {
+fn k3_create_array_assignment_element_shim(f: &mut Flattener<'_>, expr: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("k3_create_array_assignment_element_shim"); 
     f.create_array_assignment_element(expr)
 }
 
-fn k3_create_array_binding_pattern_shim(f: &mut Flattener<'_>, elements: Vec<Arc<Node>>) -> Arc<Node> {
+fn k3_create_array_binding_pattern_shim(f: &mut Flattener<'_>, elements: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("k3_create_array_binding_pattern_shim"); 
     f.create_array_binding_pattern(elements)
 }
 
 fn k3_create_object_binding_pattern_shim(
     f: &mut Flattener<'_>,
     elements: Vec<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("k3_create_object_binding_pattern_shim"); 
     f.create_object_binding_pattern(elements)
 }
 
-fn k3_create_array_binding_element_shim(f: &mut Flattener<'_>, expr: Arc<Node>) -> Arc<Node> {
+fn k3_create_array_binding_element_shim(f: &mut Flattener<'_>, expr: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("k3_create_array_binding_element_shim"); 
     f.create_array_binding_element(expr)
 }
 
 impl<'a> Flattener<'a> {
-    pub fn create_array_assignment_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> {
+    pub fn create_array_assignment_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_array_assignment_pattern"); 
         self.tx
             .factory()
             .new_array_literal_expression(&self.tx.factory().new_node_list(elements), false)
     }
 
-    pub fn create_object_assignment_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> {
+    pub fn create_object_assignment_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_object_assignment_pattern"); 
         self.tx
             .factory()
             .new_object_literal_expression(&self.tx.factory().new_node_list(elements), false)
     }
 
-    pub fn create_array_assignment_element(&mut self, expr: Arc<Node>) -> Arc<Node> {
+    pub fn create_array_assignment_element(&mut self, expr: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_array_assignment_element"); 
         expr
     }
 
@@ -428,7 +428,7 @@ impl<'a> Flattener<'a> {
         value: Option<Arc<Node>>,
         location: TextRange,
         original: Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_assignment"); 
         let target = target.unwrap();
         let value = value.unwrap();
         let expression: Arc<Node> = match self.create_assignment_callback {
@@ -446,21 +446,21 @@ impl<'a> Flattener<'a> {
         self.emit_expression(expression);
     }
 
-    pub fn create_array_binding_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> {
+    pub fn create_array_binding_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_array_binding_pattern"); 
         self.tx.factory().new_binding_pattern(
             SyntaxKind::ArrayBindingPattern,
             &self.tx.factory().new_node_list(elements),
         )
     }
 
-    pub fn create_object_binding_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> {
+    pub fn create_object_binding_pattern(&mut self, elements: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_object_binding_pattern"); 
         self.tx.factory().new_binding_pattern(
             SyntaxKind::ObjectBindingPattern,
             &self.tx.factory().new_node_list(elements),
         )
     }
 
-    pub fn create_array_binding_element(&mut self, expr: Arc<Node>) -> Arc<Node> {
+    pub fn create_array_binding_element(&mut self, expr: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_array_binding_element"); 
         self.tx
             .factory()
             .new_binding_element(None, None, Some(expr), None)
@@ -472,7 +472,7 @@ impl<'a> Flattener<'a> {
         value: Option<Arc<Node>>,
         location: TextRange,
         original: Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_binding"); 
         let mut value = value;
         if !self.expressions.is_empty() {
             let mut all = std::mem::take(&mut self.expressions);
@@ -488,7 +488,7 @@ impl<'a> Flattener<'a> {
         });
     }
 
-    pub fn emit_expression(&mut self, expr: Arc<Node>) {
+    pub fn emit_expression(&mut self, expr: Arc<Node>) { ::tsox_core::fntrace::enter("emit_expression"); 
         self.expressions.push(expr);
     }
 
@@ -497,7 +497,7 @@ impl<'a> Flattener<'a> {
         value: Option<Arc<Node>>,
         reuse_identifier_expressions: bool,
         location: TextRange,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("ensure_identifier"); 
         let value = value?;
         if reuse_identifier_expressions && is_identifier(&value) {
             return Some(value);
@@ -525,7 +525,7 @@ impl<'a> Flattener<'a> {
         value: Arc<Node>,
         default_value: Arc<Node>,
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_default_value_check"); 
         let value = self
             .ensure_identifier(Some(value), true, location)
             .unwrap();
@@ -542,7 +542,7 @@ impl<'a> Flattener<'a> {
         &mut self,
         value: Arc<Node>,
         property_name: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_destructuring_property_access"); 
         if is_computed_property_name(property_name) {
             let visited = self
                 .tx
@@ -571,7 +571,7 @@ impl<'a> Flattener<'a> {
         &mut self,
         node: Arc<Node>,
         needs_value: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_destructuring_assignment"); 
         let mut node = node;
         let mut location = node.loc();
         let mut value: Option<Arc<Node>> = None;
@@ -636,7 +636,7 @@ impl<'a> Flattener<'a> {
         node: Arc<Node>,
         rval: Option<Arc<Node>>,
         skip_initializer: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_destructuring_binding"); 
         let mut node = node;
         if is_variable_declaration(&node) {
             let mut initializer = get_initializer_of_binding_or_assignment_element(Some(&node));
@@ -719,7 +719,7 @@ impl<'a> Flattener<'a> {
         value: Option<Arc<Node>>,
         location: TextRange,
         skip_initializer: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("flatten_binding_or_assignment_element"); 
         let binding_target = match get_target_of_binding_or_assignment_element(&element) {
             None => return,
             Some(t) => t,
@@ -769,7 +769,7 @@ impl<'a> Flattener<'a> {
         pattern: Arc<Node>,
         value: Option<Arc<Node>>,
         location: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("flatten_object_binding_or_assignment_pattern"); 
         let elements = get_elements_of_binding_or_assignment_pattern(&pattern);
         let num_elements = elements.len();
         let mut value = value;
@@ -883,7 +883,7 @@ impl<'a> Flattener<'a> {
         pattern: Arc<Node>,
         value: Option<Arc<Node>>,
         location: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("flatten_array_binding_or_assignment_pattern"); 
         let elements = get_elements_of_binding_or_assignment_pattern(&pattern);
         let num_elements = elements.len();
         let mut value = value;
@@ -979,7 +979,7 @@ pub struct RestIdElemPair {
     pub element: Arc<Node>,
 }
 
-pub fn binding_or_assignment_element_assigns_to_name(element: &Arc<Node>, name: &str) -> bool {
+pub fn binding_or_assignment_element_assigns_to_name(element: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("binding_or_assignment_element_assigns_to_name"); 
     let target = match get_target_of_binding_or_assignment_element(element) {
         None => return false,
         Some(t) => t,
@@ -993,14 +993,14 @@ pub fn binding_or_assignment_element_assigns_to_name(element: &Arc<Node>, name: 
     }
 }
 
-pub fn binding_or_assignment_pattern_assigns_to_name(pattern: &Arc<Node>, name: &str) -> bool {
+pub fn binding_or_assignment_pattern_assigns_to_name(pattern: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("binding_or_assignment_pattern_assigns_to_name"); 
     let elements = get_elements_of_binding_or_assignment_pattern(pattern);
     elements
         .iter()
         .any(|element| binding_or_assignment_element_assigns_to_name(element, name))
 }
 
-pub fn binding_or_assignment_element_contains_non_literal_computed_name(element: &Arc<Node>) -> bool {
+pub fn binding_or_assignment_element_contains_non_literal_computed_name(element: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("binding_or_assignment_element_contains_non_literal_computed_name"); 
     let property_name = try_get_property_name_of_binding_or_assignment_element(element);
     if let Some(property_name) = &property_name {
         if is_computed_property_name(property_name) && !is_literal_expression(property_name.expression().expect("computed property expression").as_ref()) {
@@ -1015,7 +1015,7 @@ pub fn binding_or_assignment_element_contains_non_literal_computed_name(element:
     }
 }
 
-pub fn binding_or_assignment_pattern_contains_non_literal_computed_name(pattern: &Arc<Node>) -> bool {
+pub fn binding_or_assignment_pattern_contains_non_literal_computed_name(pattern: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("binding_or_assignment_pattern_contains_non_literal_computed_name"); 
     let elements = get_elements_of_binding_or_assignment_pattern(pattern);
     elements
         .iter()
@@ -1024,7 +1024,7 @@ pub fn binding_or_assignment_pattern_contains_non_literal_computed_name(pattern:
 
 pub fn get_initializer_of_binding_or_assignment_element(
     binding_element: Option<&Arc<Node>>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_initializer_of_binding_or_assignment_element"); 
     let binding_element = binding_element?;
     if is_declaration_binding_element(binding_element) {
         return binding_element.initializer().cloned();
@@ -1051,15 +1051,15 @@ pub fn get_initializer_of_binding_or_assignment_element(
     None
 }
 
-pub fn is_object_binding_or_assignment_pattern(node: &Arc<Node>) -> bool {
+pub fn is_object_binding_or_assignment_pattern(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_object_binding_or_assignment_pattern"); 
     node.kind == SyntaxKind::ObjectBindingPattern || node.kind == SyntaxKind::ObjectLiteralExpression
 }
 
-pub fn is_array_binding_or_assignment_pattern(node: &Arc<Node>) -> bool {
+pub fn is_array_binding_or_assignment_pattern(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_array_binding_or_assignment_pattern"); 
     node.kind == SyntaxKind::ArrayBindingPattern || node.kind == SyntaxKind::ArrayLiteralExpression
 }
 
-pub fn is_simple_binding_or_assignment_element(element: &Arc<Node>) -> bool {
+pub fn is_simple_binding_or_assignment_element(element: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_simple_binding_or_assignment_element"); 
     let target = match get_target_of_binding_or_assignment_element(element) {
         None => return true,
         Some(t) => t,

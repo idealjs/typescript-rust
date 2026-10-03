@@ -9,7 +9,7 @@ use super::impl_chunk::Scanner;
 impl Scanner {
     /// Go ReScanTemplateToken：回退到当前 token 起点重扫模板段
     /// （`}` → TemplateMiddle/TemplateTail）
-    pub fn re_scan_template_token(&mut self) -> SyntaxKind {
+    pub fn re_scan_template_token(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_template_token"); 
         self.pos = self.token_pos;
         self.token_pos = self.pos;
         self.full_start_pos = self.pos;
@@ -50,7 +50,7 @@ impl Scanner {
 
     /// Go ReScanJsxToken(allowMultilineJsxText=false)：格式化用，JSX 文本
     /// 逐行切分以便逐行缩进
-    pub fn re_scan_jsx_token(&mut self, allow_multiline_jsx_text: bool) -> SyntaxKind {
+    pub fn re_scan_jsx_token(&mut self, allow_multiline_jsx_text: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_jsx_token"); 
         self.pos = self.full_start_pos;
         self.token_pos = self.full_start_pos;
         self.token = self.scan_jsx_token_ex(allow_multiline_jsx_text);
@@ -58,7 +58,7 @@ impl Scanner {
     }
 
     /// Go ReScanJsxAttributeValue：回退重扫属性值（= 后的引号串）
-    pub fn re_scan_jsx_attribute_value(&mut self) -> SyntaxKind {
+    pub fn re_scan_jsx_attribute_value(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("re_scan_jsx_attribute_value"); 
         self.pos = self.full_start_pos;
         self.token_pos = self.full_start_pos;
         self.scan_jsx_attribute_value()

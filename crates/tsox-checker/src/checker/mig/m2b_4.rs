@@ -20,7 +20,7 @@ impl Checker {
         s: &mut CallState,
         signatures: &[Arc<Signature>],
         head_message: Option<&'static tsox_core::diagnostics::Message>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_call_resolution_errors"); 
         let candidates = r23k6_defs::call_state_candidates_for_argument_error();
         if !candidates.is_empty() {
             let last = Arc::clone(candidates.last().unwrap());
@@ -110,7 +110,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         facts: TypeFacts,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_cannot_invoke_possibly_null_or_undefined_error"); 
         let message = if facts.intersects(TypeFacts::IS_UNDEFINED) {
             if facts.intersects(TypeFacts::IS_NULL) {
                 tsox_core::diagnostics::messages_generated::CANNOT_INVOKE_AN_OBJECT_WHICH_IS_POSSIBLY_NULL_OR_UNDEFINED
@@ -123,7 +123,7 @@ impl Checker {
         self.error_message(node, message, &[]);
     }
 
-    pub fn report_circular_base_type(&mut self, node: &Arc<Node>, t: &Arc<Type>) {
+    pub fn report_circular_base_type(&mut self, node: &Arc<Node>, t: &Arc<Type>) { ::tsox_core::fntrace::enter("report_circular_base_type"); 
         let type_string = self.type_to_string_ex(
             t,
             crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::WRITE_ARRAY_AS_GENERIC,
@@ -141,7 +141,7 @@ impl Checker {
         check_static: bool,
         is_static: bool,
         message: tsox_core::diagnostics::Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_duplicate_member_errors"); 
         for member in members(node) {
             if tsox_frontend::ast::is_constructor_declaration(member) {
             for param in parameters(member) {
@@ -172,7 +172,7 @@ impl Checker {
         declaration: &Arc<Node>,
         t: &Arc<Type>,
         widening_kind: WideningKind,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_errors_from_widening"); 
         if self.no_implicit_any
             && t.object_flags
                 .intersects(ObjectFlags::ContainsWideningType)
@@ -195,7 +195,7 @@ impl Checker {
         name: &Arc<Node>,
         declaration_name: &str,
         module_name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_invalid_import_equals_export_member"); 
         if self.module_kind >= ModuleKind::ES2015 {
             self.error_message(
                 name,tsox_core::diagnostics::messages_generated::X_0_CAN_ONLY_BE_IMPORTED_BY_USING_A_DEFAULT_IMPORT,
@@ -218,7 +218,7 @@ impl Checker {
         }
     }
 
-    pub fn report_non_default_export(&mut self, module_symbol: &Arc<Symbol>, node: &Arc<Node>) {
+    pub fn report_non_default_export(&mut self, module_symbol: &Arc<Symbol>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("report_non_default_export"); 
         let node_symbol = self.symbol_of_node(node);
         let node_symbol_name = node_symbol
             .as_ref()
@@ -290,7 +290,7 @@ impl Checker {
         declaration_name: &str,
         module_symbol: &Arc<Symbol>,
         module_name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_non_exported_member"); 
         let local_symbol: Option<Arc<Symbol>> = module_symbol
             .value_declaration
             .as_ref()
@@ -361,7 +361,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         facts: TypeFacts,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_object_possibly_null_or_undefined_error"); 
         let node_text = if tsox_frontend::ast::is_entity_name_expression(node) {
             entity_name_to_string(node)
         } else {
@@ -413,7 +413,7 @@ impl Checker {
         right_type: &Arc<Type>,
         error_node: &Arc<Node>,
         is_related: Option<&mut dyn FnMut(&Checker, &Arc<Type>, &Arc<Type>) -> bool>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_operator_error"); 
         let mut would_work_with_await = false;
         let mut is_related = is_related;
         if let Some(is_related_fn) = is_related.as_deref_mut() {
@@ -472,13 +472,13 @@ impl Checker {
         right_type: &Arc<Type>,
         error_node: &Arc<Node>,
         types_are_compatible: &mut dyn FnMut(&Checker, &Arc<Type>, &Arc<Type>) -> bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_operator_error_unless"); 
         if !types_are_compatible(self, left_type, right_type) {
             self.report_operator_error(left_type, operator, right_type, error_node, None);
         }
     }
 
-    pub fn report_unmeasurable_worker(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn report_unmeasurable_worker(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("report_unmeasurable_worker"); 
         let marker_super_type = self.marker_super_type();
         let marker_sub_type = self.marker_sub_type();
         let marker_other_type = self.marker_other_type();
@@ -497,7 +497,7 @@ impl Checker {
         &mut self,
         location: &Arc<Node>,
         diagnostic: Arc<Diagnostic>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_unused_variable"); 
         let mut location = Arc::clone(location);
         while tsox_frontend::ast::is_binding_element(&location)
             || tsox_frontend::ast::is_binding_pattern(&location)
@@ -520,7 +520,7 @@ impl Checker {
         self.report_unused(&location, is_parameter, loc, message, args);
     }
 
-    pub fn report_widening_errors_in_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn report_widening_errors_in_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("report_widening_errors_in_type"); 
         let mut error_reported = false;
         if t
             .object_flags

@@ -35,7 +35,7 @@ use crate::checker::checker_lib_feature_map::{
 };
 
 impl Checker {
-    pub fn get_simplified_indexed_access_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> {
+    pub fn get_simplified_indexed_access_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("get_simplified_indexed_access_type"); 
         let key = CachedTypeKey {
             kind: if writing {
                 CachedTypeKind::IndexedAccessForWriting
@@ -64,7 +64,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         writing: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_simplified_indexed_access_type_worker"); 
         let (object_type, index_type) = match &t.data {
             TypeData::IndexedAccess(d) => (d.object_type.clone(), d.index_type.clone()),
             _ => return t.clone(),
@@ -115,7 +115,7 @@ impl Checker {
         t.clone()
     }
 
-    pub fn get_simplified_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> {
+    pub fn get_simplified_type(&mut self, t: &Arc<Type>, writing: bool) -> Arc<Type> { ::tsox_core::fntrace::enter("get_simplified_type"); 
         if t.flags.intersects(TypeFlags::IndexedAccess) {
             return self.get_simplified_indexed_access_type(t, writing);
         }
@@ -130,7 +130,7 @@ impl Checker {
         name: &str,
         symbols: Vec<Arc<Symbol>>,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_spelling_suggestion_for_name"); 
         let mut candidates: Vec<(Arc<Symbol>, String)> = Vec::new();
         for candidate in &symbols {
             let candidate_name = symbol_name(candidate);
@@ -168,7 +168,7 @@ impl Checker {
         .map(|(symbol, _)| symbol)
     }
 
-    pub fn get_suggested_import_extension(&self, extensionless_import_path: &str) -> String {
+    pub fn get_suggested_import_extension(&self, extensionless_import_path: &str) -> String { ::tsox_core::fntrace::enter("get_suggested_import_extension"); 
         if self.program.file_exists(&format!("{extensionless_import_path}.mts")) {
             return ".mjs".to_string();
         }
@@ -203,7 +203,7 @@ impl Checker {
         "".to_string()
     }
 
-    pub fn get_suggested_lib_for_non_existent_name(&self, name: &str) -> String {
+    pub fn get_suggested_lib_for_non_existent_name(&self, name: &str) -> String { ::tsox_core::fntrace::enter("get_suggested_lib_for_non_existent_name"); 
         suggested_lib_for_name(name).unwrap_or_default().to_string()
     }
 
@@ -211,7 +211,7 @@ impl Checker {
         &self,
         missing_property: &str,
         containing_type: &Arc<Type>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_suggested_lib_for_non_existent_property"); 
         if let Some(container) = self.lib_suggestion_container_name(containing_type) {
             if let Some(lib) = suggested_lib_for_property(&container, missing_property) {
                 return lib.to_string();
@@ -224,7 +224,7 @@ impl Checker {
         &mut self,
         name: &Node,
         target_module: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_suggested_symbol_for_nonexistent_module"); 
         let exports = self.get_exports_of_module(target_module);
         self.get_spelling_suggestion_for_name(name.text(), exports, SymbolFlags::MODULE_MEMBER)
     }
@@ -233,7 +233,7 @@ impl Checker {
         &mut self,
         name: &Node,
         containing_type: &Arc<Type>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_suggested_symbol_for_nonexistent_property"); 
         let mut props = self.get_properties_of_type(containing_type);
         if let Some(parent) = name.parent() {
             if is_property_access_expression(&parent) {
@@ -250,7 +250,7 @@ impl Checker {
         location: &Arc<Node>,
         outer_name: &str,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_suggested_symbol_for_nonexistent_symbol"); 
         let mut resolver = self.create_name_resolver_for_suggestion();
         resolver.resolve(location, outer_name, meaning, None, false, false)
     }
@@ -259,7 +259,7 @@ impl Checker {
         &self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_suggested_type_for_nonexistent_string_literal_type"); 
         let candidates: Vec<Arc<Type>> = target
             .types()
             .unwrap_or(&[])
@@ -282,7 +282,7 @@ impl Checker {
         object_type: &Arc<Type>,
         expr: &Arc<Node>,
         keyed_type: &Arc<Type>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_suggestion_for_nonexistent_index_signature"); 
         let has_prop = |c: &mut Checker, name: &str| -> bool {
             if let Some(prop) = c.get_property_of_object_type(object_type, name) {
                 let t = c.get_type_of_symbol(&prop);
@@ -315,7 +315,7 @@ impl Checker {
         symbols: &SymbolTable,
         name: &str,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_suggestion_for_symbol_name_lookup"); 
         if let Some(symbol) = self.get_symbol(symbols, name, meaning) {
             return Some(symbol);
         }
@@ -334,7 +334,7 @@ impl Checker {
         symbols: &SymbolTable,
         name: &str,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol"); 
         if meaning.intersects(SymbolFlags::all()) {
             if let Some(symbol) = symbols.get(name) {
                 let symbol = self.get_merged_symbol(symbol);
@@ -357,7 +357,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         exclude_type_only_meanings: bool,
         exclude_local_meanings: bool,
-    ) -> SymbolFlags {
+    ) -> SymbolFlags { ::tsox_core::fntrace::enter("get_symbol_flags_ex"); 
         let mut seen_symbols: HashSet<*const Symbol> = HashSet::new();
         let mut flags = if !exclude_local_meanings {
             symbol.flags
@@ -393,7 +393,7 @@ impl Checker {
     pub fn get_symbol_for_private_identifier_expression(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_for_private_identifier_expression"); 
         let existing = self
             .symbol_node_links
             .get(node)
@@ -409,7 +409,7 @@ impl Checker {
         resolved
     }
 
-    pub fn get_symbol_from_type_reference(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_from_type_reference(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_from_type_reference"); 
         let existing = self
             .symbol_node_links
             .get(node)
@@ -428,7 +428,7 @@ impl Checker {
     pub fn get_symbol_of_part_of_right_hand_side_of_import_equals(
         &mut self,
         entity_name: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_part_of_right_hand_side_of_import_equals"); 
         let mut entity_name = Arc::clone(entity_name);
         if entity_name.kind == SyntaxKind::Identifier
             && is_right_side_of_qualified_name_or_property_access(&entity_name)
@@ -453,7 +453,7 @@ impl Checker {
         )
     }
 
-    pub fn get_syntactic_nullishness_semantics(&self, node: &Arc<Node>) -> PredicateSemantics {
+    pub fn get_syntactic_nullishness_semantics(&self, node: &Arc<Node>) -> PredicateSemantics { ::tsox_core::fntrace::enter("get_syntactic_nullishness_semantics"); 
         let node = skip_outer_expressions(node, OuterExpressionKinds::ALL);
         match node.kind {
             SyntaxKind::AwaitExpression
@@ -511,7 +511,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn get_symbol_path(symbol: &Symbol) -> String {
+pub(crate) fn get_symbol_path(symbol: &Symbol) -> String { ::tsox_core::fntrace::enter("get_symbol_path"); 
     match symbol.parent().as_ref() {
         Some(parent) => format!("{}.{}", get_symbol_path(parent), symbol.name),
         None => symbol.name.clone(),

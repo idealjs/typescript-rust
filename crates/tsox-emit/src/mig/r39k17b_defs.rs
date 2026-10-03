@@ -16,7 +16,7 @@ use tsox_frontend::format::mig::m4o_2::PrintHandlers;
 use tsox_core::stringutil::is_line_break;
 use tsox_frontend::scanner::CommentRangeKind;
 
-pub fn change_tracker_print_handlers(writer: &mut ChangeTrackerWriter) -> PrintHandlers {
+pub fn change_tracker_print_handlers(writer: &mut ChangeTrackerWriter) -> PrintHandlers { ::tsox_core::fntrace::enter("change_tracker_print_handlers"); 
     let ct: *mut ChangeTrackerWriter = writer;
     let set_pos = move |key: TriviaPositionKey| unsafe {
         (*ct).pos.insert(key, (*ct).last_non_trivia_position);
@@ -85,7 +85,7 @@ impl<'a> Printer<'a> {
         line_map: &[crate::mig::m4q::r33k12_defs::TextPos],
         kind: CommentRangeKind,
         loc: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("write_comment_range_worker"); 
         if kind == CommentRangeKind::MultiLine {
             let indent_size = get_default_indent_size();
             let first_line = compute_line_of_position(line_map, loc.pos);
@@ -161,15 +161,15 @@ impl<'a> Printer<'a> {
         }
     }
 
-    pub fn write_comment(&mut self, text: &str) {
+    pub fn write_comment(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_comment"); 
         self.writer.write_comment(text);
     }
 
-    pub fn write(&mut self, text: &str) {
+    pub fn write(&mut self, text: &str) { ::tsox_core::fntrace::enter("write"); 
         self.write_as(text, self.write_kind);
     }
 
-    pub fn write_as(&mut self, text: &str, write_kind: WriteKind) {
+    pub fn write_as(&mut self, text: &str, write_kind: WriteKind) { ::tsox_core::fntrace::enter("write_as"); 
         match write_kind {
             WriteKind::None => self.writer.write(text),
             WriteKind::Parameter => self.write_parameter(text),
@@ -183,7 +183,7 @@ impl<'a> Printer<'a> {
         }
     }
 
-    pub fn increase_indent(&mut self) {
+    pub fn increase_indent(&mut self) { ::tsox_core::fntrace::enter("increase_indent"); 
         self.writer.increase_indent();
     }
 }

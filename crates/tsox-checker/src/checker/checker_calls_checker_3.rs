@@ -10,7 +10,7 @@ impl Checker {
         arguments: &Arc<NodeList>,
         callee_expr: &Arc<Node>,
         is_new: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_call_arguments_against"); 
         if callee_type.flags.contains(TypeFlags::Any) {
             return;
         }

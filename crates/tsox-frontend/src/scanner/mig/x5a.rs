@@ -15,7 +15,7 @@ pub fn get_token_pos_of_node(
     node: &Arc<Node>,
     source_file: &SourceFile,
     include_jsdoc: bool,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_token_pos_of_node"); 
     if node_is_missing(Some(node)) {
         return node.pos();
     }

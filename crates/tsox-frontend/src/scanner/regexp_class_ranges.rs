@@ -2,7 +2,7 @@ use crate::scanner::regexp::RegExpParser;
 use crate::scanner::regexp::decode_first_rune;
 
 impl<'a> RegExpParser<'a> {
-    pub(super) fn scan_class_ranges(&mut self) {
+    pub(super) fn scan_class_ranges(&mut self) { ::tsox_core::fntrace::enter("scan_class_ranges"); 
         if self.char() == '^' {
             self.inc_pos(1);
         }
@@ -58,7 +58,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn scan_class_atom(&mut self) -> String {
+    pub(super) fn scan_class_atom(&mut self) -> String { ::tsox_core::fntrace::enter("scan_class_atom"); 
         let ch = self.char();
         if ch == '\\' {
             self.inc_pos(1);

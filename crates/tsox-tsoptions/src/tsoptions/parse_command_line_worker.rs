@@ -13,7 +13,7 @@ pub(crate) fn parse_command_line_worker(
     HashMap<String, OptValue>,
     Vec<String>,
     Vec<Diagnostic>,
-) {
+) { ::tsox_core::fntrace::enter("parse_command_line_worker"); 
     let mut options: HashMap<String, OptValue> = HashMap::new();
     let mut watch_options: HashMap<String, OptValue> = HashMap::new();
     let mut file_names: Vec<String> = Vec::new();

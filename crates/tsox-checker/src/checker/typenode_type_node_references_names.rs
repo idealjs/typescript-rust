@@ -4,7 +4,7 @@ use tsox_frontend::ast::Node;
 use tsox_frontend::ast::SyntaxKind;
 use tsox_frontend::ast::node_data_generated::NodeData;
 
-pub(crate) fn type_node_references_names(node: &Arc<Node>, names: &[String]) -> bool {
+pub(crate) fn type_node_references_names(node: &Arc<Node>, names: &[String]) -> bool { ::tsox_core::fntrace::enter("type_node_references_names"); 
     let mut found = false;
     NodeWalker {
         names,
@@ -20,7 +20,7 @@ pub(crate) struct NodeWalker<'a> {
 }
 
 impl<'a> NodeWalker<'a> {
-    pub(crate) fn walk(&mut self, node: &Arc<Node>) {
+    pub(crate) fn walk(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("walk"); 
         if *self.found {
             return;
         }
@@ -35,11 +35,11 @@ impl<'a> NodeWalker<'a> {
     }
 }
 
-pub(crate) fn names_contain(names: &[String], text: &str) -> bool {
+pub(crate) fn names_contain(names: &[String], text: &str) -> bool { ::tsox_core::fntrace::enter("names_contain"); 
     names.iter().any(|n| n == text)
 }
 
-pub(crate) fn type_name_inside_conditional_branch(node: &Arc<Node>) -> bool {
+pub(crate) fn type_name_inside_conditional_branch(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_name_inside_conditional_branch"); 
     let mut cur = node.parent();
     while let Some(a) = cur {
         if matches!(&a.data, NodeData::ConditionalTypeNode(_)) {
@@ -56,7 +56,7 @@ pub(crate) fn type_name_inside_conditional_branch(node: &Arc<Node>) -> bool {
     false
 }
 
-pub(crate) fn node_inside(node: &Arc<Node>, root: &Arc<Node>) -> bool {
+pub(crate) fn node_inside(node: &Arc<Node>, root: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_inside"); 
     if Arc::ptr_eq(node, root) {
         return true;
     }
@@ -70,7 +70,7 @@ pub(crate) fn node_inside(node: &Arc<Node>, root: &Arc<Node>) -> bool {
     false
 }
 
-pub(crate) fn type_name_shadowed_by_type_parameter(type_name: &Arc<Node>) -> bool {
+pub(crate) fn type_name_shadowed_by_type_parameter(type_name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_name_shadowed_by_type_parameter"); 
     let name = type_name.text();
     let mut cur = type_name.parent();
     while let Some(a) = cur {

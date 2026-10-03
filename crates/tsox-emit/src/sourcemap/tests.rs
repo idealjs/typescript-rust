@@ -1,16 +1,16 @@
 use super::*;
 use tsox_core::tspath::ComparePathsOptions;
 
-fn make_generator() -> Generator {
+fn make_generator() -> Generator { ::tsox_core::fntrace::enter("make_generator"); 
     Generator::new("main.js", "/", "/", ComparePathsOptions::default())
 }
 
-fn raw_map(g: &mut Generator) -> RawSourceMap {
+fn raw_map(g: &mut Generator) -> RawSourceMap { ::tsox_core::fntrace::enter("raw_map"); 
     g.raw_source_map()
 }
 
 #[test]
-fn empty() {
+fn empty() { ::tsox_core::fntrace::enter("empty"); 
     let mut g = make_generator();
     let map = raw_map(&mut g);
     assert_eq!(
@@ -28,7 +28,7 @@ fn empty() {
 }
 
 #[test]
-fn empty_serialized() {
+fn empty_serialized() { ::tsox_core::fntrace::enter("empty_serialized"); 
     let mut g = make_generator();
     let actual = g.to_json();
     let expected =
@@ -37,7 +37,7 @@ fn empty_serialized() {
 }
 
 #[test]
-fn add_source() {
+fn add_source() { ::tsox_core::fntrace::enter("add_source"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     let map = raw_map(&mut g);
@@ -57,7 +57,7 @@ fn add_source() {
 }
 
 #[test]
-fn set_source_content() {
+fn set_source_content() { ::tsox_core::fntrace::enter("set_source_content"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.set_source_content(source_index, "foo").unwrap();
@@ -78,7 +78,7 @@ fn set_source_content() {
 }
 
 #[test]
-fn set_source_content_for_second_source_only() {
+fn set_source_content_for_second_source_only() { ::tsox_core::fntrace::enter("set_source_content_for_second_source_only"); 
     let mut g = make_generator();
     g.add_source("/skipped.ts");
     let source_index = g.add_source("/main.ts");
@@ -100,7 +100,7 @@ fn set_source_content_for_second_source_only() {
 }
 
 #[test]
-fn set_source_content_source_index_out_of_range() {
+fn set_source_content_source_index_out_of_range() { ::tsox_core::fntrace::enter("set_source_content_source_index_out_of_range"); 
     let mut g = make_generator();
     assert_eq!(
         g.set_source_content(-1, "").unwrap_err(),
@@ -113,7 +113,7 @@ fn set_source_content_source_index_out_of_range() {
 }
 
 #[test]
-fn set_source_content_for_second_source_only_serialized() {
+fn set_source_content_for_second_source_only_serialized() { ::tsox_core::fntrace::enter("set_source_content_for_second_source_only_serialized"); 
     let mut g = make_generator();
     g.add_source("/skipped.ts");
     let source_index = g.add_source("/main.ts");
@@ -124,7 +124,7 @@ fn set_source_content_for_second_source_only_serialized() {
 }
 
 #[test]
-fn add_name() {
+fn add_name() { ::tsox_core::fntrace::enter("add_name"); 
     let mut g = make_generator();
     let name_index = g.add_name("foo");
     let map = raw_map(&mut g);
@@ -144,7 +144,7 @@ fn add_name() {
 }
 
 #[test]
-fn add_generated_mapping() {
+fn add_generated_mapping() { ::tsox_core::fntrace::enter("add_generated_mapping"); 
     let mut g = make_generator();
     g.add_generated_mapping(0, 0).unwrap();
     let map = raw_map(&mut g);
@@ -152,7 +152,7 @@ fn add_generated_mapping() {
 }
 
 #[test]
-fn add_generated_mapping_on_second_line_only() {
+fn add_generated_mapping_on_second_line_only() { ::tsox_core::fntrace::enter("add_generated_mapping_on_second_line_only"); 
     let mut g = make_generator();
     g.add_generated_mapping(1, 0).unwrap();
     let map = raw_map(&mut g);
@@ -160,7 +160,7 @@ fn add_generated_mapping_on_second_line_only() {
 }
 
 #[test]
-fn add_source_mapping() {
+fn add_source_mapping() { ::tsox_core::fntrace::enter("add_source_mapping"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.add_source_mapping(0, 0, source_index, 0, 0).unwrap();
@@ -169,7 +169,7 @@ fn add_source_mapping() {
 }
 
 #[test]
-fn add_source_mapping_next_generated_character() {
+fn add_source_mapping_next_generated_character() { ::tsox_core::fntrace::enter("add_source_mapping_next_generated_character"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.add_source_mapping(0, 0, source_index, 0, 0).unwrap();
@@ -179,7 +179,7 @@ fn add_source_mapping_next_generated_character() {
 }
 
 #[test]
-fn add_source_mapping_next_generated_and_source_character() {
+fn add_source_mapping_next_generated_and_source_character() { ::tsox_core::fntrace::enter("add_source_mapping_next_generated_and_source_character"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.add_source_mapping(0, 0, source_index, 0, 0).unwrap();
@@ -189,7 +189,7 @@ fn add_source_mapping_next_generated_and_source_character() {
 }
 
 #[test]
-fn add_source_mapping_next_generated_line() {
+fn add_source_mapping_next_generated_line() { ::tsox_core::fntrace::enter("add_source_mapping_next_generated_line"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.add_source_mapping(0, 0, source_index, 0, 0).unwrap();
@@ -199,7 +199,7 @@ fn add_source_mapping_next_generated_line() {
 }
 
 #[test]
-fn add_source_mapping_previous_source_character() {
+fn add_source_mapping_previous_source_character() { ::tsox_core::fntrace::enter("add_source_mapping_previous_source_character"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.add_source_mapping(0, 0, source_index, 0, 1).unwrap();
@@ -209,7 +209,7 @@ fn add_source_mapping_previous_source_character() {
 }
 
 #[test]
-fn add_named_source_mapping() {
+fn add_named_source_mapping() { ::tsox_core::fntrace::enter("add_named_source_mapping"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     let name_index = g.add_name("foo");
@@ -221,7 +221,7 @@ fn add_named_source_mapping() {
 }
 
 #[test]
-fn add_named_source_mapping_with_previous_name() {
+fn add_named_source_mapping_with_previous_name() { ::tsox_core::fntrace::enter("add_named_source_mapping_with_previous_name"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     let name_index1 = g.add_name("foo");
@@ -236,7 +236,7 @@ fn add_named_source_mapping_with_previous_name() {
 }
 
 #[test]
-fn add_generated_mapping_generated_line_cannot_backtrack() {
+fn add_generated_mapping_generated_line_cannot_backtrack() { ::tsox_core::fntrace::enter("add_generated_mapping_generated_line_cannot_backtrack"); 
     let mut g = make_generator();
     g.add_generated_mapping(1, 0).unwrap();
     assert_eq!(
@@ -246,7 +246,7 @@ fn add_generated_mapping_generated_line_cannot_backtrack() {
 }
 
 #[test]
-fn add_generated_mapping_generated_character_cannot_be_negative() {
+fn add_generated_mapping_generated_character_cannot_be_negative() { ::tsox_core::fntrace::enter("add_generated_mapping_generated_character_cannot_be_negative"); 
     let mut g = make_generator();
     g.add_generated_mapping(0, 0).unwrap();
     assert_eq!(
@@ -256,7 +256,7 @@ fn add_generated_mapping_generated_character_cannot_be_negative() {
 }
 
 #[test]
-fn add_source_mapping_generated_line_cannot_backtrack() {
+fn add_source_mapping_generated_line_cannot_backtrack() { ::tsox_core::fntrace::enter("add_source_mapping_generated_line_cannot_backtrack"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.add_source_mapping(1, 0, source_index, 0, 0).unwrap();
@@ -267,7 +267,7 @@ fn add_source_mapping_generated_line_cannot_backtrack() {
 }
 
 #[test]
-fn add_source_mapping_generated_character_cannot_be_negative() {
+fn add_source_mapping_generated_character_cannot_be_negative() { ::tsox_core::fntrace::enter("add_source_mapping_generated_character_cannot_be_negative"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     g.add_source_mapping(0, 0, source_index, 0, 0).unwrap();
@@ -278,7 +278,7 @@ fn add_source_mapping_generated_character_cannot_be_negative() {
 }
 
 #[test]
-fn add_source_mapping_source_index_is_out_of_range() {
+fn add_source_mapping_source_index_is_out_of_range() { ::tsox_core::fntrace::enter("add_source_mapping_source_index_is_out_of_range"); 
     let mut g = make_generator();
     assert_eq!(
         g.add_source_mapping(0, 0, -1, 0, 0).unwrap_err(),
@@ -291,7 +291,7 @@ fn add_source_mapping_source_index_is_out_of_range() {
 }
 
 #[test]
-fn add_source_mapping_source_line_cannot_be_negative() {
+fn add_source_mapping_source_line_cannot_be_negative() { ::tsox_core::fntrace::enter("add_source_mapping_source_line_cannot_be_negative"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     assert_eq!(
@@ -301,7 +301,7 @@ fn add_source_mapping_source_line_cannot_be_negative() {
 }
 
 #[test]
-fn add_source_mapping_source_character_cannot_be_negative() {
+fn add_source_mapping_source_character_cannot_be_negative() { ::tsox_core::fntrace::enter("add_source_mapping_source_character_cannot_be_negative"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     assert_eq!(
@@ -311,7 +311,7 @@ fn add_source_mapping_source_character_cannot_be_negative() {
 }
 
 #[test]
-fn add_named_source_mapping_generated_line_cannot_backtrack() {
+fn add_named_source_mapping_generated_line_cannot_backtrack() { ::tsox_core::fntrace::enter("add_named_source_mapping_generated_line_cannot_backtrack"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     let name_index = g.add_name("foo");
@@ -325,7 +325,7 @@ fn add_named_source_mapping_generated_line_cannot_backtrack() {
 }
 
 #[test]
-fn add_named_source_mapping_generated_character_cannot_be_negative() {
+fn add_named_source_mapping_generated_character_cannot_be_negative() { ::tsox_core::fntrace::enter("add_named_source_mapping_generated_character_cannot_be_negative"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     let name_index = g.add_name("foo");
@@ -339,7 +339,7 @@ fn add_named_source_mapping_generated_character_cannot_be_negative() {
 }
 
 #[test]
-fn add_named_source_mapping_source_index_is_out_of_range() {
+fn add_named_source_mapping_source_index_is_out_of_range() { ::tsox_core::fntrace::enter("add_named_source_mapping_source_index_is_out_of_range"); 
     let mut g = make_generator();
     let name_index = g.add_name("foo");
     assert_eq!(
@@ -355,7 +355,7 @@ fn add_named_source_mapping_source_index_is_out_of_range() {
 }
 
 #[test]
-fn add_named_source_mapping_source_line_cannot_be_negative() {
+fn add_named_source_mapping_source_line_cannot_be_negative() { ::tsox_core::fntrace::enter("add_named_source_mapping_source_line_cannot_be_negative"); 
     let mut g = make_generator();
     let name_index = g.add_name("foo");
     let source_index = g.add_source("/main.ts");
@@ -367,7 +367,7 @@ fn add_named_source_mapping_source_line_cannot_be_negative() {
 }
 
 #[test]
-fn add_named_source_mapping_source_character_cannot_be_negative() {
+fn add_named_source_mapping_source_character_cannot_be_negative() { ::tsox_core::fntrace::enter("add_named_source_mapping_source_character_cannot_be_negative"); 
     let mut g = make_generator();
     let name_index = g.add_name("foo");
     let source_index = g.add_source("/main.ts");
@@ -379,7 +379,7 @@ fn add_named_source_mapping_source_character_cannot_be_negative() {
 }
 
 #[test]
-fn add_named_source_mapping_name_index_is_out_of_range() {
+fn add_named_source_mapping_name_index_is_out_of_range() { ::tsox_core::fntrace::enter("add_named_source_mapping_name_index_is_out_of_range"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     assert_eq!(
@@ -395,7 +395,7 @@ fn add_named_source_mapping_name_index_is_out_of_range() {
 }
 
 #[test]
-fn decoder_empty() {
+fn decoder_empty() { ::tsox_core::fntrace::enter("decoder_empty"); 
     let decoder = MappingsDecoder::new("");
     let (mappings, err) = decoder.collect_all();
     assert!(mappings.is_empty());
@@ -403,7 +403,7 @@ fn decoder_empty() {
 }
 
 #[test]
-fn decoder_single_generated_mapping() {
+fn decoder_single_generated_mapping() { ::tsox_core::fntrace::enter("decoder_single_generated_mapping"); 
     let decoder = MappingsDecoder::new("A");
     let (mappings, err) = decoder.collect_all();
     assert!(err.is_none());
@@ -422,7 +422,7 @@ fn decoder_single_generated_mapping() {
 }
 
 #[test]
-fn decoder_single_source_mapping() {
+fn decoder_single_source_mapping() { ::tsox_core::fntrace::enter("decoder_single_source_mapping"); 
     let decoder = MappingsDecoder::new("AAAA");
     let (mappings, err) = decoder.collect_all();
     assert!(err.is_none());
@@ -434,7 +434,7 @@ fn decoder_single_source_mapping() {
 }
 
 #[test]
-fn decoder_two_lines() {
+fn decoder_two_lines() { ::tsox_core::fntrace::enter("decoder_two_lines"); 
     let decoder = MappingsDecoder::new("AAAA;AAAA");
     let (mappings, err) = decoder.collect_all();
     assert!(err.is_none());
@@ -444,7 +444,7 @@ fn decoder_two_lines() {
 }
 
 #[test]
-fn decoder_roundtrip() {
+fn decoder_roundtrip() { ::tsox_core::fntrace::enter("decoder_roundtrip"); 
     let mut g = make_generator();
     let source_index = g.add_source("/main.ts");
     let name_index = g.add_name("foo");
@@ -477,7 +477,7 @@ fn decoder_roundtrip() {
 }
 
 #[test]
-fn try_get_source_mapping_url_finds_comment() {
+fn try_get_source_mapping_url_finds_comment() { ::tsox_core::fntrace::enter("try_get_source_mapping_url_finds_comment"); 
     let text = "var x = 1;\n//# sourceMappingURL=app.js.map\n";
 
     let line_starts = vec![0, 11, 42];
@@ -485,7 +485,7 @@ fn try_get_source_mapping_url_finds_comment() {
 }
 
 #[test]
-fn try_get_source_mapping_url_no_comment() {
+fn try_get_source_mapping_url_no_comment() { ::tsox_core::fntrace::enter("try_get_source_mapping_url_no_comment"); 
     let text = "var x = 1;\n";
     let line_starts = vec![0, 11];
     assert_eq!(try_get_source_mapping_url(text, &line_starts), "");

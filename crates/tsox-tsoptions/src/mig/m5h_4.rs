@@ -8,7 +8,7 @@ use tsox_frontend::ast::node_node::Node;
 use tsox_frontend::ast::node_source_file::SourceFile;
 
 impl OptionDecl {
-    pub fn disallow_null_or_undefined(&self) -> bool {
+    pub fn disallow_null_or_undefined(&self) -> bool { ::tsox_core::fntrace::enter("disallow_null_or_undefined"); 
         self.name == "extends"
     }
 }
@@ -17,7 +17,7 @@ pub fn create_diagnostic_for_invalid_enum_type(
     opt: &OptionDecl,
     source_file: Option<&SourceFile>,
     node: Option<&Node>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_for_invalid_enum_type"); 
     let names_of_type: Vec<String> = opt
         .enum_map()
         .map(|m| m.keys().cloned().collect())
@@ -32,7 +32,7 @@ pub fn create_diagnostic_for_invalid_enum_type(
     )
 }
 
-pub fn format_enum_type_keys(opt: &OptionDecl, keys: &[String]) -> String {
+pub fn format_enum_type_keys(opt: &OptionDecl, keys: &[String]) -> String { ::tsox_core::fntrace::enter("format_enum_type_keys"); 
     let keys: Vec<String> = match opt.deprecated_keys() {
         Some(deprecated) => keys
             .iter()
@@ -44,7 +44,7 @@ pub fn format_enum_type_keys(opt: &OptionDecl, keys: &[String]) -> String {
     format!("'{}'", keys.join("', '"))
 }
 
-pub fn option_kind_name(kind: OptionKind) -> &'static str {
+pub fn option_kind_name(kind: OptionKind) -> &'static str { ::tsox_core::fntrace::enter("option_kind_name"); 
     match kind {
         OptionKind::Boolean => "boolean",
         OptionKind::String => "string",
@@ -55,7 +55,7 @@ pub fn option_kind_name(kind: OptionKind) -> &'static str {
     }
 }
 
-pub fn get_compiler_option_value_type_string(option: &OptionDecl) -> String {
+pub fn get_compiler_option_value_type_string(option: &OptionDecl) -> String { ::tsox_core::fntrace::enter("get_compiler_option_value_type_string"); 
     match option.kind {
         OptionKind::ListOrElement => format!(
             "{} or Array",

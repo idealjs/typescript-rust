@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn category_names() {
+fn category_names() { crate::fntrace::enter("category_names"); 
     assert_eq!(Category::Warning.name(), "warning");
     assert_eq!(Category::Error.name(), "error");
     assert_eq!(Category::Suggestion.name(), "suggestion");
@@ -9,17 +9,17 @@ fn category_names() {
 }
 
 #[test]
-fn format_no_args() {
+fn format_no_args() { crate::fntrace::enter("format_no_args"); 
     assert_eq!(format_message("hello world", &[]), "hello world");
 }
 
 #[test]
-fn format_with_args() {
+fn format_with_args() { crate::fntrace::enter("format_with_args"); 
     assert_eq!(format_message("'{0}' expected", &["foo"]), "'foo' expected");
 }
 
 #[test]
-fn format_multiple_args() {
+fn format_multiple_args() { crate::fntrace::enter("format_multiple_args"); 
     assert_eq!(
         format_message("{0} must precede {1}", &["readonly", "public"]),
         "readonly must precede public"
@@ -27,7 +27,7 @@ fn format_multiple_args() {
 }
 
 #[test]
-fn ad_hoc_message() {
+fn ad_hoc_message() { crate::fntrace::enter("ad_hoc_message"); 
     let msg = new_ad_hoc_message("something went wrong");
     assert_eq!(msg.code, -1);
     assert_eq!(msg.category, Category::Error);
@@ -35,18 +35,18 @@ fn ad_hoc_message() {
 }
 
 #[test]
-fn format_non_placeholder_braces_left_untouched() {
+fn format_non_placeholder_braces_left_untouched() { crate::fntrace::enter("format_non_placeholder_braces_left_untouched"); 
     assert_eq!(format_message("{abc}", &["x"]), "{abc}");
 }
 
 #[test]
 #[should_panic(expected = "Invalid formatting placeholder")]
-fn format_panics_on_out_of_range_index() {
+fn format_panics_on_out_of_range_index() { crate::fntrace::enter("format_panics_on_out_of_range_index"); 
     format_message("{5}", &["a", "b", "c"]);
 }
 
 #[test]
-fn test_localize() {
+fn test_localize() { crate::fntrace::enter("test_localize"); 
     assert_eq!(IDENTIFIER_EXPECTED.format(&[]), "Identifier expected.");
     assert_eq!(X_0_EXPECTED.format(&[")"]), "')' expected.");
     assert_eq!(
@@ -56,7 +56,7 @@ fn test_localize() {
 }
 
 #[test]
-fn test_localize_by_key() {
+fn test_localize_by_key() { crate::fntrace::enter("test_localize_by_key"); 
     let id_msg = key_to_message("Identifier_expected_1003").unwrap();
     assert_eq!(id_msg.format(&[]), "Identifier expected.");
     assert_eq!(id_msg.key, "Identifier_expected_1003");
@@ -67,7 +67,7 @@ fn test_localize_by_key() {
 }
 
 #[test]
-fn test_localize_zh_cn() {
+fn test_localize_zh_cn() { crate::fntrace::enter("test_localize_zh_cn"); 
     let locale = Locale::parse("zh-CN").unwrap();
     let localized = IDENTIFIER_EXPECTED.localize(&locale, &[]);
     assert!(!localized.is_empty());
@@ -76,21 +76,21 @@ fn test_localize_zh_cn() {
 }
 
 #[test]
-fn test_localize_with_args() {
+fn test_localize_with_args() { crate::fntrace::enter("test_localize_with_args"); 
     let locale = Locale::parse("zh-CN").unwrap();
     let localized = X_0_EXPECTED.localize(&locale, &["x"]);
     assert_eq!(localized, "应为“x”。");
 }
 
 #[test]
-fn test_localize_falls_back_to_english_for_unknown_locale() {
+fn test_localize_falls_back_to_english_for_unknown_locale() { crate::fntrace::enter("test_localize_falls_back_to_english_for_unknown_locale"); 
     let locale = Locale::parse("klingon").unwrap();
     let localized = IDENTIFIER_EXPECTED.localize(&locale, &[]);
     assert_eq!(localized, IDENTIFIER_EXPECTED.text);
 }
 
 #[test]
-fn test_localize_falls_back_to_english_for_missing_key() {
+fn test_localize_falls_back_to_english_for_missing_key() { crate::fntrace::enter("test_localize_falls_back_to_english_for_missing_key"); 
     let locale = Locale::parse("zh-CN").unwrap();
     let msg = new_ad_hoc_message("ad hoc only");
     let localized = msg.localize(&locale, &[]);

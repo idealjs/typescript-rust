@@ -14,7 +14,7 @@ pub struct ChangeFileResult {
 }
 
 impl ChangeFileResult {
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.affected_projects.is_empty() && self.affected_files.is_empty()
     }
 }
@@ -35,7 +35,7 @@ impl ConfigFileRegistryBuilder {
         snapshot_id: u64,
         session_options: super::compiler_host::SessionOptions,
         custom_config_file_name: String,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         let custom_config_file_name_changed =
             custom_config_file_name != old_config_file_registry.custom_config_file_name;
         ConfigFileRegistryBuilder {
@@ -48,7 +48,7 @@ impl ConfigFileRegistryBuilder {
         }
     }
 
-    pub fn finalize(&self) -> ConfigFileRegistry {
+    pub fn finalize(&self) -> ConfigFileRegistry { ::tsox_core::fntrace::enter("finalize"); 
         if !self.custom_config_file_name_changed {
             return self.base.clone_shallow();
         }
@@ -57,17 +57,17 @@ impl ConfigFileRegistryBuilder {
         registry
     }
 
-    pub fn did_change_files(&self, _summary: &FileChangeSummary) -> ChangeFileResult {
+    pub fn did_change_files(&self, _summary: &FileChangeSummary) -> ChangeFileResult { ::tsox_core::fntrace::enter("did_change_files"); 
         ChangeFileResult::default()
     }
 
-    pub fn did_change_custom_config_file_name(&self) -> bool {
+    pub fn did_change_custom_config_file_name(&self) -> bool { ::tsox_core::fntrace::enter("did_change_custom_config_file_name"); 
         self.custom_config_file_name_changed
     }
 
-    pub fn cleanup(&self) {}
+    pub fn cleanup(&self) { ::tsox_core::fntrace::enter("cleanup"); }
 
-    pub fn is_config_base_name(&self, base_name: &str) -> bool {
+    pub fn is_config_base_name(&self, base_name: &str) -> bool { ::tsox_core::fntrace::enter("is_config_base_name"); 
         base_name == "tsconfig.json"
             || base_name == "jsconfig.json"
             || (!self.custom_config_file_name.is_empty()

@@ -24,7 +24,7 @@ impl ForAwaitTransformer {
         node: &Arc<Node>,
         bound_value: &Arc<Node>,
         non_user_code: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_for_of_statement_head"); 
         let mut emit_context = self.transformer.emit_context();
         let (initializer, expression, statement) = match &node.data {
             NodeData::ForInOrOfStatement(d) => {
@@ -75,7 +75,7 @@ impl ForAwaitTransformer {
         block
     }
 
-    pub fn create_downlevel_await(&mut self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn create_downlevel_await(&mut self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_downlevel_await"); 
         if self.enclosing_function_flags.intersects(FunctionFlags::GENERATOR) {
             return self
                 .transformer
@@ -90,7 +90,7 @@ impl ForAwaitTransformer {
         node: &Arc<Node>,
         outermost_labeled_statement: Option<&Arc<Node>>,
         ancestor_facts: ForAwaitHierarchyFacts,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_for_await_of_statement"); 
         let mut emit_context = self.transformer.emit_context();
         let (node_expression, node_statement, initializer) = match &node.data {
             NodeData::ForInOrOfStatement(d) => {
@@ -258,7 +258,7 @@ impl ForAwaitTransformer {
         f.new_try_statement(&try_block, Some(&catch_clause), Some(&finally_block))
     }
 
-    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_constructor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_constructor_declaration"); 
         let saved_enclosing_function_flags = self.enclosing_function_flags;
         self.enclosing_function_flags = get_function_flags(Some(node));
         let (modifiers, parameters, body) = match &node.data {
@@ -285,7 +285,7 @@ impl ForAwaitTransformer {
         updated
     }
 
-    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_get_accessor_declaration"); 
         let saved_enclosing_function_flags = self.enclosing_function_flags;
         self.enclosing_function_flags = get_function_flags(Some(node));
         let (modifiers, name, parameters, body) = match &node.data {
@@ -314,7 +314,7 @@ impl ForAwaitTransformer {
         updated
     }
 
-    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_set_accessor_declaration"); 
         let saved_enclosing_function_flags = self.enclosing_function_flags;
         self.enclosing_function_flags = get_function_flags(Some(node));
         let (modifiers, name, parameters, body) = match &node.data {
@@ -348,7 +348,7 @@ impl ForAwaitTransformer {
         node: &Arc<Node>,
         visit_name: bool,
         name_node: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_function_like"); 
         let saved_enclosing_function_flags = self.enclosing_function_flags;
         self.enclosing_function_flags = get_function_flags(Some(node));
         let mut emit_context = self.transformer.emit_context();
@@ -454,7 +454,7 @@ impl ForAwaitTransformer {
         updated
     }
 
-    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_method_declaration"); 
         let name = match &node.data {
             NodeData::MethodDeclaration(d) => Some(d.name.clone()),
             _ => unreachable!(),
@@ -462,7 +462,7 @@ impl ForAwaitTransformer {
         self.update_function_like(node, true, name.as_ref())
     }
 
-    pub fn visit_function_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_function_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_function_declaration"); 
         let name = match &node.data {
             NodeData::FunctionDeclaration(d) => d.name.clone(),
             _ => unreachable!(),
@@ -470,7 +470,7 @@ impl ForAwaitTransformer {
         self.update_function_like(node, false, name.as_ref())
     }
 
-    pub fn visit_function_expression(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_function_expression(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_function_expression"); 
         let name = match &node.data {
             NodeData::FunctionExpression(d) => d.name.clone(),
             _ => unreachable!(),
@@ -478,7 +478,7 @@ impl ForAwaitTransformer {
         self.update_function_like(node, false, name.as_ref())
     }
 
-    pub fn visit_arrow_function(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_arrow_function(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_arrow_function"); 
         let saved_enclosing_function_flags = self.enclosing_function_flags;
         self.enclosing_function_flags = get_function_flags(Some(node));
         let (modifiers, parameters, equals_greater_than_token, body) = match &node.data {
@@ -512,7 +512,7 @@ impl ForAwaitTransformer {
         updated
     }
 
-    pub fn transform_async_generator_function_parameter_list(&mut self, node: &Arc<Node>) -> Arc<NodeList> {
+    pub fn transform_async_generator_function_parameter_list(&mut self, node: &Arc<Node>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("transform_async_generator_function_parameter_list"); 
         let parameters = node
             .parameters()
             .map(|l| &l.nodes[..])
@@ -556,7 +556,7 @@ impl ForAwaitTransformer {
         new_parameters_array
     }
 
-    pub fn transform_async_generator_function_body(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn transform_async_generator_function_body(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("transform_async_generator_function_body"); 
         let mut emit_context = self.transformer.emit_context();
         let parameters = node
             .parameters()
@@ -687,7 +687,7 @@ impl ForAwaitTransformer {
     }
 }
 
-fn parameter_list_of(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+fn parameter_list_of(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("parameter_list_of"); 
     match &node.data {
         NodeData::MethodDeclaration(d) => Some(d.parameters.clone()),
         NodeData::FunctionDeclaration(d) => Some(d.parameters.clone()),
@@ -700,26 +700,26 @@ fn parameter_list_of(node: &Arc<Node>) -> Option<Arc<NodeList>> {
     }
 }
 
-fn error_property_access(f: &Factory, error_record: &Arc<Node>) -> Arc<Node> {
+fn error_property_access(f: &Factory, error_record: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("error_property_access"); 
     let error_identifier = f.new_identifier("error");
     f.new_property_access_expression(error_record, None, &error_identifier, NodeFlags::empty())
 }
 
-fn block_statements(block: &Arc<Node>) -> Vec<Arc<Node>> {
+fn block_statements(block: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("block_statements"); 
     match &block.data {
         NodeData::Block(d) => d.statements.nodes.clone(),
         _ => vec![],
     }
 }
 
-fn block_multi_line(block: &Arc<Node>) -> bool {
+fn block_multi_line(block: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("block_multi_line"); 
     match &block.data {
         NodeData::Block(d) => d.multi_line,
         _ => false,
     }
 }
 
-fn statement_list(block: &Arc<Node>) -> Arc<NodeList> {
+fn statement_list(block: &Arc<Node>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("statement_list"); 
     match &block.data {
         NodeData::Block(d) => d.statements.clone(),
         _ => panic!("statement_list: not a block"),

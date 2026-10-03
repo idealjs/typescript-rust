@@ -8,7 +8,7 @@ impl Checker {
     pub(crate) fn get_yield_star_return_type(
         &mut self,
         operand_type: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_yield_star_return_type"); 
         if operand_type.flags.contains(TypeFlags::Any) {
             return None;
         }
@@ -65,7 +65,7 @@ impl Checker {
 
     /// Go getIterationTypesOfIteratorResult：IteratorResult 联合中取
     /// done 含 true 变体（IteratorReturnResult）的 value
-    fn iterator_result_return_value(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    fn iterator_result_return_value(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("iterator_result_return_value"); 
         if t.is_union() {
             let parts: Vec<Arc<Type>> = t
                 .types()?

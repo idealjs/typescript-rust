@@ -10,7 +10,7 @@ use crate::checker::types::TypeFlags;
 impl Checker {
     /// Go checkMembersForOverrideModifier：类成员（含构造器参数属性）的
     /// override 修饰符检查（TS4112/4113/4114/4115/4116）
-    pub(crate) fn check_members_for_override_modifier(&mut self, class_node: &Arc<Node>) {
+    pub(crate) fn check_members_for_override_modifier(&mut self, class_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_members_for_override_modifier"); 
         let members = match &class_node.data {
             NodeData::ClassDeclaration(d) => Arc::clone(&d.members),
             NodeData::ClassExpression(d) => Arc::clone(&d.members),
@@ -94,7 +94,7 @@ impl Checker {
         base_instance: Option<&Arc<crate::checker::types::Type>>,
         base_static: Option<&Arc<crate::checker::types::Type>>,
         class_non_ambient: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_member_for_override_modifier"); 
         use tsox_core::diagnostics::messages_generated as msg;
         let Some(name_node) = member.name() else {
             return;
@@ -225,7 +225,7 @@ impl Checker {
 
     /// extends 基类节点：Identifier 经 extends_base_of 解析；
     /// 类表达式基类直接用该节点
-    fn override_base_class_node(&self, class_node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn override_base_class_node(&self, class_node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("override_base_class_node"); 
         if let Some((b, _)) = self.extends_base_of(class_node) {
             return Some(b);
         }
@@ -252,7 +252,7 @@ impl Checker {
         None
     }
 
-    fn class_display_name(class_node: &Arc<Node>) -> String {
+    fn class_display_name(class_node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("class_display_name"); 
         match &class_node.data {
             NodeData::ClassDeclaration(d) => d
                 .name
@@ -273,7 +273,7 @@ impl Checker {
         loc: &tsox_core::core::text::TextRange,
         message: tsox_core::diagnostics::Message,
         args: Vec<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_override_error"); 
         self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
             self.current_file.clone(),
             *loc,
@@ -284,4 +284,4 @@ impl Checker {
 }
 
 #[allow(dead_code)]
-fn unused_typeflags_marker(_: TypeFlags) {}
+fn unused_typeflags_marker(_: TypeFlags) { ::tsox_core::fntrace::enter("unused_typeflags_marker"); }

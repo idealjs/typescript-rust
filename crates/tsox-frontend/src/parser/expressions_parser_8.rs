@@ -3,7 +3,7 @@
 use crate::parser::expressions::*;
 
 impl Parser {
-    pub(crate) fn parse_object_literal_element_modifiers(&mut self) -> Option<Arc<ModifierList>> {
+    pub(crate) fn parse_object_literal_element_modifiers(&mut self) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("parse_object_literal_element_modifiers"); 
         let mut decorators: Vec<Arc<Node>> = Vec::new();
         let mut modifiers: Vec<(SyntaxKind, usize, usize)> = Vec::new();
         loop {

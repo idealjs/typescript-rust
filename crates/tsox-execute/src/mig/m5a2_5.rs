@@ -15,17 +15,17 @@ struct BaselineWriter<'a> {
 }
 
 impl std::io::Write for BaselineWriter<'_> {
-    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.buffer.push_str(&String::from_utf8_lossy(data));
         Ok(data.len())
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         Ok(())
     }
 }
 
-fn fs_differ_changed_paths(differ: &fs_baseline_util::FsDiffer) -> Vec<fs_baseline_util::FileChange> {
+fn fs_differ_changed_paths(differ: &fs_baseline_util::FsDiffer) -> Vec<fs_baseline_util::FileChange> { ::tsox_core::fntrace::enter("fs_differ_changed_paths"); 
     let Some(previous) = differ.serialized_diff() else {
         return Vec::new();
     };
@@ -63,7 +63,7 @@ impl TscInput {
         sys: &TestSys,
         baseline_builder: &mut String,
         command_line_args: &[String],
-    ) -> crate::execute::CommandLineResult {
+    ) -> crate::execute::CommandLineResult { ::tsox_core::fntrace::enter("execute_command"); 
         baseline_builder.push_str(&format!("tsgo {}\n", command_line_args.join(" ")));
         let result = crate::execute::command_line(sys, command_line_args);
         match result.status {
@@ -94,7 +94,7 @@ impl TscInput {
         result
     }
 
-    pub fn get_baseline_sub_folder(&self) -> String {
+    pub fn get_baseline_sub_folder(&self) -> String { ::tsox_core::fntrace::enter("get_baseline_sub_folder"); 
         let mut command_name = "tsc";
         let command_line_args = self.command_line_args.as_deref().unwrap_or(&[]);
         if command_line_args
@@ -113,7 +113,7 @@ impl TscInput {
         format!("{}{}", command_name, w)
     }
 
-    pub fn run(&self, scenario: &str) {
+    pub fn run(&self, scenario: &str) { ::tsox_core::fntrace::enter("run"); 
         let mut baseline_builder = String::new();
         let mut sys = super::m5b::new_test_sys(self, false);
         baseline_builder.push_str(&format!(
@@ -220,7 +220,7 @@ impl TscInput {
     }
 }
 
-pub fn get_diff_for_incremental(incremental_sys: &TestSys, non_incremental_sys: &TestSys) -> String {
+pub fn get_diff_for_incremental(incremental_sys: &TestSys, non_incremental_sys: &TestSys) -> String { ::tsox_core::fntrace::enter("get_diff_for_incremental"); 
     let mut diff_builder = String::new();
 
     let mut non_incremental_outputs = non_incremental_sys.fs.written_files_keys();
@@ -275,7 +275,7 @@ pub fn get_diff_for_incremental(incremental_sys: &TestSys, non_incremental_sys: 
 }
 
 impl TestSys {
-    pub fn error_writer(&self) -> Arc<Mutex<Vec<u8>>> {
+    pub fn error_writer(&self) -> Arc<Mutex<Vec<u8>>> { ::tsox_core::fntrace::enter("error_writer"); 
         Arc::clone(&self.current_write)
     }
 }
@@ -285,47 +285,47 @@ struct SharedBufferWriter {
 }
 
 impl std::io::Write for SharedBufferWriter {
-    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, data: &[u8]) -> std::io::Result<usize> { ::tsox_core::fntrace::enter("write"); 
         self.buf.lock().unwrap().extend_from_slice(data);
         Ok(data.len())
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> std::io::Result<()> { ::tsox_core::fntrace::enter("flush"); 
         Ok(())
     }
 }
 
 impl System for TestSys {
-    fn writer(&self) -> Box<dyn std::io::Write + Send> {
+    fn writer(&self) -> Box<dyn std::io::Write + Send> { ::tsox_core::fntrace::enter("writer"); 
         Box::new(SharedBufferWriter {
             buf: Arc::clone(&self.current_write),
         })
     }
 
-    fn fs(&self) -> Arc<dyn FS> {
+    fn fs(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs"); 
         TestSys::fs(self)
     }
 
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         TestSys::default_library_path(self)
     }
 
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         TestSys::current_directory(self)
     }
 
-    fn write_output_is_tty(&self) -> bool {
+    fn write_output_is_tty(&self) -> bool { ::tsox_core::fntrace::enter("write_output_is_tty"); 
         self.output_is_tty
     }
 
-    fn width_of_terminal(&self) -> usize {
+    fn width_of_terminal(&self) -> usize { ::tsox_core::fntrace::enter("width_of_terminal"); 
         match self.environment_variable("TS_TEST_TERMINAL_WIDTH") {
             Some(width) if !width.is_empty() => width.parse().unwrap_or(0),
             _ => 0,
         }
     }
 
-    fn environment_variable(&self, name: &str) -> Option<String> {
+    fn environment_variable(&self, name: &str) -> Option<String> { ::tsox_core::fntrace::enter("environment_variable"); 
         self.env.get(name).cloned()
     }
 }

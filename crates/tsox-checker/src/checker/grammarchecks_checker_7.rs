@@ -3,7 +3,7 @@
 use crate::checker::grammarchecks::*;
 
 impl Checker {
-    pub fn check_grammar_break_or_continue_statement(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_break_or_continue_statement(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_break_or_continue_statement"); 
         let target_label = match &node.data {
             NodeData::BreakStatement(data) => data.label.as_ref(),
             NodeData::ContinueStatement(data) => data.label.as_ref(),
@@ -64,7 +64,7 @@ impl Checker {
         self.grammar_error_on_node(node, message)
     }
 
-    pub fn check_grammar_variable_declaration_list(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_variable_declaration_list(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_variable_declaration_list"); 
         let data = match &node.data {
             NodeData::VariableDeclarationList(data) => data,
             _ => return false,
@@ -112,7 +112,7 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_variable_declaration(&mut self, node: &Arc<Node>) -> bool {
+    pub fn check_grammar_variable_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_variable_declaration"); 
         let data = match &node.data {
             NodeData::VariableDeclaration(data) => data,
             _ => return false,
@@ -258,7 +258,7 @@ impl Checker {
     pub fn check_grammar_parameter_list(
         &mut self,
         parameters: &tsox_frontend::ast::NodeList,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_parameter_list"); 
         let mut seen_optional = false;
         let count = parameters.nodes.len();
 

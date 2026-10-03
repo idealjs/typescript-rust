@@ -34,7 +34,7 @@ mod lsproto_lsp {
 }
 
 impl LanguageService {
-    pub fn resolve_entry_source(&self, entry: &mut ReferenceEntry) {
+    pub fn resolve_entry_source(&self, entry: &mut ReferenceEntry) { ::tsox_core::fntrace::enter("resolve_entry_source"); 
         let Some(node) = entry.node.clone() else {
             return;
         };
@@ -49,7 +49,7 @@ impl LanguageService {
         }
     }
 
-    pub fn get_range_of_entry_for_feature(&self, entry: &mut ReferenceEntry, feature: crate::ls::mig::m5s::SpanFeature) -> Option<Range> {
+    pub fn get_range_of_entry_for_feature(&self, entry: &mut ReferenceEntry, feature: crate::ls::mig::m5s::SpanFeature) -> Option<Range> { ::tsox_core::fntrace::enter("get_range_of_entry_for_feature"); 
         self.resolve_entry_source(entry);
         let source_file = super::m5t_3::source_file_of_node(&self.get_program(), entry.node.as_ref()?)?;
         let text_range = entry.text_range?;
@@ -61,7 +61,7 @@ impl LanguageService {
         }
     }
 
-    pub fn get_non_local_definition(&self, entry: &SymbolAndEntries) -> Option<crate::ls::find_all_references::NonLocalDefinition> {
+    pub fn get_non_local_definition(&self, entry: &SymbolAndEntries) -> Option<crate::ls::find_all_references::NonLocalDefinition> { ::tsox_core::fntrace::enter("get_non_local_definition"); 
         if !entry.can_use_definition_symbol() {
             return None;
         }
@@ -91,7 +91,7 @@ impl LanguageService {
         position: u32,
         is_rename: bool,
         implementations: bool,
-    ) -> (crate::ls::find_all_references::SymbolAndEntriesData, bool) {
+    ) -> (crate::ls::find_all_references::SymbolAndEntriesData, bool) { ::tsox_core::fntrace::enter("provide_symbols_and_entries_at_position"); 
         let mut node = match tsox_frontend::astnav::get_touching_property_name(&source_file.node, position as usize) {
             Some(node) => node,
             None => {
@@ -184,7 +184,7 @@ impl LanguageService {
         program: &Arc<tsox_compile::compiler::Program>,
         is_rename: bool,
         implementations: bool,
-    ) -> Vec<SymbolAndEntries> {
+    ) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_symbol_and_entries"); 
         let mut options = RefOptions::default();
         if !is_rename {
             options.use_ = ReferenceUse::References;
@@ -202,7 +202,7 @@ impl LanguageService {
         &self,
         params: &lsproto_lsp::ReferenceParams,
         data: &crate::ls::find_all_references::SymbolAndEntriesData,
-    ) -> lsproto_lsp::ReferencesResponse {
+    ) -> lsproto_lsp::ReferencesResponse { ::tsox_core::fntrace::enter("provide_references_from_data"); 
         self.symbol_and_entries_to_references(params, data)
     }
 
@@ -210,7 +210,7 @@ impl LanguageService {
         &self,
         params: &lsproto_lsp::ReferenceParams,
         data: &crate::ls::find_all_references::SymbolAndEntriesData,
-    ) -> lsproto_lsp::ReferencesResponse {
+    ) -> lsproto_lsp::ReferencesResponse { ::tsox_core::fntrace::enter("symbol_and_entries_to_references"); 
         let mut locations: Vec<Location> = Vec::new();
         let mut seen_locations: std::collections::HashSet<(String, u32, u32, u32, u32)> = std::collections::HashSet::new();
         for symbol in &data.symbols_and_entries {
@@ -235,7 +235,7 @@ impl LanguageService {
         &self,
         params: &lsproto_lsp::ReferenceParams,
         data: &crate::ls::find_all_references::SymbolAndEntriesData,
-    ) -> lsproto_lsp::VSReferencesResponse {
+    ) -> lsproto_lsp::VSReferencesResponse { ::tsox_core::fntrace::enter("symbol_and_entries_to_vs_references"); 
         let mut items: Vec<lsproto_lsp::VSReferenceItem> = Vec::new();
         let mut id: i32 = 0;
         let project_name = self.project_path.to_string();
@@ -306,7 +306,7 @@ impl LanguageService {
         &self,
         params: &lsproto_lsp::ImplementationParams,
         options: &crate::ls::find_all_references::SymbolEntryTransformOptions,
-    ) -> lsproto_lsp::ImplementationResponse {
+    ) -> lsproto_lsp::ImplementationResponse { ::tsox_core::fntrace::enter("provide_implementations_ex"); 
         let (program, file) = self.get_program_and_file(&params.text_document.uri);
         let position = lsp_position_to_offset(&file, &params.text_document_position.position);
         let (data, _) = self.provide_symbols_and_entries_at_position(&program, &file, position, false, true);
@@ -318,7 +318,7 @@ impl LanguageService {
         params: &lsproto_lsp::ImplementationParams,
         options: &crate::ls::find_all_references::SymbolEntryTransformOptions,
         data: &crate::ls::find_all_references::SymbolAndEntriesData,
-    ) -> lsproto_lsp::ImplementationResponse {
+    ) -> lsproto_lsp::ImplementationResponse { ::tsox_core::fntrace::enter("provide_implementations_from_data"); 
         self.symbol_and_entries_to_implementations(params, data, options)
     }
 
@@ -327,7 +327,7 @@ impl LanguageService {
         params: &lsproto_lsp::ImplementationParams,
         data: &crate::ls::find_all_references::SymbolAndEntriesData,
         options: &crate::ls::find_all_references::SymbolEntryTransformOptions,
-    ) -> lsproto_lsp::ImplementationResponse {
+    ) -> lsproto_lsp::ImplementationResponse { ::tsox_core::fntrace::enter("symbol_and_entries_to_implementations"); 
         let mut seen_nodes: std::collections::HashSet<usize> = std::collections::HashSet::new();
         let mut entries: Vec<ReferenceEntry> = Vec::new();
         for entry in &data.symbols_and_entries {
@@ -355,7 +355,7 @@ impl LanguageService {
         s: &SymbolAndEntries,
         include_declarations: bool,
         feature: crate::ls::mig::m5s::SpanFeature,
-    ) -> Vec<Location> {
+    ) -> Vec<Location> { ::tsox_core::fntrace::enter("convert_symbol_and_entries_to_locations"); 
         let references: Vec<&ReferenceEntry> = if include_declarations {
             s.references.iter().collect()
         } else {
@@ -373,12 +373,12 @@ impl LanguageService {
         self.convert_entries_to_locations_owned(&references, feature)
     }
 
-    pub fn convert_entries_to_locations(&self, entries: &[ReferenceEntry], feature: crate::ls::mig::m5s::SpanFeature) -> Vec<Location> {
+    pub fn convert_entries_to_locations(&self, entries: &[ReferenceEntry], feature: crate::ls::mig::m5s::SpanFeature) -> Vec<Location> { ::tsox_core::fntrace::enter("convert_entries_to_locations"); 
         let refs: Vec<&ReferenceEntry> = entries.iter().collect();
         self.convert_entries_to_locations_owned(&refs, feature)
     }
 
-    fn convert_entries_to_locations_owned(&self, entries: &[&ReferenceEntry], feature: crate::ls::mig::m5s::SpanFeature) -> Vec<Location> {
+    fn convert_entries_to_locations_owned(&self, entries: &[&ReferenceEntry], feature: crate::ls::mig::m5s::SpanFeature) -> Vec<Location> { ::tsox_core::fntrace::enter("convert_entries_to_locations_owned"); 
         let mut locations = Vec::with_capacity(entries.len());
         for entry in entries {
             let mut owned = clone_reference_entry(entry);
@@ -389,7 +389,7 @@ impl LanguageService {
         locations
     }
 
-    pub fn convert_entries_to_location_links(&self, entries: &[ReferenceEntry], feature: crate::ls::mig::m5s::SpanFeature) -> Vec<LocationLink> {
+    pub fn convert_entries_to_location_links(&self, entries: &[ReferenceEntry], feature: crate::ls::mig::m5s::SpanFeature) -> Vec<LocationLink> { ::tsox_core::fntrace::enter("convert_entries_to_location_links"); 
         let mut links = Vec::with_capacity(entries.len());
         for entry in entries {
             let mut owned = clone_reference_entry(entry);
@@ -418,7 +418,7 @@ impl LanguageService {
         links
     }
 
-    pub fn merge_references(&self, program: &Arc<tsox_compile::compiler::Program>, references_to_merge: &[Vec<SymbolAndEntries>]) -> Vec<SymbolAndEntries> {
+    pub fn merge_references(&self, program: &Arc<tsox_compile::compiler::Program>, references_to_merge: &[Vec<SymbolAndEntries>]) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("merge_references"); 
         let mut result: Vec<SymbolAndEntries> = Vec::new();
         let get_source_file_index_of_entry = |entry: &mut ReferenceEntry| -> usize {
             self.resolve_entry_source(entry);
@@ -490,7 +490,7 @@ impl LanguageService {
 
 pub type LocationLink = crate::ls::types_highlight::LocationLink;
 
-fn lsp_position_to_offset(source_file: &Arc<SourceFile>, position: &lsproto_lsp::Position) -> u32 {
+fn lsp_position_to_offset(source_file: &Arc<SourceFile>, position: &lsproto_lsp::Position) -> u32 { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line_map = &source_file.line_map;
     let line_start = line_map
         .line_starts
@@ -500,7 +500,7 @@ fn lsp_position_to_offset(source_file: &Arc<SourceFile>, position: &lsproto_lsp:
     (line_start + position.character as usize) as u32
 }
 
-fn clone_reference_entry(entry: &ReferenceEntry) -> ReferenceEntry {
+fn clone_reference_entry(entry: &ReferenceEntry) -> ReferenceEntry { ::tsox_core::fntrace::enter("clone_reference_entry"); 
     ReferenceEntry {
         kind: entry.kind,
         node: entry.node.clone(),
@@ -511,7 +511,7 @@ fn clone_reference_entry(entry: &ReferenceEntry) -> ReferenceEntry {
     }
 }
 
-fn clone_definition(def: &Definition) -> Definition {
+fn clone_definition(def: &Definition) -> Definition { ::tsox_core::fntrace::enter("clone_definition"); 
     Definition {
         kind: def.kind,
         symbol: def.symbol.clone(),
@@ -519,7 +519,7 @@ fn clone_definition(def: &Definition) -> Definition {
     }
 }
 
-fn clone_symbol_and_entries(s: &SymbolAndEntries) -> SymbolAndEntries {
+fn clone_symbol_and_entries(s: &SymbolAndEntries) -> SymbolAndEntries { ::tsox_core::fntrace::enter("clone_symbol_and_entries"); 
     SymbolAndEntries {
         definition: clone_definition(&s.definition),
         references: s.references.iter().map(clone_reference_entry).collect(),

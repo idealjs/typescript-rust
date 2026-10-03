@@ -5,7 +5,7 @@ use crate::checker::checker_statements::*;
 impl Checker {
     /// Go checkImportDeclaration/checkExportDeclaration 对每个别名绑定调用
     /// checkAliasSymbol；此处按声明形态下钻到对应绑定节点
-    pub fn check_alias_symbol_bindings(&mut self, node: &Arc<Node>) {
+    pub fn check_alias_symbol_bindings(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_alias_symbol_bindings"); 
         match &node.data {
             NodeData::ImportDeclaration(d) => {
                 let Some(clause) = &d.import_clause else {
@@ -52,7 +52,7 @@ impl Checker {
         }
     }
 
-    pub fn check_alias_symbol(&mut self, node: &Arc<Node>) {
+    pub fn check_alias_symbol(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_alias_symbol"); 
         // Go checkExportSpecifier：无 from 的 export {X} 解析到全局声明
         //（globalThis/undefined/非模块文件顶层）报 TS2661
         if node.kind == SyntaxKind::ExportSpecifier
@@ -205,7 +205,7 @@ impl Checker {
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
         target: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_js_type_only_alias"); 
         let error_node = property_name_or_name(node).unwrap_or_else(|| Arc::clone(node));
         if node.kind == SyntaxKind::ExportSpecifier {
             let mut diag = tsox_frontend::ast::Diagnostic::new(
@@ -258,7 +258,7 @@ impl Checker {
         ));
     }
 
-    fn import_conflict_anchor(node: &Arc<Node>) -> tsox_core::core::text::TextRange {
+    fn import_conflict_anchor(node: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("import_conflict_anchor"); 
         match &node.data {
             NodeData::ImportDeclaration(d) => {
                 let mut name: Option<Arc<Node>> = None;
@@ -299,7 +299,7 @@ impl Checker {
 }
 
 // Go checkExportSpecifier 的 hasModuleSpecifier：父 ExportDeclaration 带 from
-fn export_specifier_has_module_specifier(node: &Arc<Node>) -> bool {
+fn export_specifier_has_module_specifier(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("export_specifier_has_module_specifier"); 
     node.parent()
         .and_then(|clause| clause.parent())
         .and_then(|export_decl| match &export_decl.data {
@@ -317,7 +317,7 @@ fn export_specifier_has_module_specifier(node: &Arc<Node>) -> bool {
 impl Checker {
     // 无 from export {X as Y} 的导出名条目：容器（文件/最近 declare 模块）
     // exports 表中 Y 对应的既有导出符号
-    fn export_specifier_exported_entry(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn export_specifier_exported_entry(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("export_specifier_exported_entry"); 
         let exported = match &node.data {
             NodeData::ExportSpecifier(spec) => {
                 spec.name.text().trim_matches(['"', '\'', '`']).to_string()
@@ -343,7 +343,7 @@ impl Checker {
 
     // Go checkExportSpecifier：解析命中 undefined/globalThis 符号，或声明的
     // 声明容器（GetDeclarationContainer）是非模块全局源文件
-    fn symbol_is_global_declaration(&self, sym: &Arc<Symbol>) -> bool {
+    fn symbol_is_global_declaration(&self, sym: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_global_declaration"); 
         if self
             .undefined_symbol
             .as_ref()
@@ -373,7 +373,7 @@ impl Checker {
     }
 }
 
-fn property_name_or_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn property_name_or_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("property_name_or_name"); 
     match &node.data {
         NodeData::ImportSpecifier(d) => Some(
             d.property_name
@@ -395,7 +395,7 @@ fn property_name_or_name(node: &Arc<Node>) -> Option<Arc<Node>> {
 
 /// Go TryGetModuleSpecifierFromDeclaration：沿祖先找 import/export/require
 /// 声明并取其模块说明符
-fn import_or_require_specifier_of(node: &Arc<Node>) -> Option<String> {
+fn import_or_require_specifier_of(node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("import_or_require_specifier_of"); 
     let mut cur = Arc::clone(node);
     loop {
         let parent = cur.parent()?;
@@ -428,7 +428,7 @@ fn import_or_require_specifier_of(node: &Arc<Node>) -> Option<String> {
     }
 }
 
-fn module_specifier_text(spec: &Arc<Node>) -> Option<String> {
+fn module_specifier_text(spec: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("module_specifier_text"); 
     // Go isStringLiteralLike：无替换模板字面量同字符串（require(`./a`)）
     if !matches!(
         spec.kind,
@@ -439,7 +439,7 @@ fn module_specifier_text(spec: &Arc<Node>) -> Option<String> {
     Some(spec.text().trim_matches(['"', '\'', '`']).to_string())
 }
 
-fn is_require_or_import_callee(callee: &Arc<Node>) -> bool {
+fn is_require_or_import_callee(callee: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_require_or_import_callee"); 
     if callee.kind == SyntaxKind::ImportKeyword {
         return true;
     }
@@ -450,7 +450,7 @@ impl Checker {
     // Go resolveAlias→resolveEntityName：import = Ns.M 限定名按 exports 表
     // 逐段解析（成员局部声明不算导出），缺失段报 TS2694；ambient 模块
     // 上下文内不报
-    pub(crate) fn report_import_equals_entity_name_failure(&mut self, node: &Arc<Node>) {
+    pub(crate) fn report_import_equals_entity_name_failure(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("report_import_equals_entity_name_failure"); 
         if self.ambient_context_depth != 0 {
             return;
         }

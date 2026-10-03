@@ -9,7 +9,7 @@ pub(super) fn is_property_accessible(
     node: &Arc<Node>,
     containing_type: &Arc<Type>,
     property: &Arc<Symbol>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_property_accessible"); 
     let verdict = is_property_accessible_inner(node, containing_type, property);
     if std::env::var_os("TSOX_DEBUG_CMP").is_some() {
         eprintln!(
@@ -27,7 +27,7 @@ fn is_property_accessible_inner(
     node: &Arc<Node>,
     containing_type: &Arc<Type>,
     property: &Arc<Symbol>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_property_accessible_inner"); 
     if containing_type.flags.contains(TypeFlags::Any) {
         return true;
     }
@@ -52,7 +52,7 @@ fn is_property_accessible_inner(
     false
 }
 
-fn declaring_class_of(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+fn declaring_class_of(symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaring_class_of"); 
     for decl in &symbol.declarations {
         let mut current = decl.parent();
         while let Some(n) = current {
@@ -68,7 +68,7 @@ fn declaring_class_of(symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
     None
 }
 
-fn class_derives_from(class: &Arc<Node>, target: &Arc<Node>) -> bool {
+fn class_derives_from(class: &Arc<Node>, target: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_derives_from"); 
     let heritage = match &class.data {
         NodeData::ClassDeclaration(d) => d.heritage_clauses.clone(),
         NodeData::ClassExpression(d) => d.heritage_clauses.clone(),
@@ -101,7 +101,7 @@ fn class_derives_from(class: &Arc<Node>, target: &Arc<Node>) -> bool {
     false
 }
 
-pub(super) fn class_named_like(scope: &Arc<Node>, name: &str) -> Option<Arc<Node>> {
+pub(super) fn class_named_like(scope: &Arc<Node>, name: &str) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_named_like"); 
     let mut current = Some(Arc::clone(scope));
     while let Some(n) = current {
         if n.kind == SyntaxKind::SourceFile {
@@ -123,7 +123,7 @@ pub(super) fn class_named_like(scope: &Arc<Node>, name: &str) -> Option<Arc<Node
     None
 }
 
-pub(super) fn declaration_modifier_flags(symbol: &Arc<Symbol>) -> ModifierFlags {
+pub(super) fn declaration_modifier_flags(symbol: &Arc<Symbol>) -> ModifierFlags { ::tsox_core::fntrace::enter("declaration_modifier_flags"); 
     let mut flags = ModifierFlags::empty();
     for decl in &symbol.declarations {
         if let Some(mods) = decl.modifiers() {
@@ -133,12 +133,12 @@ pub(super) fn declaration_modifier_flags(symbol: &Arc<Symbol>) -> ModifierFlags 
     flags
 }
 
-pub(super) fn is_non_public_member(symbol: &Arc<Symbol>) -> bool {
+pub(super) fn is_non_public_member(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_non_public_member"); 
     declaration_modifier_flags(symbol).intersects(ModifierFlags::NonPublicAccessibilityModifier)
 }
 
 
-pub(super) fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
+pub(super) fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_node_descendant_of"); 
     let mut current = Some(Arc::clone(node));
     while let Some(n) = current {
         if Arc::ptr_eq(&n, ancestor) {
@@ -152,7 +152,7 @@ pub(super) fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> b
     false
 }
 
-pub(super) fn enclosing_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(super) fn enclosing_class_of(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("enclosing_class_of"); 
     let mut current = node.parent();
     while let Some(n) = current {
         if matches!(
@@ -166,7 +166,7 @@ pub(super) fn enclosing_class_of(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-fn is_private_identifier_member(symbol: &Arc<Symbol>) -> bool {
+fn is_private_identifier_member(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_member"); 
     symbol
         .declarations
         .iter()

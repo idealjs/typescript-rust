@@ -14,7 +14,7 @@ use tsox_frontend::ast::{ModifierList, NodeList};
 use crate::printer::generated_identifier_flags::NodeFactory;
 
 impl<'a> NodeFactory<'a> {
-    pub fn new_this_expression(&self) -> Arc<Node> {
+    pub fn new_this_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_this_expression"); 
         self.new_keyword_expression(SyntaxKind::ThisKeyword)
     }
 
@@ -27,7 +27,7 @@ impl<'a> NodeFactory<'a> {
         full_signature: Option<Arc<Node>>,
         equals_greater_than_token: &Arc<Node>,
         body: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_arrow_function"); 
         Arc::new(Node::new(
             SyntaxKind::ArrowFunction,
             NodeData::ArrowFunction(ArrowFunctionData {
@@ -52,7 +52,7 @@ impl<'a> NodeFactory<'a> {
         postfix_token: Option<&Arc<Node>>,
         type_node: Option<&Arc<Node>>,
         initializer: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_assignment"); 
         let end = initializer.loc.end();
         let type_node = type_node.cloned().unwrap_or_else(|| {
             Arc::new(Node::with_loc(
@@ -77,7 +77,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         modifiers: Option<Arc<ModifierList>>,
         declaration_list: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_variable_statement"); 
         Arc::new(Node::new(
             SyntaxKind::VariableStatement,
             NodeData::VariableStatement(VariableStatementData {

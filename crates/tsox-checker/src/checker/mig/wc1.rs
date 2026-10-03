@@ -13,7 +13,7 @@ impl Checker {
         t: &Arc<Type>,
         diagnostic: tsox_core::diagnostics::Message,
         is_await_valid: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_arithmetic_operand_type"); 
         let number_or_big_int = Arc::clone(&self.number_or_big_int_type);
         if !self.is_type_assignable_to(t, &number_or_big_int) {
             let mut maybe_missing_await = false;
@@ -28,7 +28,7 @@ impl Checker {
         true
     }
 
-    pub fn check_class_static_block_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_class_static_block_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_static_block_declaration"); 
         self.check_grammar_modifiers(node);
         node.for_each_child(|c| {
             self.check_source_element(c);
@@ -36,19 +36,19 @@ impl Checker {
         });
     }
 
-    pub fn check_array_type(&mut self, node: &Arc<Node>) {
+    pub fn check_array_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_array_type"); 
         let element_type = Arc::clone(&node.as_array_type_node().element_type);
         self.check_source_element(&element_type);
     }
 
-    pub fn check_conditional_type(&mut self, node: &Arc<Node>) {
+    pub fn check_conditional_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_conditional_type"); 
         node.for_each_child(|c| {
             self.check_source_element(c);
             true
         });
     }
 
-    pub fn check_block(&mut self, node: &Arc<Node>) {
+    pub fn check_block(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_block"); 
         if node.kind == SyntaxKind::Block {
             self.check_grammar_statement_in_ambient_context(node);
         }
@@ -62,18 +62,18 @@ impl Checker {
         self.register_for_unused_identifiers_check(node);
     }
 
-    pub fn check_break_or_continue_statement(&mut self, node: &Arc<Node>) {
+    pub fn check_break_or_continue_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_break_or_continue_statement"); 
         if !self.check_grammar_statement_in_ambient_context(node) {
             self.check_grammar_break_or_continue_statement(node);
         }
     }
 
-    pub fn check_binding_element(&mut self, node: &Arc<Node>) {
+    pub fn check_binding_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_binding_element"); 
         self.check_grammar_binding_element(node);
         self.check_variable_like_declaration(node);
     }
 
-    pub fn check_class_for_static_property_name_conflicts(&mut self, node: &Arc<Node>) {
+    pub fn check_class_for_static_property_name_conflicts(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_for_static_property_name_conflicts"); 
         if self.compiler_options.get_use_define_for_class_fields() {
             return;
         }
@@ -104,7 +104,7 @@ impl Checker {
         }
     }
 
-    pub fn check_base_type_accessibility(&mut self, t: &Arc<Type>, node: &Arc<Node>) {
+    pub fn check_base_type_accessibility(&mut self, t: &Arc<Type>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_base_type_accessibility"); 
         let signatures = self.get_signatures_of_type(t, SignatureKind::Construct);
         if let Some(first) = signatures.first() {
             if let Some(declaration) = &first.declaration {
@@ -130,7 +130,7 @@ impl Checker {
         }
     }
 
-    pub fn check_class_or_interface_for_duplicate_index_signatures(&mut self, node: &Arc<Node>) {
+    pub fn check_class_or_interface_for_duplicate_index_signatures(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_or_interface_for_duplicate_index_signatures"); 
         let Some(symbol) = self.get_symbol_of_declaration(node) else {
             return;
         };
@@ -147,7 +147,7 @@ impl Checker {
         }
     }
 
-    pub fn check_assertion(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_assertion(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_assertion"); 
         if node.kind == SyntaxKind::TypeAssertionExpression {
             if let Some(file) = self.get_source_file_of_node(node) {
                 if tsox_core::tspath::file_extension_is_one_of(
@@ -205,7 +205,7 @@ impl Checker {
         self.get_type_from_type_node(&type_node)
     }
 
-    pub fn check_assertion_deferred(&mut self, node: &Arc<Node>) {
+    pub fn check_assertion_deferred(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_assertion_deferred"); 
         let type_node = node.type_node().cloned().unwrap_or_else(|| Arc::clone(node));
         let expr_type = self.get_regular_type_of_object_literal(&self.get_base_type_of_literal_type(
             &self
@@ -236,7 +236,7 @@ impl Checker {
         }
     }
 
-    pub fn check_const_enum_access(&mut self, node: &Arc<Node>, t: &Arc<Type>) {
+    pub fn check_const_enum_access(&mut self, node: &Arc<Node>, t: &Arc<Type>) { ::tsox_core::fntrace::enter("check_const_enum_access"); 
         let parent = node.parent();
         let ok = parent.as_ref().is_some_and(|parent| {
             (tsox_frontend::ast::is_property_access_expression(parent)

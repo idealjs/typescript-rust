@@ -3,7 +3,7 @@
 use crate::checker::typenode_constructors::*;
 
 impl Checker {
-    pub(crate) fn get_optional_type(&mut self, t: Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_optional_type(&mut self, t: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_optional_type"); 
         if self.strict_null_checks && !self.exact_optional_property_types {
             self.get_union_type(vec![t, self.undefined_type()])
         } else {
@@ -11,7 +11,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_union_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn get_union_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_union_type"); 
         if types.is_empty() {
             return self.never_type();
         }
@@ -150,7 +150,7 @@ impl Checker {
         Arc::new(union)
     }
 
-    pub(crate) fn get_intersection_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn get_intersection_type(&mut self, types: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_intersection_type"); 
         if types.is_empty() {
             return self.unknown_type();
         }
@@ -270,7 +270,7 @@ impl Checker {
         intersection
     }
 
-    pub(crate) fn create_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> {
+    pub(crate) fn create_array_type(&mut self, element_type: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_array_type"); 
         self.create_array_type_ex(element_type, false)
     }
 
@@ -281,7 +281,7 @@ impl Checker {
         &mut self,
         element_type: Arc<Type>,
         readonly: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_array_type_ex"); 
         let Some(array_symbol) = self.globals.get("Array").cloned() else {
             return self.get_any_type();
         };
@@ -316,7 +316,7 @@ impl Checker {
         array_type
     }
 
-    pub(crate) fn array_type_parameter_symbols(&mut self) -> Vec<Arc<Symbol>> {
+    pub(crate) fn array_type_parameter_symbols(&mut self) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("array_type_parameter_symbols"); 
         if let Some(cached) = &self.array_type_parameter_symbols {
             return cached.clone();
         }
@@ -346,7 +346,7 @@ impl Checker {
         &mut self,
         obj_type: &Arc<Type>,
         member: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("instantiate_array_member_type"); 
         let is_evolving = obj_type.object_flags.contains(ObjectFlags::EvolvingArray);
         let is_tuple = matches!(&obj_type.data, TypeData::Tuple(_));
         if !self.is_array_type(obj_type) && !is_evolving && !is_tuple {
@@ -431,7 +431,7 @@ impl Checker {
         Some(substituted)
     }
 
-    pub(crate) fn tuple_base_element_type(&mut self, tuple: &TupleTypeData) -> Arc<Type> {
+    pub(crate) fn tuple_base_element_type(&mut self, tuple: &TupleTypeData) -> Arc<Type> { ::tsox_core::fntrace::enter("tuple_base_element_type"); 
         let number = self.number_type();
         let parts: Vec<Arc<Type>> = tuple
             .element_infos
@@ -448,7 +448,7 @@ impl Checker {
         self.get_union_type(parts)
     }
 
-    pub(crate) fn declared_array_member_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> {
+    pub(crate) fn declared_array_member_symbol(&mut self, name: &str) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("declared_array_member_symbol"); 
         let array_sym = self.globals.get("Array").cloned();
         let declared = array_sym
             .as_ref()
@@ -467,7 +467,7 @@ impl Checker {
             .and_then(|s| s.members.get(name).cloned())
     }
 
-    pub(crate) fn declared_array_member_symbols(&mut self) -> Vec<Arc<Symbol>> {
+    pub(crate) fn declared_array_member_symbols(&mut self) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("declared_array_member_symbols"); 
         let array_sym = self.globals.get("Array").cloned();
         let declared = array_sym
             .as_ref()
@@ -490,7 +490,7 @@ impl Checker {
     pub fn global_interface_properties(
         &mut self,
         interface_name: &str,
-    ) -> Option<Vec<Arc<Symbol>>> {
+    ) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("global_interface_properties"); 
         let sym = self.globals.get(interface_name).cloned()?;
         let declared = self
             .type_alias_links
@@ -506,7 +506,7 @@ impl Checker {
         &mut self,
         interface_name: &str,
         member: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("global_interface_member_symbol"); 
         let sym = self.globals.get(interface_name).cloned()?;
         let declared = self
             .type_alias_links
@@ -519,7 +519,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn uniform_enum_symbol(types: &[Arc<Type>]) -> Option<Arc<Symbol>> {
+pub(crate) fn uniform_enum_symbol(types: &[Arc<Type>]) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("uniform_enum_symbol"); 
     let mut parent: Option<Arc<Symbol>> = None;
     let uniform = !types.is_empty() && types.iter().all(|t| {
         let Some(sym) = t
@@ -544,7 +544,7 @@ pub(crate) fn uniform_enum_symbol(types: &[Arc<Type>]) -> Option<Arc<Symbol>> {
     uniform.then_some(parent).flatten()
 }
 
-fn shallow_type_eq(a: &Type, b: &Type) -> bool {
+fn shallow_type_eq(a: &Type, b: &Type) -> bool { ::tsox_core::fntrace::enter("shallow_type_eq"); 
     if a.id == b.id {
         return true;
     }

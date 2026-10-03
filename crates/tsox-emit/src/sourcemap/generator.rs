@@ -39,7 +39,7 @@ impl Generator {
         source_root: &str,
         sources_directory_path: &str,
         options: ComparePathsOptions,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         Generator {
             path_options: options,
             file: file.to_string(),
@@ -71,11 +71,11 @@ impl Generator {
         }
     }
 
-    pub fn sources(&self) -> &[String] {
+    pub fn sources(&self) -> &[String] { ::tsox_core::fntrace::enter("sources"); 
         &self.raw_sources
     }
 
-    pub fn add_source(&mut self, file_name: &str) -> SourceIndex {
+    pub fn add_source(&mut self, file_name: &str) -> SourceIndex { ::tsox_core::fntrace::enter("add_source"); 
         let source = tsox_core::tspath::get_relative_path_to_directory_or_url(
             &self.sources_directory_path,
             file_name,
@@ -96,7 +96,7 @@ impl Generator {
         &mut self,
         source_index: SourceIndex,
         content: &str,
-    ) -> Result<(), String> {
+    ) -> Result<(), String> { ::tsox_core::fntrace::enter("set_source_content"); 
         if source_index < 0 || source_index as usize >= self.sources.len() {
             return Err("sourceIndex is out of range".to_string());
         }
@@ -108,7 +108,7 @@ impl Generator {
         Ok(())
     }
 
-    pub fn add_name(&mut self, name: &str) -> NameIndex {
+    pub fn add_name(&mut self, name: &str) -> NameIndex { ::tsox_core::fntrace::enter("add_name"); 
         if let Some(&idx) = self.name_to_name_index_map.get(name) {
             return idx;
         }
@@ -118,7 +118,7 @@ impl Generator {
         idx
     }
 
-    pub fn raw_source_map(&mut self) -> RawSourceMap {
+    pub fn raw_source_map(&mut self) -> RawSourceMap { ::tsox_core::fntrace::enter("raw_source_map"); 
         self.commit_pending_mapping();
         RawSourceMap {
             version: 3,
@@ -131,12 +131,12 @@ impl Generator {
         }
     }
 
-    pub fn to_json(&mut self) -> String {
+    pub fn to_json(&mut self) -> String { ::tsox_core::fntrace::enter("to_json"); 
         let map = self.raw_source_map();
         tsox_core::json::marshal(&map).unwrap_or_default()
     }
 
-    pub fn to_base64_data_url(&mut self) -> String {
+    pub fn to_base64_data_url(&mut self) -> String { ::tsox_core::fntrace::enter("to_base64_data_url"); 
         let json = self.to_json();
         use base64::{Engine as _, engine::general_purpose};
         let encoded = general_purpose::STANDARD.encode(json.as_bytes());

@@ -3,7 +3,7 @@
 use crate::printer::impl_chunk_3::*;
 
 impl NameGenerator {
-    pub(crate) fn generate_name_for_module_or_enum(&mut self, node: &Arc<Node>) -> String {
+    pub(crate) fn generate_name_for_module_or_enum(&mut self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("generate_name_for_module_or_enum"); 
         let name_node = node.name().expect("module/enum must have a name");
         let name = (self.get_text_of_node)(name_node);
         if let Some(ref check) = self.is_unique_local_name {
@@ -18,14 +18,14 @@ impl NameGenerator {
     pub(crate) fn generate_name_for_import_or_export_declaration(
         &mut self,
         node: &Arc<Node>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("generate_name_for_import_or_export_declaration"); 
         let base_name = get_external_module_name(node)
             .map(|s| make_identifier_from_module_name(&s))
             .unwrap_or_else(|| "module".to_string());
         self.make_unique_name(&base_name, false, false, false, "", "")
     }
 
-    pub(crate) fn generate_name_for_export_default(&mut self) -> String {
+    pub(crate) fn generate_name_for_export_default(&mut self) -> String { ::tsox_core::fntrace::enter("generate_name_for_export_default"); 
         self.make_unique_name("default", false, false, false, "", "")
     }
 
@@ -35,7 +35,7 @@ impl NameGenerator {
         private_name: bool,
         prefix: &str,
         suffix: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("generate_name_for_method_or_accessor"); 
         if let Some(name) = node.name() {
             if name.kind == SyntaxKind::Identifier {
                 return self.generate_name_for_node_cached(
@@ -50,7 +50,7 @@ impl NameGenerator {
         self.make_temp_variable_name(TEMP_FLAGS_AUTO, false, private_name, prefix, suffix)
     }
 
-    pub(crate) fn make_name(&mut self, name: &GeneratedName) -> String {
+    pub(crate) fn make_name(&mut self, name: &GeneratedName) -> String { ::tsox_core::fntrace::enter("make_name"); 
         let auto_generate = &name.auto_generate;
         match auto_generate.flags.kind() {
             GeneratedIdentifierFlags::AUTO => self.make_temp_variable_name(
@@ -86,7 +86,7 @@ impl NameGenerator {
         private_name: bool,
         prefix: &str,
         suffix: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("make_temp_variable_name"); 
         let simple = prefix.is_empty() && suffix.is_empty();
         let key = if simple {
             String::new()
@@ -150,7 +150,7 @@ impl NameGenerator {
         private_name: bool,
         prefix: &str,
         suffix: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("make_unique_name"); 
         let base_name = remove_leading_hash(base_name);
         if optimistic {
             let full_name = format_generated_name(private_name, prefix, &base_name, suffix);

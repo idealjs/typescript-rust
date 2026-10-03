@@ -7,7 +7,7 @@ use tsox_frontend::ast::node_data_generated::NodeData;
 
 use crate::checker::typenode::*;
 
-pub(crate) fn index_type_less_than_fixed(index_type: &Arc<Type>, limit: usize) -> bool {
+pub(crate) fn index_type_less_than_fixed(index_type: &Arc<Type>, limit: usize) -> bool { ::tsox_core::fntrace::enter("index_type_less_than_fixed"); 
     let constituents: Vec<Arc<Type>> = if index_type.flags.contains(TypeFlags::Union) {
         index_type.types().map(|ts| ts.to_vec()).unwrap_or_default()
     } else {
@@ -27,14 +27,14 @@ pub(crate) fn index_type_less_than_fixed(index_type: &Arc<Type>, limit: usize) -
     })
 }
 
-pub(crate) fn is_static_modifier(modifiers: &Option<Arc<ModifierList>>) -> bool {
+pub(crate) fn is_static_modifier(modifiers: &Option<Arc<ModifierList>>) -> bool { ::tsox_core::fntrace::enter("is_static_modifier"); 
     modifiers
         .as_ref()
         .map(|m| m.modifier_flags.contains(ModifierFlags::Static))
         .unwrap_or(false)
 }
 
-pub(crate) fn template_token_text(node: &Arc<Node>) -> String {
+pub(crate) fn template_token_text(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("template_token_text"); 
     match &node.data {
         NodeData::TemplateHead(d) => d.text.clone(),
         NodeData::TemplateMiddle(d) => d.text.clone(),

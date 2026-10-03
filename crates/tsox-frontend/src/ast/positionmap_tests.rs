@@ -1,7 +1,7 @@
 use crate::ast::positionmap::*;
 
 #[test]
-fn test_position_map_ascii() {
+fn test_position_map_ascii() { ::tsox_core::fntrace::enter("test_position_map_ascii"); 
     let text = "const x = 1;";
     let pm = compute_position_map(text);
     assert!(pm.is_ascii_only());
@@ -12,7 +12,7 @@ fn test_position_map_ascii() {
 }
 
 #[test]
-fn test_position_map_two_byte() {
+fn test_position_map_two_byte() { ::tsox_core::fntrace::enter("test_position_map_two_byte"); 
     let text = "const café = 1;\nconst x = 2;";
     let pm = compute_position_map(text);
     assert!(!pm.is_ascii_only());
@@ -37,7 +37,7 @@ fn test_position_map_two_byte() {
 }
 
 #[test]
-fn test_position_map_four_byte() {
+fn test_position_map_four_byte() { ::tsox_core::fntrace::enter("test_position_map_four_byte"); 
     let text = "const a = \"🎉\";\nconst b = 2;";
     let pm = compute_position_map(text);
     assert!(!pm.is_ascii_only());
@@ -53,7 +53,7 @@ fn test_position_map_four_byte() {
 }
 
 #[test]
-fn test_position_map_multiple_non_ascii() {
+fn test_position_map_multiple_non_ascii() { ::tsox_core::fntrace::enter("test_position_map_multiple_non_ascii"); 
     let text = "à🎉x";
     let pm = compute_position_map(text);
 
@@ -65,7 +65,7 @@ fn test_position_map_multiple_non_ascii() {
 }
 
 #[test]
-fn test_position_map_roundtrip() {
+fn test_position_map_roundtrip() { ::tsox_core::fntrace::enter("test_position_map_roundtrip"); 
     let text = "let café = \"🎉\"; // naïve";
     let pm = compute_position_map(text);
 
@@ -82,7 +82,7 @@ fn test_position_map_roundtrip() {
 }
 
 #[test]
-fn test_position_map_three_byte_cjk() {
+fn test_position_map_three_byte_cjk() { ::tsox_core::fntrace::enter("test_position_map_three_byte_cjk"); 
     let text = "let 快 = 1;";
     let pm = compute_position_map(text);
     assert!(!pm.is_ascii_only());
@@ -98,7 +98,7 @@ fn test_position_map_three_byte_cjk() {
 }
 
 #[test]
-fn test_position_map_lone_surrogate_sentinel() {
+fn test_position_map_lone_surrogate_sentinel() { ::tsox_core::fntrace::enter("test_position_map_lone_surrogate_sentinel"); 
     let text = "a\u{10000}b";
     let pm = compute_position_map(text);
     assert!(!pm.is_ascii_only());

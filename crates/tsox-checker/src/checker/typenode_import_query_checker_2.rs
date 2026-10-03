@@ -3,7 +3,7 @@
 use crate::checker::typenode_import_query::*;
 
 impl Checker {
-    pub(crate) fn resolve_type_query(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn resolve_type_query(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_query"); 
         let NodeData::TypeQueryNode(d) = &node.data else {
             return self.error_type();
         };
@@ -48,7 +48,7 @@ impl Checker {
             }
         }
 
-        fn report_unresolved(c: &mut Checker, seg: &Arc<Node>) {
+        fn report_unresolved(c: &mut Checker, seg: &Arc<Node>) { ::tsox_core::fntrace::enter("report_unresolved"); 
             if c.ts2304_reporting_allowed_for(seg) {
                 use tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0;
                 // Go resolveEntityName：报在最左未解析段（限定名节点本身无文本）
@@ -463,7 +463,7 @@ impl Checker {
     pub(crate) fn resolve_qualified_via_property_chain(
         &mut self,
         entity: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolve_qualified_via_property_chain"); 
         let mut segments: Vec<Arc<Node>> = Vec::new();
         let mut leftmost = entity;
         loop {

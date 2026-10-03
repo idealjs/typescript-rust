@@ -20,53 +20,53 @@ pub trait NodeR36k16Accessors {
 }
 
 impl NodeR36k16Accessors for Node {
-    fn r16_flags(&self) -> NodeFlags {
+    fn r16_flags(&self) -> NodeFlags { ::tsox_core::fntrace::enter("r16_flags"); 
         self.flags
     }
 
-    fn asterisk_token(&self) -> Option<&Node> {
+    fn asterisk_token(&self) -> Option<&Node> { ::tsox_core::fntrace::enter("asterisk_token"); 
         match &self.data {
             NodeData::YieldExpression(d) => d.asterisk_token.as_deref(),
             _ => None,
         }
     }
 
-    fn argument_expression(&self) -> &Node {
+    fn argument_expression(&self) -> &Node { ::tsox_core::fntrace::enter("argument_expression"); 
         match &self.data {
             NodeData::ElementAccessExpression(d) => &d.argument_expression,
             _ => panic!("unexpected ElementAccessExpression: {:?}", self.kind),
         }
     }
 
-    fn tag(&self) -> &Node {
+    fn tag(&self) -> &Node { ::tsox_core::fntrace::enter("tag"); 
         match &self.data {
             NodeData::TaggedTemplateExpression(d) => &d.tag,
             _ => panic!("unexpected TaggedTemplateExpression: {:?}", self.kind),
         }
     }
 
-    fn template(&self) -> &Node {
+    fn template(&self) -> &Node { ::tsox_core::fntrace::enter("template"); 
         match &self.data {
             NodeData::TaggedTemplateExpression(d) => &d.template,
             _ => panic!("unexpected TaggedTemplateExpression: {:?}", self.kind),
         }
     }
 
-    fn declaration_list(&self) -> &Node {
+    fn declaration_list(&self) -> &Node { ::tsox_core::fntrace::enter("declaration_list"); 
         match &self.data {
             NodeData::VariableStatement(d) => &d.declaration_list,
             _ => panic!("unexpected VariableStatement: {:?}", self.kind),
         }
     }
 
-    fn declarations(&self) -> &NodeList {
+    fn declarations(&self) -> &NodeList { ::tsox_core::fntrace::enter("declarations"); 
         match &self.data {
             NodeData::VariableDeclarationList(d) => &d.declarations,
             _ => panic!("unexpected VariableDeclarationList: {:?}", self.kind),
         }
     }
 
-    fn statement(&self) -> &Node {
+    fn statement(&self) -> &Node { ::tsox_core::fntrace::enter("statement"); 
         match &self.data {
             NodeData::WhileStatement(d) => &d.statement,
             NodeData::DoStatement(d) => &d.statement,
@@ -78,35 +78,35 @@ impl NodeR36k16Accessors for Node {
         }
     }
 
-    fn try_block(&self) -> &Node {
+    fn try_block(&self) -> &Node { ::tsox_core::fntrace::enter("try_block"); 
         match &self.data {
             NodeData::TryStatement(d) => &d.try_block,
             _ => panic!("unexpected TryStatement: {:?}", self.kind),
         }
     }
 
-    fn catch_clause(&self) -> Option<&Node> {
+    fn catch_clause(&self) -> Option<&Node> { ::tsox_core::fntrace::enter("catch_clause"); 
         match &self.data {
             NodeData::TryStatement(d) => d.catch_clause.as_deref(),
             _ => None,
         }
     }
 
-    fn finally_block(&self) -> Option<&Node> {
+    fn finally_block(&self) -> Option<&Node> { ::tsox_core::fntrace::enter("finally_block"); 
         match &self.data {
             NodeData::TryStatement(d) => d.finally_block.as_deref(),
             _ => None,
         }
     }
 
-    fn exclamation_token(&self) -> Option<&Node> {
+    fn exclamation_token(&self) -> Option<&Node> { ::tsox_core::fntrace::enter("exclamation_token"); 
         match &self.data {
             NodeData::VariableDeclaration(d) => d.exclamation_token.as_deref(),
             _ => None,
         }
     }
 
-    fn ty(&self) -> Option<&Node> {
+    fn ty(&self) -> Option<&Node> { ::tsox_core::fntrace::enter("ty"); 
         match &self.data {
             NodeData::VariableDeclaration(d) => d.type_node.as_deref(),
             NodeData::TypeAliasDeclaration(d) => Some(d.type_node.as_ref()),
@@ -126,56 +126,56 @@ pub trait EmitContextR36k16 {
 }
 
 impl EmitContextR36k16 for tsox_frontend::format::mig::m4o_2::EmitContext {
-    fn factory(&self) -> tsox_frontend::format::mig::m4o::NodeFactory {
+    fn factory(&self) -> tsox_frontend::format::mig::m4o::NodeFactory { ::tsox_core::fntrace::enter("factory"); 
         tsox_frontend::format::mig::m4o::new_node_factory(
             tsox_frontend::format::mig::m4o::EmitContext::default(),
         )
     }
 
-    fn set_original(&self, _node: &Arc<Node>, _original: &Node) {
+    fn set_original(&self, _node: &Arc<Node>, _original: &Node) { ::tsox_core::fntrace::enter("set_original"); 
         // Go SetOriginal 写入 emitNode.original;Rust 侧 per-node 侧表尚在 m4o 迁移中,交接记待接。
     }
 
     fn get_synthetic_leading_comments(
         &self,
         _node: &Node,
-    ) -> Vec<crate::printer::mig::m4m_2::SynthesizedComment> {
+    ) -> Vec<crate::printer::mig::m4m_2::SynthesizedComment> { ::tsox_core::fntrace::enter("get_synthetic_leading_comments"); 
         Vec::new()
     }
 
-    fn get_external_helpers_module_name(&self, _source_file: &Node) -> Option<Arc<Node>> {
+    fn get_external_helpers_module_name(&self, _source_file: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_helpers_module_name"); 
         None
     }
 }
 
 impl Printer {
-    pub fn write_space(&mut self) {
+    pub fn write_space(&mut self) { ::tsox_core::fntrace::enter("write_space"); 
         self.writer.write_space(" ");
     }
 
-    pub fn write_line(&mut self) {
+    pub fn write_line(&mut self) { ::tsox_core::fntrace::enter("write_line"); 
         self.writer.write_line();
     }
 
-    pub fn write_line_repeat(&mut self, count: i32) {
+    pub fn write_line_repeat(&mut self, count: i32) { ::tsox_core::fntrace::enter("write_line_repeat"); 
         for _ in 0..count {
             self.write_line();
         }
     }
 
-    pub fn write_punctuation(&mut self, text: &str) {
+    pub fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         self.writer.write_punctuation(text);
     }
 
-    pub fn write_keyword(&mut self, text: &str) {
+    pub fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         self.writer.write_keyword(text);
     }
 
-    pub fn write_trailing_semicolon(&mut self) {
+    pub fn write_trailing_semicolon(&mut self) { ::tsox_core::fntrace::enter("write_trailing_semicolon"); 
         self.writer.write_trailing_semicolon(";");
     }
 
-    pub fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize {
+    pub fn write_token_text(&mut self, token: SyntaxKind, write_kind: WriteKind, pos: usize) -> usize { ::tsox_core::fntrace::enter("write_token_text"); 
         let text = tsox_frontend::scanner::token_to_string(token);
         self.write_as(text, write_kind);
         pos + text.len()
@@ -187,7 +187,7 @@ impl Printer {
         pos: usize,
         write_kind: WriteKind,
         context_node: &Node,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("emit_token"); 
         self.emit_token_ex(token, pos, write_kind, context_node, TEF_NONE)
     }
 
@@ -198,18 +198,18 @@ impl Printer {
         write_kind: WriteKind,
         context_node: &Node,
         flags: TokenEmitFlags,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("emit_token_ex"); 
         let state = self.enter_token_node(context_node, flags);
         let pos = self.write_token_text(token, write_kind, pos);
         self.exit_token_node(context_node, state);
         pos
     }
 
-    pub fn emit_keyword_node(&mut self, node: Option<&Node>) {
+    pub fn emit_keyword_node(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_keyword_node"); 
         self.emit_keyword_node_ex(node, TEF_NONE);
     }
 
-    pub fn emit_keyword_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) {
+    pub fn emit_keyword_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) { ::tsox_core::fntrace::enter("emit_keyword_node_ex"); 
         let Some(node) = node else {
             return;
         };
@@ -218,11 +218,11 @@ impl Printer {
         self.exit_token_node(node, state);
     }
 
-    pub fn emit_punctuation_node(&mut self, node: Option<&Node>) {
+    pub fn emit_punctuation_node(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_punctuation_node"); 
         self.emit_punctuation_node_ex(node, TEF_NONE);
     }
 
-    pub fn emit_punctuation_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) {
+    pub fn emit_punctuation_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) { ::tsox_core::fntrace::enter("emit_punctuation_node_ex"); 
         let Some(node) = node else {
             return;
         };
@@ -231,11 +231,11 @@ impl Printer {
         self.exit_token_node(node, state);
     }
 
-    pub fn emit_token_node(&mut self, node: Option<&Node>) {
+    pub fn emit_token_node(&mut self, node: Option<&Node>) { ::tsox_core::fntrace::enter("emit_token_node"); 
         self.emit_token_node_ex(node, TEF_NONE);
     }
 
-    pub fn emit_token_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) {
+    pub fn emit_token_node_ex(&mut self, node: Option<&Node>, flags: TokenEmitFlags) { ::tsox_core::fntrace::enter("emit_token_node_ex"); 
         let Some(node) = node else {
             return;
         };
@@ -248,12 +248,12 @@ impl Printer {
         }
     }
 
-    pub fn comment_will_emit_new_line(&self, comment: CommentRange) -> bool {
+    pub fn comment_will_emit_new_line(&self, comment: CommentRange) -> bool { ::tsox_core::fntrace::enter("comment_will_emit_new_line"); 
         comment.kind == tsox_frontend::scanner::CommentRangeKind::SingleLine
             || comment.has_trailing_new_line
     }
 
-    pub fn write_line_or_space(&mut self, parent_node: &Node, prev_child_node: &Node, next_child_node: &Node) {
+    pub fn write_line_or_space(&mut self, parent_node: &Node, prev_child_node: &Node, next_child_node: &Node) { ::tsox_core::fntrace::enter("write_line_or_space"); 
         if self.should_emit_on_single_line(parent_node) {
             self.write_space();
         } else if self.options.preserve_source_newlines {

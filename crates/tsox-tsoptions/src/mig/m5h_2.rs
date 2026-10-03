@@ -21,21 +21,21 @@ use crate::tsoptions::options_options::OPTIONS;
 use crate::vfs::fs::FS;
 
 impl OptionDecl {
-    pub fn deprecated_keys(&self) -> Option<&'static Set<String>> {
+    pub fn deprecated_keys(&self) -> Option<&'static Set<String>> { ::tsox_core::fntrace::enter("deprecated_keys"); 
         if self.kind != OptionKind::Enum {
             return None;
         }
         command_line_option_deprecated().get(&self.name)
     }
 
-    pub fn enum_map(&self) -> Option<&'static OrderedMap<String, OptValue>> {
+    pub fn enum_map(&self) -> Option<&'static OrderedMap<String, OptValue>> { ::tsox_core::fntrace::enter("enum_map"); 
         if self.kind != OptionKind::Enum {
             return None;
         }
         command_line_option_enum_map().get(&self.name)
     }
 
-    pub fn elements(&self) -> Option<&'static OptionDecl> {
+    pub fn elements(&self) -> Option<&'static OptionDecl> { ::tsox_core::fntrace::enter("elements"); 
         if !matches!(self.kind, OptionKind::List | OptionKind::ListOrElement) {
             return None;
         }
@@ -49,11 +49,11 @@ pub struct NameMap {
 }
 
 impl NameMap {
-    pub fn get(&self, name: &str) -> Option<&OptionDecl> {
+    pub fn get(&self, name: &str) -> Option<&OptionDecl> { ::tsox_core::fntrace::enter("get"); 
         self.options_names.get(&name.to_lowercase())
     }
 
-    pub fn get_from_short(&self, short_name: &str) -> Option<&OptionDecl> {
+    pub fn get_from_short(&self, short_name: &str) -> Option<&OptionDecl> { ::tsox_core::fntrace::enter("get_from_short"); 
         let name = self.short_option_names.get(short_name)?;
         self.get(name)
     }
@@ -62,7 +62,7 @@ impl NameMap {
         &self,
         option_name: &str,
         allow_short: bool,
-    ) -> Option<&OptionDecl> {
+    ) -> Option<&OptionDecl> { ::tsox_core::fntrace::enter("get_option_declaration_from_name"); 
         let mut option_name = option_name.to_lowercase();
         if allow_short {
             if let Some(short) = self.short_option_names.get(&option_name) {
@@ -72,7 +72,7 @@ impl NameMap {
         self.get(&option_name)
     }
 
-    pub fn get_spelling_suggestion(&self, name: &str) -> Option<&OptionDecl> {
+    pub fn get_spelling_suggestion(&self, name: &str) -> Option<&OptionDecl> { ::tsox_core::fntrace::enter("get_spelling_suggestion"); 
         tsox_core::core::mig::m3j_2::get_spelling_suggestion(
             name,
             self.options_names.values(),
@@ -82,7 +82,7 @@ impl NameMap {
     }
 }
 
-pub fn get_name_map_from_list(opt_decls: &[OptionDecl]) -> NameMap {
+pub fn get_name_map_from_list(opt_decls: &[OptionDecl]) -> NameMap { ::tsox_core::fntrace::enter("get_name_map_from_list"); 
     let mut options_names = OrderedMap::with_capacity(opt_decls.len());
     let mut short_option_names = std::collections::HashMap::new();
     for option in opt_decls {
@@ -97,7 +97,7 @@ pub fn get_name_map_from_list(opt_decls: &[OptionDecl]) -> NameMap {
     }
 }
 
-pub fn target_to_lib_map() -> OrderedMap<ScriptTarget, String> {
+pub fn target_to_lib_map() -> OrderedMap<ScriptTarget, String> { ::tsox_core::fntrace::enter("target_to_lib_map"); 
     let mut map = OrderedMap::new();
     map.set(ScriptTarget::ESNext, "lib.esnext.full.d.ts".to_string());
     map.set(ScriptTarget::ES2025, "lib.es2025.full.d.ts".to_string());
@@ -114,7 +114,7 @@ pub fn target_to_lib_map() -> OrderedMap<ScriptTarget, String> {
     map
 }
 
-pub fn get_default_lib_file_name(options: &CompilerOptions) -> String {
+pub fn get_default_lib_file_name(options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_default_lib_file_name"); 
     let map = target_to_lib_map();
     match map.get(&options.get_emit_script_target()) {
         Some(name) => name.clone(),
@@ -122,7 +122,7 @@ pub fn get_default_lib_file_name(options: &CompilerOptions) -> String {
     }
 }
 
-pub fn get_lib_file_name(lib_name: &str) -> Option<String> {
+pub fn get_lib_file_name(lib_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("get_lib_file_name"); 
     let lib_name = tsox_core::tspath::to_file_name_lower_case(lib_name);
     let mut lib_files_set = Set::new();
     for (_, file) in LIB_MAP.iter() {
@@ -137,7 +137,7 @@ pub fn get_lib_file_name(lib_name: &str) -> Option<String> {
         .map(|(_, file)| file.to_string())
 }
 
-fn option_strict_flag(name: &str) -> bool {
+fn option_strict_flag(name: &str) -> bool { ::tsox_core::fntrace::enter("option_strict_flag"); 
     matches!(
         name,
         "strict"
@@ -153,7 +153,7 @@ fn option_strict_flag(name: &str) -> bool {
     )
 }
 
-fn value_as_tristate(value: &OptValue) -> Tristate {
+fn value_as_tristate(value: &OptValue) -> Tristate { ::tsox_core::fntrace::enter("value_as_tristate"); 
     match value {
         OptValue::Bool(true) => Tristate::True,
         OptValue::Bool(false) => Tristate::False,
@@ -161,7 +161,7 @@ fn value_as_tristate(value: &OptValue) -> Tristate {
     }
 }
 
-fn opt_value_eq(a: &OptValue, b: &OptValue) -> bool {
+fn opt_value_eq(a: &OptValue, b: &OptValue) -> bool { ::tsox_core::fntrace::enter("opt_value_eq"); 
     match (a, b) {
         (OptValue::Bool(x), OptValue::Bool(y)) => x == y,
         (OptValue::Num(x), OptValue::Num(y)) => x == y,
@@ -176,7 +176,7 @@ pub fn options_have_changes(
     old_options: Option<&CompilerOptions>,
     new_options: Option<&CompilerOptions>,
     decl_filter: &dyn Fn(&OptionDecl) -> bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("options_have_changes"); 
     if old_options.is_some() && std::ptr::eq(old_options.unwrap(), new_options.unwrap()) {
         return false;
     }
@@ -197,12 +197,12 @@ pub fn options_have_changes(
     })
 }
 
-pub fn compiler_options_field_names() -> Vec<&'static str> {
+pub fn compiler_options_field_names() -> Vec<&'static str> { ::tsox_core::fntrace::enter("compiler_options_field_names"); 
     OPTIONS.iter().map(|o| o.name).collect()
 }
 
 pub fn command_line_compiler_options_map() -> &'static OrderedMap<&'static str, &'static OptionDecl>
-{
+{ ::tsox_core::fntrace::enter("command_line_compiler_options_map"); 
     static MAP: LazyLock<OrderedMap<&'static str, &'static OptionDecl>> = LazyLock::new(|| {
         let mut map = OrderedMap::with_capacity(OPTIONS.len() * 2);
         for option in OPTIONS.iter() {
@@ -218,7 +218,7 @@ pub fn for_each_compiler_option_value(
     options: &CompilerOptions,
     decl_filter: &dyn Fn(&OptionDecl) -> bool,
     fn_: &mut dyn FnMut(&OptionDecl, &OptValue, usize) -> bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("for_each_compiler_option_value"); 
     for (i, name) in compiler_options_field_names().iter().enumerate() {
         if let Some(option_declaration) = command_line_compiler_options_map().get(name) {
             if decl_filter(option_declaration) {
@@ -232,7 +232,7 @@ pub fn for_each_compiler_option_value(
     false
 }
 
-pub fn get_compiler_options_value(options: &CompilerOptions, name: &str) -> OptValue {
+pub fn get_compiler_options_value(options: &CompilerOptions, name: &str) -> OptValue { ::tsox_core::fntrace::enter("get_compiler_options_value"); 
     macro_rules! t {
         ($f:ident) => {
             match options.$f {
@@ -368,7 +368,7 @@ pub fn get_compiler_options_value(options: &CompilerOptions, name: &str) -> OptV
     }
 }
 
-fn option_affects_semantic_diagnostics(name: &str) -> bool {
+fn option_affects_semantic_diagnostics(name: &str) -> bool { ::tsox_core::fntrace::enter("option_affects_semantic_diagnostics"); 
     matches!(
         name,
         "allowImportingTsExtensions"
@@ -409,11 +409,11 @@ fn option_affects_semantic_diagnostics(name: &str) -> bool {
     )
 }
 
-fn option_affects_declaration_path(name: &str) -> bool {
+fn option_affects_declaration_path(name: &str) -> bool { ::tsox_core::fntrace::enter("option_affects_declaration_path"); 
     matches!(name, "declarationDir" | "outDir" | "outFile" | "rootDir")
 }
 
-fn option_affects_emit(name: &str) -> bool {
+fn option_affects_emit(name: &str) -> bool { ::tsox_core::fntrace::enter("option_affects_emit"); 
     matches!(
         name,
         "alwaysStrict"
@@ -451,7 +451,7 @@ fn option_affects_emit(name: &str) -> bool {
 pub fn compiler_options_affect_semantic_diagnostics(
     old_options: Option<&CompilerOptions>,
     new_options: Option<&CompilerOptions>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("compiler_options_affect_semantic_diagnostics"); 
     options_have_changes(old_options, new_options, &|option| {
         option_affects_semantic_diagnostics(option.name)
     })
@@ -460,7 +460,7 @@ pub fn compiler_options_affect_semantic_diagnostics(
 pub fn compiler_options_affect_declaration_path(
     old_options: Option<&CompilerOptions>,
     new_options: Option<&CompilerOptions>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("compiler_options_affect_declaration_path"); 
     options_have_changes(old_options, new_options, &|option| {
         option_affects_declaration_path(option.name)
     })
@@ -469,13 +469,13 @@ pub fn compiler_options_affect_declaration_path(
 pub fn compiler_options_affect_emit(
     old_options: Option<&CompilerOptions>,
     new_options: Option<&CompilerOptions>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("compiler_options_affect_emit"); 
     options_have_changes(old_options, new_options, &|option| {
         option_affects_emit(option.name)
     })
 }
 
-fn command_line_option_deprecated() -> &'static OrderedMap<&'static str, Set<String>> {
+fn command_line_option_deprecated() -> &'static OrderedMap<&'static str, Set<String>> { ::tsox_core::fntrace::enter("command_line_option_deprecated"); 
     static MAP: LazyLock<OrderedMap<&'static str, Set<String>>> = LazyLock::new(|| {
         let mut map = OrderedMap::new();
         for (name, items) in [
@@ -495,7 +495,7 @@ fn command_line_option_deprecated() -> &'static OrderedMap<&'static str, Set<Str
 }
 
 fn command_line_option_enum_map()
--> &'static OrderedMap<&'static str, OrderedMap<String, OptValue>> {
+-> &'static OrderedMap<&'static str, OrderedMap<String, OptValue>> { ::tsox_core::fntrace::enter("command_line_option_enum_map"); 
     static MAP: LazyLock<OrderedMap<&'static str, OrderedMap<String, OptValue>>> =
         LazyLock::new(|| {
             let mut map = OrderedMap::new();
@@ -528,7 +528,7 @@ fn command_line_option_enum_map()
     &MAP
 }
 
-fn command_line_option_elements() -> &'static OrderedMap<&'static str, OptionDecl> {
+fn command_line_option_elements() -> &'static OrderedMap<&'static str, OptionDecl> { ::tsox_core::fntrace::enter("command_line_option_elements"); 
     static MAP: LazyLock<OrderedMap<&'static str, OptionDecl>> = LazyLock::new(|| {
         let entries: &[(&str, &str, OptionKind, bool)] = &[
             ("lib", "lib", OptionKind::Enum, false),
@@ -627,7 +627,7 @@ const THE_TYPESCRIPT_CONTENT_MAPPER_EXEC_OF_THE_CONTENT_MAPPER_PACKAGE_0_MUST_BE
     reports_deprecated: false,
 };
 
-fn new_compiler_diagnostic(message: Message, args: Vec<String>) -> Diagnostic {
+fn new_compiler_diagnostic(message: Message, args: Vec<String>) -> Diagnostic { ::tsox_core::fntrace::enter("new_compiler_diagnostic"); 
     Diagnostic::new(None, TextRange::undefined(), message, args)
 }
 
@@ -646,10 +646,10 @@ struct OwnedResolutionHost {
 }
 
 impl ResolutionHost for OwnedResolutionHost {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         self.fs.as_ref()
     }
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 }
@@ -658,7 +658,7 @@ pub fn resolve_content_mapper_manifest(
     host: &ParseConfigHost,
     containing_file: &str,
     package_name: &str,
-) -> (ContentMapperManifest, String, Option<Diagnostic>) {
+) -> (ContentMapperManifest, String, Option<Diagnostic>) { ::tsox_core::fntrace::enter("resolve_content_mapper_manifest"); 
     let mut compiler_options = CompilerOptions::default();
     compiler_options.module_resolution = ModuleResolutionKind::Bundler;
     let resolver = Resolver::new(

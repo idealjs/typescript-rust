@@ -19,7 +19,7 @@ pub struct OutputSanitizer<'a> {
 }
 
 impl<'a> OutputSanitizer<'a> {
-    pub fn add_output_line(&mut self, s: &str) {
+    pub fn add_output_line(&mut self, s: &str) { ::tsox_core::fntrace::enter("add_output_line"); 
         let s = s.replace(
             &format!("'{}'", tsox_core::core::mig::m3k::version()),
             &format!("'{}'", harness_util::FAKE_TS_VERSION),
@@ -30,7 +30,7 @@ impl<'a> OutputSanitizer<'a> {
         self.output_lines.push(s);
     }
 
-    pub fn sanitize_build_status_time_stamp(&self) -> String {
+    pub fn sanitize_build_status_time_stamp(&self) -> String { ::tsox_core::fntrace::enter("sanitize_build_status_time_stamp"); 
         let status_line = self.lines[self.index];
         let hh_separator = status_line.find(':').expect("Expected timestamp");
         assert!(hh_separator >= 2, "Expected timestamp");
@@ -42,7 +42,7 @@ impl<'a> OutputSanitizer<'a> {
         )
     }
 
-    pub fn transform_lines(&mut self) -> String {
+    pub fn transform_lines(&mut self) -> String { ::tsox_core::fntrace::enter("transform_lines"); 
         while self.index < self.lines.len() {
             let line = self.lines[self.index];
             if line.starts_with(BUILD_STARTING_AT) {
@@ -88,7 +88,7 @@ impl<'a> OutputSanitizer<'a> {
         line_end: &str,
         skip_even_if_not_comparing: bool,
         sanitize_first_line: Option<&dyn Fn(&Self) -> String>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("add_or_skip_lines_for_comparing"); 
         if self.lines[self.index] != line_start {
             return false;
         }
@@ -114,77 +114,77 @@ impl<'a> OutputSanitizer<'a> {
     }
 }
 
-fn english_version() -> String {
+fn english_version() -> String { ::tsox_core::fntrace::enter("english_version"); 
     tsox_core::diagnostics::VERSION_0.localize(&tsox_core::locale::Locale::default(), &[
         tsox_core::core::mig::m3k::version(),
     ])
 }
 
-fn fake_english_version() -> String {
+fn fake_english_version() -> String { ::tsox_core::fntrace::enter("fake_english_version"); 
     tsox_core::diagnostics::VERSION_0.localize(&tsox_core::locale::Locale::default(), &[
         harness_util::FAKE_TS_VERSION,
     ])
 }
 
-fn czech_version() -> String {
+fn czech_version() -> String { ::tsox_core::fntrace::enter("czech_version"); 
     tsox_core::diagnostics::VERSION_0.localize(&czech_locale(), &[
         tsox_core::core::mig::m3k::version(),
     ])
 }
 
-fn fake_czech_version() -> String {
+fn fake_czech_version() -> String { ::tsox_core::fntrace::enter("fake_czech_version"); 
     tsox_core::diagnostics::VERSION_0.localize(&czech_locale(), &[
         harness_util::FAKE_TS_VERSION,
     ])
 }
 
-fn czech_locale() -> tsox_core::locale::Locale {
+fn czech_locale() -> tsox_core::locale::Locale { ::tsox_core::fntrace::enter("czech_locale"); 
     tsox_core::locale::Locale::parse("cs").expect("valid cs locale")
 }
 
 impl TestSys {
-    pub fn write_file_no_error(&self, path: &str, content: &str) {
+    pub fn write_file_no_error(&self, path: &str, content: &str) { ::tsox_core::fntrace::enter("write_file_no_error"); 
         self.fs_from_file_map()
             .write_file(path, content)
             .unwrap_or_else(|e| panic!("{}", e));
     }
 
-    pub fn remove_no_error(&self, path: &str) {
+    pub fn remove_no_error(&self, path: &str) { ::tsox_core::fntrace::enter("remove_no_error"); 
         self.fs_from_file_map()
             .remove(path)
             .unwrap_or_else(|e| panic!("{}", e));
     }
 
-    pub fn read_file_no_error(&self, path: &str) -> String {
+    pub fn read_file_no_error(&self, path: &str) -> String { ::tsox_core::fntrace::enter("read_file_no_error"); 
         self.fs_from_file_map()
             .read_file(path)
             .unwrap_or_else(|| panic!("File not found: {}", path))
     }
 
-    pub fn rename_file_no_error(&self, old_path: &str, new_path: &str) {
+    pub fn rename_file_no_error(&self, old_path: &str, new_path: &str) { ::tsox_core::fntrace::enter("rename_file_no_error"); 
         let content = self.read_file_no_error(old_path);
         self.write_file_no_error(new_path, &content);
         self.remove_no_error(old_path);
     }
 
-    pub fn replace_file_text(&self, path: &str, old_text: &str, new_text: &str) {
+    pub fn replace_file_text(&self, path: &str, old_text: &str, new_text: &str) { ::tsox_core::fntrace::enter("replace_file_text"); 
         let content = self.read_file_no_error(path);
         let content = content.replacen(old_text, new_text, 1);
         self.write_file_no_error(path, &content);
     }
 
-    pub fn replace_file_text_all(&self, path: &str, old_text: &str, new_text: &str) {
+    pub fn replace_file_text_all(&self, path: &str, old_text: &str, new_text: &str) { ::tsox_core::fntrace::enter("replace_file_text_all"); 
         let content = self.read_file_no_error(path);
         let content = content.replace(old_text, new_text);
         self.write_file_no_error(path, &content);
     }
 
-    pub fn append_file(&self, path: &str, text: &str) {
+    pub fn append_file(&self, path: &str, text: &str) { ::tsox_core::fntrace::enter("append_file"); 
         let content = self.read_file_no_error(path);
         self.write_file_no_error(path, &format!("{}{}", content, text));
     }
 
-    pub fn prepend_file(&self, path: &str, text: &str) {
+    pub fn prepend_file(&self, path: &str, text: &str) { ::tsox_core::fntrace::enter("prepend_file"); 
         let content = self.read_file_no_error(path);
         self.write_file_no_error(path, &format!("{}{}", text, content));
     }

@@ -10,16 +10,16 @@ use super::*;
     }
 
     impl OutputPathsHost for EmitHostImpl {
-        fn common_source_directory(&self) -> String {
+        fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
             EmitHostImpl::common_source_directory(self)
         }
-        fn content_mapper_extensions(&self) -> Vec<String> {
+        fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions"); 
             EmitHostImpl::content_mapper_extensions(self)
         }
-        fn get_current_directory(&self) -> String {
+        fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
             EmitHostImpl::get_current_directory(self)
         }
-        fn use_case_sensitive_file_names(&self) -> bool {
+        fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
             EmitHostImpl::use_case_sensitive_file_names(self)
         }
     }
@@ -35,7 +35,7 @@ use super::*;
         options: &CompilerOptions,
         host: &dyn OutputPathsHost,
         force: ForceEmitPaths,
-    ) -> tsox_emit::mig::m3n_5::r33k8_defs::OutputPathsValue {
+    ) -> tsox_emit::mig::m3n_5::r33k8_defs::OutputPathsValue { ::tsox_core::fntrace::enter("get_output_paths_for"); 
         use tsox_core::tspath::mig::m3i::compare_paths;
         let file_name = source_file.file_name.as_str();
         let own_output_file_path = get_own_emit_output_file_path(
@@ -78,7 +78,7 @@ use super::*;
         paths
     }
 
-    fn get_source_map_file_path(js_file_path: &str, options: &CompilerOptions) -> String {
+    fn get_source_map_file_path(js_file_path: &str, options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_source_map_file_path"); 
         if options.source_map.is_true() && !options.inline_source_map.is_true() {
             return format!("{}.map", js_file_path);
         }
@@ -90,7 +90,7 @@ use super::*;
         options: &CompilerOptions,
         host: &dyn OutputPathsHost,
         extension: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_own_emit_output_file_path"); 
         let emit_output_file_path_without_extension = if !options.out_dir.is_empty() {
             tsox_core::tspath::remove_file_extension(&get_source_file_path_in_new_dir(
                 file_name,
@@ -111,7 +111,7 @@ use super::*;
         current_directory: &str,
         common_source_directory: &str,
         use_case_sensitive_file_names: bool,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_source_file_path_in_new_dir"); 
         let mut source_file_path =
             tsox_core::tspath::get_normalized_absolute_path(file_name, current_directory);
         let (trimmed, ok) = tsox_core::tspath::mig::m3j::trim_file_path_prefix(
@@ -129,7 +129,7 @@ use super::*;
         file_name: &str,
         options: &CompilerOptions,
         host: &dyn OutputPathsHost,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_declaration_emit_output_path"); 
         let output_dir = if !options.declaration_dir.is_empty() {
             Some(&options.declaration_dir)
         } else if !options.out_dir.is_empty() {
@@ -153,7 +153,7 @@ use super::*;
     fn change_to_declaration_extension(
         path: &str,
         host: &dyn OutputPathsHost,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("change_to_declaration_extension"); 
         use tsox_core::tspath::mig::m3i::{
             get_declaration_emit_extension_for_path, get_longest_extension_from_path,
         };
@@ -178,6 +178,6 @@ use super::*;
         )
     }
 
-    fn source_file_content_mapper(_source_file: &SourceFile) -> String {
+    fn source_file_content_mapper(_source_file: &SourceFile) -> String { ::tsox_core::fntrace::enter("source_file_content_mapper"); 
         String::new()
     }

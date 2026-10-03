@@ -13,7 +13,7 @@ impl Checker {
         param: &Arc<Node>,
         is_rest: bool,
         is_this_param: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("contextual_param_type_at"); 
         let src_has_this = parameters.iter().next().is_some_and(|first| {
             matches!(&first.data, NodeData::ParameterDeclaration(fd)
                 if matches!(&fd.name.data, NodeData::Identifier(id) if id.text == "this")

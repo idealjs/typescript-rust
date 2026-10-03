@@ -22,7 +22,7 @@ pub(super) fn jsx_attribute_completion(
     file_text: &str,
     node_at_position: &Arc<Node>,
     position: usize,
-) -> Option<Vec<Arc<Symbol>>> {
+) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("jsx_attribute_completion"); 
     let (element, attributes) = opening_like_element_of(node_at_position, position)?;
     let tag_node = match &element.data {
         NodeData::JsxSelfClosingElement(d) => Arc::clone(&d.tag_name),
@@ -74,7 +74,7 @@ pub(super) fn jsx_attribute_completion(
 fn opening_like_element_of(
     node_at_position: &Arc<Node>,
     position: usize,
-) -> Option<(Arc<Node>, Arc<Node>)> {
+) -> Option<(Arc<Node>, Arc<Node>)> { ::tsox_core::fntrace::enter("opening_like_element_of"); 
     let mut current = Some(Arc::clone(node_at_position));
     while let Some(n) = current {
         if n.pos() > position {
@@ -126,7 +126,7 @@ fn filter_jsx_attributes(
     attributes: &Arc<Node>,
     text: &str,
     position: usize,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("filter_jsx_attributes"); 
     let properties = match &attributes.data {
         NodeData::JsxAttributes(d) => d.properties.iter().cloned().collect::<Vec<_>>(),
         _ => return symbols,
@@ -147,7 +147,7 @@ fn filter_jsx_attributes(
 
 /// Go isCurrentlyEditingNode 的 JSX 适配：本仓 JSX 属性节点 span 会吞掉
 /// 尾随空白（end 撑到下一个 token 起点），按去掉尾随空白的实际内容端判定
-fn is_editing_jsx_attribute(attr: &Arc<Node>, text: &str, position: usize) -> bool {
+fn is_editing_jsx_attribute(attr: &Arc<Node>, text: &str, position: usize) -> bool { ::tsox_core::fntrace::enter("is_editing_jsx_attribute"); 
     let start = skip_trivia(text, attr.pos());
     let content_end = text[..attr.end().min(text.len())]
         .trim_end()
@@ -159,7 +159,7 @@ fn is_editing_jsx_attribute(attr: &Arc<Node>, text: &str, position: usize) -> bo
 /// Go getJsxElementPropertiesName：JSX.ElementAttributesProperty 的单属性名
 /// （React.d.ts 为 "props"）。容器不存在 → None（非 intrinsic 元素 attributes
 /// 为 any）；容器无属性 → Some("")（attributes 为类实例类型本身）
-fn jsx_element_properties_name(checker: &mut Checker) -> Option<String> {
+fn jsx_element_properties_name(checker: &mut Checker) -> Option<String> { ::tsox_core::fntrace::enter("jsx_element_properties_name"); 
     jsx_namespace_container_member_name(checker, "ElementAttributesProperty")
 }
 
@@ -169,7 +169,7 @@ fn jsx_element_properties_name(checker: &mut Checker) -> Option<String> {
 pub(super) fn jsx_namespace_container_member_name(
     checker: &mut Checker,
     container_name: &str,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("jsx_namespace_container_member_name"); 
     // JSX 命名空间可来自文件内 declare namespace（locals/members）或全局 lib
     let jsx_sym = (|| {
         let symbol_map = checker.program.symbol_map();
@@ -208,7 +208,7 @@ fn find_member_on_symbol(
     checker: &mut Checker,
     sym: &Arc<Symbol>,
     member: &str,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("find_member_on_symbol"); 
     for d in &sym.declarations {
         if let Some(locals) = checker.program.symbol_map().locals.get(&d.id())
             && let Some(m) = locals.get(member)

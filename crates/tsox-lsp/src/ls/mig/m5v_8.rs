@@ -13,7 +13,7 @@ use tsox_frontend::scanner;
 use crate::ls::language_service::LanguageService;
 use crate::lsp::lsproto_lsp::Range;
 
-fn signature_help_node_builder_flags() -> tsox_checker::checker::symboltracker::NodeBuilderFlags {
+fn signature_help_node_builder_flags() -> tsox_checker::checker::symboltracker::NodeBuilderFlags { ::tsox_core::fntrace::enter("signature_help_node_builder_flags"); 
     use tsox_checker::checker::symboltracker::NodeBuilderFlags as Flags;
     Flags::OmitParameterModifiers | Flags::UseAliasDefinedOutsideCurrentScope
 }
@@ -45,7 +45,7 @@ pub fn contains_preceding_token(
     starting_token: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     container: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("contains_preceding_token"); 
     let pos = starting_token.pos();
     let preceding_token = astnav::find_preceding_token(&source_file.node, pos);
     if let Some(preceding_token) = preceding_token {
@@ -62,7 +62,7 @@ pub fn get_argument_index_for_template_piece(
     node: &Arc<Node>,
     position: usize,
     source_file: &Arc<SourceFile>,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_index_for_template_piece"); 
     if ast::mig::m3g_2::is_template_literal_token(node) {
         if is_inside_template_literal(node, position, source_file) {
             return 0;
@@ -72,7 +72,7 @@ pub fn get_argument_index_for_template_piece(
     span_index + 1
 }
 
-fn m5v_find_ancestor(start: &Arc<Node>, callback: impl Fn(&Node) -> bool) -> Option<Arc<Node>> {
+fn m5v_find_ancestor(start: &Arc<Node>, callback: impl Fn(&Node) -> bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("m5v_find_ancestor"); 
     let mut current = Some(Arc::clone(start));
     while let Some(n) = current {
         if callback(&n) {
@@ -83,7 +83,7 @@ fn m5v_find_ancestor(start: &Arc<Node>, callback: impl Fn(&Node) -> bool) -> Opt
     None
 }
 
-pub fn get_adjusted_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_adjusted_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_adjusted_node"); 
     match node.kind {
         SyntaxKind::OpenParenToken | SyntaxKind::CommaToken => Some(Arc::clone(node)),
         _ => match node.parent() {
@@ -98,7 +98,7 @@ pub fn get_argument_index(
     arguments: &ast::NodeList,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_index"); 
     get_argument_index_or_count(
         &get_token_from_node_list(arguments, node.parent().as_ref(), source_file),
         Some(node),
@@ -111,7 +111,7 @@ pub fn get_argument_count(
     arguments: &ast::NodeList,
     source_file: &Arc<SourceFile>,
     c: &mut Checker,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_count"); 
     get_argument_index_or_count(
         &get_token_from_node_list(arguments, node.parent().as_ref(), source_file),
         None,
@@ -123,7 +123,7 @@ pub fn get_argument_index_or_count(
     arguments: &[Arc<Node>],
     node: Option<&Arc<Node>>,
     c: &mut Checker,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_argument_index_or_count"); 
     let mut argument_index: usize = 0;
     let mut skip_comma = false;
     for arg in arguments {
@@ -163,7 +163,7 @@ pub fn get_argument_index_or_count(
     argument_count
 }
 
-pub fn get_spread_element_count(node: &ast::SpreadElementData, c: &mut Checker) -> usize {
+pub fn get_spread_element_count(node: &ast::SpreadElementData, c: &mut Checker) -> usize { ::tsox_core::fntrace::enter("get_spread_element_count"); 
     let spread_type = c.get_type_at_location(&node.expression);
     if !c.is_tuple_type(&spread_type) {
         return 0;
@@ -189,7 +189,7 @@ fn get_token_from_node_list(
     node_list: &ast::NodeList,
     node_list_parent: Option<&Arc<Node>>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_token_from_node_list"); 
     let Some(node_list_parent) = node_list_parent else {
         return Vec::new();
     };
@@ -226,7 +226,7 @@ pub fn get_applicable_span_for_arguments(
     argument_list: Option<&ast::NodeList>,
     node: Option<&Arc<Node>>,
     source_file: &Arc<SourceFile>,
-) -> TextRange {
+) -> TextRange { ::tsox_core::fntrace::enter("get_applicable_span_for_arguments"); 
     if argument_list.is_none() && node.is_some() {
         let node = node.unwrap();
         let span_start = node.end();
@@ -242,14 +242,14 @@ pub fn get_applicable_span_for_arguments(
     TextRange::new(applicable_span_start, applicable_span_end)
 }
 
-pub fn ensure_minimum_span_size(start: usize, end: usize) -> usize {
+pub fn ensure_minimum_span_size(start: usize, end: usize) -> usize { ::tsox_core::fntrace::enter("ensure_minimum_span_size"); 
     if end <= start {
         return start + 1;
     }
     end
 }
 
-pub fn choose_better_symbol(s: &Arc<Symbol>) -> Arc<Symbol> {
+pub fn choose_better_symbol(s: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("choose_better_symbol"); 
     if s.name == ast::INTERNAL_SYMBOL_NAME_TYPE {
         for d in &s.declarations {
             if ast::is_function_type_node(d) && ast::can_have_symbol(d.parent().as_ref().unwrap())
@@ -267,14 +267,14 @@ pub fn choose_better_symbol(s: &Arc<Symbol>) -> Arc<Symbol> {
     Arc::clone(s)
 }
 
-fn binary_expression_data_of(node: &Arc<Node>) -> Option<&ast::BinaryExpressionData> {
+fn binary_expression_data_of(node: &Arc<Node>) -> Option<&ast::BinaryExpressionData> { ::tsox_core::fntrace::enter("binary_expression_data_of"); 
     match &node.data {
         NodeData::BinaryExpression(data) => Some(data),
         _ => None,
     }
 }
 
-pub fn count_binary_expression_parameters(b: &ast::BinaryExpressionData) -> usize {
+pub fn count_binary_expression_parameters(b: &ast::BinaryExpressionData) -> usize { ::tsox_core::fntrace::enter("count_binary_expression_parameters"); 
     if let Some(left) = binary_expression_data_of(&b.left) {
         return count_binary_expression_parameters(left) + 1;
     }
@@ -285,7 +285,7 @@ pub fn get_argument_list_info_for_template(
     tag_expression: &Arc<Node>,
     argument_index: usize,
     source_file: &Arc<SourceFile>,
-) -> M5vArgumentListInfo {
+) -> M5vArgumentListInfo { ::tsox_core::fntrace::enter("get_argument_list_info_for_template"); 
     let NodeData::TaggedTemplateExpression(tag_data) = &tag_expression.data else {
         panic!("get_argument_list_info_for_template: node is not a tagged template expression");
     };
@@ -308,7 +308,7 @@ pub fn get_argument_list_info_for_template(
 pub fn get_applicable_range_for_tagged_template(
     tagged_template: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> TextRange {
+) -> TextRange { ::tsox_core::fntrace::enter("get_applicable_range_for_tagged_template"); 
     let NodeData::TaggedTemplateExpression(tag_data) = &tagged_template.data else {
         panic!("get_applicable_range_for_tagged_template: node is not a tagged template expression");
     };
@@ -338,7 +338,7 @@ pub fn get_applicable_range_for_tagged_template(
     TextRange::new(applicable_span_start, applicable_span_end)
 }
 
-fn m5v_markup_kind_str(doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind) -> &'static str {
+fn m5v_markup_kind_str(doc_format: &crate::lsp::lsproto_lsp_basic::MarkupKind) -> &'static str { ::tsox_core::fntrace::enter("m5v_markup_kind_str"); 
     match doc_format {
         crate::lsp::lsproto_lsp_basic::MarkupKind::Markdown => "markdown",
         _ => "plaintext",
@@ -352,7 +352,7 @@ impl LanguageService {
         label: &str,
         c: &mut Checker,
         doc_format: crate::lsp::lsproto_lsp_basic::MarkupKind,
-    ) -> M5vSignatureHelpParameter {
+    ) -> M5vSignatureHelpParameter { ::tsox_core::fntrace::enter("m5v_create_signature_help_parameter_from_label"); 
         let is_optional = parameter
             .check_flags
             .contains(ast::CheckFlags::OptionalParameter);
@@ -390,7 +390,7 @@ impl LanguageService {
         source_file: &Arc<SourceFile>,
         c: &mut Checker,
         doc_format: crate::lsp::lsproto_lsp_basic::MarkupKind,
-    ) -> M5vSignatureHelpParameter {
+    ) -> M5vSignatureHelpParameter { ::tsox_core::fntrace::enter("m5v_create_signature_help_parameter_for_parameter"); 
         let param_node = {
             let mut node_builder = tsox_checker::checker::mig::m2f::new_node_builder_ex(
                 c,
@@ -419,7 +419,7 @@ pub fn create_signature_help_parameter_for_type_parameter(
     enclosing_declaration: &Arc<Node>,
     c: &mut Checker,
     p: &mut tsox_frontend::format::mig::m4o_2::Printer,
-) -> Option<M5vSignatureHelpParameter> {
+) -> Option<M5vSignatureHelpParameter> { ::tsox_core::fntrace::enter("create_signature_help_parameter_for_type_parameter"); 
     let type_parameter_node = {
         let mut node_builder = tsox_checker::checker::mig::m2f::new_node_builder_ex(
             c,
@@ -448,6 +448,6 @@ fn is_inside_template_literal(
     node: &Arc<Node>,
     position: usize,
     source_file: &Arc<SourceFile>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_inside_template_literal"); 
     crate::ls::mig::m5x_4::is_inside_template_literal(node, position, source_file)
 }

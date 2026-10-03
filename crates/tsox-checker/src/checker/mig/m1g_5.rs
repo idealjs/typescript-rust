@@ -14,7 +14,7 @@ use tsox_core::diagnostics::Message;
 use tsox_frontend::ast::{Node, Symbol, SymbolFlags, SyntaxKind};
 
 impl Checker {
-    pub(crate) fn get_type_without_signatures(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_type_without_signatures(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_without_signatures"); 
         if t.flags.contains(TypeFlags::OBJECT) {
             let resolved = self.resolve_structured_type_members(t);
             let resolved_data = resolved.as_object_type();
@@ -51,7 +51,7 @@ impl Checker {
     pub(crate) fn get_type_of_module_declaration_import_attributes(
         &mut self,
         attributes: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_module_declaration_import_attributes"); 
         let Some(attributes) = attributes else {
             return self.empty_object_type();
         };
@@ -61,7 +61,7 @@ impl Checker {
     pub(crate) fn get_type_of_module_import_attributes(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_module_import_attributes"); 
         if let Some(t) = module_import_attributes_types_get(symbol) {
             return t;
         }
@@ -85,14 +85,14 @@ impl Checker {
         &mut self,
         module_symbol: &Arc<Symbol>,
         kind: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_exported_members_of_kind"); 
         module_symbol.exports.entries.values().any(|symbol| {
             symbol.name != tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
                 && self.get_symbol_flags(symbol).intersects(kind)
         })
     }
 
-    pub(crate) fn has_shadowed_namespace(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn has_shadowed_namespace(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("has_shadowed_namespace"); 
         if symbol
             .flags
             .intersects(SymbolFlags::NamespaceModule | SymbolFlags::Alias)
@@ -110,7 +110,7 @@ impl Checker {
     pub(crate) fn get_type_of_symbol_with_deferred_type(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_symbol_with_deferred_type"); 
         if let Some(t) = self
             .value_symbol_links
             .get(symbol)
@@ -141,7 +141,7 @@ impl Checker {
     pub(crate) fn get_write_type_of_symbol_with_deferred_type(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_write_type_of_symbol_with_deferred_type"); 
         if let Some(t) = self
             .value_symbol_links
             .get(symbol)
@@ -177,7 +177,7 @@ impl Checker {
     pub(crate) fn get_type_of_instantiated_symbol(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_instantiated_symbol"); 
         if let Some(t) = self
             .value_symbol_links
             .get(symbol)
@@ -202,7 +202,7 @@ impl Checker {
     pub(crate) fn get_write_type_of_instantiated_symbol(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_write_type_of_instantiated_symbol"); 
         if let Some(t) = self
             .value_symbol_links
             .get(symbol)
@@ -228,7 +228,7 @@ impl Checker {
         &mut self,
         declaration: &Arc<Node>,
         report_errors: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_widened_type_for_variable_like_declaration"); 
         let t = self.get_type_for_variable_like_declaration(declaration, true, CheckMode::Normal);
         Some(self.widen_type_for_variable_like_declaration(t, declaration, report_errors))
     }
@@ -236,7 +236,7 @@ impl Checker {
     pub(crate) fn get_type_of_func_class_enum_module(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_func_class_enum_module"); 
         if let Some(t) = self
             .value_symbol_links
             .get(symbol)
@@ -251,7 +251,7 @@ impl Checker {
         t
     }
 
-    pub(crate) fn get_type_of_enum_member(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn get_type_of_enum_member(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_enum_member"); 
         if let Some(t) = self
             .value_symbol_links
             .get(symbol)
@@ -269,7 +269,7 @@ impl Checker {
     pub(crate) fn has_common_declaration(
         &mut self,
         symbols: &[Arc<Symbol>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_common_declaration"); 
         let mut common_declarations: Vec<Arc<Node>> = Vec::new();
         for symbol in symbols {
             if symbol.declarations.is_empty() {
@@ -290,7 +290,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_reference_type"); 
         if Arc::ptr_eq(symbol, &self.unknown_symbol()) {
             return self.error_type();
         }
@@ -315,7 +315,7 @@ impl Checker {
 pub(crate) fn get_verbatim_module_syntax_error_message(
     checker: &Checker,
     node: &Arc<Node>,
-) -> Message {
+) -> Message { ::tsox_core::fntrace::enter("get_verbatim_module_syntax_error_message"); 
     let file_name = checker
         .get_source_file_of_node(node)
         .map(|sf| sf.file_name.clone())
@@ -326,7 +326,7 @@ pub(crate) fn get_verbatim_module_syntax_error_message(
     tsox_core::diagnostics::messages_generated::ECMASCRIPT_IMPORTS_AND_EXPORTS_CANNOT_BE_WRITTEN_IN_A_COMMONJS_FILE_UNDER_VERBATIMMODULESYNTAX_ADJUST_THE_TYPE_FIELD_IN_THE_NEAREST_PACKAGE_JSON_TO_MAKE_THIS_FILE_AN_ECMASCRIPT_MODULE_OR_ADJUST_YOUR_VERBATIMMODULESYNTAX_MODULE_AND_MODULERESOLUTION_SETTINGS_IN_TYPESCRIPT
 }
 
-pub(crate) fn get_type_list_key(types: &[Arc<Type>]) -> CacheHashKey {
+pub(crate) fn get_type_list_key(types: &[Arc<Type>]) -> CacheHashKey { ::tsox_core::fntrace::enter("get_type_list_key"); 
     let mut b = KeyBuilder::new();
     b.write_types(types);
     b.hash()
@@ -336,7 +336,7 @@ pub(crate) fn get_union_key(
     types: &[Arc<Type>],
     origin: Option<&Arc<Type>>,
     alias: Option<&TypeAlias>,
-) -> CacheHashKey {
+) -> CacheHashKey { ::tsox_core::fntrace::enter("get_union_key"); 
     let mut b = KeyBuilder::new();
     match origin {
         None => b.write_types(types),

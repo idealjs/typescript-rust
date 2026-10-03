@@ -6,7 +6,7 @@ use crate::checker::types::IterationTypeKind;
 
 impl Checker {
     #[allow(non_snake_case)]
-    pub fn unwrapReturnType(&mut self, return_type: &Arc<Type>, function_flags: FunctionFlags) -> Arc<Type> {
+    pub fn unwrapReturnType(&mut self, return_type: &Arc<Type>, function_flags: FunctionFlags) -> Arc<Type> { ::tsox_core::fntrace::enter("unwrapReturnType"); 
         let is_generator = function_flags.contains(FunctionFlags::GENERATOR);
         let is_async = function_flags.contains(FunctionFlags::ASYNC);
         if is_generator {

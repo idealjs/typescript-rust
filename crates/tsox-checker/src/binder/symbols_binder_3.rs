@@ -3,7 +3,7 @@
 use crate::binder::mig::m4a_4::{is_assignment_declaration, is_effective_module_declaration};
 use crate::binder::symbols::*;
 
-fn set_value_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) {
+fn set_value_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_value_declaration"); 
     let replace = match &symbol.value_declaration {
         None => true,
         Some(vd) => {
@@ -26,7 +26,7 @@ impl Binder {
         includes: SymbolFlags,
         excludes: SymbolFlags,
         target: DeclareTarget,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_symbol_into"); 
         let mut name = self.get_declaration_name(node);
         // Go declareSymbolEx：default 导出声明的导出符号恒名 "default"
         //（isDefaultExport && parent != nil），local 符号 parent 为 nil 保留声明名
@@ -184,7 +184,7 @@ impl Binder {
         &self,
         existing_flags: SymbolFlags,
         new_flags: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("can_merge_symbols"); 
         // Go bindExportDeclaration 以 excludes=None 声明 __export：多个
         // export * 恒合并进同一符号的 declarations
         if existing_flags.contains(SymbolFlags::ExportStar)
@@ -351,7 +351,7 @@ impl Binder {
         false
     }
 
-    pub(crate) fn is_let_or_const_declaration(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_let_or_const_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_let_or_const_declaration"); 
         // Go IsBlockOrCatchScoped：沿父链找变量声明列表的 let/const 位；
         // 参数按 IsPartOfParameterDeclaration 归函数作用域，catch 变量按块作用域
         let mut n = Arc::clone(node);
@@ -375,7 +375,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn has_export_declarations(container: &Arc<Node>) -> bool {
+    pub(crate) fn has_export_declarations(container: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_export_declarations"); 
         let statements: &[Arc<Node>] = match &container.data {
             tsox_frontend::ast::NodeData::SourceFile(sf) => &sf.statements.nodes,
             tsox_frontend::ast::NodeData::ModuleDeclaration(md) => {
@@ -396,7 +396,7 @@ impl Binder {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn is_var_declaration(node: &Arc<Node>) -> bool {
+    pub(crate) fn is_var_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_declaration"); 
         if node.kind == SyntaxKind::VariableDeclaration {
             if let Some(parent) = node.parent().as_ref() {
                 if parent.kind == SyntaxKind::VariableDeclarationList {
@@ -407,7 +407,7 @@ impl Binder {
         false
     }
 
-    pub(crate) fn declaration_is_var(node: &Arc<Node>) -> bool {
+    pub(crate) fn declaration_is_var(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_is_var"); 
         let mut current = Arc::clone(node);
         loop {
             match current.kind {
@@ -429,7 +429,7 @@ impl Binder {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn symbol_is_var_declaration(symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn symbol_is_var_declaration(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_var_declaration"); 
         let decl: Option<&Arc<Node>> = symbol
             .value_declaration
             .as_ref()
@@ -440,7 +440,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn get_combined_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags {
+    pub(crate) fn get_combined_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("get_combined_modifier_flags"); 
         let mut flags = node.syntactic_modifier_flags();
         if node.kind == SyntaxKind::VariableDeclaration {
             if let Some(parent) = node.parent() {

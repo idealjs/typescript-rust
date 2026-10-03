@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 use std::collections::HashMap;
 
 impl LspServer {
-    pub(super) fn handle_initialize(&mut self, params: &Value) -> Value {
+    pub(super) fn handle_initialize(&mut self, params: &Value) -> Value { ::tsox_core::fntrace::enter("handle_initialize"); 
         if let Some(root_uri) = params.get("rootUri").and_then(|v| v.as_str()) {
             if let Some(path) = root_uri.strip_prefix("file://") {
                 self.workspace_root = Some(path.to_string());
@@ -100,7 +100,7 @@ impl LspServer {
         })
     }
 
-    pub(super) fn handle_did_open(&mut self, params: &Value) -> Vec<Value> {
+    pub(super) fn handle_did_open(&mut self, params: &Value) -> Vec<Value> { ::tsox_core::fntrace::enter("handle_did_open"); 
         if let Some(td) = params.get("textDocument") {
             let uri = td.get("uri").and_then(|v| v.as_str()).unwrap_or("");
             let text = td.get("text").and_then(|v| v.as_str()).unwrap_or("");
@@ -110,7 +110,7 @@ impl LspServer {
         self.compute_all_diagnostics()
     }
 
-    pub(super) fn handle_did_change(&mut self, params: &Value) -> Vec<Value> {
+    pub(super) fn handle_did_change(&mut self, params: &Value) -> Vec<Value> { ::tsox_core::fntrace::enter("handle_did_change"); 
         if let Some(td) = params.get("textDocument") {
             let uri = td.get("uri").and_then(|v| v.as_str()).unwrap_or("");
 
@@ -126,7 +126,7 @@ impl LspServer {
         self.compute_all_diagnostics()
     }
 
-    pub(super) fn handle_did_close(&mut self, params: &Value) -> Vec<Value> {
+    pub(super) fn handle_did_close(&mut self, params: &Value) -> Vec<Value> { ::tsox_core::fntrace::enter("handle_did_close"); 
         if let Some(td) = params.get("textDocument") {
             let uri = td.get("uri").and_then(|v| v.as_str()).unwrap_or("");
             self.documents.remove(uri);
@@ -143,7 +143,7 @@ impl LspServer {
         Vec::new()
     }
 
-    pub(super) fn handle_did_change_watched_files(&mut self, params: &Value) -> Vec<Value> {
+    pub(super) fn handle_did_change_watched_files(&mut self, params: &Value) -> Vec<Value> { ::tsox_core::fntrace::enter("handle_did_change_watched_files"); 
         if let Some(changes) = params.get("changes").and_then(|v| v.as_array()) {
             for change in changes {
                 let uri = change.get("uri").and_then(|v| v.as_str()).unwrap_or("");
@@ -168,7 +168,7 @@ impl LspServer {
         self.compute_all_diagnostics()
     }
 
-    pub(super) fn compute_all_diagnostics(&self) -> Vec<Value> {
+    pub(super) fn compute_all_diagnostics(&self) -> Vec<Value> { ::tsox_core::fntrace::enter("compute_all_diagnostics"); 
         let program = match build_program_from_documents(&self.documents) {
             Some(p) => p,
             None => return Vec::new(),

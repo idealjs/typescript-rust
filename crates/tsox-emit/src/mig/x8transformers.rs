@@ -6,7 +6,7 @@ use tsox_frontend::ast::{self, Node, ModifierFlags, SyntaxKind};
 use tsox_core::core;
 use tsox_core::core::text::TextRange;
 
-fn last_modifier_of(node: &Node, pred: impl Fn(&Node) -> bool) -> Option<Arc<Node>> {
+fn last_modifier_of(node: &Node, pred: impl Fn(&Node) -> bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("last_modifier_of"); 
     if ast::can_have_modifiers(node) {
         let nodes = node.modifier_nodes();
         return nodes.iter().rev().find(|m| pred(m)).cloned();
@@ -14,7 +14,7 @@ fn last_modifier_of(node: &Node, pred: impl Fn(&Node) -> bool) -> Option<Arc<Nod
     None
 }
 
-pub fn move_range_past_decorators(node: &Node) -> TextRange {
+pub fn move_range_past_decorators(node: &Node) -> TextRange { ::tsox_core::fntrace::enter("move_range_past_decorators"); 
     let last_decorator = last_modifier_of(node, |m| ast::is_decorator(m));
     if let Some(last_decorator) = last_decorator {
         return TextRange::new(last_decorator.end(), node.end());
@@ -22,7 +22,7 @@ pub fn move_range_past_decorators(node: &Node) -> TextRange {
     move_range_past_modifiers(node)
 }
 
-pub fn move_range_past_modifiers(node: &Node) -> TextRange {
+pub fn move_range_past_modifiers(node: &Node) -> TextRange { ::tsox_core::fntrace::enter("move_range_past_modifiers"); 
     if ast::is_property_declaration(node) || ast::is_method_declaration(node) {
         return TextRange::new(node.name().map(|n| n.pos()).unwrap_or(node.pos()), node.end());
     }
@@ -40,7 +40,7 @@ pub fn move_range_past_modifiers(node: &Node) -> TextRange {
     TextRange::new(node.pos(), node.end())
 }
 
-pub fn mask_modifier_flags(node: &Arc<Node>, modifier_mask: ModifierFlags, modifier_additions: ModifierFlags) -> ModifierFlags {
+pub fn mask_modifier_flags(node: &Arc<Node>, modifier_mask: ModifierFlags, modifier_additions: ModifierFlags) -> ModifierFlags { ::tsox_core::fntrace::enter("mask_modifier_flags"); 
     let mut flags = (ast::get_combined_modifier_flags(node) & modifier_mask) | modifier_additions;
     if flags.contains(ModifierFlags::Default) && !flags.contains(ModifierFlags::Export) {
         flags ^= ModifierFlags::Export;
@@ -48,7 +48,7 @@ pub fn mask_modifier_flags(node: &Arc<Node>, modifier_mask: ModifierFlags, modif
     flags
 }
 
-pub fn needs_scope_marker(result: &Node) -> bool {
+pub fn needs_scope_marker(result: &Node) -> bool { ::tsox_core::fntrace::enter("needs_scope_marker"); 
     !ast::is_any_import_or_re_export(result)
         && !ast::is_export_assignment(result)
         && !ast::has_syntactic_modifier(result, ModifierFlags::Export)

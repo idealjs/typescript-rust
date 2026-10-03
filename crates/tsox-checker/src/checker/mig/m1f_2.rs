@@ -53,7 +53,7 @@ impl IterationTypesResolver {
         yield_type: &Arc<Type>,
         return_type: &Arc<Type>,
         next_type: Option<Arc<Type>>,
-    ) -> IterationTypes {
+    ) -> IterationTypes { ::tsox_core::fntrace::enter("get_resolved_iteration_types"); 
         IterationTypes {
             yield_type: Some(
                 (self.resolve_iteration_type)(yield_type, None).unwrap_or_else(|| yield_type.clone()),
@@ -73,7 +73,7 @@ impl Checker {
         source: &Arc<Type>,
         properties: &[Arc<Node>],
         symbol: Option<&Arc<Symbol>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_rest_type"); 
         let source = self.filter_type(source, &mut |t: &Arc<Type>| {
             !t.flags.intersects(TypeFlags::NULLABLE)
         });
@@ -142,7 +142,7 @@ impl Checker {
         result
     }
 
-    pub fn get_return_type_from_annotation(&mut self, declaration: &Arc<Node>) -> Arc<Type> {
+    pub fn get_return_type_from_annotation(&mut self, declaration: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_return_type_from_annotation"); 
         if is_constructor_declaration(declaration) {
             let parent = declaration
                 .parent()
@@ -169,7 +169,7 @@ impl Checker {
             .unwrap_or_else(|| self.error_type())
     }
 
-    pub fn get_return_type_of_full_signature(&mut self, node: &Node) -> Option<Arc<Type>> {
+    pub fn get_return_type_of_full_signature(&mut self, node: &Node) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_of_full_signature"); 
         let signature = self.get_signature_of_full_signature_type(node)?;
         self.get_return_type_of_signature(&signature)
     }
@@ -178,7 +178,7 @@ impl Checker {
         &mut self,
         func_type: &Arc<Type>,
         kind: SignatureKind,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_of_single_non_generic_signature"); 
         let signature = self.get_single_signature(func_type, kind, true);
         if let Some(signature) = signature {
             if signature.type_parameters.is_empty() {
@@ -191,7 +191,7 @@ impl Checker {
     pub fn get_return_type_of_single_non_generic_signature_of_call_chain(
         &mut self,
         expr: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_of_single_non_generic_signature_of_call_chain"); 
         let Some(expr_expression) = expr.expression() else {
             return None;
         };
@@ -206,7 +206,7 @@ impl Checker {
         ))
     }
 
-    pub fn get_siblings_of_context(&mut self, context: &mut WideningContext) -> Vec<Arc<Type>> {
+    pub fn get_siblings_of_context(&mut self, context: &mut WideningContext) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_siblings_of_context"); 
         if context.siblings.is_none() {
             let mut siblings: Vec<Arc<Type>> = vec![];
             if let Some(parent) = &mut context.parent {
@@ -230,7 +230,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         type_arguments: &[Arc<Type>],
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_signature_instantiation_without_filling_in_type_arguments"); 
         let key = CachedSignatureKey {
             sig: sig.clone(),
             key: get_type_list_key(type_arguments),
@@ -243,7 +243,7 @@ impl Checker {
         instantiation
     }
 
-    pub fn get_signature_of_full_signature_type(&mut self, node: &Node) -> Option<Arc<Signature>> {
+    pub fn get_signature_of_full_signature_type(&mut self, node: &Node) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_signature_of_full_signature_type"); 
         if is_in_js_file(node)
             && (is_function_declaration(node)
                 || is_method_declaration(node)
@@ -261,7 +261,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         kind: SignatureKind,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_signatures_of_structured_type"); 
         if !t.flags.intersects(TypeFlags::STRUCTURED_TYPE) {
             return vec![];
         }
@@ -277,7 +277,7 @@ impl Checker {
         }
     }
 
-    pub fn get_signatures_of_symbol(&mut self, symbol: Option<&Arc<Symbol>>) -> Vec<Arc<Signature>> {
+    pub fn get_signatures_of_symbol(&mut self, symbol: Option<&Arc<Symbol>>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_signatures_of_symbol"); 
         let symbol = match symbol {
             Some(s) => s,
             None => return vec![],
@@ -306,7 +306,7 @@ impl Checker {
         result
     }
 
-    pub fn get_single_call_or_construct_signature(&mut self, t: &Arc<Type>) -> Option<Arc<Signature>> {
+    pub fn get_single_call_or_construct_signature(&mut self, t: &Arc<Type>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_single_call_or_construct_signature"); 
         if let Some(call_sig) = self.get_single_signature(t, SignatureKind::Call, false) {
             return Some(call_sig);
         }
@@ -318,7 +318,7 @@ impl Checker {
         t: &Arc<Type>,
         kind: SignatureKind,
         allow_members: bool,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_single_signature"); 
         if t.flags.intersects(TypeFlags::Object) {
             let resolved = self.resolve_structured_type_members(t);
             let structured = resolved.as_structured()?;
@@ -337,13 +337,13 @@ impl Checker {
         None
     }
 
-    pub fn get_spread_argument_index(&self, args: &[Arc<Node>]) -> i64 {
+    pub fn get_spread_argument_index(&self, args: &[Arc<Node>]) -> i64 { ::tsox_core::fntrace::enter("get_spread_argument_index"); 
         find_index(args, is_spread_argument)
             .map(|i| i as i64)
             .unwrap_or(-1)
     }
 
-    pub fn get_spread_indices(&mut self, node: &Node) -> (i64, i64) {
+    pub fn get_spread_indices(&mut self, node: &Node) -> (i64, i64) { ::tsox_core::fntrace::enter("get_spread_indices"); 
         let computed = self
             .array_literal_links
             .get(node)
@@ -376,7 +376,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         t: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_string_mapping_type_for_generic_type"); 
         let key = r24k9_defs::string_mapping_key_hash(symbol, t);
         if let Some(result) = self.string_mapping_types.get(&key) {
             return result.clone();
@@ -386,7 +386,7 @@ impl Checker {
         result
     }
 
-    pub fn get_substitution_intersection(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_substitution_intersection(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_substitution_intersection"); 
         if self.is_no_infer_type(t) {
             return match &t.data {
                 TypeData::Substitution(d) => d.base_type.clone().unwrap_or_else(|| t.clone()),
@@ -407,7 +407,7 @@ impl Checker {
         &mut self,
         base_type: &Arc<Type>,
         constraint: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_substitution_type"); 
         if constraint.flags.intersects(TypeFlags::ANY_OR_UNKNOWN)
             || constraint.id == base_type.id
             || base_type.flags.intersects(TypeFlags::Any)
@@ -417,7 +417,7 @@ impl Checker {
         self.get_or_create_substitution_type(base_type, constraint)
     }
 
-    pub fn get_suggested_boolean_operator(&self, operator: SyntaxKind) -> SyntaxKind {
+    pub fn get_suggested_boolean_operator(&self, operator: SyntaxKind) -> SyntaxKind { ::tsox_core::fntrace::enter("get_suggested_boolean_operator"); 
         match operator {
             SyntaxKind::BarToken | SyntaxKind::BarEqualsToken => SyntaxKind::BarBarToken,
             SyntaxKind::CaretToken | SyntaxKind::CaretEqualsToken => {

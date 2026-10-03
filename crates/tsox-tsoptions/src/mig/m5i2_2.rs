@@ -29,7 +29,7 @@ pub type CommandLineOptionNameMap = NameMap;
 fn command_line_option_name_map_get<'a>(
     map: &'a CommandLineOptionNameMap,
     name: &str,
-) -> Option<&'a OptionDecl> {
+) -> Option<&'a OptionDecl> { ::tsox_core::fntrace::enter("command_line_option_name_map_get"); 
     map.get(name).or_else(|| map.get(&name.to_lowercase()))
 }
 
@@ -38,7 +38,7 @@ fn new_diagnostic(
     loc: TextRange,
     message: Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("new_diagnostic"); 
     Diagnostic::new(None, loc, message, args)
 }
 
@@ -47,7 +47,7 @@ pub fn convert_array_literal_expression_to_json(
     elements: &[Arc<Node>],
     element_option: Option<&OptionDecl>,
     return_value: bool,
-) -> (Option<JsonValue>, Vec<Diagnostic>) {
+) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_array_literal_expression_to_json"); 
     if !return_value {
         for element in elements {
             convert_property_value_to_json(source_file, element, element_option, return_value, None);
@@ -76,7 +76,7 @@ pub fn convert_object_literal_expression_to_json(
     node: &Node,
     object_option: Option<&OptionDecl>,
     json_conversion_notifier: Option<&JsonConversionNotifier>,
-) -> (Option<JsonObject>, Vec<Diagnostic>) {
+) -> (Option<JsonObject>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_object_literal_expression_to_json"); 
     let mut result: JsonObject = Vec::new();
     let mut errors: Vec<Diagnostic> = Vec::new();
     let properties = match &node.data {
@@ -161,7 +161,7 @@ pub fn convert_property_value_to_json(
     option: Option<&OptionDecl>,
     return_value: bool,
     json_conversion_notifier: Option<&JsonConversionNotifier>,
-) -> (Option<JsonValue>, Vec<Diagnostic>) {
+) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_property_value_to_json"); 
     let not_expected_format = || -> (Option<JsonValue>, Vec<Diagnostic>) {
         if let Some(option) = option {
             (
@@ -250,7 +250,7 @@ pub fn convert_property_value_to_json(
     }
 }
 
-pub fn convert_to_object(source_file: &SourceFile) -> (Option<JsonValue>, Vec<Diagnostic>) {
+pub fn convert_to_object(source_file: &SourceFile) -> (Option<JsonValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_to_object"); 
     convert_config_file_to_object(source_file, None)
 }
 
@@ -263,7 +263,7 @@ pub trait OptionsParserLike {
 pub fn convert_map_to_options<O: OptionsParserLike>(
     compiler_options: &JsonObject,
     mut result: O,
-) -> O {
+) -> O { ::tsox_core::fntrace::enter("convert_map_to_options"); 
     for (key, value) in compiler_options {
         result.parse_option(key, value);
     }
@@ -275,7 +275,7 @@ pub fn convert_options_from_json<O: OptionsParserLike>(
     json_options: Option<&JsonObject>,
     base_path: &str,
     mut result: O,
-) -> (O, Vec<Diagnostic>) {
+) -> (O, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("convert_options_from_json"); 
     let Some(json_map) = json_options else {
         return (result, Vec::new());
     };

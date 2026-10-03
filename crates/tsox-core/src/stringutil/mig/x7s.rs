@@ -382,13 +382,13 @@ const IGNORABLE_RANGES32: [(u32, u32, u32); 139] = [
     (0xe0100, 0xe01ef, 1),
 ];
 
-fn in_ranges(r: u32, ranges: &[(u32, u32, u32)]) -> bool {
+fn in_ranges(r: u32, ranges: &[(u32, u32, u32)]) -> bool { crate::fntrace::enter("in_ranges"); 
     ranges
         .iter()
         .any(|&(lo, hi, stride)| r >= lo && r <= hi && (r - lo) % stride == 0)
 }
 
-pub fn is_unicode_case_ignorable(r: u32) -> bool {
+pub fn is_unicode_case_ignorable(r: u32) -> bool { crate::fntrace::enter("is_unicode_case_ignorable"); 
     if r <= 0xFFFF {
         in_ranges(r, &IGNORABLE_RANGES16)
     } else {

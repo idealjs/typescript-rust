@@ -42,21 +42,21 @@ macro_rules! m5v_as_data {
 }
 
 impl M5vNodeExt for Node {
-    fn import_clause(&self) -> Option<&Arc<Node>> {
+    fn import_clause(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("import_clause"); 
         match &self.data {
             NodeData::ImportDeclaration(d) => d.import_clause.as_ref(),
             _ => None,
         }
     }
 
-    fn named_bindings(&self) -> Option<&Arc<Node>> {
+    fn named_bindings(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("named_bindings"); 
         match &self.data {
             NodeData::ImportClause(d) => d.named_bindings.as_ref(),
             _ => None,
         }
     }
 
-    fn elements(&self) -> &NodeList {
+    fn elements(&self) -> &NodeList { ::tsox_core::fntrace::enter("elements"); 
         match &self.data {
             NodeData::NamedImports(d) => &d.elements,
             NodeData::NamedExports(d) => &d.elements,
@@ -64,7 +64,7 @@ impl M5vNodeExt for Node {
         }
     }
 
-    fn is_type_only(&self) -> bool {
+    fn is_type_only(&self) -> bool { ::tsox_core::fntrace::enter("is_type_only"); 
         match &self.data {
             NodeData::ImportEqualsDeclaration(d) => d.is_type_only,
             NodeData::ImportSpecifier(d) => d.is_type_only,
@@ -83,7 +83,7 @@ impl M5vNodeExt for Node {
     m5v_as_data!(as_variable_declaration, VariableDeclaration, VariableDeclarationData);
     m5v_as_data!(as_call_expression, CallExpression, CallExpressionData);
 
-    fn initializer(&self) -> Option<&Arc<Node>> {
+    fn initializer(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("initializer"); 
         match &self.data {
             NodeData::VariableDeclaration(d) => d.initializer.as_ref(),
             _ => None,
@@ -91,7 +91,7 @@ impl M5vNodeExt for Node {
     }
 }
 
-pub fn parse_indent_style(v: &Value) -> IndentStyle {
+pub fn parse_indent_style(v: &Value) -> IndentStyle { ::tsox_core::fntrace::enter("parse_indent_style"); 
     match v {
         Value::String(s) => match s.to_lowercase().as_str() {
             "none" => IndentStyle::None,
@@ -109,7 +109,7 @@ pub fn parse_indent_style(v: &Value) -> IndentStyle {
     }
 }
 
-pub fn parse_semicolon_preference(v: &Value) -> SemicolonPreference {
+pub fn parse_semicolon_preference(v: &Value) -> SemicolonPreference { ::tsox_core::fntrace::enter("parse_semicolon_preference"); 
     if let Value::String(s) = v {
         match s.to_lowercase().as_str() {
             "insert" => return SemicolonPreference::Insert,
@@ -120,19 +120,19 @@ pub fn parse_semicolon_preference(v: &Value) -> SemicolonPreference {
     SemicolonPreference::Ignore
 }
 
-pub fn remove_diacritics(s: &str) -> String {
+pub fn remove_diacritics(s: &str) -> String { ::tsox_core::fntrace::enter("remove_diacritics"); 
     use unicode_normalization::UnicodeNormalization;
     s.nfd().filter(|r| !is_combining_mark(*r)).collect()
 }
 
-fn is_combining_mark(r: char) -> bool {
+fn is_combining_mark(r: char) -> bool { ::tsox_core::fntrace::enter("is_combining_mark"); 
     matches!(
         unicode_general_category::get_general_category(r),
         unicode_general_category::GeneralCategory::NonspacingMark
     )
 }
 
-fn measure_node_sortedness(arr: &[Arc<Node>], comparer: &StatementComparer) -> i32 {
+fn measure_node_sortedness(arr: &[Arc<Node>], comparer: &StatementComparer) -> i32 { ::tsox_core::fntrace::enter("measure_node_sortedness"); 
     let mut count = 0i32;
     for j in 0..arr.len().saturating_sub(1) {
         if comparer(&arr[j], &arr[j + 1]) > 0 {
@@ -142,7 +142,7 @@ fn measure_node_sortedness(arr: &[Arc<Node>], comparer: &StatementComparer) -> i
     count
 }
 
-pub fn get_module_specifier_expression(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_module_specifier_expression(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_module_specifier_expression"); 
     match declaration.kind {
         SyntaxKind::ImportEqualsDeclaration => {
             let module_reference = match &declaration.data {
@@ -195,13 +195,13 @@ pub fn detect_named_import_organization_by_sort(
     original_groups: &[Arc<Node>],
     comparers_to_test: &[StringComparer],
     types_to_test: &[OrganizeImportsTypeOrder],
-) -> Option<(StringComparer, OrganizeImportsTypeOrder, bool)> {
+) -> Option<(StringComparer, OrganizeImportsTypeOrder, bool)> { ::tsox_core::fntrace::enter("detect_named_import_organization_by_sort"); 
     let result =
         detect_named_import_organization_by_sort_inner(original_groups, comparers_to_test, types_to_test)?;
     Some((result.named_import_comparer, result.type_order, result.is_sorted))
 }
 
-fn named_imports_elements_of(import_decl: &Arc<Node>) -> Vec<Arc<Node>> {
+fn named_imports_elements_of(import_decl: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("named_imports_elements_of"); 
     import_decl
         .import_clause()
         .and_then(|clause| clause.named_bindings())
@@ -214,7 +214,7 @@ fn detect_named_import_organization_by_sort_inner(
     original_groups: &[Arc<Node>],
     comparers_to_test: &[StringComparer],
     types_to_test: &[OrganizeImportsTypeOrder],
-) -> Option<NamedImportSortResult> {
+) -> Option<NamedImportSortResult> { ::tsox_core::fntrace::enter("detect_named_import_organization_by_sort_inner"); 
     let mut both_named_imports = false;
     let mut import_decls_with_named: Vec<Arc<Node>> = Vec::new();
 
@@ -365,7 +365,7 @@ fn detect_named_import_organization_by_sort_inner(
     })
 }
 
-fn type_order_index(order: OrganizeImportsTypeOrder) -> usize {
+fn type_order_index(order: OrganizeImportsTypeOrder) -> usize { ::tsox_core::fntrace::enter("type_order_index"); 
     match order {
         OrganizeImportsTypeOrder::First => 0,
         OrganizeImportsTypeOrder::Inline => 1,
@@ -377,7 +377,7 @@ pub fn get_symbol_kind_of_constructor_property_method_accessor_function_or_var(
     mut type_checker: Option<&mut Checker>,
     symbol: &Arc<Symbol>,
     location: &Arc<Node>,
-) -> ScriptElementKind {
+) -> ScriptElementKind { ::tsox_core::fntrace::enter("get_symbol_kind_of_constructor_property_method_accessor_function_or_var"); 
     let roots: Vec<Arc<Symbol>> = match type_checker.as_deref_mut() {
         Some(ch) => ch.get_root_symbols(symbol),
         None => vec![Arc::clone(symbol)],
@@ -503,7 +503,7 @@ pub fn get_symbol_kind_of_constructor_property_method_accessor_function_or_var(
     ScriptElementKind::Unknown
 }
 
-pub fn is_first_declaration_of_symbol_parameter(symbol: &Arc<Symbol>) -> bool {
+pub fn is_first_declaration_of_symbol_parameter(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_first_declaration_of_symbol_parameter"); 
     let mut current = symbol.declarations.first().cloned();
     while let Some(n) = current {
         if ast::is_parameter_declaration(&n) {
@@ -523,7 +523,7 @@ pub fn is_first_declaration_of_symbol_parameter(symbol: &Arc<Symbol>) -> bool {
     false
 }
 
-pub fn is_local_variable_or_function(symbol: &Arc<Symbol>) -> bool {
+pub fn is_local_variable_or_function(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_local_variable_or_function"); 
     if symbol.parent().is_some() {
         return false;
     }
@@ -560,7 +560,7 @@ pub fn is_local_variable_or_function(symbol: &Arc<Symbol>) -> bool {
 pub fn is_deprecated_declaration(
     mut type_checker: Option<&mut Checker>,
     declaration: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_deprecated_declaration"); 
     match type_checker {
         Some(ch) => ch.is_deprecated_declaration(declaration),
         None => ast::mig::m3f_4::is_deprecated_declaration(declaration),
@@ -570,7 +570,7 @@ pub fn is_deprecated_declaration(
 pub fn get_normalized_symbol_modifiers(
     mut type_checker: Option<&mut Checker>,
     symbol: &Arc<Symbol>,
-) -> ScriptElementKindModifier {
+) -> ScriptElementKindModifier { ::tsox_core::fntrace::enter("get_normalized_symbol_modifiers"); 
     let mut modifier_set = ScriptElementKindModifier::NONE;
     let declarations = symbol.declarations.clone();
     if let Some(declaration) = declarations.first() {
@@ -594,7 +594,7 @@ pub fn get_node_modifiers(
     mut type_checker: Option<&mut Checker>,
     node: &Arc<Node>,
     exclude_flags: ast::ModifierFlags,
-) -> ScriptElementKindModifier {
+) -> ScriptElementKindModifier { ::tsox_core::fntrace::enter("get_node_modifiers"); 
     let mut result = ScriptElementKindModifier::NONE;
     let mut flags = ast::ModifierFlags::empty();
     if ast::is_declaration(node) {

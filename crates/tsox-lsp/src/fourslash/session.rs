@@ -18,7 +18,7 @@ pub const DEFAULT_FILE_NAME: &str = "main.ts";
 pub const PROJECT_ROOT: &str = "/";
 
 /// 路径归一（对齐 path.Clean）：去掉 `.` 段、合并重复分隔符；`/./foo.ts` → `/foo.ts`
-pub(crate) fn normalize_path(path: &str) -> String {
+pub(crate) fn normalize_path(path: &str) -> String { ::tsox_core::fntrace::enter("normalize_path"); 
     let mut parts: Vec<&str> = Vec::new();
     for seg in path.split('/') {
         match seg {
@@ -34,7 +34,7 @@ pub(crate) fn normalize_path(path: &str) -> String {
     }
 }
 
-pub(crate) fn project_path(name: &str) -> String {
+pub(crate) fn project_path(name: &str) -> String { ::tsox_core::fntrace::enter("project_path"); 
     if name.starts_with('/') {
         normalize_path(name)
     } else {
@@ -54,7 +54,7 @@ fn read_virtual_directory(
     path: &str,
     extensions: &[String],
     includes: &[String],
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("read_virtual_directory"); 
     let recursive = includes.iter().any(|i| i.starts_with("**/"));
     let suffix_filters: Vec<&str> = includes
         .iter()
@@ -101,22 +101,22 @@ fn read_virtual_directory(
 }
 
 impl Host for FourslashHost {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         false
     }
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.fs.read_file(path)
     }
-    fn converters(&self) -> Converters {
+    fn converters(&self) -> Converters { ::tsox_core::fntrace::enter("converters"); 
         Converters::new(PositionEncodingKind::Utf8)
     }
-    fn get_preferences(&self, _active_file: &str) -> UserPreferences {
+    fn get_preferences(&self, _active_file: &str) -> UserPreferences { ::tsox_core::fntrace::enter("get_preferences"); 
         self.prefs.lock().unwrap().clone()
     }
-    fn get_ecma_line_info(&self, _file_name: &str) -> Option<EcmaLineInfo> {
+    fn get_ecma_line_info(&self, _file_name: &str) -> Option<EcmaLineInfo> { ::tsox_core::fntrace::enter("get_ecma_line_info"); 
         None
     }
-    fn auto_import_registry(&self) -> AutoImportRegistry {
+    fn auto_import_registry(&self) -> AutoImportRegistry { ::tsox_core::fntrace::enter("auto_import_registry"); 
         AutoImportRegistry
     }
     fn read_directory(
@@ -127,16 +127,16 @@ impl Host for FourslashHost {
         _excludes: &[String],
         includes: &[String],
         _depth: i32,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("read_directory"); 
         read_virtual_directory(&*self.fs, path, extensions, includes)
     }
-    fn get_directories(&self, path: &str) -> Vec<String> {
+    fn get_directories(&self, path: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_directories"); 
         self.fs.get_accessible_entries(path).directories
     }
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.fs.directory_exists(path)
     }
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.fs.file_exists(path)
     }
 }
@@ -146,7 +146,7 @@ impl Host for FourslashHost {
 fn merge_tsconfig_compiler_options(
     files: &[TestFileInfo],
     merged_options: &mut std::collections::BTreeMap<String, String>,
-) {
+) { ::tsox_core::fntrace::enter("merge_tsconfig_compiler_options"); 
     for f in files {
         let base = f.file_name.rsplit('/').next().unwrap_or("");
         if !matches!(base, "tsconfig.json" | "jsconfig.json") {
@@ -193,20 +193,20 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn new(content: &str) -> Session {
+    pub fn new(content: &str) -> Session { ::tsox_core::fntrace::enter("new"); 
         Self::new_impl(content, None, DEFAULT_FILE_NAME)
     }
 
     /// 按测试名命名默认文件（对齐 Go fourslash：defaultFileName = 测试名 + ".ts"）
-    pub fn new_for_test(test_name: &str, content: &str) -> Session {
+    pub fn new_for_test(test_name: &str, content: &str) -> Session { ::tsox_core::fntrace::enter("new_for_test"); 
         Self::new_impl(content, None, &format!("{test_name}.ts"))
     }
 
-    pub fn new_with_capabilities(content: &str, capabilities: Option<String>) -> Session {
+    pub fn new_with_capabilities(content: &str, capabilities: Option<String>) -> Session { ::tsox_core::fntrace::enter("new_with_capabilities"); 
         Self::new_impl(content, capabilities, DEFAULT_FILE_NAME)
     }
 
-    fn new_impl(content: &str, capabilities: Option<String>, default_name: &str) -> Session {
+    fn new_impl(content: &str, capabilities: Option<String>, default_name: &str) -> Session { ::tsox_core::fntrace::enter("new_impl"); 
         let data = parse_test_data(content, default_name);
         let inner_fs = Arc::new(InMemoryFS::new());
         let mut contents = std::collections::BTreeMap::new();
@@ -247,7 +247,7 @@ impl Session {
         s
     }
 
-    pub(crate) fn rebuild_service(&mut self, file_names: Vec<String>) {
+    pub(crate) fn rebuild_service(&mut self, file_names: Vec<String>) { ::tsox_core::fntrace::enter("rebuild_service"); 
         let dyn_fs: Arc<dyn FS> = Arc::clone(&self.inner_fs) as _;
         let fs = Arc::new(BundledFS::new(dyn_fs));
         // 合并全局与各文件 @options（对齐 Go fourslash：文件头选项作用于整个测试工程）
@@ -309,7 +309,7 @@ impl Session {
         ));
     }
 
-    pub fn file_content(&self, name: &str) -> &str {
+    pub fn file_content(&self, name: &str) -> &str { ::tsox_core::fntrace::enter("file_content"); 
         self.contents.get(name).unwrap_or_else(|| {
             // 用例代码可能用 @Filename 原样名（无 / 前缀）或带 ./ 段查文件：
             // 按解析侧的规范化（GetNormalizedAbsolutePath(x, "/")）兜底
@@ -327,7 +327,7 @@ impl Session {
         })
     }
 
-    pub fn set_file_content(&mut self, name: &str, content: String) {
+    pub fn set_file_content(&mut self, name: &str, content: String) { ::tsox_core::fntrace::enter("set_file_content"); 
         self.inner_fs
             .insert_file(&project_path(name), &content);
         self.contents.insert(name.to_string(), content);
@@ -340,11 +340,11 @@ impl Session {
         self.rebuild_service(file_names);
     }
 
-    pub fn active_path(&self) -> String {
+    pub fn active_path(&self) -> String { ::tsox_core::fntrace::enter("active_path"); 
         project_path(&self.active_file)
     }
 
-    pub fn marker(&self, name: &str) -> &Marker {
+    pub fn marker(&self, name: &str) -> &Marker { ::tsox_core::fntrace::enter("marker"); 
         self.data
             .markers
             .iter()
@@ -352,7 +352,7 @@ impl Session {
             .unwrap_or_else(|| panic!("标记不存在: {name}"))
     }
 
-    pub fn ranges_in(&self, file: &str) -> Vec<&RangeMarker> {
+    pub fn ranges_in(&self, file: &str) -> Vec<&RangeMarker> { ::tsox_core::fntrace::enter("ranges_in"); 
         self.data
             .ranges
             .iter()

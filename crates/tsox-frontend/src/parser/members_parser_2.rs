@@ -3,7 +3,7 @@
 use crate::parser::members::*;
 
 impl Parser {
-    pub(crate) fn parse_heritage_clauses(&mut self) -> Option<Arc<NodeList>> {
+    pub(crate) fn parse_heritage_clauses(&mut self) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("parse_heritage_clauses"); 
         self.parse_heritage_clauses_is_interface(false)
     }
 
@@ -14,7 +14,7 @@ impl Parser {
     pub(crate) fn parse_heritage_clauses_is_interface(
         &mut self,
         is_interface: bool,
-    ) -> Option<Arc<NodeList>> {
+    ) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("parse_heritage_clauses_is_interface"); 
         let mut clauses = Vec::new();
         while matches!(
             self.token,
@@ -55,7 +55,7 @@ impl Parser {
     ///（KeywordType 亦可成名），无实参时直接产出 TypeReferenceNode；
     /// 非实体名表达式（`(typeof A)` 等）按 Go isValidHeritageTypeReferenceExpression
     /// 保持 ExpressionWithTypeArguments 原样返回，由检查器报 TS2499
-    pub(crate) fn parse_type_heritage_clause_element(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_heritage_clause_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_heritage_clause_element"); 
         let element = self.parse_heritage_clause_element();
         let (expression, type_arguments) = match &element.data {
             NodeData::ExpressionWithTypeArguments(d) => {
@@ -79,7 +79,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_heritage_clause_element(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_heritage_clause_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_heritage_clause_element"); 
         let pos = self.token_pos();
         let expression = self.parse_left_hand_side_expression();
         let type_arguments = self.parse_optional_type_arguments();
@@ -96,7 +96,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_type_member(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_type_member(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_member"); 
         if self.token == SyntaxKind::OpenParenToken || self.token == SyntaxKind::LessThanToken {
             return self.parse_signature_member(SyntaxKind::CallSignature);
         }
@@ -169,7 +169,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_type_member_modifiers(&mut self) -> Option<Arc<ModifierList>> {
+    pub(crate) fn parse_type_member_modifiers(&mut self) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("parse_type_member_modifiers"); 
         let mut modifiers = Vec::new();
 
         while matches!(
@@ -200,7 +200,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn token_can_follow_modifier(token: SyntaxKind) -> bool {
+    pub(crate) fn token_can_follow_modifier(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("token_can_follow_modifier"); 
         token == SyntaxKind::OpenBracketToken
             || token == SyntaxKind::OpenBraceToken
             || token == SyntaxKind::AsteriskToken
@@ -211,7 +211,7 @@ impl Parser {
             || token == SyntaxKind::BigIntLiteral
     }
 
-    pub(crate) fn token_can_follow_get_or_set(token: SyntaxKind) -> bool {
+    pub(crate) fn token_can_follow_get_or_set(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("token_can_follow_get_or_set"); 
         token == SyntaxKind::OpenBracketToken
             || is_identifier_or_keyword(token)
             || token == SyntaxKind::StringLiteral
@@ -219,7 +219,7 @@ impl Parser {
             || token == SyntaxKind::BigIntLiteral
     }
 
-    pub(crate) fn can_follow_export_modifier(token: SyntaxKind) -> bool {
+    pub(crate) fn can_follow_export_modifier(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("can_follow_export_modifier"); 
         token == SyntaxKind::AtToken
             || (token != SyntaxKind::AsteriskToken
                 && token != SyntaxKind::AsKeyword
@@ -230,7 +230,7 @@ impl Parser {
     pub(crate) fn token_can_follow_default_keyword(
         t: SyntaxKind,
         s: &mut crate::scanner::Scanner,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("token_can_follow_default_keyword"); 
         match t {
             SyntaxKind::ClassKeyword
             | SyntaxKind::FunctionKeyword
@@ -246,7 +246,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn is_class_member_modifier(token: SyntaxKind) -> bool {
+    pub(crate) fn is_class_member_modifier(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_class_member_modifier"); 
         matches!(
             token,
             SyntaxKind::PublicKeyword
@@ -263,7 +263,7 @@ impl Parser {
     /// TypeMembers 判定）。非成员 token（`{`、`=>`、jsdoc 杂文等）返回
     /// false，交给 abortParsingListOrMoveToNextToken 强制进展，否则
     /// parse_type_member 对不可成名 token 无消费循环
-    pub(crate) fn look_ahead_type_member_start(&self) -> bool {
+    pub(crate) fn look_ahead_type_member_start(&self) -> bool { ::tsox_core::fntrace::enter("look_ahead_type_member_start"); 
         if matches!(
             self.token,
             SyntaxKind::OpenParenToken
@@ -311,7 +311,7 @@ impl Parser {
         false
     }
 
-    pub(crate) fn look_ahead_class_member_start(&self) -> bool {
+    pub(crate) fn look_ahead_class_member_start(&self) -> bool { ::tsox_core::fntrace::enter("look_ahead_class_member_start"); 
         if self.token == SyntaxKind::AtToken {
             return true;
         }
@@ -373,7 +373,7 @@ impl Parser {
 
 /// Go convertEntityNameExpressionToEntityName：表达式形态实体名（Identifier/
 /// PropertyAccessExpression）转限定名（QualifiedName）
-pub(crate) fn convert_entity_name_expression_to_entity_name(node: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn convert_entity_name_expression_to_entity_name(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_entity_name_expression_to_entity_name"); 
     if node.kind == SyntaxKind::Identifier {
         return Arc::clone(node);
     }
@@ -394,7 +394,7 @@ pub(crate) fn convert_entity_name_expression_to_entity_name(node: &Arc<Node>) ->
 
 /// Go isValidHeritageTypeReferenceExpression：仅 Identifier 与非可选链
 /// PropertyAccessExpression 链可转类型引用
-fn is_valid_heritage_type_reference_expression(node: &Arc<Node>) -> bool {
+fn is_valid_heritage_type_reference_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_valid_heritage_type_reference_expression"); 
     if node.kind == SyntaxKind::Identifier {
         return true;
     }

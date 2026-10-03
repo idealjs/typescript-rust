@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub fn get_normalized_absolute_path(path: &str, current_directory: &str) -> String {
+pub fn get_normalized_absolute_path(path: &str, current_directory: &str) -> String { crate::fntrace::enter("get_normalized_absolute_path"); 
     let combined = if path_is_absolute(path) {
         normalize_slashes(path)
     } else if current_directory.is_empty() {
@@ -22,7 +22,7 @@ pub fn get_normalized_absolute_path(path: &str, current_directory: &str) -> Stri
     }
 }
 
-pub fn normalize_path(path: &str) -> String {
+pub fn normalize_path(path: &str) -> String { crate::fntrace::enter("normalize_path"); 
     let path = normalize_slashes(path);
 
     let simplified = path.replace("/./", "/");
@@ -43,7 +43,7 @@ pub fn normalize_path(path: &str) -> String {
     }
 }
 
-pub(crate) fn get_normalized_path_components_from_combined(path: &str) -> Vec<String> {
+pub(crate) fn get_normalized_path_components_from_combined(path: &str) -> Vec<String> { crate::fntrace::enter("get_normalized_path_components_from_combined"); 
     let root_length = get_root_length(path);
     let mut components = vec![path[..root_length].to_string()];
 
@@ -79,7 +79,7 @@ pub(crate) fn get_normalized_path_components_from_combined(path: &str) -> Vec<St
     components
 }
 
-pub(crate) fn has_relative_path_segment(p: &str) -> bool {
+pub(crate) fn has_relative_path_segment(p: &str) -> bool { crate::fntrace::enter("has_relative_path_segment"); 
     let n = p.len();
     if n == 0 {
         return false;
@@ -136,7 +136,7 @@ pub(crate) fn has_relative_path_segment(p: &str) -> bool {
     (seg_len == 1 && dot_count == 1) || (seg_len == 2 && dot_count == 2)
 }
 
-pub fn get_canonical_file_name(file_name: &str, use_case_sensitive_file_names: bool) -> String {
+pub fn get_canonical_file_name(file_name: &str, use_case_sensitive_file_names: bool) -> String { crate::fntrace::enter("get_canonical_file_name"); 
     if use_case_sensitive_file_names {
         file_name.to_string()
     } else {
@@ -144,7 +144,7 @@ pub fn get_canonical_file_name(file_name: &str, use_case_sensitive_file_names: b
     }
 }
 
-pub fn to_file_name_lower_case(file_name: &str) -> String {
+pub fn to_file_name_lower_case(file_name: &str) -> String { crate::fntrace::enter("to_file_name_lower_case"); 
     const I_WITH_DOT: char = '\u{0130}';
     if file_name.is_ascii() {
         return file_name.to_ascii_lowercase();
@@ -165,7 +165,7 @@ pub fn to_file_name_lower_case(file_name: &str) -> String {
         .collect()
 }
 
-pub fn to_path(file_name: &str, base_path: &str, use_case_sensitive_file_names: bool) -> Path {
+pub fn to_path(file_name: &str, base_path: &str, use_case_sensitive_file_names: bool) -> Path { crate::fntrace::enter("to_path"); 
     let non_canonicalized_path = if is_rooted_disk_path(file_name) {
         normalize_path(file_name)
     } else {
@@ -178,7 +178,7 @@ pub fn to_path(file_name: &str, base_path: &str, use_case_sensitive_file_names: 
     ))
 }
 
-pub fn remove_trailing_directory_separator(path: &str) -> String {
+pub fn remove_trailing_directory_separator(path: &str) -> String { crate::fntrace::enter("remove_trailing_directory_separator"); 
     if has_trailing_directory_separator(path) {
         path[..path.len() - 1].to_string()
     } else {
@@ -186,7 +186,7 @@ pub fn remove_trailing_directory_separator(path: &str) -> String {
     }
 }
 
-pub fn remove_trailing_directory_separators(path: &str) -> String {
+pub fn remove_trailing_directory_separators(path: &str) -> String { crate::fntrace::enter("remove_trailing_directory_separators"); 
     let mut result = path.to_string();
     while has_trailing_directory_separator(&result) {
         result.pop();
@@ -194,7 +194,7 @@ pub fn remove_trailing_directory_separators(path: &str) -> String {
     result
 }
 
-pub fn ensure_trailing_directory_separator(path: &str) -> String {
+pub fn ensure_trailing_directory_separator(path: &str) -> String { crate::fntrace::enter("ensure_trailing_directory_separator"); 
     if has_trailing_directory_separator(path) {
         path.to_string()
     } else {
@@ -202,7 +202,7 @@ pub fn ensure_trailing_directory_separator(path: &str) -> String {
     }
 }
 
-pub fn get_base_file_name(path: &str) -> String {
+pub fn get_base_file_name(path: &str) -> String { crate::fntrace::enter("get_base_file_name"); 
     let path = normalize_slashes(path);
     let root_length = get_root_length(&path);
     if root_length == path.len() {
@@ -219,7 +219,7 @@ pub fn get_base_file_name(path: &str) -> String {
     path[last_slash..].to_string()
 }
 
-pub fn path_is_relative(path: &str) -> bool {
+pub fn path_is_relative(path: &str) -> bool { crate::fntrace::enter("path_is_relative"); 
     if path == "." || path == ".." {
         return true;
     }
@@ -237,7 +237,7 @@ pub fn path_is_relative(path: &str) -> bool {
     false
 }
 
-pub fn ensure_path_is_non_module_name(path: &str) -> String {
+pub fn ensure_path_is_non_module_name(path: &str) -> String { crate::fntrace::enter("ensure_path_is_non_module_name"); 
     if !path_is_absolute(path) && !path_is_relative(path) {
         format!("./{}", path)
     } else {
@@ -245,22 +245,22 @@ pub fn ensure_path_is_non_module_name(path: &str) -> String {
     }
 }
 
-pub fn is_external_module_name_relative(module_name: &str) -> bool {
+pub fn is_external_module_name_relative(module_name: &str) -> bool { crate::fntrace::enter("is_external_module_name_relative"); 
     path_is_relative(module_name) || is_rooted_disk_path(module_name)
 }
 
-pub fn has_extension(file_name: &str) -> bool {
+pub fn has_extension(file_name: &str) -> bool { crate::fntrace::enter("has_extension"); 
     get_base_file_name(file_name).contains('.')
 }
 
-pub fn file_extension_is(path: &str, extension: &str) -> bool {
+pub fn file_extension_is(path: &str, extension: &str) -> bool { crate::fntrace::enter("file_extension_is"); 
     path.len() > extension.len() && path.ends_with(extension)
 }
 
 pub fn for_each_ancestor_directory<F>(directory: &str, mut callback: F)
 where
     F: FnMut(&str) -> bool,
-{
+{ crate::fntrace::enter("for_each_ancestor_directory"); 
     let mut directory = directory.to_string();
     loop {
         if callback(&directory) {

@@ -6,7 +6,7 @@ impl Checker {
     pub(crate) fn get_type_from_type_literal_or_function_or_constructor_type_node(
         &mut self,
         node: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_literal_or_function_or_constructor_type_node"); 
         if let Some(t) = self.get_cached_type(node) {
             return t;
         }
@@ -41,7 +41,7 @@ impl Checker {
     pub(crate) fn get_type_from_type_literal_members(
         &mut self,
         members: &Arc<NodeList>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_literal_members"); 
         let mut symbol_table = SymbolTable::new();
         let mut props: Vec<Arc<Symbol>> = Vec::new();
         let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
@@ -125,7 +125,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn get_type_from_function_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_function_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_function_type_node"); 
         match &node.data {
             NodeData::FunctionTypeNode(data) => {
                 self.push_scope(node);
@@ -148,7 +148,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_type_from_constructor_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_from_constructor_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_constructor_type_node"); 
         match &node.data {
             NodeData::ConstructorTypeNode(data) => {
                 self.push_scope(node);
@@ -171,7 +171,7 @@ impl Checker {
         }
     }
 
-    fn anonymous_type_literal_symbol(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn anonymous_type_literal_symbol(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("anonymous_type_literal_symbol"); 
         if let Some(existing) = self.program.symbol_map().symbol_of(node)
             && existing
                 .flags
@@ -187,7 +187,7 @@ impl Checker {
         Some(Arc::new(symbol))
     }
 
-    pub(crate) fn get_array_element_type_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn get_array_element_type_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_array_element_type_node"); 
         match &node.data {
             NodeData::ParenthesizedTypeNode(d) => Self::get_array_element_type_node(&d.type_node),
             NodeData::TupleTypeNode(d) => {
@@ -209,7 +209,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_tuple_element_flags(&self, node: &Arc<Node>) -> ElementFlags {
+    pub(crate) fn get_tuple_element_flags(&self, node: &Arc<Node>) -> ElementFlags { ::tsox_core::fntrace::enter("get_tuple_element_flags"); 
         match &node.data {
             NodeData::OptionalTypeNode(_) => ElementFlags::Optional,
             NodeData::RestTypeNode(rd) => {
@@ -236,7 +236,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_tuple_element_info(&self, node: &Arc<Node>) -> TupleElementInfo {
+    pub(crate) fn get_tuple_element_info(&self, node: &Arc<Node>) -> TupleElementInfo { ::tsox_core::fntrace::enter("get_tuple_element_info"); 
         let label = match &node.data {
             NodeData::NamedTupleMember(nd) => Some(nd.name.text().to_string()),
             _ => None,
@@ -262,7 +262,7 @@ impl Checker {
         element_types: Vec<Arc<Type>>,
         mut element_infos: Vec<TupleElementInfo>,
         readonly: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_tuple_type_ex"); 
         if element_infos.len() == 1 && element_infos[0].flags.contains(ElementFlags::Rest) {
             let elem = element_types.into_iter().next().unwrap_or_else(|| self.any_type());
             return self.create_array_type(elem);
@@ -301,7 +301,7 @@ impl Checker {
     pub(crate) fn iife_with_too_few_arguments(
         declaration: &Option<Arc<Node>>,
         parameter_count: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("iife_with_too_few_arguments"); 
         let Some(decl) = declaration else {
             return false;
         };

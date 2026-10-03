@@ -19,7 +19,7 @@ pub(super) fn is_solely_identifier_definition_location(
     text: &str,
     position: usize,
     root: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_solely_identifier_definition_location"); 
     let Some(parent) = go_token_parent(root, context) else {
         return false;
     };
@@ -190,11 +190,11 @@ pub(super) fn is_solely_identifier_definition_location(
                 || previous_token.is_some_and(|p| position > p.end)))
 }
 
-fn is_function_like_but_not_constructor(kind: SyntaxKind) -> bool {
+fn is_function_like_but_not_constructor(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_function_like_but_not_constructor"); 
     is_function_like_kind(kind) && kind != SyntaxKind::Constructor
 }
 
-fn find_ancestor(node: &Arc<Node>, predicate: &dyn Fn(&Arc<Node>) -> bool) -> Option<Arc<Node>> {
+fn find_ancestor(node: &Arc<Node>, predicate: &dyn Fn(&Arc<Node>) -> bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor"); 
     let mut current = Some(Arc::clone(node));
     while let Some(n) = current {
         if predicate(&n) {
@@ -205,11 +205,11 @@ fn find_ancestor(node: &Arc<Node>, predicate: &dyn Fn(&Arc<Node>) -> bool) -> Op
     None
 }
 
-fn find_ancestor_var_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_ancestor_var_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_var_declaration"); 
     find_ancestor(node, &|n: &Arc<Node>| n.kind == SyntaxKind::VariableDeclaration)
 }
 
-fn class_type_params_reach(class_like: &Arc<Node>, pos: usize) -> bool {
+fn class_type_params_reach(class_like: &Arc<Node>, pos: usize) -> bool { ::tsox_core::fntrace::enter("class_type_params_reach"); 
     let type_params = match &class_like.data {
         tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.type_parameters,
         tsox_frontend::ast::NodeData::ClassExpression(d) => &d.type_parameters,
@@ -224,16 +224,16 @@ fn is_previous_property_declaration_terminated(
     context: &ScanToken,
     text: &str,
     position: usize,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_previous_property_declaration_terminated"); 
     context.kind != SyntaxKind::EqualsToken
         && (context.kind == SyntaxKind::SemicolonToken
             || line_of_position(text, context.end) != line_of_position(text, position))
 }
 
-fn is_initialized_property(pd: &Arc<Node>) -> bool {
+fn is_initialized_property(pd: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_initialized_property"); 
     matches!(&pd.data, tsox_frontend::ast::NodeData::PropertyDeclaration(d) if d.initializer.is_some())
 }
 
-fn property_has_type(pd: &Arc<Node>) -> bool {
+fn property_has_type(pd: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("property_has_type"); 
     matches!(&pd.data, tsox_frontend::ast::NodeData::PropertyDeclaration(d) if d.type_node.is_some())
 }

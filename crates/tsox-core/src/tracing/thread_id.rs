@@ -22,14 +22,14 @@ pub(super) enum ThreadKey {
 }
 
 impl ThreadKey {
-    fn display_name(&self) -> String {
+    fn display_name(&self) -> String { crate::fntrace::enter("display_name"); 
         match self {
             ThreadKey::Checker { index } => format!("checker:{index}"),
             ThreadKey::File { text } => format!("file:{text}"),
         }
     }
 
-    fn default_thread_id(&self) -> usize {
+    fn default_thread_id(&self) -> usize { crate::fntrace::enter("default_thread_id"); 
         match self {
             ThreadKey::Checker { index } => FIRST_SYNTHETIC_THREAD_ID + index,
             ThreadKey::File { .. } => stable_trace_thread_id(self),
@@ -37,7 +37,7 @@ impl ThreadKey {
     }
 }
 
-fn stable_trace_thread_id(key: &ThreadKey) -> usize {
+fn stable_trace_thread_id(key: &ThreadKey) -> usize { crate::fntrace::enter("stable_trace_thread_id"); 
     let input = match key {
         ThreadKey::Checker { index } => format!("checker:{index}"),
         ThreadKey::File { text } => format!("file:{text}"),
@@ -46,7 +46,7 @@ fn stable_trace_thread_id(key: &ThreadKey) -> usize {
     FIRST_FILE_THREAD_ID + (hash as usize % FILE_THREAD_ID_HASH_RANGE)
 }
 
-fn thread_key_from_args(args: &[(String, TraceArg)]) -> Option<ThreadKey> {
+fn thread_key_from_args(args: &[(String, TraceArg)]) -> Option<ThreadKey> { crate::fntrace::enter("thread_key_from_args"); 
     if args.is_empty() {
         return None;
     }
@@ -79,7 +79,7 @@ pub(super) fn resolve_thread_id(
     events: &mut Vec<TraceEvent>,
     thread_ids: &mut HashMap<ThreadKey, usize>,
     args: &[(String, TraceArg)],
-) -> usize {
+) -> usize { crate::fntrace::enter("resolve_thread_id"); 
     let key = match thread_key_from_args(args) {
         Some(k) => k,
         None => return MAIN_THREAD_ID,

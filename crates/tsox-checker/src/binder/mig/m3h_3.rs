@@ -11,11 +11,11 @@ thread_local! {
     static EMIT_FLAGS: std::cell::Cell<u32> = const { std::cell::Cell::new(0) };
 }
 
-fn add_async_emit_flag() {
+fn add_async_emit_flag() { ::tsox_core::fntrace::enter("add_async_emit_flag"); 
     EMIT_FLAGS.with(|f| f.set(f.get() | tsox_frontend::ast::NodeFlags::HasAsyncFunctions.bits()));
 }
 
-fn clone_flow_node(n: &tsox_frontend::ast::FlowNode) -> tsox_frontend::ast::FlowNode {
+fn clone_flow_node(n: &tsox_frontend::ast::FlowNode) -> tsox_frontend::ast::FlowNode { ::tsox_core::fntrace::enter("clone_flow_node"); 
     tsox_frontend::ast::FlowNode {
         flags: n.flags,
         node: n.node.clone(),
@@ -28,7 +28,7 @@ fn clone_flow_node(n: &tsox_frontend::ast::FlowNode) -> tsox_frontend::ast::Flow
 }
 
 impl Binder {
-    pub(crate) fn bind_function_declaration(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_function_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_function_declaration"); 
         let is_declaration_file = self
             .current_source_file
             .as_ref()
@@ -47,7 +47,7 @@ impl Binder {
         );
     }
 
-    pub(crate) fn bind_function_expression(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_function_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_function_expression"); 
         let is_declaration_file = self
             .current_source_file
             .as_ref()
@@ -69,7 +69,7 @@ impl Binder {
         self.bind_anonymous_declaration(node, SymbolFlags::Function, &binding_name);
     }
 
-    pub(crate) fn bind_function_or_constructor_type(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_function_or_constructor_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_function_or_constructor_type"); 
         let declaration_name = self.get_declaration_name(node);
         let symbol = self.new_symbol(SymbolFlags::Signature, &declaration_name);
         self.add_declaration_to_symbol(&symbol, node, SymbolFlags::Signature);
@@ -88,7 +88,7 @@ impl Binder {
         node: &Arc<Node>,
         break_target: &Arc<FlowLabel>,
         continue_target: &Arc<FlowLabel>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_iterative_statement"); 
         let save_break_target = self.current_break_target.clone();
         let save_continue_target = self.current_continue_target.clone();
         self.current_break_target = Some(Arc::new(clone_flow_node(&break_target.node)));
@@ -103,11 +103,11 @@ impl Binder {
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
         symbol_excludes: SymbolFlags,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_jsx_attribute"); 
         self.declare_symbol_and_add_to_symbol_table(node, symbol_flags, symbol_excludes);
     }
 
-    pub(crate) fn bind_jsx_attributes(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_jsx_attributes(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_jsx_attributes"); 
         self.bind_anonymous_declaration(
             node,
             SymbolFlags::ObjectLiteral,
@@ -115,19 +115,19 @@ impl Binder {
         );
     }
 
-    pub(crate) fn bind_modifiers(&mut self, modifiers: Option<&Arc<ModifierList>>) {
+    pub(crate) fn bind_modifiers(&mut self, modifiers: Option<&Arc<ModifierList>>) { ::tsox_core::fntrace::enter("bind_modifiers"); 
         if let Some(modifiers) = modifiers {
             self.bind_each(&modifiers.nodes);
         }
     }
 
-    pub(crate) fn bind_node_list(&mut self, node_list: Option<&Arc<NodeList>>) {
+    pub(crate) fn bind_node_list(&mut self, node_list: Option<&Arc<NodeList>>) { ::tsox_core::fntrace::enter("bind_node_list"); 
         if let Some(node_list) = node_list {
             self.bind_each(&node_list.nodes);
         }
     }
 
-    pub(crate) fn bind_parameter(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_parameter(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_parameter"); 
         let decl_name = node.name().cloned();
         let question_token = match &node.data {
             NodeData::ParameterDeclaration(d) => d.question_token.clone(),
@@ -175,7 +175,7 @@ impl Binder {
         node: &Arc<Node>,
         symbol_flags: SymbolFlags,
         symbol_excludes: SymbolFlags,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_property_or_method_or_accessor"); 
         let is_declaration_file = self
             .current_source_file
             .as_ref()
@@ -201,7 +201,7 @@ impl Binder {
         &self,
         node: &Option<Arc<Node>>,
         container: Option<&Arc<Node>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup_entity_option"); 
         match (node, container) {
             (Some(node), Some(container)) => self.lookup_entity(node, container),
             _ => None,

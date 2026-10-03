@@ -4,7 +4,7 @@ use crate::checker::checker_imports_namespace::*;
 
 impl Checker {
     // 裸说明符的程序内回退解析：node_modules / @types 约定路径（内存 FS 场景）
-    fn resolve_bare_specifier_in_program(&self, spec: &str) -> Option<String> {
+    fn resolve_bare_specifier_in_program(&self, spec: &str) -> Option<String> { ::tsox_core::fntrace::enter("resolve_bare_specifier_in_program"); 
         let candidates = [
             format!("/node_modules/@types/{spec}/index.d.ts"),
             format!("/node_modules/{spec}/index.d.ts"),
@@ -19,7 +19,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn type_of_imported_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+    pub(crate) fn type_of_imported_symbol(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_of_imported_symbol"); 
         // 环守卫：`export import B = A` 的 A 又解析回 B 时无限递归；
         // Go 在 symbolLinks 里缓存解析中状态，这里以访问栈等价
         let key = symbol.id();
@@ -32,7 +32,7 @@ impl Checker {
         result
     }
 
-    fn type_of_imported_symbol_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+    fn type_of_imported_symbol_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_of_imported_symbol_inner"); 
         // import * as X from "m"：X 的类型是模块命名空间类型（typeof import("m")）
         if let Some(decl) = symbol
             .declarations
@@ -329,7 +329,7 @@ impl Checker {
         &self,
         namespace: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("object_literal_export_member"); 
         let ea_sym = namespace.exports.get("export=")?;
         for d in &ea_sym.declarations {
             if let tsox_frontend::ast::NodeData::ExportAssignment(ea) = &d.data
@@ -352,7 +352,7 @@ impl Checker {
     pub(crate) fn heritage_type_arguments_for_base(
         &mut self,
         base_sym: &Arc<Symbol>,
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("heritage_type_arguments_for_base"); 
         let class_node = self.enclosing_class_stack.last().cloned()?;
         let heritage = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(data) => data.heritage_clauses.clone(),

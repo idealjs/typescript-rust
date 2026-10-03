@@ -36,7 +36,7 @@ impl View {
         &self,
         export: &Export,
         usage_position: Option<&crate::lsp::lsproto::Position>,
-    ) -> Option<Fix> {
+    ) -> Option<Fix> { ::tsox_core::fntrace::enter("try_use_existing_namespace_import"); 
         let usage_position = usage_position?;
 
         if get_import_kind(&self.importing_file, export, &self.program, false) != ImportKind::Named {
@@ -73,7 +73,7 @@ impl View {
         &self,
         export: &Export,
         is_valid_type_only_use_site: bool,
-    ) -> Option<Fix> {
+    ) -> Option<Fix> { ::tsox_core::fntrace::enter("try_add_to_existing_import"); 
         let existing_imports = self.get_existing_imports();
         let matching_declarations = existing_imports.get(&export.export_id.module_id);
         if matching_declarations.is_empty() {
@@ -183,7 +183,7 @@ impl View {
         best
     }
 
-    pub fn get_existing_imports(&self) -> MultiMap<ModuleID, ExistingImport> {
+    pub fn get_existing_imports(&self) -> MultiMap<ModuleID, ExistingImport> { ::tsox_core::fntrace::enter("get_existing_imports"); 
         let mut result: MultiMap<ModuleID, ExistingImport> = MultiMap::new();
         let ch = self.program.get_type_checker();
 
@@ -230,7 +230,7 @@ impl View {
         result
     }
 
-    pub fn compare_module_specifiers_for_ranking(&self, a: &Fix, b: &Fix) -> std::cmp::Ordering {
+    pub fn compare_module_specifiers_for_ranking(&self, a: &Fix, b: &Fix) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_module_specifiers_for_ranking"); 
         let comparison = crate::ls::autoimport_fix::compare_module_specifier_relativity(a, b, &self.preferences);
         if comparison != std::cmp::Ordering::Equal {
             return comparison;
@@ -258,7 +258,7 @@ impl View {
         ordering_of_i32(tspath::mig::m3i::compare_number_of_directory_separators(&a.auto_import_fix.module_specifier, &b.auto_import_fix.module_specifier))
     }
 
-    pub fn compare_module_specifiers_for_sorting(&self, a: &Fix, b: &Fix) -> std::cmp::Ordering {
+    pub fn compare_module_specifiers_for_sorting(&self, a: &Fix, b: &Fix) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_module_specifiers_for_sorting"); 
         let res = self.compare_module_specifiers_for_ranking(a, b);
         if res != std::cmp::Ordering::Equal {
             return res;
@@ -284,7 +284,7 @@ impl View {
         b: &str,
         importing_file: &SourceFile,
         program: &Program,
-    ) -> std::cmp::Ordering {
+    ) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_node_core_module_specifiers"); 
         if a.starts_with("node:") && !b.starts_with("node:") {
             if self.should_use_uri_style_node_core_modules.is_true() {
                 return std::cmp::Ordering::Less;
@@ -304,7 +304,7 @@ impl View {
     }
 }
 
-pub fn detect_syntax_indicators(file: &SourceFile, options: &CompilerOptions) -> (bool, bool) {
+pub fn detect_syntax_indicators(file: &SourceFile, options: &CompilerOptions) -> (bool, bool) { ::tsox_core::fntrace::enter("detect_syntax_indicators"); 
     let has_cjs = file.common_js_module_indicator.is_some();
     if options.get_emit_module_detection_kind() != ModuleDetectionKind::Force {
         let has_esm = file.external_module_indicator.is_some();
@@ -337,7 +337,7 @@ pub fn promote_from_type_only(
     compiler_options: &CompilerOptions,
     source_file: &SourceFile,
     preferences: &UserPreferences,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("promote_from_type_only"); 
     let convert_existing_to_type_only = compiler_options.verbatim_module_syntax;
 
     match alias_declaration.kind {
@@ -452,7 +452,7 @@ pub fn promote_import_clause(
     preferences: &UserPreferences,
     convert_existing_to_type_only: Tristate,
     alias_declaration: Option<&Arc<Node>>,
-) {
+) { ::tsox_core::fntrace::enter("promote_import_clause"); 
     if import_clause.phase_modifier() == Some(ast::SyntaxKind::TypeKeyword) {
         delete_type_keyword(changes, source_file, import_clause.pos());
     }
@@ -508,7 +508,7 @@ pub fn promote_import_clause(
     }
 }
 
-pub fn get_module_specifier_text(promoted_declaration: &Arc<Node>) -> String {
+pub fn get_module_specifier_text(promoted_declaration: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_module_specifier_text"); 
     if promoted_declaration.kind == ast::SyntaxKind::ImportEqualsDeclaration {
         let module_reference = promoted_declaration.module_reference();
         if ast::is_external_module_reference(&module_reference) {
@@ -528,7 +528,7 @@ pub fn get_module_specifier_text(promoted_declaration: &Arc<Node>) -> String {
     tsox_frontend::scanner::mig::m3i::get_text_of_node(&module_specifier)
 }
 
-pub fn delete_type_keyword(changes: &mut Tracker, source_file: &SourceFile, start_pos: usize) {
+pub fn delete_type_keyword(changes: &mut Tracker, source_file: &SourceFile, start_pos: usize) { ::tsox_core::fntrace::enter("delete_type_keyword"); 
     let mut scan = tsox_frontend::scanner::mig::m4d_2::get_scanner_for_source_file(source_file, start_pos);
     if scan.token() != ast::SyntaxKind::TypeKeyword {
         return;

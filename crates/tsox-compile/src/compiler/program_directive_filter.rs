@@ -11,7 +11,7 @@ impl Program {
     pub(crate) fn filter_diagnostics_with_preceding_directives(
         &self,
         diagnostics: Vec<Diagnostic>,
-    ) -> Vec<Diagnostic> {
+    ) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("filter_diagnostics_with_preceding_directives"); 
         let mut files_with_directives: Vec<u64> = Vec::new();
         let mut states: std::collections::HashMap<
             u64,
@@ -82,7 +82,7 @@ fn walk_suppressing_directive(
     file: &SourceFile,
     directives: &std::collections::HashMap<usize, usize>,
     pos: usize,
-) -> Option<usize> {
+) -> Option<usize> { ::tsox_core::fntrace::enter("walk_suppressing_directive"); 
     let mut line = file.line_map.line_at(pos);
     while line > 0 {
         line -= 1;
@@ -99,7 +99,7 @@ fn walk_suppressing_directive(
     None
 }
 
-pub(crate) fn suppressed_by_preceding_directive(file: &SourceFile, pos: usize) -> bool {
+pub(crate) fn suppressed_by_preceding_directive(file: &SourceFile, pos: usize) -> bool { ::tsox_core::fntrace::enter("suppressed_by_preceding_directive"); 
     if file.comment_directives.is_empty() {
         return false;
     }
@@ -112,7 +112,7 @@ pub(crate) fn suppressed_by_preceding_directive(file: &SourceFile, pos: usize) -
     walk_suppressing_directive(file, &directives, pos).is_some()
 }
 
-fn is_comment_or_blank_line(text: &str, pos: usize) -> bool {
+fn is_comment_or_blank_line(text: &str, pos: usize) -> bool { ::tsox_core::fntrace::enter("is_comment_or_blank_line"); 
     let bytes = text.as_bytes();
     let mut pos = pos;
     while pos < bytes.len() && (bytes[pos] == b' ' || bytes[pos] == b'\t') {

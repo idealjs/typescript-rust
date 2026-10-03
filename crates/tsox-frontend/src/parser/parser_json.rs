@@ -3,7 +3,7 @@
 use crate::parser::impl_chunk::*;
 
 impl Parser {
-    pub(crate) fn parse_json_text(&mut self) -> (NodeList, Arc<Node>) {
+    pub(crate) fn parse_json_text(&mut self) -> (NodeList, Arc<Node>) { ::tsox_core::fntrace::enter("parse_json_text"); 
         let pos = self.node_pos();
         if self.token == SyntaxKind::EndOfFile {
             let end_of_file = self.create_token_node();
@@ -86,7 +86,7 @@ impl Parser {
         (statements, end_of_file)
     }
 
-    fn look_ahead_2_tokens_after_current(&self) -> (SyntaxKind, SyntaxKind) {
+    fn look_ahead_2_tokens_after_current(&self) -> (SyntaxKind, SyntaxKind) { ::tsox_core::fntrace::enter("look_ahead_2_tokens_after_current"); 
         let mut scanner = self.scanner.clone();
         let next1 = scanner.scan();
         let next2 = scanner.scan();

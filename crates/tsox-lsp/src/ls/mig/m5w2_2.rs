@@ -49,7 +49,7 @@ impl LanguageService {
         checker: &mut Checker,
         compiler_options: &tsox_core::core::compiler_options::CompilerOptions,
         include_symbols: bool,
-    ) -> Option<CompletionList> {
+    ) -> Option<CompletionList> { ::tsox_core::fntrace::enter("m5w2_get_string_literal_completions"); 
         if is_in_reference_comment(file, position) {
             let completion = self.m5w2_get_triple_slash_reference_completions(
                 file,
@@ -92,7 +92,7 @@ impl LanguageService {
         type_checker: &mut Checker,
         options: &tsox_core::core::compiler_options::CompilerOptions,
         include_symbols: bool,
-    ) -> Option<CompletionList> {
+    ) -> Option<CompletionList> { ::tsox_core::fntrace::enter("m5w2_convert_string_literal_completions"); 
         let optional_replacement_range =
             crate::ls::mig::m5q_3::create_range_from_string_literal_like_content(
                 self,
@@ -206,7 +206,7 @@ impl LanguageService {
         completion: PathCompletions,
         file: &Arc<SourceFile>,
         position: usize,
-    ) -> Option<CompletionList> {
+    ) -> Option<CompletionList> { ::tsox_core::fntrace::enter("m5w2_convert_path_completions"); 
         let is_new_identifier_location = true;
         let default_commit_characters =
             crate::ls::mig::m5q_3::get_default_commit_characters(is_new_identifier_location);
@@ -265,7 +265,7 @@ impl LanguageService {
         node: &Arc<Node>,
         position: usize,
         type_checker: &mut Checker,
-    ) -> Option<StringLiteralCompletions> {
+    ) -> Option<StringLiteralCompletions> { ::tsox_core::fntrace::enter("m5w2_get_string_literal_completion_entries"); 
         let parent = walk_up_parentheses(node.parent()?)?;
         match parent.kind {
             tsox_frontend::ast::SyntaxKind::LiteralType => {
@@ -552,7 +552,7 @@ impl LanguageService {
         position: usize,
         context_token: Option<&Arc<Node>>,
         doc_format: crate::lsp::lsproto::MarkupKind,
-    ) -> lsp::CompletionItem {
+    ) -> lsp::CompletionItem { ::tsox_core::fntrace::enter("m5w2_get_string_literal_completion_details"); 
         let Some(context_token) = context_token else {
             return item;
         };
@@ -586,7 +586,7 @@ impl LanguageService {
         file: &Arc<SourceFile>,
         checker: &mut Checker,
         doc_format: crate::lsp::lsproto::MarkupKind,
-    ) -> lsp::CompletionItem {
+    ) -> lsp::CompletionItem { ::tsox_core::fntrace::enter("m5w2_string_literal_completion_details"); 
         if completion.from_paths.is_some() {
             return item;
         }
@@ -622,7 +622,7 @@ impl LanguageService {
         position: usize,
         program: &Arc<Program>,
         checker: Option<&mut Checker>,
-    ) -> Option<PathCompletions> {
+    ) -> Option<PathCompletions> { ::tsox_core::fntrace::enter("m5w2_get_triple_slash_reference_completions"); 
         let compiler_options = program.options();
         let token = tsox_frontend::astnav::get_token_at_position(&file.node, position)?;
 
@@ -703,7 +703,7 @@ pub fn from_contextual_type(
     context_flags: tsox_checker::checker::ContextFlags,
     node: &Arc<Node>,
     type_checker: &mut Checker,
-) -> Option<CompletionsFromTypes> {
+) -> Option<CompletionsFromTypes> { ::tsox_core::fntrace::enter("from_contextual_type"); 
     to_completions_from_types(get_string_literal_types(
         crate::ls::mig::m5x_6::get_contextual_type_from_parent(node, type_checker, context_flags)
             .as_ref(),
@@ -714,7 +714,7 @@ pub fn from_contextual_type(
 
 pub fn to_completions_from_types(
     types: Vec<Arc<tsox_checker::checker::Type>>,
-) -> Option<CompletionsFromTypes> {
+) -> Option<CompletionsFromTypes> { ::tsox_core::fntrace::enter("to_completions_from_types"); 
     if types.is_empty() {
         return None;
     }
@@ -726,7 +726,7 @@ pub fn to_completions_from_types(
 
 pub fn to_string_literal_completions_from_types(
     types: Vec<Arc<tsox_checker::checker::Type>>,
-) -> Option<StringLiteralCompletions> {
+) -> Option<StringLiteralCompletions> { ::tsox_core::fntrace::enter("to_string_literal_completions_from_types"); 
     let result = to_completions_from_types(types)?;
     Some(StringLiteralCompletions {
         from_types: Some(result),
@@ -740,7 +740,7 @@ pub fn from_unionable_literal_type(
     parent: &Arc<Node>,
     position: usize,
     type_checker: &mut Checker,
-) -> Option<StringLiteralCompletions> {
+) -> Option<StringLiteralCompletions> { ::tsox_core::fntrace::enter("from_unionable_literal_type"); 
     use tsox_frontend::ast::SyntaxKind;
     match grandparent.kind {
         SyntaxKind::CallExpression
@@ -845,7 +845,7 @@ pub fn from_unionable_literal_type(
 pub fn string_literal_completions_for_object_literal(
     type_checker: &mut Checker,
     object_literal_expression: &Arc<Node>,
-) -> Option<CompletionsFromProperties> {
+) -> Option<CompletionsFromProperties> { ::tsox_core::fntrace::enter("string_literal_completions_for_object_literal"); 
     let contextual_type = type_checker.get_contextual_type(
         object_literal_expression,
         tsox_checker::checker::ContextFlags::None,
@@ -870,7 +870,7 @@ pub fn string_literal_completions_for_object_literal(
 pub fn string_literal_completions_from_properties(
     t: &Arc<tsox_checker::checker::Type>,
     type_checker: &mut Checker,
-) -> CompletionsFromProperties {
+) -> CompletionsFromProperties { ::tsox_core::fntrace::enter("string_literal_completions_from_properties"); 
     CompletionsFromProperties {
         symbols: type_checker
             .get_apparent_properties(t)
@@ -889,7 +889,7 @@ pub fn get_string_literal_completions_from_signature(
     arg: &Arc<Node>,
     argument_info: &crate::ls::mig::m5q_3::ArgumentInfoForCompletions,
     type_checker: &mut Checker,
-) -> Option<CompletionsFromTypes> {
+) -> Option<CompletionsFromTypes> { ::tsox_core::fntrace::enter("get_string_literal_completions_from_signature"); 
     let mut is_new_identifier = false;
     let mut uniques = tsox_core::collections::set::Set::new();
     let editing_argument = if tsox_frontend::ast::mig::m3g::is_jsx_opening_like_element(call) {
@@ -936,7 +936,7 @@ pub fn get_string_literal_types(
     t: Option<&Arc<tsox_checker::checker::Type>>,
     uniques: Option<&mut tsox_core::collections::set::Set<String>>,
     type_checker: &mut Checker,
-) -> Vec<Arc<tsox_checker::checker::Type>> {
+) -> Vec<Arc<tsox_checker::checker::Type>> { ::tsox_core::fntrace::enter("get_string_literal_types"); 
     let Some(t) = t else {
         return Vec::new();
     };
@@ -970,7 +970,7 @@ pub fn get_string_literal_types(
 pub fn get_already_used_types_in_string_literal_union(
     union: &Arc<Node>,
     current: &Arc<Node>,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_already_used_types_in_string_literal_union"); 
     let tsox_frontend::ast::NodeData::UnionTypeNode(d) = &union.data else {
         unreachable!()
     };
@@ -993,11 +993,11 @@ pub fn get_already_used_types_in_string_literal_union(
 pub fn has_index_signature(
     t: &Arc<tsox_checker::checker::Type>,
     type_checker: &mut Checker,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("has_index_signature"); 
     type_checker.get_string_index_type(t).is_some() || type_checker.get_number_index_type(t).is_some()
 }
 
-pub fn is_require_call_argument(node: &Arc<Node>) -> bool {
+pub fn is_require_call_argument(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_require_call_argument"); 
     let parent = node.parent();
     match parent {
         Some(parent) if tsox_frontend::ast::is_call_expression(&parent) => {
@@ -1014,7 +1014,7 @@ pub fn is_require_call_argument(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn walk_up_parentheses(node: Arc<Node>) -> Option<Arc<Node>> {
+pub fn walk_up_parentheses(node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("walk_up_parentheses"); 
     match node.kind {
         tsox_frontend::ast::SyntaxKind::ParenthesizedType => {
             tsox_frontend::ast::mig::m3h::walk_up_parenthesized_types(&node)
@@ -1027,7 +1027,7 @@ pub fn walk_up_parentheses(node: Arc<Node>) -> Option<Arc<Node>> {
 }
 
 
-fn literal_value_as_string(t: &Arc<tsox_checker::checker::Type>) -> String {
+fn literal_value_as_string(t: &Arc<tsox_checker::checker::Type>) -> String { ::tsox_core::fntrace::enter("literal_value_as_string"); 
     t.as_literal_type()
         .map(|l| match &l.value {
             tsox_checker::checker::types::LiteralValue::String(s) => s.clone(),
@@ -1036,7 +1036,7 @@ fn literal_value_as_string(t: &Arc<tsox_checker::checker::Type>) -> String {
         .unwrap_or_default()
 }
 
-pub fn has_triple_slash_prefix(comment_text: &str) -> bool {
+pub fn has_triple_slash_prefix(comment_text: &str) -> bool { ::tsox_core::fntrace::enter("has_triple_slash_prefix"); 
     comment_text.starts_with("///") && comment_text[3..].trim_start().starts_with('<')
 }
 
@@ -1049,7 +1049,7 @@ impl LanguageService {
         items: &mut [lsp::CompletionItem],
         default_commit_characters: Option<&Vec<String>>,
         optional_replacement_span: Option<&crate::lsp::lsproto::Range>,
-    ) -> Option<CompletionItemDefaults> {
+    ) -> Option<CompletionItemDefaults> { ::tsox_core::fntrace::enter("m5w2_set_item_defaults"); 
         use crate::ls::mig::m5q_3 as q3;
         let ctx = crate::mig::m5m::ResolvedClientCapabilitiesContext {
             capabilities: None,
@@ -1132,7 +1132,7 @@ impl LanguageService {
         location: &Arc<Node>,
         position: usize,
         doc_format: crate::lsp::lsproto::MarkupKind,
-    ) -> &'a mut lsp::CompletionItem {
+    ) -> &'a mut lsp::CompletionItem { ::tsox_core::fntrace::enter("m5w2_create_completion_details_for_symbol"); 
         let content_format = match &doc_format {
             crate::lsp::lsproto::MarkupKind::Markdown => "markdown",
             crate::lsp::lsproto::MarkupKind::PlainText => "plaintext",
@@ -1155,7 +1155,7 @@ fn m5w2_create_completion_details<'a>(
     detail: &str,
     documentation: &str,
     doc_format: crate::lsp::lsproto::MarkupKind,
-) -> &'a mut lsp::CompletionItem {
+) -> &'a mut lsp::CompletionItem { ::tsox_core::fntrace::enter("m5w2_create_completion_details"); 
     if item.detail.is_none() && !detail.is_empty() {
         item.detail = Some(detail.to_string());
     }
@@ -1175,7 +1175,7 @@ fn m5w2_create_completion_details<'a>(
 fn m5w2_get_constraint_of_type_argument_property(
     node: &Arc<Node>,
     type_checker: &mut Checker,
-) -> Option<Arc<tsox_checker::checker::Type>> {
+) -> Option<Arc<tsox_checker::checker::Type>> { ::tsox_core::fntrace::enter("m5w2_get_constraint_of_type_argument_property"); 
     if tsox_frontend::ast::is_type_node(node) {
         if let Some(constraint) = type_checker.get_type_argument_constraint(node) {
             return Some(constraint);
@@ -1222,7 +1222,7 @@ fn m5w2_get_properties_for_object_expression(
     completions_type: Option<&Arc<tsox_checker::checker::Type>>,
     obj: &Arc<Node>,
     type_checker: &mut Checker,
-) -> Vec<Arc<Symbol>> {
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("m5w2_get_properties_for_object_expression"); 
     use tsox_checker::checker::types::{TYPE_FLAGS_ANY_OR_UNKNOWN, UnionReduction};
     use tsox_checker::checker::Type;
 
@@ -1273,7 +1273,7 @@ fn m5w2_get_properties_for_object_expression(
     properties
 }
 
-pub fn parse_triple_slash_directive_fragment(text: &str) -> (String, String, String, bool) {
+pub fn parse_triple_slash_directive_fragment(text: &str) -> (String, String, String, bool) { ::tsox_core::fntrace::enter("parse_triple_slash_directive_fragment"); 
     let empty = String::new();
     if !text.starts_with("///") {
         return (empty.clone(), empty.clone(), empty.clone(), false);

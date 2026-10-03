@@ -7,7 +7,7 @@ use std::sync::Arc;
 pub fn find_outermost_node_within_list_level(
     node: &Arc<Node>,
     file: &crate::ast::SourceFile,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_outermost_node_within_list_level"); 
     let mut current = Some(Arc::clone(node));
     while let Some(cur) = current.clone() {
         let Some(parent) = cur.parent() else {

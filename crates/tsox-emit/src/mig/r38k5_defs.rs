@@ -19,7 +19,7 @@ pub trait R38K5NodeVisitorExt {
     fn visit_nodes_list(&mut self, nodes: &NodeList) -> Arc<NodeList>;
 }
 
-fn r38k5_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor {
+fn r38k5_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor { ::tsox_core::fntrace::enter("r38k5_m3c_visitor"); 
     tsox_frontend::ast::mig::m3c::NodeVisitor {
         factory: tsox_frontend::ast::mig::m3c::NodeFactory {
             hooks: tsox_frontend::ast::mig::m3c::NodeFactoryHooks::default(),
@@ -30,18 +30,18 @@ fn r38k5_m3c_visitor() -> tsox_frontend::ast::mig::m3c::NodeVisitor {
 }
 
 impl R38K5NodeVisitorExt for NodeVisitor {
-    fn visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_each_child"); 
         Some(visit_each_child(node, &mut r38k5_m3c_visitor()))
     }
 
-    fn visit_node_option(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    fn visit_node_option(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node_option"); 
         self.visit_node_opt(node)
     }
 
     fn visit_modifiers(
         &mut self,
         modifiers: &Option<Arc<ModifierList>>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         let modifiers = modifiers.as_ref()?;
         let nodes = self.visit_nodes_list(&modifiers.list);
         Some(Arc::new(ModifierList {
@@ -53,7 +53,7 @@ impl R38K5NodeVisitorExt for NodeVisitor {
         }))
     }
 
-    fn visit_nodes_list(&mut self, nodes: &NodeList) -> Arc<NodeList> {
+    fn visit_nodes_list(&mut self, nodes: &NodeList) -> Arc<NodeList> { ::tsox_core::fntrace::enter("visit_nodes_list"); 
         let visited = nodes
             .nodes
             .iter()
@@ -75,7 +75,7 @@ pub trait R38K5ArcNodeExt {
 }
 
 impl R38K5ArcNodeExt for Arc<Node> {
-    fn heritage_clauses(&self) -> Option<&Arc<NodeList>> {
+    fn heritage_clauses(&self) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("heritage_clauses"); 
         match &self.data {
             NodeData::ClassDeclaration(d) => d.heritage_clauses.as_ref(),
             NodeData::ClassExpression(d) => d.heritage_clauses.as_ref(),
@@ -84,7 +84,7 @@ impl R38K5ArcNodeExt for Arc<Node> {
         }
     }
 
-    fn members(&self) -> &Arc<NodeList> {
+    fn members(&self) -> &Arc<NodeList> { ::tsox_core::fntrace::enter("members"); 
         match &self.data {
             NodeData::ClassDeclaration(d) => &d.members,
             NodeData::ClassExpression(d) => &d.members,
@@ -94,7 +94,7 @@ impl R38K5ArcNodeExt for Arc<Node> {
         }
     }
 
-    fn postfix_token(&self) -> Option<&Arc<Node>> {
+    fn postfix_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("postfix_token"); 
         match &self.data {
             NodeData::MethodDeclaration(d) => d.postfix_token.as_ref(),
             NodeData::PropertyDeclaration(d) => d.postfix_token.as_ref(),
@@ -102,7 +102,7 @@ impl R38K5ArcNodeExt for Arc<Node> {
         }
     }
 
-    fn asterisk_token(&self) -> Option<&Arc<Node>> {
+    fn asterisk_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("asterisk_token"); 
         match &self.data {
             NodeData::MethodDeclaration(d) => d.asterisk_token.as_ref(),
             NodeData::FunctionDeclaration(d) => d.asterisk_token.as_ref(),
@@ -111,7 +111,7 @@ impl R38K5ArcNodeExt for Arc<Node> {
         }
     }
 
-    fn full_signature(&self) -> Option<&Arc<Node>> {
+    fn full_signature(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("full_signature"); 
         match &self.data {
             NodeData::MethodDeclaration(d) => d.full_signature.as_ref(),
             NodeData::GetAccessorDeclaration(d) => d.full_signature.as_ref(),
@@ -124,11 +124,11 @@ impl R38K5ArcNodeExt for Arc<Node> {
 }
 
 impl AsyncTransformer {
-    pub fn visitor(&self) -> NodeVisitor {
+    pub fn visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("visitor"); 
         NodeVisitor::default()
     }
 
-    pub fn emit_context_mut(&mut self) -> &mut EmitContext {
+    pub fn emit_context_mut(&mut self) -> &mut EmitContext { ::tsox_core::fntrace::enter("emit_context_mut"); 
         self.emit_context.as_mut().unwrap()
     }
 }

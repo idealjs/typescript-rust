@@ -3,11 +3,11 @@
 use crate::checker::checker_prop_access::*;
 
 impl Checker {
-    pub fn is_array_mutation_method(&self, name: &str) -> bool {
+    pub fn is_array_mutation_method(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("is_array_mutation_method"); 
         matches!(name, "push" | "unshift")
     }
 
-    pub fn boxed_apparent_type_of_primitive(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn boxed_apparent_type_of_primitive(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("boxed_apparent_type_of_primitive"); 
         use crate::checker::types::TYPE_FLAGS_ENUM_LIKE;
         let name = if t.flags.intersects(
             TypeFlags::String
@@ -84,7 +84,7 @@ impl Checker {
         out: &mut Vec<Arc<Node>>,
         visited: &mut Vec<*const Node>,
         depth: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_boxed_heritage_members"); 
         if depth >= 6 {
             return;
         }
@@ -136,7 +136,7 @@ impl Checker {
         &mut self,
         symbol_name: &str,
         prop_name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("global_interface_has_property"); 
         if !self.global_interface_members.contains_key(symbol_name) {
             let names = self.collect_global_interface_member_names(symbol_name);
             self.global_interface_members
@@ -151,7 +151,7 @@ impl Checker {
     pub(crate) fn collect_global_interface_member_names(
         &self,
         interface_name: &str,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("collect_global_interface_member_names"); 
         let mut names: Vec<String> = Vec::new();
         for file in &self.files {
             let statements: Vec<Arc<Node>> = match &file.node.data {

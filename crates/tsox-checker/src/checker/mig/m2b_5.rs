@@ -8,7 +8,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         location: &Arc<Node>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_alias_with_deprecation_check"); 
         if !symbol.flags.intersects(SymbolFlags::Alias)
             || self.is_deprecated_symbol(symbol)
             || self.get_declaration_of_alias_symbol(symbol).is_none()
@@ -45,7 +45,7 @@ impl Checker {
         target_symbol
     }
 
-    pub fn resolve_base_types_of_interface(&mut self, t: &Arc<Type>) {
+    pub fn resolve_base_types_of_interface(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_base_types_of_interface"); 
         let symbol = t.symbol.clone().unwrap();
         for declaration in &symbol.declarations {
             if tsox_frontend::ast::is_interface_declaration(declaration) {
@@ -76,11 +76,11 @@ impl Checker {
         }
     }
 
-    pub fn resolve_class_or_interface_members(&mut self, t: &Arc<Type>) {
+    pub fn resolve_class_or_interface_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_class_or_interface_members"); 
         self.resolve_object_type_members(t, t, &[], &[]);
     }
 
-    pub fn resolve_declared_members(&mut self, t: &Arc<Type>) {
+    pub fn resolve_declared_members(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("resolve_declared_members"); 
         let mut t = Arc::clone(t);
         let Some(t_mut) = Arc::get_mut(&mut t) else {
             return;
@@ -119,7 +119,7 @@ impl Checker {
         interface.declared_index_infos = declared_index_infos;
     }
 
-    pub fn resolve_error_call(&mut self, node: &Arc<Node>) -> Arc<Signature> {
+    pub fn resolve_error_call(&mut self, node: &Arc<Node>) -> Arc<Signature> { ::tsox_core::fntrace::enter("resolve_error_call"); 
         self.resolve_untyped_call(node);
         self.unknown_signature()
     }

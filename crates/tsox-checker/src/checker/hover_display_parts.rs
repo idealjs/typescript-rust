@@ -14,7 +14,7 @@ pub(crate) struct HoverPartsBuilder {
 }
 
 impl HoverPartsBuilder {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             parts: Vec::new(),
             alias_level: 0,
@@ -23,12 +23,12 @@ impl HoverPartsBuilder {
         }
     }
 
-    pub(crate) fn is_empty(&self) -> bool {
+    pub(crate) fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.parts.is_empty()
     }
 
     /// Go writeNewLine：已有内容先换行；alias 链层加 (alias) 前缀
-    pub(crate) fn write_new_line(&mut self) {
+    pub(crate) fn write_new_line(&mut self) { ::tsox_core::fntrace::enter("write_new_line"); 
         if !self.parts.is_empty() {
             push_space(&mut self.parts, "\n");
         }
@@ -39,7 +39,7 @@ impl HoverPartsBuilder {
         }
     }
 
-    pub(crate) fn visit_alias(&mut self, id: u64) -> bool {
+    pub(crate) fn visit_alias(&mut self, id: u64) -> bool { ::tsox_core::fntrace::enter("visit_alias"); 
         if self.visited_aliases.contains(&id) {
             return false;
         }
@@ -47,23 +47,23 @@ impl HoverPartsBuilder {
         true
     }
 
-    pub(crate) fn write_keyword(&mut self, text: &str) {
+    pub(crate) fn write_keyword(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_keyword"); 
         push_keyword(&mut self.parts, text);
     }
 
-    pub(crate) fn write_punctuation(&mut self, text: &str) {
+    pub(crate) fn write_punctuation(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_punctuation"); 
         push_punctuation(&mut self.parts, text);
     }
 
-    pub(crate) fn write_text(&mut self, text: &str, kind: DisplayPartKind) {
+    pub(crate) fn write_text(&mut self, text: &str, kind: DisplayPartKind) { ::tsox_core::fntrace::enter("write_text"); 
         push_part(&mut self.parts, text, kind);
     }
 
-    pub(crate) fn write_space(&mut self, text: &str) {
+    pub(crate) fn write_space(&mut self, text: &str) { ::tsox_core::fntrace::enter("write_space"); 
         push_space(&mut self.parts, text);
     }
 
-    pub(crate) fn extend(&mut self, other: Vec<SymbolDisplayPart>) {
+    pub(crate) fn extend(&mut self, other: Vec<SymbolDisplayPart>) { ::tsox_core::fntrace::enter("extend"); 
         self.parts.extend(other);
     }
 }
@@ -78,7 +78,7 @@ impl Checker {
         parenthesized: bool,
         symbol: &Arc<Symbol>,
         call: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_signatures"); 
         let total = signatures.len();
         for (i, sig) in signatures.iter().enumerate() {
             b.write_new_line();
@@ -110,7 +110,7 @@ impl Checker {
         b: &mut HoverPartsBuilder,
         sig: &Arc<Signature>,
         call: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_signature"); 
         let mut sig = Arc::clone(sig);
         if let Some(call) = call
             && !sig.type_parameters.is_empty()
@@ -187,7 +187,7 @@ impl Checker {
         &mut self,
         b: &mut HoverPartsBuilder,
         params: &[Arc<crate::checker::types::Type>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_type_params"); 
         if params.is_empty() {
             return;
         }
@@ -216,7 +216,7 @@ impl Checker {
         &mut self,
         b: &mut HoverPartsBuilder,
         tps: &tsox_frontend::ast::NodeList,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_type_params_from_decls"); 
         if tps.nodes.is_empty() {
             return;
         }
@@ -249,7 +249,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) -> (Vec<Arc<Signature>>, Option<Arc<Node>>) {
+    ) -> (Vec<Arc<Signature>>, Option<Arc<Node>>) { ::tsox_core::fntrace::enter("hover_get_signatures_at_location"); 
         let t = self.get_type_of_symbol(symbol);
         let signatures = t
             .as_structured()
@@ -269,7 +269,7 @@ impl Checker {
     }
 
     /// Go getCallOrNewExpression：属性访问名字段提升 + 父级调用/构造位
-    pub(crate) fn hover_call_or_new_expression(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn hover_call_or_new_expression(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("hover_call_or_new_expression"); 
         let mut node = Arc::clone(node);
         if let Some(parent) = node.parent().as_ref()
             && parent.kind == SyntaxKind::PropertyAccessExpression

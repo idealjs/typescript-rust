@@ -10,7 +10,7 @@ use super::language_service::LanguageService;
 use super::types::CodeLens;
 
 impl LanguageService {
-    pub fn provide_code_lenses(&self, _document_uri: &DocumentUri) -> Vec<CodeLens> {
+    pub fn provide_code_lenses(&self, _document_uri: &DocumentUri) -> Vec<CodeLens> { ::tsox_core::fntrace::enter("provide_code_lenses"); 
         Vec::new()
     }
 
@@ -19,7 +19,7 @@ impl LanguageService {
         _code_lens: &CodeLens,
         _show_locations_command_name: Option<&str>,
         _orchestrator: Option<&dyn CrossProjectOrchestrator>,
-    ) -> CodeLens {
+    ) -> CodeLens { ::tsox_core::fntrace::enter("resolve_code_lens"); 
         CodeLens::default()
     }
 
@@ -29,15 +29,15 @@ impl LanguageService {
         _file: &Arc<tsox_frontend::ast::SourceFile>,
         _node: &Arc<Node>,
         _kind: &str,
-    ) -> CodeLens {
+    ) -> CodeLens { ::tsox_core::fntrace::enter("new_code_lens_for_node"); 
         CodeLens::default()
     }
 }
 
-pub fn is_valid_reference_lens_node(_node: &Arc<Node>) -> bool {
+pub fn is_valid_reference_lens_node(_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_valid_reference_lens_node"); 
     false
 }
 
-pub fn is_valid_implementations_code_lens_node(_node: &Arc<Node>) -> bool {
+pub fn is_valid_implementations_code_lens_node(_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_valid_implementations_code_lens_node"); 
     false
 }

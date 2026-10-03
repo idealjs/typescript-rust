@@ -38,7 +38,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_await_operand"); 
         if let Some(contextual_type) = self.get_contextual_type(node, context_flags) {
             if let Some(contextual_awaited_type) = self.get_awaited_type_no_alias(&contextual_type) {
                 let promise_like = self.create_promise_like_type(&contextual_awaited_type);
@@ -51,7 +51,7 @@ impl Checker {
         None
     }
 
-    pub fn get_contextual_type_for_decorator(&mut self, decorator: &Arc<Node>) -> Option<Arc<Type>> {
+    pub fn get_contextual_type_for_decorator(&mut self, decorator: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_decorator"); 
         let signature = self.get_decorator_call_signature(decorator)?;
         Some(self.get_or_create_type_from_signature(&signature))
     }
@@ -60,7 +60,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_object_literal_method"); 
         if node.flags.intersects(ast::NodeFlags::InWithStatement) {
             return None;
         }
@@ -70,7 +70,7 @@ impl Checker {
     pub fn get_contextually_typed_parameter_type(
         &mut self,
         parameter: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextually_typed_parameter_type"); 
         let Some(function) = parameter.parent() else {
             return None;
         };
@@ -132,7 +132,7 @@ impl Checker {
         self.try_get_type_at_position(&contextual_signature, index)
     }
 
-    pub fn get_declared_type_of_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_declared_type_of_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_alias"); 
         if let Some(links) = self.declared_type_links.get(symbol) {
             if let Some(t) = &links.declared_type {
                 return Arc::clone(t);
@@ -144,7 +144,7 @@ impl Checker {
         t
     }
 
-    pub fn get_declared_type_of_enum(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_declared_type_of_enum(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_enum"); 
         if let Some(links) = self.declared_type_links.get(symbol) {
             if let Some(t) = &links.declared_type {
                 return Arc::clone(t);
@@ -191,7 +191,7 @@ impl Checker {
         enum_type
     }
 
-    pub fn get_declared_type_of_enum_member(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_declared_type_of_enum_member(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_enum_member"); 
         if let Some(links) = self.declared_type_links.get(symbol) {
             if let Some(t) = &links.declared_type {
                 return Arc::clone(t);
@@ -207,7 +207,7 @@ impl Checker {
             .unwrap_or_else(|| self.unknown_type())
     }
 
-    pub fn get_declaring_constructor(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn get_declaring_constructor(&self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaring_constructor"); 
         for declaration in &symbol.declarations {
             let container = get_this_container(declaration, false, false);
             if ast::is_constructor_declaration(&container) {
@@ -217,14 +217,14 @@ impl Checker {
         None
     }
 
-    pub fn get_decorator_call_signature(&mut self, decorator: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub fn get_decorator_call_signature(&mut self, decorator: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_decorator_call_signature"); 
         if self.legacy_decorators {
             return self.get_legacy_decorator_call_signature(decorator);
         }
         self.get_es_decorator_call_signature(decorator)
     }
 
-    pub fn get_default_construct_signatures(&mut self, class_type: &Arc<Type>) -> Vec<Arc<Signature>> {
+    pub fn get_default_construct_signatures(&mut self, class_type: &Arc<Type>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_default_construct_signatures"); 
         let base_constructor_type = self.get_base_constructor_type_of_class(class_type);
         let base_signatures = self.get_signatures_of_type(
             &base_constructor_type.unwrap_or_else(|| self.unknown_type()),
@@ -297,7 +297,7 @@ impl Checker {
         result
     }
 
-    pub fn get_definitely_falsy_part_of_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_definitely_falsy_part_of_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_definitely_falsy_part_of_type"); 
         if t.flags.intersects(TypeFlags::String) {
             return self.empty_string_type();
         }
@@ -321,7 +321,7 @@ impl Checker {
         self.never_type()
     }
 
-    pub fn get_es_decorator_call_signature(&mut self, decorator: &Arc<Node>) -> Option<Arc<Signature>> {
+    pub fn get_es_decorator_call_signature(&mut self, decorator: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_es_decorator_call_signature"); 
         let Some(node) = decorator.parent() else {
             return None;
         };
@@ -411,7 +411,7 @@ impl Checker {
         self.es_decorator_signature_result(&node)
     }
 
-    fn es_decorator_signature_result(&self, node: &Arc<Node>) -> Option<Arc<Signature>> {
+    fn es_decorator_signature_result(&self, node: &Arc<Node>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("es_decorator_signature_result"); 
         let links = self.signature_links.get(node)?;
         match &links.decorator_signature {
             Some(sig) => {
@@ -425,7 +425,7 @@ impl Checker {
         }
     }
 
-    pub fn get_effective_call_arguments(&mut self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    pub fn get_effective_call_arguments(&mut self, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_effective_call_arguments"); 
         if ast::is_jsx_opening_fragment(node) {
             let empty_fresh = self.empty_fresh_jsx_object_type();
             return vec![self.create_synthetic_expression(node, &empty_fresh, false, None)];
@@ -516,7 +516,7 @@ impl Checker {
         end_skip_count: i32,
         writing: bool,
         no_reductions: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_element_type_of_slice_of_tuple_type"); 
         let length = self.get_type_reference_arity(t) - end_skip_count;
         let element_infos = t.target_tuple_type()?.element_infos.clone();
         if index < length {
@@ -542,7 +542,7 @@ impl Checker {
         None
     }
 
-    pub fn get_entity_name_for_decorator_metadata(&self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn get_entity_name_for_decorator_metadata(&self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_entity_name_for_decorator_metadata"); 
         let node = node?;
         match node.kind {
             SyntaxKind::IntersectionType => {
@@ -564,7 +564,7 @@ impl Checker {
         }
     }
 
-    fn get_entity_name_for_decorator_metadata_from_type_list(&self, types: &[Arc<Node>]) -> Option<Arc<Node>> {
+    fn get_entity_name_for_decorator_metadata_from_type_list(&self, types: &[Arc<Node>]) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_entity_name_for_decorator_metadata_from_type_list"); 
         for t in types {
             if let Some(found) = self.get_entity_name_for_decorator_metadata(Some(t)) {
                 return Some(found);
@@ -574,7 +574,7 @@ impl Checker {
     }
 }
 
-fn attributes_arc(node: &Node) -> Arc<Node> {
+fn attributes_arc(node: &Node) -> Arc<Node> { ::tsox_core::fntrace::enter("attributes_arc"); 
     match &node.data {
         NodeData::JsxOpeningElement(d) => Arc::clone(&d.attributes),
         NodeData::JsxSelfClosingElement(d) => Arc::clone(&d.attributes),
@@ -582,17 +582,17 @@ fn attributes_arc(node: &Node) -> Arc<Node> {
     }
 }
 
-pub(crate) fn params_of(node: &Node) -> &[Arc<Node>] {
+pub(crate) fn params_of(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("params_of"); 
     tsox_frontend::ast::mig::m3f_2::node_parameters(node)
         .map(|l| l.nodes.as_slice())
         .unwrap_or(&[])
 }
 
-pub(crate) fn is_tuple_type(t: &Type) -> bool {
+pub(crate) fn is_tuple_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_tuple_type"); 
     t.object_flags.contains(ObjectFlags::Tuple)
 }
 
-pub(crate) fn get_string_literal_value(t: &Type) -> String {
+pub(crate) fn get_string_literal_value(t: &Type) -> String { ::tsox_core::fntrace::enter("get_string_literal_value"); 
     match &t.data {
         TypeData::Literal(l) => match &l.value {
             LiteralValue::String(s) => s.clone(),
@@ -602,7 +602,7 @@ pub(crate) fn get_string_literal_value(t: &Type) -> String {
     }
 }
 
-pub(crate) fn get_number_literal_value(t: &Type) -> f64 {
+pub(crate) fn get_number_literal_value(t: &Type) -> f64 { ::tsox_core::fntrace::enter("get_number_literal_value"); 
     match &t.data {
         TypeData::Literal(l) => match &l.value {
             LiteralValue::Number(n) => n.0,
@@ -612,7 +612,7 @@ pub(crate) fn get_number_literal_value(t: &Type) -> f64 {
     }
 }
 
-pub(crate) fn interface_local_type_parameters(t: &Arc<Type>) -> Vec<Arc<Type>> {
+pub(crate) fn interface_local_type_parameters(t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("interface_local_type_parameters"); 
     match &t.data {
         TypeData::Interface(i) => i.all_type_parameters[i
             .outer_type_parameter_count

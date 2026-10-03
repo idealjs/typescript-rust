@@ -1,13 +1,13 @@
 use crate::ast::*;
 
-pub fn is_declaration(node: &Node) -> bool {
+pub fn is_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_declaration"); 
     if node.kind == SyntaxKind::TypeParameter {
         return node.parent().is_some();
     }
     is_declaration_node(node)
 }
 
-pub fn is_declaration_node(node: &Node) -> bool {
+pub fn is_declaration_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_declaration_node"); 
     matches!(
         node.kind,
         SyntaxKind::VariableDeclaration
@@ -56,7 +56,7 @@ pub fn is_declaration_node(node: &Node) -> bool {
     )
 }
 
-pub fn can_have_symbol(node: &Node) -> bool {
+pub fn can_have_symbol(node: &Node) -> bool { ::tsox_core::fntrace::enter("can_have_symbol"); 
     matches!(
         node.kind,
         SyntaxKind::ArrowFunction
@@ -118,7 +118,7 @@ pub fn can_have_symbol(node: &Node) -> bool {
     )
 }
 
-pub fn can_have_modifiers(node: &Node) -> bool {
+pub fn can_have_modifiers(node: &Node) -> bool { ::tsox_core::fntrace::enter("can_have_modifiers"); 
     matches!(
         node.kind,
         SyntaxKind::TypeParameter
@@ -150,7 +150,7 @@ pub fn can_have_modifiers(node: &Node) -> bool {
     )
 }
 
-pub fn can_have_decorators(node: &Node) -> bool {
+pub fn can_have_decorators(node: &Node) -> bool { ::tsox_core::fntrace::enter("can_have_decorators"); 
     matches!(
         node.kind,
         SyntaxKind::Parameter

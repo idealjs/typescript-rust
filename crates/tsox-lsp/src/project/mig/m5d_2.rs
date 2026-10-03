@@ -28,7 +28,7 @@ impl<K: Eq + std::hash::Hash + Clone, V: Clone, LoadArgs: Clone> OwnerCache<K, V
     pub fn new(
         parse: impl Fn(&K, &LoadArgs) -> V + Send + Sync + 'static,
         is_expired: Option<impl Fn(&K, &V, &LoadArgs) -> bool + Send + Sync + 'static>,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         OwnerCache {
             entries: Mutex::new(HashMap::new()),
             is_expired: is_expired
@@ -37,7 +37,7 @@ impl<K: Eq + std::hash::Hash + Clone, V: Clone, LoadArgs: Clone> OwnerCache<K, V
         }
     }
 
-    pub fn load_and_acquire(&self, identity: K, owner: u64, load_args: LoadArgs) -> V {
+    pub fn load_and_acquire(&self, identity: K, owner: u64, load_args: LoadArgs) -> V { ::tsox_core::fntrace::enter("load_and_acquire"); 
         let (entry, loaded) = self.load_or_store_locked_entry(identity.clone());
         let mut value = entry.value.lock().unwrap();
         let expired = loaded
@@ -53,7 +53,7 @@ impl<K: Eq + std::hash::Hash + Clone, V: Clone, LoadArgs: Clone> OwnerCache<K, V
         value.clone().unwrap()
     }
 
-    pub fn acquire(&self, identity: K, owner: u64, value: V) {
+    pub fn acquire(&self, identity: K, owner: u64, value: V) { ::tsox_core::fntrace::enter("acquire"); 
         let (entry, loaded) = self.load_or_store_locked_entry(identity);
         if !loaded {
             *entry.value.lock().unwrap() = Some(value);
@@ -61,7 +61,7 @@ impl<K: Eq + std::hash::Hash + Clone, V: Clone, LoadArgs: Clone> OwnerCache<K, V
         entry.owners.lock().unwrap().insert(owner);
     }
 
-    pub fn load_or_store_locked_entry(&self, key: K) -> (Arc<OwnerCacheEntry<V>>, bool) {
+    pub fn load_or_store_locked_entry(&self, key: K) -> (Arc<OwnerCacheEntry<V>>, bool) { ::tsox_core::fntrace::enter("load_or_store_locked_entry"); 
         let mut entries = self.entries.lock().unwrap();
         if let Some(existing) = entries.get(&key) {
             return (existing.clone(), true);
@@ -91,7 +91,7 @@ pub fn new_parse_cache_key(
     options: SourceFileParseOptions,
     hash: Hash128,
     script_kind: i32,
-) -> ParseCacheKey {
+) -> ParseCacheKey { ::tsox_core::fntrace::enter("new_parse_cache_key"); 
     let mut kind = script_kind;
     if kind == 0 {
         kind = script_kind_from_file_name(&options.file_name);
@@ -104,7 +104,7 @@ pub fn content_mapped_parse_cache_key(
     raw_hash: Hash128,
     transform_identity: Hash128,
     diagnostic_locale: &str,
-) -> ContentMappedParseCacheKey {
+) -> ContentMappedParseCacheKey { ::tsox_core::fntrace::enter("content_mapped_parse_cache_key"); 
     let mut buf = Vec::with_capacity(32 + diagnostic_locale.len());
     buf.extend_from_slice(&raw_hash.hi.to_le_bytes());
     buf.extend_from_slice(&raw_hash.lo.to_le_bytes());
@@ -117,21 +117,21 @@ pub fn content_mapped_parse_cache_key(
     }
 }
 
-pub fn source_file_parse_options(file_name: &str) -> SourceFileParseOptions {
+pub fn source_file_parse_options(file_name: &str) -> SourceFileParseOptions { ::tsox_core::fntrace::enter("source_file_parse_options"); 
     SourceFileParseOptions {
         file_name: file_name.to_string(),
         path: tsox_core::tspath::to_path(file_name, "", false),
     }
 }
 
-fn duplicate_hash_128(hash: u128) -> Hash128 {
+fn duplicate_hash_128(hash: u128) -> Hash128 { ::tsox_core::fntrace::enter("duplicate_hash_128"); 
     Hash128 {
         lo: hash as u64,
         hi: (hash >> 64) as u64,
     }
 }
 
-pub fn parse_cache_key_for_file(file: &tsox_frontend::ast::SourceFile) -> ParseCacheKey {
+pub fn parse_cache_key_for_file(file: &tsox_frontend::ast::SourceFile) -> ParseCacheKey { ::tsox_core::fntrace::enter("parse_cache_key_for_file"); 
     new_parse_cache_key(
         source_file_parse_options(&file.file_name),
         crate::project::overlay_fs::hash_string_128(&file.text),
@@ -141,7 +141,7 @@ pub fn parse_cache_key_for_file(file: &tsox_frontend::ast::SourceFile) -> ParseC
 
 pub fn content_mapped_parse_cache_key_for_file(
     file: &tsox_frontend::ast::SourceFile,
-) -> ContentMappedParseCacheKey {
+) -> ContentMappedParseCacheKey { ::tsox_core::fntrace::enter("content_mapped_parse_cache_key_for_file"); 
     ContentMappedParseCacheKey {
         options: source_file_parse_options(&file.file_name),
         hash: crate::project::overlay_fs::hash_string_128(&file.text),
@@ -150,7 +150,7 @@ pub fn content_mapped_parse_cache_key_for_file(
 
 pub fn parse_cache_key_for_duplicate(
     file: &tsox_compile::compiler::DuplicateSourceFile,
-) -> ParseCacheKey {
+) -> ParseCacheKey { ::tsox_core::fntrace::enter("parse_cache_key_for_duplicate"); 
     new_parse_cache_key(
         source_file_parse_options(&file.file_name),
         duplicate_hash_128(file.hash),
@@ -160,14 +160,14 @@ pub fn parse_cache_key_for_duplicate(
 
 pub fn content_mapped_parse_cache_key_for_duplicate(
     file: &tsox_compile::compiler::DuplicateSourceFile,
-) -> ContentMappedParseCacheKey {
+) -> ContentMappedParseCacheKey { ::tsox_core::fntrace::enter("content_mapped_parse_cache_key_for_duplicate"); 
     ContentMappedParseCacheKey {
         options: source_file_parse_options(&file.file_name),
         hash: duplicate_hash_128(file.hash),
     }
 }
 
-pub fn hash_bytes_128(bytes: &[u8]) -> Hash128 {
+pub fn hash_bytes_128(bytes: &[u8]) -> Hash128 { ::tsox_core::fntrace::enter("hash_bytes_128"); 
     use std::hash::Hasher;
     use xxhash_rust::xxh3::Xxh3;
     let mut hasher = Xxh3::new();
@@ -180,7 +180,7 @@ pub fn hash_bytes_128(bytes: &[u8]) -> Hash128 {
     Hash128 { lo, hi }
 }
 
-pub fn new_parse_cache(options: RefCountCacheOptions) -> ParseCache {
+pub fn new_parse_cache(options: RefCountCacheOptions) -> ParseCache { ::tsox_core::fntrace::enter("new_parse_cache"); 
     ParseCache::new(options)
 }
 
@@ -189,7 +189,7 @@ pub struct ContentMappedParseCache {
 }
 
 impl ContentMappedParseCache {
-    pub fn new(options: RefCountCacheOptions) -> Self {
+    pub fn new(options: RefCountCacheOptions) -> Self { ::tsox_core::fntrace::enter("new"); 
         ContentMappedParseCache {
             inner: RefCountCache::new(options),
         }
@@ -198,19 +198,19 @@ impl ContentMappedParseCache {
 
 pub fn new_content_mapped_parse_cache(
     options: RefCountCacheOptions,
-) -> ContentMappedParseCache {
+) -> ContentMappedParseCache { ::tsox_core::fntrace::enter("new_content_mapped_parse_cache"); 
     ContentMappedParseCache::new(options)
 }
 
 impl ProgramCounter {
-    pub fn ref_program(&mut self, program: &Arc<tsox_compile::compiler::Program>) {
+    pub fn ref_program(&mut self, program: &Arc<tsox_compile::compiler::Program>) { ::tsox_core::fntrace::enter("ref_program"); 
         self.r#ref(program);
     }
 }
 
 pub fn new_ref_count_cache<K: Eq + std::hash::Hash + Clone, V: Clone>(
     options: RefCountCacheOptions,
-) -> RefCountCache<K, V> {
+) -> RefCountCache<K, V> { ::tsox_core::fntrace::enter("new_ref_count_cache"); 
     RefCountCache::new(options)
 }
 
@@ -218,7 +218,7 @@ impl<K: Eq + std::hash::Hash + Clone, V: Clone> RefCountCache<K, V> {
     pub fn acquire_or_error<F>(&self, identity: K, produce: F) -> Result<V, String>
     where
         F: FnOnce() -> Result<V, String>,
-    {
+    { ::tsox_core::fntrace::enter("acquire_or_error"); 
         if self.has(&identity) {
             return Ok(self.acquire(identity, |_| {
                 panic!("cache entry disappeared between has and acquire")
@@ -233,7 +233,7 @@ impl<K: Eq + std::hash::Hash + Clone, V: Clone> RefCountCache<K, V> {
         }
     }
 
-    pub fn ref_entry(&self, identity: &K) {
+    pub fn ref_entry(&self, identity: &K) { ::tsox_core::fntrace::enter("ref_entry"); 
         self.r#ref(identity);
     }
 }

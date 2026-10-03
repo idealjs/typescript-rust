@@ -62,7 +62,7 @@ impl TypingsInstaller {
     pub fn new(
         options: &TypingsInstallerOptions,
         host: Arc<dyn TypingsInstallerHost>,
-    ) -> TypingsInstaller {
+    ) -> TypingsInstaller { ::tsox_core::fntrace::enter("new"); 
         TypingsInstaller {
             typings_location: options.typings_location.clone(),
             host,
@@ -80,7 +80,7 @@ impl TypingsInstaller {
         name: &str,
         _fs: &dyn FS,
         _logger: Option<&dyn AtaLogger>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_known_types_package_name"); 
         let (validation_result, _, _) = validate_package_name(name);
         if validation_result != NameValidationResult::NameOk {
             return false;
@@ -92,11 +92,11 @@ impl TypingsInstaller {
     pub fn install_typings(
         &self,
         _request: &TypingsInstallRequest,
-    ) -> Result<TypingsInstallResult, String> {
+    ) -> Result<TypingsInstallResult, String> { ::tsox_core::fntrace::enter("install_typings"); 
         todo!("install_typings requires npm install and types registry infrastructure")
     }
 
-    pub fn init(&self, _project_id: &str, _fs: &dyn FS, _logger: Option<&dyn AtaLogger>) {
+    pub fn init(&self, _project_id: &str, _fs: &dyn FS, _logger: Option<&dyn AtaLogger>) { ::tsox_core::fntrace::enter("init"); 
         self.init_once.call_once(|| {});
     }
 
@@ -105,7 +105,7 @@ impl TypingsInstaller {
         _project_id: &tsox_core::tspath::Path,
         _logger: Option<&dyn AtaLogger>,
         typings_to_install: &[String],
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("filter_typings"); 
         let mut result = Vec::new();
         for typing in typings_to_install {
             let typing_key = tsox_tsoptions::module::mangle_scoped_package_name(typing);
@@ -134,7 +134,7 @@ impl TypingsInstaller {
         &self,
         _resolver: &tsox_tsoptions::module::Resolver,
         _package_name: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("typing_to_file_name"); 
         todo!("typing_to_file_name requires module resolver")
     }
 }
@@ -143,7 +143,7 @@ pub fn install_npm_packages(
     _package_names: &[String],
     _concurrency_limit: usize,
     _install_packages: &dyn Fn(&[String]) -> Result<(), String>,
-) -> Result<(), String> {
+) -> Result<(), String> { ::tsox_core::fntrace::enter("install_npm_packages"); 
     todo!("install_npm_packages requires concurrency infrastructure")
 }
 

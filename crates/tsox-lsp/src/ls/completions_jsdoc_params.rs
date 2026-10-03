@@ -19,7 +19,7 @@ pub(crate) fn jsdoc_parameter_completions(
     tags: &[Arc<Node>],
     position: usize,
     tag_name_only: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("jsdoc_parameter_completions"); 
     // Go jsDoc.Parent：JSDoc 经 HasJSDoc 挂在其宿主声明上，取挂了本
     // doc 的 function-like
     let Some(fun) = jsdoc_host_function_like(file, doc_start, doc_end) else {
@@ -94,7 +94,7 @@ fn jsdoc_param_tags_for_destructuring(
     initializer: Option<Arc<Node>>,
     dot_dot_dot: bool,
     is_js: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("jsdoc_param_tags_for_destructuring"); 
     if !is_js {
         return vec![jsdoc_param_annotation(
             checker, file, path, initializer, dot_dot_dot, is_js, false,
@@ -111,7 +111,7 @@ fn jsdoc_param_pattern_worker(
     initializer: Option<Arc<Node>>,
     dot_dot_dot: bool,
     is_js: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("jsdoc_param_pattern_worker"); 
     if pattern.kind == SyntaxKind::ObjectBindingPattern && !dot_dot_dot {
         if let NodeData::BindingPattern(d) = &pattern.data {
             let root = jsdoc_param_annotation(
@@ -143,7 +143,7 @@ fn jsdoc_param_element_worker(
     path: &str,
     element: &Arc<Node>,
     is_js: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("jsdoc_param_element_worker"); 
     let NodeData::BindingElement(d) = &element.data else {
         return Vec::new();
     };
@@ -187,7 +187,7 @@ fn jsdoc_param_element_worker(
     Vec::new()
 }
 
-fn property_name_text(pn: &Arc<Node>) -> String {
+fn property_name_text(pn: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("property_name_text"); 
     match &pn.data {
         NodeData::Identifier(d) => d.text.clone(),
         NodeData::StringLiteral(d) => d.text.clone(),
@@ -206,7 +206,7 @@ fn jsdoc_param_annotation(
     dot_dot_dot: bool,
     is_js: bool,
     is_object: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("jsdoc_param_annotation"); 
     let name = match &initializer {
         Some(init) => jsdoc_param_name_with_initializer(file, name, init),
         None => name,
@@ -237,7 +237,7 @@ fn jsdoc_param_name_with_initializer(
     file: &Arc<SourceFile>,
     name: String,
     initializer: &Arc<Node>,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("jsdoc_param_name_with_initializer"); 
     let (s, e) = (initializer.pos().min(file.text.len()), initializer.end().min(file.text.len()));
     let text = if s < e { file.text[s..e].trim() } else { "" };
     if text.contains('\n') || text.len() > 80 {
@@ -247,17 +247,17 @@ fn jsdoc_param_name_with_initializer(
     }
 }
 
-fn tag_param_name_identifier(tag: &Arc<Node>) -> bool {
+fn tag_param_name_identifier(tag: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("tag_param_name_identifier"); 
     matches!(&tag.data, NodeData::JSDocParameterOrPropertyTag(d) if d.name.kind == SyntaxKind::Identifier)
 }
 
-fn jsdoc_host_function_like(sf: &Arc<SourceFile>, doc_start: usize, doc_end: usize) -> Option<Arc<Node>> {
+fn jsdoc_host_function_like(sf: &Arc<SourceFile>, doc_start: usize, doc_end: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("jsdoc_host_function_like"); 
     let mut best: Option<Arc<Node>> = None;
     walk_hosts(sf, &sf.node, doc_start, doc_end, &mut best);
     best
 }
 
-fn walk_hosts(sf: &Arc<SourceFile>, n: &Arc<Node>, doc_start: usize, doc_end: usize, best: &mut Option<Arc<Node>>) {
+fn walk_hosts(sf: &Arc<SourceFile>, n: &Arc<Node>, doc_start: usize, doc_end: usize, best: &mut Option<Arc<Node>>) { ::tsox_core::fntrace::enter("walk_hosts"); 
     let dbg = std::env::var("TSOX_DEBUG_JSDOC").is_ok();
     if is_function_like_kind(n.kind) {
         let docs = tsox_frontend::parser::parse_jsdoc_for_node(sf, n);
@@ -284,7 +284,7 @@ fn walk_hosts(sf: &Arc<SourceFile>, n: &Arc<Node>, doc_start: usize, doc_end: us
     });
 }
 
-fn is_function_like_kind(kind: SyntaxKind) -> bool {
+fn is_function_like_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_function_like_kind"); 
     matches!(
         kind,
         SyntaxKind::FunctionDeclaration
@@ -298,7 +298,7 @@ fn is_function_like_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-fn function_like_parameters(fun: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::NodeList>> {
+fn function_like_parameters(fun: &Arc<Node>) -> Option<&Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("function_like_parameters"); 
     match &fun.data {
         NodeData::FunctionDeclaration(d) => Some(&d.parameters),
         NodeData::MethodDeclaration(d) => Some(&d.parameters),

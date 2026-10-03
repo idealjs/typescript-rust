@@ -31,7 +31,7 @@ pub(crate) const ANCESTRY_CONTAINERS: &[SyntaxKind] = &[
     SyntaxKind::ConditionalType,
 ];
 
-pub(crate) fn lexical_scope_chain_ids(node: &Arc<Node>) -> Vec<u64> {
+pub(crate) fn lexical_scope_chain_ids(node: &Arc<Node>) -> Vec<u64> { ::tsox_core::fntrace::enter("lexical_scope_chain_ids"); 
     let mut chain = Vec::new();
     let mut ancestor = node.parent();
     while let Some(a) = ancestor {
@@ -44,7 +44,7 @@ pub(crate) fn lexical_scope_chain_ids(node: &Arc<Node>) -> Vec<u64> {
 }
 
 impl Checker {
-    pub fn resolve_identifier(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn resolve_identifier(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_identifier"); 
         self.resolve_identifier_with_meaning(node, SymbolFlags::all())
     }
 
@@ -52,7 +52,7 @@ impl Checker {
         &self,
         node: &Arc<Node>,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_identifier_with_meaning"); 
         self.resolve_identifier_scope_symbol(node, meaning)
             .and_then(|s| self.follow_alias(&s))
     }
@@ -61,7 +61,7 @@ impl Checker {
         &self,
         node: &Arc<Node>,
         record_meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_identifier_use"); 
         let scope = self.resolve_identifier_scope_symbol(node, SymbolFlags::all());
         let result = scope.as_ref().and_then(|s| self.follow_alias(s));
         if let Some(sym) = &scope
@@ -73,7 +73,7 @@ impl Checker {
         result
     }
 
-    fn self_reference_location_exempts(&self, node: &Arc<Node>, resolved: &Arc<Symbol>) -> bool {
+    fn self_reference_location_exempts(&self, node: &Arc<Node>, resolved: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("self_reference_location_exempts"); 
         let name = match &node.data {
             tsox_frontend::ast::NodeData::Identifier(data) => data.text.as_str(),
             _ => return false,
@@ -114,14 +114,14 @@ impl Checker {
         })
     }
 
-    pub(crate) fn record_symbol_reference(&self, symbol: &Arc<Symbol>, bits: SymbolFlags) {
+    pub(crate) fn record_symbol_reference(&self, symbol: &Arc<Symbol>, bits: SymbolFlags) { ::tsox_core::fntrace::enter("record_symbol_reference"); 
         self.symbol_reference_kinds
             .entry(symbol.id())
             .and_modify(|f| *f |= bits)
             .or_insert(bits);
     }
 
-    pub(crate) fn alias_chain_hits_meaning(&self, sym: &Arc<Symbol>, meaning: SymbolFlags) -> bool {
+    pub(crate) fn alias_chain_hits_meaning(&self, sym: &Arc<Symbol>, meaning: SymbolFlags) -> bool { ::tsox_core::fntrace::enter("alias_chain_hits_meaning"); 
         if !sym.flags.intersects(SymbolFlags::Alias) {
             return false;
         }
@@ -131,7 +131,7 @@ impl Checker {
         }
     }
 
-    pub fn follow_alias(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn follow_alias(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("follow_alias"); 
         if !symbol.flags.intersects(SymbolFlags::Alias) {
             return Some(Arc::clone(symbol));
         }
@@ -174,7 +174,7 @@ impl Checker {
         &self,
         container_sym: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("augmentation_target_member"); 
         let decl = container_sym
             .declarations
             .iter()
@@ -200,7 +200,7 @@ impl Checker {
     }
 }
 
-pub(crate) fn node_parent_is_require_call(node: &Arc<Node>) -> bool {
+pub(crate) fn node_parent_is_require_call(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_parent_is_require_call"); 
     let Some(parent) = node.parent() else {
         return false;
     };

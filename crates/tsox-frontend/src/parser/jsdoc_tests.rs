@@ -1,6 +1,6 @@
 use crate::parser::jsdoc::*;
 
-pub(crate) fn parse_jsdoc(source: &str) -> Arc<Node> {
+pub(crate) fn parse_jsdoc(source: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc"); 
     let mut parser = crate::parser::Parser::new(source.to_string());
 
     let text = source;
@@ -13,13 +13,13 @@ pub(crate) fn parse_jsdoc(source: &str) -> Arc<Node> {
 }
 
 #[test]
-pub(crate) fn parse_empty_jsdoc() {
+pub(crate) fn parse_empty_jsdoc() { ::tsox_core::fntrace::enter("parse_empty_jsdoc"); 
     let node = parse_jsdoc("/** */");
     assert_eq!(node.kind, SyntaxKind::JSDoc);
 }
 
 #[test]
-pub(crate) fn parse_simple_comment() {
+pub(crate) fn parse_simple_comment() { ::tsox_core::fntrace::enter("parse_simple_comment"); 
     let node = parse_jsdoc("/** This is a comment */");
     assert_eq!(node.kind, SyntaxKind::JSDoc);
     if let NodeData::JSDoc(d) = &node.data {
@@ -31,7 +31,7 @@ pub(crate) fn parse_simple_comment() {
 }
 
 #[test]
-pub(crate) fn parse_param_tag() {
+pub(crate) fn parse_param_tag() { ::tsox_core::fntrace::enter("parse_param_tag"); 
     let node = parse_jsdoc("/** @param {string} name The name */");
     assert_eq!(node.kind, SyntaxKind::JSDoc);
     if let NodeData::JSDoc(d) = &node.data {
@@ -42,7 +42,7 @@ pub(crate) fn parse_param_tag() {
 }
 
 #[test]
-pub(crate) fn parse_returns_tag() {
+pub(crate) fn parse_returns_tag() { ::tsox_core::fntrace::enter("parse_returns_tag"); 
     let node = parse_jsdoc("/** @returns {number} The result */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -52,7 +52,7 @@ pub(crate) fn parse_returns_tag() {
 }
 
 #[test]
-pub(crate) fn parse_type_tag() {
+pub(crate) fn parse_type_tag() { ::tsox_core::fntrace::enter("parse_type_tag"); 
     let node = parse_jsdoc("/** @type {string} */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -62,7 +62,7 @@ pub(crate) fn parse_type_tag() {
 }
 
 #[test]
-pub(crate) fn parse_deprecated_tag() {
+pub(crate) fn parse_deprecated_tag() { ::tsox_core::fntrace::enter("parse_deprecated_tag"); 
     let node = parse_jsdoc("/** @deprecated Use newThing instead */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -72,7 +72,7 @@ pub(crate) fn parse_deprecated_tag() {
 }
 
 #[test]
-pub(crate) fn parse_multiple_tags() {
+pub(crate) fn parse_multiple_tags() { ::tsox_core::fntrace::enter("parse_multiple_tags"); 
     let node = parse_jsdoc(
         "/**\n * @param {string} x First\n * @param {number} y Second\n * @returns {boolean}\n */",
     );
@@ -86,7 +86,7 @@ pub(crate) fn parse_multiple_tags() {
 }
 
 #[test]
-pub(crate) fn parse_template_tag() {
+pub(crate) fn parse_template_tag() { ::tsox_core::fntrace::enter("parse_template_tag"); 
     let node = parse_jsdoc("/** @template T */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -96,7 +96,7 @@ pub(crate) fn parse_template_tag() {
 }
 
 #[test]
-pub(crate) fn parse_typedef_tag() {
+pub(crate) fn parse_typedef_tag() { ::tsox_core::fntrace::enter("parse_typedef_tag"); 
     let node = parse_jsdoc("/** @typedef {Object} MyType */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -106,7 +106,7 @@ pub(crate) fn parse_typedef_tag() {
 }
 
 #[test]
-pub(crate) fn parse_callback_tag() {
+pub(crate) fn parse_callback_tag() { ::tsox_core::fntrace::enter("parse_callback_tag"); 
     let node = parse_jsdoc("/** @callback MyCallback */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -116,7 +116,7 @@ pub(crate) fn parse_callback_tag() {
 }
 
 #[test]
-pub(crate) fn parse_see_tag() {
+pub(crate) fn parse_see_tag() { ::tsox_core::fntrace::enter("parse_see_tag"); 
     let node = parse_jsdoc("/** @see OtherThing */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -126,7 +126,7 @@ pub(crate) fn parse_see_tag() {
 }
 
 #[test]
-pub(crate) fn parse_simple_tags() {
+pub(crate) fn parse_simple_tags() { ::tsox_core::fntrace::enter("parse_simple_tags"); 
     for (tag_str, expected_kind) in [
         ("@public", SyntaxKind::JSDocPublicTag),
         ("@private", SyntaxKind::JSDocPrivateTag),
@@ -149,7 +149,7 @@ pub(crate) fn parse_simple_tags() {
 }
 
 #[test]
-pub(crate) fn parse_unknown_tag() {
+pub(crate) fn parse_unknown_tag() { ::tsox_core::fntrace::enter("parse_unknown_tag"); 
     let node = parse_jsdoc("/** @customtag some text */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -159,7 +159,7 @@ pub(crate) fn parse_unknown_tag() {
 }
 
 #[test]
-pub(crate) fn parse_throws_tag() {
+pub(crate) fn parse_throws_tag() { ::tsox_core::fntrace::enter("parse_throws_tag"); 
     let node = parse_jsdoc("/** @throws {Error} When something goes wrong */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -169,7 +169,7 @@ pub(crate) fn parse_throws_tag() {
 }
 
 #[test]
-pub(crate) fn parse_satisfies_tag() {
+pub(crate) fn parse_satisfies_tag() { ::tsox_core::fntrace::enter("parse_satisfies_tag"); 
     let node = parse_jsdoc("/** @satisfies {string} */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -179,7 +179,7 @@ pub(crate) fn parse_satisfies_tag() {
 }
 
 #[test]
-pub(crate) fn parse_this_tag() {
+pub(crate) fn parse_this_tag() { ::tsox_core::fntrace::enter("parse_this_tag"); 
     let node = parse_jsdoc("/** @this {MyClass} */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -189,7 +189,7 @@ pub(crate) fn parse_this_tag() {
 }
 
 #[test]
-pub(crate) fn parse_param_with_brackets() {
+pub(crate) fn parse_param_with_brackets() { ::tsox_core::fntrace::enter("parse_param_with_brackets"); 
     let node = parse_jsdoc("/** @param {string} [name] Optional */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -203,7 +203,7 @@ pub(crate) fn parse_param_with_brackets() {
 }
 
 #[test]
-pub(crate) fn parse_multiline_comment_with_tags() {
+pub(crate) fn parse_multiline_comment_with_tags() { ::tsox_core::fntrace::enter("parse_multiline_comment_with_tags"); 
     let source = "/**
  * Description here.
  *
@@ -219,7 +219,7 @@ pub(crate) fn parse_multiline_comment_with_tags() {
 }
 
 #[test]
-pub(crate) fn parse_link_in_comment() {
+pub(crate) fn parse_link_in_comment() { ::tsox_core::fntrace::enter("parse_link_in_comment"); 
     let node = parse_jsdoc("/** See {@link Foo} for details */");
     assert_eq!(node.kind, SyntaxKind::JSDoc);
 
@@ -229,7 +229,7 @@ pub(crate) fn parse_link_in_comment() {
 }
 
 #[test]
-pub(crate) fn parse_implements_tag() {
+pub(crate) fn parse_implements_tag() { ::tsox_core::fntrace::enter("parse_implements_tag"); 
     let node = parse_jsdoc("/** @implements {IFoo} */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -239,7 +239,7 @@ pub(crate) fn parse_implements_tag() {
 }
 
 #[test]
-pub(crate) fn parse_augments_tag() {
+pub(crate) fn parse_augments_tag() { ::tsox_core::fntrace::enter("parse_augments_tag"); 
     let node = parse_jsdoc("/** @augments {Base} */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -249,7 +249,7 @@ pub(crate) fn parse_augments_tag() {
 }
 
 #[test]
-pub(crate) fn parse_overload_tag() {
+pub(crate) fn parse_overload_tag() { ::tsox_core::fntrace::enter("parse_overload_tag"); 
     let node = parse_jsdoc("/** @overload */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -259,7 +259,7 @@ pub(crate) fn parse_overload_tag() {
 }
 
 #[test]
-pub(crate) fn parse_template_with_constraint() {
+pub(crate) fn parse_template_with_constraint() { ::tsox_core::fntrace::enter("parse_template_with_constraint"); 
     let node = parse_jsdoc("/** @template {string} T */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -269,7 +269,7 @@ pub(crate) fn parse_template_with_constraint() {
 }
 
 #[test]
-pub(crate) fn parse_template_multiple() {
+pub(crate) fn parse_template_multiple() { ::tsox_core::fntrace::enter("parse_template_multiple"); 
     let node = parse_jsdoc("/** @template T,U,V */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -282,7 +282,7 @@ pub(crate) fn parse_template_multiple() {
 }
 
 #[test]
-pub(crate) fn parse_param_name_first() {
+pub(crate) fn parse_param_name_first() { ::tsox_core::fntrace::enter("parse_param_name_first"); 
     let node = parse_jsdoc("/** @param name {string} */");
     if let NodeData::JSDoc(d) = &node.data {
         let tags = d.tags.as_ref().expect("should have tags");
@@ -296,14 +296,14 @@ pub(crate) fn parse_param_name_first() {
 }
 
 #[test]
-pub(crate) fn parse_jsdoc_like_text_detection() {
+pub(crate) fn parse_jsdoc_like_text_detection() { ::tsox_core::fntrace::enter("parse_jsdoc_like_text_detection"); 
     assert!(is_jsdoc_like_text("/** comment */"));
     assert!(!is_jsdoc_like_text("/**/"));
     assert!(!is_jsdoc_like_text("/* not jsdoc */"));
 }
 
 #[test]
-pub(crate) fn parse_remove_trailing_whitespace() {
+pub(crate) fn parse_remove_trailing_whitespace() { ::tsox_core::fntrace::enter("parse_remove_trailing_whitespace"); 
     let comments = vec!["hello".to_string(), "  ".to_string(), "\n".to_string()];
     let result = remove_trailing_whitespace(comments);
     assert_eq!(result.len(), 1);
@@ -311,18 +311,18 @@ pub(crate) fn parse_remove_trailing_whitespace() {
 }
 
 #[test]
-pub(crate) fn parse_remove_leading_newlines() {
+pub(crate) fn parse_remove_leading_newlines() { ::tsox_core::fntrace::enter("parse_remove_leading_newlines"); 
     let comments = vec!["\n".to_string(), "\r\n".to_string(), "hello".to_string()];
     let result = remove_leading_newlines(comments);
     assert_eq!(result.len(), 1);
     assert_eq!(result[0], "hello");
 }
 
-pub(crate) fn parse_source(source: &str) -> crate::ast::SourceFile {
+pub(crate) fn parse_source(source: &str) -> crate::ast::SourceFile { ::tsox_core::fntrace::enter("parse_source"); 
     crate::parser::Parser::parse_source_file_text("test.ts", source.to_string())
 }
 
-pub(crate) fn first_statement(file: &crate::ast::SourceFile) -> Arc<Node> {
+pub(crate) fn first_statement(file: &crate::ast::SourceFile) -> Arc<Node> { ::tsox_core::fntrace::enter("first_statement"); 
     use crate::ast::node_data_generated::*;
     match &file.node.data {
         NodeData::SourceFile(d) => d.statements.nodes[0].clone(),
@@ -331,7 +331,7 @@ pub(crate) fn first_statement(file: &crate::ast::SourceFile) -> Arc<Node> {
 }
 
 #[test]
-pub(crate) fn get_jsdoc_comment_ranges_finds_leading_jsdoc() {
+pub(crate) fn get_jsdoc_comment_ranges_finds_leading_jsdoc() { ::tsox_core::fntrace::enter("get_jsdoc_comment_ranges_finds_leading_jsdoc"); 
     let text = "/** Hello */\nconst x = 1;";
     let file = parse_source(text);
     let stmt = first_statement(&file);
@@ -341,7 +341,7 @@ pub(crate) fn get_jsdoc_comment_ranges_finds_leading_jsdoc() {
 }
 
 #[test]
-pub(crate) fn get_jsdoc_comment_ranges_skips_non_jsdoc_comments() {
+pub(crate) fn get_jsdoc_comment_ranges_skips_non_jsdoc_comments() { ::tsox_core::fntrace::enter("get_jsdoc_comment_ranges_skips_non_jsdoc_comments"); 
     let text = "/* not jsdoc */\nconst x = 1;";
     let file = parse_source(text);
     let stmt = first_statement(&file);
@@ -350,7 +350,7 @@ pub(crate) fn get_jsdoc_comment_ranges_skips_non_jsdoc_comments() {
 }
 
 #[test]
-pub(crate) fn get_jsdoc_comment_ranges_skips_empty_jsdoc() {
+pub(crate) fn get_jsdoc_comment_ranges_skips_empty_jsdoc() { ::tsox_core::fntrace::enter("get_jsdoc_comment_ranges_skips_empty_jsdoc"); 
     let text = "/**/\nconst x = 1;";
     let file = parse_source(text);
     let stmt = first_statement(&file);
@@ -359,7 +359,7 @@ pub(crate) fn get_jsdoc_comment_ranges_skips_empty_jsdoc() {
 }
 
 #[test]
-pub(crate) fn parse_jsdoc_for_node_returns_parsed_tags() {
+pub(crate) fn parse_jsdoc_for_node_returns_parsed_tags() { ::tsox_core::fntrace::enter("parse_jsdoc_for_node_returns_parsed_tags"); 
     let text = "/**\n * @param {string} name\n * @returns {void}\n */\nfunction f(name) {}\n";
     let file = parse_source(text);
     let stmt = first_statement(&file);
@@ -374,7 +374,7 @@ pub(crate) fn parse_jsdoc_for_node_returns_parsed_tags() {
 }
 
 #[test]
-pub(crate) fn parse_jsdoc_for_node_no_comments_returns_empty() {
+pub(crate) fn parse_jsdoc_for_node_no_comments_returns_empty() { ::tsox_core::fntrace::enter("parse_jsdoc_for_node_no_comments_returns_empty"); 
     let text = "const x = 1;";
     let file = parse_source(text);
     let stmt = first_statement(&file);
@@ -383,7 +383,7 @@ pub(crate) fn parse_jsdoc_for_node_no_comments_returns_empty() {
 }
 
 #[test]
-pub(crate) fn resolve_jsdoc_caches_result() {
+pub(crate) fn resolve_jsdoc_caches_result() { ::tsox_core::fntrace::enter("resolve_jsdoc_caches_result"); 
     let text = "/** Doc */\nconst x = 1;";
     let file = parse_source(text);
     let stmt = first_statement(&file);
@@ -397,7 +397,7 @@ pub(crate) fn resolve_jsdoc_caches_result() {
 }
 
 #[test]
-pub(crate) fn resolve_jsdoc_multiple_jsdoc_comments() {
+pub(crate) fn resolve_jsdoc_multiple_jsdoc_comments() { ::tsox_core::fntrace::enter("resolve_jsdoc_multiple_jsdoc_comments"); 
     let text = "/** First */\n/** Second */\nconst x = 1;";
     let file = parse_source(text);
     let stmt = first_statement(&file);
@@ -406,7 +406,7 @@ pub(crate) fn resolve_jsdoc_multiple_jsdoc_comments() {
 }
 
 #[test]
-pub(crate) fn node_jsdoc_returns_empty_without_flag() {
+pub(crate) fn node_jsdoc_returns_empty_without_flag() { ::tsox_core::fntrace::enter("node_jsdoc_returns_empty_without_flag"); 
     let text = "/** Doc */\nconst x = 1;";
     let file = parse_source(text);
     let stmt = first_statement(&file);

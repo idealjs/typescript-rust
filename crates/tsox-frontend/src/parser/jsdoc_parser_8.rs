@@ -9,7 +9,7 @@ impl crate::parser::Parser {
         end: usize,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<NodeList> {
+    ) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_trailing_tag_comments"); 
         let margin = if indent_text.is_empty() {
             margin + end.saturating_sub(pos)
         } else {
@@ -29,7 +29,7 @@ impl crate::parser::Parser {
         &mut self,
         indent: usize,
         initial_margin: Option<&str>,
-    ) -> Arc<NodeList> {
+    ) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_tag_comments"); 
         let pos = self.token_pos();
         let mut state = JSDocState::BeginningOfLine;
         let mut comments: Vec<String> = Vec::new();
@@ -181,7 +181,7 @@ impl crate::parser::Parser {
         target: PropertyLikeParse,
         indent: usize,
         name: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_child_parameter_or_property_tag"); 
         // Go canParseTag 初始 true：进入时（rewind/set_range 后）遇到的第一个
         // 可跟标签的 @ 即子标签候选
         let mut can_parse_tag = true;
@@ -219,7 +219,7 @@ impl crate::parser::Parser {
         target: PropertyLikeParse,
         indent: usize,
         _name: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_parse_child_tag"); 
         debug_assert_eq!(self.token, SyntaxKind::AtToken);
         let start = self.token_pos();
         self.next_token_jsdoc();

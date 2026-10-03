@@ -54,24 +54,24 @@ type ObjectLiteralExpression = Arc<tsox_frontend::ast::Node>;
 pub struct ContentMapperError(pub String);
 
 impl ContentMapperError {
-    pub fn project_unavailable() -> Self {
+    pub fn project_unavailable() -> Self { ::tsox_core::fntrace::enter("project_unavailable"); 
         Self("content mapper project is unavailable".to_string())
     }
 }
 
 impl From<TransformError> for ContentMapperError {
-    fn from(err: TransformError) -> Self {
+    fn from(err: TransformError) -> Self { ::tsox_core::fntrace::enter("from"); 
         Self(err.to_string())
     }
 }
 
 impl From<SupplementalFileCollisionError> for ContentMapperError {
-    fn from(err: SupplementalFileCollisionError) -> Self {
+    fn from(err: SupplementalFileCollisionError) -> Self { ::tsox_core::fntrace::enter("from"); 
         Self(err.to_string())
     }
 }
 
-fn cached_fs_from(fs: Arc<dyn FS>) -> Arc<dyn FS> {
+fn cached_fs_from(fs: Arc<dyn FS>) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("cached_fs_from"); 
     Arc::new(CachedFS::new(fs))
 }
 
@@ -79,7 +79,7 @@ fn parse_source_file(
     opts: &SourceFileParseOptions,
     text: &str,
     _script_kind: ScriptKind,
-) -> Arc<SourceFile> {
+) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("parse_source_file"); 
     Arc::new(tsox_frontend::parser::Parser::parse_source_file_text(
         &opts.file_name,
         text.to_string(),
@@ -93,7 +93,7 @@ pub fn new_cached_fs_compiler_host(
     extended_config_cache: ExtendedConfigCache,
     trace: Option<TraceFn>,
     content_mapper_project: Option<Arc<dyn ContentMapperProject>>,
-) -> CompilerHostImpl {
+) -> CompilerHostImpl { ::tsox_core::fntrace::enter("new_cached_fs_compiler_host"); 
     new_compiler_host(
         current_directory,
         cached_fs_from(fs),
@@ -111,7 +111,7 @@ pub fn new_compiler_host(
     extended_config_cache: ExtendedConfigCache,
     trace: Option<TraceFn>,
     content_mapper_project: Option<Arc<dyn ContentMapperProject>>,
-) -> CompilerHostImpl {
+) -> CompilerHostImpl { ::tsox_core::fntrace::enter("new_compiler_host"); 
     let trace = trace.unwrap_or_else(|| Box::new(|_msg: &tsox_core::diagnostics::Message, _args: &[String]| {}));
     CompilerHostImpl {
         current_directory,
@@ -124,23 +124,23 @@ pub fn new_compiler_host(
 }
 
 impl CompilerHostImpl {
-    pub fn fs(&self) -> &Arc<dyn FS> {
+    pub fn fs(&self) -> &Arc<dyn FS> { ::tsox_core::fntrace::enter("fs"); 
         &self.fs
     }
 
-    pub fn default_library_path(&self) -> &str {
+    pub fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         &self.default_library_path
     }
 
-    pub fn get_current_directory(&self) -> &str {
+    pub fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         &self.current_directory
     }
 
-    pub fn trace(&self, msg_: &tsox_core::diagnostics::Message, args: &[String]) {
+    pub fn trace(&self, msg_: &tsox_core::diagnostics::Message, args: &[String]) { ::tsox_core::fntrace::enter("trace"); 
         (self.trace)(msg_, args);
     }
 
-    pub fn get_source_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         let text = self.fs.read_file(&opts.file_name)?;
         Some(parse_source_file(opts, &text, ensure_script_kind_from_file_name(&opts.file_name)))
     }
@@ -149,7 +149,7 @@ impl CompilerHostImpl {
         &self,
         parse_options: &SourceFileParseOptions,
         mapper: &Mapper,
-    ) -> Result<ContentMapperSourceFiles, ContentMapperError> {
+    ) -> Result<ContentMapperSourceFiles, ContentMapperError> { ::tsox_core::fntrace::enter("get_content_mapped_source_files"); 
         let Some(project) = &self.content_mapper_project else {
             return Err(ContentMapperError::project_unavailable());
         };
@@ -170,11 +170,11 @@ impl CompilerHostImpl {
         Ok(files)
     }
 
-    pub fn content_mapper_project(&self) -> Option<&Arc<dyn ContentMapperProject>> {
+    pub fn content_mapper_project(&self) -> Option<&Arc<dyn ContentMapperProject>> { ::tsox_core::fntrace::enter("content_mapper_project"); 
         self.content_mapper_project.as_ref()
     }
 
-    pub fn get_resolved_project_reference(&self, file_name: &str, path: &Path) -> Option<ParsedCommandLine> {
+    pub fn get_resolved_project_reference(&self, file_name: &str, path: &Path) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("get_resolved_project_reference"); 
         let sys = ParseConfigHost {
             fs: self.fs.clone(),
             current_directory: self.current_directory.clone(),
@@ -192,21 +192,21 @@ impl CompilerHostImpl {
 }
 
 impl HasFileName for RedirectsFile {
-    fn path(&self) -> String {
+    fn path(&self) -> String { ::tsox_core::fntrace::enter("path"); 
         self.path.0.clone()
     }
 
-    fn file_name(&self) -> String {
+    fn file_name(&self) -> String { ::tsox_core::fntrace::enter("file_name"); 
         self.file_name.clone()
     }
 }
 
 impl HasFileName for Arc<SourceFile> {
-    fn path(&self) -> String {
+    fn path(&self) -> String { ::tsox_core::fntrace::enter("path"); 
         tsox_frontend::ast::mig::m3b_2::path(self)
     }
 
-    fn file_name(&self) -> String {
+    fn file_name(&self) -> String { ::tsox_core::fntrace::enter("file_name"); 
         self.file_name.clone()
     }
 }
@@ -223,7 +223,7 @@ pub struct IncludeProcessor {
     pub compiler_options_syntax: Mutex<Option<ObjectLiteralExpression>>,
 }
 
-pub fn update_file_include_processor(p: &mut Program) {
+pub fn update_file_include_processor(p: &mut Program) { ::tsox_core::fntrace::enter("update_file_include_processor"); 
     let (file_include_reasons, processing_diagnostics) = match p.include_processor.as_deref_mut() {
         Some(old) => (
             std::mem::take(&mut old.file_include_reasons),
@@ -239,7 +239,7 @@ pub fn update_file_include_processor(p: &mut Program) {
 }
 
 impl IncludeProcessor {
-    pub fn get_diagnostics(&self, p: &Program) -> Arc<DiagnosticsCollection> {
+    pub fn get_diagnostics(&self, p: &Program) -> Arc<DiagnosticsCollection> { ::tsox_core::fntrace::enter("get_diagnostics"); 
         let mut computed = self.computed_diagnostics.lock().unwrap();
         if computed.is_none() {
             let collection = DiagnosticsCollection::new();
@@ -265,7 +265,7 @@ impl IncludeProcessor {
         computed.as_ref().unwrap().clone()
     }
 
-    fn to_diagnostic(&self, d: &ProcessingDiagnostic, program: &Program) -> Diagnostic {
+    fn to_diagnostic(&self, d: &ProcessingDiagnostic, program: &Program) -> Diagnostic { ::tsox_core::fntrace::enter("to_diagnostic"); 
         match d.kind {
             ProcessingDiagnosticKind::UnknownReference => {
                 let ref_ = d.as_file_include_reason();
@@ -303,7 +303,7 @@ impl IncludeProcessor {
         }
     }
 
-    fn create_diagnostic_explaining_file(&self, d: &ProcessingDiagnostic, program: &Program) -> Diagnostic {
+    fn create_diagnostic_explaining_file(&self, d: &ProcessingDiagnostic, program: &Program) -> Diagnostic { ::tsox_core::fntrace::enter("create_diagnostic_explaining_file"); 
         let diag = d.as_include_explaining_diagnostic();
         let mut include_details: Vec<Diagnostic> = Vec::new();
         let mut related_info: Vec<Diagnostic> = Vec::new();
@@ -399,7 +399,7 @@ impl IncludeProcessor {
         program: &Program,
         preferred_location: &mut Option<Arc<FileIncludeReason>>,
         related_info: &mut Vec<Diagnostic>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("process_related_info"); 
         if preferred_location.is_none()
             && include_reason.is_referenced_file()
             && !self.get_reference_location(include_reason, program).is_synthetic
@@ -416,7 +416,7 @@ impl IncludeProcessor {
         }
     }
 
-    pub fn add_processing_diagnostics(&mut self, d: Vec<Arc<ProcessingDiagnostic>>) {
+    pub fn add_processing_diagnostics(&mut self, d: Vec<Arc<ProcessingDiagnostic>>) { ::tsox_core::fntrace::enter("add_processing_diagnostics"); 
         self.processing_diagnostics.extend(d);
     }
 
@@ -426,7 +426,7 @@ impl IncludeProcessor {
         existing_casing: &str,
         current_casing: &str,
         reason: &Arc<FileIncludeReason>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_processing_diagnostics_for_file_casing"); 
         let existing_reasons = self.file_include_reasons.get(file);
         if !reason.is_referenced_file()
             && existing_reasons
@@ -457,7 +457,7 @@ impl IncludeProcessor {
         }
     }
 
-    pub fn get_reference_location(&self, r: &Arc<FileIncludeReason>, program: &Program) -> Arc<ReferenceFileLocation> {
+    pub fn get_reference_location(&self, r: &Arc<FileIncludeReason>, program: &Program) -> Arc<ReferenceFileLocation> { ::tsox_core::fntrace::enter("get_reference_location"); 
         let key = Arc::as_ptr(r) as usize;
         {
             let cache = self.reason_to_reference_location.lock().unwrap();
@@ -474,7 +474,7 @@ impl IncludeProcessor {
         loc
     }
 
-    pub fn get_compiler_options_object_literal_syntax(&self, program: &Program) -> Option<ObjectLiteralExpression> {
+    pub fn get_compiler_options_object_literal_syntax(&self, program: &Program) -> Option<ObjectLiteralExpression> { ::tsox_core::fntrace::enter("get_compiler_options_object_literal_syntax"); 
         let mut syntax = self.compiler_options_syntax.lock().unwrap();
         if syntax.is_none() {
             if let Some(config_file) = program.opts.config.config_file.as_ref() {
@@ -514,7 +514,7 @@ impl IncludeProcessor {
         syntax.clone()
     }
 
-    pub fn get_related_info(&self, r: &Arc<FileIncludeReason>, program: &Program) -> Option<Diagnostic> {
+    pub fn get_related_info(&self, r: &Arc<FileIncludeReason>, program: &Program) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("get_related_info"); 
         let key = Arc::as_ptr(r) as usize;
         {
             let cache = self.include_reason_to_related_info.lock().unwrap();
@@ -536,7 +536,7 @@ impl IncludeProcessor {
         program: &Program,
         file_path: &Path,
         to_file_name: &dyn Fn(&str) -> String,
-    ) -> Vec<Diagnostic> {
+    ) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("explain_redirect_and_implied_format"); 
         {
             let cache = self.redirect_and_file_format.lock().unwrap();
             if let Some(existing) = cache.get(file_path) {
@@ -629,7 +629,7 @@ pub struct ParseTaskData {
 }
 
 impl ParseTaskData {
-    pub fn new(task: Arc<Mutex<ParseTask>>) -> Self {
+    pub fn new(task: Arc<Mutex<ParseTask>>) -> Self { ::tsox_core::fntrace::enter("new"); 
         let key = task.lock().unwrap().normalized_file_path.clone();
         let mut tasks = HashMap::new();
         tasks.insert(key, task);
@@ -649,7 +649,7 @@ pub struct FilesParser {
 }
 
 impl Default for FilesParser {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             wg: new_work_group(true),
             task_data_by_path: Mutex::new(HashMap::new()),

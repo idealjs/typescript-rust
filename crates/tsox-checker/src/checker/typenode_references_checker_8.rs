@@ -3,7 +3,7 @@
 use crate::checker::typenode_references::*;
 
 impl Checker {
-    pub(crate) fn resolve_namespace_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn resolve_namespace_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_namespace_type"); 
         // namespace+interface 合并符号：接口声明类型（type_alias_links）与
         // 模块实例类型（值侧）分离缓存，避免互相污染
         let merged_with_type_meaning = symbol.flags.contains(SymbolFlags::Interface);
@@ -21,7 +21,7 @@ impl Checker {
         self.resolve_namespace_type_uncached(symbol)
     }
 
-    fn resolve_namespace_type_uncached(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    fn resolve_namespace_type_uncached(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_namespace_type_uncached"); 
         if symbol.flags.intersects(SymbolFlags::MODULE)
             && crate::checker::utilities_get_assignment_target::is_shorthand_ambient_module_symbol(
                 symbol,

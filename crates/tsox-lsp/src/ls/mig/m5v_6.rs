@@ -14,7 +14,7 @@ pub trait M5v6NodeExt {
 }
 
 impl M5v6NodeExt for Node {
-    fn as_mapped_type_node(&self) -> &MappedTypeNodeData {
+    fn as_mapped_type_node(&self) -> &MappedTypeNodeData { ::tsox_core::fntrace::enter("as_mapped_type_node"); 
         match &self.data {
             NodeData::MappedTypeNode(d) => d,
             _ => panic!("AsMappedTypeNode on wrong node kind"),
@@ -27,7 +27,7 @@ pub trait M5v6FactoryExt {
 }
 
 impl M5v6FactoryExt for NodeFactory {
-    fn new_syntax_list(&self, children: &[Arc<Node>]) -> Node {
+    fn new_syntax_list(&self, children: &[Arc<Node>]) -> Node { ::tsox_core::fntrace::enter("new_syntax_list"); 
         Node::new(
             SyntaxKind::SyntaxList,
             NodeData::SyntaxList(SyntaxListData {
@@ -49,7 +49,7 @@ pub struct SelectionRangeBuilder {
     pub oldest_index: usize,
 }
 
-pub fn new_selection_range_builder(capacity: usize) -> SelectionRangeBuilder {
+pub fn new_selection_range_builder(capacity: usize) -> SelectionRangeBuilder { ::tsox_core::fntrace::enter("new_selection_range_builder"); 
     SelectionRangeBuilder {
         ranges: Vec::with_capacity(capacity),
         oldest_index: 0,
@@ -57,7 +57,7 @@ pub fn new_selection_range_builder(capacity: usize) -> SelectionRangeBuilder {
 }
 
 impl SelectionRangeBuilder {
-    pub fn push(&mut self, selection_range: Range) {
+    pub fn push(&mut self, selection_range: Range) { ::tsox_core::fntrace::enter("push"); 
         if self.ranges.len() < self.ranges.capacity() {
             self.ranges.push(selection_range);
             return;
@@ -73,7 +73,7 @@ impl SelectionRangeBuilder {
     pub fn build(
         &self,
         mut result: Option<Box<M5vSelectionRange>>,
-    ) -> Option<Box<M5vSelectionRange>> {
+    ) -> Option<Box<M5vSelectionRange>> { ::tsox_core::fntrace::enter("build"); 
         for i in 0..self.ranges.len() {
             let index = (self.oldest_index + i) % self.ranges.len();
             result = Some(Box::new(M5vSelectionRange {
@@ -89,7 +89,7 @@ pub fn get_selection_children(
     factory: &NodeFactory,
     node: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_selection_children"); 
     if !ast::is_mapped_type_node(node) {
         return crate::ls::utilities::get_children_from_non_jsdoc_node(node, source_file);
     }
@@ -149,7 +149,7 @@ pub fn group_children(
     factory: &NodeFactory,
     children: &[Arc<Node>],
     group_on: &dyn Fn(&Arc<Node>) -> bool,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("group_children"); 
     let mut result: Vec<Arc<Node>> = Vec::new();
     let mut group: Vec<Arc<Node>> = Vec::new();
     for child in children {
@@ -174,7 +174,7 @@ pub fn split_children(
     children: &[Arc<Node>],
     pivot_on: &dyn Fn(&Arc<Node>) -> bool,
     separate_trailing_semicolon: bool,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("split_children"); 
     if children.len() < 2 {
         return children.to_vec();
     }
@@ -216,7 +216,7 @@ pub fn split_children(
     result
 }
 
-pub fn create_syntax_list(factory: &NodeFactory, children: &[Arc<Node>]) -> Arc<Node> {
+pub fn create_syntax_list(factory: &NodeFactory, children: &[Arc<Node>]) -> Arc<Node> { ::tsox_core::fntrace::enter("create_syntax_list"); 
     let mut list = factory.new_syntax_list(children);
     list.loc = TextRange::new(
         children[0].pos(),

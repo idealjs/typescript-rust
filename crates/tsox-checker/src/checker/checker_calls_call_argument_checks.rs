@@ -8,7 +8,7 @@ impl Checker {
     pub(crate) fn first_declared_type_parameter_count(
         &self,
         class_sym: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("first_declared_type_parameter_count"); 
         class_sym
             .declarations
             .iter()
@@ -30,7 +30,7 @@ impl Checker {
         sig: &Arc<Signature>,
         is_new: bool,
         callee_type: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_explicit_type_argument_count"); 
         let provided = Self::explicit_type_argument_count(node);
 
         let expected = if is_new {
@@ -82,7 +82,7 @@ impl Checker {
         !mismatch
     }
 
-    fn callee_has_overload_arity_split(&self, callee_type: &Arc<Type>) -> bool {
+    fn callee_has_overload_arity_split(&self, callee_type: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("callee_has_overload_arity_split"); 
         let sigs = self.get_signatures_of_type(
             callee_type,
             crate::checker::types_type_id::SignatureKind::Call,
@@ -104,7 +104,7 @@ impl Checker {
         node: &Arc<Node>,
         callee_type: &Arc<Type>,
         arg_count: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_overload_type_argument_arity"); 
         let sigs = self.get_signatures_of_type(
             callee_type,
             crate::checker::types_type_id::SignatureKind::Call,
@@ -163,7 +163,7 @@ impl Checker {
 
     // 声明级最小实参数：default 子句前的非默认形参个数（resolved 默认惰性，
     // 语义位取声明节点）
-    pub(crate) fn declared_min_type_argument_count(sig: &Arc<Signature>) -> usize {
+    pub(crate) fn declared_min_type_argument_count(sig: &Arc<Signature>) -> usize { ::tsox_core::fntrace::enter("declared_min_type_argument_count"); 
         let Some(decl) = &sig.declaration else {
             return sig.type_parameters.len();
         };
@@ -187,7 +187,7 @@ impl Checker {
         tps.len()
     }
 
-    fn report_type_argument_count_mismatch(&mut self, node: &Arc<Node>, provided: usize, expected: String) {
+    fn report_type_argument_count_mismatch(&mut self, node: &Arc<Node>, provided: usize, expected: String) { ::tsox_core::fntrace::enter("report_type_argument_count_mismatch"); 
         let loc = match &node.data {
             tsox_frontend::ast::NodeData::CallExpression(d) => d
                 .type_arguments
@@ -212,7 +212,7 @@ impl Checker {
         ));
     }
 
-    fn signature_type_parameter_arity_range(&self, sig: &Arc<Signature>) -> (usize, usize) {
+    fn signature_type_parameter_arity_range(&self, sig: &Arc<Signature>) -> (usize, usize) { ::tsox_core::fntrace::enter("signature_type_parameter_arity_range"); 
         let max = sig.type_parameters.len();
         let mut min = 0;
         for (i, tp) in sig.type_parameters.iter().enumerate() {
@@ -226,7 +226,7 @@ impl Checker {
     fn declared_type_parameter_arity_range(
         &self,
         class_sym: &Arc<tsox_frontend::ast::Symbol>,
-    ) -> (usize, usize) {
+    ) -> (usize, usize) { ::tsox_core::fntrace::enter("declared_type_parameter_arity_range"); 
         let params = class_sym.declarations.iter().find_map(|d| match &d.data {
             tsox_frontend::ast::NodeData::InterfaceDeclaration(i) => {
                 i.type_parameters.as_ref().map(|t| t.len())
@@ -268,7 +268,7 @@ impl Checker {
         (min, max)
     }
 
-    fn type_parameter_has_default(&self, t: &Arc<Type>) -> bool {
+    fn type_parameter_has_default(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_parameter_has_default"); 
         if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
             && tp.resolved_default_type.get().is_some()
         {
@@ -293,7 +293,7 @@ impl Checker {
         rest_element_type: &Option<Arc<Type>>,
         inferred_types: &[Arc<Type>],
         new_explicit_subst: &Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_call_arguments_loop"); 
         for (i, arg) in arguments.iter().enumerate() {
             let base_param_type = if has_rest && i >= rest_index {
                 Arc::clone(rest_element_type.as_ref().unwrap())

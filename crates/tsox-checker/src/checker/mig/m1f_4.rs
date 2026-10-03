@@ -35,7 +35,7 @@ use crate::checker::mig::m2a::r18k8_flags::{
 use std::sync::Arc;
 
 impl Checker {
-    pub fn get_target_of_access_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_access_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_access_expression"); 
         let parent = node.parent_rc();
         if parent.kind == SyntaxKind::BinaryExpression {
             let expr = parent.as_binary_expression();
@@ -46,7 +46,7 @@ impl Checker {
         None
     }
 
-    pub fn get_target_of_alias_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_alias_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_alias_declaration"); 
         match node.kind {
             SyntaxKind::ImportEqualsDeclaration | SyntaxKind::VariableDeclaration => {
                 self.get_target_of_import_equals_declaration(node)
@@ -84,7 +84,7 @@ impl Checker {
         }
     }
 
-    pub fn get_target_of_alias_like_expression(&mut self, expression: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_alias_like_expression(&mut self, expression: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_alias_like_expression"); 
         if is_class_expression(expression) {
             return self.check_expression_cached(expression).symbol().cloned();
         }
@@ -105,7 +105,7 @@ impl Checker {
         self.get_resolved_symbol_nil(expression)
     }
 
-    pub fn get_target_of_export_assignment(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_export_assignment(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_export_assignment"); 
         if is_contained_by_namespace(node) {
             return None;
         }
@@ -119,7 +119,7 @@ impl Checker {
         node: &Arc<Node>,
         meaning: SymbolFlags,
         dont_resolve_alias: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_export_specifier"); 
         let name = node.property_name_or_name();
         if module_export_name_is_default(&name) {
             if let Some(specifier) = self.get_module_specifier_for_import_or_export(node) {
@@ -149,7 +149,7 @@ impl Checker {
         resolved
     }
 
-    pub fn get_target_of_import_clause(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_import_clause(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_import_clause"); 
         let attributes = get_import_attributes(&node.parent_rc());
         let import_attributes_type = self.get_type_from_import_attributes(attributes.as_ref());
         let module_symbol = self.resolve_external_module_name_worker(
@@ -166,7 +166,7 @@ impl Checker {
         None
     }
 
-    pub fn get_target_of_import_equals_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_import_equals_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_import_equals_declaration"); 
         let is_external_reference = is_variable_declaration(node)
             || node.as_import_equals_declaration().module_reference.kind
                 == SyntaxKind::ExternalModuleReference;
@@ -213,7 +213,7 @@ impl Checker {
         resolved
     }
 
-    pub fn get_target_of_import_specifier(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_import_specifier(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_import_specifier"); 
         let name = node.property_name_or_name();
         if node.kind == SyntaxKind::ImportSpecifier && module_export_name_is_default(&name) {
             if let Some(specifier) = self.get_module_specifier_for_import_or_export(node) {
@@ -247,7 +247,7 @@ impl Checker {
         module_symbol: &Arc<Symbol>,
         node: &Arc<Node>,
         dont_resolve_alias: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_module_default"); 
         let file = module_symbol
             .declarations
             .iter()
@@ -327,7 +327,7 @@ impl Checker {
         export_default_symbol
     }
 
-    pub fn get_target_of_namespace_export(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_namespace_export(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_namespace_export"); 
         let module_specifier = self.get_module_specifier_for_import_or_export(node)?;
         let attributes = get_import_attributes(&node.parent_rc());
         let import_attributes_type = self.get_type_from_import_attributes(attributes.as_ref());
@@ -344,7 +344,7 @@ impl Checker {
         resolved
     }
 
-    pub fn get_target_of_namespace_export_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_namespace_export_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_namespace_export_declaration"); 
         let parent = node.parent_rc();
         if can_have_symbol(&parent) {
             let symbol = self.get_symbol_of_node(&parent)?;
@@ -355,7 +355,7 @@ impl Checker {
         None
     }
 
-    pub fn get_target_of_namespace_import(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_target_of_namespace_import(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_target_of_namespace_import"); 
         let module_specifier = self.get_module_specifier_for_import_or_export(node)?;
         let attributes = get_import_attributes(&node.parent_rc().parent_rc());
         let import_attributes_type = self.get_type_from_import_attributes(attributes.as_ref());
@@ -372,12 +372,12 @@ impl Checker {
         resolved
     }
 
-    pub fn get_checker_target_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_checker_target_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_checker_target_type"); 
         get_target_type(t)
     }
 }
 
-pub(crate) fn get_target_type(t: &Arc<Type>) -> Arc<Type> {
+pub(crate) fn get_target_type(t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_target_type"); 
     if t.object_flags.intersects(ObjectFlags::Reference) {
         if let Some(target) = t.target() {
             return target.clone();
@@ -386,7 +386,7 @@ pub(crate) fn get_target_type(t: &Arc<Type>) -> Arc<Type> {
     t.clone()
 }
 
-pub(crate) fn get_template_type_key(texts: &[String], types: &[Arc<Type>]) -> CacheHashKey {
+pub(crate) fn get_template_type_key(texts: &[String], types: &[Arc<Type>]) -> CacheHashKey { ::tsox_core::fntrace::enter("get_template_type_key"); 
     let mut b = KeyBuilder::new();
     b.write_types(types);
     b.write_byte(b'|');
@@ -400,7 +400,7 @@ pub(crate) fn get_template_type_key(texts: &[String], types: &[Arc<Type>]) -> Ca
     b.hash()
 }
 
-pub(crate) fn get_this_parameter_from_node_context(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_this_parameter_from_node_context(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_this_parameter_from_node_context"); 
     let this_container = get_this_container(node, false, false);
     if is_function_like(&this_container) {
         return get_this_parameter(&this_container);
@@ -408,7 +408,7 @@ pub(crate) fn get_this_parameter_from_node_context(node: &Arc<Node>) -> Option<A
     None
 }
 
-pub(crate) fn get_start_element_count(t: &Arc<Type>, flags: ElementFlags) -> usize {
+pub(crate) fn get_start_element_count(t: &Arc<Type>, flags: ElementFlags) -> usize { ::tsox_core::fntrace::enter("get_start_element_count"); 
     let element_infos = match t.target_tuple_type() {
         Some(d) => &d.element_infos,
         None => return 0,
@@ -421,7 +421,7 @@ pub(crate) fn get_start_element_count(t: &Arc<Type>, flags: ElementFlags) -> usi
     element_infos.len()
 }
 
-pub(crate) fn get_end_element_count(t: &Arc<Type>, flags: ElementFlags) -> usize {
+pub(crate) fn get_end_element_count(t: &Arc<Type>, flags: ElementFlags) -> usize { ::tsox_core::fntrace::enter("get_end_element_count"); 
     let element_infos = match t.target_tuple_type() {
         Some(d) => &d.element_infos,
         None => return 0,
@@ -434,12 +434,12 @@ pub(crate) fn get_end_element_count(t: &Arc<Type>, flags: ElementFlags) -> usize
     element_infos.len()
 }
 
-pub(crate) fn get_total_fixed_element_count(t: &Arc<Type>) -> usize {
+pub(crate) fn get_total_fixed_element_count(t: &Arc<Type>) -> usize { ::tsox_core::fntrace::enter("get_total_fixed_element_count"); 
     let fixed_length = t.target_tuple_type().map(|d| d.fixed_length).unwrap_or(0);
     fixed_length + get_end_element_count(t, ELEMENT_FLAGS_FIXED)
 }
 
-pub(crate) fn get_tuple_key(element_infos: &[TupleElementInfo], readonly: bool) -> CacheHashKey {
+pub(crate) fn get_tuple_key(element_infos: &[TupleElementInfo], readonly: bool) -> CacheHashKey { ::tsox_core::fntrace::enter("get_tuple_key"); 
     let mut b = KeyBuilder::new();
     for e in element_infos {
         if e.flags.intersects(ElementFlags::Required) {
@@ -461,7 +461,7 @@ pub(crate) fn get_tuple_key(element_infos: &[TupleElementInfo], readonly: bool) 
     b.hash()
 }
 
-pub(crate) fn get_symbol_of_node_impl(c: &mut Checker, node: &Node) -> Option<Arc<Symbol>> {
+pub(crate) fn get_symbol_of_node_impl(c: &mut Checker, node: &Node) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_node_impl"); 
     let symbol = c.program.symbol_map().symbol_of(node).cloned()?;
     let late = c.get_late_bound_symbol(&symbol);
     Some(c.get_merged_symbol(&late))

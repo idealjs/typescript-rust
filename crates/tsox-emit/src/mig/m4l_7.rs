@@ -29,7 +29,7 @@ use r38k3_defs::{K3NodeAccessExt, TypeEraserK3Ext};
 use r38k3b_defs::visit_accessor_declaration_k3;
 
 impl TypeEraserTransformer {
-    pub(crate) fn visit_inner_tail(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn visit_inner_tail(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_inner_tail"); 
         match node.kind {
             SyntaxKind::PropertyDeclaration => {
                 if self.compiler_options.experimental_decorators.is_true()

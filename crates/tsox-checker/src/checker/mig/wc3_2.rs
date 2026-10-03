@@ -13,7 +13,7 @@ use tsox_core::diagnostics::messages_generated as msg;
 use tsox_frontend::ast::{self, Node, Symbol, SyntaxKind};
 
 impl Checker {
-    pub fn is_constraint_position(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> bool {
+    pub fn is_constraint_position(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_constraint_position"); 
         let parent = node.parent().unwrap();
         let is_call_or_new = ast::is_call_expression(&parent) || ast::is_new_expression(&parent);
         if ast::is_property_access_expression(&parent) || ast::is_qualified_name(&parent) {
@@ -36,7 +36,7 @@ impl Checker {
         false
     }
 
-    pub fn is_constructor_accessible(&mut self, node: &Arc<Node>, signature: Option<&Arc<Signature>>) -> bool {
+    pub fn is_constructor_accessible(&mut self, node: &Arc<Node>, signature: Option<&Arc<Signature>>) -> bool { ::tsox_core::fntrace::enter("is_constructor_accessible"); 
         let Some(signature) = signature else {
             return true;
         };
@@ -87,7 +87,7 @@ impl Checker {
     pub fn is_constructor_declared_this_property(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> (ThisAssignmentDeclarationKind, Option<Arc<Node>>) {
+    ) -> (ThisAssignmentDeclarationKind, Option<Arc<Node>>) { ::tsox_core::fntrace::enter("is_constructor_declared_this_property"); 
         if symbol.value_declaration.is_none()
             || !ast::is_binary_expression(symbol.value_declaration.as_ref().unwrap())
         {
@@ -151,7 +151,7 @@ impl Checker {
         (kind, location)
     }
 
-    pub fn is_constructor_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_constructor_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_constructor_type"); 
         if !self.get_signatures_of_type(t, SignatureKind::Construct).is_empty() {
             return true;
         }
@@ -162,13 +162,13 @@ impl Checker {
         false
     }
 
-    pub fn is_context_sensitive_function_like_declaration(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_context_sensitive_function_like_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_context_sensitive_function_like_declaration"); 
         tsox_frontend::ast::mig::m3f_2::has_context_sensitive_parameters(node)
             || self.has_context_sensitive_return_expression(node)
             || self.has_context_sensitive_yield_expression(node)
     }
 
-    pub fn is_context_sensitive_function_or_object_literal_method(&mut self, fn_node: &Arc<Node>) -> bool {
+    pub fn is_context_sensitive_function_or_object_literal_method(&mut self, fn_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_context_sensitive_function_or_object_literal_method"); 
         (ast::is_function_expression_or_arrow_function(fn_node) || ast::is_object_literal_method(fn_node))
             && self.is_context_sensitive_function_like_declaration(fn_node)
     }
@@ -177,7 +177,7 @@ impl Checker {
         &self,
         symbol: &Arc<Symbol>,
         container: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_declaration_contained_by"); 
         if let Some(declaration) = symbol.value_declaration.as_ref() {
             for d in &container.declarations {
                 if declaration.loc.contained_by(&d.loc) {
@@ -188,7 +188,7 @@ impl Checker {
         false
     }
 
-    pub fn is_deferred_type(&mut self, t: &Arc<Type>, check_tuples: bool) -> bool {
+    pub fn is_deferred_type(&mut self, t: &Arc<Type>, check_tuples: bool) -> bool { ::tsox_core::fntrace::enter("is_deferred_type"); 
         self.is_generic_type(t)
             || check_tuples
                 && is_tuple_type(t)
@@ -202,7 +202,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         has_default_type_arguments: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_deferred_type_reference_node"); 
         if self.alias_symbol_for_type_node(node).is_some() {
             return true;
         }
@@ -229,7 +229,7 @@ impl Checker {
         false
     }
 
-    pub fn is_deprecated_symbol(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn is_deprecated_symbol(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_deprecated_symbol"); 
         let parent_symbol = self.get_parent_of_symbol(symbol);
         if parent_symbol.is_some() && symbol.declarations.len() > 1 {
             if parent_symbol.unwrap().flags.intersects(SymbolFlags::Interface) {
@@ -253,14 +253,14 @@ impl Checker {
                     .all(|d| self.is_deprecated_declaration(d)))
     }
 
-    pub fn is_discriminant_with_never_type(&mut self, prop: &Arc<Symbol>) -> bool {
+    pub fn is_discriminant_with_never_type(&mut self, prop: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_discriminant_with_never_type"); 
         !prop.flags.intersects(SymbolFlags::Optional)
             && prop.check_flags.intersects(CHECK_FLAGS_NON_UNIFORM_AND_LITERAL)
             && !prop.check_flags.intersects(CheckFlags::HasNeverType)
             && self.get_type_of_symbol(prop).flags.contains(TypeFlags::Never)
     }
 
-    pub fn is_empty_resolved_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_empty_resolved_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_empty_resolved_type"); 
         !Arc::ptr_eq(t, &self.any_function_type())
             && t.as_structured().map_or(true, |s| {
                 s.properties.is_empty() && s.signatures.is_empty() && s.index_infos.is_empty()
@@ -271,7 +271,7 @@ impl Checker {
         &mut self,
         source: Option<&Arc<Type>>,
         target: Option<&Arc<Type>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_exact_optional_property_mismatch"); 
         match (source, target) {
             (Some(source), Some(target)) => {
                 self.maybe_type_of_kind(source, TypeFlags::Undefined)
@@ -285,7 +285,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         property_name_type: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_excluded_mapped_property_name"); 
         if t.flags.contains(TypeFlags::Conditional) {
             let true_type = self.get_true_type_from_conditional_type(t);
             let false_type = self.get_false_type_from_conditional_type(t);
@@ -312,17 +312,17 @@ impl Checker {
     }
 }
 
-pub fn is_const_enum_object_type(t: &Arc<Type>) -> bool {
+pub fn is_const_enum_object_type(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_const_enum_object_type"); 
     t.object_flags.intersects(ObjectFlags::Anonymous)
         && t.symbol().is_some()
         && is_const_enum_symbol(t.symbol().as_ref().unwrap())
 }
 
-pub fn is_const_enum_symbol(symbol: &Symbol) -> bool {
+pub fn is_const_enum_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_const_enum_symbol"); 
     symbol.flags.intersects(SymbolFlags::ConstEnum)
 }
 
-pub fn is_contained_by_namespace(node: &Arc<Node>) -> bool {
+pub fn is_contained_by_namespace(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_contained_by_namespace"); 
     let mut container = node.parent().unwrap();
     if !ast::is_source_file(&container) {
         container = container.parent().unwrap();
@@ -330,7 +330,7 @@ pub fn is_contained_by_namespace(node: &Arc<Node>) -> bool {
     ast::is_module_declaration(&container) && !ast::is_ambient_module(&container)
 }
 
-pub fn is_es2015_or_later_iterable(n: &str) -> bool {
+pub fn is_es2015_or_later_iterable(n: &str) -> bool { ::tsox_core::fntrace::enter("is_es2015_or_later_iterable"); 
     matches!(
         n,
         "Float32Array"
@@ -349,11 +349,11 @@ pub fn is_es2015_or_later_iterable(n: &str) -> bool {
 pub fn is_esm_format_import_importing_commonjs_format_file(
     usage_mode: ResolutionMode,
     target_mode: ResolutionMode,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_esm_format_import_importing_commonjs_format_file"); 
     usage_mode == ModuleKind::ESNext && target_mode == ModuleKind::CommonJS
 }
 
-pub fn is_export_or_export_expression(location: &Arc<Node>) -> bool {
+pub fn is_export_or_export_expression(location: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_export_or_export_expression"); 
     ast::find_ancestor(location, |n: &Node| {
         let Some(parent) = n.parent() else {
             return false;

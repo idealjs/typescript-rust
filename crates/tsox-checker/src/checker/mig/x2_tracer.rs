@@ -9,7 +9,7 @@ use crate::checker::utilities_token_is_identifier_or_keyword::type_to_string;
 use super::x3::{wrap_type, TracedType, TracedTypeAdapter};
 
 impl TracedTypeAdapter {
-    pub(crate) fn conditional_check_type(&self) -> Option<TracedType> {
+    pub(crate) fn conditional_check_type(&self) -> Option<TracedType> { ::tsox_core::fntrace::enter("conditional_check_type"); 
         let t = unsafe { &*self.t };
         if !t.flags.intersects(TypeFlags::Conditional) {
             return None;
@@ -20,7 +20,7 @@ impl TracedTypeAdapter {
             .map(wrap_type)
     }
 
-    pub(crate) fn conditional_extends_type(&self) -> Option<TracedType> {
+    pub(crate) fn conditional_extends_type(&self) -> Option<TracedType> { ::tsox_core::fntrace::enter("conditional_extends_type"); 
         let t = unsafe { &*self.t };
         if !t.flags.intersects(TypeFlags::Conditional) {
             return None;
@@ -31,7 +31,7 @@ impl TracedTypeAdapter {
             .map(wrap_type)
     }
 
-    pub(crate) fn conditional_true_type(&self) -> Option<TracedType> {
+    pub(crate) fn conditional_true_type(&self) -> Option<TracedType> { ::tsox_core::fntrace::enter("conditional_true_type"); 
         let t = unsafe { &*self.t };
         if !t.flags.intersects(TypeFlags::Conditional) {
             return None;
@@ -42,7 +42,7 @@ impl TracedTypeAdapter {
             .map(|t| wrap_type(t))
     }
 
-    pub(crate) fn conditional_false_type(&self) -> Option<TracedType> {
+    pub(crate) fn conditional_false_type(&self) -> Option<TracedType> { ::tsox_core::fntrace::enter("conditional_false_type"); 
         let t = unsafe { &*self.t };
         if !t.flags.intersects(TypeFlags::Conditional) {
             return None;
@@ -55,7 +55,7 @@ impl TracedTypeAdapter {
 }
 
 impl Checker {
-    pub(crate) fn traced_type_display(&self, a: &TracedTypeAdapter) -> String {
+    pub(crate) fn traced_type_display(&self, a: &TracedTypeAdapter) -> String { ::tsox_core::fntrace::enter("traced_type_display"); 
         let t = unsafe { &*a.t };
         if t.object_flags.intersects(ObjectFlags::Anonymous)
             || t.flags.intersects(

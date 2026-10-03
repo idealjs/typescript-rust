@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         declaration_for_scope: Option<&Arc<Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_scope_exempt"); 
         if let Some(declaration_for_scope) = declaration_for_scope {
             let is_fn_like = |n: &Arc<Node>| {
                 matches!(

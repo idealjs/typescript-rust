@@ -9,11 +9,11 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-fn object_type_instantiations_slot(t: &Arc<Type>) -> usize {
+fn object_type_instantiations_slot(t: &Arc<Type>) -> usize { ::tsox_core::fntrace::enter("object_type_instantiations_slot"); 
     Arc::as_ptr(t) as *const () as usize
 }
 
-pub(crate) fn object_type_instantiations_is_empty(target: &Arc<Type>) -> bool {
+pub(crate) fn object_type_instantiations_is_empty(target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("object_type_instantiations_is_empty"); 
     OBJECT_TYPE_INSTANTIATIONS.with(|map| {
         map.borrow()
             .get(&object_type_instantiations_slot(target))
@@ -24,7 +24,7 @@ pub(crate) fn object_type_instantiations_is_empty(target: &Arc<Type>) -> bool {
 pub(crate) fn object_type_instantiations_get(
     target: &Arc<Type>,
     key: &CacheHashKey,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("object_type_instantiations_get"); 
     OBJECT_TYPE_INSTANTIATIONS.with(|map| {
         map.borrow_mut()
             .get(&object_type_instantiations_slot(target))
@@ -37,7 +37,7 @@ pub(crate) fn object_type_instantiations_insert(
     target: &Arc<Type>,
     key: CacheHashKey,
     t: Arc<Type>,
-) {
+) { ::tsox_core::fntrace::enter("object_type_instantiations_insert"); 
     OBJECT_TYPE_INSTANTIATIONS.with(|map| {
         map.borrow_mut()
             .entry(object_type_instantiations_slot(target))
@@ -50,20 +50,20 @@ thread_local! {
     static FLOW_NODE_POST_SUPER: RefCell<HashMap<usize, bool>> = RefCell::new(HashMap::new());
 }
 
-fn flow_node_post_super_slot(flow: &Arc<tsox_frontend::ast::FlowNode>) -> usize {
+fn flow_node_post_super_slot(flow: &Arc<tsox_frontend::ast::FlowNode>) -> usize { ::tsox_core::fntrace::enter("flow_node_post_super_slot"); 
     Arc::as_ptr(flow) as *const () as usize
 }
 
 pub(crate) fn flow_node_post_super_get(
     flow: &Arc<tsox_frontend::ast::FlowNode>,
-) -> Option<bool> {
+) -> Option<bool> { ::tsox_core::fntrace::enter("flow_node_post_super_get"); 
     FLOW_NODE_POST_SUPER.with(|map| map.borrow().get(&flow_node_post_super_slot(flow)).copied())
 }
 
 pub(crate) fn flow_node_post_super_insert(
     flow: Arc<tsox_frontend::ast::FlowNode>,
     post_super: bool,
-) {
+) { ::tsox_core::fntrace::enter("flow_node_post_super_insert"); 
     FLOW_NODE_POST_SUPER.with(|map| {
         map.borrow_mut()
             .insert(flow_node_post_super_slot(&flow), post_super);

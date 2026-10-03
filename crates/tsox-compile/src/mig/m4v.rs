@@ -112,17 +112,17 @@ pub trait SourceFileMayBeEmittedHost: Send + Sync {
     fn source_files(&self) -> Vec<Arc<SourceFile>>;
 }
 
-pub fn printer_get_emit_context() -> EmitContext {
+pub fn printer_get_emit_context() -> EmitContext { ::tsox_core::fntrace::enter("printer_get_emit_context"); 
     tsox_emit::printer::mig::m4m_3::get_emit_context().0
 }
 
-fn writer_is_at_start_of_line(writer: &EmitTextWriter, new_line: &str) -> bool {
+fn writer_is_at_start_of_line(writer: &EmitTextWriter, new_line: &str) -> bool { ::tsox_core::fntrace::enter("writer_is_at_start_of_line"); 
     // Go textwriter.go:84 lineStart:空文本或以换行结尾(Rust writer 未跟踪 lineStart,按可观察状态等价)
     let text = writer.string();
     text.is_empty() || text.ends_with(new_line)
 }
 
-fn source_file_with_node(file: &Arc<SourceFile>, node: Arc<Node>) -> Arc<SourceFile> {
+fn source_file_with_node(file: &Arc<SourceFile>, node: Arc<Node>) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("source_file_with_node"); 
     // Go TransformSourceFile 返回的仍是同一 SourceFile 视图;Rust 变换器产出 Arc<Node>,
     // 以原文件元数据重建包装(m4d_4 copy_from 同思路)
     Arc::new(SourceFile {
@@ -153,7 +153,7 @@ fn source_file_with_node(file: &Arc<SourceFile>, node: Arc<Node>) -> Arc<SourceF
     })
 }
 
-fn empty_print_handlers() -> PrinterHandlers {
+fn empty_print_handlers() -> PrinterHandlers { ::tsox_core::fntrace::enter("empty_print_handlers"); 
     PrinterHandlers {
         has_global_name: None,
         map_source_position: None,
@@ -166,7 +166,7 @@ fn empty_print_handlers() -> PrinterHandlers {
     }
 }
 
-fn script_target_display(target: ScriptTarget) -> String {
+fn script_target_display(target: ScriptTarget) -> String { ::tsox_core::fntrace::enter("script_target_display"); 
     match target {
         ScriptTarget::None => String::new(),
         ScriptTarget::ES5 => "ES5".to_string(),
@@ -186,18 +186,18 @@ fn script_target_display(target: ScriptTarget) -> String {
     }
 }
 
-pub fn printer_put_emit_context(_context: EmitContext) {}
+pub fn printer_put_emit_context(_context: EmitContext) { ::tsox_core::fntrace::enter("printer_put_emit_context"); }
 
 pub fn sourcemap_new_generator(
     generated_file_name: &str,
     source_root: &str,
     source_map_directory: &str,
     options: &ComparePathsOptions,
-) -> SourceMapGenerator {
+) -> SourceMapGenerator { ::tsox_core::fntrace::enter("sourcemap_new_generator"); 
     SourceMapGenerator
 }
 
-pub fn get_base_filename(path: &str) -> String {
+pub fn get_base_filename(path: &str) -> String { ::tsox_core::fntrace::enter("get_base_filename"); 
     tsox_core::tspath::get_base_file_name(path)
 }
 
@@ -207,7 +207,7 @@ pub fn get_source_file_path_in_new_dir(
     current_directory: &str,
     common_source_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_source_file_path_in_new_dir"); 
     get_source_file_path_in_new_dir_worker(
         file_name,
         new_dir_path,
@@ -223,7 +223,7 @@ pub fn get_source_file_path_in_new_dir_worker(
     current_directory: &str,
     common_source_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_source_file_path_in_new_dir_worker"); 
     let options = ComparePathsOptions {
         use_case_sensitive_file_names,
         current_directory: current_directory.to_string(),
@@ -239,7 +239,7 @@ pub fn get_common_source_directory(
     files: impl Fn() -> Vec<String>,
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_common_source_directory"); 
     let mut common_source_directory;
     if !options.root_dir.is_empty() {
         common_source_directory = options.root_dir.clone();
@@ -259,7 +259,7 @@ fn compute_common_source_directory_of_filenames(
     file_names: &[String],
     current_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("compute_common_source_directory_of_filenames"); 
     let mut common_path_components: Vec<String> = Vec::new();
     let mut have_common = false;
     for source_file in file_names {
@@ -299,31 +299,31 @@ fn compute_common_source_directory_of_filenames(
     path
 }
 
-pub fn ts_transforms_new_metadata_transformer(opts: &TransformOptions) -> Arc<Transformer> {
+pub fn ts_transforms_new_metadata_transformer(opts: &TransformOptions) -> Arc<Transformer> { ::tsox_core::fntrace::enter("ts_transforms_new_metadata_transformer"); 
     tsox_emit::mig::m4l_2::MetadataTransformer::new_metadata_transformer(opts)
 }
 
-pub fn ts_transforms_new_type_eraser_transformer(opts: &TransformOptions) -> Arc<Transformer> {
+pub fn ts_transforms_new_type_eraser_transformer(opts: &TransformOptions) -> Arc<Transformer> { ::tsox_core::fntrace::enter("ts_transforms_new_type_eraser_transformer"); 
     tsox_emit::mig::m4l_6::TypeEraserTransformer::new_type_eraser_transformer(opts)
 }
 
-pub fn ts_transforms_new_runtime_syntax_transformer(opts: &TransformOptions) -> Transformer {
+pub fn ts_transforms_new_runtime_syntax_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("ts_transforms_new_runtime_syntax_transformer"); 
     Transformer::new(runtime_syntax_transformer_visit, Some(opts.context.clone()))
 }
 
-fn runtime_syntax_transformer_visit(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+fn runtime_syntax_transformer_visit(_tx: &mut Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("runtime_syntax_transformer_visit"); 
     Some(node)
 }
 
-pub fn is_source_file_js(file: &SourceFile) -> bool {
+pub fn is_source_file_js(file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_source_file_js"); 
     file.script_kind == ScriptKind::Js || file.script_kind == ScriptKind::Jsx
 }
 
-pub fn is_json_source_file(file: &SourceFile) -> bool {
+pub fn is_json_source_file(file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_json_source_file"); 
     file.script_kind == ScriptKind::Json
 }
 
-pub fn node_is_synthesized(node: &Node) -> bool {
+pub fn node_is_synthesized(node: &Node) -> bool { ::tsox_core::fntrace::enter("node_is_synthesized"); 
     (node.loc.pos() as i32) < 0 || (node.end() as i32) < 0
 }
 
@@ -355,7 +355,7 @@ impl Emitter {
         &mut self,
         emit_context: &EmitContext,
         mut source_file: Arc<SourceFile>,
-    ) -> Arc<SourceFile> {
+    ) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("run_script_transformers"); 
         for transformer in get_script_transformers(emit_context, self.host.clone(), &source_file) {
             // Go: transformer.TransformSourceFile(sourceFile) = visitor.VisitSourceFile。
             // Rust 变换器以 Arc<Node> 驱动,输出节点重建 SourceFile 包装。
@@ -375,7 +375,7 @@ impl Emitter {
         mut source_file: Arc<SourceFile>,
         declaration_file_path: &str,
         declaration_map_path: &str,
-    ) -> (Arc<SourceFile>, Vec<Diagnostic>) {
+    ) -> (Arc<SourceFile>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("run_declaration_transformers"); 
         let mut diags = Vec::new();
         let force_dts_emit = self.emit_only == EmitOnly::EmitOnlyBuilderSignature
             || (self.force_emit && self.emit_only == EmitOnly::EmitOnlyDts);
@@ -413,7 +413,7 @@ impl Emitter {
         (source_file, diags)
     }
 
-    pub fn emit_js_file(&mut self, source_file: Option<Arc<SourceFile>>, js_file_path: &str, source_map_file_path: &str) {
+    pub fn emit_js_file(&mut self, source_file: Option<Arc<SourceFile>>, js_file_path: &str, source_map_file_path: &str) { ::tsox_core::fntrace::enter("emit_js_file"); 
         let options = self.host.options().clone();
         let Some(source_file) = source_file else { return };
         if self.emit_only != EmitOnly::EmitAll && self.emit_only != EmitOnly::EmitOnlyJs || js_file_path.is_empty() {
@@ -446,7 +446,7 @@ impl Emitter {
         printer_put_emit_context(emit_context);
     }
 
-    pub fn emit_declaration_file(&mut self, source_file: Option<Arc<SourceFile>>, declaration_file_path: &str, declaration_map_path: &str) {
+    pub fn emit_declaration_file(&mut self, source_file: Option<Arc<SourceFile>>, declaration_file_path: &str, declaration_map_path: &str) { ::tsox_core::fntrace::enter("emit_declaration_file"); 
         let options = self.host.options().clone();
         let Some(source_file) = source_file else { return };
         if self.emit_only == EmitOnly::EmitOnlyJs || declaration_file_path.is_empty() {
@@ -520,7 +520,7 @@ impl Emitter {
         printer_: &mut Printer,
         map_options: &CompilerOptions,
         should_emit_source_maps_flag: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("print_source_file"); 
         let options = self.host.options();
         let emit_bom = options.emit_bom.is_true();
         let mut source_map_generator = None;
@@ -625,14 +625,14 @@ impl Emitter {
         self.writer.clear();
     }
 
-    pub fn write_text(&mut self, file_name: &str, text: &str, data: &WriteFileData) -> Result<(), String> {
+    pub fn write_text(&mut self, file_name: &str, text: &str, data: &WriteFileData) -> Result<(), String> { ::tsox_core::fntrace::enter("write_text"); 
         if let Some(write_file) = self.write_file.as_ref() {
             return write_file(file_name, text, Some(data));
         }
         self.host.write_file(file_name, text).map_err(|err| err.to_string())
     }
 
-    pub fn get_source_map_directory(&self, map_options: &CompilerOptions, file_path: &str, source_file: Option<&Arc<SourceFile>>) -> String {
+    pub fn get_source_map_directory(&self, map_options: &CompilerOptions, file_path: &str, source_file: Option<&Arc<SourceFile>>) -> String { ::tsox_core::fntrace::enter("get_source_map_directory"); 
         if !map_options.source_root.is_empty() {
             return self.host.common_source_directory();
         }
@@ -662,7 +662,7 @@ impl Emitter {
         file_path: &str,
         source_map_file_path: &str,
         source_file: Option<&Arc<SourceFile>>,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_source_mapping_url"); 
         if map_options.inline_source_map.is_true() {
             // Go: generator.ToBase64DataURL()。m4o_2::Generator 桩,占位空串(交接 1)。
             let _ = source_map_generator;
@@ -706,7 +706,7 @@ pub struct DeclarationMapSource {
     line_map: Vec<TextPos>,
 }
 
-pub fn new_declaration_map_source(source_file: &Arc<SourceFile>) -> DeclarationMapSource {
+pub fn new_declaration_map_source(source_file: &Arc<SourceFile>) -> DeclarationMapSource { ::tsox_core::fntrace::enter("new_declaration_map_source"); 
     // Go: OriginalText()/OriginalFileName()。Rust SourceFile 尚无重定向/内容映射字段，
     // 无重定向时 original 即当前值（交接 6）。
     let text = source_file.text.clone();
@@ -718,18 +718,18 @@ pub fn new_declaration_map_source(source_file: &Arc<SourceFile>) -> DeclarationM
 }
 
 impl DeclarationMapSource {
-    pub fn file_name(&self) -> &str {
+    pub fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
-    pub fn ecma_line_map(&self) -> &[TextPos] {
+    pub fn ecma_line_map(&self) -> &[TextPos] { ::tsox_core::fntrace::enter("ecma_line_map"); 
         &self.line_map
     }
 }
 
-pub fn get_module_transformer(opts: &TransformOptions) -> Transformer {
+pub fn get_module_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("get_module_transformer"); 
     match opts.compiler_options.get_emit_module_kind() {
         ModuleKind::Preserve => module_transforms_new_es_module_transformer(opts),
         ModuleKind::ESNext
@@ -749,7 +749,7 @@ pub fn get_module_transformer(opts: &TransformOptions) -> Transformer {
     }
 }
 
-fn jsx_transforms_new_jsx_transformer(opts: &TransformOptions) -> Transformer {
+fn jsx_transforms_new_jsx_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("jsx_transforms_new_jsx_transformer"); 
     // Go: jsxtransforms.NewJSXTransformer(opts) 返回 *Transformer。
     // m4i_13::JSXTransformer 状态结构尚无 visit_entry/Transformer 桥接,
     // 按 wt1 shell 模式构造状态后返回身份 visit(交接 5)。
@@ -757,14 +757,14 @@ fn jsx_transforms_new_jsx_transformer(opts: &TransformOptions) -> Transformer {
     Transformer::new(runtime_syntax_transformer_visit, Some(opts.context.clone()))
 }
 
-fn es_transforms_new_use_strict_transformer(opts: &TransformOptions) -> Transformer {
+fn es_transforms_new_use_strict_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("es_transforms_new_use_strict_transformer"); 
     // Go: estransforms.NewUseStrictTransformer(opts)。m4i::UseStrictTransformer 状态结构
     // 尚无 visit_entry/Transformer 桥接,同 shell 模式(交接 5)。
     let _tx = tsox_emit::mig::m4i::new_use_strict_transformer(opts);
     Transformer::new(runtime_syntax_transformer_visit, Some(opts.context.clone()))
 }
 
-fn inliners_new_const_enum_inlining_transformer(opts: &TransformOptions) -> Transformer {
+fn inliners_new_const_enum_inlining_transformer(opts: &TransformOptions) -> Transformer { ::tsox_core::fntrace::enter("inliners_new_const_enum_inlining_transformer"); 
     // Go: inliners.NewConstEnumInliningTransformer(opts)。m4i_12 状态结构同上(交接 5)。
     let _tx = tsox_emit::mig::m4i_12::new_const_enum_inlining_transformer(opts);
     Transformer::new(runtime_syntax_transformer_visit, Some(opts.context.clone()))
@@ -774,7 +774,7 @@ pub fn get_script_transformers(
     emit_context: &EmitContext,
     host: Arc<EmitHostImpl>,
     source_file: &Arc<SourceFile>,
-) -> Vec<Arc<Transformer>> {
+) -> Vec<Arc<Transformer>> { ::tsox_core::fntrace::enter("get_script_transformers"); 
     let mut tx: Vec<Arc<Transformer>> = Vec::new();
     let options = host.options();
 
@@ -840,12 +840,12 @@ pub fn get_script_transformers(
     tx
 }
 
-pub fn should_emit_source_maps(map_options: &CompilerOptions, source_file: &Arc<SourceFile>) -> bool {
+pub fn should_emit_source_maps(map_options: &CompilerOptions, source_file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("should_emit_source_maps"); 
     (map_options.source_map.is_true() || map_options.inline_source_map.is_true())
         && !file_extension_is(&source_file.file_name, EXTENSION_JSON)
 }
 
-pub fn get_source_root(map_options: &CompilerOptions) -> String {
+pub fn get_source_root(map_options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_source_root"); 
     let mut source_root = normalize_slashes(&map_options.source_root);
     if !source_root.is_empty() {
         source_root = ensure_trailing_directory_separator(&source_root);
@@ -858,7 +858,7 @@ pub fn source_file_may_be_emitted(
     host: &dyn SourceFileMayBeEmittedHost,
     force_dts_emit: bool,
     force_js_emit: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("source_file_may_be_emitted"); 
     let options = host.options();
     if !force_js_emit && options.no_emit_for_js_files.is_true() && is_source_file_js(source_file) {
         return false;
@@ -922,7 +922,7 @@ pub fn get_source_files_to_emit(
     target_source_files: Option<Vec<Arc<SourceFile>>>,
     force_dts_emit: bool,
     force_js_emit: bool,
-) -> Vec<Arc<SourceFile>> {
+) -> Vec<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_files_to_emit"); 
     let target_source_files = target_source_files.unwrap_or_else(|| host.source_files());
     target_source_files
         .into_iter()
@@ -930,11 +930,11 @@ pub fn get_source_files_to_emit(
         .collect()
 }
 
-pub fn is_source_file_not_json(file: &Arc<SourceFile>) -> bool {
+pub fn is_source_file_not_json(file: &Arc<SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_source_file_not_json"); 
     !is_json_source_file(file)
 }
 
-pub fn new_declaration_emit_host_bridge(host: &Arc<EmitHostImpl>) -> BridgeDeclarationEmitHost {
+pub fn new_declaration_emit_host_bridge(host: &Arc<EmitHostImpl>) -> BridgeDeclarationEmitHost { ::tsox_core::fntrace::enter("new_declaration_emit_host_bridge"); 
     let get_source_file_from_reference_host = host.clone();
     let get_output_paths_for_host = host.clone();
     let source_file_may_be_emitted_host = host.clone();
@@ -986,7 +986,7 @@ pub fn new_declaration_emit_host_bridge(host: &Arc<EmitHostImpl>) -> BridgeDecla
     })
 }
 
-pub fn get_declaration_diagnostics(host: Arc<EmitHostImpl>, file: &Arc<SourceFile>) -> Vec<Diagnostic> {
+pub fn get_declaration_diagnostics(host: Arc<EmitHostImpl>, file: &Arc<SourceFile>) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_declaration_diagnostics"); 
     let full_files: Vec<Arc<SourceFile>> = get_source_files_to_emit(
         host.as_ref(),
         Some(vec![file.clone()]),
@@ -1026,7 +1026,7 @@ pub enum FileIncludeKind {
 }
 
 impl FileIncludeReasonData {
-    pub fn clone_data(&self) -> FileIncludeReasonData {
+    pub fn clone_data(&self) -> FileIncludeReasonData { ::tsox_core::fntrace::enter("clone_data"); 
         match self {
             FileIncludeReasonData::None => FileIncludeReasonData::None,
             FileIncludeReasonData::Index(index) => FileIncludeReasonData::Index(*index),
@@ -1075,15 +1075,15 @@ pub struct FileIncludeReason {
 }
 
 impl FileIncludeReason {
-    pub fn new(kind: FileIncludeKind, data: FileIncludeReasonData) -> Self {
+    pub fn new(kind: FileIncludeKind, data: FileIncludeReasonData) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self { kind, data, relative_file_name_diag: None, diag: None }
     }
 
-    pub fn is_referenced_file(&self) -> bool {
+    pub fn is_referenced_file(&self) -> bool { ::tsox_core::fntrace::enter("is_referenced_file"); 
         self.kind <= FileIncludeKind::LibReferenceDirective
     }
 
-    pub fn clone_reason(&self) -> Box<FileIncludeReason> {
+    pub fn clone_reason(&self) -> Box<FileIncludeReason> { ::tsox_core::fntrace::enter("clone_reason"); 
         Box::new(FileIncludeReason {
             kind: self.kind,
             data: self.data.clone_data(),
@@ -1092,35 +1092,35 @@ impl FileIncludeReason {
         })
     }
 
-    pub fn as_index(&self) -> usize {
+    pub fn as_index(&self) -> usize { ::tsox_core::fntrace::enter("as_index"); 
         match &self.data {
             FileIncludeReasonData::Index(index) => *index,
             _ => panic!("FileIncludeReason data is not an index"),
         }
     }
 
-    pub fn as_lib_file_index(&self) -> Option<usize> {
+    pub fn as_lib_file_index(&self) -> Option<usize> { ::tsox_core::fntrace::enter("as_lib_file_index"); 
         match &self.data {
             FileIncludeReasonData::Index(index) => Some(*index),
             _ => None,
         }
     }
 
-    pub fn as_referenced_file_data(&self) -> &ReferencedFileData {
+    pub fn as_referenced_file_data(&self) -> &ReferencedFileData { ::tsox_core::fntrace::enter("as_referenced_file_data"); 
         match &self.data {
             FileIncludeReasonData::ReferencedFile(data) => data,
             _ => panic!("FileIncludeReason data is not referencedFileData"),
         }
     }
 
-    pub fn as_automatic_type_directive_file_data(&self) -> &AutomaticTypeDirectiveFileData {
+    pub fn as_automatic_type_directive_file_data(&self) -> &AutomaticTypeDirectiveFileData { ::tsox_core::fntrace::enter("as_automatic_type_directive_file_data"); 
         match &self.data {
             FileIncludeReasonData::AutomaticTypeDirectiveFile(data) => data,
             _ => panic!("FileIncludeReason data is not automaticTypeDirectiveFileData"),
         }
     }
 
-    pub fn get_referenced_location(&self, program: &Program) -> ReferenceFileLocation {
+    pub fn get_referenced_location(&self, program: &Program) -> ReferenceFileLocation { ::tsox_core::fntrace::enter("get_referenced_location"); 
         let ref_ = self.as_referenced_file_data();
         let file = program
             .get_source_file_by_path(ref_.file.as_str())
@@ -1182,7 +1182,7 @@ impl FileIncludeReason {
         }
     }
 
-    pub fn to_diagnostic(self: &Arc<Self>, program: &Program, relative_file_name: bool) -> Option<Diagnostic> {
+    pub fn to_diagnostic(self: &Arc<Self>, program: &Program, relative_file_name: bool) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("to_diagnostic"); 
         if relative_file_name {
             self.compute_diagnostic(program, &|file_name: &str| {
                 get_relative_path_from_directory(
@@ -1196,7 +1196,7 @@ impl FileIncludeReason {
         }
     }
 
-    fn compute_diagnostic(self: &Arc<Self>, program: &Program, to_file_name: &dyn Fn(&str) -> String) -> Option<Diagnostic> {
+    fn compute_diagnostic(self: &Arc<Self>, program: &Program, to_file_name: &dyn Fn(&str) -> String) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("compute_diagnostic"); 
         if self.is_referenced_file() {
             return self.compute_reference_file_diagnostic(program, to_file_name);
         }
@@ -1296,7 +1296,7 @@ impl FileIncludeReason {
         }
     }
 
-    fn compute_reference_file_diagnostic(self: &Arc<Self>, program: &Program, to_file_name: &dyn Fn(&str) -> String) -> Option<Diagnostic> {
+    fn compute_reference_file_diagnostic(self: &Arc<Self>, program: &Program, to_file_name: &dyn Fn(&str) -> String) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("compute_reference_file_diagnostic"); 
         let reference_location = ip_of(program).get_reference_location(self, program);
         let reference_text = reference_location.text();
         match self.kind {
@@ -1380,7 +1380,7 @@ impl FileIncludeReason {
         }
     }
 
-    pub fn to_related_info(self: &Arc<Self>, program: &Program) -> Option<Diagnostic> {
+    pub fn to_related_info(self: &Arc<Self>, program: &Program) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("to_related_info"); 
         if self.is_referenced_file() {
             return self.compute_reference_file_related_info(program);
         }
@@ -1493,7 +1493,7 @@ impl FileIncludeReason {
         }
     }
 
-    fn compute_reference_file_related_info(self: &Arc<Self>, program: &Program) -> Option<Diagnostic> {
+    fn compute_reference_file_related_info(self: &Arc<Self>, program: &Program) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("compute_reference_file_related_info"); 
         let reference_location = ip_of(program).get_reference_location(self, program);
         if reference_location.is_synthetic {
             return None;
@@ -1525,7 +1525,7 @@ pub struct ReferenceFileLocation {
 }
 
 impl ReferenceFileLocation {
-    pub fn text(&self) -> String {
+    pub fn text(&self) -> String { ::tsox_core::fntrace::enter("text"); 
         if let Some(node) = &self.node {
             if !node_is_synthesized(node) {
                 let text = &self.file.text;
@@ -1538,7 +1538,7 @@ impl ReferenceFileLocation {
         self.file.text[ref_.range.pos() as usize..ref_.range.end() as usize].to_string()
     }
 
-    pub fn diagnostic_at(&self, message: Message, args: Vec<String>) -> Option<Diagnostic> {
+    pub fn diagnostic_at(&self, message: Message, args: Vec<String>) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("diagnostic_at"); 
         if let Some(node) = &self.node {
             Some(create_diagnostic_for_node_in_source_file(
                 &self.file, node, message, args,
@@ -1572,21 +1572,21 @@ pub struct ProcessingDiagnostic {
 }
 
 impl ProcessingDiagnostic {
-    pub fn as_file_include_reason(&self) -> &FileIncludeReason {
+    pub fn as_file_include_reason(&self) -> &FileIncludeReason { ::tsox_core::fntrace::enter("as_file_include_reason"); 
         match &self.data {
             ProcessingDiagnosticData::FileIncludeReason(reason) => reason,
             _ => panic!("processingDiagnostic data is not a FileIncludeReason"),
         }
     }
 
-    pub fn as_include_explaining_diagnostic(&self) -> &IncludeExplainingDiagnostic {
+    pub fn as_include_explaining_diagnostic(&self) -> &IncludeExplainingDiagnostic { ::tsox_core::fntrace::enter("as_include_explaining_diagnostic"); 
         match &self.data {
             ProcessingDiagnosticData::IncludeExplainingDiagnostic(diag) => diag,
             _ => panic!("processingDiagnostic data is not an includeExplainingDiagnostic"),
         }
     }
 
-    pub fn create_diagnostic_explaining_file(&self, program: &Program) -> Option<Diagnostic> {
+    pub fn create_diagnostic_explaining_file(&self, program: &Program) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("create_diagnostic_explaining_file"); 
         let diag = self.as_include_explaining_diagnostic();
         let mut include_details: Vec<Diagnostic> = Vec::new();
         let mut related_info: Vec<Diagnostic> = Vec::new();
@@ -1686,7 +1686,7 @@ impl ProcessingDiagnostic {
     }
 }
 
-fn find_reason_arc(program: &Program, reason: *const FileIncludeReason) -> Option<Arc<FileIncludeReason>> {
+fn find_reason_arc(program: &Program, reason: *const FileIncludeReason) -> Option<Arc<FileIncludeReason>> { ::tsox_core::fntrace::enter("find_reason_arc"); 
     ip_of(program)
         .file_include_reasons
         .values()
@@ -1703,7 +1703,7 @@ pub struct IncludeExplainingDiagnostic {
     pub args: Vec<String>,
 }
 
-fn ip_of(program: &Program) -> &IncludeProcessor {
+fn ip_of(program: &Program) -> &IncludeProcessor { ::tsox_core::fntrace::enter("ip_of"); 
     // Go: includeProcessor 在 createProgram 时创建,非 nil;Rust 侧为 Option 字段
     program
         .include_processor

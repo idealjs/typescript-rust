@@ -14,13 +14,13 @@ pub trait R38K9SourceFileNodeExt {
 }
 
 impl R38K9SourceFileNodeExt for SourceFile {
-    fn as_node(&self) -> Arc<Node> {
+    fn as_node(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("as_node"); 
         self.node.clone()
     }
 }
 
 impl R38K9SourceFileNodeExt for Arc<SourceFile> {
-    fn as_node(&self) -> Arc<Node> {
+    fn as_node(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("as_node"); 
         self.node.clone()
     }
 }
@@ -60,67 +60,67 @@ macro_rules! cast_data {
 }
 
 impl R38K9NodeCastExt for Arc<Node> {
-    fn as_binary_expression(&self) -> &ndg::BinaryExpressionData {
+    fn as_binary_expression(&self) -> &ndg::BinaryExpressionData { ::tsox_core::fntrace::enter("as_binary_expression"); 
         cast_data!(self, BinaryExpression)
     }
 
-    fn as_catch_clause(&self) -> &ndg::CatchClauseData {
+    fn as_catch_clause(&self) -> &ndg::CatchClauseData { ::tsox_core::fntrace::enter("as_catch_clause"); 
         cast_data!(self, CatchClause)
     }
 
-    fn as_tagged_template_expression(&self) -> &ndg::TaggedTemplateExpressionData {
+    fn as_tagged_template_expression(&self) -> &ndg::TaggedTemplateExpressionData { ::tsox_core::fntrace::enter("as_tagged_template_expression"); 
         cast_data!(self, TaggedTemplateExpression)
     }
 
-    fn as_template_expression(&self) -> &ndg::TemplateExpressionData {
+    fn as_template_expression(&self) -> &ndg::TemplateExpressionData { ::tsox_core::fntrace::enter("as_template_expression"); 
         cast_data!(self, TemplateExpression)
     }
 
-    fn as_template_span(&self) -> &ndg::TemplateSpanData {
+    fn as_template_span(&self) -> &ndg::TemplateSpanData { ::tsox_core::fntrace::enter("as_template_span"); 
         cast_data!(self, TemplateSpan)
     }
 
-    fn as_binding_element(&self) -> &ndg::BindingElementData {
+    fn as_binding_element(&self) -> &ndg::BindingElementData { ::tsox_core::fntrace::enter("as_binding_element"); 
         cast_data!(self, BindingElement)
     }
 
-    fn as_binding_pattern(&self) -> &ndg::BindingPatternData {
+    fn as_binding_pattern(&self) -> &ndg::BindingPatternData { ::tsox_core::fntrace::enter("as_binding_pattern"); 
         cast_data!(self, BindingPattern)
     }
 
-    fn as_variable_declaration(&self) -> &ndg::VariableDeclarationData {
+    fn as_variable_declaration(&self) -> &ndg::VariableDeclarationData { ::tsox_core::fntrace::enter("as_variable_declaration"); 
         cast_data!(self, VariableDeclaration)
     }
 
-    fn as_shorthand_property_assignment(&self) -> &ndg::ShorthandPropertyAssignmentData {
+    fn as_shorthand_property_assignment(&self) -> &ndg::ShorthandPropertyAssignmentData { ::tsox_core::fntrace::enter("as_shorthand_property_assignment"); 
         cast_data!(self, ShorthandPropertyAssignment)
     }
 
-    fn as_for_statement(&self) -> &ndg::ForStatementData {
+    fn as_for_statement(&self) -> &ndg::ForStatementData { ::tsox_core::fntrace::enter("as_for_statement"); 
         cast_data!(self, ForStatement)
     }
 
-    fn as_import_equals_declaration(&self) -> &ndg::ImportEqualsDeclarationData {
+    fn as_import_equals_declaration(&self) -> &ndg::ImportEqualsDeclarationData { ::tsox_core::fntrace::enter("as_import_equals_declaration"); 
         cast_data!(self, ImportEqualsDeclaration)
     }
 
-    fn as_conditional_expression(&self) -> &ndg::ConditionalExpressionData {
+    fn as_conditional_expression(&self) -> &ndg::ConditionalExpressionData { ::tsox_core::fntrace::enter("as_conditional_expression"); 
         cast_data!(self, ConditionalExpression)
     }
 
-    fn as_import_attribute(&self) -> &ndg::ImportAttributeData {
+    fn as_import_attribute(&self) -> &ndg::ImportAttributeData { ::tsox_core::fntrace::enter("as_import_attribute"); 
         cast_data!(self, ImportAttribute)
     }
 
-    fn as_block_data(&self) -> &ndg::BlockData {
+    fn as_block_data(&self) -> &ndg::BlockData { ::tsox_core::fntrace::enter("as_block_data"); 
         cast_data!(self, Block)
     }
 
-    fn as_source_file_data(&self) -> &ndg::SourceFileData {
+    fn as_source_file_data(&self) -> &ndg::SourceFileData { ::tsox_core::fntrace::enter("as_source_file_data"); 
         cast_data!(self, SourceFile)
     }
 
-    fn initializer(&self) -> Option<&Arc<Node>> {
+    fn initializer(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("initializer"); 
         match &self.data {
             NodeData::VariableDeclaration(d) => d.initializer.as_ref(),
             NodeData::ParameterDeclaration(d) => d.initializer.as_ref(),
@@ -135,7 +135,7 @@ impl R38K9NodeCastExt for Arc<Node> {
         }
     }
 
-    fn body(&self) -> Option<&Arc<Node>> {
+    fn body(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("body"); 
         match &self.data {
             NodeData::ArrowFunction(d) => Some(&d.body),
             NodeData::FunctionExpression(d) => Some(&d.body),
@@ -148,7 +148,7 @@ impl R38K9NodeCastExt for Arc<Node> {
         }
     }
 
-    fn call_arguments(&self) -> &[Arc<Node>] {
+    fn call_arguments(&self) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("call_arguments"); 
         match &self.data {
             NodeData::CallExpression(d) => &d.arguments.nodes,
             NodeData::NewExpression(d) => match &d.arguments {
@@ -159,7 +159,7 @@ impl R38K9NodeCastExt for Arc<Node> {
         }
     }
 
-    fn tag_name(&self) -> Arc<Node> {
+    fn tag_name(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("tag_name"); 
         match &self.data {
             NodeData::JsxOpeningElement(d) => d.tag_name.clone(),
             NodeData::JsxClosingElement(d) => d.tag_name.clone(),
@@ -168,7 +168,7 @@ impl R38K9NodeCastExt for Arc<Node> {
         }
     }
 
-    fn statement_list(&self) -> Arc<NodeList> {
+    fn statement_list(&self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("statement_list"); 
         match &self.data {
             NodeData::Block(d) => d.statements.clone(),
             NodeData::SourceFile(d) => d.statements.clone(),
@@ -177,11 +177,11 @@ impl R38K9NodeCastExt for Arc<Node> {
         }
     }
 
-    fn block_statements(&self) -> Arc<NodeList> {
+    fn block_statements(&self) -> Arc<NodeList> { ::tsox_core::fntrace::enter("block_statements"); 
         self.statement_list()
     }
 
-    fn template_literal_like_data(&self) -> crate::mig::m4i::TemplateLiteralLikeDataBase {
+    fn template_literal_like_data(&self) -> crate::mig::m4i::TemplateLiteralLikeDataBase { ::tsox_core::fntrace::enter("template_literal_like_data"); 
         match &self.data {
             NodeData::NoSubstitutionTemplateLiteral(d) => crate::mig::m4i::TemplateLiteralLikeDataBase {
                 text: d.text.clone(),
@@ -215,13 +215,13 @@ pub trait R38K9ParamDeclDataExt {
 }
 
 impl R38K9ParamDeclDataExt for ndg::ParameterDeclarationData {
-    fn name(&self) -> &Arc<Node> {
+    fn name(&self) -> &Arc<Node> { ::tsox_core::fntrace::enter("name"); 
         &self.name
     }
-    fn dot_dot_dot_token(&self) -> Option<&Arc<Node>> {
+    fn dot_dot_dot_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("dot_dot_dot_token"); 
         self.dot_dot_dot_token.as_ref()
     }
-    fn initializer(&self) -> Option<&Arc<Node>> {
+    fn initializer(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("initializer"); 
         self.initializer.as_ref()
     }
 }
@@ -232,10 +232,10 @@ pub trait R38K9MethodDeclDataExt {
 }
 
 impl R38K9MethodDeclDataExt for ndg::MethodDeclarationData {
-    fn asterisk_token(&self) -> Option<&Arc<Node>> {
+    fn asterisk_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("asterisk_token"); 
         self.asterisk_token.as_ref()
     }
-    fn postfix_token(&self) -> Option<&Arc<Node>> {
+    fn postfix_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("postfix_token"); 
         self.postfix_token.as_ref()
     }
 }
@@ -245,7 +245,7 @@ pub trait R38K9FunctionDeclDataExt {
 }
 
 impl R38K9FunctionDeclDataExt for ndg::FunctionDeclarationData {
-    fn asterisk_token(&self) -> Option<&Arc<Node>> {
+    fn asterisk_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("asterisk_token"); 
         self.asterisk_token.as_ref()
     }
 }
@@ -255,7 +255,7 @@ pub trait R38K9ArrowFnDataExt {
 }
 
 impl R38K9ArrowFnDataExt for ndg::ArrowFunctionData {
-    fn equals_greater_than_token(&self) -> &Arc<Node> {
+    fn equals_greater_than_token(&self) -> &Arc<Node> { ::tsox_core::fntrace::enter("equals_greater_than_token"); 
         &self.equals_greater_than_token
     }
 }
@@ -265,13 +265,13 @@ pub trait R38K9FnExprDataExt {
 }
 
 impl R38K9FnExprDataExt for ndg::FunctionExpressionData {
-    fn asterisk_token(&self) -> Option<&Arc<Node>> {
+    fn asterisk_token(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("asterisk_token"); 
         self.asterisk_token.as_ref()
     }
 }
 
 impl<'a> NodeFactory<'a> {
-    pub fn r38k9_new_spread_element(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn r38k9_new_spread_element(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("r38k9_new_spread_element"); 
         Arc::new(Node::new(
             SyntaxKind::SpreadElement,
             NodeData::SpreadElement(ndg::SpreadElementData {
@@ -280,7 +280,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn r38k9_new_spread_assignment(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn r38k9_new_spread_assignment(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("r38k9_new_spread_assignment"); 
         Arc::new(Node::new(
             SyntaxKind::SpreadAssignment,
             NodeData::SpreadAssignment(ndg::SpreadAssignmentData {
@@ -289,7 +289,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn r38k9_new_logical_or_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    pub fn r38k9_new_logical_or_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("r38k9_new_logical_or_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -303,7 +303,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         cooked: &Arc<Node>,
         raw: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("r38k9_new_template_object_helper"); 
         self.new_call_expression(
             &self.new_identifier("__makeTemplateObject"),
             None,
@@ -314,6 +314,6 @@ impl<'a> NodeFactory<'a> {
     }
 }
 
-pub fn r38k9_same_node(a: &Arc<Node>, b: &Arc<Node>) -> bool {
+pub fn r38k9_same_node(a: &Arc<Node>, b: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("r38k9_same_node"); 
     Arc::ptr_eq(a, b)
 }

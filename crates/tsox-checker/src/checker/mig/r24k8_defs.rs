@@ -13,7 +13,7 @@ pub(crate) fn map_type_ex_self(
     t: &Arc<Type>,
     f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> Option<Arc<Type>>,
     no_reductions: bool,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type_ex_self"); 
     if t.flags.contains(TypeFlags::Never) {
         return Some(Arc::clone(t));
     }
@@ -62,17 +62,17 @@ impl SignatureFlags {
 }
 
 impl Type {
-    pub(crate) fn set_union_origin(&mut self, origin: Option<Arc<Type>>) {
+    pub(crate) fn set_union_origin(&mut self, origin: Option<Arc<Type>>) { ::tsox_core::fntrace::enter("set_union_origin"); 
         if let TypeData::Union(u) = &mut self.data {
             u.origin = origin;
         }
     }
 
-    pub(crate) fn set_alias(&mut self, alias: Option<TypeAlias>) {
+    pub(crate) fn set_alias(&mut self, alias: Option<TypeAlias>) { ::tsox_core::fntrace::enter("set_alias"); 
         self.alias = alias.map(Box::new);
     }
 
-    pub(crate) fn set_type_parameter_target(&mut self, target: &Arc<Type>) {
+    pub(crate) fn set_type_parameter_target(&mut self, target: &Arc<Type>) { ::tsox_core::fntrace::enter("set_type_parameter_target"); 
         if let TypeData::TypeParameter(tp) = &mut self.data {
             tp.target = Some(Arc::clone(target));
         }
@@ -80,7 +80,7 @@ impl Type {
 }
 
 impl WideningContext {
-    pub(crate) fn with_siblings(siblings: Vec<Arc<Type>>) -> WideningContext {
+    pub(crate) fn with_siblings(siblings: Vec<Arc<Type>>) -> WideningContext { ::tsox_core::fntrace::enter("with_siblings"); 
         WideningContext {
             parent: None,
             property_name: String::new(),
@@ -91,7 +91,7 @@ impl WideningContext {
         }
     }
 
-    pub(crate) fn get_child_context(&self, property_name: &str) -> WideningContext {
+    pub(crate) fn get_child_context(&self, property_name: &str) -> WideningContext { ::tsox_core::fntrace::enter("get_child_context"); 
         WideningContext {
             parent: None,
             property_name: property_name.to_string(),
@@ -104,7 +104,7 @@ impl WideningContext {
 }
 
 impl Checker {
-    pub fn get_infer_type_parameters(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> {
+    pub fn get_infer_type_parameters(&mut self, node: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_infer_type_parameters"); 
         let type_parameter_symbols: Vec<Arc<Symbol>> = {
             let symbol_map = self.program.symbol_map();
             symbol_map
@@ -131,7 +131,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         context: Option<&WideningContext>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_type_of_object_literal"); 
         let mut members = SymbolTable::new();
         for prop in self.get_properties_of_object_type(t) {
             let widened = self.get_widened_property(&prop, context);
@@ -162,7 +162,7 @@ impl Checker {
         result
     }
 
-    pub fn check_property_assignment(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_property_assignment(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_property_assignment"); 
         if let Some(name) = node.name() {
             if tsox_frontend::ast::node_data_generated::is_computed_property_name(name) {
                 self.check_computed_property_name(name);

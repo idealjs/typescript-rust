@@ -5,7 +5,7 @@ use crate::checker::checker_calls::*;
 // Go checkTypeArguments 的约束满足段：显式类型实参不满足（实例化后）
 // 约束时报 TS2344，首错即止
 impl Checker {
-    pub(crate) fn check_call_type_argument_nodes(&mut self, args: &NodeList) {
+    pub(crate) fn check_call_type_argument_nodes(&mut self, args: &NodeList) { ::tsox_core::fntrace::enter("check_call_type_argument_nodes"); 
         for tn in args.iter() {
             self.get_type_from_type_node(&tn);
             self.check_type_annotation(&tn);
@@ -16,7 +16,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         sig: &Arc<Signature>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_call_type_argument_constraints"); 
         let type_arg_nodes: Vec<Arc<Node>> = match &node.data {
             NodeData::CallExpression(d) => d.type_arguments.as_ref(),
             NodeData::NewExpression(d) => d.type_arguments.as_ref(),
@@ -97,7 +97,7 @@ impl Checker {
     pub(crate) fn receiver_class_type_argument_substitution(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)> {
+    ) -> Option<(Vec<Arc<Type>>, Vec<Arc<Type>>)> { ::tsox_core::fntrace::enter("receiver_class_type_argument_substitution"); 
         let callee = match &node.data {
             NodeData::CallExpression(d) => Arc::clone(&d.expression),
             NodeData::NewExpression(d) => Arc::clone(&d.expression),
@@ -129,7 +129,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Option<(String, String, String)> {
+    ) -> Option<(String, String, String)> { ::tsox_core::fntrace::enter("first_incompatible_property"); 
         let target_props = self.get_properties_of_type(target);
         let source_props = self.get_properties_of_type(source);
         for tp in target_props {
@@ -159,7 +159,7 @@ impl Checker {
     }
 
 }
-pub(crate) fn keeps_unsubstituted_type_parameter(t: &Arc<Type>) -> bool {
+pub(crate) fn keeps_unsubstituted_type_parameter(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("keeps_unsubstituted_type_parameter"); 
     if t.is_type_parameter() {
         return true;
     }

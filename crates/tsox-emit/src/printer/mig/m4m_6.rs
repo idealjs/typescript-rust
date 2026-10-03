@@ -13,14 +13,14 @@ use super::m4m_3::{
     VarScope,
 };
 
-fn clone_node_list(list: &NodeList) -> NodeList {
+fn clone_node_list(list: &NodeList) -> NodeList { ::tsox_core::fntrace::enter("clone_node_list"); 
     let mut cloned = NodeList::new(list.nodes.clone());
     cloned.loc = list.loc;
     cloned
 }
 
 impl EmitContext {
-    pub fn end_variable_environment(&mut self) -> Vec<Arc<Node>> {
+    pub fn end_variable_environment(&mut self) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("end_variable_environment"); 
         let scope = self.var_scope_stack.pop().unwrap_or_default();
         let mut statements: Vec<Arc<Node>> = vec![];
         if !scope.functions.is_empty() {
@@ -46,7 +46,7 @@ impl EmitContext {
     pub fn end_and_merge_variable_environment_list(
         &mut self,
         statements: Option<&NodeList>,
-    ) -> Option<NodeList> {
+    ) -> Option<NodeList> { ::tsox_core::fntrace::enter("end_and_merge_variable_environment_list"); 
         let nodes: Vec<Arc<Node>> = match statements {
             Some(list) => list.nodes.clone(),
             None => vec![],
@@ -63,7 +63,7 @@ impl EmitContext {
         statements.map(clone_node_list)
     }
 
-    pub fn add_variable_declaration(&mut self, name: &Arc<Node>) {
+    pub fn add_variable_declaration(&mut self, name: &Arc<Node>) { ::tsox_core::fntrace::enter("add_variable_declaration"); 
         let var_decl = self
             .factory()
             .new_variable_declaration(name, None, None, None);
@@ -75,7 +75,7 @@ impl EmitContext {
         }
     }
 
-    pub fn add_hoisted_function_declaration(&mut self, node: &Arc<Node>) {
+    pub fn add_hoisted_function_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("add_hoisted_function_declaration"); 
         self.set_emit_flags(node, EmitFlags::CUSTOM_PROLOGUE);
         self.var_scope_stack
             .last_mut()
@@ -84,7 +84,7 @@ impl EmitContext {
             .push(node.clone());
     }
 
-    pub fn end_lexical_environment(&mut self) -> Vec<Arc<Node>> {
+    pub fn end_lexical_environment(&mut self) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("end_lexical_environment"); 
         let scope = self.let_scope_stack.pop().unwrap_or_default();
         let mut statements: Vec<Arc<Node>> = vec![];
         if !scope.variables.is_empty() {
@@ -102,7 +102,7 @@ impl EmitContext {
     pub fn end_and_merge_lexical_environment_list(
         &mut self,
         statements: Option<&NodeList>,
-    ) -> Option<NodeList> {
+    ) -> Option<NodeList> { ::tsox_core::fntrace::enter("end_and_merge_lexical_environment_list"); 
         let nodes: Vec<Arc<Node>> = match statements {
             Some(list) => list.nodes.clone(),
             None => vec![],
@@ -119,7 +119,7 @@ impl EmitContext {
         statements.map(clone_node_list)
     }
 
-    pub fn add_lexical_declaration(&mut self, name: &Arc<Node>) {
+    pub fn add_lexical_declaration(&mut self, name: &Arc<Node>) { ::tsox_core::fntrace::enter("add_lexical_declaration"); 
         let var_decl = self
             .factory()
             .new_variable_declaration(name, None, None, None);

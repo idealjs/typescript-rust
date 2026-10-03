@@ -95,27 +95,27 @@ impl SubtreeFacts {
 
 impl std::ops::BitOr for SubtreeFacts {
     type Output = SubtreeFacts;
-    fn bitor(self, rhs: SubtreeFacts) -> SubtreeFacts {
+    fn bitor(self, rhs: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("bitor"); 
         SubtreeFacts(self.0 | rhs.0)
     }
 }
 
 impl std::ops::BitOrAssign for SubtreeFacts {
-    fn bitor_assign(&mut self, rhs: SubtreeFacts) {
+    fn bitor_assign(&mut self, rhs: SubtreeFacts) { ::tsox_core::fntrace::enter("bitor_assign"); 
         self.0 |= rhs.0;
     }
 }
 
 impl std::ops::BitAnd for SubtreeFacts {
     type Output = SubtreeFacts;
-    fn bitand(self, rhs: SubtreeFacts) -> SubtreeFacts {
+    fn bitand(self, rhs: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("bitand"); 
         SubtreeFacts(self.0 & rhs.0)
     }
 }
 
 impl std::ops::Not for SubtreeFacts {
     type Output = SubtreeFacts;
-    fn not(self) -> SubtreeFacts {
+    fn not(self) -> SubtreeFacts { ::tsox_core::fntrace::enter("not"); 
         SubtreeFacts(!self.0 & SUBTREE_FACTS_MASK)
     }
 }

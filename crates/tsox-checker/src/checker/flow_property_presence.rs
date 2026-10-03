@@ -14,15 +14,15 @@ pub(crate) enum PropertyPresence {
 }
 
 impl PropertyPresence {
-    pub(crate) fn is_definitely(self) -> bool {
+    pub(crate) fn is_definitely(self) -> bool { ::tsox_core::fntrace::enter("is_definitely"); 
         matches!(self, PropertyPresence::Definitely)
     }
-    pub(crate) fn is_definitely_not(self) -> bool {
+    pub(crate) fn is_definitely_not(self) -> bool { ::tsox_core::fntrace::enter("is_definitely_not"); 
         matches!(self, PropertyPresence::DefinitelyNot)
     }
 }
 
-pub(crate) fn is_assignment_operator(kind: SyntaxKind) -> bool {
+pub(crate) fn is_assignment_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_assignment_operator"); 
     matches!(
         kind,
         SyntaxKind::EqualsToken
@@ -48,7 +48,7 @@ pub(crate) fn clauses_of_range(
     switch_stmt: &Arc<Node>,
     start: usize,
     end: usize,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("clauses_of_range"); 
     let NodeData::SwitchStatement(sd) = &switch_stmt.data else {
         return Vec::new();
     };

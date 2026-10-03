@@ -3,7 +3,7 @@
 use crate::checker::checker_classes::*;
 
 impl Checker {
-    pub(crate) fn check_class_accessor_member(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_class_accessor_member(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_accessor_member"); 
         if node.kind != SyntaxKind::Constructor
             && let Some(name) = Self::member_name_node(node)
         {

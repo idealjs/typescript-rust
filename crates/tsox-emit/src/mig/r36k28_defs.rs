@@ -20,7 +20,7 @@ impl<'a> NodeFactory<'a> {
         type_parameters: Option<Arc<NodeList>>,
         heritage_clauses: Option<&NodeList>,
         members: &NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_class_declaration"); 
         let mut updated = Node::new(
             SyntaxKind::ClassDeclaration,
             NodeData::ClassDeclaration(ClassDeclarationData {
@@ -51,7 +51,7 @@ impl<'a> NodeFactory<'a> {
         type_parameters: Option<Arc<NodeList>>,
         heritage_clauses: Option<&NodeList>,
         members: &NodeList,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_class_expression"); 
         let mut updated = Node::new(
             SyntaxKind::ClassExpression,
             NodeData::ClassExpression(ClassExpressionData {
@@ -77,7 +77,7 @@ impl<'a> NodeFactory<'a> {
     pub fn split_standard_prologue(
         &self,
         source: impl AsRef<[Arc<Node>]>,
-    ) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) {
+    ) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("split_standard_prologue"); 
         let source = source.as_ref();
         for (i, statement) in source.iter().enumerate() {
             if !is_prologue_directive(statement) {
@@ -96,24 +96,24 @@ pub trait R36K28NodeVisitorExt {
 }
 
 impl R36K28NodeVisitorExt for NodeVisitor {
-    fn visit_modifiers(&mut self, modifiers: Option<&Arc<ModifierList>>) -> Option<Arc<ModifierList>> {
+    fn visit_modifiers(&mut self, modifiers: Option<&Arc<ModifierList>>) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         modifiers.map(|m| {
             let visited: Vec<Arc<Node>> = m.list.nodes.iter().map(|n| self.visit_node(n)).collect();
             Arc::new(ModifierList::new(visited, m.modifier_flags))
         })
     }
 
-    fn visit_nodes(&mut self, nodes: &Arc<NodeList>) -> Arc<NodeList> {
+    fn visit_nodes(&mut self, nodes: &Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("visit_nodes"); 
         Arc::new(NodeList::new(
             nodes.nodes.iter().map(|n| self.visit_node(n)).collect(),
         ))
     }
 
-    fn visit_nodes_opt(&mut self, nodes: Option<&Arc<NodeList>>) -> Option<Arc<NodeList>> {
+    fn visit_nodes_opt(&mut self, nodes: Option<&Arc<NodeList>>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("visit_nodes_opt"); 
         nodes.map(|l| self.visit_nodes(l))
     }
 
-    fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> (Vec<Arc<Node>>, bool) {
+    fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("visit_slice"); 
         let visited: Vec<Arc<Node>> = nodes.iter().map(|n| self.visit_node(n)).collect();
         let changed = visited
             .iter()

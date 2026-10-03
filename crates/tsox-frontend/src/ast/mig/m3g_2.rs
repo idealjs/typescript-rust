@@ -2,7 +2,7 @@ use crate::ast::*;
 use std::sync::Arc;
 use tsox_core::core::tristate::Tristate;
 
-pub fn is_non_local_alias(symbol: Option<&Symbol>, excludes: SymbolFlags) -> bool {
+pub fn is_non_local_alias(symbol: Option<&Symbol>, excludes: SymbolFlags) -> bool { ::tsox_core::fntrace::enter("is_non_local_alias"); 
     let Some(symbol) = symbol else {
         return false;
     };
@@ -11,7 +11,7 @@ pub fn is_non_local_alias(symbol: Option<&Symbol>, excludes: SymbolFlags) -> boo
         || flags.intersects(SymbolFlags::Alias) && flags.intersects(SymbolFlags::Assignment)
 }
 
-pub fn is_object_binding_or_assignment_element(node: &Node) -> bool {
+pub fn is_object_binding_or_assignment_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_object_binding_or_assignment_element"); 
     matches!(
         node.kind,
         SyntaxKind::BindingElement
@@ -21,14 +21,14 @@ pub fn is_object_binding_or_assignment_element(node: &Node) -> bool {
     )
 }
 
-pub fn is_object_literal_method(node: &Node) -> bool {
+pub fn is_object_literal_method(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_object_literal_method"); 
     node.kind == SyntaxKind::MethodDeclaration
         && node
             .parent()
             .is_some_and(|p| p.kind == SyntaxKind::ObjectLiteralExpression)
 }
 
-pub fn is_object_literal_or_class_expression_method_or_accessor(node: &Node) -> bool {
+pub fn is_object_literal_or_class_expression_method_or_accessor(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_object_literal_or_class_expression_method_or_accessor"); 
     matches!(
         node.kind,
         SyntaxKind::MethodDeclaration
@@ -39,11 +39,11 @@ pub fn is_object_literal_or_class_expression_method_or_accessor(node: &Node) -> 
     })
 }
 
-pub fn is_object_type_declaration(node: &Node) -> bool {
+pub fn is_object_type_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_object_type_declaration"); 
     is_class_like(node) || is_interface_declaration(node) || is_type_literal_node(node)
 }
 
-pub fn is_optional_chain_root(node: &Node) -> bool {
+pub fn is_optional_chain_root(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_optional_chain_root"); 
     if !is_optional_chain(node) || is_non_null_expression(node) {
         return false;
     }
@@ -55,7 +55,7 @@ pub fn is_optional_chain_root(node: &Node) -> bool {
     }
 }
 
-pub fn is_outermost_optional_chain(node: &Arc<Node>) -> bool {
+pub fn is_outermost_optional_chain(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_outermost_optional_chain"); 
     let Some(parent) = node.parent() else {
         return true;
     };
@@ -64,32 +64,32 @@ pub fn is_outermost_optional_chain(node: &Arc<Node>) -> bool {
         || !parent.expression().is_some_and(|e| Arc::ptr_eq(e, node))
 }
 
-pub fn is_parameter_like(node: &Node) -> bool {
+pub fn is_parameter_like(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_parameter_like"); 
     matches!(
         node.kind,
         SyntaxKind::Parameter | SyntaxKind::TypeParameter
     )
 }
 
-pub fn is_parameter_property_declaration(node: &Node, parent: &Node) -> bool {
+pub fn is_parameter_property_declaration(node: &Node, parent: &Node) -> bool { ::tsox_core::fntrace::enter("is_parameter_property_declaration"); 
     is_parameter_declaration(node)
         && has_syntactic_modifier(node, ModifierFlags::ParameterPropertyModifier)
         && parent.kind == SyntaxKind::Constructor
 }
 
-pub fn is_parameter_property_modifier(kind: SyntaxKind) -> bool {
+pub fn is_parameter_property_modifier(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_parameter_property_modifier"); 
     modifier_to_flag(kind).intersects(ModifierFlags::ParameterPropertyModifier)
 }
 
-pub fn is_parse_tree_node(node: &Node) -> bool {
+pub fn is_parse_tree_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_parse_tree_node"); 
     !node.flags.intersects(NodeFlags::Synthesized)
 }
 
-pub fn is_part_of_parameter_declaration(node: &Arc<Node>) -> bool {
+pub fn is_part_of_parameter_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_parameter_declaration"); 
     get_root_declaration(node).kind == SyntaxKind::Parameter
 }
 
-pub fn is_part_of_type_query(node: &Arc<Node>) -> bool {
+pub fn is_part_of_type_query(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_query"); 
     let mut node = node.clone();
     while matches!(node.kind, SyntaxKind::QualifiedName | SyntaxKind::Identifier) {
         let Some(parent) = node.parent() else {
@@ -100,7 +100,7 @@ pub fn is_part_of_type_query(node: &Arc<Node>) -> bool {
     node.kind == SyntaxKind::TypeQuery
 }
 
-pub fn is_plain_js_file(file: Option<&SourceFile>, check_js: Tristate) -> bool {
+pub fn is_plain_js_file(file: Option<&SourceFile>, check_js: Tristate) -> bool { ::tsox_core::fntrace::enter("is_plain_js_file"); 
     match file {
         Some(file) => {
             matches!(file.script_kind, ScriptKind::Js | ScriptKind::Jsx)
@@ -110,7 +110,7 @@ pub fn is_plain_js_file(file: Option<&SourceFile>, check_js: Tristate) -> bool {
     }
 }
 
-pub fn is_primitive_literal_value(node: &Node, include_big_int: bool) -> bool {
+pub fn is_primitive_literal_value(node: &Node, include_big_int: bool) -> bool { ::tsox_core::fntrace::enter("is_primitive_literal_value"); 
     match node.kind {
         SyntaxKind::TrueKeyword
         | SyntaxKind::FalseKeyword
@@ -133,12 +133,12 @@ pub fn is_primitive_literal_value(node: &Node, include_big_int: bool) -> bool {
     }
 }
 
-pub fn is_private_identifier_class_element_declaration(node: &Node) -> bool {
+pub fn is_private_identifier_class_element_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_class_element_declaration"); 
     (is_property_declaration(node) || is_method_or_accessor(node))
         && node.name().is_some_and(|n| is_private_identifier(n))
 }
 
-pub fn is_property_access_entity_name_expression(node: &Node, allow_js: bool) -> bool {
+pub fn is_property_access_entity_name_expression(node: &Node, allow_js: bool) -> bool { ::tsox_core::fntrace::enter("is_property_access_entity_name_expression"); 
     is_property_access_expression(node)
         && node.name().is_some_and(|n| is_identifier(n))
         && node
@@ -146,11 +146,11 @@ pub fn is_property_access_entity_name_expression(node: &Node, allow_js: bool) ->
             .is_some_and(|e| crate::ast::mig::x6a::is_entity_name_expression_ex(e, allow_js))
 }
 
-pub fn is_proto_setter(node: &Node) -> bool {
+pub fn is_proto_setter(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_proto_setter"); 
     (is_identifier(node) || is_string_literal(node)) && node.text() == "__proto__"
 }
 
-pub fn is_prototype_access(node: &Arc<Node>) -> bool {
+pub fn is_prototype_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_prototype_access"); 
     if crate::ast::mig::m3f_3::is_bindable_static_access_expression(node, false) {
         if let Some(name) = crate::ast::mig::m3e_4::get_element_or_property_access_name(node) {
             return name.text() == "prototype";
@@ -159,12 +159,12 @@ pub fn is_prototype_access(node: &Arc<Node>) -> bool {
     false
 }
 
-pub fn is_push_or_unshift_identifier(node: &Node) -> bool {
+pub fn is_push_or_unshift_identifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_push_or_unshift_identifier"); 
     let text = node.text();
     text == "push" || text == "unshift"
 }
 
-pub fn is_require_variable_statement(node: &Node) -> bool {
+pub fn is_require_variable_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_require_variable_statement"); 
     if !is_variable_statement(node) {
         return false;
     }
@@ -182,7 +182,7 @@ pub fn is_require_variable_statement(node: &Node) -> bool {
             .all(|decl| crate::ast::mig::m3g_3::is_variable_declaration_initialized_to_require(decl))
 }
 
-pub fn is_resolution_mode_override_host(node: Option<&Node>) -> bool {
+pub fn is_resolution_mode_override_host(node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("is_resolution_mode_override_host"); 
     let Some(node) = node else {
         return false;
     };
@@ -195,14 +195,14 @@ pub fn is_resolution_mode_override_host(node: Option<&Node>) -> bool {
     )
 }
 
-pub fn is_right_side_of_property_access(node: &Arc<Node>) -> bool {
+pub fn is_right_side_of_property_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_right_side_of_property_access"); 
     node.parent().is_some_and(|parent| {
         parent.kind == SyntaxKind::PropertyAccessExpression
             && parent.name().is_some_and(|n| Arc::ptr_eq(n, node))
     })
 }
 
-pub fn is_right_side_of_qualified_name_or_property_access(node: &Arc<Node>) -> bool {
+pub fn is_right_side_of_qualified_name_or_property_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_right_side_of_qualified_name_or_property_access"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -214,7 +214,7 @@ pub fn is_right_side_of_qualified_name_or_property_access(node: &Arc<Node>) -> b
     }
 }
 
-pub fn is_signed_numeric_literal(node: &Node) -> bool {
+pub fn is_signed_numeric_literal(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_signed_numeric_literal"); 
     if node.kind != SyntaxKind::PrefixUnaryExpression {
         return false;
     }
@@ -227,7 +227,7 @@ pub fn is_signed_numeric_literal(node: &Node) -> bool {
     }
 }
 
-pub fn is_string_literal_like_type(node: &Node) -> bool {
+pub fn is_string_literal_like_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_string_literal_like_type"); 
     if node.kind != SyntaxKind::LiteralType {
         return false;
     }
@@ -237,22 +237,22 @@ pub fn is_string_literal_like_type(node: &Node) -> bool {
     }
 }
 
-pub fn is_string_text_containing_node(node: &Node) -> bool {
+pub fn is_string_text_containing_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_string_text_containing_node"); 
     node.kind == SyntaxKind::StringLiteral || is_template_literal_kind(node.kind)
 }
 
-pub fn is_super_property(node: &Node) -> bool {
+pub fn is_super_property(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_super_property"); 
     (is_property_access_expression(node) || is_element_access_expression(node))
         && node.expression().is_some_and(|e| e.kind == SyntaxKind::SuperKeyword)
 }
 
-pub fn is_tag_name(node: &Arc<Node>) -> bool {
+pub fn is_tag_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_tag_name"); 
     node.parent().is_some_and(|parent| {
         is_jsdoc_tag(&parent) && parent.name().is_some_and(|n| Arc::ptr_eq(n, node))
     })
 }
 
-pub fn is_template_literal_kind(kind: SyntaxKind) -> bool {
+pub fn is_template_literal_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_template_literal_kind"); 
     matches!(
         kind,
         SyntaxKind::NoSubstitutionTemplateLiteral
@@ -262,11 +262,11 @@ pub fn is_template_literal_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn is_template_literal_token(node: &Node) -> bool {
+pub fn is_template_literal_token(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_template_literal_token"); 
     is_template_literal_kind(node.kind)
 }
 
-pub fn is_this_in_type_query(node: &Arc<Node>) -> bool {
+pub fn is_this_in_type_query(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_this_in_type_query"); 
     if !is_this_identifier(Some(node)) {
         return false;
     }
@@ -287,14 +287,14 @@ pub fn is_this_in_type_query(node: &Arc<Node>) -> bool {
     current.parent().is_some_and(|p| p.kind == SyntaxKind::TypeQuery)
 }
 
-pub fn is_this_parameter(node: &Node) -> bool {
+pub fn is_this_parameter(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_this_parameter"); 
     is_parameter_declaration(node)
         && node
             .name()
             .is_some_and(|n| is_this_identifier(Some(&**n)))
 }
 
-pub fn is_type_declaration(node: &Node) -> bool {
+pub fn is_type_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_declaration"); 
     match node.kind {
         SyntaxKind::TypeParameter
         | SyntaxKind::ClassDeclaration
@@ -311,7 +311,7 @@ pub fn is_type_declaration(node: &Node) -> bool {
     }
 }
 
-pub fn is_type_declaration_name(name: &Arc<Node>) -> bool {
+pub fn is_type_declaration_name(name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_declaration_name"); 
     if name.kind != SyntaxKind::Identifier {
         return false;
     }
@@ -320,11 +320,11 @@ pub fn is_type_declaration_name(name: &Arc<Node>) -> bool {
     })
 }
 
-pub fn is_type_keyword_token(node: &Node) -> bool {
+pub fn is_type_keyword_token(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_keyword_token"); 
     node.kind == SyntaxKind::TypeKeyword
 }
 
-pub fn is_type_only_import_declaration(node: &Node) -> bool {
+pub fn is_type_only_import_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only_import_declaration"); 
     match node.kind {
         SyntaxKind::ImportSpecifier => {
             crate::ast::mig::m3b::is_type_only(node)
@@ -341,7 +341,7 @@ pub fn is_type_only_import_declaration(node: &Node) -> bool {
     }
 }
 
-fn is_type_only_export_declaration(node: &Node) -> bool {
+fn is_type_only_export_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only_export_declaration"); 
     match node.kind {
         SyntaxKind::ExportSpecifier => {
             crate::ast::mig::m3b::is_type_only(node)
@@ -361,11 +361,11 @@ fn is_type_only_export_declaration(node: &Node) -> bool {
     }
 }
 
-pub fn is_type_only_import_or_export_declaration(node: &Node) -> bool {
+pub fn is_type_only_import_or_export_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only_import_or_export_declaration"); 
     is_type_only_import_declaration(node) || is_type_only_export_declaration(node)
 }
 
-pub fn is_type_reference_type(node: &Node) -> bool {
+pub fn is_type_reference_type(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_reference_type"); 
     matches!(
         node.kind,
         SyntaxKind::TypeReference | SyntaxKind::ExpressionWithTypeArguments

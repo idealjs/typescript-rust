@@ -181,7 +181,7 @@ impl ContainerFlags {
 
 impl std::ops::BitOr for ContainerFlags {
     type Output = Self;
-    fn bitor(self, rhs: Self) -> Self {
+    fn bitor(self, rhs: Self) -> Self { ::tsox_core::fntrace::enter("bitor"); 
         Self(self.0 | rhs.0)
     }
 }

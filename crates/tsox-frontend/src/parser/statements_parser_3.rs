@@ -6,7 +6,7 @@ impl Parser {
     pub(crate) fn parse_variable_declaration_worker(
         &mut self,
         allow_exclamation: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_variable_declaration_worker"); 
         let pos = self.token_pos();
         let name = self.parse_identifier_or_pattern_with_diagnostic(Some(
             &tsox_core::diagnostics::PRIVATE_IDENTIFIERS_ARE_NOT_ALLOWED_IN_VARIABLE_DECLARATIONS,
@@ -53,14 +53,14 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_identifier_or_pattern(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_identifier_or_pattern(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_identifier_or_pattern"); 
         self.parse_identifier_or_pattern_with_diagnostic(None)
     }
 
     pub(crate) fn parse_identifier_or_pattern_with_diagnostic(
         &mut self,
         private_msg: Option<&'static tsox_core::diagnostics::Message>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_identifier_or_pattern_with_diagnostic"); 
         if self.token == SyntaxKind::OpenBracketToken {
             self.parse_array_binding_pattern()
         } else if self.token == SyntaxKind::OpenBraceToken {
@@ -70,7 +70,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_array_binding_pattern(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_array_binding_pattern(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_array_binding_pattern"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBracketToken);
         let elements = self.allow_in(|p| {
@@ -90,7 +90,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_array_binding_element(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_array_binding_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_array_binding_element"); 
         let pos = self.token_pos();
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
         let name = if self.token != SyntaxKind::CommaToken {
@@ -120,7 +120,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_object_binding_pattern(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_object_binding_pattern(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_object_binding_pattern"); 
         let pos = self.token_pos();
         self.expect(SyntaxKind::OpenBraceToken);
         let elements = self.allow_in(|p| {
@@ -140,7 +140,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_object_binding_element(&mut self) -> Arc<Node> {
+    pub(crate) fn parse_object_binding_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_object_binding_element"); 
         let pos = self.token_pos();
         let dot_dot_dot_token = self.parse_optional_token(SyntaxKind::DotDotDotToken);
         let is_identifier = self.is_binding_identifier();
@@ -176,7 +176,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_optional_type_annotation(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn parse_optional_type_annotation(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_optional_type_annotation"); 
         if self.token == SyntaxKind::ColonToken {
             self.next_token();
             Some(self.parse_type())
@@ -185,7 +185,7 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_optional_return_type(&mut self) -> Option<Arc<Node>> {
+    pub(crate) fn parse_optional_return_type(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_optional_return_type"); 
         if self.token == SyntaxKind::ColonToken {
             self.next_token();
             Some(self.parse_type_or_type_predicate())

@@ -53,32 +53,32 @@ static EXTENDS_ELEMENT_OPTION_DECLARATION: OptionDecl = OptionDecl {
     show_in_simplified_help: false,
 };
 
-pub fn option_elements(decl: &OptionDecl) -> OptionDecl {
+pub fn option_elements(decl: &OptionDecl) -> OptionDecl { ::tsox_core::fntrace::enter("option_elements"); 
     if !matches!(decl.kind, OptionKind::List) {
         return *decl;
     }
     EXTENDS_ELEMENT_OPTION_DECLARATION
 }
 
-fn compiler_options_value_table(options: &CompilerOptions) -> HashMap<String, JsonValue> {
+fn compiler_options_value_table(options: &CompilerOptions) -> HashMap<String, JsonValue> { ::tsox_core::fntrace::enter("compiler_options_value_table"); 
     let _ = options;
     HashMap::new()
 }
 
-fn option_decls_by_json_name() -> HashMap<String, OptionDecl> {
+fn option_decls_by_json_name() -> HashMap<String, OptionDecl> { ::tsox_core::fntrace::enter("option_decls_by_json_name"); 
     HashMap::new()
 }
 
-fn default_value_map() -> HashMap<String, bool> {
+fn default_value_map() -> HashMap<String, bool> { ::tsox_core::fntrace::enter("default_value_map"); 
     HashMap::new()
 }
 
-fn compiler_options_from_json_map(option_map: &serde_json::Map<String, JsonValue>) -> CompilerOptions {
+fn compiler_options_from_json_map(option_map: &serde_json::Map<String, JsonValue>) -> CompilerOptions { ::tsox_core::fntrace::enter("compiler_options_from_json_map"); 
     let _ = option_map;
     CompilerOptions::default()
 }
 
-fn skip_trivia(_text: &str, pos: usize) -> usize {
+fn skip_trivia(_text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("skip_trivia"); 
     pos
 }
 
@@ -89,7 +89,7 @@ pub fn get_extended_config(
     resolution_stack: &[String],
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
     extended_source_files: &mut Vec<String>,
-) -> (Option<ParsedTsconfig>, Vec<Diagnostic>) {
+) -> (Option<ParsedTsconfig>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("get_extended_config"); 
     let _ = source_file;
     let mut errors: Vec<Diagnostic> = Vec::new();
     let extended_config_path = tspath::to_path(
@@ -120,7 +120,7 @@ pub fn parse_extended_config(
     resolution_stack: &[String],
     host: &ParseConfigHost,
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
-) -> ExtendedConfigCacheEntry {
+) -> ExtendedConfigCacheEntry { ::tsox_core::fntrace::enter("parse_extended_config"); 
     let read_file = |name: &str| host.fs.read_file(name);
     let (extended_result, read_errors) = read_json_config_file(file_name, path, &read_file);
     if !read_errors.is_empty() {
@@ -161,7 +161,7 @@ pub fn get_extends_config_path(
     base_path: &str,
     value_expression: Option<&Node>,
     source_file: Option<&SourceFile>,
-) -> (String, Vec<Diagnostic>) {
+) -> (String, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("get_extends_config_path"); 
     let extended_config = tspath::normalize_slashes(extended_config);
     let mut errors: Vec<Diagnostic> = Vec::new();
     let error_file = source_file;
@@ -217,7 +217,7 @@ pub fn get_extends_config_path_or_array(
     property_assignment: Option<&Node>,
     value_expression: Option<&Node>,
     source_file: Option<&SourceFile>,
-) -> (Vec<String>, Vec<Diagnostic>) {
+) -> (Vec<String>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("get_extends_config_path_or_array"); 
     let _ = property_assignment;
     let mut extended_config_path_array: Vec<String> = Vec::new();
     let mut new_base = base_path.to_string();
@@ -289,7 +289,7 @@ pub fn parse_json_config_file_content(
     config_file_name: &str,
     resolution_stack: &[String],
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
-) -> ParsedCommandLine {
+) -> ParsedCommandLine { ::tsox_core::fntrace::enter("parse_json_config_file_content"); 
     let normalized = normalize_json_value(json);
     let mut json_object: JsonObject = match &normalized {
         JsonValue::Object(entries) => entries
@@ -317,7 +317,7 @@ pub fn get_parsed_command_line_of_config_file(
     options_raw: Option<&JsonObject>,
     sys: &ParseConfigHost,
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
-) -> (Option<ParsedCommandLine>, Vec<Diagnostic>) {
+) -> (Option<ParsedCommandLine>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("get_parsed_command_line_of_config_file"); 
     let config_file_name = tspath::get_normalized_absolute_path(config_file_name, &sys.current_directory);
     let path = tspath::to_path(
         &config_file_name,
@@ -341,7 +341,7 @@ pub fn get_parsed_command_line_of_config_file_path(
     options_raw: Option<&JsonObject>,
     sys: &ParseConfigHost,
     extended_config_cache: Option<&ExtendedConfigCacheValue>,
-) -> (Option<ParsedCommandLine>, Vec<Diagnostic>) {
+) -> (Option<ParsedCommandLine>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("get_parsed_command_line_of_config_file_path"); 
     let mut errors: Vec<Diagnostic> = Vec::new();
     let read_file = |name: &str| sys.fs.read_file(name);
     let (config_file_text, read_errors) = try_read_file(config_file_name, &read_file);
@@ -365,7 +365,7 @@ pub fn get_parsed_command_line_of_config_file_path(
     )
 }
 
-pub fn convert_to_ts_config(config_parse_result: &ParsedCommandLine, config_file_name: &str) -> TSConfig {
+pub fn convert_to_ts_config(config_parse_result: &ParsedCommandLine, config_file_name: &str) -> TSConfig { ::tsox_core::fntrace::enter("convert_to_ts_config"); 
     let config_file_name = if config_file_name.is_empty() {
         "tsconfig.json"
     } else {

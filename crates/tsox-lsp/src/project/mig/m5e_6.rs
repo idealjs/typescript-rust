@@ -58,19 +58,19 @@ trait SourceFileContentMapperExt {
 }
 
 impl SourceFileContentMapperExt for ast::SourceFile {
-    fn content_mapper(&self) -> String {
+    fn content_mapper(&self) -> String { ::tsox_core::fntrace::enter("content_mapper"); 
         tsox_compile::mig::m3l_cm_2::content_mapper_source_file_info(&self.file_name)
             .map(|info| info.content_mapper)
             .unwrap_or_default()
     }
 
-    fn is_content_mapper_supplemental(&self) -> bool {
+    fn is_content_mapper_supplemental(&self) -> bool { ::tsox_core::fntrace::enter("is_content_mapper_supplemental"); 
         tsox_compile::mig::m3l_cm_2::content_mapper_source_file_info(&self.file_name)
             .map(|info| info.canonical_source_file.is_some())
             .unwrap_or(false)
     }
 
-    fn is_content_mapper_failure_stub(&self) -> bool {
+    fn is_content_mapper_failure_stub(&self) -> bool { ::tsox_core::fntrace::enter("is_content_mapper_failure_stub"); 
         tsox_frontend::ast::mig::m3b_2::is_content_mapper_failure_stub(self)
     }
 }
@@ -78,43 +78,43 @@ impl SourceFileContentMapperExt for ast::SourceFile {
 impl crate::ls::autoimport::RegistryCloneHost
     for crate::project::auto_import::AutoImportRegistryCloneHost
 {
-    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS {
+    fn fs(&self) -> &dyn tsox_tsoptions::vfs::FS { ::tsox_core::fntrace::enter("fs"); 
         todo!("AutoImportRegistryCloneHost::fs requires snapshotFSBuilder integration")
     }
 
-    fn get_current_directory(&self) -> &str {
+    fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         <crate::project::auto_import::AutoImportRegistryCloneHost as crate::project::auto_import::RegistryCloneHost>::get_current_directory(self)
     }
 
     fn get_default_project(
         &self,
         _path: &Path,
-    ) -> (Path, Option<Arc<tsox_compile::compiler::Program>>) {
+    ) -> (Path, Option<Arc<tsox_compile::compiler::Program>>) { ::tsox_core::fntrace::enter("get_default_project"); 
         (Path::default(), None)
     }
 
     fn get_program_for_project(
         &self,
         _project_path: &Path,
-    ) -> Option<Arc<tsox_compile::compiler::Program>> {
+    ) -> Option<Arc<tsox_compile::compiler::Program>> { ::tsox_core::fntrace::enter("get_program_for_project"); 
         None
     }
 
     fn get_package_json(
         &self,
         _file_name: &str,
-    ) -> Option<crate::project::auto_import::PackageJsonInfoCacheEntry> {
+    ) -> Option<crate::project::auto_import::PackageJsonInfoCacheEntry> { ::tsox_core::fntrace::enter("get_package_json"); 
         None
     }
 
-    fn get_source_file(&self, _file_name: &str, _path: &Path) -> Option<Arc<ast::SourceFile>> {
+    fn get_source_file(&self, _file_name: &str, _path: &Path) -> Option<Arc<ast::SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         None
     }
 
-    fn dispose(&self) {}
+    fn dispose(&self) { ::tsox_core::fntrace::enter("dispose"); }
 }
 
-fn position_encoding_from_protocol(encoding: &str) -> lsconv::PositionEncodingKind {
+fn position_encoding_from_protocol(encoding: &str) -> lsconv::PositionEncodingKind { ::tsox_core::fntrace::enter("position_encoding_from_protocol"); 
     if encoding == crate::lsp::lsproto::POSITION_ENCODING_UTF8 {
         lsconv::PositionEncodingKind::Utf8
     } else if encoding == crate::lsp::lsproto::POSITION_ENCODING_UTF32 {
@@ -124,11 +124,11 @@ fn position_encoding_from_protocol(encoding: &str) -> lsconv::PositionEncodingKi
     }
 }
 
-fn empty_lsp_line_map() -> lsconv::LspLineMap {
+fn empty_lsp_line_map() -> lsconv::LspLineMap { ::tsox_core::fntrace::enter("empty_lsp_line_map"); 
     crate::ls::lsconv_linemap::compute_lsp_line_starts("")
 }
 
-fn new_snapshot_line_map_closure() -> Box<dyn Fn(&str) -> lsconv::LspLineMap + Send + Sync> {
+fn new_snapshot_line_map_closure() -> Box<dyn Fn(&str) -> lsconv::LspLineMap + Send + Sync> { ::tsox_core::fntrace::enter("new_snapshot_line_map_closure"); 
     let snapshot_cell: OnceLock<Arc<Snapshot>> = OnceLock::new();
     Box::new(move |file_name: &str| {
         snapshot_cell
@@ -138,7 +138,7 @@ fn new_snapshot_line_map_closure() -> Box<dyn Fn(&str) -> lsconv::LspLineMap + S
     })
 }
 
-fn wire_snapshot_line_map_closure(new_snapshot: &mut Arc<Snapshot>) {
+fn wire_snapshot_line_map_closure(new_snapshot: &mut Arc<Snapshot>) { ::tsox_core::fntrace::enter("wire_snapshot_line_map_closure"); 
     let cell = Arc::downgrade(new_snapshot);
     let converters = Arc::get_mut(new_snapshot)
         .expect("freshly created snapshot is uniquely held")
@@ -162,7 +162,7 @@ pub fn new_snapshot(
     user_preferences: UserPreferences,
     auto_imports: Option<Arc<autoimport::Registry>>,
     auto_imports_watch: Option<Arc<WatchedFiles<HashMap<Path, String>>>>,
-) -> Snapshot {
+) -> Snapshot { ::tsox_core::fntrace::enter("new_snapshot"); 
     let mut s = Snapshot::new(id);
     s.fs = Some(fs);
     s.config_file_registry = Some(config_file_registry);
@@ -178,7 +178,7 @@ pub fn new_snapshot(
 }
 
 impl Snapshot {
-    pub fn content_mapper_watch_state(&self) -> (&Vec<String>, &HashSet<Path>) {
+    pub fn content_mapper_watch_state(&self) -> (&Vec<String>, &HashSet<Path>) { ::tsox_core::fntrace::enter("content_mapper_watch_state"); 
         let (extensions, watched_files) = self
             .content_mapper_watch_state_once
             .get_or_init(|| {
@@ -203,7 +203,7 @@ impl Snapshot {
         change: SnapshotChange,
         overlays: Option<&HashMap<Path, Arc<Overlay>>>,
         session: &Session,
-    ) -> Arc<Snapshot> {
+    ) -> Arc<Snapshot> { ::tsox_core::fntrace::enter("clone_snapshot"); 
         let start = std::time::Instant::now();
         let mut inferred_content_mappers = self.inferred_project_content_mappers.clone();
         let mut inferred_content_mapper_extensions = self.inferred_project_content_mapper_extensions.clone();
@@ -409,7 +409,7 @@ impl Snapshot {
         old_project: Option<&Project>,
         mut file_changes: FileChangeSummary,
         session: &Session,
-    ) -> Arc<Snapshot> {
+    ) -> Arc<Snapshot> { ::tsox_core::fntrace::enter("clone_for_program"); 
         let start = std::time::Instant::now();
         let fs_snapshot = self.fs.as_ref().expect("fs");
         let mut fs = new_snapshot_fs_builder(
@@ -524,7 +524,7 @@ impl Snapshot {
         fs: &mut SnapshotFSBuilder,
         file_changes: FileChangeSummary,
         content_mapper_contributions: Option<&ContentMapperContributions>,
-    ) -> FileChangeSummary {
+    ) -> FileChangeSummary { ::tsox_core::fntrace::enter("process_file_changes"); 
         let mut file_changes = file_changes;
         if file_changes.has_excessive_watch_events() {
             if file_changes.invalidate_all {
@@ -559,7 +559,7 @@ impl Snapshot {
         file_changes
     }
 
-    pub fn get_projects_containing_file(&self, uri: &lsproto::DocumentUri) -> Vec<&Project> {
+    pub fn get_projects_containing_file(&self, uri: &lsproto::DocumentUri) -> Vec<&Project> { ::tsox_core::fntrace::enter("get_projects_containing_file"); 
         let file_name = uri.file_name();
         let path = (self.fs.as_ref().expect("fs").to_path)(&file_name);
         self.project_collection
@@ -568,28 +568,28 @@ impl Snapshot {
             .get_projects_containing_file(&path)
     }
 
-    pub fn lsp_line_map(&self, file_name: &str) -> Option<lsconv::LspLineMap> {
+    pub fn lsp_line_map(&self, file_name: &str) -> Option<lsconv::LspLineMap> { ::tsox_core::fntrace::enter("lsp_line_map"); 
         self.get_file(file_name)
             .map(|f| crate::ls::lsconv_linemap::compute_lsp_line_starts(f.content()))
     }
 
-    pub fn get_ecma_line_info(&self, _file_name: &str) -> Option<sourcemap::EcmaLineInfo> {
+    pub fn get_ecma_line_info(&self, _file_name: &str) -> Option<sourcemap::EcmaLineInfo> { ::tsox_core::fntrace::enter("get_ecma_line_info"); 
         todo!("ECMALineInfo 未移植：按 Go lineinfo.go 移植至 tsox-frontend sourcemap（跨 crate 交接）")
     }
 
-    pub fn get_preferences(&self, _active_file: &str) -> UserPreferences {
+    pub fn get_preferences(&self, _active_file: &str) -> UserPreferences { ::tsox_core::fntrace::enter("get_preferences"); 
         self.user_preferences()
     }
 
-    pub fn auto_import_registry(&self) -> Option<Arc<autoimport::Registry>> {
+    pub fn auto_import_registry(&self) -> Option<Arc<autoimport::Registry>> { ::tsox_core::fntrace::enter("auto_import_registry"); 
         self.auto_imports.clone()
     }
 
-    pub fn directory_exists(&self, path: &str) -> bool {
+    pub fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         self.fs.as_ref().unwrap().fs.directory_exists(path)
     }
 
-    pub fn get_directories(&self, path: &str) -> Vec<String> {
+    pub fn get_directories(&self, path: &str) -> Vec<String> { ::tsox_core::fntrace::enter("get_directories"); 
         self.fs.as_ref().unwrap().fs.get_accessible_entries(path).directories
     }
 
@@ -601,7 +601,7 @@ impl Snapshot {
         excludes: &[String],
         includes: &[String],
         depth: i32,
-    ) -> Vec<String> {
+    ) -> Vec<String> { ::tsox_core::fntrace::enter("read_directory"); 
         let extensions_ref: Vec<&str> = extensions.iter().map(|s| s.as_str()).collect();
         let excludes_ref: Vec<&str> = excludes.iter().map(|s| s.as_str()).collect();
         let includes_ref: Vec<&str> = includes.iter().map(|s| s.as_str()).collect();
@@ -616,7 +616,7 @@ impl Snapshot {
         )
     }
 
-    pub fn deref(&self, session: &Session) {
+    pub fn deref(&self, session: &Session) { ::tsox_core::fntrace::enter("deref"); 
         let rc = self.ref_count.fetch_sub(1, std::sync::atomic::Ordering::SeqCst) - 1;
         if rc < 0 {
             panic!("snapshot {}: ref count below zero, parentId={}", self.id, self.parent_id);
@@ -626,7 +626,7 @@ impl Snapshot {
         }
     }
 
-    fn dispose_with_session(&self, session: &Session) {
+    fn dispose_with_session(&self, session: &Session) { ::tsox_core::fntrace::enter("dispose_with_session"); 
         for project in self.projects() {
             if let Some(program) = project.get_program()
                 && session.program_counter_deref(&program)
@@ -669,60 +669,60 @@ impl Snapshot {
 }
 
 impl Project {
-    pub fn content_mapper_watched_files(&self) -> Option<&HashSet<Path>> {
+    pub fn content_mapper_watched_files(&self) -> Option<&HashSet<Path>> { ::tsox_core::fntrace::enter("content_mapper_watched_files"); 
         self.content_mapper_watched_files.as_ref()
     }
 
-    pub fn freeze_host(&self, _fs: &SnapshotFS, _registry: &ConfigFileRegistry) {
+    pub fn freeze_host(&self, _fs: &SnapshotFS, _registry: &ConfigFileRegistry) { ::tsox_core::fntrace::enter("freeze_host"); 
     }
 }
 
 impl Session {
-    pub fn fs_fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> {
+    pub fn fs_fs(&self) -> Arc<dyn tsox_tsoptions::vfs::FS> { ::tsox_core::fntrace::enter("fs_fs"); 
         self.fs.as_ref().expect("fs").fs.clone()
     }
 
-    pub fn next_snapshot_id(&self) -> u64 {
+    pub fn next_snapshot_id(&self) -> u64 { ::tsox_core::fntrace::enter("next_snapshot_id"); 
         self.snapshot_id
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
     }
 
-    pub fn program_counter_ref(&self, program: &Arc<tsox_compile::compiler::Program>) {
+    pub fn program_counter_ref(&self, program: &Arc<tsox_compile::compiler::Program>) { ::tsox_core::fntrace::enter("program_counter_ref"); 
         self.program_counter
             .as_ref()
             .expect("program counter")
             .r#ref(program);
     }
 
-    pub fn program_counter_deref(&self, program: &Arc<tsox_compile::compiler::Program>) -> bool {
+    pub fn program_counter_deref(&self, program: &Arc<tsox_compile::compiler::Program>) -> bool { ::tsox_core::fntrace::enter("program_counter_deref"); 
         self.program_counter
             .as_ref()
             .expect("program counter")
             .deref(program)
     }
 
-    pub fn extended_config_cache_add_owner(&self, path: &Path, owner: u64) {
+    pub fn extended_config_cache_add_owner(&self, path: &Path, owner: u64) { ::tsox_core::fntrace::enter("extended_config_cache_add_owner"); 
         self.extended_config_cache
             .as_ref()
             .expect("extended config cache")
             .add_owner(path, owner);
     }
 
-    pub fn extended_config_cache_release(&self, path: &Path, owner: u64) {
+    pub fn extended_config_cache_release(&self, path: &Path, owner: u64) { ::tsox_core::fntrace::enter("extended_config_cache_release"); 
         self.extended_config_cache
             .as_ref()
             .expect("extended config cache")
             .release(path, owner);
     }
 
-    pub fn parse_cache_deref(&self, key: &ParseCacheKey) {
+    pub fn parse_cache_deref(&self, key: &ParseCacheKey) { ::tsox_core::fntrace::enter("parse_cache_deref"); 
         self.parse_cache
             .as_ref()
             .expect("parse cache")
             .deref(key);
     }
 
-    pub fn content_mapped_parse_cache_deref(&self, key: &ParseCacheKey) {
+    pub fn content_mapped_parse_cache_deref(&self, key: &ParseCacheKey) { ::tsox_core::fntrace::enter("content_mapped_parse_cache_deref"); 
         self.content_mapped_parse_cache
             .as_ref()
             .expect("content mapped parse cache")
@@ -731,23 +731,23 @@ impl Session {
 }
 
 impl Snapshot {
-    pub fn user_preferences(&self) -> UserPreferences {
+    pub fn user_preferences(&self) -> UserPreferences { ::tsox_core::fntrace::enter("user_preferences"); 
         self.user_preferences.clone()
     }
 
-    pub fn config_file_registry(&self) -> &ConfigFileRegistry {
+    pub fn config_file_registry(&self) -> &ConfigFileRegistry { ::tsox_core::fntrace::enter("config_file_registry"); 
         self.config_file_registry
             .as_deref()
             .expect("config file registry")
     }
 
-    pub fn project_collection(&self) -> &crate::project::project_collection::ProjectCollection {
+    pub fn project_collection(&self) -> &crate::project::project_collection::ProjectCollection { ::tsox_core::fntrace::enter("project_collection"); 
         self.project_collection
             .as_deref()
             .expect("project collection")
     }
 
-    pub fn to_path_fn(&self) -> Arc<dyn Fn(&str) -> Path + Send + Sync> {
+    pub fn to_path_fn(&self) -> Arc<dyn Fn(&str) -> Path + Send + Sync> { ::tsox_core::fntrace::enter("to_path_fn"); 
         let fs = Arc::clone(self.fs.as_ref().expect("fs"));
         Arc::new(move |file_name: &str| (fs.to_path)(file_name))
     }
@@ -755,19 +755,19 @@ impl Snapshot {
     pub fn get_file(
         &self,
         file_name: &str,
-    ) -> Option<std::sync::Arc<dyn crate::project::overlay_fs::FileHandle>> {
+    ) -> Option<std::sync::Arc<dyn crate::project::overlay_fs::FileHandle>> { ::tsox_core::fntrace::enter("get_file"); 
         self.fs.as_ref().expect("fs").get_file(file_name)
     }
 
-    pub fn fs_disk_directories(&self) -> &HashMap<Path, HashMap<Path, String>> {
+    pub fn fs_disk_directories(&self) -> &HashMap<Path, HashMap<Path, String>> { ::tsox_core::fntrace::enter("fs_disk_directories"); 
         &self.fs.as_ref().expect("fs").disk_directories
     }
 
-    pub fn fs_node_modules_realpath_aliases(&self) -> &HashMap<Path, Arc<RealpathAliasSet>> {
+    pub fn fs_node_modules_realpath_aliases(&self) -> &HashMap<Path, Arc<RealpathAliasSet>> { ::tsox_core::fntrace::enter("fs_node_modules_realpath_aliases"); 
         &self.fs.as_ref().expect("fs").node_modules_realpath_aliases
     }
 
-    pub fn extended_source_files(&self) -> Vec<String> {
+    pub fn extended_source_files(&self) -> Vec<String> { ::tsox_core::fntrace::enter("extended_source_files"); 
         let mut files = Vec::new();
         if let Some(registry) = &self.config_file_registry {
             for config in registry.configs.values() {
@@ -784,7 +784,7 @@ impl super::m5d_5::ProjectCollectionBuilderMig<'_> {
     pub fn did_update_ata_state(
         &mut self,
         ata_changes: &HashMap<Path, crate::project::snapshot::ATAStateChange>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_update_ata_state"); 
         for (project_path, ata_change) in ata_changes {
             let change = ata_change.clone();
             self.configured_projects.change(project_path, |p| {
@@ -795,7 +795,7 @@ impl super::m5d_5::ProjectCollectionBuilderMig<'_> {
         }
     }
 
-    pub fn did_request_project(&mut self, project_id: &Path) {
+    pub fn did_request_project(&mut self, project_id: &Path) { ::tsox_core::fntrace::enter("did_request_project"); 
         if let Some(entry) = self.configured_projects.load(project_id) {
             self.update_program(&entry, None);
         }
@@ -805,7 +805,7 @@ impl super::m5d_5::ProjectCollectionBuilderMig<'_> {
         &mut self,
         uri: &lsproto::DocumentUri,
         configured_projects_only: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("did_request_file"); 
         let file_name = uri.file_name();
         let path = (self.to_path)(&file_name);
         if self.default_projects_invalidated {
@@ -859,7 +859,7 @@ impl super::m5d_5::ProjectCollectionBuilderMig<'_> {
         }
     }
 
-    pub fn did_change_custom_config_file_name(&mut self) {
+    pub fn did_change_custom_config_file_name(&mut self) { ::tsox_core::fntrace::enter("did_change_custom_config_file_name"); 
         if !self
             .config_file_registry_builder
             .did_change_custom_config_file_name()
@@ -871,7 +871,7 @@ impl super::m5d_5::ProjectCollectionBuilderMig<'_> {
         self.program_structure_changed = true;
     }
 
-    pub fn did_change_files(&mut self, summary: &FileChangeSummary) {
+    pub fn did_change_files(&mut self, summary: &FileChangeSummary) { ::tsox_core::fntrace::enter("did_change_files"); 
         self.open_files_changed = self.open_files_changed
             || !summary.opened.0.is_empty()
             || !summary.closed.is_empty();
@@ -957,7 +957,7 @@ impl super::m5d_5::ProjectCollectionBuilderMig<'_> {
     ) -> (
         crate::project::project_collection::ProjectCollection,
         ConfigFileRegistry,
-    ) {
+    ) { ::tsox_core::fntrace::enter("finalize"); 
         let (configured_projects, configured_projects_changed) =
             self.configured_projects.finalize();
         let inferred_project_changed = self.inferred_project.dirty();
@@ -996,7 +996,7 @@ impl super::m5d_5::ProjectCollectionBuilderMig<'_> {
 
 fn uri_set(
     uris: impl Iterator<Item = lsproto::DocumentUri>,
-) -> tsox_core::collections::set::Set<lsproto::DocumentUri> {
+) -> tsox_core::collections::set::Set<lsproto::DocumentUri> { ::tsox_core::fntrace::enter("uri_set"); 
     let mut set = tsox_core::collections::set::Set::new();
     for uri in uris {
         set.insert(uri);

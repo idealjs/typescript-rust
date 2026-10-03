@@ -3,7 +3,7 @@
 use crate::parser::members::*;
 
 impl Parser {
-    pub(crate) fn is_index_signature_start(&self) -> bool {
+    pub(crate) fn is_index_signature_start(&self) -> bool { ::tsox_core::fntrace::enter("is_index_signature_start"); 
         if self.token != SyntaxKind::OpenBracketToken {
             return false;
         }
@@ -41,7 +41,7 @@ impl Parser {
         )
     }
 
-    pub(crate) fn token_is_identifier(scanner: &crate::scanner::Scanner) -> bool {
+    pub(crate) fn token_is_identifier(scanner: &crate::scanner::Scanner) -> bool { ::tsox_core::fntrace::enter("token_is_identifier"); 
         let t = scanner.token();
         if t == SyntaxKind::Identifier {
             return true;
@@ -54,7 +54,7 @@ impl Parser {
         &mut self,
         pos: usize,
         modifiers: Option<Arc<ModifierList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_index_signature"); 
         let parameters = self.parse_bracketedList(
             ParsingContext::Parameters,
             Parser::parse_parameter,
@@ -77,7 +77,7 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_signature_member(&mut self, kind: SyntaxKind) -> Arc<Node> {
+    pub(crate) fn parse_signature_member(&mut self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_signature_member"); 
         let pos = self.token_pos();
         if kind == SyntaxKind::ConstructSignature {
             self.expect(SyntaxKind::NewKeyword);
@@ -124,13 +124,13 @@ impl Parser {
         }
     }
 
-    pub(crate) fn parse_type_member_semicolon(&mut self) {
+    pub(crate) fn parse_type_member_semicolon(&mut self) { ::tsox_core::fntrace::enter("parse_type_member_semicolon"); 
         if !self.parse_optional(SyntaxKind::SemicolonToken) {
             self.parse_optional(SyntaxKind::CommaToken);
         }
     }
 
-    pub(crate) fn parse_class_members(&mut self) -> NodeList {
+    pub(crate) fn parse_class_members(&mut self) -> NodeList { ::tsox_core::fntrace::enter("parse_class_members"); 
         // Go parseClassDeclaration：缺 '{' 时不解析类体，成员为缺失列表
         //（后续语句不被类体吞掉）
         if self.expect_report(SyntaxKind::OpenBraceToken) {

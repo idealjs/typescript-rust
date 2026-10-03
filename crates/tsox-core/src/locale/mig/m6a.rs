@@ -1,29 +1,29 @@
 use crate::core::mig::context::Context;
 use crate::locale::Locale;
 
-pub fn with_locale(ctx: Context, locale: Locale) -> Context {
+pub fn with_locale(ctx: Context, locale: Locale) -> Context { crate::fntrace::enter("with_locale"); 
     ctx.with_value(locale_context_key(), locale)
 }
 
-pub fn from_context(ctx: &Context) -> Locale {
+pub fn from_context(ctx: &Context) -> Locale { crate::fntrace::enter("from_context"); 
     ctx.value(locale_context_key()).cloned().unwrap_or_default()
 }
 
-pub fn parse(locale_str: &str) -> (Locale, bool) {
+pub fn parse(locale_str: &str) -> (Locale, bool) { crate::fntrace::enter("parse"); 
     let tag = language_tag_of(locale_str);
     let ok = !locale_str.is_empty() && is_well_formed(locale_str);
     (Locale(tag.to_string()), ok)
 }
 
-fn locale_context_key() -> &'static str {
+fn locale_context_key() -> &'static str { crate::fntrace::enter("locale_context_key"); 
     "locale"
 }
 
-fn language_tag_of(s: &str) -> &str {
+fn language_tag_of(s: &str) -> &str { crate::fntrace::enter("language_tag_of"); 
     s
 }
 
-fn is_well_formed(s: &str) -> bool {
+fn is_well_formed(s: &str) -> bool { crate::fntrace::enter("is_well_formed"); 
     let mut subtags = s.split('-');
     let Some(lang) = subtags.next() else {
         return false;

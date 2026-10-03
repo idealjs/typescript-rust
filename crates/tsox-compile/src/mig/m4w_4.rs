@@ -14,7 +14,7 @@ use tsox_frontend::ast::diagnostic::Diagnostic;
 use tsox_frontend::ast::mig::m3b_2;
 use tsox_tsoptions::tsoptions::ParsedCommandLine;
 
-fn contains_path(parent: &str, target: &str, options: &tspath::ComparePathsOptions) -> bool {
+fn contains_path(parent: &str, target: &str, options: &tspath::ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("contains_path"); 
     let parent = tspath::combine_paths(&options.current_directory, &[parent]);
     let target = tspath::combine_paths(&options.current_directory, &[target]);
     if parent.is_empty() || target.is_empty() {
@@ -63,7 +63,7 @@ pub trait ProgramLike {
 }
 
 impl Program {
-    pub fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> {
+    pub fn get_global_diagnostics(&self) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_global_diagnostics"); 
         if self.source_files.is_empty() {
             return Vec::new();
         }
@@ -76,20 +76,20 @@ impl Program {
     pub fn get_declaration_diagnostics(
         self: &Arc<Self>,
         source_file: Option<&Arc<SourceFile>>,
-    ) -> Vec<Arc<Diagnostic>> {
+    ) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("get_declaration_diagnostics"); 
         self.collect_diagnostics(source_file, true, &mut |file| {
             self.get_declaration_diagnostics_for_file(file)
         })
     }
 
-    pub fn program(&self) -> &Program {
+    pub fn program(&self) -> &Program { ::tsox_core::fntrace::enter("program"); 
         self
     }
 
     pub fn get_source_file_meta_data(
         &self,
         path: &str,
-    ) -> Option<tsox_frontend::ast::mig::x4ast::SourceFileMetaData> {
+    ) -> Option<tsox_frontend::ast::mig::x4ast::SourceFileMetaData> { ::tsox_core::fntrace::enter("get_source_file_meta_data"); 
         self.source_file_meta_datas.get(path).cloned()
     }
 
@@ -97,7 +97,7 @@ impl Program {
         &self,
         source_file: &Arc<SourceFile>,
         location: &Arc<Node>,
-    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode {
+    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode { ::tsox_core::fntrace::enter("get_emit_syntax_for_usage_location"); 
         let meta = self
             .source_file_meta_datas
             .get(m3b_2::path(source_file).as_str())
@@ -116,7 +116,7 @@ impl Program {
     pub fn get_implied_node_format_for_emit(
         &self,
         source_file: &Arc<SourceFile>,
-    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode {
+    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode { ::tsox_core::fntrace::enter("get_implied_node_format_for_emit"); 
         tsox_frontend::ast::mig::x4ast::get_implied_node_format_for_emit_worker(
             &source_file.file_name,
             self.project_reference_file_mapper
@@ -131,7 +131,7 @@ impl Program {
         &self,
         source_file: &Arc<SourceFile>,
         location: &Arc<Node>,
-    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode {
+    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode { ::tsox_core::fntrace::enter("get_mode_for_usage_location"); 
         let meta = self
             .source_file_meta_datas
             .get(m3b_2::path(source_file).as_str())
@@ -150,7 +150,7 @@ impl Program {
     pub fn get_default_resolution_mode_for_file(
         &self,
         source_file: &Arc<SourceFile>,
-    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode {
+    ) -> tsox_core::core::compiler_options_kinds::ResolutionMode { ::tsox_core::fntrace::enter("get_default_resolution_mode_for_file"); 
         let meta = self
             .source_file_meta_datas
             .get(m3b_2::path(source_file).as_str())
@@ -165,7 +165,7 @@ impl Program {
         )
     }
 
-    pub fn is_global_typings_file(&self, file_name: &str) -> bool {
+    pub fn is_global_typings_file(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_global_typings_file"); 
         if !tspath::is_declaration_file_name(file_name) {
             return false;
         }
@@ -176,7 +176,7 @@ impl Program {
         )
     }
 
-    pub fn get_default_lib_file(&self, path: &str) -> Option<LibFile> {
+    pub fn get_default_lib_file(&self, path: &str) -> Option<LibFile> { ::tsox_core::fntrace::enter("get_default_lib_file"); 
         self.lib_files.get(path).cloned()
     }
 
@@ -184,7 +184,7 @@ impl Program {
         &mut self,
         source_files: &[String],
         root_directory: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_source_files_belong_to_path"); 
         let mut all_files_belong_to_path = true;
         for file in source_files {
             let absolute_sourceFilePath = tspath::get_canonical_file_name(
@@ -218,7 +218,7 @@ impl Program {
     pub fn get_source_file_for_resolved_module(
         &self,
         file_name: &str,
-    ) -> Option<Arc<SourceFile>> {
+    ) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file_for_resolved_module"); 
         let file = self.get_source_file(file_name);
         if file.is_none() {
             let filename = self.get_parse_file_redirect(file_name);
@@ -229,11 +229,11 @@ impl Program {
         file
     }
 
-    pub fn files_by_path(&self) -> &HashMap<String, Arc<SourceFile>> {
+    pub fn files_by_path(&self) -> &HashMap<String, Arc<SourceFile>> { ::tsox_core::fntrace::enter("files_by_path"); 
         &self.files_by_path
     }
 
-    pub fn has_same_file_names(&self, other: &Program) -> bool {
+    pub fn has_same_file_names(&self, other: &Program) -> bool { ::tsox_core::fntrace::enter("has_same_file_names"); 
         maps_equal_by(&self.files_by_path, &other.files_by_path, |a, b| {
             a.file_name == b.file_name
         }) && maps_equal_by(
@@ -243,7 +243,7 @@ impl Program {
         )
     }
 
-    pub fn is_emit_blocked(&self, emit_file_name: &str) -> bool {
+    pub fn is_emit_blocked(&self, emit_file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_emit_blocked"); 
         self.has_emit_blocking_diagnostics
             .contains(&self.to_path(emit_file_name).0)
     }
@@ -253,7 +253,7 @@ fn maps_equal_by<K: std::hash::Hash + Eq, V, F: Fn(&V, &V) -> bool>(
     a: &HashMap<K, V>,
     b: &HashMap<K, V>,
     eq: F,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("maps_equal_by"); 
     a.len() == b.len()
         && a.iter().all(|(k, va)| match b.get(k) {
             Some(vb) => eq(va, vb),
@@ -264,7 +264,7 @@ fn maps_equal_by<K: std::hash::Hash + Eq, V, F: Fn(&V, &V) -> bool>(
 pub fn filter_no_emit_semantic_diagnostics(
     diagnostics: Vec<Arc<Diagnostic>>,
     options: &tsox_core::core::compiler_options::CompilerOptions,
-) -> Vec<Arc<Diagnostic>> {
+) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("filter_no_emit_semantic_diagnostics"); 
     if !options.no_emit.is_true() {
         return diagnostics;
     }
@@ -276,7 +276,7 @@ pub fn filter_no_emit_semantic_diagnostics(
 
 pub fn sort_and_deduplicate_diagnostics(
     diagnostics: Vec<Arc<Diagnostic>>,
-) -> Vec<Arc<Diagnostic>> {
+) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("sort_and_deduplicate_diagnostics"); 
     let mut diagnostics = diagnostics;
     diagnostics.sort_by(|a, b| tsox_frontend::ast::mig::m3d_2::compare_diagnostics(a, b));
     compact_and_merge_related_infos(diagnostics)
@@ -284,7 +284,7 @@ pub fn sort_and_deduplicate_diagnostics(
 
 pub fn compact_and_merge_related_infos(
     mut diagnostics: Vec<Arc<Diagnostic>>,
-) -> Vec<Arc<Diagnostic>> {
+) -> Vec<Arc<Diagnostic>> { ::tsox_core::fntrace::enter("compact_and_merge_related_infos"); 
     if diagnostics.len() < 2 {
         return diagnostics;
     }
@@ -330,7 +330,7 @@ pub fn compact_and_merge_related_infos(
 
 pub fn combine_emit_results(
     results: Vec<tsox_emit::emitter::EmitResult>,
-) -> tsox_emit::emitter::EmitResult {
+) -> tsox_emit::emitter::EmitResult { ::tsox_core::fntrace::enter("combine_emit_results"); 
     let mut result = tsox_emit::emitter::EmitResult::default();
     for emit_result in results {
         if emit_result.emit_skipped {

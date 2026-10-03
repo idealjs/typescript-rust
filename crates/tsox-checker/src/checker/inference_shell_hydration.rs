@@ -5,7 +5,7 @@ impl Checker {
     /// 空成员壳（create_array_type 手工实例、构建窗口中途快照）经符号与
     /// 类型实参重解析出完整实例，成员类型已完成实参替换；与
     /// is_object_type_related_to 的壳重解析同构。返回 None 表示无需水化
-    pub(crate) fn instantiated_members_shell(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn instantiated_members_shell(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("instantiated_members_shell"); 
         let sym = t.symbol.as_ref()?;
         if !sym.declarations.iter().any(|d| {
             matches!(

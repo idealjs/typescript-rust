@@ -6,7 +6,7 @@ use tsox_frontend::ast::SyntaxKind;
 impl Checker {
     /// Go isGenericMappedType（checker.go:25259）：约束为泛型索引类型，或 as
     /// 子句代入迭代参数后仍为泛型索引类型
-    pub(crate) fn mapped_type_keys_are_generic(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn mapped_type_keys_are_generic(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("mapped_type_keys_are_generic"); 
         let TypeData::Mapped(m) = &t.data else {
             return false;
         };
@@ -28,7 +28,7 @@ impl Checker {
     }
 
     /// Go isMappedTypeWithKeyofConstraintDeclaration（checker.go:23051）
-    pub(crate) fn is_mapped_type_with_keyof_constraint_declaration(t: &Arc<Type>) -> bool {
+    pub(crate) fn is_mapped_type_with_keyof_constraint_declaration(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_mapped_type_with_keyof_constraint_declaration"); 
         let TypeData::Mapped(m) = &t.data else {
             return false;
         };
@@ -36,7 +36,7 @@ impl Checker {
     }
 
     /// Go getModifiersTypeFromMappedType（checker.go:28478）
-    pub(crate) fn get_modifiers_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_modifiers_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_modifiers_type_from_mapped_type"); 
         let TypeData::Mapped(m) = &t.data else {
             return self.unknown_type();
         };
@@ -77,7 +77,7 @@ impl Checker {
         &mut self,
         name_type: &Arc<Type>,
         target_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_apparent_mapped_type_keys"); 
         let modifiers = self.get_modifiers_type_from_mapped_type(target_type);
         let apparent = self.get_apparent_type(&modifiers);
         let mut key_types: Vec<Arc<Type>> = self
@@ -113,7 +113,7 @@ impl Checker {
         &mut self,
         mapped: &Arc<Type>,
         include_name_type: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("mapped_deferred_key_set"); 
         let name_type = self.get_name_type_from_mapped_type(mapped);
         let key_type = match &name_type {
             Some(nt) if Self::is_mapped_type_with_keyof_constraint_declaration(mapped) => {
@@ -130,7 +130,7 @@ impl Checker {
         Some(key_type)
     }
 
-    fn mapped_keyof_operand_node(t: &Arc<Type>) -> Option<Arc<tsox_frontend::ast::Node>> {
+    fn mapped_keyof_operand_node(t: &Arc<Type>) -> Option<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("mapped_keyof_operand_node"); 
         let TypeData::Mapped(m) = &t.data else {
             return None;
         };

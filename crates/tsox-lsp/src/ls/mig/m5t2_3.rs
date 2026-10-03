@@ -13,7 +13,7 @@ use crate::mig::m5u_conv::{new_converters as new_m5u_converters, SourceFileScrip
 
 fn m5t23_m5u_converters(
     encoding: crate::ls::lsconv_converters::PositionEncodingKind,
-) -> crate::mig::m5u_conv::M5uConverters {
+) -> crate::mig::m5u_conv::M5uConverters { ::tsox_core::fntrace::enter("m5t23_m5u_converters"); 
     new_m5u_converters(
         encoding,
         Box::new(crate::ls::lsconv_linemap::compute_lsp_line_starts),
@@ -22,7 +22,7 @@ fn m5t23_m5u_converters(
 
 /// Go projection.SpanMap()：span map 挂在 SourceFile 上，Rust ast 层尚未
 /// 落地该字段（m6b_2::SpanMap 亦无生产方），先返 None，见 progress_notes_r59A.md 交接
-fn source_file_span_map_m5t23(_file: &Arc<SourceFile>) -> Option<crate::mig::m6b_2::SpanMap> {
+fn source_file_span_map_m5t23(_file: &Arc<SourceFile>) -> Option<crate::mig::m6b_2::SpanMap> { ::tsox_core::fntrace::enter("source_file_span_map_m5t23"); 
     None
 }
 
@@ -95,14 +95,14 @@ pub struct VSContainerElement {
     pub elements: Vec<VSImageElementOrClassifiedTextElementOrContainerElement>,
 }
 
-pub fn new_vs_image_id(id: i32) -> VSImageId {
+pub fn new_vs_image_id(id: i32) -> VSImageId { ::tsox_core::fntrace::enter("new_vs_image_id"); 
     VSImageId {
         guid: VS_IMAGE_CATALOG_GUID.to_string(),
         id,
     }
 }
 
-pub fn get_vs_hover_image_id(kind: ScriptElementKind, modifiers: ScriptElementKindModifier) -> Option<VSImageId> {
+pub fn get_vs_hover_image_id(kind: ScriptElementKind, modifiers: ScriptElementKindModifier) -> Option<VSImageId> { ::tsox_core::fntrace::enter("get_vs_hover_image_id"); 
     let is_private = modifiers & ScriptElementKindModifier::PRIVATE.0 != 0;
     let is_protected = modifiers & ScriptElementKindModifier::PROTECTED.0 != 0;
     let pick = |private: i32, protected: i32, public: i32| {
@@ -162,7 +162,7 @@ pub fn build_vs_hover_raw_content(
     image_id: &VSImageId,
     quick_info_runs: &[VSClassifiedTextRun],
     documentation_runs: &[VSClassifiedTextRun],
-) -> Option<VSContainerElement> {
+) -> Option<VSContainerElement> { ::tsox_core::fntrace::enter("build_vs_hover_raw_content"); 
     if quick_info_runs.is_empty() {
         return None;
     }
@@ -203,7 +203,7 @@ impl LanguageService {
         file: &Arc<SourceFile>,
         options: &crate::ls::lsutil_format_code_options::FormatCodeSettings,
         original_range: TextRange,
-    ) -> Vec<crate::lsp::lsproto_lsp_basic::TextEdit> {
+    ) -> Vec<crate::lsp::lsproto_lsp_basic::TextEdit> { ::tsox_core::fntrace::enter("get_formatting_edits_for_mapped_range"); 
         let mut projections = vec![file.clone()];
         projections.extend(file.supplemental_source_files());
         let mut candidates: Vec<MappedFormattingRange> = Vec::new();
@@ -274,7 +274,7 @@ impl LanguageService {
     }
 }
 
-pub fn non_overlapping_formatting_ranges(candidates: Vec<MappedFormattingRange>) -> Vec<MappedFormattingRange> {
+pub fn non_overlapping_formatting_ranges(candidates: Vec<MappedFormattingRange>) -> Vec<MappedFormattingRange> { ::tsox_core::fntrace::enter("non_overlapping_formatting_ranges"); 
     let mut candidates = candidates;
     candidates.sort_by(|a, b| {
         let c = a.original_range.pos().cmp(&b.original_range.pos());

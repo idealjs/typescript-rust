@@ -8,7 +8,7 @@ impl crate::parser::Parser {
         start: usize,
         end: usize,
         full_start: usize,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_jsdoc_comment"); 
         {
             let text = self.scanner.text();
             if !is_jsdoc_like_text(&text[start..]) {
@@ -42,7 +42,7 @@ impl crate::parser::Parser {
         end: usize,
         full_start: usize,
         indent: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_comment_worker"); 
         let mut tags: Vec<Arc<Node>> = Vec::new();
         let mut tags_pos: usize = 0;
         let mut tags_end: usize = 0;
@@ -267,7 +267,7 @@ impl crate::parser::Parser {
         comments: &[String],
         pos: usize,
         end: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("finish_jsdoc_text"); 
         Arc::new(Node::with_loc(
             SyntaxKind::JSDocText,
             NodeData::JSDocText(JSDocTextData {

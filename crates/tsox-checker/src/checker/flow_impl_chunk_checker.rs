@@ -10,7 +10,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         flow: Option<&Arc<FlowNode>>,
         location: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowed_type_of_symbol"); 
         let declared = self.get_type_of_symbol(symbol);
         self.get_narrowed_type_of_symbol_with_declared(symbol, flow, declared, location)
     }
@@ -21,7 +21,7 @@ impl Checker {
         flow: Option<&Arc<FlowNode>>,
         declared: Arc<Type>,
         location: Option<&Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowed_type_of_symbol_with_declared"); 
         let frame_type = self
             .logical_rhs_narrowing_frames
             .iter()
@@ -67,7 +67,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         reference: &Arc<Node>,
         declared: &Arc<Type>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("extended_flow_container"); 
         let Some(value_declaration) = symbol.value_declaration.clone() else {
             return self.get_control_flow_container(reference);
         };
@@ -92,7 +92,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         node: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowable_type_for_reference"); 
         if self.narrowable_reference_query_stack.len() >= 4 {
             return Arc::clone(t);
         }
@@ -121,7 +121,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    fn has_generic_with_union_constraint(&self, t: &Arc<Type>) -> bool {
+    fn has_generic_with_union_constraint(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_generic_with_union_constraint"); 
         if t.flags.contains(TypeFlags::Intersection) {
             if let crate::checker::types::TypeData::Intersection(i) = &t.data {
                 return i
@@ -150,7 +150,7 @@ impl Checker {
                 })
     }
 
-    fn is_constraint_position_for_reference(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> bool {
+    fn is_constraint_position_for_reference(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_constraint_position_for_reference"); 
         let Some(parent) = node.parent() else {
             return false;
         };
@@ -197,7 +197,7 @@ impl Checker {
         }
     }
 
-    fn has_contextual_type_with_no_generic_types(&mut self, node: &Arc<Node>) -> bool {
+    fn has_contextual_type_with_no_generic_types(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_contextual_type_with_no_generic_types"); 
         if !matches!(node.kind, SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression) {
             return false;
         }
@@ -210,7 +210,7 @@ impl Checker {
         result
     }
 
-    fn has_contextual_type_with_no_generic_types_inner(&mut self, node: &Arc<Node>) -> bool {
+    fn has_contextual_type_with_no_generic_types_inner(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_contextual_type_with_no_generic_types_inner"); 
         if let Some(parent) = node.parent()
             && let tsox_frontend::ast::NodeData::VariableDeclaration(d) = &parent.data
             && d.initializer.as_ref().is_some_and(|init| Arc::ptr_eq(init, node))
@@ -235,11 +235,11 @@ impl Checker {
         &mut self,
         reference: &Arc<Node>,
         declared: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_flow_type_of_reference"); 
         self.get_flow_type_of_reference_ex(reference, declared, None, None)
     }
 
-    pub(crate) fn type_is_never_after_removing_nullable(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn type_is_never_after_removing_nullable(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_never_after_removing_nullable"); 
         if !self.strict_null_checks {
             return false;
         }
@@ -256,7 +256,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_definite_assignment_flow_type"); 
         if self.flow_analysis_disabled {
             return None;
         }
@@ -287,7 +287,7 @@ impl Checker {
         Some(narrowed)
     }
 
-    pub(crate) fn type_contains_undefined_local(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn type_contains_undefined_local(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_contains_undefined_local"); 
         if t.flags.contains(TypeFlags::Undefined) {
             return true;
         }
@@ -308,7 +308,7 @@ impl Checker {
         target: &FlowRef,
         flow: &Arc<FlowNode>,
         initial: &Arc<Type>,
-    ) -> u64 {
+    ) -> u64 { ::tsox_core::fntrace::enter("flow_cache_key"); 
         let ref_part = match target {
             FlowRef::Symbol(symbol) => symbol.id(),
             FlowRef::Node(node) => node.id(),
@@ -327,7 +327,7 @@ impl Checker {
         target: &FlowRef,
         depth: u32,
         query: &mut FlowQuery,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("type_at_flow_node"); 
         let key = Arc::as_ptr(flow) as usize;
         if let Some(t) = query.memo.get(&key) {
             return Arc::clone(t);
@@ -359,7 +359,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn report_flow_control_error(&mut self, target: &FlowRef) {
+    pub(crate) fn report_flow_control_error(&mut self, target: &FlowRef) { ::tsox_core::fntrace::enter("report_flow_control_error"); 
         use tsox_frontend::ast::SyntaxKind;
         let Some(anchor) = target.anchor_node() else {
             return;
@@ -406,7 +406,7 @@ impl Checker {
     }
 }
 
-fn pattern_element_count(pattern: &Arc<Node>) -> usize {
+fn pattern_element_count(pattern: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("pattern_element_count"); 
     match &pattern.data {
         tsox_frontend::ast::NodeData::BindingPattern(d) => d.elements.len(),
         _ => 0,

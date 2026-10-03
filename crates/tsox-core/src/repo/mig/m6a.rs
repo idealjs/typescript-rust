@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 
 static ROOT_PATH: OnceLock<String> = OnceLock::new();
 
-pub fn root_path() -> &'static str {
+pub fn root_path() -> &'static str { crate::fntrace::enter("root_path"); 
     ROOT_PATH.get_or_init(|| {
         let filename = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
 
@@ -35,12 +35,12 @@ pub fn root_path() -> &'static str {
     })
 }
 
-fn is_workspace_root(dir: &Path) -> bool {
+fn is_workspace_root(dir: &Path) -> bool { crate::fntrace::enter("is_workspace_root"); 
     std::fs::read_to_string(dir.join("Cargo.toml"))
         .map(|content| content.contains("[workspace]"))
         .unwrap_or(false)
 }
 
-pub fn RootPath() -> &'static str {
+pub fn RootPath() -> &'static str { crate::fntrace::enter("RootPath"); 
     root_path()
 }

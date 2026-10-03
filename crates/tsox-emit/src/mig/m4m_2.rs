@@ -26,7 +26,7 @@ use tsox_frontend::scanner::TOKEN_FLAGS_NONE;
 use crate::mig::m4j::r36k3_defs::R36K3NodeFactoryExt;
 use crate::printer::{EmitContext, NodeFactory};
 
-pub fn get_ecma_line_of_position(source_file: &SourceFile, position: usize) -> usize {
+pub fn get_ecma_line_of_position(source_file: &SourceFile, position: usize) -> usize { ::tsox_core::fntrace::enter("get_ecma_line_of_position"); 
     source_file.line_map.line_at(position)
 }
 
@@ -34,18 +34,18 @@ static SOURCE_FILE_REGISTRY: std::sync::OnceLock<
     std::sync::Mutex<std::collections::HashMap<u64, std::sync::Arc<SourceFile>>>,
 > = std::sync::OnceLock::new();
 
-fn source_file_registry() -> &'static std::sync::Mutex<std::collections::HashMap<u64, std::sync::Arc<SourceFile>>> {
+fn source_file_registry() -> &'static std::sync::Mutex<std::collections::HashMap<u64, std::sync::Arc<SourceFile>>> { ::tsox_core::fntrace::enter("source_file_registry"); 
     SOURCE_FILE_REGISTRY.get_or_init(|| std::sync::Mutex::new(std::collections::HashMap::new()))
 }
 
-pub fn register_source_file_line_map(source_file: &std::sync::Arc<SourceFile>) {
+pub fn register_source_file_line_map(source_file: &std::sync::Arc<SourceFile>) { ::tsox_core::fntrace::enter("register_source_file_line_map"); 
     source_file_registry()
         .lock()
         .unwrap()
         .insert(source_file.id(), source_file.clone());
 }
 
-pub fn registered_source_file_of_node(source_file_node: &Arc<Node>) -> Option<std::sync::Arc<SourceFile>> {
+pub fn registered_source_file_of_node(source_file_node: &Arc<Node>) -> Option<std::sync::Arc<SourceFile>> { ::tsox_core::fntrace::enter("registered_source_file_of_node"); 
     source_file_registry()
         .lock()
         .unwrap()
@@ -57,7 +57,7 @@ pub fn is_original_node_single_line_in_file(
     emit_context: &EmitContext,
     source_file: Option<std::sync::Arc<SourceFile>>,
     node: Option<&Arc<Node>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_original_node_single_line_in_file"); 
     let node = match node {
         Some(n) => n,
         None => return false,
@@ -72,31 +72,31 @@ pub fn is_original_node_single_line_in_file(
     start_line == end_line
 }
 
-pub fn is_generated_identifier(emit_context: &EmitContext, name: &Arc<Node>) -> bool {
+pub fn is_generated_identifier(emit_context: &EmitContext, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_generated_identifier"); 
     emit_context.has_auto_generate_info(name)
 }
 
-pub fn is_helper_name(emit_context: &EmitContext, name: &Arc<Node>) -> bool {
+pub fn is_helper_name(emit_context: &EmitContext, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_helper_name"); 
     emit_context.emit_flags(name).contains(EmitFlags::HELPER_NAME)
 }
 
-pub fn is_local_name(emit_context: &EmitContext, name: &Arc<Node>) -> bool {
+pub fn is_local_name(emit_context: &EmitContext, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_local_name"); 
     emit_context.emit_flags(name).contains(EmitFlags::LOCAL_NAME)
 }
 
-pub fn is_export_name(emit_context: &EmitContext, name: &Arc<Node>) -> bool {
+pub fn is_export_name(emit_context: &EmitContext, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_export_name"); 
     emit_context.emit_flags(name).contains(EmitFlags::EXPORT_NAME)
 }
 
-fn node_matches(child: Option<&Arc<Node>>, name: &Arc<Node>) -> bool {
+fn node_matches(child: Option<&Arc<Node>>, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_matches"); 
     child.map_or(false, |c| Arc::ptr_eq(c, name))
 }
 
-fn node_in_list(list: &tsox_frontend::ast::NodeList, name: &Arc<Node>) -> bool {
+fn node_in_list(list: &tsox_frontend::ast::NodeList, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_in_list"); 
     list.nodes.iter().any(|c| Arc::ptr_eq(c, name))
 }
 
-pub fn is_identifier_reference(name: &Arc<Node>, parent: &Arc<Node>) -> bool {
+pub fn is_identifier_reference(name: &Arc<Node>, parent: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_identifier_reference"); 
     match parent.kind {
         SyntaxKind::BinaryExpression
         | SyntaxKind::PrefixUnaryExpression
@@ -207,7 +207,7 @@ pub fn is_identifier_reference(name: &Arc<Node>, parent: &Arc<Node>) -> bool {
     }
 }
 
-fn binding_element_data(element: &Arc<Node>) -> &tsox_frontend::ast::node_data_generated::BindingElementData {
+fn binding_element_data(element: &Arc<Node>) -> &tsox_frontend::ast::node_data_generated::BindingElementData { ::tsox_core::fntrace::enter("binding_element_data"); 
     match &element.data {
         NodeData::BindingElement(d) => d,
         _ => panic!("BindingElement expected"),
@@ -217,7 +217,7 @@ fn binding_element_data(element: &Arc<Node>) -> &tsox_frontend::ast::node_data_g
 pub fn convert_binding_element_to_array_assignment_element(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_array_assignment_element"); 
     let binding = binding_element_data(element);
     let Some(name) = binding.name.clone() else {
         let elision = emit_context.factory().new_omitted_expression();
@@ -248,7 +248,7 @@ pub fn convert_binding_element_to_array_assignment_element(
 pub fn convert_binding_element_to_object_assignment_element(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_object_assignment_element"); 
     let binding = binding_element_data(element);
     let name = binding.name.clone().expect("BindingElement name expected");
     if binding.dot_dot_dot_token.is_some() {
@@ -297,7 +297,7 @@ pub fn convert_binding_element_to_object_assignment_element(
 pub fn convert_binding_pattern_to_assignment_pattern(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_pattern_to_assignment_pattern"); 
     match element.kind {
         SyntaxKind::ArrayBindingPattern => {
             convert_binding_element_to_array_assignment_pattern(emit_context, element)
@@ -309,7 +309,7 @@ pub fn convert_binding_pattern_to_assignment_pattern(
     }
 }
 
-fn binding_pattern_elements(element: &Arc<Node>) -> std::sync::Arc<tsox_frontend::ast::NodeList> {
+fn binding_pattern_elements(element: &Arc<Node>) -> std::sync::Arc<tsox_frontend::ast::NodeList> { ::tsox_core::fntrace::enter("binding_pattern_elements"); 
     match &element.data {
         NodeData::BindingPattern(d) => d.elements.clone(),
         _ => panic!("BindingPattern expected"),
@@ -319,7 +319,7 @@ fn binding_pattern_elements(element: &Arc<Node>) -> std::sync::Arc<tsox_frontend
 pub fn convert_binding_element_to_object_assignment_pattern(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_object_assignment_pattern"); 
     let mut properties: Vec<Arc<Node>> = vec![];
     let elements = binding_pattern_elements(element);
     for child in elements.nodes.iter() {
@@ -337,7 +337,7 @@ pub fn convert_binding_element_to_object_assignment_pattern(
     object
 }
 
-fn node_list_with_loc(nodes: Vec<Arc<Node>>, loc: TextRange) -> tsox_frontend::ast::NodeList {
+fn node_list_with_loc(nodes: Vec<Arc<Node>>, loc: TextRange) -> tsox_frontend::ast::NodeList { ::tsox_core::fntrace::enter("node_list_with_loc"); 
     let mut list = tsox_frontend::ast::NodeList::new(nodes);
     list.loc = loc;
     list
@@ -346,7 +346,7 @@ fn node_list_with_loc(nodes: Vec<Arc<Node>>, loc: TextRange) -> tsox_frontend::a
 pub fn convert_binding_element_to_array_assignment_pattern(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_element_to_array_assignment_pattern"); 
     let mut elements_out: Vec<Arc<Node>> = vec![];
     let elements = binding_pattern_elements(element);
     for child in elements.nodes.iter() {
@@ -366,7 +366,7 @@ pub fn convert_binding_element_to_array_assignment_pattern(
 pub fn convert_binding_name_to_assignment_element_target(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("convert_binding_name_to_assignment_element_target"); 
     if is_binding_pattern(element) {
         return convert_binding_pattern_to_assignment_pattern(emit_context, element);
     }
@@ -376,7 +376,7 @@ pub fn convert_binding_name_to_assignment_element_target(
 pub fn convert_variable_declaration_to_assignment_expression(
     emit_context: &EmitContext,
     element: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("convert_variable_declaration_to_assignment_expression"); 
     let declaration = match &element.data {
         NodeData::VariableDeclaration(d) => d,
         _ => panic!("VariableDeclaration expected"),
@@ -395,7 +395,7 @@ pub fn convert_variable_declaration_to_assignment_expression(
     Some(assignment)
 }
 
-pub fn single_or_many(nodes: Option<&[Arc<Node>]>, factory: &NodeFactory) -> Option<Arc<Node>> {
+pub fn single_or_many(nodes: Option<&[Arc<Node>]>, factory: &NodeFactory) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("single_or_many"); 
     let nodes = nodes?;
     if nodes.len() == 1 {
         return Some(nodes[0].clone());
@@ -403,14 +403,14 @@ pub fn single_or_many(nodes: Option<&[Arc<Node>]>, factory: &NodeFactory) -> Opt
     Some(factory.new_syntax_list(nodes.to_vec()))
 }
 
-pub fn is_simple_copiable_expression(expression: &Arc<Node>) -> bool {
+pub fn is_simple_copiable_expression(expression: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_simple_copiable_expression"); 
     is_string_literal_like(expression)
         || is_numeric_literal(expression)
         || is_keyword_kind(expression.kind)
         || is_identifier(expression)
 }
 
-pub fn is_original_node_single_line(emit_context: &EmitContext, node: Option<&Arc<Node>>) -> bool {
+pub fn is_original_node_single_line(emit_context: &EmitContext, node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_original_node_single_line"); 
     let node = match node {
         Some(n) => n,
         None => return false,
@@ -429,11 +429,11 @@ pub fn is_original_node_single_line(emit_context: &EmitContext, node: Option<&Ar
     start_line == end_line
 }
 
-pub fn is_simple_inlineable_expression(expression: &Arc<Node>) -> bool {
+pub fn is_simple_inlineable_expression(expression: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_simple_inlineable_expression"); 
     !is_identifier(expression) && is_simple_copiable_expression(expression)
 }
 
-pub fn find_super_statement_index_path(statements: &[Arc<Node>], start: usize) -> Vec<usize> {
+pub fn find_super_statement_index_path(statements: &[Arc<Node>], start: usize) -> Vec<usize> { ::tsox_core::fntrace::enter("find_super_statement_index_path"); 
     let mut indices =
         find_super_statement_index_path_worker(statements, start, Vec::new()).unwrap_or_default();
     indices.reverse();
@@ -444,7 +444,7 @@ pub fn find_super_statement_index_path_worker(
     statements: &[Arc<Node>],
     start: usize,
     indices: Vec<usize>,
-) -> Option<Vec<usize>> {
+) -> Option<Vec<usize>> { ::tsox_core::fntrace::enter("find_super_statement_index_path_worker"); 
     let mut indices = indices;
     for i in start..statements.len() {
         let statement = &statements[i];
@@ -471,7 +471,7 @@ pub fn find_super_statement_index_path_worker(
     None
 }
 
-pub fn get_super_call_from_statement(statement: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_super_call_from_statement(statement: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_super_call_from_statement"); 
     if !is_expression_statement(statement) {
         return None;
     }
@@ -482,7 +482,7 @@ pub fn get_super_call_from_statement(statement: &Arc<Node>) -> Option<Arc<Node>>
     None
 }
 
-pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange {
+pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("move_range_past_modifiers"); 
     if is_property_declaration(node) || is_method_declaration(node) {
         return TextRange::new(node.name().unwrap().pos(), node.end());
     }
@@ -500,7 +500,7 @@ pub fn move_range_past_modifiers(node: &Arc<Node>) -> TextRange {
     move_range_past_decorators(node)
 }
 
-pub fn move_range_past_decorators(node: &Arc<Node>) -> TextRange {
+pub fn move_range_past_decorators(node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("move_range_past_decorators"); 
     let mut last_decorator: Option<Arc<Node>> = None;
     if can_have_modifiers(node) {
         let nodes = node.modifier_nodes();
@@ -517,7 +517,7 @@ pub fn move_range_past_decorators(node: &Arc<Node>) -> TextRange {
     node.loc
 }
 
-pub fn get_non_assignment_operator_for_compound_assignment(kind: SyntaxKind) -> SyntaxKind {
+pub fn get_non_assignment_operator_for_compound_assignment(kind: SyntaxKind) -> SyntaxKind { ::tsox_core::fntrace::enter("get_non_assignment_operator_for_compound_assignment"); 
     match kind {
         SyntaxKind::PlusEqualsToken => SyntaxKind::PlusToken,
         SyntaxKind::MinusEqualsToken => SyntaxKind::MinusToken,
@@ -540,7 +540,7 @@ pub fn get_non_assignment_operator_for_compound_assignment(kind: SyntaxKind) -> 
     }
 }
 
-pub fn constant_expression(value: &ConstantValue, factory: &NodeFactory) -> Option<Arc<Node>> {
+pub fn constant_expression(value: &ConstantValue, factory: &NodeFactory) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("constant_expression"); 
     match value {
         ConstantValue::String(s) => Some(factory.new_string_literal(s, TOKEN_FLAGS_NONE)),
         ConstantValue::Number(n) => {

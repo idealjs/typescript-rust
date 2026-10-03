@@ -39,7 +39,7 @@ impl AliasResolver {
         module_resolver: Option<Arc<Resolver>>,
         to_path: Box<dyn Fn(&str) -> tsox_core::tspath::Path + Send + Sync>,
         on_failed_ambient_module_lookup: Box<dyn Fn(&dyn HasFileName, &str) + Send + Sync>,
-    ) -> AliasResolver {
+    ) -> AliasResolver { ::tsox_core::fntrace::enter("new"); 
         AliasResolver {
             to_path,
             host,
@@ -51,35 +51,35 @@ impl AliasResolver {
         }
     }
 
-    pub fn bind_source_files(&self) {}
+    pub fn bind_source_files(&self) { ::tsox_core::fntrace::enter("bind_source_files"); }
 
-    pub fn source_files(&self) -> &[Arc<SourceFile>] {
+    pub fn source_files(&self) -> &[Arc<SourceFile>] { ::tsox_core::fntrace::enter("source_files"); 
         &self.root_files
     }
 
-    pub fn options(&self) -> CompilerOptions {
+    pub fn options(&self) -> CompilerOptions { ::tsox_core::fntrace::enter("options"); 
         let mut opts = CompilerOptions::default();
         opts.no_check = true.into();
         opts
     }
 
-    pub fn get_current_directory(&self) -> &str {
+    pub fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.host.get_current_directory()
     }
 
-    pub fn use_case_sensitive_file_names(&self) -> bool {
+    pub fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.host.fs().use_case_sensitive_file_names()
     }
 
-    pub fn get_source_file(&self, _file_name: &str) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self, _file_name: &str) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         todo!("AliasResolver::get_source_file requires binder integration")
     }
 
-    pub fn get_default_resolution_mode_for_file(&self, _file: &dyn HasFileName) -> ResolutionMode {
+    pub fn get_default_resolution_mode_for_file(&self, _file: &dyn HasFileName) -> ResolutionMode { ::tsox_core::fntrace::enter("get_default_resolution_mode_for_file"); 
         ModuleKind::ESNext
     }
 
-    pub fn get_emit_module_format_of_file(&self, _source_file: &dyn HasFileName) -> ModuleKind {
+    pub fn get_emit_module_format_of_file(&self, _source_file: &dyn HasFileName) -> ModuleKind { ::tsox_core::fntrace::enter("get_emit_module_format_of_file"); 
         ModuleKind::ESNext
     }
 
@@ -88,15 +88,15 @@ impl AliasResolver {
         _current_source_file: &dyn HasFileName,
         _module_reference: &str,
         _mode: ResolutionMode,
-    ) -> Arc<ResolvedModule> {
+    ) -> Arc<ResolvedModule> { ::tsox_core::fntrace::enter("get_resolved_module"); 
         todo!("AliasResolver::get_resolved_module requires module resolver integration")
     }
 
-    pub fn is_source_file_default_library(&self, _path: &tsox_core::tspath::Path) -> bool {
+    pub fn is_source_file_default_library(&self, _path: &tsox_core::tspath::Path) -> bool { ::tsox_core::fntrace::enter("is_source_file_default_library"); 
         false
     }
 
-    pub fn get_packages_map(&self) -> Option<HashMap<String, bool>> {
+    pub fn get_packages_map(&self) -> Option<HashMap<String, bool>> { ::tsox_core::fntrace::enter("get_packages_map"); 
         None
     }
 }

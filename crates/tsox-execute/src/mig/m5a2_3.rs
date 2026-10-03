@@ -18,7 +18,7 @@ pub struct ReadableBuildInfoSemanticDiagnostic {
 }
 
 impl Serialize for ReadableBuildInfoSemanticDiagnostic {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         if !self.file.is_empty() {
             return self.file.serialize(serializer);
         }
@@ -27,7 +27,7 @@ impl Serialize for ReadableBuildInfoSemanticDiagnostic {
 }
 
 impl<'de> Deserialize<'de> for ReadableBuildInfoSemanticDiagnostic {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer)?;
         if let Ok(file) = serde_json::from_value::<String>(value.clone()) {
             return Ok(ReadableBuildInfoSemanticDiagnostic {
@@ -53,7 +53,7 @@ pub struct ReadableBuildInfoFilePendingEmit {
 }
 
 impl Serialize for ReadableBuildInfoFilePendingEmit {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         (
             self.file.clone(),
             self.emit_kind.clone(),
@@ -64,7 +64,7 @@ impl Serialize for ReadableBuildInfoFilePendingEmit {
 }
 
 impl<'de> Deserialize<'de> for ReadableBuildInfoFilePendingEmit {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let value = serde_json::Value::deserialize(deserializer).map_err(|_| {
             serde::de::Error::custom("invalid readableBuildInfoFilePendingEmit")
         })?;
@@ -121,13 +121,13 @@ pub struct ReadableBuildInfoResolvedRoot {
 }
 
 impl Serialize for ReadableBuildInfoResolvedRoot {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         (self.resolved.clone(), self.root.clone()).serialize(serializer)
     }
 }
 
 impl<'de> Deserialize<'de> for ReadableBuildInfoResolvedRoot {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         let resolved_and_root = <(String, String)>::deserialize(deserializer)
             .map_err(|_| serde::de::Error::custom("invalid BuildInfoResolvedRoot"))?;
         Ok(ReadableBuildInfoResolvedRoot {
@@ -139,7 +139,7 @@ impl<'de> Deserialize<'de> for ReadableBuildInfoResolvedRoot {
 
 pub fn to_readable_build_info_repopulate_info(
     info: Option<&BuildInfoRepopulateInfo>,
-) -> Option<ReadableBuildInfoRepopulateInfo> {
+) -> Option<ReadableBuildInfoRepopulateInfo> { ::tsox_core::fntrace::enter("to_readable_build_info_repopulate_info"); 
     let info = info?;
     Some(ReadableBuildInfoRepopulateInfo {
         kind: info.kind,
@@ -149,7 +149,7 @@ pub fn to_readable_build_info_repopulate_info(
     })
 }
 
-pub fn to_readable_file_emit_kind(file_emit_kind: FileEmitKind) -> String {
+pub fn to_readable_file_emit_kind(file_emit_kind: FileEmitKind) -> String { ::tsox_core::fntrace::enter("to_readable_file_emit_kind"); 
     let mut builder = String::new();
     let mut add_flags = |flags: &str| {
         if builder.is_empty() {
@@ -190,7 +190,7 @@ pub fn to_readable_file_emit_kind(file_emit_kind: FileEmitKind) -> String {
     "None".to_string()
 }
 
-pub fn to_readable_build_info(build_info: &BuildInfo, build_info_text: &str) -> String {
+pub fn to_readable_build_info(build_info: &BuildInfo, build_info_text: &str) -> String { ::tsox_core::fntrace::enter("to_readable_build_info"); 
     let mut readable = ReadableBuildInfo {
         build_info,
         version: build_info.version.clone(),

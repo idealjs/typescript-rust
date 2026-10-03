@@ -4,7 +4,7 @@ use crate::checker::checker_impl_chunk::*;
 use tsox_frontend::ast::SymbolTable;
 
 impl Checker {
-    pub(crate) fn merge_global_symbols(&mut self, dst: &Arc<Symbol>, src: &Arc<Symbol>) {
+    pub(crate) fn merge_global_symbols(&mut self, dst: &Arc<Symbol>, src: &Arc<Symbol>) { ::tsox_core::fntrace::enter("merge_global_symbols"); 
         let dst_mut = Arc::as_ptr(dst) as *mut Symbol;
         unsafe {
             (*dst_mut).flags |= src.flags;
@@ -53,7 +53,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn populate_globals(&mut self) {
+    pub(crate) fn populate_globals(&mut self) { ::tsox_core::fntrace::enter("populate_globals"); 
         let mut script_files: Vec<Arc<SourceFile>> = Vec::new();
         let mut bundled_script_files: Vec<Arc<SourceFile>> = Vec::new();
         for f in self
@@ -214,7 +214,7 @@ impl Checker {
 
     /// Go mergeModuleAugmentation（非 global）：增广模块的导出并入目标模块符号；
     /// 目标带 export * 时先并入 re-export 解析出的目标符号（声明合并）
-    fn merge_module_augmentations(&mut self) {
+    fn merge_module_augmentations(&mut self) { ::tsox_core::fntrace::enter("merge_module_augmentations"); 
         use tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_STAR;
         let mut augs: Vec<(Arc<Node>, Arc<Node>)> = Vec::new();
         for file in &self.files {
@@ -323,7 +323,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn report_missing_global_types(&mut self) {
+    pub(crate) fn report_missing_global_types(&mut self) { ::tsox_core::fntrace::enter("report_missing_global_types"); 
         const GLOBAL_TYPE_NAMES: &[&str] = &[
             "Array",
             "Boolean",
@@ -350,7 +350,7 @@ impl Checker {
 }
 
 impl Checker {
-    fn merge_augmentation_symbols(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+    fn merge_augmentation_symbols(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) { ::tsox_core::fntrace::enter("merge_augmentation_symbols"); 
         let mut records = Vec::new();
         let mut conflicts = Vec::new();
         merge_declarations_into_rec(target, source, &mut records, &mut conflicts);
@@ -363,7 +363,7 @@ impl Checker {
     }
 }
 
-fn merge_symbol_flags_conflict(target: &SymbolFlags, source: &SymbolFlags) -> bool {
+fn merge_symbol_flags_conflict(target: &SymbolFlags, source: &SymbolFlags) -> bool { ::tsox_core::fntrace::enter("merge_symbol_flags_conflict"); 
     (*target & get_excluded_symbol_flags(*source)) != SymbolFlags::empty()
         && !(*source | *target).intersects(SymbolFlags::Assignment)
 }
@@ -373,7 +373,7 @@ fn merge_declarations_into_rec(
     source: &Arc<Symbol>,
     records: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
     conflicts: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
-) -> Arc<Symbol> {
+) -> Arc<Symbol> { ::tsox_core::fntrace::enter("merge_declarations_into_rec"); 
     if merge_symbol_flags_conflict(&target.flags, &source.flags) {
         conflicts.push((Arc::clone(target), Arc::clone(source)));
         return Arc::clone(source);
@@ -399,7 +399,7 @@ fn merge_symbol_tables_into(
     source: &SymbolTable,
     records: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
     conflicts: &mut Vec<(Arc<Symbol>, Arc<Symbol>)>,
-) {
+) { ::tsox_core::fntrace::enter("merge_symbol_tables_into"); 
     let entries: Vec<(String, Arc<Symbol>)> = source
         .entries
         .iter()

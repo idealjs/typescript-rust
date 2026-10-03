@@ -43,11 +43,11 @@ pub enum FileEmitKind {
 }
 
 impl FileEmitKind {
-    fn bits(self) -> u32 {
+    fn bits(self) -> u32 { ::tsox_core::fntrace::enter("bits"); 
         self as u32
     }
 
-    fn from_bits(bits: u32) -> FileEmitKind {
+    fn from_bits(bits: u32) -> FileEmitKind { ::tsox_core::fntrace::enter("from_bits"); 
         match bits {
             b if b == FileEmitKind::None as u32 => FileEmitKind::None,
             b if b == FileEmitKind::Js as u32 => FileEmitKind::Js,
@@ -78,17 +78,17 @@ impl FileEmitKind {
         }
     }
 
-    fn or(self, other: FileEmitKind) -> FileEmitKind {
+    fn or(self, other: FileEmitKind) -> FileEmitKind { ::tsox_core::fntrace::enter("or"); 
         FileEmitKind::from_bits(self.bits() | other.bits())
     }
 
-    fn and(self, other: FileEmitKind) -> FileEmitKind {
+    fn and(self, other: FileEmitKind) -> FileEmitKind { ::tsox_core::fntrace::enter("and"); 
         FileEmitKind::from_bits(self.bits() & other.bits())
     }
 }
 
 /// Go: incremental.GetFileEmitKind
-pub fn get_file_emit_kind(options: &CompilerOptions) -> FileEmitKind {
+pub fn get_file_emit_kind(options: &CompilerOptions) -> FileEmitKind { ::tsox_core::fntrace::enter("get_file_emit_kind"); 
     let mut result = FileEmitKind::Js;
     if options.source_map.is_true() {
         result = result.or(FileEmitKind::JsMap);

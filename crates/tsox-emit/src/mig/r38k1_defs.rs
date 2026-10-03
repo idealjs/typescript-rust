@@ -37,7 +37,7 @@ pub trait R38K1NodeVisitorExt {
     fn visit_slice(&mut self, nodes: Vec<Arc<Node>>) -> (Vec<Arc<Node>>, bool);
 }
 
-fn r38k1_m3c_visitor() -> m3c::NodeVisitor {
+fn r38k1_m3c_visitor() -> m3c::NodeVisitor { ::tsox_core::fntrace::enter("r38k1_m3c_visitor"); 
     m3c::NodeVisitor {
         factory: m3c::NodeFactory {
             hooks: m3c::NodeFactoryHooks::default(),
@@ -48,20 +48,20 @@ fn r38k1_m3c_visitor() -> m3c::NodeVisitor {
 }
 
 impl R38K1NodeVisitorExt for NodeVisitor {
-    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    fn visit(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         Some(m3c::visit_each_child(&node, &mut r38k1_m3c_visitor()))
     }
 
-    fn visit_opt(&mut self, node: Option<Arc<Node>>) -> Option<Arc<Node>> {
+    fn visit_opt(&mut self, node: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_opt"); 
         let node = node?;
         self.visit(node)
     }
 
-    fn visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_each_child"); 
         Some(m3c::visit_each_child(node, &mut r38k1_m3c_visitor()))
     }
 
-    fn visit_nodes(&mut self, nodes: Arc<NodeList>) -> Arc<NodeList> {
+    fn visit_nodes(&mut self, nodes: Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("visit_nodes"); 
         let visited = nodes
             .nodes
             .iter()
@@ -73,7 +73,7 @@ impl R38K1NodeVisitorExt for NodeVisitor {
         })
     }
 
-    fn visit_slice(&mut self, nodes: Vec<Arc<Node>>) -> (Vec<Arc<Node>>, bool) {
+    fn visit_slice(&mut self, nodes: Vec<Arc<Node>>) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("visit_slice"); 
         let mut changed = false;
         let out = nodes
             .into_iter()
@@ -94,45 +94,45 @@ pub trait R38K1NodeExt {
 }
 
 impl R38K1NodeExt for Node {
-    fn loc(&self) -> TextRange {
+    fn loc(&self) -> TextRange { ::tsox_core::fntrace::enter("loc"); 
         self.loc
     }
 
-    fn set_loc(&mut self, loc: TextRange) {
+    fn set_loc(&mut self, loc: TextRange) { ::tsox_core::fntrace::enter("set_loc"); 
         self.loc = loc;
     }
 
-    fn set_kind(&mut self, kind: SyntaxKind) {
+    fn set_kind(&mut self, kind: SyntaxKind) { ::tsox_core::fntrace::enter("set_kind"); 
         self.kind = kind;
     }
 }
 
 impl DeclarationTransformer {
-    pub fn binding_name_visitor(&self) -> NodeVisitor {
+    pub fn binding_name_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("binding_name_visitor"); 
         NodeVisitor::default()
     }
 
-    pub fn expression_visitor(&self) -> NodeVisitor {
+    pub fn expression_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("expression_visitor"); 
         NodeVisitor::default()
     }
 
-    pub fn cjs_export_assignment_visitor(&self) -> NodeVisitor {
+    pub fn cjs_export_assignment_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("cjs_export_assignment_visitor"); 
         NodeVisitor::default()
     }
 
-    pub fn export_stripping_visitor(&self) -> NodeVisitor {
+    pub fn export_stripping_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("export_stripping_visitor"); 
         NodeVisitor::default()
     }
 
-    pub fn this_property_visitor(&self) -> NodeVisitor {
+    pub fn this_property_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("this_property_visitor"); 
         NodeVisitor::default()
     }
 
-    pub fn declare_stripping_visitor(&self) -> NodeVisitor {
+    pub fn declare_stripping_visitor(&self) -> NodeVisitor { ::tsox_core::fntrace::enter("declare_stripping_visitor"); 
         NodeVisitor::default()
     }
 
-    pub fn should_strip_internal(&self, node: Option<&Arc<Node>>) -> bool {
+    pub fn should_strip_internal(&self, node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("should_strip_internal"); 
         match node {
             Some(node) => {
                 self.state_data.strip_internal
@@ -142,7 +142,7 @@ impl DeclarationTransformer {
         }
     }
 
-    pub fn is_internal_declaration(&self, node: &Arc<Node>, source_file: Option<&SourceFile>) -> bool {
+    pub fn is_internal_declaration(&self, node: &Arc<Node>, source_file: Option<&SourceFile>) -> bool { ::tsox_core::fntrace::enter("is_internal_declaration"); 
         let Some(source_file) = source_file else {
             return false;
         };
@@ -160,14 +160,14 @@ impl DeclarationTransformer {
         &mut self,
         entity_name: &Arc<Node>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_entity_name_visibility"); 
         let visibility_result = self
             .resolver
             .is_entity_name_visible(entity_name, enclosing_declaration);
         self.tracker_handle_symbol_accessibility_error(visibility_result);
     }
 
-    pub fn check_name(&mut self, node: &Arc<Node>) {
+    pub fn check_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_name"); 
         let old_diag = self.state_data.get_symbol_accessibility_diagnostic.take();
         if !self.suppress_new_diagnostic_contexts {
             self.state_data.get_symbol_accessibility_diagnostic =
@@ -186,7 +186,7 @@ impl DeclarationTransformer {
         self.state_data.error_name_node = None;
     }
 
-    pub fn ensure_modifiers(&self, node: &Arc<Node>) -> Option<Arc<ModifierList>> {
+    pub fn ensure_modifiers(&self, node: &Arc<Node>) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("ensure_modifiers"); 
         let current_flags = get_combined_modifier_flags_of(&self.emit_context(), node);
         let new_flags = self.ensure_modifier_flags(node);
         if current_flags == new_flags {
@@ -209,7 +209,7 @@ impl DeclarationTransformer {
         Some(self.factory().new_modifier_list(result))
     }
 
-    pub fn ensure_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags {
+    pub fn ensure_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("ensure_modifier_flags"); 
         let mut mask = ModifierFlags::all()
             - ModifierFlags::Public
             - ModifierFlags::Async
@@ -229,7 +229,7 @@ impl DeclarationTransformer {
         (get_combined_modifier_flags_of(&self.emit_context(), node) & mask) | additions
     }
 
-    pub fn ensure_type(&mut self, node: &Arc<Node>, ignore_private: bool) -> Option<Arc<Node>> {
+    pub fn ensure_type(&mut self, node: &Arc<Node>, ignore_private: bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("ensure_type"); 
         if !ignore_private
             && self
                 .host()
@@ -280,7 +280,7 @@ impl DeclarationTransformer {
         &mut self,
         node: &Arc<Node>,
         params: &Arc<NodeList>,
-    ) -> Option<Arc<NodeList>> {
+    ) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("ensure_type_params"); 
         if self
             .host()
             .get_effective_declaration_flags(
@@ -306,7 +306,7 @@ impl DeclarationTransformer {
         &mut self,
         parent: &Arc<Node>,
         input: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("rewrite_module_specifier"); 
         let input = input?;
         self.result_has_external_module_indicator = self.result_has_external_module_indicator
             || (parent.kind != SyntaxKind::ModuleDeclaration
@@ -314,11 +314,11 @@ impl DeclarationTransformer {
         Some(Arc::clone(input))
     }
 
-    pub fn preserve_js_doc(&mut self, updated: &Arc<Node>, original: &Arc<Node>) {
+    pub fn preserve_js_doc(&mut self, updated: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("preserve_js_doc"); 
         self.emit_context.assign_comment_range(updated, original);
     }
 
-    pub fn preserve_partial_js_doc(&mut self, updated: &Arc<Node>, original: &Arc<Node>) {
+    pub fn preserve_partial_js_doc(&mut self, updated: &Arc<Node>, original: &Arc<Node>) { ::tsox_core::fntrace::enter("preserve_partial_js_doc"); 
         if !original.flags.contains(NodeFlags::Reparsed) {
             return;
         }
@@ -346,7 +346,7 @@ impl DeclarationTransformer {
         );
     }
 
-    pub fn should_print_with_initializer(&self, node: &Arc<Node>) -> bool {
+    pub fn should_print_with_initializer(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_print_with_initializer"); 
         can_have_literal_initializer(self.host(), node)
             && node.initializer().is_some()
             && self
@@ -357,7 +357,7 @@ impl DeclarationTransformer {
     pub fn setup_diagnostic_context(
         &mut self,
         input: &Arc<Node>,
-    ) -> (bool, Box<dyn FnOnce(&mut Self)>) {
+    ) -> (bool, Box<dyn FnOnce(&mut Self)>) { ::tsox_core::fntrace::enter("setup_diagnostic_context"); 
         let can_produce_diagnostic = can_produce_diagnostics(input);
         let old_suppress = self.suppress_new_diagnostic_contexts;
         let should_enter_suppress = (input.kind == SyntaxKind::TypeLiteral
@@ -389,7 +389,7 @@ impl DeclarationTransformer {
         )
     }
 
-    pub fn get_lib_references(&self) -> Vec<FileReference> {
+    pub fn get_lib_references(&self) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_lib_references"); 
         self.state_data
             .raw_lib_reference_directives
             .iter()
@@ -403,7 +403,7 @@ impl DeclarationTransformer {
             .collect()
     }
 
-    pub fn get_type_references(&self) -> Vec<FileReference> {
+    pub fn get_type_references(&self) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_type_references"); 
         self.state_data
             .raw_type_reference_directives
             .iter()
@@ -417,7 +417,7 @@ impl DeclarationTransformer {
             .collect()
     }
 
-    pub fn get_name_expression_preferring_identifier(&self, name_expr: &Arc<Node>) -> Arc<Node> {
+    pub fn get_name_expression_preferring_identifier(&self, name_expr: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_name_expression_preferring_identifier"); 
         if is_numeric_literal(name_expr) {
             return self
                 .factory()
@@ -442,7 +442,7 @@ impl DeclarationTransformer {
     pub fn transform_and_replace_late_painted_statements(
         &mut self,
         statements: Arc<NodeList>,
-    ) -> Arc<NodeList> {
+    ) -> Arc<NodeList> { ::tsox_core::fntrace::enter("transform_and_replace_late_painted_statements"); 
         let mut visited: Vec<Arc<Node>> = Vec::new();
         for statement in &statements.nodes {
             let id = tsox_frontend::ast::mig::m3f::get_node_id(
@@ -463,7 +463,7 @@ impl DeclarationTransformer {
     fn tracker_handle_symbol_accessibility_error(
         &mut self,
         visibility_result: tsox_checker::checker::types::SymbolAccessibilityResult,
-    ) {
+    ) { ::tsox_core::fntrace::enter("tracker_handle_symbol_accessibility_error"); 
         use tsox_checker::checker::types::SymbolAccessibility;
         if visibility_result.accessibility != SymbolAccessibility::Accessible {
             let error_node = self
@@ -490,16 +490,16 @@ impl DeclarationTransformer {
 fn get_combined_modifier_flags_of(
     emit_context: &EmitContext,
     node: &Arc<Node>,
-) -> ModifierFlags {
+) -> ModifierFlags { ::tsox_core::fntrace::enter("get_combined_modifier_flags_of"); 
     tsox_frontend::ast::get_combined_modifier_flags(&emit_context.parse_node(node).expect("parse node"))
         & ModifierFlags::all()
 }
 
-fn is_implicitly_exported(node: &Arc<Node>) -> bool {
+fn is_implicitly_exported(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_implicitly_exported"); 
     tsox_frontend::ast::mig::x6a::is_implicitly_exported_jsdoc_declaration(node)
 }
 
-fn is_binding_element_of(node: &Arc<Node>) -> bool {
+fn is_binding_element_of(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_binding_element_of"); 
     matches!(
         node.kind,
         SyntaxKind::BindingElement
@@ -509,6 +509,6 @@ fn is_binding_element_of(node: &Arc<Node>) -> bool {
 fn is_private_method_type_parameter_of(
     host: &dyn super::DeclarationEmitHost,
     node: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_private_method_type_parameter_of"); 
     crate::mig::m4e_2::is_private_method_type_parameter(host, node)
 }

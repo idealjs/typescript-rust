@@ -23,7 +23,7 @@ impl Checker {
         mut mapper: Option<Arc<TypeMapper>>,
         for_constraint: bool,
         mut alias: Option<Arc<TypeAlias>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_conditional_type"); 
         let mut result: Option<Arc<Type>> = None;
         let mut extra_types: Vec<Arc<Type>> = Vec::new();
         let mut tail_count = 0;
@@ -218,7 +218,7 @@ impl Checker {
         &mut self,
         new_type: &Arc<Type>,
         new_mapper: Option<&Arc<TypeMapper>>,
-    ) -> Option<(Arc<ConditionalRoot>, Option<Arc<TypeMapper>>)> {
+    ) -> Option<(Arc<ConditionalRoot>, Option<Arc<TypeMapper>>)> { ::tsox_core::fntrace::enter("get_tail_recursion_root"); 
         if new_type.flags.intersects(TypeFlags::Conditional) {
             if let Some(new_mapper) = new_mapper {
                 let root = Arc::new(*new_type.as_conditional_type().unwrap().root.clone().unwrap());
@@ -263,7 +263,7 @@ impl Checker {
         None
     }
 
-    pub fn is_simple_tuple_type(&self, node: &Arc<Node>) -> bool {
+    pub fn is_simple_tuple_type(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_simple_tuple_type"); 
         let elems = node.elements().map(|l| l.nodes.as_slice()).unwrap_or(&[]);
         is_tuple_type_node(node)
             && !elems.is_empty()
@@ -282,7 +282,7 @@ impl Checker {
         target: &Arc<Type>,
         element_types: Vec<Arc<Type>>,
         object_flags: ObjectFlags,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_normalized_tuple_type_ex"); 
         let d = target.as_tuple_type().unwrap();
         if !d.combined_flags.intersects(ELEMENT_FLAGS_NON_REQUIRED) {
             return self.create_type_reference_ex(target, &element_types, object_flags);

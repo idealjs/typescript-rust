@@ -26,7 +26,7 @@ impl<'a> NodeBuilder<'a> {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("index_info_to_index_signature_declaration"); 
         let _ = (enclosing_declaration, flags, internal_flags, tracker);
         self.index_info_to_index_signature_declaration_helper(info, None)
     }
@@ -37,7 +37,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         index_info: &IndexInfo,
         type_node: Option<&Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("index_info_to_object_computed_names_or_signature_declaration"); 
         if !index_info.components.is_empty() {
             let ch_ptr: *mut Checker = self.ch as *const Checker as *mut Checker;
             let enclosing = self.ctx.borrow().enclosing_declaration.clone();
@@ -94,7 +94,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         index_info: &IndexInfo,
         type_node: Option<&Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("index_info_to_index_signature_declaration_helper"); 
         let name = get_name_from_index_info(index_info);        let indexer_type_node = self.type_to_type_node(index_info.key_type.as_ref()?);
         let indexing_parameter_name = self.new_identifier(&name, None);
         let indexing_parameter = self.f.new_parameter_declaration(
@@ -130,7 +130,7 @@ impl<'a> NodeBuilderImpl<'a> {
     }
 }
 
-pub fn has_type_annotation(declaration: Option<&Arc<Node>>) -> bool {
+pub fn has_type_annotation(declaration: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("has_type_annotation"); 
     let Some(declaration) = declaration else { return false };
     if declaration.type_().is_none() {
         return false;
@@ -141,7 +141,7 @@ pub fn has_type_annotation(declaration: Option<&Arc<Node>>) -> bool {
     true
 }
 
-pub fn get_type_alias_for_type_literal(c: &Checker, t: &Arc<Type>) -> Option<Arc<Symbol>> {
+pub fn get_type_alias_for_type_literal(c: &Checker, t: &Arc<Type>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_type_alias_for_type_literal"); 
     if let Some(symbol) = t.symbol.as_ref()
         && symbol.flags.intersects(SymbolFlags::TypeLiteral)
         && !symbol.declarations.is_empty()

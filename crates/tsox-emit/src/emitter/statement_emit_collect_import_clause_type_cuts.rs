@@ -13,7 +13,7 @@ pub(crate) fn collect_import_clause_type_cuts(
     clause: &Node,
     source: &str,
     cuts: &mut Vec<(usize, usize)>,
-) {
+) { ::tsox_core::fntrace::enter("collect_import_clause_type_cuts"); 
     let cd = match &clause.data {
         NodeData::ImportClause(cd) => cd,
         _ => return,
@@ -57,7 +57,7 @@ pub(crate) fn collect_import_clause_type_cuts(
     }
 }
 
-pub(crate) fn specifier_cut_range(spec: &Node, source: &str) -> (usize, usize) {
+pub(crate) fn specifier_cut_range(spec: &Node, source: &str) -> (usize, usize) { ::tsox_core::fntrace::enter("specifier_cut_range"); 
     let s = spec.pos();
     let e = spec.end();
     let bytes = source.as_bytes();
@@ -92,7 +92,7 @@ pub(crate) struct JsxRuntimeUsage {
     pub(crate) used_fragment: bool,
 }
 
-pub(crate) fn needs_jsx_transform(options: &CompilerOptions, source_file: &SourceFile) -> bool {
+pub(crate) fn needs_jsx_transform(options: &CompilerOptions, source_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("needs_jsx_transform"); 
     matches!(options.jsx, JsxEmit::ReactJSX | JsxEmit::ReactJSXDev)
         && tsox_core::tspath::file_extension_is(&source_file.file_name, ".tsx")
 }
@@ -101,7 +101,7 @@ pub(crate) fn collect_jsx_replacements(
     statements: &[Arc<Node>],
     source: &str,
     usage: &mut JsxRuntimeUsage,
-) -> Vec<(usize, usize, String)> {
+) -> Vec<(usize, usize, String)> { ::tsox_core::fntrace::enter("collect_jsx_replacements"); 
     let mut replacements = Vec::new();
     for stmt in statements {
         collect_jsx_replacements_recursive(stmt, source, &mut replacements, usage);
@@ -114,7 +114,7 @@ pub(crate) fn collect_jsx_replacements_recursive(
     source: &str,
     replacements: &mut Vec<(usize, usize, String)>,
     usage: &mut JsxRuntimeUsage,
-) {
+) { ::tsox_core::fntrace::enter("collect_jsx_replacements_recursive"); 
     match node.kind {
         SyntaxKind::JsxElement | SyntaxKind::JsxSelfClosingElement | SyntaxKind::JsxFragment => {
             let text = generate_jsx_call(node, source, usage);
@@ -129,7 +129,7 @@ pub(crate) fn collect_jsx_replacements_recursive(
     }
 }
 
-pub(crate) fn generate_jsx_call(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String {
+pub(crate) fn generate_jsx_call(node: &Node, source: &str, usage: &mut JsxRuntimeUsage) -> String { ::tsox_core::fntrace::enter("generate_jsx_call"); 
     match &node.data {
         NodeData::JsxSelfClosingElement(d) => {
             generate_element_call(&d.tag_name, &d.attributes, None, source, usage)

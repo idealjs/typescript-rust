@@ -20,7 +20,7 @@ impl<'a> ResolutionState<'a> {
         package_json: &InfoCacheEntry,
         package_name: &str,
         exports: &ExportsOrImports,
-    ) -> Vec<Arc<ResolvedEntrypoint>> {
+    ) -> Vec<Arc<ResolvedEntrypoint>> { ::tsox_core::fntrace::enter("load_entrypoints_from_export_map"); 
         let mut entrypoints: Vec<Arc<ResolvedEntrypoint>> = Vec::new();
         match exports.json_value.value_type {
             JsonValueType::Array => {
@@ -90,7 +90,7 @@ impl<'a> ResolutionState<'a> {
         exclude_conditions: &[String],
         exports: &ExportsOrImports,
         entrypoints: &mut Vec<Arc<ResolvedEntrypoint>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("load_entrypoints_from_target_exports"); 
         match exports.json_value.value_type {
             JsonValueType::String => {
                 let s = exports.json_value.as_string();
@@ -185,7 +185,7 @@ impl<'a> ResolutionState<'a> {
         exclude_conditions: &[String],
         s: &str,
         entrypoints: &mut Vec<Arc<ResolvedEntrypoint>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("load_entrypoints_from_pattern_target"); 
         if s.matches('*').count() != 1 {
             return;
         }
@@ -243,7 +243,7 @@ impl<'a> ResolutionState<'a> {
         exclude_conditions: &[String],
         s: &str,
         entrypoints: &mut Vec<Arc<ResolvedEntrypoint>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("load_entrypoints_from_file_target"); 
         let components = tspath::get_path_components(s, "");
         let escapes = components[2..].iter().any(|p| p == ".." || p == "." || p == "node_modules");
         if escapes {
@@ -278,7 +278,7 @@ impl<'a> ResolutionState<'a> {
         leading_slice: &str,
         trailing_slice: &str,
         case_sensitive: bool,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("get_matched_star_for_pattern_entrypoint"); 
         if has_prefix_and_suffix_without_overlap(file, leading_slice, trailing_slice, case_sensitive) {
             return Some(file[leading_slice.len()..file.len() - trailing_slice.len()].to_string());
         }

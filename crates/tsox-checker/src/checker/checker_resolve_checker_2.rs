@@ -7,7 +7,7 @@ impl Checker {
         &self,
         node: &Node,
         start_in_declaration_container: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_referenced_value_symbol"); 
         let symbol_map = self.program.symbol_map();
 
         if let Some(sym) = symbol_map.symbol_of(node) {
@@ -27,7 +27,7 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn find_parent_declaration_container(&self, _node: &Node) -> Option<u64> {
+    pub(crate) fn find_parent_declaration_container(&self, _node: &Node) -> Option<u64> { ::tsox_core::fntrace::enter("find_parent_declaration_container"); 
         for &container_id in self.scope_stack.iter().rev() {
             let symbol_map = self.program.symbol_map();
             if let Some(container_sym) = symbol_map.symbols.get(&container_id) {
@@ -43,7 +43,7 @@ impl Checker {
     }
 
 
-    pub fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn get_merged_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_merged_symbol"); 
         let mut current = Arc::clone(symbol);
         for _ in 0..16 {
             let Some(target_id) = self.merged_symbols.get(&current.id()) else {
@@ -63,7 +63,7 @@ impl Checker {
     pub(crate) fn get_export_symbol_of_value_symbol_if_exported(
         &self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("get_export_symbol_of_value_symbol_if_exported"); 
         let mut result = Arc::clone(symbol);
         if symbol.flags.intersects(SymbolFlags::ExportValue) {
             if let Some(ref export_sym) = symbol.export_symbol {
@@ -78,14 +78,14 @@ impl Checker {
     pub(crate) fn type_only_alias_value_declaration(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<(Arc<Node>, bool)> {
+    ) -> Option<(Arc<Node>, bool)> { ::tsox_core::fntrace::enter("type_only_alias_value_declaration"); 
         self.type_only_alias_value_declaration_impl(symbol)
     }
 
     fn type_only_alias_value_declaration_impl(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<(Arc<Node>, bool)> {
+    ) -> Option<(Arc<Node>, bool)> { ::tsox_core::fntrace::enter("type_only_alias_value_declaration_impl"); 
         let mut current = Arc::clone(symbol);
         for hop in 0..16 {
             if !current.flags.contains(SymbolFlags::Alias)
@@ -170,7 +170,7 @@ impl Checker {
         module_sym: &Arc<Symbol>,
         name: &str,
         depth: usize,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_type_only_export_in_module_chain"); 
         if depth == 0 {
             return None;
         }
@@ -340,7 +340,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn is_type_only_alias_declaration(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_type_only_alias_declaration(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_type_only_alias_declaration"); 
         if let Some(node) = self.get_declaration_of_alias_symbol(symbol) {
             let current = Some(Arc::clone(&node));
             while let Some(ref n) = current {
@@ -384,7 +384,7 @@ impl Checker {
     pub(crate) fn get_declaration_of_alias_symbol(
         &self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaration_of_alias_symbol"); 
         symbol
             .declarations
             .iter()
@@ -398,7 +398,7 @@ impl Checker {
         _location: &Node,
         name: &str,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_identifier_at_location"); 
         let symbol_map = self.program.symbol_map();
 
         for &container_id in self.scope_stack.iter().rev() {
@@ -454,7 +454,7 @@ impl Checker {
 }
 
 /// ImportSpecifier 所属 ImportClause 的 phase 是 `import type` 形态
-fn import_clause_phase_is_type(specifier: &Arc<Node>) -> bool {
+fn import_clause_phase_is_type(specifier: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("import_clause_phase_is_type"); 
     specifier
         .parent()
         .and_then(|named| named.parent())

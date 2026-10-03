@@ -2,7 +2,7 @@ use crate::core::work_group::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 #[test]
-fn parallel() {
+fn parallel() { crate::fntrace::enter("parallel"); 
     let wg = new_work_group(false);
     let counter = Arc::new(AtomicUsize::new(0));
     for _ in 0..10 {
@@ -16,7 +16,7 @@ fn parallel() {
 }
 
 #[test]
-fn single_threaded() {
+fn single_threaded() { crate::fntrace::enter("single_threaded"); 
     let wg = new_work_group(true);
     let counter = Arc::new(AtomicUsize::new(0));
     for _ in 0..10 {

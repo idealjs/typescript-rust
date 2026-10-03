@@ -1,7 +1,7 @@
 use crate::core::binary_search::*;
 
 #[test]
-fn search_found() {
+fn search_found() { crate::fntrace::enter("search_found"); 
     let data = [1, 3, 5, 7, 9];
     let (i, found) = binary_search_unique_func(&data, |_, x| x.cmp(&5));
     assert!(found);
@@ -9,7 +9,7 @@ fn search_found() {
 }
 
 #[test]
-fn search_not_found() {
+fn search_not_found() { crate::fntrace::enter("search_not_found"); 
     let data = [1, 3, 5, 7, 9];
     let (i, found) = binary_search_unique_func(&data, |_, x| x.cmp(&4));
     assert!(!found);
@@ -17,7 +17,7 @@ fn search_not_found() {
 }
 
 #[test]
-fn search_empty() {
+fn search_empty() { crate::fntrace::enter("search_empty"); 
     let data: [i32; 0] = [];
     let (i, found) = binary_search_unique_func(&data, |_, _| Ordering::Equal);
     assert!(!found);

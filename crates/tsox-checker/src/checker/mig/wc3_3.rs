@@ -14,7 +14,7 @@ use tsox_core::diagnostics::messages_generated as msg;
 use tsox_frontend::ast::{self, Node, Symbol, SyntaxKind};
 
 impl Checker {
-    pub fn is_for_in_variable_for_numeric_property_names(&mut self, expr: &Arc<Node>) -> bool {
+    pub fn is_for_in_variable_for_numeric_property_names(&mut self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_for_in_variable_for_numeric_property_names"); 
         let e = ast::skip_parentheses(expr);
         if ast::is_identifier(&e) {
             if let Some(symbol) = self.get_resolved_symbol(&e) {
@@ -48,12 +48,12 @@ impl Checker {
         false
     }
 
-    pub fn is_function_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_function_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_function_type"); 
         t.flags.intersects(TypeFlags::Object)
             && !self.get_signatures_of_type(t, SignatureKind::Call).is_empty()
     }
 
-    pub fn is_generic_function_returning_function(&mut self, signature: &Arc<Signature>) -> bool {
+    pub fn is_generic_function_returning_function(&mut self, signature: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("is_generic_function_returning_function"); 
         !signature.type_parameters.is_empty()
             && self.is_function_type(
                 self.get_return_type_of_signature(signature)
@@ -62,12 +62,12 @@ impl Checker {
             )
     }
 
-    pub fn is_generic_object_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_object_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_object_type"); 
         self.get_generic_object_flags(t)
             .intersects(ObjectFlags::IsGenericObjectType)
     }
 
-    pub fn is_generic_reducible_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_reducible_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_reducible_type"); 
         (t.flags.intersects(TypeFlags::Union)
             && t.object_flags.intersects(ObjectFlags::ContainsIntersections)
             && t.types()
@@ -77,13 +77,13 @@ impl Checker {
             || (t.flags.intersects(TypeFlags::Intersection) && self.is_reducible_intersection(t))
     }
 
-    pub fn is_generic_string_like_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_string_like_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_string_like_type"); 
         t.flags
             .intersects(TypeFlags::TemplateLiteral | TypeFlags::StringMapping)
             && !self.is_pattern_literal_type(t)
     }
 
-    pub fn is_generic_type_with_undefined_constraint(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_type_with_undefined_constraint(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_type_with_undefined_constraint"); 
         if t.flags.intersects(TYPE_FLAGS_INSTANTIABLE) {
             let constraint = self.get_base_constraint_of_type(t);
             if let Some(constraint) = constraint {
@@ -93,7 +93,7 @@ impl Checker {
         false
     }
 
-    pub fn is_generic_type_without_nullable_constraint(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_type_without_nullable_constraint(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_type_without_nullable_constraint"); 
         if t.flags.contains(TypeFlags::Intersection) {
             return t
                 .as_intersection_type()
@@ -107,7 +107,7 @@ impl Checker {
             && !self.maybe_type_of_kind(&self.get_base_constraint_or_type(t), crate::checker::types_type_id::TYPE_FLAGS_NULLABLE)
     }
 
-    pub fn is_global_nan(&mut self, expr: &Arc<Node>) -> bool {
+    pub fn is_global_nan(&mut self, expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_global_nan"); 
         if ast::is_identifier(expr) && expr.text() == "NaN" {
             let global_nan_symbol =
                 crate::checker::mig::wc3::r24k3_defs::get_global_nan_symbol_or_nil(self);
@@ -122,7 +122,7 @@ impl Checker {
         false
     }
 
-    pub fn is_global_symbol_constructor(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_global_symbol_constructor(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_global_symbol_constructor"); 
         let symbol = self.get_symbol_of_node(node);
         let global_symbol = self.get_global_es_symbol_constructor_type_symbol_or_nil();
         global_symbol.is_some() && symbol.is_some()
@@ -133,7 +133,7 @@ impl Checker {
         &mut self,
         implementation: &Arc<Signature>,
         overload: &Arc<Signature>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_implementation_compatible_with_overload"); 
         let erased_source = self.get_erased_signature(implementation);
         let erased_target = self.get_erased_signature(overload);
         let source_return_type = self.get_return_type_of_signature(&erased_source);
@@ -155,7 +155,7 @@ impl Checker {
         false
     }
 
-    pub fn is_inline_import_attributes(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_inline_import_attributes(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_inline_import_attributes"); 
         if !ast::is_object_literal_expression(node)
             || !node
                 .parent()
@@ -201,7 +201,7 @@ impl Checker {
             )
     }
 
-    pub fn is_intersection_empty(&mut self, type1: &Arc<Type>, type2: &Arc<Type>) -> bool {
+    pub fn is_intersection_empty(&mut self, type1: &Arc<Type>, type2: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_intersection_empty"); 
         let intersected = self.intersect_types(Some(type1), Some(type2));
         let never_type = Arc::clone(self.never_type.get().unwrap());
         self.get_union_type(vec![intersected.unwrap(), never_type])
@@ -209,7 +209,7 @@ impl Checker {
             .contains(TypeFlags::Never)
     }
 
-    pub fn is_key_type_included(&mut self, key_type: &Arc<Type>, include: TypeFlags) -> bool {
+    pub fn is_key_type_included(&mut self, key_type: &Arc<Type>, include: TypeFlags) -> bool { ::tsox_core::fntrace::enter("is_key_type_included"); 
         key_type.flags.intersects(include)
             || key_type.flags.intersects(TypeFlags::Intersection)
                 && key_type
@@ -219,7 +219,7 @@ impl Checker {
                     .any(|t| self.is_key_type_included(t, include))
     }
 
-    pub fn is_late_bindable_index_signature(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_late_bindable_index_signature(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_late_bindable_index_signature"); 
         if !is_late_bindable_ast(node) {
             return false;
         }
@@ -233,7 +233,7 @@ impl Checker {
         self.is_type_usable_as_index_signature_declaration(&argument_type)
     }
 
-    pub fn is_mapped_type_generic_indexed_access(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_mapped_type_generic_indexed_access(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_mapped_type_generic_indexed_access"); 
         if t.flags.intersects(TypeFlags::IndexedAccess) {
             let indexed_access = t.as_indexed_access_type().unwrap();
             let object_type = indexed_access.object_type.as_ref().unwrap();
@@ -255,7 +255,7 @@ impl Checker {
         false
     }
 
-    pub fn is_method_access_for_call(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_method_access_for_call(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_method_access_for_call"); 
         let mut node = Arc::clone(node);
         while node
             .parent()
@@ -270,7 +270,7 @@ impl Checker {
             && Arc::ptr_eq(&node.parent().unwrap().expression().unwrap(), &node)
     }
 
-    pub fn is_mutable_array_or_tuple(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_mutable_array_or_tuple(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_mutable_array_or_tuple"); 
         (self.is_array_type(t) && !self.is_readonly_array_type(t))
             || (is_tuple_type(t) && !t.target_tuple_type().unwrap().readonly)
     }
@@ -279,7 +279,7 @@ impl Checker {
         &mut self,
         tp: &Arc<Type>,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_parameter_possibly_referenced"); 
         if tp.symbol().is_some() && tp.symbol().as_ref().unwrap().declarations.len() == 1 {
             let container = tp
                 .symbol()
@@ -307,7 +307,7 @@ impl Checker {
     }
 }
 
-fn type_parameter_contains_reference(c: &mut Checker, tp: &Arc<Type>, node: &Arc<Node>) -> bool {
+fn type_parameter_contains_reference(c: &mut Checker, tp: &Arc<Type>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_parameter_contains_reference"); 
     match node.kind {
         SyntaxKind::ThisType => tp.as_type_parameter().unwrap().is_this_type,
         SyntaxKind::TypeReference => {
@@ -380,11 +380,11 @@ fn type_parameter_contains_reference(c: &mut Checker, tp: &Arc<Type>, node: &Arc
     }
 }
 
-pub fn is_generic_tuple_type(t: &Arc<Type>) -> bool {
+pub fn is_generic_tuple_type(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_tuple_type"); 
     is_tuple_type(t) && t.target_tuple_type().unwrap().combined_flags.intersects(ElementFlags::Variadic)
 }
 
-pub fn is_identifier_that_starts_with_underscore(node: &Arc<Node>) -> bool {
+pub fn is_identifier_that_starts_with_underscore(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_identifier_that_starts_with_underscore"); 
     ast::is_identifier(node) && !node.text().is_empty() && node.text().starts_with('_')
 }
 
@@ -392,7 +392,7 @@ pub fn is_immediately_used_in_initializer_of_block_scoped_variable(
     declaration: &Arc<Node>,
     usage: &Arc<Node>,
     decl_container: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_immediately_used_in_initializer_of_block_scoped_variable"); 
     let grandparent = declaration.parent().unwrap().parent().unwrap();
     match grandparent.kind {
         SyntaxKind::VariableStatement | SyntaxKind::ForStatement | SyntaxKind::ForOfStatement => {
@@ -414,7 +414,7 @@ fn is_same_scope_descendent_of(
     initial: &Arc<Node>,
     parent: &Arc<Node>,
     stop_at: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_same_scope_descendent_of"); 
     let mut cur = Some(Arc::clone(initial));
     while let Some(n) = cur {
         if Arc::ptr_eq(&n, parent) {
@@ -433,24 +433,24 @@ fn is_same_scope_descendent_of(
     false
 }
 
-pub fn is_instance_property_with_initializer_or_private_identifier_property(n: &Arc<Node>) -> bool {
+pub fn is_instance_property_with_initializer_or_private_identifier_property(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_instance_property_with_initializer_or_private_identifier_property"); 
     tsox_frontend::ast::mig::m3g_2::is_private_identifier_class_element_declaration(n)
         || (ast::is_property_declaration(n)
             && !ast::is_static(n)
             && n.initializer().is_some())
 }
 
-pub fn is_internal_module_import_equals_declaration(node: &Arc<Node>) -> bool {
+pub fn is_internal_module_import_equals_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_internal_module_import_equals_declaration"); 
     node.kind == SyntaxKind::ImportEqualsDeclaration
         && node.as_import_equals_declaration().module_reference.kind
             != SyntaxKind::ExternalModuleReference
 }
 
-pub fn is_intersection_type(t: &Arc<Type>) -> bool {
+pub fn is_intersection_type(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_intersection_type"); 
     t.flags.intersects(TypeFlags::Intersection)
 }
 
-pub fn is_invalid_computed_property_name(node: &Arc<Node>) -> bool {
+pub fn is_invalid_computed_property_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_invalid_computed_property_name"); 
     let grandparent = node.parent().unwrap().parent().unwrap();
     (ast::is_type_literal_node(&grandparent)
         || ast::is_class_like(&grandparent)
@@ -466,7 +466,7 @@ pub fn is_invalid_computed_property_name(node: &Arc<Node>) -> bool {
         && !ast::is_accessor(&node.parent().unwrap())
 }
 
-pub fn is_late_bindable_ast(node: &Arc<Node>) -> bool {
+pub fn is_late_bindable_ast(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_late_bindable_ast"); 
     let expr = if ast::is_computed_property_name(node) {
         node.expression()
     } else if ast::is_element_access_expression(node) {
@@ -477,7 +477,7 @@ pub fn is_late_bindable_ast(node: &Arc<Node>) -> bool {
     expr.is_some() && ast::is_entity_name_expression(&expr.unwrap())
 }
 
-pub fn is_local_type_alias(symbol: &Arc<Symbol>) -> bool {
+pub fn is_local_type_alias(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_local_type_alias"); 
     let declaration = symbol
         .declarations
         .iter()
@@ -487,6 +487,6 @@ pub fn is_local_type_alias(symbol: &Arc<Symbol>) -> bool {
         && ast::mig::x4ast::get_containing_function(&declaration.unwrap()).is_some()
 }
 
-pub fn is_zero_big_int(t: &Arc<Type>) -> bool {
+pub fn is_zero_big_int(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_zero_big_int"); 
     get_big_int_literal_value(t) == jsnum::PseudoBigInt::new("0", false)
 }

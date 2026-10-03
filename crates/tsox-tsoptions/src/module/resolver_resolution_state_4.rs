@@ -7,7 +7,7 @@ impl<'a> ResolutionState<'a> {
         &self,
         ext: Extensions,
         candidate: &str,
-    ) -> Option<(String, packagejson::Fields)> {
+    ) -> Option<(String, packagejson::Fields)> { ::tsox_core::fntrace::enter("get_package_file"); 
         let pkg_json_path = tsox_core::tspath::combine_paths(candidate, &["package.json"]);
         if !self.fs.file_exists(&pkg_json_path) {
             return None;
@@ -41,7 +41,7 @@ impl<'a> ResolutionState<'a> {
         &self,
         ext: Extensions,
         package_file: &str,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_file_name_from_package_json_field"); 
         let extension = tsox_core::tspath::try_get_extension_from_path(package_file);
         if tsox_core::tspath::extension_is_ts(extension)
             && ext.intersects(Extensions::TYPESCRIPT | Extensions::DECLARATION)
@@ -59,7 +59,7 @@ impl<'a> ResolutionState<'a> {
         self.load_module_from_file_no_implicit_extensions(ext, package_file)
     }
 
-    pub(crate) fn condition_matches(&self, condition: &str) -> bool {
+    pub(crate) fn condition_matches(&self, condition: &str) -> bool { ::tsox_core::fntrace::enter("condition_matches"); 
         if condition == "default" || self.conditions.iter().any(|c| c == condition) {
             return true;
         }
@@ -76,7 +76,7 @@ impl<'a> ResolutionState<'a> {
         subpath: &str,
         package_directory: &str,
         exports: &packagejson::ExportsOrImports,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_exports"); 
         if !exports.json_value.is_present() || exports.json_value.is_falsy() {
             return CONTINUE_SEARCHING;
         }
@@ -134,7 +134,7 @@ impl<'a> ResolutionState<'a> {
         CONTINUE_SEARCHING
     }
 
-    pub(crate) fn load_module_from_imports(&mut self) -> Option<Resolved> {
+    pub(crate) fn load_module_from_imports(&mut self) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_imports"); 
         if self.name == "#" {
             return CONTINUE_SEARCHING;
         }
@@ -173,7 +173,7 @@ impl<'a> ResolutionState<'a> {
         )
     }
 
-    pub(crate) fn load_module_from_self_name_reference(&mut self) -> Option<Resolved> {
+    pub(crate) fn load_module_from_self_name_reference(&mut self) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_self_name_reference"); 
         let directory_path = tsox_core::tspath::get_normalized_absolute_path(
             &self.containing_directory,
             self.current_directory,
@@ -201,7 +201,7 @@ impl<'a> ResolutionState<'a> {
         self.load_module_from_exports(self.extensions, &subpath, &package_directory, exports)
     }
 
-    pub(crate) fn get_package_scope_for_path(&self, directory: &str) -> Option<(String, packagejson::Fields)> {
+    pub(crate) fn get_package_scope_for_path(&self, directory: &str) -> Option<(String, packagejson::Fields)> { ::tsox_core::fntrace::enter("get_package_scope_for_path"); 
         let mut dir = directory.to_string();
         loop {
             let pkg_json_path = tsox_core::tspath::combine_paths(&dir, &["package.json"]);

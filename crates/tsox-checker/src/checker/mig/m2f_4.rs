@@ -24,7 +24,7 @@ use crate::checker::nodecopy_builder::NodeBuilderImpl;
 use crate::checker::symboltracker::NodeBuilderFlags;
 use crate::checker::types::{Type, TypeFlags};
 
-pub fn get_topmost_indexed_access_type(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_topmost_indexed_access_type(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_topmost_indexed_access_type"); 
     if let NodeData::IndexedAccessTypeNode(iat) = &node.data {
         if tsox_frontend::ast::is_indexed_access_type_node(&iat.object_type) {
             return get_topmost_indexed_access_type(&iat.object_type);
@@ -33,7 +33,7 @@ pub fn get_topmost_indexed_access_type(node: &Arc<Node>) -> Arc<Node> {
     Arc::clone(node)
 }
 
-pub fn can_use_property_access(name: &str) -> bool {
+pub fn can_use_property_access(name: &str) -> bool { ::tsox_core::fntrace::enter("can_use_property_access"); 
     if name.is_empty() {
         return false;
     }
@@ -44,7 +44,7 @@ pub fn can_use_property_access(name: &str) -> bool {
     is_identifier_text(name, LanguageVariant::Standard)
 }
 
-pub fn is_default_binding_context(location: &Node) -> bool {
+pub fn is_default_binding_context(location: &Node) -> bool { ::tsox_core::fntrace::enter("is_default_binding_context"); 
     location.kind == SyntaxKind::SourceFile || tsox_frontend::ast::is_ambient_module(location)
 }
 
@@ -55,7 +55,7 @@ impl<'a> NodeBuilderImpl<'a> {
         index: usize,
         stopper: usize,
         override_type_arguments: Option<&Arc<tsox_frontend::ast::NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_access_from_symbol_chain"); 
         let type_parameter_nodes = if index != chain.len() - 1 {
             self.lookup_type_parameter_nodes(chain, index)
         } else {
@@ -231,7 +231,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         chain: &[Arc<Symbol>],
         index: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_expression_from_symbol_chain"); 
         let type_parameter_nodes = self.lookup_expression_chain_type_argument_nodes(chain, index);
         let symbol = &chain[index];
 
@@ -320,7 +320,7 @@ impl<'a> NodeBuilderImpl<'a> {
         )
     }
 
-    pub fn get_name_of_symbol_from_name_type(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub fn get_name_of_symbol_from_name_type(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("get_name_of_symbol_from_name_type"); 
         let name_type = self
             .ch
             .value_symbol_links
@@ -364,7 +364,7 @@ impl<'a> NodeBuilderImpl<'a> {
         String::new()
     }
 
-    pub fn get_name_of_symbol_as_written(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub fn get_name_of_symbol_as_written(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("get_name_of_symbol_as_written"); 
         let remapped = {
             let ctx = self.ctx.borrow();
             r24k13_defs::remapped_symbol_references_with(&ctx, |m| {
@@ -462,7 +462,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn get_type_parameters_of_class_or_interface(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_parameters_of_class_or_interface"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let mut result: Vec<Arc<Type>> = Vec::new();
         result.extend(ch.get_outer_type_parameters_of_class_or_interface(symbol));
@@ -476,7 +476,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         chain: &[Arc<Symbol>],
         index: usize,
-    ) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+    ) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("lookup_type_parameter_nodes"); 
         let symbol = &chain[index];
         let symbol_id = tsox_frontend::ast::get_symbol_id(symbol);
         let listed = {
@@ -526,7 +526,7 @@ impl<'a> NodeBuilderImpl<'a> {
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
         yield_module_symbol: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("lookup_symbol_chain_worker"); 
         let mut chain: Vec<Arc<Symbol>> = Vec::new();
         let is_type_parameter = symbol.flags.intersects(SymbolFlags::TypeParameter);
         let (has_enclosing, use_fully_qualified, skip_chain) = {
@@ -548,6 +548,6 @@ impl<'a> NodeBuilderImpl<'a> {
     }
 }
 
-fn starts_with_single_or_double_quote(s: &str) -> bool {
+fn starts_with_single_or_double_quote(s: &str) -> bool { ::tsox_core::fntrace::enter("starts_with_single_or_double_quote"); 
     s.starts_with('\'') || s.starts_with('"')
 }

@@ -39,7 +39,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         check_mode: CheckMode,
-    ) {
+    ) { ::tsox_core::fntrace::enter("contextually_check_function_expression_or_object_literal_method"); 
         if self.node_links.get_or_default(node).flags.contains(NodeCheckFlags::ContextChecked) {
             return;
         }
@@ -131,7 +131,7 @@ impl Checker {
         &mut self,
         first: &SymbolTable,
         second: &SymbolTable,
-    ) -> SymbolTable {
+    ) -> SymbolTable { ::tsox_core::fntrace::enter("combine_symbol_tables"); 
         if first.is_empty() {
             return second.clone();
         }
@@ -148,7 +148,7 @@ impl Checker {
         &mut self,
         value_symbol: &Arc<Symbol>,
         type_symbol: &Arc<Symbol>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("combine_value_and_type_symbols"); 
         if value_symbol.id() == self.unknown_symbol().id() && type_symbol.id() == self.unknown_symbol().id() {
             return self.unknown_symbol();
         }
@@ -183,7 +183,7 @@ impl Checker {
         target_symbol: Option<&Arc<Symbol>>,
         node: &Arc<Node>,
         name: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_no_module_member_symbol"); 
         if self.compiler_options.no_check.is_true() {
             return;
         }
@@ -230,7 +230,7 @@ impl Checker {
         mode: ResolutionMode,
         resolved_module: &ResolvedModule,
         module_reference: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_on_implicit_any_module"); 
         if is_side_effect_import(error_node) {
             return;
         }
@@ -265,7 +265,7 @@ impl Checker {
         module_reference: &str,
         mode: ResolutionMode,
         package_name: &str,
-    ) -> Arc<Diagnostic> {
+    ) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("create_module_not_found_chain"); 
         let mut stored_package_name = package_name.to_string();
         if stored_package_name == module_reference {
             stored_package_name = String::new();
@@ -292,7 +292,7 @@ impl Checker {
         &mut self,
         source_file: &Arc<SourceFile>,
         error_node: &Arc<Node>,
-    ) -> Arc<Diagnostic> {
+    ) -> Arc<Diagnostic> { ::tsox_core::fntrace::enter("create_mode_mismatch_details"); 
         let details = create_mode_mismatch_details_worker(self.program.as_ref(), source_file);
         let mut result = new_diagnostic_for_node(Some(error_node), details.message, details.args);
         result.set_repopulate_info(Some(RepopulateDiagnosticInfo {

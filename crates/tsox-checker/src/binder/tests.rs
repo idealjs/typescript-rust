@@ -1,7 +1,7 @@
 use super::*;
 use tsox_frontend::parser::Parser;
 
-fn parse_and_bind(source: &str) -> (Arc<SourceFile>, NodeSymbolMap) {
+fn parse_and_bind(source: &str) -> (Arc<SourceFile>, NodeSymbolMap) { ::tsox_core::fntrace::enter("parse_and_bind"); 
     let source_file = Arc::new(Parser::parse_source_file_text(
         "test.ts",
         source.to_string(),
@@ -11,7 +11,7 @@ fn parse_and_bind(source: &str) -> (Arc<SourceFile>, NodeSymbolMap) {
 }
 
 #[test]
-fn bind_variable_declaration() {
+fn bind_variable_declaration() { ::tsox_core::fntrace::enter("bind_variable_declaration"); 
     let (file, map) = parse_and_bind("var x = 1;");
     let statements = match &file.node.data {
         NodeData::SourceFile(data) => &data.statements,
@@ -29,7 +29,7 @@ fn bind_variable_declaration() {
 }
 
 #[test]
-fn bind_function_declaration() {
+fn bind_function_declaration() { ::tsox_core::fntrace::enter("bind_function_declaration"); 
     let (file, _map) = parse_and_bind("function foo() { return 42; }");
     let mut binder = Binder::new();
     binder.bind_source_file(&Arc::clone(&file));
@@ -37,7 +37,7 @@ fn bind_function_declaration() {
 }
 
 #[test]
-fn bind_class_declaration() {
+fn bind_class_declaration() { ::tsox_core::fntrace::enter("bind_class_declaration"); 
     let (file, _map) = parse_and_bind("class Foo { bar() {} }");
     let mut binder = Binder::new();
     binder.bind_source_file(&Arc::clone(&file));
@@ -45,7 +45,7 @@ fn bind_class_declaration() {
 }
 
 #[test]
-fn bind_interface_declaration() {
+fn bind_interface_declaration() { ::tsox_core::fntrace::enter("bind_interface_declaration"); 
     let (file, _map) = parse_and_bind("interface Foo { bar: number; }");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -53,7 +53,7 @@ fn bind_interface_declaration() {
 }
 
 #[test]
-fn bind_import_declaration() {
+fn bind_import_declaration() { ::tsox_core::fntrace::enter("bind_import_declaration"); 
     let (file, _map) = parse_and_bind("import { foo } from 'mod';");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -62,7 +62,7 @@ fn bind_import_declaration() {
 }
 
 #[test]
-fn bind_multiple_declarations() {
+fn bind_multiple_declarations() { ::tsox_core::fntrace::enter("bind_multiple_declarations"); 
     let (file, _map) = parse_and_bind("let x = 1; let y = 2; let z = 3;");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -70,7 +70,7 @@ fn bind_multiple_declarations() {
 }
 
 #[test]
-fn bind_nested_scope() {
+fn bind_nested_scope() { ::tsox_core::fntrace::enter("bind_nested_scope"); 
     let (file, _map) = parse_and_bind("function foo() { let x = 1; }");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -79,7 +79,7 @@ fn bind_nested_scope() {
 }
 
 #[test]
-fn flow_start_node_exists() {
+fn flow_start_node_exists() { ::tsox_core::fntrace::enter("flow_start_node_exists"); 
     let (file, map) = parse_and_bind("let x = 1;");
 
     let flow = map.flow_node_of(&file.node);
@@ -89,7 +89,7 @@ fn flow_start_node_exists() {
 }
 
 #[test]
-fn flow_identifier_has_flow_node() {
+fn flow_identifier_has_flow_node() { ::tsox_core::fntrace::enter("flow_identifier_has_flow_node"); 
     let (file, map) = parse_and_bind("let x = 1; x;");
 
     let statements = match &file.node.data {
@@ -108,7 +108,7 @@ fn flow_identifier_has_flow_node() {
 }
 
 #[test]
-fn flow_if_statement_merges() {
+fn flow_if_statement_merges() { ::tsox_core::fntrace::enter("flow_if_statement_merges"); 
     let (file, _map) = parse_and_bind("let x = 1; if (x > 0) { x = 2; } else { x = 3; }");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -116,7 +116,7 @@ fn flow_if_statement_merges() {
 }
 
 #[test]
-fn flow_while_statement() {
+fn flow_while_statement() { ::tsox_core::fntrace::enter("flow_while_statement"); 
     let (file, _map) = parse_and_bind("let i = 0; while (i < 10) { i = i + 1; }");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -124,7 +124,7 @@ fn flow_while_statement() {
 }
 
 #[test]
-fn flow_for_statement() {
+fn flow_for_statement() { ::tsox_core::fntrace::enter("flow_for_statement"); 
     let (file, _map) = parse_and_bind("for (let i = 0; i < 10; i++) { console.log(i); }");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -132,7 +132,7 @@ fn flow_for_statement() {
 }
 
 #[test]
-fn flow_switch_statement() {
+fn flow_switch_statement() { ::tsox_core::fntrace::enter("flow_switch_statement"); 
     let (file, _map) =
         parse_and_bind("let x = 1; switch (x) { case 1: x = 2; break; default: x = 0; }");
     let mut binder = Binder::new();
@@ -141,7 +141,7 @@ fn flow_switch_statement() {
 }
 
 #[test]
-fn flow_return_statement_unreachable() {
+fn flow_return_statement_unreachable() { ::tsox_core::fntrace::enter("flow_return_statement_unreachable"); 
     let (file, map) = parse_and_bind("function foo() { return 1; let x = 2; }");
     let _ = map;
     let mut binder = Binder::new();
@@ -150,7 +150,7 @@ fn flow_return_statement_unreachable() {
 }
 
 #[test]
-fn flow_throw_statement() {
+fn flow_throw_statement() { ::tsox_core::fntrace::enter("flow_throw_statement"); 
     let (file, _map) = parse_and_bind("function foo() { throw new Error(); }");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -158,7 +158,7 @@ fn flow_throw_statement() {
 }
 
 #[test]
-fn flow_assignment_has_effects() {
+fn flow_assignment_has_effects() { ::tsox_core::fntrace::enter("flow_assignment_has_effects"); 
     let (file, _map) = parse_and_bind("let x = 1; x = 2;");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -166,7 +166,7 @@ fn flow_assignment_has_effects() {
 }
 
 #[test]
-fn flow_call_expression_has_effects() {
+fn flow_call_expression_has_effects() { ::tsox_core::fntrace::enter("flow_call_expression_has_effects"); 
     let (file, _map) = parse_and_bind("console.log('hello');");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
@@ -174,7 +174,7 @@ fn flow_call_expression_has_effects() {
 }
 
 #[test]
-fn flow_try_catch_finally_does_not_crash() {
+fn flow_try_catch_finally_does_not_crash() { ::tsox_core::fntrace::enter("flow_try_catch_finally_does_not_crash"); 
     let (file, _map) =
         parse_and_bind("try { let x = 1; } catch (e) { let y = 2; } finally { let z = 3; }");
     let mut binder = Binder::new();
@@ -183,7 +183,7 @@ fn flow_try_catch_finally_does_not_crash() {
 }
 
 #[test]
-fn flow_try_with_throw_in_catch() {
+fn flow_try_with_throw_in_catch() { ::tsox_core::fntrace::enter("flow_try_with_throw_in_catch"); 
     let (file, _map) = parse_and_bind(
         "function f() {\
          try { throw new Error(); }\
@@ -197,7 +197,7 @@ fn flow_try_with_throw_in_catch() {
 }
 
 #[test]
-fn flow_labeled_break_to_outer_loop() {
+fn flow_labeled_break_to_outer_loop() { ::tsox_core::fntrace::enter("flow_labeled_break_to_outer_loop"); 
     let (file, _map) = parse_and_bind(
         "outer: for (let i = 0; i < 3; i++) {\
          for (let j = 0; j < 3; j++) {\
@@ -211,7 +211,7 @@ fn flow_labeled_break_to_outer_loop() {
 }
 
 #[test]
-fn flow_labeled_continue_to_outer_loop() {
+fn flow_labeled_continue_to_outer_loop() { ::tsox_core::fntrace::enter("flow_labeled_continue_to_outer_loop"); 
     let (file, _map) = parse_and_bind(
         "outer: for (let i = 0; i < 3; i++) {\
          for (let j = 0; j < 3; j++) {\
@@ -225,20 +225,20 @@ fn flow_labeled_continue_to_outer_loop() {
 }
 
 #[test]
-fn flow_array_mutation_call_has_effects() {
+fn flow_array_mutation_call_has_effects() { ::tsox_core::fntrace::enter("flow_array_mutation_call_has_effects"); 
     let (file, _map) = parse_and_bind("let arr = []; arr.push(1);");
     let mut binder = Binder::new();
     binder.bind_source_file(&file);
     assert!(binder.has_flow_effects);
 }
 
-fn file_symbol<'a>(file: &'a SourceFile, map: &'a NodeSymbolMap) -> &'a Arc<Symbol> {
+fn file_symbol<'a>(file: &'a SourceFile, map: &'a NodeSymbolMap) -> &'a Arc<Symbol> { ::tsox_core::fntrace::enter("file_symbol"); 
     map.symbols
         .get(&file.node.id())
         .expect("source file should have a symbol")
 }
 
-fn find_statement(file: &SourceFile, kind: SyntaxKind) -> Option<Arc<Node>> {
+fn find_statement(file: &SourceFile, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_statement"); 
     let NodeData::SourceFile(data) = &file.node.data else {
         return None;
     };
@@ -249,7 +249,7 @@ fn find_statement(file: &SourceFile, kind: SyntaxKind) -> Option<Arc<Node>> {
         .cloned()
 }
 
-fn find_child(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+fn find_child(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_child"); 
     let mut found: Option<Arc<Node>> = None;
     tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
         if child.kind == kind {
@@ -262,7 +262,7 @@ fn find_child(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
     found
 }
 
-fn find_descendant(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+fn find_descendant(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_descendant"); 
     if node.kind == kind {
         return Some(Arc::clone(node));
     }
@@ -277,7 +277,7 @@ fn find_descendant(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
 }
 
 #[test]
-fn bind_export_default_expression_creates_default_export_symbol() {
+fn bind_export_default_expression_creates_default_export_symbol() { ::tsox_core::fntrace::enter("bind_export_default_expression_creates_default_export_symbol"); 
     let (file, map) = parse_and_bind("export default 42;");
     let export_assignment =
         find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
@@ -297,7 +297,7 @@ fn bind_export_default_expression_creates_default_export_symbol() {
 }
 
 #[test]
-fn bind_export_default_identifier_creates_alias() {
+fn bind_export_default_identifier_creates_alias() { ::tsox_core::fntrace::enter("bind_export_default_identifier_creates_alias"); 
     let (file, map) = parse_and_bind("const foo = 1; export default foo;");
     let export_assignment =
         find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
@@ -311,7 +311,7 @@ fn bind_export_default_identifier_creates_alias() {
 }
 
 #[test]
-fn bind_export_equals_creates_export_equals_symbol() {
+fn bind_export_equals_creates_export_equals_symbol() { ::tsox_core::fntrace::enter("bind_export_equals_creates_export_equals_symbol"); 
     let (file, map) = parse_and_bind("function x() {} export = x;");
     let export_assignment =
         find_statement(&file, SyntaxKind::ExportAssignment).expect("export assignment");
@@ -332,7 +332,7 @@ fn bind_export_equals_creates_export_equals_symbol() {
 }
 
 #[test]
-fn bind_export_star_creates_export_star_symbol() {
+fn bind_export_star_creates_export_star_symbol() { ::tsox_core::fntrace::enter("bind_export_star_creates_export_star_symbol"); 
     let (file, map) = parse_and_bind("export * from \"mod\";");
     let export_decl =
         find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
@@ -353,7 +353,7 @@ fn bind_export_star_creates_export_star_symbol() {
 }
 
 #[test]
-fn bind_export_star_as_ns_creates_alias() {
+fn bind_export_star_as_ns_creates_alias() { ::tsox_core::fntrace::enter("bind_export_star_as_ns_creates_alias"); 
     let (file, map) = parse_and_bind("export * as ns from \"mod\";");
     let export_decl =
         find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
@@ -370,7 +370,7 @@ fn bind_export_star_as_ns_creates_alias() {
 }
 
 #[test]
-fn bind_export_named_specifiers_does_not_duplicate() {
+fn bind_export_named_specifiers_does_not_duplicate() { ::tsox_core::fntrace::enter("bind_export_named_specifiers_does_not_duplicate"); 
     let (file, map) = parse_and_bind("const a = 1; const b = 2; export { a, b };");
     let export_decl =
         find_statement(&file, SyntaxKind::ExportDeclaration).expect("export declaration");
@@ -382,7 +382,7 @@ fn bind_export_named_specifiers_does_not_duplicate() {
 }
 
 #[test]
-fn bind_import_clause_default_import_creates_local_alias() {
+fn bind_import_clause_default_import_creates_local_alias() { ::tsox_core::fntrace::enter("bind_import_clause_default_import_creates_local_alias"); 
     let (file, map) = parse_and_bind("import D from \"mod\";");
     let import_decl =
         find_statement(&file, SyntaxKind::ImportDeclaration).expect("import declaration");
@@ -401,7 +401,7 @@ fn bind_import_clause_default_import_creates_local_alias() {
 }
 
 #[test]
-fn bind_import_clause_without_name_is_noop() {
+fn bind_import_clause_without_name_is_noop() { ::tsox_core::fntrace::enter("bind_import_clause_without_name_is_noop"); 
     let (file, map) = parse_and_bind("import { x } from \"mod\";");
     let import_decl =
         find_statement(&file, SyntaxKind::ImportDeclaration).expect("import declaration");
@@ -413,7 +413,7 @@ fn bind_import_clause_without_name_is_noop() {
 }
 
 #[test]
-fn bind_exported_namespace_member_has_export_symbol_link() {
+fn bind_exported_namespace_member_has_export_symbol_link() { ::tsox_core::fntrace::enter("bind_exported_namespace_member_has_export_symbol_link"); 
     let (file, map) = parse_and_bind("namespace N { export const x = 1; }");
 
     let ns = find_statement(&file, SyntaxKind::ModuleDeclaration).expect("namespace N");
@@ -430,7 +430,7 @@ fn bind_exported_namespace_member_has_export_symbol_link() {
 }
 
 #[test]
-fn bind_non_exported_namespace_member_has_no_export_symbol() {
+fn bind_non_exported_namespace_member_has_no_export_symbol() { ::tsox_core::fntrace::enter("bind_non_exported_namespace_member_has_no_export_symbol"); 
     let (file, map) = parse_and_bind("namespace N { const x = 1; }");
     let ns = find_statement(&file, SyntaxKind::ModuleDeclaration).expect("namespace N");
     let ns_sym = map.symbol_of(&ns).expect("namespace symbol");
@@ -448,7 +448,7 @@ fn bind_non_exported_namespace_member_has_no_export_symbol() {
 }
 
 #[test]
-fn bind_exported_top_level_member_has_export_symbol_link() {
+fn bind_exported_top_level_member_has_export_symbol_link() { ::tsox_core::fntrace::enter("bind_exported_top_level_member_has_export_symbol_link"); 
     let (file, map) = parse_and_bind("export const x = 1;");
     let var_stmt =
         find_statement(&file, SyntaxKind::VariableStatement).expect("variable statement");
@@ -466,7 +466,7 @@ fn bind_exported_top_level_member_has_export_symbol_link() {
 }
 
 #[test]
-fn bind_generic_alias_type_params_do_not_leak_into_file_members() {
+fn bind_generic_alias_type_params_do_not_leak_into_file_members() { ::tsox_core::fntrace::enter("bind_generic_alias_type_params_do_not_leak_into_file_members"); 
     let (file, map) = parse_and_bind(
         "export type G<T> = { [P in T]: string };\nexport type T = G<\"a\">;\nexport const q = 1;",
     );
@@ -499,7 +499,7 @@ fn bind_generic_alias_type_params_do_not_leak_into_file_members() {
 }
 
 #[test]
-fn bind_mapped_type_param_in_node_locals() {
+fn bind_mapped_type_param_in_node_locals() { ::tsox_core::fntrace::enter("bind_mapped_type_param_in_node_locals"); 
     let (file, map) = parse_and_bind("type M<K extends string> = { [P in K]: number };");
     let fsym = file_symbol(&file, &map);
     assert!(

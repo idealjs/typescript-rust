@@ -9,7 +9,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         _indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_typedef_tag"); 
         let type_expression = self.try_parse_type_expression();
         self.skip_whitespace_or_asterisk();
         let full_name = self.parse_jsdoc_type_name_with_namespace(false);
@@ -105,7 +105,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         _indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_callback_tag"); 
         let full_name = self.parse_jsdoc_type_name_with_namespace(false);
         let name = full_name.unwrap_or_else(|| {
             self.parse_jsdoc_identifier_name(Some(tsox_core::diagnostics::IDENTIFIER_EXPECTED))
@@ -132,7 +132,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         _indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_overload_tag"); 
         self.skip_whitespace();
         let comment = self.parse_tag_comments(margin, None);
         let type_expression = self.parse_jsdoc_signature(start, margin);
@@ -148,7 +148,7 @@ impl crate::parser::Parser {
         ))
     }
 
-    pub(crate) fn parse_jsdoc_signature(&mut self, start: usize, indent: usize) -> Arc<Node> {
+    pub(crate) fn parse_jsdoc_signature(&mut self, start: usize, indent: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_signature"); 
         let parameters = self.parse_callback_tag_parameters(indent);
         let return_tag = if self.parse_optional_jsdoc(SyntaxKind::AtToken) {
             let tag = self.parse_tag(indent);
@@ -175,7 +175,7 @@ impl crate::parser::Parser {
         ))
     }
 
-    pub(crate) fn parse_callback_tag_parameters(&mut self, indent: usize) -> Arc<NodeList> {
+    pub(crate) fn parse_callback_tag_parameters(&mut self, indent: usize) -> Arc<NodeList> { ::tsox_core::fntrace::enter("parse_callback_tag_parameters"); 
         let pos = self.token_pos();
         let mut params = Vec::new();
         loop {
@@ -206,7 +206,7 @@ impl crate::parser::Parser {
     /// Go jsdoc import 解析用 skip-asterisks 主扫描器（trivia 自动跳过）；
     /// 本仓 jsdoc 扫描器产出空白 token，各解析步间显式跳 trivia
     /// （换行后的 * 行装饰一并跳过）
-    fn skip_jsdoc_import_trivia(&mut self) {
+    fn skip_jsdoc_import_trivia(&mut self) { ::tsox_core::fntrace::enter("skip_jsdoc_import_trivia"); 
         let mut after_newline = false;
         loop {
             match self.token {
@@ -231,7 +231,7 @@ impl crate::parser::Parser {
         tag_name: Arc<Node>,
         margin: usize,
         indent_text: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_import_tag"); 
         let after_import_pos = self.token_pos();
 
         let mut identifier: Option<Arc<Node>> = None;
@@ -335,7 +335,7 @@ impl crate::parser::Parser {
     }
 
     /// `* as name`
-    fn parse_jsdoc_namespace_import(&mut self) -> Arc<Node> {
+    fn parse_jsdoc_namespace_import(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_namespace_import"); 
         let pos = self.token_pos();
         self.parse_expected_jsdoc(SyntaxKind::AsteriskToken);
         self.skip_jsdoc_import_trivia();
@@ -351,7 +351,7 @@ impl crate::parser::Parser {
     }
 
     /// `{ A, B as C }`
-    fn parse_jsdoc_named_imports(&mut self) -> Arc<Node> {
+    fn parse_jsdoc_named_imports(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_named_imports"); 
         let pos = self.token_pos();
         self.parse_expected_jsdoc(SyntaxKind::OpenBraceToken);
         let mut elements: Vec<Arc<Node>> = Vec::new();
@@ -402,7 +402,7 @@ impl crate::parser::Parser {
     }
 
     /// `with { key: "value", … }`
-    fn parse_jsdoc_import_attributes(&mut self) -> Arc<Node> {
+    fn parse_jsdoc_import_attributes(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_jsdoc_import_attributes"); 
         let pos = self.token_pos();
         let token = self.token;
         self.parse_expected_jsdoc(token);
@@ -467,7 +467,7 @@ impl crate::parser::Parser {
 
 /// Go isObjectOrObjectArrayTypeReference：Object 关键字、Object 引用（无类型
 /// 实参）或其数组形态；入参为 JSDocTypeExpression，判断其内部类型节点
-pub(crate) fn is_object_or_object_array_type_reference(te: &Arc<Node>) -> bool {
+pub(crate) fn is_object_or_object_array_type_reference(te: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_object_or_object_array_type_reference"); 
     let type_node = match &te.data {
         NodeData::JSDocTypeExpression(d) => &d.type_node,
         _ => te,
@@ -487,7 +487,7 @@ pub(crate) fn is_object_or_object_array_type_reference(te: &Arc<Node>) -> bool {
     }
 }
 
-pub(crate) fn jsdoc_type_tag_type_expression(tag: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn jsdoc_type_tag_type_expression(tag: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("jsdoc_type_tag_type_expression"); 
     match &tag.data {
         NodeData::JSDocTypeTag(d) => Some(Arc::clone(&d.type_expression)),
         _ => None,

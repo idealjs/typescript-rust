@@ -10,7 +10,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_excess_properties"); 
         use tsox_core::diagnostics::messages_generated as msg;
         if !crate::checker::relater_predicates::is_excess_property_check_target(target)
             || !self.no_implicit_any && target.object_flags.contains(ObjectFlags::JSLiteral)
@@ -146,7 +146,7 @@ impl Checker {
         false
     }
 
-    fn excess_error_context_is_jsx(&self) -> bool {
+    fn excess_error_context_is_jsx(&self) -> bool { ::tsox_core::fntrace::enter("excess_error_context_is_jsx"); 
         use tsox_frontend::ast::SyntaxKind;
         let is_opening_like = |k: SyntaxKind| {
             matches!(
@@ -163,7 +163,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn excess_check_error_target(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn excess_check_error_target(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("excess_check_error_target"); 
         if t.flags.contains(TypeFlags::Union)
             && let Some(types) = t.types()
         {
@@ -197,7 +197,7 @@ impl Checker {
         &mut self,
         types: &[Arc<Type>],
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_of_property_in_types"); 
         let mut parts: Vec<Arc<Type>> = Vec::with_capacity(types.len());
         for t in types {
             parts.push(self.type_of_property_in_type(t, name));
@@ -208,7 +208,7 @@ impl Checker {
         Some(self.get_union_type(parts))
     }
 
-    fn type_of_property_in_type(&mut self, t: &Arc<Type>, name: &str) -> Arc<Type> {
+    fn type_of_property_in_type(&mut self, t: &Arc<Type>, name: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_property_in_type"); 
         let apparent = self.apparent_type_for_property_lookup(t);
         if let Some(prop) = self.get_property_of_type(&apparent, name) {
             return self.get_type_of_symbol(&prop);
@@ -230,7 +230,7 @@ impl Checker {
         self.undefined_type()
     }
 
-    fn apparent_type_for_property_lookup(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn apparent_type_for_property_lookup(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("apparent_type_for_property_lookup"); 
         if !t.flags.contains(TypeFlags::Substitution) {
             return Arc::clone(t);
         }
@@ -252,7 +252,7 @@ impl Checker {
         source: &Arc<Type>,
         union_target: &Arc<Type>,
         relation: RelationKind,
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("matching_discriminant_constituents"); 
         let members: Vec<Arc<Type>> = union_target.types()?.to_vec();
         if !source
             .flags
@@ -321,7 +321,7 @@ impl Checker {
         prop_type: &Arc<Type>,
         target_type: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("discriminant_matches"); 
         let distributed: Vec<Arc<Type>> = prop_type
             .types()
             .map(|ts| ts.to_vec())
@@ -338,7 +338,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_of_property_in_type_opt"); 
         let apparent = self.apparent_type_for_property_lookup(t);
         if let Some(prop) = self.get_property_of_type(&apparent, name) {
             return Some(self.get_type_of_symbol(&prop));
@@ -364,7 +364,7 @@ impl Checker {
         &mut self,
         union_target: &Arc<Type>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_discriminant_property_of_union_members"); 
         let Some(prop) = self.get_union_or_intersection_property(union_target, name) else {
             return false;
         };

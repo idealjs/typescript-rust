@@ -16,14 +16,14 @@ use crate::mig::r33k6_shim::Visitor;
 use crate::printer::generated_identifier_flags::{EmitContext, NodeFactory};
 
 impl Clone for EmitContext {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         let mut cloned = EmitContext::new();
         cloned.next_id = AtomicU32::new(self.next_id.load(Ordering::Relaxed));
         cloned
     }
 }
 
-pub fn empty_has_file_name() -> HasFileNameImpl {
+pub fn empty_has_file_name() -> HasFileNameImpl { ::tsox_core::fntrace::enter("empty_has_file_name"); 
     new_has_file_name(String::new(), tsox_core::tspath::Path(String::new()))
 }
 
@@ -60,7 +60,7 @@ impl NodeAsR37k8Ext for Node {
     as_data_r37k8!(as_call_expression, CallExpression, CallExpressionData);
     as_data_r37k8!(as_string_literal, StringLiteral, StringLiteralData);
 
-    fn is_declaration_file(&self) -> bool {
+    fn is_declaration_file(&self) -> bool { ::tsox_core::fntrace::enter("is_declaration_file"); 
         let _ = self.kind == SyntaxKind::SourceFile;
         false
     }
@@ -72,13 +72,13 @@ pub enum OptNode {
 }
 
 impl From<Arc<Node>> for OptNode {
-    fn from(node: Arc<Node>) -> Self {
+    fn from(node: Arc<Node>) -> Self { ::tsox_core::fntrace::enter("from"); 
         OptNode::Some(node)
     }
 }
 
 impl From<Option<Arc<Node>>> for OptNode {
-    fn from(node: Option<Arc<Node>>) -> Self {
+    fn from(node: Option<Arc<Node>>) -> Self { ::tsox_core::fntrace::enter("from"); 
         match node {
             Some(n) => OptNode::Some(n),
             None => OptNode::None,
@@ -87,24 +87,24 @@ impl From<Option<Arc<Node>>> for OptNode {
 }
 
 impl Visitor {
-    pub fn visit_node(&mut self, node: impl Into<OptNode>) -> Option<Arc<Node>> {
+    pub fn visit_node(&mut self, node: impl Into<OptNode>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node"); 
         match node.into() {
             OptNode::None => None,
             OptNode::Some(n) => Some(n),
         }
     }
 
-    pub fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> Vec<Arc<Node>> {
+    pub fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("visit_slice"); 
         nodes.to_vec()
     }
 
-    pub fn visit_each_child(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_each_child(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_each_child"); 
         let _ = &node;
         Some(node)
     }
 }
 
-pub fn split_standard_prologue_r37k8(source: &[Arc<Node>]) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) {
+pub fn split_standard_prologue_r37k8(source: &[Arc<Node>]) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("split_standard_prologue_r37k8"); 
     let mut prologue = Vec::new();
     let mut rest = Vec::new();
     let mut in_prologue = true;
@@ -119,7 +119,7 @@ pub fn split_standard_prologue_r37k8(source: &[Arc<Node>]) -> (Vec<Arc<Node>>, V
     (prologue, rest)
 }
 
-pub fn split_custom_prologue_r37k8(source: &[Arc<Node>]) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) {
+pub fn split_custom_prologue_r37k8(source: &[Arc<Node>]) -> (Vec<Arc<Node>>, Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("split_custom_prologue_r37k8"); 
     let mut custom = Vec::new();
     let mut rest = Vec::new();
     let mut in_prologue = true;
@@ -145,7 +145,7 @@ impl<'a> NodeFactory<'a> {
         import_clause: Option<Arc<Node>>,
         module_specifier: Arc<Node>,
         attributes: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_declaration"); 
         let _ = modifiers;
         Arc::new(Node::new(
             SyntaxKind::ImportDeclaration,
@@ -163,7 +163,7 @@ impl<'a> NodeFactory<'a> {
         is_type_only: SyntaxKind,
         name: Option<Arc<Node>>,
         named_bindings: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_clause"); 
         let _ = is_type_only;
         Arc::new(Node::new(
             SyntaxKind::ImportClause,
@@ -175,14 +175,14 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_namespace_import(&self, name: Arc<Node>) -> Arc<Node> {
+    pub fn new_namespace_import(&self, name: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_namespace_import"); 
         Arc::new(Node::new(
             SyntaxKind::NamespaceImport,
             NodeData::NamespaceImport(NamespaceImportData { name }),
         ))
     }
 
-    pub fn new_meta_property(&self, keyword_token: SyntaxKind, name: Arc<Node>) -> Arc<Node> {
+    pub fn new_meta_property(&self, keyword_token: SyntaxKind, name: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_meta_property"); 
         Arc::new(Node::new(
             SyntaxKind::MetaProperty,
             NodeData::MetaProperty(MetaPropertyData {
@@ -192,7 +192,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_true_expression(&self) -> Arc<Node> {
+    pub fn new_true_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_true_expression"); 
         Arc::new(Node::new(
             SyntaxKind::TrueKeyword,
             NodeData::Identifier(IdentifierData {
@@ -206,7 +206,7 @@ impl<'a> NodeFactory<'a> {
         name: Arc<Node>,
         parameters: Arc<NodeList>,
         body: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_get_accessor_declaration"); 
         Arc::new(Node::new(
             SyntaxKind::GetAccessor,
             NodeData::GetAccessorDeclaration(GetAccessorDeclarationData {
@@ -221,7 +221,7 @@ impl<'a> NodeFactory<'a> {
         ))
     }
 
-    pub fn new_run_initializers_helper(&self, initializers: Arc<NodeList>) -> Arc<Node> {
+    pub fn new_run_initializers_helper(&self, initializers: Arc<NodeList>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_run_initializers_helper"); 
         Arc::new(Node::new(
             SyntaxKind::CallExpression,
             NodeData::CallExpression(CallExpressionData {
@@ -245,7 +245,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         expression: Arc<Node>,
         _use_js_extension: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_rewrite_relative_import_extensions_helper"); 
         expression
     }
 
@@ -257,7 +257,7 @@ impl<'a> NodeFactory<'a> {
         _type_arguments: Option<Arc<Node>>,
         arguments: Arc<NodeList>,
         _flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_call_expression"); 
         let call = node.as_call_expression();
         Arc::new(Node::new(
             SyntaxKind::CallExpression,

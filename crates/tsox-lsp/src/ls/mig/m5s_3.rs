@@ -23,7 +23,7 @@ pub struct MovedFile {
     pub new_file_name: String,
 }
 
-pub fn create_string_text_range(source_file: &Arc<SourceFile>, node: &Arc<Node>) -> TextRange {
+pub fn create_string_text_range(source_file: &Arc<SourceFile>, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("create_string_text_range"); 
     TextRange::new(
         tsox_frontend::scanner::mig::x5a::get_token_pos_of_node(node, source_file, false) + 1,
         node.end() - 1,
@@ -32,7 +32,7 @@ pub fn create_string_text_range(source_file: &Arc<SourceFile>, node: &Arc<Node>)
 
 pub fn get_ts_config_object_literal_expression(
     ts_config_source_file: Option<&Arc<SourceFile>>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_ts_config_object_literal_expression"); 
     let ts_config_source_file = ts_config_source_file?;
     let statements = match &ts_config_source_file.node.data {
         ast::node_data_generated::NodeData::SourceFile(d) => &d.statements,
@@ -50,7 +50,7 @@ pub fn get_ts_config_object_literal_expression(
 pub fn for_each_object_property(
     object_literal: Option<&Arc<Node>>,
     mut cb: impl FnMut(&Arc<Node>, &str),
-) {
+) { ::tsox_core::fntrace::enter("for_each_object_property"); 
     let Some(object_literal) = object_literal else {
         return;
     };
@@ -75,7 +75,7 @@ pub fn relative_path_from_directory(
     from_directory: &str,
     to: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("relative_path_from_directory"); 
     tsox_core::tspath::mig::m3i::get_relative_path_from_directory(
         from_directory,
         to,
@@ -90,7 +90,7 @@ pub fn relative_import_path_from_directory(
     from_directory: &str,
     to: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("relative_import_path_from_directory"); 
     tsox_core::tspath::ensure_path_is_non_module_name(&relative_path_from_directory(
         from_directory,
         to,
@@ -98,7 +98,7 @@ pub fn relative_import_path_from_directory(
     ))
 }
 
-pub fn is_ambient_module_symbol(symbol: Option<&Arc<Symbol>>) -> bool {
+pub fn is_ambient_module_symbol(symbol: Option<&Arc<Symbol>>) -> bool { ::tsox_core::fntrace::enter("is_ambient_module_symbol"); 
     let Some(symbol) = symbol else {
         return false;
     };
@@ -115,7 +115,7 @@ pub fn update_paths_property(
     change_tracker: &mut crate::ls::change_tracker_tracker::Tracker,
     old_to_new: &PathUpdater,
     use_case_sensitive_file_names: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("update_paths_property"); 
     let initializer = match &property.data {
         ast::node_data_generated::NodeData::PropertyAssignment(d) => Some(Arc::clone(&d.initializer)),
         _ => None,
@@ -149,7 +149,7 @@ pub fn try_update_config_string(
     change_tracker: &mut crate::ls::change_tracker_tracker::Tracker,
     old_to_new: &PathUpdater,
     use_case_sensitive_file_names: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("try_update_config_string"); 
     if !ast::is_string_literal(element) {
         return false;
     }
@@ -190,7 +190,7 @@ impl LanguageService {
         old_import_from_path: &str,
         new_import_from_path: &str,
         relative_specifier: &str,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("update_relative_path"); 
         let old_absolute = tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
             &tsox_core::tspath::get_directory_path(old_import_from_path),
             &[relative_specifier],
@@ -215,7 +215,7 @@ impl LanguageService {
         new_import_from_path: &str,
         importing_source_file_moved: bool,
         user_preferences: &tsox_tsoptions::modulespecifiers::UserPreferences,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_updated_import_specifier"); 
         let imported_module_symbol = checker.get_symbol_at_location(import_literal);
         if is_ambient_module_symbol(imported_module_symbol.as_ref()) {
             return String::new();
@@ -272,19 +272,19 @@ impl LanguageService {
 struct ProgramSpecifierHost<'a>(&'a tsox_compile::compiler::Program);
 
 impl tsox_tsoptions::modulespecifiers::ModuleSpecifierGenerationHost for ProgramSpecifierHost<'_> {
-    fn get_current_directory(&self) -> String {
+    fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
         self.0.get_current_directory().to_string()
     }
 
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.0.use_case_sensitive_file_names()
     }
 
-    fn common_source_directory(&self) -> String {
+    fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
         tsox_checker::checker::Program::common_source_directory(self.0)
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         self.0.file_exists(path)
     }
 }
@@ -294,7 +294,7 @@ pub fn get_source_file_to_import(
     source_file: &Arc<SourceFile>,
     import_literal: &Arc<Node>,
     old_to_new: &PathUpdater,
-) -> Option<ToImport> {
+) -> Option<ToImport> { ::tsox_core::fntrace::enter("get_source_file_to_import"); 
     let resolved = program.get_resolved_module_from_module_specifier(source_file, import_literal);
     if let Some(resolved) = resolved {
         if !resolved.resolved_file_name.is_empty() {
@@ -322,7 +322,7 @@ pub fn get_updated_import_specifier_from_moved_source_files(
     moved_files: &[MovedFile],
     importing_source_file_name: &str,
     user_preferences: &tsox_tsoptions::modulespecifiers::UserPreferences,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_updated_import_specifier_from_moved_source_files"); 
     let resolution_mode = program.get_mode_for_usage_location(source_file, import_literal);
     let host = ProgramSpecifierHost(program);
     for candidate in moved_files {
@@ -359,18 +359,18 @@ pub fn get_updated_import_specifier_from_moved_source_files(
 }
 
 impl SymbolAndEntries {
-    pub fn definition_node(&self) -> Option<&Arc<Node>> {
+    pub fn definition_node(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("definition_node"); 
         if self.definition.kind == DefinitionKind::Symbol {
             return None;
         }
         self.definition.node.as_ref()
     }
 
-    pub fn definition_symbol(&self) -> Option<&Arc<Symbol>> {
+    pub fn definition_symbol(&self) -> Option<&Arc<Symbol>> { ::tsox_core::fntrace::enter("definition_symbol"); 
         self.definition.symbol.as_ref()
     }
 
-    pub fn can_use_definition_symbol(&self) -> bool {
+    pub fn can_use_definition_symbol(&self) -> bool { ::tsox_core::fntrace::enter("can_use_definition_symbol"); 
         match self.definition.kind {
             DefinitionKind::Symbol | DefinitionKind::This => self.definition.symbol.is_some(),
             _ => false,
@@ -379,11 +379,11 @@ impl SymbolAndEntries {
 }
 
 impl ReferenceEntry {
-    pub fn node(&self) -> Option<&Arc<Node>> {
+    pub fn node(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("node"); 
         self.node.as_ref()
     }
 
-    pub fn is_node_entry(&self) -> bool {
+    pub fn is_node_entry(&self) -> bool { ::tsox_core::fntrace::enter("is_node_entry"); 
         self.node.is_some()
     }
 }
@@ -428,7 +428,7 @@ impl<'a> RefState<'a> {
         coming_from: ImpExpKind,
         text: &str,
         all_search_symbols: Vec<Arc<Symbol>>,
-    ) -> RefSearch {
+    ) -> RefSearch { ::tsox_core::fntrace::enter("create_search"); 
         let mut search = RefSearch {
             symbol: symbol.clone(),
             coming_from,
@@ -447,7 +447,7 @@ impl<'a> RefState<'a> {
         &self,
         export_symbol: &Arc<Symbol>,
         export_info: &crate::ls::import_tracker::ExportInfo,
-    ) -> Option<crate::ls::import_tracker::ImportsResult> {
+    ) -> Option<crate::ls::import_tracker::ImportsResult> { ::tsox_core::fntrace::enter("get_import_searches"); 
         let tracker = crate::ls::import_tracker::create_import_tracker(
             &self.program,
             &self.source_files,
@@ -458,7 +458,7 @@ impl<'a> RefState<'a> {
         Some(tracker(export_symbol, export_info, is_for_rename))
     }
 
-    pub fn add_reference(&mut self, reference_location: Arc<Node>, symbol: Option<Arc<Symbol>>, kind: EntryKind) {
+    pub fn add_reference(&mut self, reference_location: Arc<Node>, symbol: Option<Arc<Symbol>>, kind: EntryKind) { ::tsox_core::fntrace::enter("add_reference"); 
         let entry = match kind {
             EntryKind::Range => ReferenceEntry {
                 kind,
@@ -480,7 +480,7 @@ impl<'a> RefState<'a> {
         self.pending_entries.push(entry);
     }
 
-    pub fn explicitly_inherits_from(&mut self, symbol: &Arc<Symbol>, parent: &Arc<Symbol>) -> bool {
+    pub fn explicitly_inherits_from(&mut self, symbol: &Arc<Symbol>, parent: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("explicitly_inherits_from"); 
         let mut seen = std::collections::HashSet::new();
         explicitly_inherits_from_worker(&mut self.checker, symbol, parent, &mut seen)
     }
@@ -491,7 +491,7 @@ fn explicitly_inherits_from_worker(
     symbol: &Arc<Symbol>,
     parent: &Arc<Symbol>,
     seen: &mut std::collections::HashSet<u64>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("explicitly_inherits_from_worker"); 
     if Arc::ptr_eq(symbol, parent) {
         return true;
     }
@@ -513,7 +513,7 @@ fn explicitly_inherits_from_worker(
     })
 }
 
-pub fn get_class_constructor_symbol(class_symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+pub fn get_class_constructor_symbol(class_symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_class_constructor_symbol"); 
     class_symbol
         .members
         .get(ast::INTERNAL_SYMBOL_NAME_CONSTRUCTOR)
@@ -524,7 +524,7 @@ pub fn find_own_constructor_references(
     class_symbol: Option<&Arc<Symbol>>,
     source_file: &Arc<SourceFile>,
     add_node: &mut impl FnMut(Arc<Node>),
-) {
+) { ::tsox_core::fntrace::enter("find_own_constructor_references"); 
     let Some(ctor_symbol) = class_symbol.and_then(get_class_constructor_symbol) else {
         return;
     };
@@ -543,7 +543,7 @@ pub fn find_own_constructor_references(
 pub fn find_super_constructor_accesses(
     class_declaration: &Arc<Node>,
     add_node: &mut impl FnMut(Arc<Node>),
-) {
+) { ::tsox_core::fntrace::enter("find_super_constructor_accesses"); 
     forEach_descendant_of_kind(class_declaration, SyntaxKind::SuperKeyword, &mut |node| {
         if node
             .parent()
@@ -559,7 +559,7 @@ pub fn forEach_descendant_of_kind(
     node: &Arc<Node>,
     kind: SyntaxKind,
     action: &mut dyn FnMut(&Arc<Node>),
-) {
+) { ::tsox_core::fntrace::enter("forEach_descendant_of_kind"); 
     if node.kind == kind {
         action(node);
     }
@@ -569,7 +569,7 @@ pub fn forEach_descendant_of_kind(
     });
 }
 
-pub fn get_all_references_for_import_meta(source_files: &[Arc<SourceFile>]) -> Vec<SymbolAndEntries> {
+pub fn get_all_references_for_import_meta(source_files: &[Arc<SourceFile>]) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_all_references_for_import_meta"); 
     let mut references: Vec<ReferenceEntry> = Vec::new();
     for source_file in source_files {
         for node in crate::ls::mig::m5t_4::get_possible_symbol_reference_nodes(
@@ -609,7 +609,7 @@ pub fn get_all_references_for_keyword(
     source_files: &[Arc<SourceFile>],
     keyword_kind: SyntaxKind,
     filter_read_only_type_operator: bool,
-) -> Vec<SymbolAndEntries> {
+) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_all_references_for_keyword"); 
     let mut result = Vec::new();
     for source_file in source_files {
         let keywords = collect_keywords(source_file.as_ref(), keyword_kind);
@@ -630,7 +630,7 @@ pub fn get_all_references_for_keyword(
     result
 }
 
-fn collect_keywords(source_file: &SourceFile, kind: SyntaxKind) -> Vec<Arc<Node>> {
+fn collect_keywords(source_file: &SourceFile, kind: SyntaxKind) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_keywords"); 
     let mut result = Vec::new();
     let root = &source_file.node;
     forEach_descendant_of_kind(root, kind, &mut |node| {
@@ -639,7 +639,7 @@ fn collect_keywords(source_file: &SourceFile, kind: SyntaxKind) -> Vec<Arc<Node>
     result
 }
 
-fn is_readonly_type_operator(node: &Arc<Node>) -> bool {
+fn is_readonly_type_operator(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_readonly_type_operator"); 
     if node.kind != SyntaxKind::ReadonlyKeyword {
         return false;
     }
@@ -660,7 +660,7 @@ fn is_readonly_type_operator(node: &Arc<Node>) -> bool {
 pub fn get_label_references_in_node(
     container: &Arc<Node>,
     target_label: &Arc<Node>,
-) -> Vec<SymbolAndEntries> {
+) -> Vec<SymbolAndEntries> { ::tsox_core::fntrace::enter("get_label_references_in_node"); 
     let label_name = target_label.text();
     let references = get_label_references_in_node_worker(container, &label_name);
     if !references.is_empty() {
@@ -679,7 +679,7 @@ pub fn get_label_references_in_node(
 fn get_label_references_in_node_worker(
     container: &Arc<Node>,
     label_name: &str,
-) -> Vec<ReferenceEntry> {
+) -> Vec<ReferenceEntry> { ::tsox_core::fntrace::enter("get_label_references_in_node_worker"); 
     let mut result = Vec::new();
     ast::for_each_child(container, |child| {
         if ast::is_labeled_statement(child) {
@@ -712,7 +712,7 @@ fn get_label_references_in_node_worker(
     result
 }
 
-fn get_break_or_continue_target(node: &Arc<Node>, label_name: &str) -> Option<Arc<Node>> {
+fn get_break_or_continue_target(node: &Arc<Node>, label_name: &str) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_break_or_continue_target"); 
     if node.kind != SyntaxKind::BreakStatement && node.kind != SyntaxKind::ContinueStatement {
         return None;
     }
@@ -724,7 +724,7 @@ fn get_break_or_continue_target(node: &Arc<Node>, label_name: &str) -> Option<Ar
     }
 }
 
-pub fn get_context_node_for_node_entry(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_context_node_for_node_entry(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_context_node_for_node_entry"); 
     let mut last_node = node.clone();
     let mut current = node.parent();
     while let Some(parent) = current {
@@ -737,7 +737,7 @@ pub fn get_context_node_for_node_entry(node: &Arc<Node>) -> Arc<Node> {
     last_node
 }
 
-fn is_node_entry_context(kind: SyntaxKind) -> bool {
+fn is_node_entry_context(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_node_entry_context"); 
     matches!(
         kind,
         SyntaxKind::PropertyAccessExpression
@@ -750,7 +750,7 @@ fn is_node_entry_context(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn get_context_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_context_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_context_node"); 
     if ast::is_export_assignment(node) {
         return Some(node.clone());
     }
@@ -767,7 +767,7 @@ pub fn get_context_node(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-fn get_context_node_for_export_or_import_specifier(specifier: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_context_node_for_export_or_import_specifier(specifier: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_context_node_for_export_or_import_specifier"); 
     let parent = specifier.parent()?;
     let export_declaration = parent.parent()?;
     if ast::is_export_declaration(&export_declaration) {

@@ -3,7 +3,7 @@
 use crate::checker::checker_classes::*;
 
 impl Checker {
-    pub(crate) fn resolve_base_class_constructor_type(&mut self) -> Option<Arc<Type>> {
+    pub(crate) fn resolve_base_class_constructor_type(&mut self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolve_base_class_constructor_type"); 
         let (base_node, symbol) = self.base_class_node_of_enclosing_class()?;
 
         let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
@@ -15,7 +15,7 @@ impl Checker {
         Some(ctor_type)
     }
 
-    pub(crate) fn base_class_node_of_enclosing_class(&self) -> Option<(Arc<Node>, Arc<Symbol>)> {
+    pub(crate) fn base_class_node_of_enclosing_class(&self) -> Option<(Arc<Node>, Arc<Symbol>)> { ::tsox_core::fntrace::enter("base_class_node_of_enclosing_class"); 
         let class_node = self.enclosing_class_stack.last().cloned()?;
         self.extends_base_of(&class_node)
     }
@@ -29,7 +29,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         class_tps: &[Arc<tsox_frontend::ast::Symbol>],
         arg_types: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_class_instance_type"); 
         let node_id = class_node.id();
         let saved = self.class_instance_type_cache.remove(&node_id);
         self.this_type_cache.remove(&node_id);
@@ -92,7 +92,7 @@ impl Checker {
         instance
     }
 
-    pub(crate) fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_entity_name_class_symbol(&mut self, expr: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_entity_name_class_symbol"); 
         match expr.kind {
             SyntaxKind::Identifier => self.resolve_identifier(expr),
             SyntaxKind::PropertyAccessExpression => {
@@ -112,7 +112,7 @@ impl Checker {
 
     /// Go resolveQualifiedName：heritage 左端以 Namespace 含义预解析成功时
     /// 返回其 node id（仅 namespace 无 Value 含义者会触发 TS2708）
-    pub(crate) fn namespace_leftmost_suppress_id(&mut self, expr: &Arc<Node>) -> Option<u64> {
+    pub(crate) fn namespace_leftmost_suppress_id(&mut self, expr: &Arc<Node>) -> Option<u64> { ::tsox_core::fntrace::enter("namespace_leftmost_suppress_id"); 
         let mut current: &Arc<Node> = expr;
         while let tsox_frontend::ast::NodeData::PropertyAccessExpression(d) = &current.data {
             current = &d.expression;
@@ -130,7 +130,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn emit_ts2506(&mut self, class_node: &Arc<Node>, symbol: &Arc<Symbol>) {
+    pub(crate) fn emit_ts2506(&mut self, class_node: &Arc<Node>, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("emit_ts2506"); 
         let class_name_loc = match &class_node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(cd) => cd
                 .name
@@ -149,7 +149,7 @@ impl Checker {
         ));
     }
 
-    pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_base_class_instance_type"); 
         if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
             // Go resolveBaseTypesOfClass 非 class 符号分支（mixin 形态）：
             // extends 表达式是调用时，实例基型 = 基构造类型首个构造签名的
@@ -258,7 +258,7 @@ impl Checker {
         &mut self,
         type_ref: &Arc<Node>,
         expr: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_mixin_base_instance_type"); 
         let own_type = type_ref
             .parent()
             .and_then(|clause| clause.parent())
@@ -302,7 +302,7 @@ impl Checker {
         &mut self,
         derived: &Arc<Type>,
         base: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("merge_instance_types"); 
         if base.flags.contains(TypeFlags::Any) {
             return Arc::clone(derived);
         }
@@ -364,11 +364,11 @@ impl Checker {
     pub(crate) fn get_type_from_heritage_type_reference(
         &mut self,
         type_ref: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_heritage_type_reference"); 
         self.get_type_from_type_node(type_ref)
     }
 
-    pub(crate) fn check_property_initialization(&mut self, class_node: &Arc<Node>) {
+    pub(crate) fn check_property_initialization(&mut self, class_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_property_initialization"); 
         if !self.strict_null_checks || !self.strict_property_initialization {
             return;
         }
@@ -458,7 +458,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn node_text(&self, node: &Arc<Node>) -> String {
+    pub(crate) fn node_text(&self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("node_text"); 
         match &node.data {
             tsox_frontend::ast::NodeData::Identifier(d) => d.text.clone(),
             tsox_frontend::ast::NodeData::PrivateIdentifier(d) => d.text.clone(),
@@ -483,7 +483,7 @@ impl Checker {
         &mut self,
         _member: &Arc<Node>,
         name: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_property_name"); 
         self.resolve_identifier(name)
     }
 }

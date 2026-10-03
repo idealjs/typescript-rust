@@ -12,21 +12,21 @@ use tsox_frontend::ast::{
     is_tagged_template_expression,
 };
 
-pub(crate) fn get_big_int_literal_value(t: &Arc<Type>) -> tsox_core::jsnum::PseudoBigInt {
+pub(crate) fn get_big_int_literal_value(t: &Arc<Type>) -> tsox_core::jsnum::PseudoBigInt { ::tsox_core::fntrace::enter("get_big_int_literal_value"); 
     match t.literal_data().map(|d| &d.value) {
         Some(LiteralValue::BigInt(b)) => b.clone(),
         _ => unreachable!("getBigIntLiteralValue on non bigint literal"),
     }
 }
 
-pub(crate) fn get_boolean_literal_value(t: &Arc<Type>) -> bool {
+pub(crate) fn get_boolean_literal_value(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("get_boolean_literal_value"); 
     match t.literal_data().map(|d| &d.value) {
         Some(LiteralValue::Boolean(b)) => *b,
         _ => unreachable!("getBooleanLiteralValue on non boolean literal"),
     }
 }
 
-pub(crate) fn for_each_type(t: &Arc<Type>, f: &mut dyn FnMut(&Arc<Type>)) {
+pub(crate) fn for_each_type(t: &Arc<Type>, f: &mut dyn FnMut(&Arc<Type>)) { ::tsox_core::fntrace::enter("for_each_type"); 
     if t.flags.contains(TypeFlags::Union) {
         if let Some(us) = t.types() {
             for u in us {
@@ -39,7 +39,7 @@ pub(crate) fn for_each_type(t: &Arc<Type>, f: &mut dyn FnMut(&Arc<Type>)) {
 }
 
 impl Checker {
-    pub(crate) fn get_base_type_of_enum_like_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_base_type_of_enum_like_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_base_type_of_enum_like_type"); 
         if t.flags.contains(TypeFlags::EnumLiteral) {
             if let Some(symbol) = &t.symbol {
                 if symbol.flags.contains(SymbolFlags::EnumMember) {
@@ -52,7 +52,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub(crate) fn get_base_type_of_literal_type_union(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_base_type_of_literal_type_union(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_base_type_of_literal_type_union"); 
         let self_ptr = self as *mut Checker;
         self.map_type(t, &mut |t| {
             let ch = unsafe { &*self_ptr };
@@ -65,7 +65,7 @@ impl Checker {
         &mut self,
         declaration: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_variable_like_declaration"); 
         if let Some(type_node) = declaration.type_node() {
             return Some(self.get_type_from_type_node(type_node));
         }
@@ -91,7 +91,7 @@ impl Checker {
         &mut self,
         declaration: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_static_property_declaration"); 
         if let Some(parent) = declaration.parent() {
             if is_expression(&parent) {
                 if let Some(parent_type) = self.get_contextual_type(&parent, context_flags) {
@@ -109,7 +109,7 @@ impl Checker {
     pub(crate) fn get_contextual_signature_for_function_like_declaration(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_contextual_signature_for_function_like_declaration"); 
         if is_function_expression_or_arrow_function(node) || is_object_literal_method(node) {
             return self.get_contextual_signature(node);
         }
@@ -120,7 +120,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_conditional_operand"); 
         if let Some(parent) = node.parent() {
             if let NodeData::ConditionalExpression(conditional) = &parent.data {
                 let is_branch = conditional.when_true.id() == node.id()
@@ -137,7 +137,7 @@ impl Checker {
         &mut self,
         template: &Arc<Node>,
         substitution_expression: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_substitution_expression"); 
         if let Some(parent) = template.parent() {
             if is_tagged_template_expression(&parent) {
                 return self.get_contextual_type_for_argument(&parent, substitution_expression);
@@ -149,13 +149,13 @@ impl Checker {
     pub(crate) fn get_contextual_import_attribute_type(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_import_attribute_type"); 
         let global_type = self.get_global_import_attributes_type();
         let name = node.name().map(|n| n.text().to_string()).unwrap_or_default();
         self.get_type_of_property_of_contextual_type(&global_type, &name)
     }
 
-    pub(crate) fn get_effective_decorator_arguments(&mut self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    pub(crate) fn get_effective_decorator_arguments(&mut self, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_effective_decorator_arguments"); 
         let expr = node.expression().cloned().unwrap_or_else(|| Arc::clone(node));
         let signature = self.get_decorator_call_signature(node);
         if let Some(signature) = signature {

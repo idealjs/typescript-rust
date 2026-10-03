@@ -9,7 +9,7 @@ impl Binder {
         node: &Arc<Node>,
         existing: &Arc<Symbol>,
         name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_duplicate_identifier_all"); 
         self.report_declaration_conflict_all(node, existing, Some(name), &DUPLICATE_IDENTIFIER_0);
     }
 
@@ -21,7 +21,7 @@ impl Binder {
         existing: &Arc<Symbol>,
         name: Option<&str>,
         message: &'static tsox_core::diagnostics::Message,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_declaration_conflict_all"); 
         let push = |b: &mut Self, n: &Arc<Node>| {
             let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(n)
                 .unwrap_or_else(|| Arc::clone(n));
@@ -48,7 +48,7 @@ impl Binder {
     }
 
     // Go DeclarationNameToString：名字按源文本展示（字符串字面量名带引号）
-    fn declaration_name_display(b: &Binder, name_node: &Arc<Node>, fallback: &str) -> String {
+    fn declaration_name_display(b: &Binder, name_node: &Arc<Node>, fallback: &str) -> String { ::tsox_core::fntrace::enter("declaration_name_display"); 
         if name_node.loc.end() == name_node.loc.pos() {
             return "(Missing)".to_string();
         }
@@ -67,7 +67,7 @@ impl Binder {
         existing: &Arc<Symbol>,
         name: &str,
         includes: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("report_symbol_conflict"); 
         let mut conflicted = false;
         let both_block_scoped_var = existing.flags.contains(SymbolFlags::BlockScopedVariable)
             && includes.contains(SymbolFlags::BlockScopedVariable);

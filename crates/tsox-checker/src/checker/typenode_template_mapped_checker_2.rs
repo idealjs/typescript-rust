@@ -3,7 +3,7 @@
 use crate::checker::typenode_template_mapped::*;
 
 impl Checker {
-    pub(crate) fn make_union_two(&self, a: Arc<Type>, b: Arc<Type>) -> Arc<Type> {
+    pub(crate) fn make_union_two(&self, a: Arc<Type>, b: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("make_union_two"); 
         Arc::new(Type::new(
             TypeFlags::Union,
             TypeData::Union(UnionTypeData {

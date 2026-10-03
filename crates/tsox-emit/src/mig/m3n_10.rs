@@ -21,7 +21,7 @@ use tsox_frontend::ast::NodeList;
 use tsox_frontend::ast::syntax_kind_generated::SyntaxKind;
 use tsox_frontend::ast::is_function_like;
 
-pub fn parameter_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn parameter_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parameter_dot_dot_dot_token"); 
     match &node.data {
         NodeData::ParameterDeclaration(d) => d.dot_dot_dot_token.clone(),
         _ => None,
@@ -29,18 +29,18 @@ pub fn parameter_dot_dot_dot_token(node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 impl DeclarationTransformer {
-    pub fn emit_context(&self) -> EmitContext {
+    pub fn emit_context(&self) -> EmitContext { ::tsox_core::fntrace::enter("emit_context"); 
         self.transformer.emit_context()
     }
 
-    pub fn visitor(&mut self) -> &mut NodeVisitor {
+    pub fn visitor(&mut self) -> &mut NodeVisitor { ::tsox_core::fntrace::enter("visitor"); 
         self.transformer.visitor()
     }
 
     pub fn setup_diagnostic_context(
         &mut self,
         input: &Arc<Node>,
-    ) -> (bool, Box<dyn FnOnce(&mut Self)>) {
+    ) -> (bool, Box<dyn FnOnce(&mut Self)>) { ::tsox_core::fntrace::enter("setup_diagnostic_context"); 
         let can_produce_diagnostic = can_produce_diagnostics(input);
         let old_within_object_literal_type = self.suppress_new_diagnostic_contexts;
         let should_enter_suppress_new_diagnostics_context_context = (input.kind
@@ -72,7 +72,7 @@ impl DeclarationTransformer {
         )
     }
 
-    pub fn ensure_type(&mut self, node: &Arc<Node>, ignore_private: bool) -> Option<Arc<Node>> {
+    pub fn ensure_type(&mut self, node: &Arc<Node>, ignore_private: bool) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("ensure_type"); 
         let parse_node = self.emit_context().parse_node(node);
         let is_private = parse_node.as_ref().is_some_and(|pn| {
             self.host
@@ -166,7 +166,7 @@ impl DeclarationTransformer {
         type_node
     }
 
-    pub fn should_print_with_initializer(&self, node: &Arc<Node>) -> bool {
+    pub fn should_print_with_initializer(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_print_with_initializer"); 
         can_have_literal_initializer(&self.host, node)
             && node.initializer().is_some()
             && self
@@ -178,7 +178,7 @@ impl DeclarationTransformer {
         &mut self,
         node: &Arc<Node>,
         params: Option<&Arc<NodeList>>,
-    ) -> Option<Arc<NodeList>> {
+    ) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("ensure_type_params"); 
         let parse_node = self.emit_context().parse_node(node);
         let is_private = parse_node.as_ref().is_some_and(|pn| {
             self.host
@@ -218,7 +218,7 @@ impl DeclarationTransformer {
         None
     }
 
-    pub fn ensure_parameter(&mut self, p: &Arc<Node>) -> Arc<Node> {
+    pub fn ensure_parameter(&mut self, p: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("ensure_parameter"); 
         let old_diag = self.state.get_symbol_accessibility_diagnostic.take();
         if !self.suppress_new_diagnostic_contexts {
             self.state.get_symbol_accessibility_diagnostic =
@@ -249,7 +249,7 @@ impl DeclarationTransformer {
         result
     }
 
-    pub fn ensure_no_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn ensure_no_initializer(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("ensure_no_initializer"); 
         if self.should_print_with_initializer(node) {
             let initializer = node.initializer();
             let unwrapped = initializer.map(unwrap_parenthesized_expression);
@@ -266,7 +266,7 @@ impl DeclarationTransformer {
         None
     }
 
-    pub fn update_param_list(&mut self, node: &Arc<Node>, params: &Arc<NodeList>) -> Arc<NodeList> {
+    pub fn update_param_list(&mut self, node: &Arc<Node>, params: &Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("update_param_list"); 
         let parse_node = self.emit_context().parse_node(node).expect("parse node");
         if self
             .host
@@ -284,7 +284,7 @@ impl DeclarationTransformer {
         self.factory().new_node_list(results)
     }
 
-    pub fn transform_function_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_function_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_function_declaration"); 
         let fd = input.as_function_declaration_r42k01();
         let type_parameters = fd
             .type_parameters
@@ -306,7 +306,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_class_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_class_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_class_declaration"); 
         let previous_enclosing_declaration = self.enclosing_declaration.clone();
         self.enclosing_declaration = Some(input.clone());
         let old_name = self.state.error_name_node.clone();
@@ -354,7 +354,7 @@ impl DeclarationTransformer {
         Some(result)
     }
 
-    pub fn transform_enum_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_enum_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_enum_declaration"); 
         let ed = input.as_enum_declaration_r42k01();
         let mut kept: Vec<Arc<Node>> = Vec::with_capacity(ed.members.nodes.len());
         for m in &ed.members.nodes {

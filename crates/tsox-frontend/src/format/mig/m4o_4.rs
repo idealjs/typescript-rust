@@ -22,7 +22,7 @@ use super::m4t_3::{
 };
 use super::m4t_5::is_pinned_comment;
 
-fn heritage_clauses(node: &Node) -> &[Arc<Node>] {
+fn heritage_clauses(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("heritage_clauses"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => heritage_clause_list(&d.heritage_clauses),
         NodeData::ClassExpression(d) => heritage_clause_list(&d.heritage_clauses),
@@ -30,35 +30,35 @@ fn heritage_clauses(node: &Node) -> &[Arc<Node>] {
     }
 }
 
-fn heritage_clause_list(heritage_clauses: &Option<Arc<NodeList>>) -> &[Arc<Node>] {
+fn heritage_clause_list(heritage_clauses: &Option<Arc<NodeList>>) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("heritage_clause_list"); 
     heritage_clauses
         .as_ref()
         .map(|l| l.nodes.as_slice())
         .unwrap_or(&[])
 }
 
-fn case_block_clauses(node: &Node) -> &NodeList {
+fn case_block_clauses(node: &Node) -> &NodeList { ::tsox_core::fntrace::enter("case_block_clauses"); 
     match &node.data {
         NodeData::CaseBlock(d) => &d.clauses,
         _ => panic!("Unhandled case in Node.Clauses"),
     }
 }
 
-fn catch_variable_declaration(node: &Node) -> Option<&Arc<Node>> {
+fn catch_variable_declaration(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("catch_variable_declaration"); 
     match &node.data {
         NodeData::CatchClause(d) => d.variable_declaration.as_ref(),
         _ => panic!("Unhandled case in Node.VariableDeclaration"),
     }
 }
 
-fn catch_block(node: &Node) -> &Arc<Node> {
+fn catch_block(node: &Node) -> &Arc<Node> { ::tsox_core::fntrace::enter("catch_block"); 
     match &node.data {
         NodeData::CatchClause(d) => &d.block,
         _ => panic!("Unhandled case in Node.Block"),
     }
 }
 
-fn block_multi_line(node: &Node) -> bool {
+fn block_multi_line(node: &Node) -> bool { ::tsox_core::fntrace::enter("block_multi_line"); 
     match &node.data {
         NodeData::Block(d) => d.multi_line,
         _ => panic!("Unhandled case in Node.MultiLine"),
@@ -66,7 +66,7 @@ fn block_multi_line(node: &Node) -> bool {
 }
 
 impl Printer {
-    pub fn emit_as_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_as_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_as_expression"); 
         let state = self.enter_node(node);
         self.emit_expression(
             node.expression().expect("as expression requires expression"),
@@ -81,7 +81,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_class_expression(&mut self, node: &Arc<Node>) {
+    pub fn emit_class_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_class_expression"); 
         let state = self.enter_node(node);
         self.generate_name_needed(node.name());
         let pos = self.emit_modifier_list(node, node.modifiers(), true);
@@ -119,7 +119,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_class_declaration(&mut self, node: &Arc<Node>) {
+    pub fn emit_class_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_class_declaration"); 
         let state = self.enter_node(node);
         self.generate_name_needed(node.name());
         let pos = self.emit_modifier_list(node, node.modifiers(), true);
@@ -153,7 +153,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_block(&mut self, node: &Arc<Node>) {
+    pub fn emit_block(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_block"); 
         let state = self.enter_node(node);
         self.generate_names(node);
         self.emit_token(SyntaxKind::OpenBraceToken, node.pos(), WriteKind::Punctuation, node);
@@ -184,7 +184,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_continue_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_continue_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_continue_statement"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::ContinueKeyword, node.pos(), WriteKind::Keyword, node);
         if let Some(label) = node_label(node) {
@@ -195,7 +195,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_break_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_break_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_break_statement"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::BreakKeyword, node.pos(), WriteKind::Keyword, node);
         if let Some(label) = node_label(node) {
@@ -206,14 +206,14 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_debugger_statement(&mut self, node: &Arc<Node>) {
+    pub fn emit_debugger_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_debugger_statement"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::DebuggerKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_trailing_semicolon();
         self.exit_node(node, state);
     }
 
-    pub fn emit_case_block(&mut self, node: &Arc<Node>) {
+    pub fn emit_case_block(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_case_block"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::OpenBraceToken, node.pos(), WriteKind::Punctuation, node);
         let clauses = case_block_clauses(node);
@@ -233,7 +233,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_case_or_default_clause_statements(&mut self, node: &Arc<Node>, colon_pos: usize) {
+    pub fn emit_case_or_default_clause_statements(&mut self, node: &Arc<Node>, colon_pos: usize) { ::tsox_core::fntrace::enter("emit_case_or_default_clause_statements"); 
         let statements = node_statements(node);
         let emit_as_single_statement = statements.len() == 1
             && (self
@@ -259,7 +259,7 @@ impl Printer {
         self.emit_list(Printer::emit_statement, node, statements, format);
     }
 
-    pub fn emit_case_clause(&mut self, node: &Arc<Node>) {
+    pub fn emit_case_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_case_clause"); 
         let state = self.enter_node(node);
         self.emit_token(SyntaxKind::CaseKeyword, node.pos(), WriteKind::Keyword, node);
         self.write_space();
@@ -275,14 +275,14 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_default_clause(&mut self, node: &Arc<Node>) {
+    pub fn emit_default_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_default_clause"); 
         let state = self.enter_node(node);
         let pos = self.emit_token(SyntaxKind::DefaultKeyword, node.pos(), WriteKind::Keyword, node);
         self.emit_case_or_default_clause_statements(node, pos);
         self.exit_node(node, state);
     }
 
-    pub fn emit_case_or_default_clause_node(&mut self, node: &Arc<Node>) {
+    pub fn emit_case_or_default_clause_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_case_or_default_clause_node"); 
         match node.kind {
             SyntaxKind::CaseClause => self.emit_case_clause(node),
             SyntaxKind::DefaultClause => self.emit_default_clause(node),
@@ -290,7 +290,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_catch_clause(&mut self, node: &Arc<Node>) {
+    pub fn emit_catch_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_catch_clause"); 
         let state = self.enter_node(node);
         let open_paren_pos =
             self.emit_token(SyntaxKind::CatchKeyword, node.pos(), WriteKind::Keyword, node);
@@ -317,7 +317,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_comments_before_node(&mut self, node: &Arc<Node>) -> Option<CommentState> {
+    pub fn emit_comments_before_node(&mut self, node: &Arc<Node>) -> Option<CommentState> { ::tsox_core::fntrace::enter("emit_comments_before_node"); 
         if !self.should_emit_comments(node) {
             return None;
         }
@@ -343,7 +343,7 @@ impl Printer {
         })
     }
 
-    pub fn emit_comments_after_node(&mut self, node: &Arc<Node>, state: Option<CommentState>) {
+    pub fn emit_comments_after_node(&mut self, node: &Arc<Node>, state: Option<CommentState>) { ::tsox_core::fntrace::enter("emit_comments_after_node"); 
         let Some(state) = state else {
             return;
         };
@@ -386,7 +386,7 @@ impl Printer {
         mut pos: usize,
         context_node: &Arc<Node>,
         flags: TokenEmitFlags,
-    ) -> (Option<CommentState>, usize) {
+    ) -> (Option<CommentState>, usize) { ::tsox_core::fntrace::enter("emit_comments_before_token"); 
         if flags.contains(TokenEmitFlags::NO_COMMENTS) || self.comments_disabled {
             if let Some(source_file) = &self.current_source_file {
                 if !position_is_synthesized(pos) {
@@ -430,7 +430,7 @@ impl Printer {
         pos: usize,
         context_node: &Arc<Node>,
         state: Option<CommentState>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_comments_after_token"); 
         let Some(_state) = state else {
             return;
         };
@@ -451,7 +451,7 @@ impl Printer {
     pub fn emit_detached_comments(
         &mut self,
         text_range: TextRange,
-    ) -> Option<DetachedCommentsInfo> {
+    ) -> Option<DetachedCommentsInfo> { ::tsox_core::fntrace::enter("emit_detached_comments"); 
         let Some(source_file) = self.current_source_file.clone() else {
             return None;
         };
@@ -531,7 +531,7 @@ impl Printer {
         &mut self,
         comments: &[CommentRange],
         comment_separator: CommentSeparator,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("emit_comments"); 
         let mut intervening_separator = false;
         if comments.is_empty() {
             return false;
@@ -565,7 +565,7 @@ impl Printer {
         true
     }
 
-    pub fn emit_comment(&mut self, comment: &CommentRange) {
+    pub fn emit_comment(&mut self, comment: &CommentRange) { ::tsox_core::fntrace::enter("emit_comment"); 
         self.emit_pos(comment.pos);
         self.write_comment_range(comment);
         self.emit_pos(comment.end);
@@ -576,7 +576,7 @@ impl Printer {
         node: &Arc<Node>,
         detached_range: TextRange,
         state: Option<CommentState>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_detached_comments_after_statement_list"); 
         let Some(state) = state else {
             return;
         };
@@ -597,7 +597,7 @@ impl Printer {
 }
 
 impl Default for CommentState {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         CommentState {
             emit_flags: 0,
             comment_range: TextRange::default(),
@@ -609,13 +609,13 @@ impl Default for CommentState {
 }
 
 impl Printer {
-    pub fn should_emit_comments(&self, node: &Arc<Node>) -> bool {
+    pub fn should_emit_comments(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_emit_comments"); 
         !self.comments_disabled
             && (self.emit_context.emit_flags(node) & super::m4o::EmitFlags::NO_COMMENTS.0)
                 != super::m4o::EmitFlags::NO_COMMENTS.0
     }
 
-    pub fn should_write_comment(&self, comment: &CommentRange) -> bool {
+    pub fn should_write_comment(&self, comment: &CommentRange) -> bool { ::tsox_core::fntrace::enter("should_write_comment"); 
         let _ = comment;
         !self.comments_disabled
     }
@@ -624,7 +624,7 @@ impl Printer {
         &mut self,
         pos: usize,
         comment_pos: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("should_emit_new_line_before_leading_comment_of_position"); 
         let Some(source_file) = self.current_source_file.clone() else {
             return false;
         };
@@ -634,7 +634,7 @@ impl Printer {
         comment_line > node_line
     }
 
-    pub fn emit_leading_comments(&mut self, pos: usize, elided: bool) -> bool {
+    pub fn emit_leading_comments(&mut self, pos: usize, elided: bool) -> bool { ::tsox_core::fntrace::enter("emit_leading_comments"); 
         let _ = elided;
         if self.comments_disabled {
             return false;
@@ -655,7 +655,7 @@ impl Printer {
         node: &Arc<Node>,
         emit_flags: u32,
         comment_range: TextRange,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_leading_comments_of_node"); 
         let _ = node;
         if (emit_flags & super::m4o::EmitFlags::NO_LEADING_COMMENTS.0) != 0 {
             return;
@@ -663,11 +663,11 @@ impl Printer {
         self.emit_leading_comments(comment_range.pos(), false);
     }
 
-    pub fn emit_leading_synthetic_comments_of_node(&mut self, node: &Arc<Node>, emit_flags: u32) {
+    pub fn emit_leading_synthetic_comments_of_node(&mut self, node: &Arc<Node>, emit_flags: u32) { ::tsox_core::fntrace::enter("emit_leading_synthetic_comments_of_node"); 
         let _ = (node, emit_flags);
     }
 
-    pub fn emit_trailing_comments(&mut self, pos: usize, separator: CommentSeparator) {
+    pub fn emit_trailing_comments(&mut self, pos: usize, separator: CommentSeparator) { ::tsox_core::fntrace::enter("emit_trailing_comments"); 
         if self.comments_disabled {
             return;
         }
@@ -689,7 +689,7 @@ impl Printer {
         container_pos: i64,
         container_end: i64,
         declaration_list_container_end: i64,
-    ) {
+    ) { ::tsox_core::fntrace::enter("emit_trailing_comments_of_node"); 
         let _ = (
             node,
             container_pos,
@@ -702,13 +702,13 @@ impl Printer {
         self.emit_trailing_comments(comment_range.end(), CommentSeparator::Before);
     }
 
-    pub fn emit_trailing_synthetic_comments_of_node(&mut self, node: &Arc<Node>, emit_flags: u32) {
+    pub fn emit_trailing_synthetic_comments_of_node(&mut self, node: &Arc<Node>, emit_flags: u32) { ::tsox_core::fntrace::enter("emit_trailing_synthetic_comments_of_node"); 
         let _ = (node, emit_flags);
     }
 
-    pub fn emit_pos(&mut self, _pos: usize) {}
+    pub fn emit_pos(&mut self, _pos: usize) { ::tsox_core::fntrace::enter("emit_pos"); }
 
-    pub fn write_comment_range(&mut self, comment: &CommentRange) {
+    pub fn write_comment_range(&mut self, comment: &CommentRange) { ::tsox_core::fntrace::enter("write_comment_range"); 
         let Some(source_file) = self.current_source_file.clone() else {
             return;
         };

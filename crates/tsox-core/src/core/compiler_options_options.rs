@@ -140,6 +140,6 @@ pub struct CompilerOptions {
     pub checkers: Option<i32>,
 }
 
-pub fn empty_compiler_options() -> CompilerOptions {
+pub fn empty_compiler_options() -> CompilerOptions { crate::fntrace::enter("empty_compiler_options"); 
     CompilerOptions::default()
 }

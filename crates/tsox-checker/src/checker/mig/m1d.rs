@@ -17,7 +17,7 @@ use crate::checker::checker_this_container::get_this_container;
 use crate::checker::mig::m1f_4::{get_target_type, get_this_parameter_from_node_context};
 
 impl Checker {
-    pub(crate) fn get_deprecated_suggestion_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn get_deprecated_suggestion_node(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_deprecated_suggestion_node"); 
         let node = skip_parentheses(node);
         match node.kind {
             SyntaxKind::CallExpression | SyntaxKind::Decorator | SyntaxKind::NewExpression => {
@@ -64,7 +64,7 @@ impl Checker {
     pub(crate) fn get_class_or_interface_declarations_of_symbol(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_class_or_interface_declarations_of_symbol"); 
         symbol
             .declarations
             .iter()
@@ -73,7 +73,7 @@ impl Checker {
             .collect()
     }
 
-    pub(crate) fn get_context_node(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn get_context_node(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_context_node"); 
         if is_jsx_attributes(node) {
             if let Some(parent) = node.parent() {
                 if !is_jsx_self_closing_element(&parent) {
@@ -86,7 +86,7 @@ impl Checker {
         Arc::clone(node)
     }
 
-    pub(crate) fn get_context_free_type_of_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_context_free_type_of_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_context_free_type_of_expression"); 
         let any_type = self.get_any_type();
         self.push_contextual_type(node, &any_type, false);
         let t = self.check_expression_ex(node, CheckMode::SkipContextSensitive);
@@ -97,7 +97,7 @@ impl Checker {
     pub(crate) fn get_diagnostic_head_message_for_decorator_resolution(
         &mut self,
         node: &Arc<Node>,
-    ) -> &'static tsox_core::diagnostics::Message {
+    ) -> &'static tsox_core::diagnostics::Message { ::tsox_core::fntrace::enter("get_diagnostic_head_message_for_decorator_resolution"); 
         let parent_kind = node.parent().map(|p| p.kind).unwrap_or(SyntaxKind::Unknown);
         match parent_kind {
             SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
@@ -122,14 +122,14 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         signature: &Arc<Signature>,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("get_decorator_argument_count"); 
         if self.compiler_options.experimental_decorators.is_true() {
             return self.get_legacy_decorator_argument_count(node, signature) as usize;
         }
         self.get_parameter_count(signature).clamp(1, 2)
     }
 
-    pub(crate) fn get_effective_check_node(&mut self, argument: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn get_effective_check_node(&mut self, argument: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_effective_check_node"); 
         let flags = if is_in_js_file(argument) {
             OuterExpressionKinds::PARENS
                 | OuterExpressionKinds::SATISFIES
@@ -144,7 +144,7 @@ impl Checker {
         &mut self,
         prop: &Arc<Symbol>,
         callback: &mut dyn FnMut(&mut Checker, &Arc<Symbol>) -> bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("for_each_property"); 
         if !prop.check_flags.contains(CheckFlags::SYNTHETIC) {
             return callback(self, prop);
         }
@@ -166,7 +166,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn get_declaring_class(&mut self, prop: &Arc<Symbol>) -> Option<Arc<Type>> {
+    pub(crate) fn get_declaring_class(&mut self, prop: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_declaring_class"); 
         if let Some(parent) = prop.parent() {
             if parent.flags.intersects(SymbolFlags::Class) {
                 let parent_of_symbol = self.get_parent_of_symbol(prop)?;
@@ -180,7 +180,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         callback: &mut dyn FnMut(&Arc<Node>) -> bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("for_each_enclosing_class"); 
         let mut containing_class = get_containing_class(node);
         while let Some(class_like) = containing_class {
             if callback(&class_like) {
@@ -194,7 +194,7 @@ impl Checker {
     pub(crate) fn get_enclosing_class_from_this_parameter(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_enclosing_class_from_this_parameter"); 
         let this_parameter = get_this_parameter_from_node_context(node);
         let mut this_type: Option<Arc<Type>> = None;
         if let Some(parameter) = &this_parameter {
@@ -227,7 +227,7 @@ impl Checker {
         left_type: &Arc<Type>,
         right_type: &Arc<Type>,
         is_related: &mut dyn FnMut(&Arc<Type>, &Arc<Type>) -> bool,
-    ) -> (Arc<Type>, Arc<Type>) {
+    ) -> (Arc<Type>, Arc<Type>) { ::tsox_core::fntrace::enter("get_base_types_if_unrelated"); 
         let mut effective_left = Arc::clone(left_type);
         let mut effective_right = Arc::clone(right_type);
         let left_base = self.get_base_type_of_literal_type(left_type);
@@ -243,7 +243,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         facts: TypeFacts,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_adjusted_type_with_facts"); 
         if facts == TypeFacts::NONE {
             return self.never_type();
         }

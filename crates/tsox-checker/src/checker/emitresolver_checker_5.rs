@@ -3,7 +3,7 @@
 use crate::checker::emitresolver::*;
 
 impl Checker {
-    pub fn is_optional_parameter(&self, node: &Arc<Node>) -> bool {
+    pub fn is_optional_parameter(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_optional_parameter"); 
         match &node.data {
             NodeData::ParameterDeclaration(data) => {
                 data.question_token.is_some() || node.kind == SyntaxKind::RestType
@@ -12,7 +12,7 @@ impl Checker {
         }
     }
 
-    pub fn is_literal_const_declaration(&self, node: &Arc<Node>) -> bool {
+    pub fn is_literal_const_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_literal_const_declaration"); 
         if node.kind != SyntaxKind::VariableDeclaration {
             return false;
         }
@@ -35,7 +35,7 @@ impl Checker {
         )
     }
 
-    pub fn get_constant_value(&mut self, node: &Arc<Node>) -> Option<String> {
+    pub fn get_constant_value(&mut self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("get_constant_value"); 
         if node.kind == SyntaxKind::EnumMember {
             return self.get_enum_member_value_string(node);
         }
@@ -61,7 +61,7 @@ impl Checker {
         }
     }
 
-    pub fn is_referenced_alias_declaration(&self, node: &Arc<Node>) -> bool {
+    pub fn is_referenced_alias_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_referenced_alias_declaration"); 
         if let Some(links) = self.declaration_links.get(node) {
             if links.is_visible.is_true() {
                 return true;
@@ -71,23 +71,23 @@ impl Checker {
         true
     }
 
-    pub fn is_value_alias_declaration(&self, node: &Arc<Node>) -> bool {
+    pub fn is_value_alias_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_value_alias_declaration"); 
         match &node.data {
             NodeData::ImportSpecifier(data) => !data.is_type_only,
             _ => true,
         }
     }
 
-    pub fn get_symbol_of_declaration(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_of_declaration(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_declaration"); 
         self.program.symbol_map().symbol_of(node).cloned()
     }
 
-    pub fn is_const_enum_member(&self, symbol: &Symbol) -> bool {
+    pub fn is_const_enum_member(&self, symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_const_enum_member"); 
         symbol.flags.contains(SymbolFlags::ConstEnum)
     }
 }
 
-pub(crate) fn collect_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub(crate) fn collect_children(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_children"); 
     let mut children: Vec<Arc<Node>> = Vec::new();
     for_each_child(node, |child| {
         children.push(Arc::clone(child));

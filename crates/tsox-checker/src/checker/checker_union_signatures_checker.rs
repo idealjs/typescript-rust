@@ -2,7 +2,7 @@
 
 use crate::checker::checker_union_signatures::*;
 
-fn same_signature_slice(a: &[Arc<Signature>], b: &[Arc<Signature>]) -> bool {
+fn same_signature_slice(a: &[Arc<Signature>], b: &[Arc<Signature>]) -> bool { ::tsox_core::fntrace::enter("same_signature_slice"); 
     a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| Arc::ptr_eq(x, y))
 }
 
@@ -13,7 +13,7 @@ impl Checker {
     pub(crate) fn union_call_signatures_empty(
         &mut self,
         signature_lists: &[Vec<Arc<Signature>>],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("union_call_signatures_empty"); 
         let mut index_with_length_over_one = 0usize;
         let mut count_length_over_one = 0usize;
         for (i, list) in signature_lists.iter().enumerate() {
@@ -73,7 +73,7 @@ impl Checker {
     pub(crate) fn union_leaf_call_signature_lists(
         &mut self,
         leaves: &[Arc<Type>],
-    ) -> Vec<Vec<Arc<Signature>>> {
+    ) -> Vec<Vec<Arc<Signature>>> { ::tsox_core::fntrace::enter("union_leaf_call_signature_lists"); 
         leaves
             .iter()
             .map(|m| {
@@ -91,7 +91,7 @@ impl Checker {
     pub fn get_union_signatures(
         &mut self,
         signature_lists: &[Vec<Arc<Signature>>],
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_union_signatures"); 
         if signature_lists.is_empty() || signature_lists.iter().any(|l| l.is_empty()) {
             return Vec::new();
         }
@@ -125,7 +125,7 @@ impl Checker {
         left: &Arc<Signature>,
         right: &Arc<Signature>,
         is_union: bool,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("combine_union_member_signature"); 
         let (params, overrides) = self.combine_union_parameters(left, right, is_union);
         let mut flags = left.flags | right.flags;
         flags.remove(SignatureFlags::HasRestParameter);
@@ -163,14 +163,14 @@ impl Checker {
         Arc::new(s)
     }
 
-    fn combined_has_rest_tail(&mut self, left: &Arc<Signature>, right: &Arc<Signature>) -> bool {
+    fn combined_has_rest_tail(&mut self, left: &Arc<Signature>, right: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("combined_has_rest_tail"); 
         self.has_effective_rest_parameter(left) || self.has_effective_rest_parameter(right)
     }
 
     pub(crate) fn get_intersected_signatures(
         &mut self,
         signatures: &[Arc<Signature>],
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_intersected_signatures"); 
         if !self.no_implicit_any {
             return None;
         }
@@ -199,7 +199,7 @@ impl Checker {
         left: &Arc<Signature>,
         right: &Arc<Signature>,
         is_union: bool,
-    ) -> (Vec<Arc<Symbol>>, Vec<Arc<Type>>) {
+    ) -> (Vec<Arc<Symbol>>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("combine_union_parameters"); 
         let left_count = self.get_parameter_count(left);
         let right_count = self.get_parameter_count(right);
         let (longest, shorter, longest_count) = if left_count >= right_count {
@@ -285,12 +285,12 @@ impl Checker {
         (params, overrides)
     }
 
-    fn combined_param_type_at(&mut self, sig: &Arc<Signature>, i: usize) -> Arc<Type> {
+    fn combined_param_type_at(&mut self, sig: &Arc<Signature>, i: usize) -> Arc<Type> { ::tsox_core::fntrace::enter("combined_param_type_at"); 
         self.try_get_type_at_position(sig, i)
             .unwrap_or_else(|| self.unknown_type())
     }
 
-    fn parameter_name_at_position(&mut self, sig: &Arc<Signature>, i: usize) -> String {
+    fn parameter_name_at_position(&mut self, sig: &Arc<Signature>, i: usize) -> String { ::tsox_core::fntrace::enter("parameter_name_at_position"); 
         sig.parameters
             .get(i)
             .map(|p| p.name.clone())

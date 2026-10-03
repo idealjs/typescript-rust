@@ -14,7 +14,7 @@ impl Checker {
         node: &Arc<Node>,
         signatures: &[Arc<Signature>],
         args: &Arc<tsox_frontend::ast::NodeList>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("candidate_for_overload_failure"); 
         if signatures.is_empty() {
             return None;
         }
@@ -40,7 +40,7 @@ impl Checker {
     fn create_union_of_signatures_for_overload_failure(
         &mut self,
         candidates: &[Arc<Signature>],
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("create_union_of_signatures_for_overload_failure"); 
         let non_rest_count = |s: &Arc<Signature>| {
             if s.has_rest_parameter() {
                 s.parameters.len().saturating_sub(1)
@@ -118,7 +118,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         pos: usize,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("overload_failure_type_at_position"); 
         let non_rest = if sig.has_rest_parameter() {
             sig.parameters.len().saturating_sub(1)
         } else {
@@ -134,7 +134,7 @@ impl Checker {
         None
     }
 
-    fn effective_rest_element_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> {
+    fn effective_rest_element_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("effective_rest_element_type"); 
         let rest_param = sig.parameters.last()?;
         let rest_type = self.get_type_of_symbol(rest_param);
         self.get_array_element_type_of(&rest_type)
@@ -144,7 +144,7 @@ impl Checker {
         &mut self,
         index: usize,
         t: Arc<Type>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("synthetic_parameter_symbol_for_overload_failure"); 
         let name = format!("arg{index}");
         let mut symbol = Symbol::new(SymbolFlags::Property, name);
         symbol.check_flags |= CheckFlags::SyntheticProperty;
@@ -163,7 +163,7 @@ impl Checker {
         &mut self,
         sources: &[&Arc<Symbol>],
         t: Arc<Type>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("synthetic_rest_symbol_for_overload_failure"); 
         let mut symbol = Symbol::new(SymbolFlags::Property, "rest".to_string());
         symbol.check_flags |= CheckFlags::SyntheticProperty;
         for s in sources {
@@ -195,7 +195,7 @@ impl Checker {
     pub(crate) fn try_combine_union_call_signatures(
         &mut self,
         sigs: &[Arc<Signature>],
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("try_combine_union_call_signatures"); 
         if sigs.len() < 2 {
             return None;
         }
@@ -290,7 +290,7 @@ impl Checker {
         Some(Arc::new(combined))
     }
 
-    fn effective_rest_param_type(&mut self, s: &Arc<Signature>) -> Option<Arc<Type>> {
+    fn effective_rest_param_type(&mut self, s: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("effective_rest_param_type"); 
         if let Some(overrides) = &s.instantiated_parameter_types {
             return overrides.last().cloned();
         }

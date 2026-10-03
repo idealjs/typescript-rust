@@ -20,7 +20,7 @@ pub mod r26k6_defs;
 use self::r26k6_defs::{unresolved_symbols_get, unresolved_symbols_insert};
 
 impl Checker {
-    pub(crate) fn has_default_value(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn has_default_value(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_default_value"); 
         if is_binding_element(node) {
             return node.initializer().is_some();
         }
@@ -42,12 +42,12 @@ impl Checker {
         false
     }
 
-    pub(crate) fn has_parse_diagnostics(&mut self, source_file: &Arc<Node>) -> bool {
+    pub(crate) fn has_parse_diagnostics(&mut self, source_file: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_parse_diagnostics"); 
         self.get_source_file_of_node(source_file)
             .is_some_and(|f| f.has_parse_diagnostics)
     }
 
-    pub(crate) fn has_signatures(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn has_signatures(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_signatures"); 
         !self
             .get_signatures_of_structured_type(t, SignatureKind::Call)
             .is_empty()
@@ -63,7 +63,7 @@ impl Checker {
         original_symbol: &Arc<Symbol>,
         module_specifier: &Arc<Node>,
         import_attributes_type: Option<&Arc<Type>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_with_synthetic_default_only"); 
         let has_default_only =
             self.is_only_importable_as_default(module_specifier, None, import_attributes_type);
         if has_default_only && t.is_some_and(|t| !self.is_error_type(t)) {
@@ -83,11 +83,11 @@ impl Checker {
         None
     }
 
-    pub(crate) fn has_bindable_name(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn has_bindable_name(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_bindable_name"); 
         !has_dynamic_name(node) || self.has_late_bindable_name(node)
     }
 
-    pub(crate) fn has_late_bindable_name(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn has_late_bindable_name(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_late_bindable_name"); 
         let Some(name) = get_name_of_declaration(node) else {
             return false;
         };
@@ -102,12 +102,12 @@ impl Checker {
         crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(&t)
     }
 
-    pub(crate) fn has_late_bindable_index_signature(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn has_late_bindable_index_signature(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_late_bindable_index_signature"); 
         get_name_of_declaration(node)
             .is_some_and(|name| self.is_late_bindable_index_signature(&name))
     }
 
-    pub(crate) fn has_type_parameter_default(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn has_type_parameter_default(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_type_parameter_default"); 
         let Some(symbol) = &t.symbol else {
             return false;
         };
@@ -122,7 +122,7 @@ impl Checker {
     pub(crate) fn has_array_or_type_type_constraint(
         &mut self,
         type_variable: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_array_or_type_type_constraint"); 
         let Some(constraint) = self.get_constraint_of_type_parameter(type_variable) else {
             return false;
         };
@@ -132,7 +132,7 @@ impl Checker {
     pub(crate) fn get_unresolved_symbol_for_entity_name(
         &mut self,
         name: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_unresolved_symbol_for_entity_name"); 
         let identifier = match name.kind {
             SyntaxKind::QualifiedName => match &name.data {
                 NodeData::QualifiedName(q) => Arc::clone(&q.right),
@@ -184,7 +184,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         arity: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_signature_with_arity_greater_than"); 
         for signature in self.get_signatures_of_symbol(Some(symbol)) {
             if self.get_parameter_count(&signature) > arity {
                 return true;
@@ -196,7 +196,7 @@ impl Checker {
     pub(crate) fn get_type_of_first_parameter_of_signature(
         &mut self,
         signature: &Arc<Signature>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_first_parameter_of_signature"); 
         let fallback = self.never_type();
         self.get_type_of_first_parameter_of_signature_with_fallback(signature, &fallback)
     }
@@ -205,14 +205,14 @@ impl Checker {
         &mut self,
         signature: &Arc<Signature>,
         fallback_type: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_first_parameter_of_signature_with_fallback"); 
         if !signature.parameters.is_empty() {
             return self.get_type_at_position(signature, 0);
         }
         Arc::clone(fallback_type)
     }
 
-    pub(crate) fn has_type_facts(&mut self, t: &Arc<Type>, mask: TypeFacts) -> bool {
+    pub(crate) fn has_type_facts(&mut self, t: &Arc<Type>, mask: TypeFacts) -> bool { ::tsox_core::fntrace::enter("has_type_facts"); 
         !self.get_type_facts(t, mask).is_empty()
     }
 }

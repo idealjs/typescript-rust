@@ -7,14 +7,14 @@ impl Checker {
         &self,
         signature: &Arc<Signature>,
         type_parameter: &Type,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_type_parameter_at_top_level_in_return_type"); 
         if let Some(return_type) = signature.resolved_return_type.get() {
             return self.is_type_parameter_at_top_level(return_type, type_parameter, 0);
         }
         false
     }
 
-    pub(crate) fn get_type_from_inference(&mut self, inference: &InferenceInfo) -> Option<Arc<Type>> {
+    pub(crate) fn get_type_from_inference(&mut self, inference: &InferenceInfo) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_from_inference"); 
         if !inference.candidates.is_empty() {
             Some(self.get_union_type_ex(
                 inference.candidates.clone(),
@@ -27,7 +27,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+    pub(crate) fn get_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> { ::tsox_core::fntrace::enter("get_common_supertype"); 
         if types.len() == 1 {
             return types[0].clone();
         }
@@ -60,7 +60,7 @@ impl Checker {
         self.get_nullable_type(&supertype, nullable_flags)
     }
 
-    pub(crate) fn get_single_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+    pub(crate) fn get_single_common_supertype(&mut self, types: &[Arc<Type>]) -> Arc<Type> { ::tsox_core::fntrace::enter("get_single_common_supertype"); 
         let candidate = self.find_leftmost_type(types);
 
         let all_are_strict_subtypes = types
@@ -84,7 +84,7 @@ impl Checker {
         candidate.unwrap_or_else(|| self.unknown_type())
     }
 
-    pub(crate) fn find_leftmost_type(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+    pub(crate) fn find_leftmost_type(&mut self, types: &[Arc<Type>]) -> Arc<Type> { ::tsox_core::fntrace::enter("find_leftmost_type"); 
         let mut candidate: Option<Arc<Type>> = None;
         for t in types {
             match &candidate {
@@ -99,7 +99,7 @@ impl Checker {
         candidate.unwrap_or_else(|| self.unknown_type())
     }
 
-    pub(crate) fn get_common_subtype(&mut self, types: &[Arc<Type>]) -> Arc<Type> {
+    pub(crate) fn get_common_subtype(&mut self, types: &[Arc<Type>]) -> Arc<Type> { ::tsox_core::fntrace::enter("get_common_subtype"); 
         let mut subtype: Option<Arc<Type>> = None;
         for t in types {
             match &subtype {
@@ -114,7 +114,7 @@ impl Checker {
         subtype.unwrap_or_else(|| self.unknown_type())
     }
 
-    pub(crate) fn get_combined_type_flags(&self, types: &[Arc<Type>]) -> TypeFlags {
+    pub(crate) fn get_combined_type_flags(&self, types: &[Arc<Type>]) -> TypeFlags { ::tsox_core::fntrace::enter("get_combined_type_flags"); 
         let mut flags = TypeFlags::None;
         for t in types {
             if t.flags.contains(TypeFlags::Union) {
@@ -128,7 +128,7 @@ impl Checker {
         flags
     }
 
-    pub(crate) fn literal_types_with_same_base_type(&self, types: &[Arc<Type>]) -> bool {
+    pub(crate) fn literal_types_with_same_base_type(&self, types: &[Arc<Type>]) -> bool { ::tsox_core::fntrace::enter("literal_types_with_same_base_type"); 
         let mut common_base_type: Option<Arc<Type>> = None;
         for t in types {
             if t.flags.contains(TypeFlags::Never) {
@@ -147,21 +147,21 @@ impl Checker {
         true
     }
 
-    pub(crate) fn is_const_type_variable(&self, _t: &Type, _depth: i32) -> bool {
+    pub(crate) fn is_const_type_variable(&self, _t: &Type, _depth: i32) -> bool { ::tsox_core::fntrace::enter("is_const_type_variable"); 
         false
     }
 
     pub(crate) fn get_default_constraint_of_conditional_type(
         &self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_default_constraint_of_conditional_type"); 
         if let Some(constraint) = self.get_constraint_of_type_parameter(t) {
             return Some(constraint);
         }
         None
     }
 
-    pub(crate) fn maybe_type_of_kind(&self, t: &Type, flags: TypeFlags) -> bool {
+    pub(crate) fn maybe_type_of_kind(&self, t: &Type, flags: TypeFlags) -> bool { ::tsox_core::fntrace::enter("maybe_type_of_kind"); 
         if t.flags.intersects(flags) {
             return true;
         }
@@ -176,7 +176,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn create_union_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn create_union_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_union_type"); 
         let filtered: Vec<Arc<Type>> = types
             .into_iter()
             .filter(|t| !t.flags.contains(TypeFlags::Never))
@@ -203,7 +203,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn create_intersection_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn create_intersection_type(&self, types: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_intersection_type"); 
         if types.is_empty() {
             return self.unknown_type();
         }
@@ -225,7 +225,7 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn get_this_argument_type(&self, _node: &tsox_frontend::ast::Node) -> Arc<Type> {
+    pub(crate) fn get_this_argument_type(&self, _node: &tsox_frontend::ast::Node) -> Arc<Type> { ::tsox_core::fntrace::enter("get_this_argument_type"); 
         self.undefined_type()
     }
 
@@ -235,11 +235,11 @@ impl Checker {
         _args: &[Arc<tsox_frontend::ast::Node>],
         _start: usize,
         _end: usize,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_spread_argument_type"); 
         self.unknown_type()
     }
 
-    pub(crate) fn is_object_or_array_literal_type(&self, t: &Type) -> bool {
+    pub(crate) fn is_object_or_array_literal_type(&self, t: &Type) -> bool { ::tsox_core::fntrace::enter("is_object_or_array_literal_type"); 
         t.flags.contains(TypeFlags::Object)
             && t.object_flags
                 .intersects(ObjectFlags::ObjectLiteral | ObjectFlags::ArrayLiteral)
@@ -248,7 +248,7 @@ impl Checker {
 
 pub(super) fn function_like_parameters(
     node: &Arc<tsox_frontend::ast::Node>,
-) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("function_like_parameters"); 
     use tsox_frontend::ast::NodeData;
     match &node.data {
         NodeData::FunctionExpression(d) => Some(Arc::clone(&d.parameters)),
@@ -262,7 +262,7 @@ pub(super) fn function_like_parameters(
     }
 }
 
-pub(crate) fn is_this_parameter_node(param: &Arc<tsox_frontend::ast::Node>) -> bool {
+pub(crate) fn is_this_parameter_node(param: &Arc<tsox_frontend::ast::Node>) -> bool { ::tsox_core::fntrace::enter("is_this_parameter_node"); 
     if let tsox_frontend::ast::NodeData::ParameterDeclaration(pd) = &param.data {
         return matches!(&pd.name.data, tsox_frontend::ast::NodeData::Identifier(id) if id.text == "this");
     }

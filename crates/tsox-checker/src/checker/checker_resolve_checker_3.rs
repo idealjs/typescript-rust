@@ -9,7 +9,7 @@ impl Checker {
         source: &SymbolTable,
         unidirectional: bool,
         merged_parent: Option<u64>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("merge_symbol_table"); 
         let entries: Vec<(String, Arc<Symbol>)> = source
             .iter()
             .map(|(k, v)| (k.clone(), Arc::clone(v)))
@@ -34,7 +34,7 @@ impl Checker {
         target: &Arc<Symbol>,
         source: &Arc<Symbol>,
         unidirectional: bool,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("merge_symbol"); 
         let excluded = get_excluded_symbol_flags(source.flags);
         if target.flags.intersects(excluded) == false
             || (source.flags | target.flags).intersects(SymbolFlags::Assignment)
@@ -163,7 +163,7 @@ result_mut.set_parent(&result);
         }
     }
 
-    pub(crate) fn report_merge_symbol_error(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+    pub(crate) fn report_merge_symbol_error(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) { ::tsox_core::fntrace::enter("report_merge_symbol_error"); 
         let is_either_enum =
             target.flags.contains(SymbolFlags::ENUM) || source.flags.contains(SymbolFlags::ENUM);
         let is_either_block_scoped = target.flags.intersects(SymbolFlags::BlockScopedVariable)
@@ -226,23 +226,23 @@ result_mut.set_parent(&result);
         }
     }
 
-    pub fn record_merged_symbol(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+    pub fn record_merged_symbol(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) { ::tsox_core::fntrace::enter("record_merged_symbol"); 
         self.merged_symbols.insert(source.id(), target.id());
         self.merged_symbol_targets
             .insert(target.id(), Arc::clone(target));
     }
 
-    pub fn merged_symbol_by_id(&self, id: u64) -> Option<Arc<Symbol>> {
+    pub fn merged_symbol_by_id(&self, id: u64) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("merged_symbol_by_id"); 
         self.merged_symbol_targets.get(&id).cloned()
     }
 
-    pub(crate) fn record_merged_symbol_if_absent(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) {
+    pub(crate) fn record_merged_symbol_if_absent(&mut self, target: &Arc<Symbol>, source: &Arc<Symbol>) { ::tsox_core::fntrace::enter("record_merged_symbol_if_absent"); 
         if !self.merged_symbols.contains_key(&source.id()) {
             self.record_merged_symbol(target, source);
         }
     }
 
-    pub fn clone_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn clone_symbol(&self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("clone_symbol"); 
         let mut cloned = Symbol::new(symbol.flags | SymbolFlags::Transient, &symbol.name);
         cloned.declarations = symbol.declarations.clone();
 cloned.set_parent(&symbol);
@@ -257,7 +257,7 @@ cloned.set_parent(&symbol);
         Some(result)
     }
 
-    pub fn resolve_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> {
+    pub fn resolve_symbol(&self, symbol: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("resolve_symbol"); 
         if let Some(result) = self.follow_alias(symbol) {
             result
         } else {
@@ -265,7 +265,7 @@ cloned.set_parent(&symbol);
         }
     }
 
-    pub fn get_symbol_at_location(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_at_location(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_at_location"); 
         if let Some(sym) = self.program.symbol_map().symbol_of(node) {
             return Some(Arc::clone(sym));
         }

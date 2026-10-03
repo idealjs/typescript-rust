@@ -3,7 +3,7 @@
 use crate::scanner::regexp_escapes::*;
 
 impl<'a> RegExpParser<'a> {
-    pub(crate) fn scan_atom_escape(&mut self) {
+    pub(crate) fn scan_atom_escape(&mut self) { ::tsox_core::fntrace::enter("scan_atom_escape"); 
         let ch = self.char();
         if ch == 'k' {
             self.inc_pos(1);
@@ -35,7 +35,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn scan_decimal_escape(&mut self) -> bool {
+    pub(super) fn scan_decimal_escape(&mut self) -> bool { ::tsox_core::fntrace::enter("scan_decimal_escape"); 
         let ch = self.char();
         if ('1'..='9').contains(&ch) {
             let start = self.pos;
@@ -51,7 +51,7 @@ impl<'a> RegExpParser<'a> {
         false
     }
 
-    pub(crate) fn scan_character_escape(&mut self, atom_escape: bool) -> String {
+    pub(crate) fn scan_character_escape(&mut self, atom_escape: bool) -> String { ::tsox_core::fntrace::enter("scan_character_escape"); 
         if self.pos >= self.body_end {
             self.error(
                 tsox_core::diagnostics::UNDETERMINED_CHARACTER_ESCAPE,
@@ -101,7 +101,7 @@ impl<'a> RegExpParser<'a> {
         annex_b: bool,
         any_unicode_mode: bool,
         atom_escape: bool,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("scan_escape_sequence"); 
         let start = self.pos;
         self.inc_pos(1);
         if self.pos >= self.body_end {
@@ -279,7 +279,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn report_octal_escape(&mut self, start: usize, ch: char, atom_escape: bool) {
+    pub(super) fn report_octal_escape(&mut self, start: usize, ch: char, atom_escape: bool) { ::tsox_core::fntrace::enter("report_octal_escape"); 
         if !atom_escape && ch != '0' {
             self.error(
                 tsox_core::diagnostics::OCTAL_ESCAPE_SEQUENCES_AND_BACKREFERENCES_ARE_NOT_ALLOWED_IN_A_CHARACTER_CLASS_IF_THIS_WAS_INTENDED_AS_AN_ESCAPE_SEQUENCE_USE_THE_SYNTAX_0_INSTEAD,
@@ -289,7 +289,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(crate) fn scan_group_name(&mut self, is_reference: bool) {
+    pub(crate) fn scan_group_name(&mut self, is_reference: bool) { ::tsox_core::fntrace::enter("scan_group_name"); 
         let token_start = self.pos;
         let name = self.scan_identifier_name();
         if self.pos == token_start {
@@ -318,7 +318,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn named_capturing_groups_contains(&self, name: &str) -> bool {
+    pub(super) fn named_capturing_groups_contains(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("named_capturing_groups_contains"); 
         self.named_capturing_groups.iter().any(|g| g.contains(name))
     }
 }

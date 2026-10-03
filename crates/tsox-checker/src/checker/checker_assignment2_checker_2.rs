@@ -3,7 +3,7 @@
 use crate::checker::checker_assignment2::*;
 
 impl Checker {
-    pub(crate) fn get_type_of_meta_property(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub(crate) fn get_type_of_meta_property(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_meta_property"); 
         use tsox_core::core::compiler_options::ModuleKind;
         let (keyword_token, name) = match &node.data {
             tsox_frontend::ast::NodeData::MetaProperty(d) => (d.keyword_token, &d.name),
@@ -77,7 +77,7 @@ impl Checker {
     pub(crate) fn program_implied_format(
         &self,
         file_name: &str,
-    ) -> tsox_core::core::compiler_options::ModuleKind {
+    ) -> tsox_core::core::compiler_options::ModuleKind { ::tsox_core::fntrace::enter("program_implied_format"); 
         use tsox_core::core::compiler_options::ModuleKind;
         match self.program.get_emit_module_format_of_file(file_name) {
             ModuleKind::None => {
@@ -90,7 +90,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn syntactic_truthy_semantics(&mut self, node: &Arc<Node>) -> (bool, bool) {
+    pub(crate) fn syntactic_truthy_semantics(&mut self, node: &Arc<Node>) -> (bool, bool) { ::tsox_core::fntrace::enter("syntactic_truthy_semantics"); 
         let mut n: Arc<Node> = Arc::clone(node);
         loop {
             match &n.data {
@@ -151,7 +151,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_truthiness_of_type(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_truthiness_of_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_truthiness_of_type"); 
         let (always, never) = self.syntactic_truthy_semantics(node);
         let message = if always && !never {
             tsox_core::diagnostics::messages_generated::THIS_KIND_OF_EXPRESSION_IS_ALWAYS_TRUTHY

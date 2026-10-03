@@ -19,7 +19,7 @@ pub fn get_list(
     r: TextRange,
     node: &Arc<Node>,
     source_file: &SourceFile,
-) -> Option<NodeList> {
+) -> Option<NodeList> { ::tsox_core::fntrace::enter("get_list"); 
     let list = list?;
     if r.contained_by(&get_visual_list_range(node, list.loc, source_file)) {
         return Some(NodeList {
@@ -30,7 +30,7 @@ pub fn get_list(
     None
 }
 
-pub fn get_new_line_or_default_from_context(ctx: &crate::format::FormatContext) -> String {
+pub fn get_new_line_or_default_from_context(ctx: &crate::format::FormatContext) -> String { ::tsox_core::fntrace::enter("get_new_line_or_default_from_context"); 
     if !ctx.new_line_character.is_empty() {
         return ctx.new_line_character.clone();
     }
@@ -38,7 +38,7 @@ pub fn get_new_line_or_default_from_context(ctx: &crate::format::FormatContext) 
     "\n".to_string()
 }
 
-pub fn get_open_token_for_list(node: &Arc<Node>, list: &NodeList) -> SyntaxKind {
+pub fn get_open_token_for_list(node: &Arc<Node>, list: &NodeList) -> SyntaxKind { ::tsox_core::fntrace::enter("get_open_token_for_list"); 
     match node.kind {
         SyntaxKind::Constructor
         | SyntaxKind::FunctionDeclaration
@@ -88,14 +88,14 @@ pub fn get_open_token_for_list(node: &Arc<Node>, list: &NodeList) -> SyntaxKind 
     SyntaxKind::Unknown
 }
 
-fn ptr_eq_opt(a: Option<&NodeList>, b: &NodeList) -> bool {
+fn ptr_eq_opt(a: Option<&NodeList>, b: &NodeList) -> bool { ::tsox_core::fntrace::enter("ptr_eq_opt"); 
     match a {
         Some(a) => std::ptr::eq(a, b),
         None => false,
     }
 }
 
-pub fn get_rule_insertion_index(index_bitmap: u32, mask_position: usize) -> usize {
+pub fn get_rule_insertion_index(index_bitmap: u32, mask_position: usize) -> usize { ::tsox_core::fntrace::enter("get_rule_insertion_index"); 
     let mask: u32 = (1 << MASK_BIT_SIZE) - 1;
     let mut index = 0usize;
     let mut index_bitmap = index_bitmap;

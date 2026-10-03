@@ -1,7 +1,7 @@
 use crate::scanner::impl_chunk::*;
 
 impl Scanner {
-    pub(crate) fn scan_bigint_suffix(&mut self) -> SyntaxKind {
+    pub(crate) fn scan_bigint_suffix(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_bigint_suffix"); 
         if self.pos < self.end && self.text.as_bytes()[self.pos] as char == 'n' {
             self.pos += 1;
             SyntaxKind::BigIntLiteral
@@ -10,7 +10,7 @@ impl Scanner {
         }
     }
 
-    pub(crate) fn scan_number(&mut self) -> SyntaxKind {
+    pub(crate) fn scan_number(&mut self) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_number"); 
         let start = self.pos;
         if self.text.as_bytes()[self.pos] as char == '0' && self.pos + 1 < self.end {
             let next = self.text.as_bytes()[self.pos + 1] as char;
@@ -181,7 +181,7 @@ impl Scanner {
         self.token
     }
 
-    pub(crate) fn scan_number_fragment_with_sep(&mut self, is_hex: bool) {
+    pub(crate) fn scan_number_fragment_with_sep(&mut self, is_hex: bool) { ::tsox_core::fntrace::enter("scan_number_fragment_with_sep"); 
         let mut allow_separator = false;
         let mut is_prev_separator = false;
         loop {
@@ -228,7 +228,7 @@ impl Scanner {
         }
     }
 
-    pub(crate) fn scan_binary_or_octal_digits(&mut self, base: u8) {
+    pub(crate) fn scan_binary_or_octal_digits(&mut self, base: u8) { ::tsox_core::fntrace::enter("scan_binary_or_octal_digits"); 
         let mut allow_separator = false;
         let mut is_prev_separator = false;
         loop {

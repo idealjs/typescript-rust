@@ -28,7 +28,7 @@ pub struct ConfigFileEntry {
 }
 
 impl ConfigFileEntry {
-    pub fn new(has_relative_pattern_capability: bool, file_name: String) -> Self {
+    pub fn new(has_relative_pattern_capability: bool, file_name: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         let _ = has_relative_pattern_capability;
         ConfigFileEntry {
             file_name,
@@ -41,7 +41,7 @@ impl ConfigFileEntry {
         }
     }
 
-    pub fn new_extended(file_name: String, extending_config_path: Path) -> Self {
+    pub fn new_extended(file_name: String, extending_config_path: Path) -> Self { ::tsox_core::fntrace::enter("new_extended"); 
         let mut entry = ConfigFileEntry {
             file_name,
             pending_reload: PendingReload::Full,
@@ -63,7 +63,7 @@ pub struct ConfigFileNames {
 }
 
 impl ConfigFileNames {
-    pub fn new(nearest_config_file_name: String) -> Self {
+    pub fn new(nearest_config_file_name: String) -> Self { ::tsox_core::fntrace::enter("new"); 
         ConfigFileNames {
             nearest_config_file_name,
             ancestors: HashMap::new(),
@@ -79,22 +79,22 @@ pub struct ConfigFileRegistry {
 }
 
 impl ConfigFileRegistry {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         ConfigFileRegistry::default()
     }
 
-    pub fn get_config(&self, path: &Path) -> Option<&ParsedCommandLine> {
+    pub fn get_config(&self, path: &Path) -> Option<&ParsedCommandLine> { ::tsox_core::fntrace::enter("get_config"); 
         self.configs.get(path).and_then(|e| e.command_line.as_ref())
     }
 
-    pub fn get_config_file_name(&self, path: &Path) -> &str {
+    pub fn get_config_file_name(&self, path: &Path) -> &str { ::tsox_core::fntrace::enter("get_config_file_name"); 
         self.config_file_names
             .get(path)
             .map(|e| e.nearest_config_file_name.as_str())
             .unwrap_or("")
     }
 
-    pub fn get_ancestor_config_file_name(&self, path: &Path, higher_than_config: &str) -> &str {
+    pub fn get_ancestor_config_file_name(&self, path: &Path, higher_than_config: &str) -> &str { ::tsox_core::fntrace::enter("get_ancestor_config_file_name"); 
         self.config_file_names
             .get(path)
             .and_then(|e| e.ancestors.get(higher_than_config))
@@ -102,7 +102,7 @@ impl ConfigFileRegistry {
             .unwrap_or("")
     }
 
-    pub fn clone_shallow(&self) -> ConfigFileRegistry {
+    pub fn clone_shallow(&self) -> ConfigFileRegistry { ::tsox_core::fntrace::enter("clone_shallow"); 
         ConfigFileRegistry {
             configs: self.configs.clone(),
             config_file_names: self.config_file_names.clone(),

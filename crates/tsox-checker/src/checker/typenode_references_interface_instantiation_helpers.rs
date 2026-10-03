@@ -8,7 +8,7 @@ impl Checker {
         interface_decls: &[Arc<Node>],
         tp_symbols: &[Arc<Symbol>],
         arg_types: &[Arc<Type>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("push_interface_type_argument_mapping"); 
         let mut mapping = HashMap::new();
         for (i, tp_sym) in tp_symbols.iter().enumerate() {
             if let Some(arg) = arg_types.get(i) {
@@ -56,7 +56,7 @@ impl Checker {
     pub(crate) fn instantiate_declaration_type_parameters(
         &mut self,
         tps: Vec<Arc<Type>>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("instantiate_declaration_type_parameters"); 
         if self.type_argument_stack.is_empty() {
             return tps;
         }
@@ -126,7 +126,7 @@ impl Checker {
         &mut self,
         interface_decls: &[Arc<Node>],
         heritage_degraded: &mut bool,
-    ) -> Vec<(Arc<Node>, Arc<Type>)> {
+    ) -> Vec<(Arc<Node>, Arc<Type>)> { ::tsox_core::fntrace::enter("collect_interface_base_types"); 
         let mut base_types: Vec<(Arc<Node>, Arc<Type>)> = Vec::new();
         for decl in interface_decls {
             if let NodeData::InterfaceDeclaration(d) = &decl.data {

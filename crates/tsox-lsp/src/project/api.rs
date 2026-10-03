@@ -9,7 +9,7 @@ impl Session {
         &self,
         _api_file_changes: &FileChangeSummary,
         _api_request: &APISnapshotRequest,
-    ) -> Result<Box<Snapshot>, String> {
+    ) -> Result<Box<Snapshot>, String> { ::tsox_core::fntrace::enter("api_update"); 
         todo!("Session::api_update requires full session/snapshot integration")
     }
 }

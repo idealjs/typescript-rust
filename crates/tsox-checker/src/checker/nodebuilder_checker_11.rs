@@ -4,7 +4,7 @@ use crate::checker::nodebuilder::*;
 use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
 impl Checker {
-    pub(crate) fn signature_to_parameter_nodes(&mut self, sig: &Signature) -> Vec<Arc<Node>> {
+    pub(crate) fn signature_to_parameter_nodes(&mut self, sig: &Signature) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("signature_to_parameter_nodes"); 
         sig.parameters
             .iter()
             .map(|param| {
@@ -17,7 +17,7 @@ impl Checker {
             .collect()
     }
 
-    pub(crate) fn call_signature_to_node(&mut self, sig: &Signature) -> Arc<Node> {
+    pub(crate) fn call_signature_to_node(&mut self, sig: &Signature) -> Arc<Node> { ::tsox_core::fntrace::enter("call_signature_to_node"); 
         let params = self.signature_to_parameter_nodes(sig);
         let ret_type = sig
             .resolved_return_type
@@ -33,7 +33,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         mask: SymbolFlags,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("symbol_to_type_node"); 
         let _ = mask;
 
         let name = self.identifier(&symbol.name);
@@ -55,11 +55,11 @@ impl Checker {
         self.type_reference_node(name, type_args)
     }
 
-    pub(crate) fn keyword_node(&self, kind: SyntaxKind) -> Arc<Node> {
+    pub(crate) fn keyword_node(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("keyword_node"); 
         Arc::new(Node::new(kind, NodeData::Token))
     }
 
-    pub(crate) fn identifier(&self, text: &str) -> Arc<Node> {
+    pub(crate) fn identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("identifier"); 
         Arc::new(Node::new(
             SyntaxKind::Identifier,
             NodeData::Identifier(IdentifierData {
@@ -68,7 +68,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn string_literal_node(&self, text: &str) -> Arc<Node> {
+    pub(crate) fn string_literal_node(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("string_literal_node"); 
         Arc::new(Node::new(
             SyntaxKind::StringLiteral,
             NodeData::StringLiteral(StringLiteralData {
@@ -78,7 +78,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn numeric_literal_node(&self, text: &str) -> Arc<Node> {
+    pub(crate) fn numeric_literal_node(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("numeric_literal_node"); 
         Arc::new(Node::new(
             SyntaxKind::NumericLiteral,
             NodeData::NumericLiteral(NumericLiteralData {
@@ -88,7 +88,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn bigint_literal_node(&self, text: &str) -> Arc<Node> {
+    pub(crate) fn bigint_literal_node(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("bigint_literal_node"); 
         Arc::new(Node::new(
             SyntaxKind::BigIntLiteral,
             NodeData::BigIntLiteral(BigIntLiteralData {
@@ -98,7 +98,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn literal_type_node(&self, literal: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn literal_type_node(&self, literal: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("literal_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::LiteralType,
             NodeData::LiteralTypeNode(LiteralTypeNodeData { literal }),
@@ -109,7 +109,7 @@ impl Checker {
         &self,
         type_name: Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_reference_node"); 
         Arc::new(Node::new(
             SyntaxKind::TypeReference,
             NodeData::TypeReferenceNode(TypeReferenceNodeData {
@@ -119,14 +119,14 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn array_type_node(&self, element_type: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn array_type_node(&self, element_type: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("array_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::ArrayType,
             NodeData::ArrayTypeNode(ArrayTypeNodeData { element_type }),
         ))
     }
 
-    pub(crate) fn tuple_type_node(&self, elements: Vec<Arc<Node>>) -> Arc<Node> {
+    pub(crate) fn tuple_type_node(&self, elements: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("tuple_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::TupleType,
             NodeData::TupleTypeNode(TupleTypeNodeData {
@@ -135,7 +135,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn union_type_node(&self, types: Vec<Arc<Node>>) -> Arc<Node> {
+    pub(crate) fn union_type_node(&self, types: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("union_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::UnionType,
             NodeData::UnionTypeNode(UnionTypeNodeData {
@@ -144,7 +144,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn intersection_type_node(&self, types: Vec<Arc<Node>>) -> Arc<Node> {
+    pub(crate) fn intersection_type_node(&self, types: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("intersection_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::IntersectionType,
             NodeData::IntersectionTypeNode(IntersectionTypeNodeData {
@@ -153,14 +153,14 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn parenthesized_type_node(&self, type_node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn parenthesized_type_node(&self, type_node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("parenthesized_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::ParenthesizedType,
             NodeData::ParenthesizedTypeNode(ParenthesizedTypeNodeData { type_node }),
         ))
     }
 
-    pub(crate) fn function_type_node(&self, params: Vec<Arc<Node>>, ret: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn function_type_node(&self, params: Vec<Arc<Node>>, ret: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("function_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::FunctionType,
             NodeData::FunctionTypeNode(FunctionTypeNodeData {
@@ -171,7 +171,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn type_literal_node(&self, members: Vec<Arc<Node>>) -> Arc<Node> {
+    pub(crate) fn type_literal_node(&self, members: Vec<Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_literal_node"); 
         Arc::new(Node::new(
             SyntaxKind::TypeLiteral,
             NodeData::TypeLiteralNode(TypeLiteralNodeData {
@@ -185,7 +185,7 @@ impl Checker {
         name: Arc<Node>,
         optional: bool,
         type_node: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("property_signature_node"); 
         let postfix_token = if optional {
             Some(self.keyword_node(SyntaxKind::QuestionToken))
         } else {
@@ -213,7 +213,7 @@ impl Checker {
         name: Arc<Node>,
         optional: bool,
         type_node: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parameter_node"); 
         let question_token = if optional {
             Some(self.keyword_node(SyntaxKind::QuestionToken))
         } else {
@@ -232,7 +232,7 @@ impl Checker {
         ))
     }
 
-    pub(crate) fn rest_type_node(&self, type_node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn rest_type_node(&self, type_node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("rest_type_node"); 
         Arc::new(Node::new(
             SyntaxKind::RestType,
             NodeData::RestTypeNode(RestTypeNodeData { type_node }),
@@ -243,7 +243,7 @@ impl Checker {
         &self,
         operator: SyntaxKind,
         type_node: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_operator_node"); 
         Arc::new(Node::new(
             SyntaxKind::TypeOperator,
             NodeData::TypeOperatorNode(TypeOperatorNodeData {
@@ -253,7 +253,7 @@ impl Checker {
         ))
     }
 
-    pub fn symbol_to_string(&mut self, symbol: &Arc<Symbol>) -> String {
+    pub fn symbol_to_string(&mut self, symbol: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("symbol_to_string"); 
         self.symbol_to_string_ex(
             symbol,
             SymbolFormatFlags::AllowAnyNodeKind,
@@ -266,7 +266,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         flags: SymbolFormatFlags,
         _meaning: SymbolFlags,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("symbol_to_string_ex"); 
         let name = symbol.name.clone();
 
         if flags.contains(SymbolFormatFlags::WriteTypeParametersOrArguments) {
@@ -279,7 +279,7 @@ impl Checker {
         name
     }
 
-    pub(crate) fn collect_type_parameter_names(&self, symbol: &Arc<Symbol>) -> Option<Vec<String>> {
+    pub(crate) fn collect_type_parameter_names(&self, symbol: &Arc<Symbol>) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("collect_type_parameter_names"); 
         for decl in &symbol.declarations {
             let tps = match &decl.data {
                 NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
@@ -306,7 +306,7 @@ impl Checker {
     pub(crate) fn collect_type_parameter_displays(
         &self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Vec<String>> {
+    ) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("collect_type_parameter_displays"); 
         for decl in &symbol.declarations {
             let tps = match &decl.data {
                 NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),

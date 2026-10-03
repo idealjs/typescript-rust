@@ -46,12 +46,12 @@ impl OperatorPrecedenceFlags {
     pub const NEW_WITHOUT_ARGUMENTS: OperatorPrecedenceFlags = OperatorPrecedenceFlags(1 << 0);
     pub const OPTIONAL_CHAIN: OperatorPrecedenceFlags = OperatorPrecedenceFlags(1 << 1);
 
-    pub fn contains(self, other: OperatorPrecedenceFlags) -> bool {
+    pub fn contains(self, other: OperatorPrecedenceFlags) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 }
 
-pub fn get_operator(expression: &Arc<Node>) -> SyntaxKind {
+pub fn get_operator(expression: &Arc<Node>) -> SyntaxKind { ::tsox_core::fntrace::enter("get_operator"); 
     match &expression.data {
         crate::ast::node_data_generated::NodeData::BinaryExpression(d) => d.operator_token.kind,
         crate::ast::node_data_generated::NodeData::PrefixUnaryExpression(d) => d.operator,
@@ -60,7 +60,7 @@ pub fn get_operator(expression: &Arc<Node>) -> SyntaxKind {
     }
 }
 
-pub fn get_expression_precedence(expression: &Arc<Node>) -> OperatorPrecedence {
+pub fn get_expression_precedence(expression: &Arc<Node>) -> OperatorPrecedence { ::tsox_core::fntrace::enter("get_expression_precedence"); 
     let operator = get_operator(expression);
     let mut flags = OperatorPrecedenceFlags::NONE;
     if expression.kind == SyntaxKind::NewExpression
@@ -77,7 +77,7 @@ pub fn get_operator_precedence(
     node_kind: SyntaxKind,
     operator_kind: SyntaxKind,
     flags: OperatorPrecedenceFlags,
-) -> OperatorPrecedence {
+) -> OperatorPrecedence { ::tsox_core::fntrace::enter("get_operator_precedence"); 
     match node_kind {
         SyntaxKind::SpreadElement => OperatorPrecedence::Spread,
         SyntaxKind::YieldExpression => OperatorPrecedence::Yield,
@@ -164,7 +164,7 @@ pub fn get_operator_precedence(
     }
 }
 
-pub fn get_binary_operator_precedence(operator_kind: SyntaxKind) -> OperatorPrecedence {
+pub fn get_binary_operator_precedence(operator_kind: SyntaxKind) -> OperatorPrecedence { ::tsox_core::fntrace::enter("get_binary_operator_precedence"); 
     match operator_kind {
         SyntaxKind::QuestionQuestionToken => OPERATOR_PRECEDENCE_COALESCE,
         SyntaxKind::BarBarToken => OperatorPrecedence::LogicalOr,
@@ -199,7 +199,7 @@ pub fn get_binary_operator_precedence(operator_kind: SyntaxKind) -> OperatorPrec
 pub fn get_leftmost_expression(
     node: &Arc<Node>,
     stop_at_call_expressions: bool,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("get_leftmost_expression"); 
     let mut node = node.clone();
     loop {
         let next = match &node.data {
@@ -249,7 +249,7 @@ pub enum TypePrecedence {
 pub const TYPE_PRECEDENCE_LOWEST: TypePrecedence = TypePrecedence::Conditional;
 pub const TYPE_PRECEDENCE_HIGHEST: TypePrecedence = TypePrecedence::NonArray;
 
-pub fn get_type_node_precedence(n: &Arc<Node>) -> TypePrecedence {
+pub fn get_type_node_precedence(n: &Arc<Node>) -> TypePrecedence { ::tsox_core::fntrace::enter("get_type_node_precedence"); 
     match n.kind {
         SyntaxKind::ConditionalType => TypePrecedence::Conditional,
         SyntaxKind::JSDocOptionalType | SyntaxKind::JSDocVariadicType => TypePrecedence::Jsdoc,
@@ -342,36 +342,36 @@ impl SubtreeFacts {
     pub const COMPUTED: SubtreeFacts = SubtreeFacts(1 << 25);
     pub const NONE: SubtreeFacts = SubtreeFacts(0);
 
-    pub fn contains(self, other: SubtreeFacts) -> bool {
+    pub fn contains(self, other: SubtreeFacts) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 
-    pub fn union(self, other: SubtreeFacts) -> SubtreeFacts {
+    pub fn union(self, other: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("union"); 
         SubtreeFacts(self.0 | other.0)
     }
 
-    pub fn without(self, other: SubtreeFacts) -> SubtreeFacts {
+    pub fn without(self, other: SubtreeFacts) -> SubtreeFacts { ::tsox_core::fntrace::enter("without"); 
         SubtreeFacts(self.0 & !other.0)
     }
 }
 
 pub fn propagate_eraseable_syntax_list_subtree_facts(
     children: Option<&NodeList>,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_eraseable_syntax_list_subtree_facts"); 
     match children {
         Some(_) => SubtreeFacts::CONTAINS_TYPE_SCRIPT,
         None => SubtreeFacts::NONE,
     }
 }
 
-pub fn propagate_eraseable_syntax_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts {
+pub fn propagate_eraseable_syntax_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_eraseable_syntax_subtree_facts"); 
     match child {
         Some(_) => SubtreeFacts::CONTAINS_TYPE_SCRIPT,
         None => SubtreeFacts::NONE,
     }
 }
 
-pub fn propagate_object_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts {
+pub fn propagate_object_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_object_binding_element_subtree_facts"); 
     let mut facts = propagate_subtree_facts(Some(child));
     if facts.contains(SubtreeFacts::CONTAINS_REST_OR_SPREAD) {
         facts = facts.without(SubtreeFacts::CONTAINS_REST_OR_SPREAD);
@@ -382,11 +382,11 @@ pub fn propagate_object_binding_element_subtree_facts(child: &Arc<Node>) -> Subt
     facts
 }
 
-pub fn propagate_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts {
+pub fn propagate_binding_element_subtree_facts(child: &Arc<Node>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_binding_element_subtree_facts"); 
     propagate_subtree_facts(Some(child)).without(SubtreeFacts::CONTAINS_REST_OR_SPREAD)
 }
 
-pub fn propagate_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts {
+pub fn propagate_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_subtree_facts"); 
     match child {
         None => SubtreeFacts::NONE,
         Some(child) => child.propagate_subtree_facts(),
@@ -396,7 +396,7 @@ pub fn propagate_subtree_facts(child: Option<&Arc<Node>>) -> SubtreeFacts {
 pub fn propagate_node_list_subtree_facts(
     children: Option<&NodeList>,
     propagate: impl Fn(&Arc<Node>) -> SubtreeFacts,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_node_list_subtree_facts"); 
     let Some(children) = children else {
         return SubtreeFacts::NONE;
     };
@@ -409,7 +409,7 @@ pub fn propagate_node_list_subtree_facts(
 
 pub fn propagate_modifier_list_subtree_facts(
     children: Option<&crate::ast::node_node_list::ModifierList>,
-) -> SubtreeFacts {
+) -> SubtreeFacts { ::tsox_core::fntrace::enter("propagate_modifier_list_subtree_facts"); 
     let Some(children) = children else {
         return SubtreeFacts::NONE;
     };
@@ -418,7 +418,7 @@ pub fn propagate_modifier_list_subtree_facts(
     })
 }
 
-pub fn symbol_name(symbol: &crate::ast::symbol::Symbol) -> String {
+pub fn symbol_name(symbol: &crate::ast::symbol::Symbol) -> String { ::tsox_core::fntrace::enter("symbol_name"); 
     if let Some(value_declaration) = &symbol.value_declaration {
         if crate::ast::mig::m3g_2::is_private_identifier_class_element_declaration(
             value_declaration,
@@ -432,11 +432,11 @@ pub fn symbol_name(symbol: &crate::ast::symbol::Symbol) -> String {
     symbol.name.clone()
 }
 
-pub fn escape_all_internal_symbol_names(name: &str) -> String {
+pub fn escape_all_internal_symbol_names(name: &str) -> String { ::tsox_core::fntrace::enter("escape_all_internal_symbol_names"); 
     name.replace(INTERNAL_SYMBOL_NAME_PREFIX, "__")
 }
 
-pub fn escape_symbol_name(name: &str) -> String {
+pub fn escape_symbol_name(name: &str) -> String { ::tsox_core::fntrace::enter("escape_symbol_name"); 
     if let Some(rest) = name.strip_prefix(INTERNAL_SYMBOL_NAME_PREFIX) {
         return format!("__{}", rest);
     }

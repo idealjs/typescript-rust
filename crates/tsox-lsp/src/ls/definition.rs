@@ -19,7 +19,7 @@ impl LanguageService {
         &self,
         document_uri: &DocumentUri,
         position: Position,
-    ) -> Vec<LocationLink> {
+    ) -> Vec<LocationLink> { ::tsox_core::fntrace::enter("provide_definition"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
 
@@ -59,7 +59,7 @@ impl LanguageService {
         &self,
         document_uri: &DocumentUri,
         position: Position,
-    ) -> Vec<LocationLink> {
+    ) -> Vec<LocationLink> { ::tsox_core::fntrace::enter("provide_type_definition"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
         let offset = lsp_position_to_offset(line_map, &position);
@@ -93,18 +93,18 @@ impl LanguageService {
     }
 }
 
-pub fn get_declarations_from_location(checker: &Checker, node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn get_declarations_from_location(checker: &Checker, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_declarations_from_location"); 
     if let Some(symbol) = checker.get_symbol_at_location(node) {
         return symbol.declarations.clone();
     }
     Vec::new()
 }
 
-pub fn try_get_signature_declaration(_checker: &Checker, _node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn try_get_signature_declaration(_checker: &Checker, _node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_signature_declaration"); 
     None
 }
 
-pub fn get_declarations_from_type(ty: &tsox_checker::checker::Type) -> Vec<Arc<Node>> {
+pub fn get_declarations_from_type(ty: &tsox_checker::checker::Type) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_declarations_from_type"); 
     if let Some(symbol) = ty.symbol.as_ref() {
         return symbol.declarations.clone();
     }
@@ -112,11 +112,11 @@ pub fn get_declarations_from_type(ty: &tsox_checker::checker::Type) -> Vec<Arc<N
 }
 
 #[doc(hidden)]
-pub fn find_deepest_node_for_probe(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+pub fn find_deepest_node_for_probe(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node_for_probe"); 
     find_deepest_node(node, offset)
 }
 
-fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -137,26 +137,26 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-fn get_source_file_of_node(node: &Arc<Node>, fallback: &Arc<SourceFile>) -> Arc<SourceFile> {
+fn get_source_file_of_node(node: &Arc<Node>, fallback: &Arc<SourceFile>) -> Arc<SourceFile> { ::tsox_core::fntrace::enter("get_source_file_of_node"); 
     let _ = node;
     Arc::clone(fallback)
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
 
-fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range {
+fn node_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>) -> Range { ::tsox_core::fntrace::enter("node_range_to_lsp_range"); 
     Range {
         start: offset_to_position(line_map, node.pos()),
         end: offset_to_position(line_map, node.end()),
     }
 }
 
-fn name_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>, text: &str) -> Range {
+fn name_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>, text: &str) -> Range { ::tsox_core::fntrace::enter("name_range_to_lsp_range"); 
     let node_start = tsox_frontend::scanner::skip_trivia(text, node.pos());
 
     let name_node: Option<&Arc<Node>> = match &node.data {
@@ -195,7 +195,7 @@ fn name_range_to_lsp_range(line_map: &LineMap, node: &Arc<Node>, text: &str) -> 
     }
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -204,7 +204,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

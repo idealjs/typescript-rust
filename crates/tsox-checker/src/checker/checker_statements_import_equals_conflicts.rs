@@ -3,7 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub fn check_import_equals_conflicts(&mut self, node: &Arc<Node>) {
+    pub fn check_import_equals_conflicts(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_import_equals_conflicts"); 
         self.check_external_import_in_namespace(node);
         if matches!(
             node.kind,
@@ -228,7 +228,7 @@ impl Checker {
     /// 模块名且不在文件顶层、也不在 ambient 模块块内时，import 形态报
     /// TS1147；嵌套（namespace 内）的 import= 声明不在 program 级扫描
     /// （collectModuleReferences 仅遍历顶层），此处补报模块不可解析 TS2307
-    fn check_external_import_in_namespace(&mut self, node: &Arc<Node>) {
+    fn check_external_import_in_namespace(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_external_import_in_namespace"); 
         if !matches!(
             node.kind,
             SyntaxKind::ImportDeclaration | SyntaxKind::ImportEqualsDeclaration | SyntaxKind::ExportDeclaration

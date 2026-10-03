@@ -1,6 +1,6 @@
 use crate::ast::*;
 
-fn is_function_like_declaration_kind(kind: SyntaxKind) -> bool {
+fn is_function_like_declaration_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_function_like_declaration_kind"); 
     matches!(
         kind,
         SyntaxKind::FunctionDeclaration
@@ -13,11 +13,11 @@ fn is_function_like_declaration_kind(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn is_function_like_declaration(node: &Node) -> bool {
+pub fn is_function_like_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_like_declaration"); 
     is_function_like_declaration_kind(node.kind)
 }
 
-pub fn is_function_like_kind(kind: SyntaxKind) -> bool {
+pub fn is_function_like_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_function_like_kind"); 
     matches!(
         kind,
         SyntaxKind::MethodSignature
@@ -30,26 +30,26 @@ pub fn is_function_like_kind(kind: SyntaxKind) -> bool {
     ) || is_function_like_declaration_kind(kind)
 }
 
-pub fn is_function_like(node: &Node) -> bool {
+pub fn is_function_like(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_like"); 
     is_function_like_kind(node.kind)
 }
 
-pub fn is_function_like_or_class_static_block_declaration(node: &Node) -> bool {
+pub fn is_function_like_or_class_static_block_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_like_or_class_static_block_declaration"); 
     is_function_like(node) || is_class_static_block_declaration(node)
 }
 
-pub fn is_function_or_source_file(node: &Node) -> bool {
+pub fn is_function_or_source_file(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_or_source_file"); 
     is_function_like(node) || is_source_file(node)
 }
 
-pub fn is_class_like(node: &Node) -> bool {
+pub fn is_class_like(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_like"); 
     matches!(
         node.kind,
         SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
     )
 }
 
-pub fn is_class_or_interface_like(node: &Node) -> bool {
+pub fn is_class_or_interface_like(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_or_interface_like"); 
     matches!(
         node.kind,
         SyntaxKind::ClassDeclaration
@@ -58,7 +58,7 @@ pub fn is_class_or_interface_like(node: &Node) -> bool {
     )
 }
 
-pub fn is_class_element(node: &Node) -> bool {
+pub fn is_class_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_element"); 
     matches!(
         node.kind,
         SyntaxKind::Constructor
@@ -72,14 +72,14 @@ pub fn is_class_element(node: &Node) -> bool {
     )
 }
 
-pub fn is_method_or_accessor(node: &Node) -> bool {
+pub fn is_method_or_accessor(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_method_or_accessor"); 
     matches!(
         node.kind,
         SyntaxKind::MethodDeclaration | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor
     )
 }
 
-pub fn is_type_element(node: &Node) -> bool {
+pub fn is_type_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_element"); 
     matches!(
         node.kind,
         SyntaxKind::ConstructSignature
@@ -93,7 +93,7 @@ pub fn is_type_element(node: &Node) -> bool {
     )
 }
 
-pub fn is_object_literal_element(node: &Node) -> bool {
+pub fn is_object_literal_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_object_literal_element"); 
     matches!(
         node.kind,
         SyntaxKind::PropertyAssignment
@@ -105,18 +105,18 @@ pub fn is_object_literal_element(node: &Node) -> bool {
     )
 }
 
-pub fn is_accessor(node: &Node) -> bool {
+pub fn is_accessor(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_accessor"); 
     matches!(node.kind, SyntaxKind::GetAccessor | SyntaxKind::SetAccessor)
 }
 
-pub fn is_module_or_enum_declaration(node: &Node) -> bool {
+pub fn is_module_or_enum_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_or_enum_declaration"); 
     matches!(
         node.kind,
         SyntaxKind::ModuleDeclaration | SyntaxKind::EnumDeclaration
     )
 }
 
-pub fn is_function_expression_or_arrow_function(node: &Node) -> bool {
+pub fn is_function_expression_or_arrow_function(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_expression_or_arrow_function"); 
     matches!(
         node.kind,
         SyntaxKind::FunctionExpression | SyntaxKind::ArrowFunction

@@ -39,7 +39,7 @@ pub enum KeywordCompletionFilters {
     TypeKeyword,
 }
 
-pub fn keyword_filters_from_syntax_kind(keyword_completion: ast::SyntaxKind) -> KeywordCompletionFilters {
+pub fn keyword_filters_from_syntax_kind(keyword_completion: ast::SyntaxKind) -> KeywordCompletionFilters { ::tsox_core::fntrace::enter("keyword_filters_from_syntax_kind"); 
     match keyword_completion {
         ast::SyntaxKind::TypeKeyword => KeywordCompletionFilters::TypeKeyword,
         _ => panic!(
@@ -58,14 +58,14 @@ pub fn keyword_completion_data(
     keyword_filters: KeywordCompletionFilters,
     filter_out_ts_only_keywords: bool,
     is_new_identifier_location: bool,
-) -> CompletionDataKeyword {
+) -> CompletionDataKeyword { ::tsox_core::fntrace::enter("keyword_completion_data"); 
     CompletionDataKeyword {
         keyword_completions: get_keyword_completions(keyword_filters, filter_out_ts_only_keywords),
         is_new_identifier_location,
     }
 }
 
-pub fn get_typescript_keyword_completions(keyword_filter: KeywordCompletionFilters) -> Vec<lsproto::CompletionItem> {
+pub fn get_typescript_keyword_completions(keyword_filter: KeywordCompletionFilters) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_typescript_keyword_completions"); 
     all_keyword_completions()
         .into_iter()
         .filter(|entry| {
@@ -108,12 +108,12 @@ pub fn get_typescript_keyword_completions(keyword_filter: KeywordCompletionFilte
 
 /// Go ast.Kind(i)：SyntaxKind 为 #[repr(i16)] 连续枚举，
 /// 仅用于关键字区间(BreakKeyword..=DeferKeyword 均为 token kind)
-fn syntax_kind_from_i16(kind: i16) -> ast::SyntaxKind {
+fn syntax_kind_from_i16(kind: i16) -> ast::SyntaxKind { ::tsox_core::fntrace::enter("syntax_kind_from_i16"); 
     debug_assert!(kind >= ast::SyntaxKind::BreakKeyword as i16 && kind <= ast::SyntaxKind::DeferKeyword as i16);
     unsafe { std::mem::transmute::<i16, ast::SyntaxKind>(kind) }
 }
 
-fn all_keyword_completions() -> Vec<lsproto::CompletionItem> {
+fn all_keyword_completions() -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("all_keyword_completions"); 
     let mut result = Vec::new();
     let mut kind = ast::SyntaxKind::BreakKeyword as i16;
     while kind <= ast::SyntaxKind::DeferKeyword as i16 {
@@ -132,7 +132,7 @@ fn all_keyword_completions() -> Vec<lsproto::CompletionItem> {
 fn get_keyword_completions(
     keyword_filter: KeywordCompletionFilters,
     filter_out_ts_only_keywords: bool,
-) -> Vec<lsproto::CompletionItem> {
+) -> Vec<lsproto::CompletionItem> { ::tsox_core::fntrace::enter("get_keyword_completions"); 
     if !filter_out_ts_only_keywords {
         return get_typescript_keyword_completions(keyword_filter);
     }
@@ -146,7 +146,7 @@ fn get_keyword_completions(
         .collect()
 }
 
-pub fn get_scope_node(initial_token: Option<&Arc<Node>>, position: usize, file: &Arc<SourceFile>) -> Option<Arc<Node>> {
+pub fn get_scope_node(initial_token: Option<&Arc<Node>>, position: usize, file: &Arc<SourceFile>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_scope_node"); 
     let mut scope = initial_token.cloned();
     while let Some(node) = scope {
         if crate::ls::utilities::position_belongs_to_node(&node, position, file) {
@@ -161,7 +161,7 @@ pub fn is_probably_global_type(
     t: &Arc<tsox_checker::checker::Type>,
     file: &Arc<SourceFile>,
     type_checker: &mut Checker,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_probably_global_type"); 
     let file_node = &file.node;
     for name in ["self", "global", "globalThis"] {
         if let Some(symbol) = type_checker.get_global_symbol(name, ast::SymbolFlags::VALUE, None) {
@@ -174,7 +174,7 @@ pub fn is_probably_global_type(
     false
 }
 
-pub fn try_get_type_literal_node(node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+pub fn try_get_type_literal_node(node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_type_literal_node"); 
     let node = node?;
     let parent = node.parent()?;
     use ast::SyntaxKind as K;
@@ -198,7 +198,7 @@ pub fn try_get_type_literal_node(node: Option<&Arc<Node>>) -> Option<Arc<Node>> 
     }
 }
 
-pub fn get_switched_type(case_clause: &Arc<Node>, type_checker: &mut Checker) -> Option<Arc<tsox_checker::checker::Type>> {
+pub fn get_switched_type(case_clause: &Arc<Node>, type_checker: &mut Checker) -> Option<Arc<tsox_checker::checker::Type>> { ::tsox_core::fntrace::enter("get_switched_type"); 
     let expr = case_clause
         .parent()?
         .parent()?
@@ -211,7 +211,7 @@ pub fn get_recommended_completion(
     previous_token: &Arc<Node>,
     contextual_type: &Arc<tsox_checker::checker::Type>,
     type_checker: &mut Checker,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_recommended_completion"); 
     let types: Vec<Arc<tsox_checker::checker::Type>> = if contextual_type.is_union() {
         contextual_type.types().map(|t| t.to_vec()).unwrap_or_default()
     } else {
@@ -234,7 +234,7 @@ pub fn get_first_symbol_in_chain(
     symbol: &Arc<Symbol>,
     enclosing_declaration: &Arc<Node>,
     type_checker: &mut Checker,
-) -> Option<Arc<Symbol>> {
+) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_first_symbol_in_chain"); 
     let chain = type_checker.get_accessible_symbol_chain_public(
         symbol,
         Some(enclosing_declaration),
@@ -253,7 +253,7 @@ pub fn get_first_symbol_in_chain(
     None
 }
 
-pub fn is_module_symbol(symbol: &Arc<Symbol>) -> bool {
+pub fn is_module_symbol(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_module_symbol"); 
     symbol
         .declarations
         .iter()
@@ -264,7 +264,7 @@ pub fn is_class_like_member_completion(
     symbol: &Arc<Symbol>,
     location: &Arc<Node>,
     file: &Arc<SourceFile>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_class_like_member_completion"); 
     if ast::is_in_js_file(location) {
         return false;
     }
@@ -286,7 +286,7 @@ pub fn is_class_like_member_completion(
     symbol.flags.intersects(member_flags) && location_ok
 }
 
-pub fn symbol_appears_to_be_type_only(symbol: &Arc<Symbol>, type_checker: &mut Checker) -> bool {
+pub fn symbol_appears_to_be_type_only(symbol: &Arc<Symbol>, type_checker: &mut Checker) -> bool { ::tsox_core::fntrace::enter("symbol_appears_to_be_type_only"); 
     let flags = type_checker.skip_alias(symbol).combined_local_and_export_symbol_flags();
     !flags.intersects(ast::SymbolFlags::VALUE)
         && (symbol.declarations.is_empty()
@@ -303,7 +303,7 @@ pub fn should_include_symbol(
     file: &Arc<SourceFile>,
     type_checker: &mut Checker,
     compiler_options: &core::compiler_options::CompilerOptions,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("should_include_symbol"); 
     let mut all_flags = symbol.flags;
     let location = location.expect("data.location");
     if location.parent().map_or(false, |p| ast::is_export_assignment(&p)) {
@@ -396,7 +396,7 @@ fn symbol_can_be_referenced_at_type_location(
     symbol: &Arc<Symbol>,
     type_checker: &mut Checker,
     seen_modules: &mut HashSet<u64>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("symbol_can_be_referenced_at_type_location"); 
     non_alias_can_be_referenced_at_type_location(symbol, type_checker, seen_modules)
         || {
             let export_symbol = symbol
@@ -412,7 +412,7 @@ fn non_alias_can_be_referenced_at_type_location(
     symbol: &Arc<Symbol>,
     type_checker: &mut Checker,
     seen_modules: &mut HashSet<u64>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("non_alias_can_be_referenced_at_type_location"); 
     symbol.flags.intersects(ast::SymbolFlags::TYPE)
         || type_checker.is_unknown_symbol(symbol)
         || (symbol.flags.intersects(ast::SymbolFlags::MODULE)
@@ -428,7 +428,7 @@ pub fn is_valid_trigger(
     trigger_character: &str,
     context_token: Option<&Arc<Node>>,
     position: usize,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_valid_trigger"); 
     use ast::SyntaxKind as K;
     match trigger_character {
         "." | "@" => true,
@@ -476,7 +476,7 @@ pub fn is_valid_trigger(
     }
 }
 
-pub fn try_get_function_like_body_completion_container(context_token: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+pub fn try_get_function_like_body_completion_container(context_token: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_function_like_body_completion_container"); 
     let context_token = context_token?;
     let mut prev: Option<Arc<Node>> = None;
     let mut scope = Some(context_token.clone());
@@ -497,7 +497,7 @@ pub fn try_get_function_like_body_completion_container(context_token: Option<&Ar
     None
 }
 
-pub fn try_get_constructor_like_completion_container(context_token: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+pub fn try_get_constructor_like_completion_container(context_token: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_constructor_like_completion_container"); 
     let context_token = context_token?;
     let parent = context_token.parent()?;
     use ast::SyntaxKind as K;
@@ -519,7 +519,7 @@ pub fn try_get_constructor_like_completion_container(context_token: Option<&Arc<
     }
 }
 
-pub fn is_constructor_parameter_completion(node: &Arc<Node>) -> bool {
+pub fn is_constructor_parameter_completion(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_constructor_parameter_completion"); 
     node.parent().map_or(false, |parent| {
         parent.parent().map_or(false, |grand| {
             ast::is_parameter_declaration(&parent)
@@ -529,7 +529,7 @@ pub fn is_constructor_parameter_completion(node: &Arc<Node>) -> bool {
     })
 }
 
-pub fn is_from_object_type_declaration(node: &Arc<Node>) -> bool {
+pub fn is_from_object_type_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_from_object_type_declaration"); 
     node.parent().map_or(false, |parent| {
         parent.parent().map_or(false, |grand| {
             m3f_4::is_class_or_type_element(&parent) && m3g_2::is_object_type_declaration(&grand)
@@ -537,7 +537,7 @@ pub fn is_from_object_type_declaration(node: &Arc<Node>) -> bool {
     })
 }
 
-pub fn try_get_containing_jsx_element(context_token: Option<&Arc<Node>>, file: &Arc<SourceFile>) -> Option<Arc<Node>> {
+pub fn try_get_containing_jsx_element(context_token: Option<&Arc<Node>>, file: &Arc<SourceFile>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_containing_jsx_element"); 
     let context_token = context_token?;
     let parent = context_token.parent()?;
     use ast::SyntaxKind as K;

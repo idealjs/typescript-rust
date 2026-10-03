@@ -19,16 +19,16 @@ pub struct EcmaLineInfo {
 pub fn create_ecma_line_info(
     text: String,
     line_starts: Vec<tsox_core::core::text::TextPos>,
-) -> EcmaLineInfo {
+) -> EcmaLineInfo { ::tsox_core::fntrace::enter("create_ecma_line_info"); 
     EcmaLineInfo { text, line_starts }
 }
 
 impl EcmaLineInfo {
-    pub fn line_count(&self) -> usize {
+    pub fn line_count(&self) -> usize { ::tsox_core::fntrace::enter("line_count"); 
         self.line_starts.len()
     }
 
-    pub fn line_text(&self, line: usize) -> &str {
+    pub fn line_text(&self, line: usize) -> &str { ::tsox_core::fntrace::enter("line_text"); 
         let pos = self.line_starts[line] as usize;
         let end = if line + 1 < self.line_starts.len() {
             self.line_starts[line + 1] as usize
@@ -56,7 +56,7 @@ pub struct MappedPosition {
 pub type SourceMappedPosition = MappedPosition;
 
 impl MappedPosition {
-    pub fn is_source_mapped_position(&self) -> bool {
+    pub fn is_source_mapped_position(&self) -> bool { ::tsox_core::fntrace::enter("is_source_mapped_position"); 
         self.source_index != MISSING_SOURCE && self.source_position != MISSING_POSITION
     }
 }
@@ -79,7 +79,7 @@ pub fn create_document_position_mapper(
     host: &dyn Host,
     source_map: &RawSourceMap,
     map_path: &str,
-) -> DocumentPositionMapper {
+) -> DocumentPositionMapper { ::tsox_core::fntrace::enter("create_document_position_mapper"); 
     let map_directory = get_directory_path(map_path);
     let source_root = if !source_map.source_root.is_empty() {
         get_normalized_absolute_path(&source_map.source_root, &map_directory)
@@ -187,7 +187,7 @@ pub fn create_document_position_mapper(
 }
 
 impl DocumentPositionMapper {
-    pub fn get_source_position(&self, loc: &DocumentPosition) -> Option<DocumentPosition> {
+    pub fn get_source_position(&self, loc: &DocumentPosition) -> Option<DocumentPosition> { ::tsox_core::fntrace::enter("get_source_position"); 
         if self.generated_mappings.is_empty() {
             return None;
         }
@@ -207,7 +207,7 @@ impl DocumentPositionMapper {
         })
     }
 
-    pub fn get_generated_position(&self, loc: &DocumentPosition) -> Option<DocumentPosition> {
+    pub fn get_generated_position(&self, loc: &DocumentPosition) -> Option<DocumentPosition> { ::tsox_core::fntrace::enter("get_generated_position"); 
         let source_index = *self
             .source_to_source_index_map
             .get(&get_canonical_file_name(
@@ -233,7 +233,7 @@ impl DocumentPositionMapper {
 pub fn get_document_position_mapper(
     host: &dyn Host,
     generated_file_name: &str,
-) -> Option<DocumentPositionMapper> {
+) -> Option<DocumentPositionMapper> { ::tsox_core::fntrace::enter("get_document_position_mapper"); 
     let mut map_file_name = try_get_source_mapping_url_for_file(host, generated_file_name);
     if !map_file_name.is_empty() {
         if let Some((base64_object, matched)) = try_parse_base64_url(&map_file_name) {
@@ -273,7 +273,7 @@ pub fn convert_document_to_source_mapper(
     host: &dyn Host,
     contents: &str,
     map_file_name: &str,
-) -> Option<DocumentPositionMapper> {
+) -> Option<DocumentPositionMapper> { ::tsox_core::fntrace::enter("convert_document_to_source_mapper"); 
     let source_map = try_parse_raw_source_map(contents)?;
     if source_map.sources.is_empty() || source_map.file.is_empty() || source_map.mappings.is_empty()
     {
@@ -285,7 +285,7 @@ pub fn convert_document_to_source_mapper(
     Some(create_document_position_mapper(host, &source_map, map_file_name))
 }
 
-pub fn try_parse_raw_source_map(contents: &str) -> Option<RawSourceMap> {
+pub fn try_parse_raw_source_map(contents: &str) -> Option<RawSourceMap> { ::tsox_core::fntrace::enter("try_parse_raw_source_map"); 
     let source_map: RawSourceMap = tsox_core::json::unmarshal(contents).ok()?;
     if source_map.version != 3 {
         return None;
@@ -293,7 +293,7 @@ pub fn try_parse_raw_source_map(contents: &str) -> Option<RawSourceMap> {
     Some(source_map)
 }
 
-fn try_get_source_mapping_url_for_file(host: &dyn Host, file_name: &str) -> String {
+fn try_get_source_mapping_url_for_file(host: &dyn Host, file_name: &str) -> String { ::tsox_core::fntrace::enter("try_get_source_mapping_url_for_file"); 
     match host.get_ecma_line_info(file_name) {
         Some(line_info) => {
             for index in (0..line_info.line_count()).rev() {
@@ -321,7 +321,7 @@ fn try_get_source_mapping_url_for_file(host: &dyn Host, file_name: &str) -> Stri
     }
 }
 
-pub fn try_parse_base64_url(url: &str) -> Option<(String, bool)> {
+pub fn try_parse_base64_url(url: &str) -> Option<(String, bool)> { ::tsox_core::fntrace::enter("try_parse_base64_url"); 
     let rest = match url.strip_prefix("data:") {
         Some(rest) => rest,
         None => return None,
@@ -354,7 +354,7 @@ pub fn try_parse_base64_url(url: &str) -> Option<(String, bool)> {
     Some((rest.to_string(), true))
 }
 
-fn base64_std_char_value(b: u8) -> Result<u32, String> {
+fn base64_std_char_value(b: u8) -> Result<u32, String> { ::tsox_core::fntrace::enter("base64_std_char_value"); 
     match b {
         b'A'..=b'Z' => Ok((b - b'A') as u32),
         b'a'..=b'z' => Ok((b - b'a') as u32 + 26),
@@ -365,7 +365,7 @@ fn base64_std_char_value(b: u8) -> Result<u32, String> {
     }
 }
 
-fn base64_std_decode(input: &str) -> Result<Vec<u8>, String> {
+fn base64_std_decode(input: &str) -> Result<Vec<u8>, String> { ::tsox_core::fntrace::enter("base64_std_decode"); 
     let mut out = Vec::with_capacity(input.len() / 4 * 3);
     let mut acc: u32 = 0;
     let mut nbits = 0usize;
@@ -391,7 +391,7 @@ fn base64_std_decode(input: &str) -> Result<Vec<u8>, String> {
     Ok(out)
 }
 
-fn find_workspace_root(start: &Path) -> Option<PathBuf> {
+fn find_workspace_root(start: &Path) -> Option<PathBuf> { ::tsox_core::fntrace::enter("find_workspace_root"); 
     let mut dir = start.to_path_buf();
     loop {
         if dir.join("Cargo.toml").is_file() {
@@ -403,7 +403,7 @@ fn find_workspace_root(start: &Path) -> Option<PathBuf> {
     }
 }
 
-pub fn test_data_path() -> PathBuf {
+pub fn test_data_path() -> PathBuf { ::tsox_core::fntrace::enter("test_data_path"); 
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let root = find_workspace_root(&manifest_dir)
         .unwrap_or_else(|| panic!("could not find Cargo.toml above {}", manifest_dir.display()));

@@ -17,7 +17,7 @@ impl LanguageService {
         &self,
         document_uri: &DocumentUri,
         positions: &[Position],
-    ) -> Vec<SelectionRange> {
+    ) -> Vec<SelectionRange> { ::tsox_core::fntrace::enter("provide_selection_ranges"); 
         let (_program, source_file) = self.get_program_and_file(document_uri);
         let mut results = Vec::new();
         for position in positions {
@@ -29,7 +29,7 @@ impl LanguageService {
     }
 }
 
-pub fn get_smart_selection_range(source_file: &Arc<SourceFile>, pos: usize) -> SelectionRange {
+pub fn get_smart_selection_range(source_file: &Arc<SourceFile>, pos: usize) -> SelectionRange { ::tsox_core::fntrace::enter("get_smart_selection_range"); 
     let line_map = &source_file.line_map;
 
     let node = find_deepest_node(&source_file.node, pos);
@@ -64,7 +64,7 @@ pub fn get_smart_selection_range(source_file: &Arc<SourceFile>, pos: usize) -> S
     })
 }
 
-fn find_deepest_node<'a>(node: &'a Arc<Node>, pos: usize) -> Arc<Node> {
+fn find_deepest_node<'a>(node: &'a Arc<Node>, pos: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     if pos < node.pos() || pos > node.end() {
         return node.clone();
     }
@@ -81,14 +81,14 @@ fn find_deepest_node<'a>(node: &'a Arc<Node>, pos: usize) -> Arc<Node> {
     deepest.unwrap_or_else(|| node.clone())
 }
 
-fn offset_range_to_lsp_range(line_map: &LineMap, start: usize, end: usize) -> Range {
+fn offset_range_to_lsp_range(line_map: &LineMap, start: usize, end: usize) -> Range { ::tsox_core::fntrace::enter("offset_range_to_lsp_range"); 
     Range {
         start: offset_to_position(line_map, start),
         end: offset_to_position(line_map, end),
     }
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -97,14 +97,14 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),
     }
 }
 
-fn lsp_position_to_offset(source_file: &Arc<SourceFile>, position: &Position) -> usize {
+fn lsp_position_to_offset(source_file: &Arc<SourceFile>, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line_map = &source_file.line_map;
     let line = position.line as usize;
     let character = position.character as usize;

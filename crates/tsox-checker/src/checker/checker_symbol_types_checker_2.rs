@@ -12,7 +12,7 @@ impl Checker {
     pub(crate) fn resolve_symbol_declared_type_on_demand(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolve_symbol_declared_type_on_demand"); 
         // Go getTypeOfVariableOrParameterOrPropertyWorker：变量类符号类型解析
         // 进 type resolution 栈，同符号重入即环（reportCircularityError）
         let uses_frame = symbol.declarations.iter().any(|d| {
@@ -57,7 +57,7 @@ impl Checker {
     fn resolve_symbol_declared_type_on_demand_inner(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("resolve_symbol_declared_type_on_demand_inner"); 
         use tsox_frontend::ast::NodeData;
         // 合并符号（UMD 全局 export as namespace + declare global 变量）声明
         // 列表混有非变量声明：优先取变量/属性/参数类声明
@@ -415,7 +415,7 @@ impl Checker {
         &mut self,
         decl: &Arc<Node>,
         t: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_binding_parent_undefined"); 
         if !self.strict_null_checks {
             return t;
         }
@@ -453,7 +453,7 @@ impl Checker {
     }
 
     /// Go getTypeFactsWorker 的 EQUndefined 位：any/unknown/未定类型视为可能
-    fn type_may_be_undefined(t: &Arc<Type>) -> bool {
+    fn type_may_be_undefined(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_may_be_undefined"); 
         if t.flags.intersects(
             TypeFlags::Any
                 | TypeFlags::Unknown
@@ -470,7 +470,7 @@ impl Checker {
     }
 
     /// 绑定元素解析属性时，把源类型的属性符号挂为 container（显示限定名用）。
-    fn link_binding_element_container(&mut self, elem: &Arc<Node>, t: &Arc<Type>, name: &str) {
+    fn link_binding_element_container(&mut self, elem: &Arc<Node>, t: &Arc<Type>, name: &str) { ::tsox_core::fntrace::enter("link_binding_element_container"); 
         let Some(sym) = t.symbol.clone() else { return };
         let member = self
             .resolve_interface_type_ex(&sym, None)
@@ -494,7 +494,7 @@ impl Checker {
     }
 
     /// 绑定元素类型：沿模式链上行到根声明取类型，再按属性/索引路径逐层查。
-    pub(crate) fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> {
+    pub(crate) fn binding_element_type(&mut self, elem: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("binding_element_type"); 
         use tsox_frontend::ast::NodeData;
         if let Some(sym) = self.program.symbol_map().symbol_of(elem)
             && let Some(t) = self
@@ -651,7 +651,7 @@ impl Checker {
         &mut self,
         call: &Arc<Node>,
         sig: &Arc<Signature>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("substitute_explicit_call_type_args"); 
         if sig.type_parameters.is_empty() {
             return Arc::clone(sig);
         }
@@ -676,7 +676,7 @@ impl Checker {
     pub(crate) fn contextual_type_of_parameter(
         &mut self,
         param: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("contextual_type_of_parameter"); 
         use tsox_frontend::ast::NodeData;
         let host = param.parent()?;
         let (host_kind_ok, host_type_params, host_params) = match &host.data {
@@ -775,7 +775,7 @@ impl Checker {
         self.contextual_param_type_at(&sig, &host_params, param_index, param, is_rest, is_this_param)
     }
 
-    fn widen_argument_type_deep(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn widen_argument_type_deep(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("widen_argument_type_deep"); 
         let widened = self.get_widened_type(t);
         let TypeData::Object(o) = &widened.data else {
             return widened;
@@ -825,7 +825,7 @@ impl Checker {
     }
 
     /// 元素的 computed 属性名节点（仅显式 property_name 位）
-    pub(crate) fn binding_element_computed_property_name(elem: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn binding_element_computed_property_name(elem: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("binding_element_computed_property_name"); 
         let tsox_frontend::ast::NodeData::BindingElement(be) = &elem.data else {
             return None;
         };
@@ -839,7 +839,7 @@ impl Checker {
         seg_elem: &Arc<Node>,
         t: Arc<Type>,
         root_has_type: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("binding_default_value_tail"); 
         let tsox_frontend::ast::NodeData::BindingElement(be) = &seg_elem.data else {
             return t;
         };
@@ -865,7 +865,7 @@ impl Checker {
         elem: &Arc<Node>,
         t: Arc<Type>,
         seg: &BindingPathSeg,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("binding_path_step"); 
         // 带默认值的元素（a = expr）：类型由默认值提供，属性缺失不诊断
         //（Go getTypeForVariableLikeDeclaration 的 hasInitializer 分支）
         let elem_has_initializer = matches!(
@@ -1057,7 +1057,7 @@ impl Checker {
 
     /// rest 绑定元素类型：对象模式取排除同模式其他绑定名后的剩余属性对象；
     /// 数组模式取剩余元素数组（Go getRestTypeAtObject / getRestTypeAtPosition）。
-    pub(crate) fn rest_element_type(&mut self, elem: &Arc<Node>, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn rest_element_type(&mut self, elem: &Arc<Node>, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("rest_element_type"); 
         let is_array_pattern = elem
             .parent()
             .is_some_and(|p| p.kind == tsox_frontend::ast::SyntaxKind::ArrayBindingPattern);
@@ -1138,7 +1138,7 @@ impl Checker {
         Arc::new(rebuilt)
     }
 
-    fn remove_nullable_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn remove_nullable_constituents(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_nullable_constituents"); 
         if !t.is_union() {
             if t.flags.intersects(TYPE_FLAGS_NULLABLE) {
                 return self.never_type();
@@ -1163,7 +1163,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_spreadable_property(&self, prop: &Arc<Symbol>) -> bool {
+    pub(crate) fn is_spreadable_property(&self, prop: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_spreadable_property"); 
         let no_private_ident = !prop.declarations.iter().any(|d| {
             matches!(
                 &d.data,
@@ -1185,13 +1185,13 @@ impl Checker {
             .any(|d| d.parent().is_some_and(|p| tsox_frontend::ast::is_class_like(&p)))
     }
 
-    fn is_method_or_accessor(node: &Arc<Node>) -> bool {
+    fn is_method_or_accessor(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_method_or_accessor"); 
         use tsox_frontend::ast::SyntaxKind as K;
         matches!(node.kind, K::MethodDeclaration | K::MethodSignature | K::GetAccessor | K::SetAccessor)
     }
 
     /// 同一对象模式中其他元素绑定的属性名（rest 类型需排除这些属性）
-    fn pattern_excluded_property_names(elem: &Arc<Node>) -> Vec<String> {
+    fn pattern_excluded_property_names(elem: &Arc<Node>) -> Vec<String> { ::tsox_core::fntrace::enter("pattern_excluded_property_names"); 
         let mut out = Vec::new();
         let Some(pattern) = elem
             .parent()
@@ -1229,7 +1229,7 @@ impl Checker {
         &mut self,
         decl: &Arc<Node>,
         f: impl FnOnce(&mut Self) -> T,
-    ) -> T {
+    ) -> T { ::tsox_core::fntrace::enter("with_declaring_file_context"); 
         let saved_file = self.current_file.take();
         let saved_id = self.current_file_id;
         let saved_symbol = self.current_file_symbol.take();
@@ -1295,7 +1295,7 @@ impl Checker {
     pub(crate) fn get_type_of_merged_namespace_symbol(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_merged_namespace_symbol"); 
         if let Some(cached) = self
             .declared_type_links
             .get(symbol)

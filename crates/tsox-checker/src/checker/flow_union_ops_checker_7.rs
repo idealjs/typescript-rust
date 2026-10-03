@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         candidate: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_to_subtype"); 
         if type_.flags.contains(TypeFlags::Any) {
             return Arc::clone(candidate);
         }
@@ -39,7 +39,7 @@ impl Checker {
         &mut self,
         type_: &Arc<Type>,
         candidate: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("remove_subtype_from_union"); 
         if type_.is_union() {
             let constituents = self.constituent_types(type_);
             let remaining: Vec<Arc<Type>> = constituents
@@ -59,7 +59,7 @@ impl Checker {
         &mut self,
         original: &Arc<Type>,
         constituents: Vec<Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("rebuild_union_or_never"); 
         if constituents.is_empty() {
             return self.never_type();
         }

@@ -1,14 +1,14 @@
 use super::*;
 
 #[test]
-fn test_new_known_symlink() {
+fn test_new_known_symlink() { crate::fntrace::enter("test_new_known_symlink"); 
     let cache = KnownSymlinks::new("/test/dir", true);
     assert_eq!(cache.cwd, "/test/dir");
     assert!(cache.use_case_sensitive_file_names);
 }
 
 #[test]
-fn test_set_directory() {
+fn test_set_directory() { crate::fntrace::enter("test_set_directory"); 
     let cache = KnownSymlinks::new("/test/dir", true);
     let symlink_path =
         tspath::to_path("/test/symlink", "/test/dir", true).ensure_trailing_directory_separator();
@@ -44,7 +44,7 @@ fn test_set_directory() {
 }
 
 #[test]
-fn test_set_file() {
+fn test_set_file() { crate::fntrace::enter("test_set_file"); 
     let cache = KnownSymlinks::new("/test/dir", true);
     let symlink = "/test/symlink/file.ts";
     let symlink_path = tspath::to_path(symlink, "/test/dir", true);
@@ -58,7 +58,7 @@ fn test_set_file() {
 }
 
 #[test]
-fn test_process_resolution() {
+fn test_process_resolution() { crate::fntrace::enter("test_process_resolution"); 
     let cache = KnownSymlinks::new("/test/dir", true);
 
     cache.process_resolution("", "");
@@ -76,7 +76,7 @@ fn test_process_resolution() {
 }
 
 #[test]
-fn test_guess_directory_symlink() {
+fn test_guess_directory_symlink() { crate::fntrace::enter("test_guess_directory_symlink"); 
     let cache = KnownSymlinks::new("/test/dir", true);
 
     let cases: &[(&str, &str, &str, &str, &str, &str)] = &[
@@ -136,7 +136,7 @@ fn test_guess_directory_symlink() {
 }
 
 #[test]
-fn test_is_node_modules_or_scoped_package_directory() {
+fn test_is_node_modules_or_scoped_package_directory() { crate::fntrace::enter("test_is_node_modules_or_scoped_package_directory"); 
     let cache = KnownSymlinks::new("/test/dir", true);
 
     let cases: &[(&str, &str, bool)] = &[
@@ -158,7 +158,7 @@ fn test_is_node_modules_or_scoped_package_directory() {
 }
 
 #[test]
-fn test_set_symlinks_from_resolutions() {
+fn test_set_symlinks_from_resolutions() { crate::fntrace::enter("test_set_symlinks_from_resolutions"); 
     let cache = KnownSymlinks::new("/test/dir", true);
 
     let resolved_modules: &[(&str, &str)] = &[
@@ -184,7 +184,7 @@ fn test_set_symlinks_from_resolutions() {
 }
 
 #[test]
-fn test_known_symlinks_thread_safety() {
+fn test_known_symlinks_thread_safety() { crate::fntrace::enter("test_known_symlinks_thread_safety"); 
     use std::thread;
 
     let cache = KnownSymlinks::new("/test/dir", true);

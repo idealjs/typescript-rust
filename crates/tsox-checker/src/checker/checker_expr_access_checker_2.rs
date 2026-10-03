@@ -7,7 +7,7 @@ impl Checker {
     pub(crate) fn property_type_includes_undefined(
         &mut self,
         data: &tsox_frontend::ast::node_data_generated::PropertyDeclarationData,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("property_type_includes_undefined"); 
         let Some(tn) = &data.type_node else {
             return false;
         };
@@ -25,7 +25,7 @@ impl Checker {
     }
 
     #[allow(dead_code)]
-    pub(crate) fn class_constructor_assigns_property(&self, name: &str) -> bool {
+    pub(crate) fn class_constructor_assigns_property(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("class_constructor_assigns_property"); 
         let Some(class) = self.enclosing_class_stack.last() else {
             return false;
         };
@@ -50,7 +50,7 @@ impl Checker {
         callee_expr: &Arc<Node>,
         arg_index: usize,
         arg: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_call_arg_with_context"); 
         let is_function_arg = matches!(
             arg.kind,
             SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
@@ -73,7 +73,7 @@ impl Checker {
         }
     }
 
-    fn callee_has_generic_signature(&mut self, callee_expr: &Arc<Node>) -> bool {
+    fn callee_has_generic_signature(&mut self, callee_expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("callee_has_generic_signature"); 
         let callee_type = self.get_type_of_node(callee_expr);
         self.get_signatures_of_type(&callee_type, crate::checker::SignatureKind::Call)
             .first()
@@ -83,7 +83,7 @@ impl Checker {
     pub(crate) fn contextual_signature_of_arrow(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("contextual_signature_of_arrow"); 
         let t = self.get_contextual_type(node, ContextFlags::None)?;
         if let TypeData::IndexedAccess(ia) = &t.data
             && let (Some(o), Some(i)) = (&ia.object_type, &ia.index_type)
@@ -97,7 +97,7 @@ impl Checker {
         self.first_call_signature(&t)
     }
 
-    pub(crate) fn first_call_signature(&mut self, t: &Arc<Type>) -> Option<Arc<Signature>> {
+    pub(crate) fn first_call_signature(&mut self, t: &Arc<Type>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("first_call_signature"); 
         if let TypeData::Union(u) = &t.data {
             for constituent in &u.union_or_intersection.types {
                 if constituent
@@ -120,7 +120,7 @@ impl Checker {
         &mut self,
         callee_expr: &Arc<Node>,
         arg_index: usize,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("contextual_param_count_for_arg"); 
         let t = self.get_type_of_node(callee_expr);
         if t.flags.contains(TypeFlags::Any) {
             if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &callee_expr.data
@@ -191,7 +191,7 @@ impl Checker {
             .map_or(0, |callback_sig| callback_sig.parameters.len())
     }
 
-    pub(crate) fn symbol_is_abstract_class(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn symbol_is_abstract_class(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_abstract_class"); 
         for decl in &symbol.declarations {
             if decl.kind == SyntaxKind::ClassDeclaration
                 && decl.has_syntactic_modifier(ModifierFlags::Abstract)
@@ -202,7 +202,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn type_includes_abstract_constructor(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn type_includes_abstract_constructor(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_includes_abstract_constructor"); 
         if t.flags.contains(TypeFlags::Any) {
             return false;
         }
@@ -232,7 +232,7 @@ impl Checker {
     pub(crate) fn declaring_class_of_member(
         &self,
         member_symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaring_class_of_member"); 
         self.declaring_class_of_private_member(member_symbol)
             .or_else(|| {
                 for decl in &member_symbol.declarations {
@@ -254,7 +254,7 @@ impl Checker {
     pub(crate) fn declaring_class_of_private_member(
         &self,
         member_symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaring_class_of_private_member"); 
         for decl in &member_symbol.declarations {
             if matches!(
                 decl.kind,

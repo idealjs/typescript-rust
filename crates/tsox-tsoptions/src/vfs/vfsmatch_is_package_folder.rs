@@ -3,13 +3,13 @@ use std::collections::HashSet;
 
 use crate::vfs::vfsmatch::*;
 
-pub(crate) fn is_package_folder(name: &str) -> bool {
+pub(crate) fn is_package_folder(name: &str) -> bool { ::tsox_core::fntrace::enter("is_package_folder"); 
     name.eq_ignore_ascii_case("node_modules")
         || name.eq_ignore_ascii_case("jspm_packages")
         || name.eq_ignore_ascii_case("bower_components")
 }
 
-pub fn ensure_trailing_slash(s: &str) -> String {
+pub fn ensure_trailing_slash(s: &str) -> String { ::tsox_core::fntrace::enter("ensure_trailing_slash"); 
     if !s.is_empty() && s.as_bytes()[s.len() - 1] != b'/' {
         format!("{s}/")
     } else {
@@ -29,7 +29,7 @@ pub(crate) fn new_glob_matcher(
     base_path: &str,
     case_sensitive: bool,
     usage: Usage,
-) -> GlobMatcher {
+) -> GlobMatcher { ::tsox_core::fntrace::enter("new_glob_matcher"); 
     let mut includes = Vec::with_capacity(include_specs.len());
     for spec in include_specs {
         if let Some(p) = compile_glob_pattern(spec, base_path, usage, case_sensitive) {
@@ -50,7 +50,7 @@ pub(crate) fn new_glob_matcher(
 }
 
 impl GlobMatcher {
-    pub(crate) fn matches_file_parts(&self, prefix: &str, suffix: &str) -> (usize, bool) {
+    pub(crate) fn matches_file_parts(&self, prefix: &str, suffix: &str) -> (usize, bool) { ::tsox_core::fntrace::enter("matches_file_parts"); 
         for ex in &self.excludes {
             if ex.matches_parts(prefix, suffix) {
                 return (0, false);
@@ -70,7 +70,7 @@ impl GlobMatcher {
         (0, false)
     }
 
-    pub(crate) fn matches_directory_parts(&self, prefix: &str, suffix: &str) -> bool {
+    pub(crate) fn matches_directory_parts(&self, prefix: &str, suffix: &str) -> bool { ::tsox_core::fntrace::enter("matches_directory_parts"); 
         for ex in &self.excludes {
             if ex.matches_parts(prefix, suffix) {
                 return false;
@@ -105,7 +105,7 @@ impl<'a> GlobVisitor<'a> {
         absolute_path: &str,
         depth: i32,
         resolved_real_path: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("visit"); 
         let real_path = if !resolved_real_path.is_empty() {
             resolved_real_path.to_string()
         } else {
@@ -181,7 +181,7 @@ pub fn match_files(
     current_directory: &str,
     depth: i32,
     host: &dyn FS,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("match_files"); 
     let path = tsox_core::tspath::normalize_path(path);
     let current_directory = tsox_core::tspath::normalize_path(current_directory);
     let absolute_path = tsox_core::tspath::combine_paths(&current_directory, &[&path]);
@@ -234,7 +234,7 @@ impl SpecMatcher {
         base_path: &str,
         usage: Usage,
         use_case_sensitive_file_names: bool,
-    ) -> Option<Self> {
+    ) -> Option<Self> { ::tsox_core::fntrace::enter("new"); 
         if specs.is_empty() {
             return None;
         }
@@ -252,11 +252,11 @@ impl SpecMatcher {
         Some(SpecMatcher { patterns })
     }
 
-    pub fn matches(&self, path: &str) -> bool {
+    pub fn matches(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("matches"); 
         self.patterns.iter().any(|p| p.matches(path))
     }
 
-    pub fn match_index(&self, path: &str) -> i32 {
+    pub fn match_index(&self, path: &str) -> i32 { ::tsox_core::fntrace::enter("match_index"); 
         for (i, p) in self.patterns.iter().enumerate() {
             if p.matches(path) {
                 return i as i32;

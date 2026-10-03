@@ -3,14 +3,14 @@
 use crate::checker::checker_suggestions_resolve::*;
 
 impl Checker {
-    pub(crate) fn find_name_suggestion(&self, name: &str, meaning: SymbolFlags) -> Option<String> {
+    pub(crate) fn find_name_suggestion(&self, name: &str, meaning: SymbolFlags) -> Option<String> { ::tsox_core::fntrace::enter("find_name_suggestion"); 
         let mut candidates: Vec<&Arc<Symbol>> = Vec::new();
         let symbol_map = self.program.symbol_map();
         fn push_symbol<'a>(
             cands: &mut Vec<&'a Arc<Symbol>>,
             sym: &'a Arc<Symbol>,
             meaning: SymbolFlags,
-        ) {
+        ) { ::tsox_core::fntrace::enter("push_symbol"); 
             if sym.flags.intersects(meaning) {
                 cands.push(sym);
             }
@@ -103,7 +103,7 @@ impl Checker {
         best.map(|(_, c)| c.clone())
     }
 
-    pub(crate) fn suggestion_order_key(&self, sym: &Arc<Symbol>) -> (usize, usize) {
+    pub(crate) fn suggestion_order_key(&self, sym: &Arc<Symbol>) -> (usize, usize) { ::tsox_core::fntrace::enter("suggestion_order_key"); 
         let Some(decl) = sym.declarations.first() else {
             return (usize::MAX, usize::MAX);
         };
@@ -118,7 +118,7 @@ impl Checker {
         (idx, decl.loc.pos())
     }
 
-    pub(crate) fn inside_function_body(node: &Arc<Node>) -> bool {
+    pub(crate) fn inside_function_body(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("inside_function_body"); 
         let mut anc = node.parent();
         while let Some(a) = anc {
             match a.kind {
@@ -139,7 +139,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn check_class_heritage_members(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_class_heritage_members(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_heritage_members"); 
         let (name, type_parameters, members, is_class_expression) = match &node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => {
                 (&d.name, d.type_parameters.as_ref(), &d.members, false)
@@ -302,7 +302,7 @@ impl Checker {
         base_node: &Arc<Node>,
         _class_name: &str,
         _base_name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_member_override_compatibility"); 
         let Some(own_type) = own_type else { return };
         {
             let prop_name = name_node.text().to_string();
@@ -336,7 +336,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn class_members_of(class: &Arc<Node>) -> &Arc<NodeList> {
+    pub(crate) fn class_members_of(class: &Arc<Node>) -> &Arc<NodeList> { ::tsox_core::fntrace::enter("class_members_of"); 
         match &class.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.members,
             tsox_frontend::ast::NodeData::ClassExpression(d) => &d.members,
@@ -347,7 +347,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn find_class_member_by_name(class: &Arc<Node>, name: &str) -> Option<Arc<Node>> {
+    pub(crate) fn find_class_member_by_name(class: &Arc<Node>, name: &str) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_class_member_by_name"); 
         Self::class_members_of(class)
             .iter()
             .find(|m| {

@@ -12,7 +12,7 @@ pub enum IndentStyle {
 }
 
 impl IndentStyle {
-    pub fn parse(value: &serde_json::Value) -> IndentStyle {
+    pub fn parse(value: &serde_json::Value) -> IndentStyle { ::tsox_core::fntrace::enter("parse"); 
         match value {
             serde_json::Value::String(s) => match s.to_ascii_lowercase().as_str() {
                 "none" => IndentStyle::None,
@@ -44,7 +44,7 @@ impl SemicolonPreference {
     pub const INSERT: &'static str = "insert";
     pub const REMOVE: &'static str = "remove";
 
-    pub fn parse(value: &serde_json::Value) -> SemicolonPreference {
+    pub fn parse(value: &serde_json::Value) -> SemicolonPreference { ::tsox_core::fntrace::enter("parse"); 
         if let serde_json::Value::String(s) = value {
             match s.to_ascii_lowercase().as_str() {
                 "ignore" => return SemicolonPreference::Ignore,
@@ -56,7 +56,7 @@ impl SemicolonPreference {
         SemicolonPreference::Ignore
     }
 
-    pub fn as_str(self) -> &'static str {
+    pub fn as_str(self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
         match self {
             SemicolonPreference::Ignore => "ignore",
             SemicolonPreference::Insert => "insert",
@@ -109,7 +109,7 @@ pub struct FormatCodeSettings {
 }
 
 impl FormatCodeSettings {
-    pub fn editor_settings(&self) -> EditorSettings {
+    pub fn editor_settings(&self) -> EditorSettings { ::tsox_core::fntrace::enter("editor_settings"); 
         EditorSettings {
             base_indent_size: self.base_indent_size,
             indent_size: self.indent_size,
@@ -122,7 +122,7 @@ impl FormatCodeSettings {
     }
 }
 
-pub fn get_default_format_code_settings() -> FormatCodeSettings {
+pub fn get_default_format_code_settings() -> FormatCodeSettings { ::tsox_core::fntrace::enter("get_default_format_code_settings"); 
     FormatCodeSettings {
         base_indent_size: 0,
         indent_size: default_indent_size(),
@@ -152,14 +152,14 @@ pub fn get_default_format_code_settings() -> FormatCodeSettings {
     }
 }
 
-fn default_indent_size() -> i32 {
+fn default_indent_size() -> i32 { ::tsox_core::fntrace::enter("default_indent_size"); 
     4
 }
 
 pub fn from_ls_format_options(
     f: &FormatCodeSettings,
     opt: &FormattingOptions,
-) -> FormatCodeSettings {
+) -> FormatCodeSettings { ::tsox_core::fntrace::enter("from_ls_format_options"); 
     let mut updated = f.clone();
     updated.tab_size = opt.tab_size as i32;
     updated.indent_size = opt.tab_size as i32;
@@ -170,7 +170,7 @@ pub fn from_ls_format_options(
     updated
 }
 
-pub fn to_ls_format_options(settings: &FormatCodeSettings) -> FormattingOptions {
+pub fn to_ls_format_options(settings: &FormatCodeSettings) -> FormattingOptions { ::tsox_core::fntrace::enter("to_ls_format_options"); 
     FormattingOptions {
         tab_size: settings.tab_size as u32,
         insert_spaces: settings.convert_tabs_to_spaces.is_true(),
@@ -184,7 +184,7 @@ pub fn set_format_code_setting(
     name: &str,
     tristate: Tristate,
     raw_value: &str,
-) {
+) { ::tsox_core::fntrace::enter("set_format_code_setting"); 
     match name {
         "base_indent_size" => settings.base_indent_size = raw_value.parse().unwrap_or(0),
         "indent_size" => settings.indent_size = raw_value.parse().unwrap_or(4),
@@ -266,13 +266,13 @@ pub fn set_format_code_setting(
 }
 
 impl serde::Serialize for SemicolonPreference {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_str(self.as_str())
     }
 }
 
 impl<'de> serde::Deserialize<'de> for SemicolonPreference {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match String::deserialize(deserializer)?.to_ascii_lowercase().as_str() {
             "insert" => Self::Insert,
             "remove" => Self::Remove,
@@ -282,13 +282,13 @@ impl<'de> serde::Deserialize<'de> for SemicolonPreference {
 }
 
 impl serde::Serialize for IndentStyle {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
         serializer.serialize_i32(*self as i32)
     }
 }
 
 impl<'de> serde::Deserialize<'de> for IndentStyle {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
         Ok(match i32::deserialize(deserializer)? {
             1 => Self::Block,
             2 => Self::Smart,

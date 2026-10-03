@@ -47,7 +47,7 @@ pub(crate) struct WideningContext {
 }
 
 impl WideningContext {
-    pub fn get_child_context(self: &Arc<Self>, property_name: &str) -> Arc<WideningContext> {
+    pub fn get_child_context(self: &Arc<Self>, property_name: &str) -> Arc<WideningContext> { ::tsox_core::fntrace::enter("get_child_context"); 
         if let Some(cached) = self.child_contexts.borrow().get(property_name) {
             return Arc::clone(cached);
         }
@@ -201,7 +201,7 @@ impl Checker {
         &mut self,
         name: &str,
         base_type: &Arc<Type>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_suggested_symbol_for_nonexistent_class_member"); 
         let properties = self.get_properties_of_type(base_type);
         self.get_spelling_suggestion_for_name(name, properties, SymbolFlags::CLASS_MEMBER)
     }
@@ -211,7 +211,7 @@ impl Checker {
         left: &Arc<Signature>,
         right: &Arc<Signature>,
         is_union: bool,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("combine_union_or_intersection_member_signatures"); 
         let mut type_params: Vec<Arc<Type>> = left.type_parameters.clone();
         if type_params.is_empty() {
             type_params = right.type_parameters.clone();
@@ -280,7 +280,7 @@ impl Checker {
         right: Option<&Arc<Symbol>>,
         mapper: Option<&Arc<TypeMapper>>,
         is_union: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("combine_union_or_intersection_this_param"); 
         let left = match left {
             Some(l) => l,
             None => return right.cloned(),
@@ -306,7 +306,7 @@ impl Checker {
         right: &Arc<Signature>,
         mapper: Option<&Arc<TypeMapper>>,
         is_union: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("combine_union_or_intersection_parameters"); 
         let left_count = self.get_parameter_count(left);
         let right_count = self.get_parameter_count(right);
         let (longest_count, longest, shorter) = if left_count >= right_count {
@@ -402,7 +402,7 @@ impl Checker {
         source_prop: &Arc<Symbol>,
         target_prop: &Arc<Symbol>,
         compare_types: &dyn Fn(&mut Checker, &Arc<Type>, &Arc<Type>) -> Ternary,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_properties"); 
         if Arc::ptr_eq(source_prop, target_prop) {
             return Ternary::True;
         }
@@ -433,7 +433,7 @@ impl Checker {
         compare_types(self, &source_type, &target_type)
     }
 
-    pub fn compute_is_uniform_union_type(&mut self, types: &[Arc<Type>]) -> bool {
+    pub fn compute_is_uniform_union_type(&mut self, types: &[Arc<Type>]) -> bool { ::tsox_core::fntrace::enter("compute_is_uniform_union_type"); 
         let mut enum_symbol: Option<Arc<Symbol>> = None;
         let mut has_string_or_number_literal = false;
         for t in types {
@@ -460,7 +460,7 @@ impl Checker {
         true
     }
 
-    pub fn create_canonical_signature(&mut self, signature: &Arc<Signature>) -> Arc<Signature> {
+    pub fn create_canonical_signature(&mut self, signature: &Arc<Signature>) -> Arc<Signature> { ::tsox_core::fntrace::enter("create_canonical_signature"); 
         let type_arguments: Vec<Arc<Type>> = signature
             .type_parameters
             .iter()
@@ -482,7 +482,7 @@ impl Checker {
         &mut self,
         element_infos: &[TupleElementInfo],
         readonly: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_tuple_target_type"); 
         let arity = element_infos.len();
         let min_length = element_infos
             .iter()
@@ -563,7 +563,7 @@ impl Checker {
         rest_type: &Arc<Type>,
         rest_index: usize,
         rest_symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("expand_signature_parameters_with_tuple_members"); 
         let element_types = self.get_type_arguments(rest_type);
         let element_infos = rest_type.target_tuple_type().unwrap().element_infos.clone();
         let associated_names =
@@ -599,7 +599,7 @@ impl Checker {
     pub fn extract_redundant_template_literals(
         &mut self,
         mut types: Vec<Arc<Type>>,
-    ) -> (Vec<Arc<Type>>, bool) {
+    ) -> (Vec<Arc<Type>>, bool) { ::tsox_core::fntrace::enter("extract_redundant_template_literals"); 
         let literals: Vec<Arc<Type>> = types
             .iter()
             .filter(|t| t.flags.intersects(TypeFlags::StringLiteral))
@@ -631,7 +631,7 @@ impl Checker {
         (types, false)
     }
 
-    pub fn filter_types(&mut self, types: &mut [Arc<Type>], predicate: &mut dyn FnMut(&Arc<Type>) -> bool) {
+    pub fn filter_types(&mut self, types: &mut [Arc<Type>], predicate: &mut dyn FnMut(&Arc<Type>) -> bool) { ::tsox_core::fntrace::enter("filter_types"); 
         for t in types.iter_mut() {
             *t = self.filter_type(t, predicate);
         }
@@ -641,7 +641,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         f: &mut dyn FnMut(&Arc<Type>) -> bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("filter_type"); 
         if t.flags.intersects(TypeFlags::Union) {
             let types = t.types().unwrap_or(&[]).to_vec();
             let filtered: Vec<Arc<Type>> = types.iter().filter(|u| f(u)).cloned().collect();
@@ -692,7 +692,7 @@ impl Checker {
         error_node: Option<&Arc<Node>>,
         diagnostic_message: Option<&'static Message>,
         args: &[&str],
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_awaited_type_no_alias_ex"); 
         if is_type_any(t) {
             return Some(Arc::clone(t));
         }
@@ -766,7 +766,7 @@ impl Checker {
         Some(Arc::clone(t))
     }
 
-    pub fn get_conditional_flow_type_of_type(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_conditional_flow_type_of_type(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_conditional_flow_type_of_type"); 
         let mut constraints: Vec<Arc<Type>> = Vec::new();
         let mut covariant = true;
         let mut node = Some(Arc::clone(node));
@@ -828,7 +828,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn compute_base_constraint(&mut self, t: &Arc<Type>, stack: Vec<RecursionId>) -> Option<Arc<Type>> {
+    pub fn compute_base_constraint(&mut self, t: &Arc<Type>, stack: Vec<RecursionId>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("compute_base_constraint"); 
         if t.flags.intersects(TypeFlags::TypeParameter) {
             let constraint = self.get_constraint_from_type_parameter(t);
             if t.as_type_parameter().unwrap().is_this_type {
@@ -969,7 +969,7 @@ impl Checker {
     }
 
 
-    pub fn get_assignment_declaration_initializer_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> {
+    pub fn get_assignment_declaration_initializer_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_assignment_declaration_initializer_type"); 
         if is_binary_expression(node) {
             let t: Arc<Type>;
             match get_assignment_declaration_kind(node) {
@@ -1007,11 +1007,11 @@ impl Checker {
         None
     }
 
-    pub fn numeric_string_type(&mut self) -> Arc<Type> {
+    pub fn numeric_string_type(&mut self) -> Arc<Type> { ::tsox_core::fntrace::enter("numeric_string_type"); 
         self.get_union_type(vec![self.number_type(), self.string_type()])
     }
 
-    pub fn get_constraint_from_type_parameter(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_constraint_from_type_parameter(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_constraint_from_type_parameter"); 
         if let Some(constraint) = t.as_type_parameter().unwrap().constraint.clone() {
             return constraint;
         }

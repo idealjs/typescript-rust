@@ -39,7 +39,7 @@ pub struct ProjectExt {
     pub installed_typings_info: Option<ata::TypingsInfo>,
 }
 
-fn project_ext_map() -> &'static Mutex<HashMap<Path, ProjectExt>> {
+fn project_ext_map() -> &'static Mutex<HashMap<Path, ProjectExt>> { ::tsox_core::fntrace::enter("project_ext_map"); 
     static MAP: OnceLock<Mutex<HashMap<Path, ProjectExt>>> = OnceLock::new();
     MAP.get_or_init(|| Mutex::new(HashMap::new()))
 }
@@ -49,7 +49,7 @@ pub fn new_configured_project(
     config_file_path: Path,
     builder: &ProjectCollectionBuilder,
     logger: Option<&LogTree>,
-) -> Project {
+) -> Project { ::tsox_core::fntrace::enter("new_configured_project"); 
     let _ = config_file_path;
     let directory = tsox_core::tspath::get_directory_path(&config_file_name);
     new_project(
@@ -69,7 +69,7 @@ pub fn new_inferred_project(
     content_mappers: Vec<tsox_compile::mig::m3l_cm::Mapper>,
     builder: &ProjectCollectionBuilder,
     logger: Option<&LogTree>,
-) -> Project {
+) -> Project { ::tsox_core::fntrace::enter("new_inferred_project"); 
     let mut p = new_project(
         INFERRED_PROJECT_NAME.to_string(),
         Kind::Inferred,
@@ -110,7 +110,7 @@ pub fn new_inferred_project_command_line(
     project_references: &[ProjectReference],
     content_mappers: &[tsox_compile::mig::m3l_cm::Mapper],
     compare_paths_options: tsox_core::tspath::ComparePathsOptions,
-) -> ParsedCommandLine {
+) -> ParsedCommandLine { ::tsox_core::fntrace::enter("new_inferred_project_command_line"); 
     let mut command_line = tsox_tsoptions::mig::m5h_3::new_parsed_command_line(
         compiler_options,
         root_file_names.to_vec(),
@@ -123,7 +123,7 @@ pub fn new_inferred_project_command_line(
 
 fn to_tsoptions_content_mappers(
     mappers: &[tsox_compile::mig::m3l_cm::Mapper],
-) -> Vec<tsox_tsoptions::mig::m5h_3::ContentMapper> {
+) -> Vec<tsox_tsoptions::mig::m5h_3::ContentMapper> { ::tsox_core::fntrace::enter("to_tsoptions_content_mappers"); 
     mappers
         .iter()
         .map(|m| tsox_tsoptions::mig::m5h_3::ContentMapper {
@@ -149,7 +149,7 @@ pub fn new_inferred_project_from_project(
     project: &Project,
     builder: &ProjectCollectionBuilder,
     logger: Option<&LogTree>,
-) -> Project {
+) -> Project { ::tsox_core::fntrace::enter("new_inferred_project_from_project"); 
     let mut inferred = new_project(
         INFERRED_PROJECT_NAME.to_string(),
         Kind::Inferred,
@@ -173,11 +173,11 @@ pub fn new_inferred_project_from_project(
     inferred
 }
 
-fn default_use_case_sensitive_file_names() -> bool {
+fn default_use_case_sensitive_file_names() -> bool { ::tsox_core::fntrace::enter("default_use_case_sensitive_file_names"); 
     ComparePathsOptions::default().use_case_sensitive_file_names
 }
 
-fn resolved_relative_pattern_support() -> bool {
+fn resolved_relative_pattern_support() -> bool { ::tsox_core::fntrace::enter("resolved_relative_pattern_support"); 
     let ctx = crate::mig::m5m::ResolvedClientCapabilitiesContext {
         capabilities: None,
     };
@@ -196,7 +196,7 @@ pub fn new_project(
     current_directory: String,
     builder: &ProjectCollectionBuilder,
     logger: Option<&LogTree>,
-) -> Project {
+) -> Project { ::tsox_core::fntrace::enter("new_project"); 
     if let Some(logger) = logger {
         logger.log(&format!(
             "Creating {}Project: {}, currentDirectory: {}",
@@ -262,7 +262,7 @@ fn new_watched_files_for_paths(
     workspace_directory: String,
     _current_directory: String,
     _use_case_sensitive_file_names: bool,
-) -> WatchedFiles<Vec<String>> {
+) -> WatchedFiles<Vec<String>> { ::tsox_core::fntrace::enter("new_watched_files_for_paths"); 
     let workspace = Path(workspace_directory);
     WatchedFiles::new(
         &name,
@@ -284,18 +284,18 @@ fn new_watched_files_for_paths(
 }
 
 impl Project {
-    pub fn current_directory(&self) -> &str {
+    pub fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         &self.current_directory
     }
 
-    pub fn config_file_name(&self) -> &str {
+    pub fn config_file_name(&self) -> &str { ::tsox_core::fntrace::enter("config_file_name"); 
         if self.kind != Kind::Configured {
             panic!("ConfigFileName called on non-configured project");
         }
         &self.config_file_name
     }
 
-    pub fn ext(&self) -> ProjectExt {
+    pub fn ext(&self) -> ProjectExt { ::tsox_core::fntrace::enter("ext"); 
         project_ext_map()
             .lock()
             .unwrap()
@@ -304,32 +304,32 @@ impl Project {
             .unwrap_or_default()
     }
 
-    pub fn set_ext(&self, ext: ProjectExt) {
+    pub fn set_ext(&self, ext: ProjectExt) { ::tsox_core::fntrace::enter("set_ext"); 
         project_ext_map()
             .lock()
             .unwrap()
             .insert(self.config_file_path.clone(), ext);
     }
 
-    pub fn host(&self) -> Option<Arc<CompilerHostImpl>> {
+    pub fn host(&self) -> Option<Arc<CompilerHostImpl>> { ::tsox_core::fntrace::enter("host"); 
         self.ext().host
     }
 
-    pub fn checker_pool(&self) -> Option<Arc<CheckerPool>> {
+    pub fn checker_pool(&self) -> Option<Arc<CheckerPool>> { ::tsox_core::fntrace::enter("checker_pool"); 
         self.ext().checker_pool
     }
 
-    pub fn set_checker_pool(&self, pool: Option<Arc<CheckerPool>>) {
+    pub fn set_checker_pool(&self, pool: Option<Arc<CheckerPool>>) { ::tsox_core::fntrace::enter("set_checker_pool"); 
         let mut ext = self.ext();
         ext.checker_pool = pool;
         self.set_ext(ext);
     }
 
-    pub fn program_files_watch(&self) -> Option<Arc<WatchedFiles<SyncSetOfPaths>>> {
+    pub fn program_files_watch(&self) -> Option<Arc<WatchedFiles<SyncSetOfPaths>>> { ::tsox_core::fntrace::enter("program_files_watch"); 
         self.ext().program_files_watch
     }
 
-    pub fn get_project_diagnostics(&self) -> Vec<Arc<ast::Diagnostic>> {
+    pub fn get_project_diagnostics(&self) -> Vec<Arc<ast::Diagnostic>> { ::tsox_core::fntrace::enter("get_project_diagnostics"); 
         let global_diags = match &self.checker_pool() {
             Some(_pool) => {
                 todo!("CheckerPool::get_global_diagnostics 未移植：Rust CheckerPool 无该公开方法")
@@ -350,29 +350,29 @@ impl Project {
         )
     }
 
-    pub fn has_file_in_program(&self, file_name: &str) -> bool {
+    pub fn has_file_in_program(&self, file_name: &str) -> bool { ::tsox_core::fntrace::enter("has_file_in_program"); 
         self.contains_file_in_program(&self.to_path(file_name))
     }
 
-    pub fn contains_file_in_program(&self, path: &Path) -> bool {
+    pub fn contains_file_in_program(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("contains_file_in_program"); 
         match &self.program {
             Some(program) => program.get_source_file_by_path(&path.0).is_some(),
             None => false,
         }
     }
 
-    pub fn is_source_from_project_reference_in_program(&self, path: &Path) -> bool {
+    pub fn is_source_from_project_reference_in_program(&self, path: &Path) -> bool { ::tsox_core::fntrace::enter("is_source_from_project_reference_in_program"); 
         match &self.program {
             Some(program) => program.is_source_from_project_reference(&path.0),
             None => false,
         }
     }
 
-    pub fn clone_project(&self) -> Project {
+    pub fn clone_project(&self) -> Project { ::tsox_core::fntrace::enter("clone_project"); 
         self.clone_shallow()
     }
 
-    pub fn get_command_line_with_typings_files(&self) -> Option<ParsedCommandLine> {
+    pub fn get_command_line_with_typings_files(&self) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("get_command_line_with_typings_files"); 
         if self.typings_files.is_empty() {
             return self.command_line.clone();
         }
@@ -389,7 +389,7 @@ impl Project {
         Some(command_line.with_file_names(new_root_names))
     }
 
-    pub fn set_potential_project_reference(&mut self, config_file_path: Path) {
+    pub fn set_potential_project_reference(&mut self, config_file_path: Path) { ::tsox_core::fntrace::enter("set_potential_project_reference"); 
         match &mut self.potential_project_references {
             None => {
                 let mut set = HashSet::new();
@@ -405,7 +405,7 @@ impl Project {
     pub fn has_potential_project_reference(
         &self,
         project_tree_request: &ProjectTreeRequest,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("has_potential_project_reference"); 
         if let Some(command_line) = &self.command_line {
             let mut command_line = command_line.clone();
             for path in command_line.resolved_project_reference_paths() {
@@ -423,13 +423,13 @@ impl Project {
         false
     }
 
-    pub fn clone_watchers(&self) -> WatchedFiles<SyncSetOfPaths> {
+    pub fn clone_watchers(&self) -> WatchedFiles<SyncSetOfPaths> { ::tsox_core::fntrace::enter("clone_watchers"); 
         todo!("host.source_fs.seen_files 未接线：snapshotFS 尚未并入 Project host")
     }
 
-    pub fn log(&self, _msg: &str) {}
+    pub fn log(&self, _msg: &str) { ::tsox_core::fntrace::enter("log"); }
 
-    pub fn to_path(&self, file_name: &str) -> Path {
+    pub fn to_path(&self, file_name: &str) -> Path { ::tsox_core::fntrace::enter("to_path"); 
         let use_case_sensitive = self
             .host()
             .map(|h| h.fs().use_case_sensitive_file_names())
@@ -446,7 +446,7 @@ impl Project {
         write_file_names: bool,
         write_file_explanation: bool,
         builder: &mut String,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("print"); 
         let _ = write_file_explanation;
         builder.push_str(&format!("\nProject '{}'\n", self.name()));
         match &self.program {
@@ -467,7 +467,7 @@ impl Project {
         builder.clone()
     }
 
-    pub fn get_type_acquisition(&self) -> Option<m3k::TypeAcquisition> {
+    pub fn get_type_acquisition(&self) -> Option<m3k::TypeAcquisition> { ::tsox_core::fntrace::enter("get_type_acquisition"); 
         if self.kind == Kind::Inferred {
             return Some(m3k::TypeAcquisition {
                 enable: Tristate::True,
@@ -482,7 +482,7 @@ impl Project {
             .cloned()
     }
 
-    pub fn get_unresolved_imports(&self) -> Option<Set<String>> {
+    pub fn get_unresolved_imports(&self) -> Option<Set<String>> { ::tsox_core::fntrace::enter("get_unresolved_imports"); 
         self.program.as_ref().map(|p| {
             let mut set = Set::new();
             for item in p.get_unresolved_imports() {
@@ -492,7 +492,7 @@ impl Project {
         })
     }
 
-    pub fn should_trigger_ata(&self, snapshot_id: u64) -> bool {
+    pub fn should_trigger_ata(&self, snapshot_id: u64) -> bool { ::tsox_core::fntrace::enter("should_trigger_ata"); 
         if self.program.is_none() || self.command_line.is_none() {
             return false;
         }
@@ -513,7 +513,7 @@ impl Project {
         }
     }
 
-    pub fn compute_typings_info(&self) -> ata::TypingsInfo {
+    pub fn compute_typings_info(&self) -> ata::TypingsInfo { ::tsox_core::fntrace::enter("compute_typings_info"); 
         ata::TypingsInfo {
             compiler_options: self
                 .command_line
@@ -526,7 +526,7 @@ impl Project {
     }
 }
 
-fn to_ata_type_acquisition(ta: &m3k::TypeAcquisition) -> ata::TypeAcquisition {
+fn to_ata_type_acquisition(ta: &m3k::TypeAcquisition) -> ata::TypeAcquisition { ::tsox_core::fntrace::enter("to_ata_type_acquisition"); 
     ata::TypeAcquisition {
         enable: ta.enable == Tristate::True,
         include: if ta.include.is_empty() {
@@ -539,7 +539,7 @@ fn to_ata_type_acquisition(ta: &m3k::TypeAcquisition) -> ata::TypeAcquisition {
     }
 }
 
-fn typings_info_equal(a: &ata::TypingsInfo, b: &ata::TypingsInfo) -> bool {
+fn typings_info_equal(a: &ata::TypingsInfo, b: &ata::TypingsInfo) -> bool { ::tsox_core::fntrace::enter("typings_info_equal"); 
     format!("{:?}", a) == format!("{:?}", b)
 }
 
@@ -550,10 +550,10 @@ fn create_resolution_lookup_glob_mapper(
     _default_library_path: &str,
     _project_current_directory: &str,
     _use_case_sensitive_file_names: bool,
-) -> Box<dyn Fn(&SyncSetOfPaths) -> PatternsAndIgnored + Send + Sync> {
+) -> Box<dyn Fn(&SyncSetOfPaths) -> PatternsAndIgnored + Send + Sync> { ::tsox_core::fntrace::enter("create_resolution_lookup_glob_mapper"); 
     Box::new(|_seen_files: &SyncSetOfPaths| PatternsAndIgnored::default())
 }
 
-fn core_identity(patterns: &PatternsAndIgnored) -> PatternsAndIgnored {
+fn core_identity(patterns: &PatternsAndIgnored) -> PatternsAndIgnored { ::tsox_core::fntrace::enter("core_identity"); 
     patterns.clone()
 }

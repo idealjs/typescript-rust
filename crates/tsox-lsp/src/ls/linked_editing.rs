@@ -19,7 +19,7 @@ impl LanguageService {
     pub fn provide_linked_editing_range(
         &self,
         params: &LinkedEditingRangeParams,
-    ) -> Option<LinkedEditingRanges> {
+    ) -> Option<LinkedEditingRanges> { ::tsox_core::fntrace::enter("provide_linked_editing_range"); 
         let (program, source_file) = self.get_program_and_file(&params.text_document.uri);
         let line_map = &source_file.line_map;
 
@@ -41,7 +41,7 @@ impl LanguageService {
     }
 }
 
-fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
+fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> { ::tsox_core::fntrace::enter("find_jsx_linked_ranges"); 
     let tag_node = find_jsx_tag_ancestor(node);
 
     let tag_node = match tag_node {
@@ -90,7 +90,7 @@ fn find_jsx_linked_ranges(node: &Arc<Node>, line_map: &LineMap) -> Vec<Range> {
     }
 }
 
-fn find_jsx_tag_ancestor(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn find_jsx_tag_ancestor(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_jsx_tag_ancestor"); 
     let mut current = Some(Arc::clone(node));
     while let Some(n) = current {
         match n.kind {
@@ -106,7 +106,7 @@ fn find_jsx_tag_ancestor(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-fn jsx_tag_name_range(tag_node: &Arc<Node>, line_map: &LineMap) -> Option<Range> {
+fn jsx_tag_name_range(tag_node: &Arc<Node>, line_map: &LineMap) -> Option<Range> { ::tsox_core::fntrace::enter("jsx_tag_name_range"); 
     let tag_name = match &tag_node.data {
         NodeData::JsxOpeningElement(data) => &data.tag_name,
         NodeData::JsxClosingElement(data) => &data.tag_name,
@@ -119,7 +119,7 @@ fn jsx_tag_name_range(tag_node: &Arc<Node>, line_map: &LineMap) -> Option<Range>
     })
 }
 
-fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -140,14 +140,14 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -156,7 +156,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

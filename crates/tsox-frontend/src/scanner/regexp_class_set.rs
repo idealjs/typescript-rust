@@ -3,7 +3,7 @@ use crate::scanner::regexp::RegExpParser;
 use crate::scanner::regexp::decode_first_rune;
 
 impl<'a> RegExpParser<'a> {
-    pub(super) fn scan_class_set_expression(&mut self) {
+    pub(super) fn scan_class_set_expression(&mut self) { ::tsox_core::fntrace::enter("scan_class_set_expression"); 
         let mut is_character_complement = false;
         if self.char() == '^' {
             self.inc_pos(1);
@@ -202,7 +202,7 @@ impl<'a> RegExpParser<'a> {
     pub(super) fn scan_class_set_sub_expression(
         &mut self,
         expression_type: ClassSetExpressionType,
-    ) {
+    ) { ::tsox_core::fntrace::enter("scan_class_set_sub_expression"); 
         let mut expression_may_contain_strings = self.may_contain_strings;
         while self.pos < self.body_end {
             let ch = self.char();

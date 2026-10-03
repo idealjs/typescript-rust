@@ -100,27 +100,27 @@ pub struct PathSet {
 }
 
 impl PathSet {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         PathSet { items: Vec::new() }
     }
-    pub fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool { ::tsox_core::fntrace::enter("is_empty"); 
         self.items.is_empty()
     }
-    pub fn has(&self, path: &TspathPath) -> bool {
+    pub fn has(&self, path: &TspathPath) -> bool { ::tsox_core::fntrace::enter("has"); 
         self.items.iter().any(|p| p == path)
     }
-    pub fn add(&mut self, path: TspathPath) {
+    pub fn add(&mut self, path: TspathPath) { ::tsox_core::fntrace::enter("add"); 
         if !self.has(&path) {
             self.items.push(path);
         }
     }
-    pub fn delete(&mut self, path: &TspathPath) {
+    pub fn delete(&mut self, path: &TspathPath) { ::tsox_core::fntrace::enter("delete"); 
         self.items.retain(|p| p != path);
     }
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self) { ::tsox_core::fntrace::enter("clear"); 
         self.items.clear();
     }
-    pub fn to_hash_set(&self) -> HashSet<TspathPath> {
+    pub fn to_hash_set(&self) -> HashSet<TspathPath> { ::tsox_core::fntrace::enter("to_hash_set"); 
         self.items.iter().cloned().collect()
     }
 }
@@ -135,7 +135,7 @@ pub struct Session {
 }
 
 impl Session {
-    pub fn get_snapshot_data(&self, handle: SnapshotID) -> Result<*const SnapshotData> {
+    pub fn get_snapshot_data(&self, handle: SnapshotID) -> Result<*const SnapshotData> { ::tsox_core::fntrace::enter("get_snapshot_data"); 
         let guard = self.snapshots_mu.read().unwrap();
         match guard.snapshots.get(&handle) {
             Some(sd) => Ok(std::ptr::from_ref(sd.as_ref())),
@@ -144,15 +144,15 @@ impl Session {
     }
 }
 
-pub fn raw_binary(data: &[u8]) -> String {
+pub fn raw_binary(data: &[u8]) -> String { ::tsox_core::fntrace::enter("raw_binary"); 
     base64_encode_impl(data, false)
 }
 
-pub fn base64_std_encode(data: &[u8]) -> String {
+pub fn base64_std_encode(data: &[u8]) -> String { ::tsox_core::fntrace::enter("base64_std_encode"); 
     base64_encode_impl(data, true)
 }
 
-fn base64_encode_impl(data: &[u8], padded: bool) -> String {
+fn base64_encode_impl(data: &[u8], padded: bool) -> String { ::tsox_core::fntrace::enter("base64_encode_impl"); 
     const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity(data.len().div_ceil(3) * 4);
     for chunk in data.chunks(3) {
@@ -177,18 +177,18 @@ fn base64_encode_impl(data: &[u8], padded: bool) -> String {
     out
 }
 
-pub fn new_project_response(_proj: &Project) -> ProjectResponse {
+pub fn new_project_response(_proj: &Project) -> ProjectResponse { ::tsox_core::fntrace::enter("new_project_response"); 
     ProjectResponse
 }
 
 pub fn compute_snapshot_changes(
     _prev: &Snapshot,
     _current: &Snapshot,
-) -> Option<SnapshotChanges> {
+) -> Option<SnapshotChanges> { ::tsox_core::fntrace::enter("compute_snapshot_changes"); 
     None
 }
 
-fn node_builder_type_format_flags(bits: u32) -> TypeFormatFlags {
+fn node_builder_type_format_flags(bits: u32) -> TypeFormatFlags { ::tsox_core::fntrace::enter("node_builder_type_format_flags"); 
     let canonical_bits: [(u32, TypeFormatFlags); 5] = [
         (1 << 0, TypeFormatFlags::NO_TRUNCATION),
         (1 << 1, TypeFormatFlags::WRITE_ARRAY_AS_GENERIC),
@@ -205,12 +205,12 @@ fn node_builder_type_format_flags(bits: u32) -> TypeFormatFlags {
     flags
 }
 
-pub fn parse_project_handle(project: &ProjectID) -> String {
+pub fn parse_project_handle(project: &ProjectID) -> String { ::tsox_core::fntrace::enter("parse_project_handle"); 
     project.clone()
 }
 
 impl Session {
-    pub fn retain_snapshot_data(&mut self, handle: SnapshotID) -> Result<*mut SnapshotData> {
+    pub fn retain_snapshot_data(&mut self, handle: SnapshotID) -> Result<*mut SnapshotData> { ::tsox_core::fntrace::enter("retain_snapshot_data"); 
         let mut guard = self.snapshots_mu.write().unwrap();
         match guard.snapshots.get_mut(&handle) {
             Some(sd) => {
@@ -221,7 +221,7 @@ impl Session {
         }
     }
 
-    pub fn release_snapshot(&mut self, handle: SnapshotID) -> Result<()> {
+    pub fn release_snapshot(&mut self, handle: SnapshotID) -> Result<()> { ::tsox_core::fntrace::enter("release_snapshot"); 
         let mut guard = self.snapshots_mu.write().unwrap();
         let release = match guard.snapshots.get_mut(&handle) {
             None => return Err(err_client_error(&format!("snapshot {handle} not found"))),
@@ -241,7 +241,7 @@ impl Session {
         &self,
         snapshot: SnapshotID,
         project_handle: ProjectID,
-    ) -> Result<CheckerSetup<'_>> {
+    ) -> Result<CheckerSetup<'_>> { ::tsox_core::fntrace::enter("setup_checker"); 
         let sd = unsafe { &*self.get_snapshot_data(snapshot)? };
         let program = sd.get_program(&project_handle)?;
         let checker = program.get_type_checker();
@@ -259,7 +259,7 @@ impl Session {
         program: &Arc<Program>,
         project_handle: ProjectID,
         active_file: &str,
-    ) -> Result<tsox_lsp::ls::language_service::LanguageService> {
+    ) -> Result<tsox_lsp::ls::language_service::LanguageService> { ::tsox_core::fntrace::enter("setup_language_service"); 
         let project_name = parse_project_handle(&project_handle);
         let path = TspathPath(project_name.clone());
         let proj = sd
@@ -282,7 +282,7 @@ impl Session {
         &self,
         program: &Program,
         file: Option<&DocumentIdentifier>,
-    ) -> Result<Option<*const SourceFile>> {
+    ) -> Result<Option<*const SourceFile>> { ::tsox_core::fntrace::enter("resolve_optional_source_file"); 
         let file = match file {
             Some(file) => file,
             None => return Ok(None),
@@ -299,7 +299,7 @@ impl Session {
         &self,
         params: &GetTypePropertyParams,
         getter: impl Fn(&Arc<CheckerType>) -> Option<&Arc<CheckerType>>,
-    ) -> Result<Option<TypeResponse>> {
+    ) -> Result<Option<TypeResponse>> { ::tsox_core::fntrace::enter("resolve_type_property_of_type"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let t = sd.resolve_type_handle(&params.project, params.r#type)?;
         let result = getter(unsafe { &*t });
@@ -313,7 +313,7 @@ impl Session {
         &self,
         params: &GetTypePropertyParams,
         getter: impl Fn(&Arc<CheckerType>) -> Vec<Arc<CheckerType>>,
-    ) -> Result<Option<Vec<TypeResponse>>> {
+    ) -> Result<Option<Vec<TypeResponse>>> { ::tsox_core::fntrace::enter("resolve_type_array_property_of_type"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let t = sd.resolve_type_handle(&params.project, params.r#type)?;
         let types = getter(unsafe { &*t });
@@ -331,7 +331,7 @@ impl Session {
         &self,
         params: &GetTypePropertyParams,
         getter: impl Fn(&Arc<CheckerType>) -> Option<&Arc<Symbol>>,
-    ) -> Result<Option<SymbolResponse>> {
+    ) -> Result<Option<SymbolResponse>> { ::tsox_core::fntrace::enter("resolve_symbol_property_of_type"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let t = sd.resolve_type_handle(&params.project, params.r#type)?;
         let result = getter(unsafe { &*t });
@@ -345,7 +345,7 @@ impl Session {
         &self,
         params: &GetSymbolPropertyParams,
         getter: impl Fn(&Arc<Symbol>) -> Option<&Arc<Symbol>>,
-    ) -> Result<Option<SymbolResponse>> {
+    ) -> Result<Option<SymbolResponse>> { ::tsox_core::fntrace::enter("resolve_symbol_property_of_symbol"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let symbol = sd.resolve_symbol_handle(params.symbol)?;
         let result = getter(unsafe { &*symbol });
@@ -359,7 +359,7 @@ impl Session {
         &self,
         params: &GetSymbolPropertyParams,
         getter: impl Fn(&Arc<Symbol>) -> Vec<Arc<Symbol>>,
-    ) -> Result<Option<Vec<SymbolResponse>>> {
+    ) -> Result<Option<Vec<SymbolResponse>>> { ::tsox_core::fntrace::enter("resolve_symbol_table_property_of_symbol"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let symbol = sd.resolve_symbol_handle(params.symbol)?;
         let symbol_table = getter(unsafe { &*symbol });
@@ -386,7 +386,7 @@ impl Session {
         &self,
         params: &GetSignaturePropertyParams,
         getter: impl Fn(&Arc<CheckerSignature>) -> Vec<Arc<Symbol>>,
-    ) -> Result<Option<Vec<SymbolResponse>>> {
+    ) -> Result<Option<Vec<SymbolResponse>>> { ::tsox_core::fntrace::enter("resolve_symbol_array_property_of_signature"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let sig = sd.resolve_signature_handle(&params.project, params.signature)?;
         let symbols = getter(unsafe { &*sig });
@@ -404,7 +404,7 @@ impl Session {
         &self,
         params: &GetSignaturePropertyParams,
         getter: impl Fn(&Arc<CheckerSignature>) -> Option<&Arc<Symbol>>,
-    ) -> Result<Option<SymbolResponse>> {
+    ) -> Result<Option<SymbolResponse>> { ::tsox_core::fntrace::enter("resolve_symbol_property_of_signature"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let sig = sd.resolve_signature_handle(&params.project, params.signature)?;
         let result = getter(unsafe { &*sig });
@@ -418,7 +418,7 @@ impl Session {
         &self,
         params: &GetSignaturePropertyParams,
         getter: impl Fn(&Arc<CheckerSignature>) -> Vec<Arc<CheckerType>>,
-    ) -> Result<Option<Vec<TypeResponse>>> {
+    ) -> Result<Option<Vec<TypeResponse>>> { ::tsox_core::fntrace::enter("resolve_type_array_property_of_signature"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let sig = sd.resolve_signature_handle(&params.project, params.signature)?;
         let types = getter(unsafe { &*sig });
@@ -436,7 +436,7 @@ impl Session {
         &self,
         params: &GetSignaturePropertyParams,
         getter: impl Fn(&Arc<CheckerSignature>) -> Option<&Arc<CheckerSignature>>,
-    ) -> Result<Option<SignatureResponse>> {
+    ) -> Result<Option<SignatureResponse>> { ::tsox_core::fntrace::enter("resolve_signature_property_of_signature"); 
         let sd = unsafe { &*self.get_snapshot_data(params.snapshot)? };
         let sig = sd.resolve_signature_handle(&params.project, params.signature)?;
         let result = getter(unsafe { &*sig });
@@ -449,7 +449,7 @@ impl Session {
     pub fn handle_type_to_type_node(
         &self,
         params: &TypeToTypeNodeParams,
-    ) -> Result<Option<SourceFileResponse>> {
+    ) -> Result<Option<SourceFileResponse>> { ::tsox_core::fntrace::enter("handle_type_to_type_node"); 
         let mut setup = self.setup_checker(params.snapshot, params.project.clone())?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let mut enclosing_declaration: Option<*const Node> = None;
@@ -473,7 +473,7 @@ impl Session {
     pub fn handle_type_to_string(
         &self,
         params: &TypeToTypeNodeParams,
-    ) -> Result<String> {
+    ) -> Result<String> { ::tsox_core::fntrace::enter("handle_type_to_string"); 
         let mut setup = self.setup_checker(params.snapshot, params.project.clone())?;
         let t = setup.resolve_type_handle(params.r#type)?;
         let mut enclosing_declaration: Option<*const Node> = None;
@@ -498,7 +498,7 @@ impl Session {
         &self,
         params: &TranspileParams,
         declaration: bool,
-    ) -> Result<TranspileOutputResponse> {
+    ) -> Result<TranspileOutputResponse> { ::tsox_core::fntrace::enter("handle_transpile"); 
         crate::api::mig::m5m::transpile_output(&params.input, params.options.clone(), declaration)
     }
 
@@ -506,7 +506,7 @@ impl Session {
         &self,
         params: &TranspileFromFileParams,
         declaration: bool,
-    ) -> Result<TranspileOutputResponse> {
+    ) -> Result<TranspileOutputResponse> { ::tsox_core::fntrace::enter("handle_transpile_from_file"); 
         let file_name = tsox_core::tspath::get_normalized_absolute_path(
             &params.file_name,
             self.project_session.current_directory(),
@@ -525,7 +525,7 @@ impl Session {
         crate::api::mig::m5m::transpile_output(&input, options, declaration)
     }
 
-    pub fn release_open_refs(&mut self) {
+    pub fn release_open_refs(&mut self) { ::tsox_core::fntrace::enter("release_open_refs"); 
         let mut update_guard = self.update_mu.lock().unwrap();
         if self.open_projects.is_empty() && self.open_files.is_empty() {
             return;
@@ -550,7 +550,7 @@ impl Session {
         drop(update_guard);
     }
 
-    pub fn to_path(&self, file_name: &str) -> TspathPath {
+    pub fn to_path(&self, file_name: &str) -> TspathPath { ::tsox_core::fntrace::enter("to_path"); 
         let fs = self.project_session.fs().expect("project session fs");
         tspath_to_path(
             file_name,
@@ -562,7 +562,7 @@ impl Session {
     pub fn to_file_change_summary(
         &self,
         changes: Option<&APIFileChanges>,
-    ) -> FileChangeSummary {
+    ) -> FileChangeSummary { ::tsox_core::fntrace::enter("to_file_change_summary"); 
         let changes = match changes {
             Some(changes) => changes,
             None => return FileChangeSummary::default(),
@@ -595,7 +595,7 @@ impl Session {
     pub fn handle_update_snapshot(
         &mut self,
         params: &UpdateSnapshotParams,
-    ) -> Result<UpdateSnapshotResponse> {
+    ) -> Result<UpdateSnapshotResponse> { ::tsox_core::fntrace::enter("handle_update_snapshot"); 
         let _update_guard = self.update_mu.lock().unwrap();
         let file_changes = self.to_file_change_summary(params.file_changes.as_ref());
         let mut api_request = APISnapshotRequest::default();
@@ -719,7 +719,7 @@ impl Session {
     pub fn handle_update_temporary_snapshot(
         &mut self,
         params: &UpdateTemporarySnapshotParams,
-    ) -> Result<UpdateSnapshotResponse> {
+    ) -> Result<UpdateSnapshotResponse> { ::tsox_core::fntrace::enter("handle_update_temporary_snapshot"); 
         let base_sd = self.retain_snapshot_data(params.snapshot)?;
         let uri = params
             .file

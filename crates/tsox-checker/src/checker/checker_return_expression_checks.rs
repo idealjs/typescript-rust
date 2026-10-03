@@ -12,7 +12,7 @@ impl Checker {
         expr: &Arc<Node>,
         in_conditional: bool,
         in_return_statement: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_return_expression_against_type"); 
         let unwrapped = Checker::skip_parentheses(expr);
         if let NodeData::ConditionalExpression(d) = &unwrapped.data {
             for branch in [&d.when_true, &d.when_false] {
@@ -48,7 +48,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn is_thenable_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_thenable_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_thenable_type"); 
         if !t.flags.contains(TypeFlags::Object) {
             return false;
         }
@@ -66,7 +66,7 @@ impl Checker {
         t: &Arc<Type>,
         error_node: Option<&Arc<Node>>,
         message: tsox_core::diagnostics::Message,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("check_awaited_type_no_alias"); 
         if self.get_promised_type_of_promise(t).is_none() && self.is_thenable_type(t) {
             if let Some(node) = error_node {
                 let file = self.get_source_file_of_node(node);
@@ -85,7 +85,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         return_type_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_async_function_return_type"); 
         let return_type = self.get_type_from_type_node(return_type_node);
         if crate::checker::utilities::is_type_error(&return_type) {
             return;

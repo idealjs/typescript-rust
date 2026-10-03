@@ -35,7 +35,7 @@ pub struct MetadataTransformer<'a> {
 }
 
 impl<'a> MetadataTransformer<'a> {
-    pub fn new_metadata_transformer(opts: &TransformOptions) -> Arc<Transformer> {
+    pub fn new_metadata_transformer(opts: &TransformOptions) -> Arc<Transformer> { ::tsox_core::fntrace::enter("new_metadata_transformer"); 
         let mut tx = Box::new(MetadataTransformer {
             legacy_decorators: opts.compiler_options.experimental_decorators.is_true(),
             resolver: &opts.emit_resolver,
@@ -56,26 +56,26 @@ impl<'a> MetadataTransformer<'a> {
         &self,
         _visit: fn(&mut Self, Arc<Node>) -> Option<Arc<Node>>,
         emit_context: &EmitContext,
-    ) -> Arc<Transformer> {
+    ) -> Arc<Transformer> { ::tsox_core::fntrace::enter("new_transformer"); 
         Arc::new(Transformer::new(
             metadata_transformer_visit_entry,
             Some(emit_context.clone()),
         ))
     }
 
-    pub fn emit_context_mut(&mut self) -> &mut EmitContext {
+    pub fn emit_context_mut(&mut self) -> &mut EmitContext { ::tsox_core::fntrace::enter("emit_context_mut"); 
         self.emit_context.as_mut().unwrap()
     }
 
-    pub fn factory(&self) -> NodeFactory<'_> {
+    pub fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(self.emit_context.as_ref().unwrap())
     }
 
-    pub fn visitor(&mut self) -> &mut NodeVisitor {
+    pub fn visitor(&mut self) -> &mut NodeVisitor { ::tsox_core::fntrace::enter("visitor"); 
         self.substitution_visitor.as_mut().unwrap()
     }
 
-    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit"); 
         if !node
             .subtree_facts()
             .intersects(SubtreeContainsDecorators)
@@ -111,15 +111,15 @@ impl<'a> MetadataTransformer<'a> {
         }
     }
 
-    pub fn set_parent(&mut self, node: Option<Arc<Node>>) {
+    pub fn set_parent(&mut self, node: Option<Arc<Node>>) { ::tsox_core::fntrace::enter("set_parent"); 
         self.parent = node;
     }
 
-    pub fn set_current_lexical_scope(&mut self, node: Option<Arc<Node>>) {
+    pub fn set_current_lexical_scope(&mut self, node: Option<Arc<Node>>) { ::tsox_core::fntrace::enter("set_current_lexical_scope"); 
         self.current_lexical_scope = node;
     }
 
-    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_class_expression(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_expression"); 
         let old_parent = self.parent.take();
         self.parent = Some(Arc::clone(node));
 
@@ -147,7 +147,7 @@ impl<'a> MetadataTransformer<'a> {
         result
     }
 
-    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_class_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_class_declaration"); 
         let old_parent = self.parent.take();
         self.parent = Some(Arc::clone(node));
 
@@ -175,7 +175,7 @@ impl<'a> MetadataTransformer<'a> {
         result
     }
 
-    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_property_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_property_declaration"); 
         if !has_decorators(node) {
             return self.visitor().visit_each_child(node);
         }
@@ -200,7 +200,7 @@ impl<'a> MetadataTransformer<'a> {
         ))
     }
 
-    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_method_declaration"); 
         if !has_decorators(node) && get_decorators_of_parameters(Some(node)).is_empty() {
             return self.visitor().visit_each_child(node);
         }
@@ -236,7 +236,7 @@ impl<'a> MetadataTransformer<'a> {
         ))
     }
 
-    pub fn visit_set_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_set_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_set_accessor"); 
         if !has_decorators(node) && get_decorators_of_parameters(Some(node)).is_empty() {
             return self.visitor().visit_each_child(node);
         }
@@ -268,7 +268,7 @@ impl<'a> MetadataTransformer<'a> {
         ))
     }
 
-    pub fn visit_get_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_get_accessor(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_get_accessor"); 
         if !has_decorators(node) {
             return self.visitor().visit_each_child(node);
         }

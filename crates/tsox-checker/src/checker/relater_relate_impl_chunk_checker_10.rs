@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_enum_type_related_to"); 
         let Some(source_symbol) = source.symbol.as_ref() else {
             return false;
         };
@@ -98,7 +98,7 @@ impl Checker {
         true
     }
 
-    pub(crate) fn is_unknown_like_union_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_unknown_like_union_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_unknown_like_union_type"); 
         if !self.strict_null_checks || !t.flags.contains(TypeFlags::Union) {
             return false;
         }
@@ -118,7 +118,7 @@ impl Checker {
         has_undefined && has_null && has_empty_object
     }
 
-    pub fn is_empty_anonymous_object_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_empty_anonymous_object_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_empty_anonymous_object_type"); 
         if !t.object_flags.contains(ObjectFlags::Anonymous) {
             return false;
         }
@@ -134,7 +134,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn structured_type_is_empty(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn structured_type_is_empty(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("structured_type_is_empty"); 
         !Arc::ptr_eq(t, &self.any_function_type())
             && self.get_properties_of_type(t).is_empty()
             && t.as_structured()
@@ -147,7 +147,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         source_is_primitive: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_index_signatures_related_to"); 
         use tsox_core::diagnostics::messages_generated as msg;
         if source.flags.contains(TypeFlags::Any) {
             return true;

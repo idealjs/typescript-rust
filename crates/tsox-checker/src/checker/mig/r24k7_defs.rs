@@ -4,11 +4,11 @@ use crate::checker::checker::Checker;
 use crate::checker::types::{IntersectionFlags, Type, TypeData, TypeFlags};
 
 impl Checker {
-    pub fn is_primitive_or_object_or_empty_type(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_primitive_or_object_or_empty_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_primitive_or_object_or_empty_type"); 
         t.flags.intersects(TypeFlags::PRIMITIVE | TypeFlags::NON_PRIMITIVE) || self.is_empty_anonymous_object_type(t)
     }
 
-    pub fn contains_missing_type(&self, t: &Arc<Type>) -> bool {
+    pub fn contains_missing_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("contains_missing_type"); 
         Arc::ptr_eq(t, &self.missing_type)
             || t.flags.intersects(TypeFlags::UNION)
                 && match &t.data {
@@ -21,7 +21,7 @@ impl Checker {
                 }
     }
 
-    pub fn get_cross_product_intersections(&mut self, types: &[Arc<Type>], flags: IntersectionFlags) -> Vec<Arc<Type>> {
+    pub fn get_cross_product_intersections(&mut self, types: &[Arc<Type>], flags: IntersectionFlags) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("get_cross_product_intersections"); 
         let count = Checker::cross_product_union_size(types);
         let mut intersections: Vec<Arc<Type>> = Vec::new();
         for i in 0..count {

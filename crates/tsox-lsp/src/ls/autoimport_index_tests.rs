@@ -7,13 +7,13 @@ struct TestEntry {
 }
 
 impl Named for TestEntry {
-    fn name(&self) -> &str {
+    fn name(&self) -> &str { ::tsox_core::fntrace::enter("name"); 
         &self.name
     }
 }
 
 #[test]
-fn test_word_indices() {
+fn test_word_indices() { ::tsox_core::fntrace::enter("test_word_indices"); 
     assert_eq!(word_indices("CamelCase"), vec![0, 5]);
     assert_eq!(word_indices("snake_case"), vec![0, 6]);
     assert_eq!(word_indices("ParseURL"), vec![0, 5]);
@@ -21,7 +21,7 @@ fn test_word_indices() {
 }
 
 #[test]
-fn test_contains_chars_in_order() {
+fn test_contains_chars_in_order() { ::tsox_core::fntrace::enter("test_contains_chars_in_order"); 
     assert!(contains_chars_in_order("CamelCase", "cc"));
     assert!(contains_chars_in_order("hello world", "hw"));
     assert!(!contains_chars_in_order("hello world", "wh"));

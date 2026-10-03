@@ -19,20 +19,20 @@ pub struct ScriptInfo {
 }
 
 impl Script for ScriptInfo {
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
-    fn text(&self) -> &str {
+    fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 }
 
 impl LanguageService {
-    pub fn get_mapped_location(&self, _file_name: &str, _file_range: TextRange) -> Location {
+    pub fn get_mapped_location(&self, _file_name: &str, _file_range: TextRange) -> Location { ::tsox_core::fntrace::enter("get_mapped_location"); 
         Location::default()
     }
 
-    pub fn get_script(&self, file_name: &str) -> Option<ScriptInfo> {
+    pub fn get_script(&self, file_name: &str) -> Option<ScriptInfo> { ::tsox_core::fntrace::enter("get_script"); 
         let text = self.read_file(file_name)?;
         Some(ScriptInfo {
             file_name: file_name.to_string(),
@@ -44,7 +44,7 @@ impl LanguageService {
         &self,
         _file_name: &str,
         _position: TextPos,
-    ) -> Option<DocumentPosition> {
+    ) -> Option<DocumentPosition> { ::tsox_core::fntrace::enter("try_get_source_position"); 
         None
     }
 }

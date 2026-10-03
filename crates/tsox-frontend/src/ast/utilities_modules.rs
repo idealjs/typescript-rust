@@ -1,7 +1,7 @@
 use crate::ast::*;
 use std::sync::Arc;
 
-pub fn is_identifier_name(node: &Arc<Node>) -> bool {
+pub fn is_identifier_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_identifier_name"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -41,14 +41,14 @@ pub fn is_identifier_name(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_in_top_level_context(node: &Arc<Node>) -> bool {
+pub fn is_in_top_level_context(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_top_level_context"); 
     let Some(parent) = node.parent() else {
         return true;
     };
     !find_ancestor(&parent, is_function_like).is_some()
 }
 
-pub fn is_module_with_string_literal_name(node: &Node) -> bool {
+pub fn is_module_with_string_literal_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_with_string_literal_name"); 
     is_module_declaration(node)
         && node
             .name()
@@ -56,7 +56,7 @@ pub fn is_module_with_string_literal_name(node: &Node) -> bool {
             .unwrap_or(false)
 }
 
-pub fn is_ambient_module(node: &Node) -> bool {
+pub fn is_ambient_module(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_ambient_module"); 
     if !is_module_declaration(node) {
         return false;
     }
@@ -68,7 +68,7 @@ pub fn is_ambient_module(node: &Node) -> bool {
     }
 }
 
-pub fn is_global_scope_augmentation(node: &Node) -> bool {
+pub fn is_global_scope_augmentation(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_global_scope_augmentation"); 
     if !is_module_declaration(node) {
         return false;
     }
@@ -78,6 +78,6 @@ pub fn is_global_scope_augmentation(node: &Node) -> bool {
     false
 }
 
-pub fn is_ambient_module_symbol_name(s: &str) -> bool {
+pub fn is_ambient_module_symbol_name(s: &str) -> bool { ::tsox_core::fntrace::enter("is_ambient_module_symbol_name"); 
     s.starts_with('"') && s.ends_with('"')
 }

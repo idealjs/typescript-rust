@@ -37,7 +37,7 @@ impl FlowFlags {
 
 impl std::ops::BitOr for FlowFlags {
     type Output = Self;
-    fn bitor(self, rhs: Self) -> Self {
+    fn bitor(self, rhs: Self) -> Self { ::tsox_core::fntrace::enter("bitor"); 
         Self(self.0 | rhs.0)
     }
 }
@@ -57,7 +57,7 @@ pub struct FlowNode {
 }
 
 impl FlowNode {
-    pub fn new(flags: FlowFlags) -> Self {
+    pub fn new(flags: FlowFlags) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             flags,
             node: None,

@@ -59,7 +59,7 @@ pub struct WatchCompilerHost {
 }
 
 impl WatchCompilerHost {
-    pub fn get_source_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> {
+    pub fn get_source_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         let info = self.inner.fs().stat(&opts.file_name);
         let path = Path(opts.path.clone());
 
@@ -93,27 +93,27 @@ impl WatchCompilerHost {
 }
 
 impl CompilerHost for WatchCompilerHost {
-    fn fs(&self) -> &dyn FS {
+    fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
         CompilerHost::fs(&self.inner)
     }
 
-    fn fs_arc(&self) -> Arc<dyn FS> {
+    fn fs_arc(&self) -> Arc<dyn FS> { ::tsox_core::fntrace::enter("fs_arc"); 
         CompilerHost::fs_arc(&self.inner)
     }
 
-    fn current_directory(&self) -> &str {
+    fn current_directory(&self) -> &str { ::tsox_core::fntrace::enter("current_directory"); 
         CompilerHost::current_directory(&self.inner)
     }
 
-    fn default_library_path(&self) -> &str {
+    fn default_library_path(&self) -> &str { ::tsox_core::fntrace::enter("default_library_path"); 
         CompilerHost::default_library_path(&self.inner)
     }
 
-    fn content_mapper_project(&self) -> Option<Arc<dyn contentmapper::Project>> {
+    fn content_mapper_project(&self) -> Option<Arc<dyn contentmapper::Project>> { ::tsox_core::fntrace::enter("content_mapper_project"); 
         CompilerHost::content_mapper_project(&self.inner)
     }
 
-    fn get_source_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> {
+    fn get_source_file(&self, opts: &SourceFileParseOptions) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("get_source_file"); 
         WatchCompilerHost::get_source_file(self, opts)
     }
 
@@ -121,7 +121,7 @@ impl CompilerHost for WatchCompilerHost {
         &self,
         parse_options: &SourceFileParseOptions,
         mapper: &tsox_compile::mig::m3l_cm::Mapper,
-    ) -> Result<tsox_compile::mig::m3l_cm_2::SourceFiles, m4v_3::ContentMapperError> {
+    ) -> Result<tsox_compile::mig::m3l_cm_2::SourceFiles, m4v_3::ContentMapperError> { ::tsox_core::fntrace::enter("get_content_mapped_source_files"); 
         CompilerHost::get_content_mapped_source_files(&self.inner, parse_options, mapper)
     }
 }
@@ -167,7 +167,7 @@ pub fn create_watcher(
     report_diagnostic: Box<dyn Fn(&ast::Diagnostic)>,
     report_error_summary: Box<dyn Fn(&[Arc<ast::Diagnostic>])>,
     testing: Option<Arc<dyn crate::mig::m5b::testing::CommandLineTesting>>,
-) -> Watcher {
+) -> Watcher { ::tsox_core::fntrace::enter("create_watcher"); 
     let sys_for_wm = Arc::clone(&sys);
     let mut wm =
         WatchManager::new(sys.writer(), Arc::new(move |dir| sys_for_wm.fs().directory_exists(dir)));
@@ -215,7 +215,7 @@ pub fn create_watcher(
 }
 
 impl Watcher {
-    pub fn start(&mut self, ctx: &crate::mig::m5b_4::Context) {
+    pub fn start(&mut self, ctx: &crate::mig::m5b_4::Context) { ::tsox_core::fntrace::enter("start"); 
         self.content_mapper_host =
             new_content_mapper_host(&*self.sys, &self.config.compiler_options);
         let owns_host = self.content_mapper_host.is_some() && self.testing.is_none();
@@ -282,7 +282,7 @@ impl Watcher {
         }
     }
 
-    pub fn replace_content_mapper_project(&mut self, config: &ParsedCommandLine) {
+    pub fn replace_content_mapper_project(&mut self, config: &ParsedCommandLine) { ::tsox_core::fntrace::enter("replace_content_mapper_project"); 
         let host = match &mut self.content_mapper_host {
             Some(h) => h,
             None => return,
@@ -302,7 +302,7 @@ impl Watcher {
         self.content_mapper_project = project;
     }
 
-    pub fn content_mapper_watched_files(&self) -> Vec<String> {
+    pub fn content_mapper_watched_files(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_watched_files"); 
         let mut files: Vec<String> = Vec::new();
         for mapper in self.config.content_mappers() {
             if !mapper.package_directory.is_empty() && mapper.contribution_id.is_empty() {
@@ -327,7 +327,7 @@ impl Watcher {
         files
     }
 
-    pub fn compute_desired_watches(&mut self, seen_file_paths: &[String]) -> HashMap<String, bool> {
+    pub fn compute_desired_watches(&mut self, seen_file_paths: &[String]) -> HashMap<String, bool> { ::tsox_core::fntrace::enter("compute_desired_watches"); 
         let cwd = self.sys.current_directory().to_string();
 
         let mut desired_dirs: HashMap<String, bool> = HashMap::new();
@@ -375,19 +375,19 @@ impl Watcher {
         self.wm.resolve_desired_dirs(&coverage.dirs())
     }
 
-    pub fn reconcile_watches(&mut self, seen_file_paths: &[String]) -> Result<(), String> {
+    pub fn reconcile_watches(&mut self, seen_file_paths: &[String]) -> Result<(), String> { ::tsox_core::fntrace::enter("reconcile_watches"); 
         let desired_dirs = self.compute_desired_watches(seen_file_paths);
         self.wm.reconcile_watches(&desired_dirs)
     }
 
-    pub fn compare_paths_options(&self) -> ComparePathsOptions {
+    pub fn compare_paths_options(&self) -> ComparePathsOptions { ::tsox_core::fntrace::enter("compare_paths_options"); 
         ComparePathsOptions {
             use_case_sensitive_file_names: self.sys.fs().use_case_sensitive_file_names(),
             current_directory: self.sys.current_directory().to_string(),
         }
     }
 
-    pub fn do_cycle(&mut self) {
+    pub fn do_cycle(&mut self) { ::tsox_core::fntrace::enter("do_cycle"); 
         self.wm.lock();
         let (changed_paths, overflow) = self.wm.drain_events();
         let has_events = !changed_paths.is_empty() || overflow;
@@ -485,7 +485,7 @@ impl Watcher {
         self.wm.unlock();
     }
 
-    pub fn is_relevant_change(&self, changed_paths: &HashMap<String, EventKind>) -> bool {
+    pub fn is_relevant_change(&self, changed_paths: &HashMap<String, EventKind>) -> bool { ::tsox_core::fntrace::enter("is_relevant_change"); 
         let case_sensitive = self.sys.fs().use_case_sensitive_file_names();
         let cwd = self.sys.current_directory().to_string();
         let opts = self.compare_paths_options();
@@ -515,7 +515,7 @@ impl Watcher {
         false
     }
 
-    pub fn do_build(&mut self) -> Result<(), String> {
+    pub fn do_build(&mut self) -> Result<(), String> { ::tsox_core::fntrace::enter("do_build"); 
         if self.config_modified {
             self.source_file_cache = tsox_core::collections::syncmap::SyncMap::new();
             self.watch_set_dirty = true;
@@ -684,7 +684,7 @@ impl Watcher {
         Ok(())
     }
 
-    pub fn try_update_program(&mut self, host: Arc<WatchCompilerHost>) -> bool {
+    pub fn try_update_program(&mut self, host: Arc<WatchCompilerHost>) -> bool { ::tsox_core::fntrace::enter("try_update_program"); 
         let old_program = self.program.as_ref().unwrap().get_program();
 
         let mut changed_path: Option<Path> = None;
@@ -731,15 +731,15 @@ impl Watcher {
         reused
     }
 
-    pub fn fast_path_builds(&self) -> usize {
+    pub fn fast_path_builds(&self) -> usize { ::tsox_core::fntrace::enter("fast_path_builds"); 
         self.fast_path_builds
     }
 
-    pub fn full_builds(&self) -> usize {
+    pub fn full_builds(&self) -> usize { ::tsox_core::fntrace::enter("full_builds"); 
         self.full_builds
     }
 
-    pub fn evict_changed_source_files(&mut self, changed_paths: &HashMap<String, EventKind>) {
+    pub fn evict_changed_source_files(&mut self, changed_paths: &HashMap<String, EventKind>) { ::tsox_core::fntrace::enter("evict_changed_source_files"); 
         let case_sensitive = self.sys.fs().use_case_sensitive_file_names();
         let cwd = self.sys.current_directory().to_string();
         for event_path in changed_paths.keys() {
@@ -753,7 +753,7 @@ impl Watcher {
         }
     }
 
-    pub fn compile_and_emit(&mut self) -> CompileAndEmitResult {
+    pub fn compile_and_emit(&mut self) -> CompileAndEmitResult { ::tsox_core::fntrace::enter("compile_and_emit"); 
         let mut compile_times = CompileTimes::default();
         let emit_program = super::m5a_3::EmitProgram;
         let program_like = EmitProgramLike { program: &emit_program };
@@ -771,7 +771,7 @@ impl Watcher {
         emit_files_and_report_errors(&mut input)
     }
 
-    pub fn content_mapper_manifest_changed(&self, changed_paths: &HashMap<String, EventKind>) -> bool {
+    pub fn content_mapper_manifest_changed(&self, changed_paths: &HashMap<String, EventKind>) -> bool { ::tsox_core::fntrace::enter("content_mapper_manifest_changed"); 
         for mapper in self.config.content_mappers() {
             if mapper.package_directory.is_empty() || !mapper.contribution_id.is_empty() {
                 continue;
@@ -783,7 +783,7 @@ impl Watcher {
         false
     }
 
-    pub fn recheck_ts_config(&mut self, force: bool) -> bool {
+    pub fn recheck_ts_config(&mut self, force: bool) -> bool { ::tsox_core::fntrace::enter("recheck_ts_config"); 
         if self.config_file_name.is_empty() {
             return false;
         }
@@ -832,7 +832,7 @@ impl Watcher {
         false
     }
 
-    pub fn parse_config_file(&mut self) -> Option<ParsedCommandLine> {
+    pub fn parse_config_file(&mut self) -> Option<ParsedCommandLine> { ::tsox_core::fntrace::enter("parse_config_file"); 
         let extended_config_cache = ExtendedConfigCache::default();
         let sys = tsox_tsoptions::mig::m5j_2::ParseConfigHost {
             fs: self.sys.fs(),
@@ -877,7 +877,7 @@ pub fn equal_jsx_implicit_import(
     options: &CompilerOptions,
     old_file: &SourceFile,
     new_file: &SourceFile,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("equal_jsx_implicit_import"); 
     let is_jsx = |file: &SourceFile| {
         file.script_kind == ScriptKind::Jsx
             || file.script_kind == ScriptKind::Tsx
@@ -894,13 +894,13 @@ fn get_trace_from_sys(
     sys: &dyn System,
     locale: Option<tsox_core::locale::Locale>,
     testing: Option<&dyn crate::mig::m5b::testing::CommandLineTesting>,
-) -> super::m5a::TraceFn {
+) -> super::m5a::TraceFn { ::tsox_core::fntrace::enter("get_trace_from_sys"); 
     get_trace_from_sys_tsc(sys, locale, testing)
 }
 
 fn content_mapper_to_mapper(
     mapper: &tsox_tsoptions::mig::m5h_3::ContentMapper,
-) -> tsox_compile::mig::m3l_cm::Mapper {
+) -> tsox_compile::mig::m3l_cm::Mapper { ::tsox_core::fntrace::enter("content_mapper_to_mapper"); 
     tsox_compile::mig::m3l_cm::Mapper {
         definition: tsox_compile::mig::m3l_cm::Definition {
             package: mapper.definition.package.clone(),

@@ -7,7 +7,7 @@ use super::m3g::is_literal_computed_property_declaration_name;
 use super::m3h::is_argument_of_element_access_expression;
 use super::w5::get_leftmost_access_expression;
 
-fn node_is_type_only(node: &Node) -> bool {
+fn node_is_type_only(node: &Node) -> bool { ::tsox_core::fntrace::enter("node_is_type_only"); 
     match &node.data {
         NodeData::ExportSpecifier(d) => d.is_type_only,
         NodeData::ImportSpecifier(d) => d.is_type_only,
@@ -18,7 +18,7 @@ fn node_is_type_only(node: &Node) -> bool {
     }
 }
 
-pub fn is_part_of_type_node_in_parent(node: &Arc<Node>) -> bool {
+pub fn is_part_of_type_node_in_parent(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_node_in_parent"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -74,7 +74,7 @@ pub fn is_part_of_type_node_in_parent(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_part_of_type_expression_with_type_arguments(node: &Node) -> bool {
+pub fn is_part_of_type_expression_with_type_arguments(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_expression_with_type_arguments"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -89,7 +89,7 @@ pub fn is_part_of_type_expression_with_type_arguments(node: &Node) -> bool {
     is_jsdoc_implements_tag(&parent) || is_jsdoc_augments_tag(&parent)
 }
 
-pub fn is_shorthand_property_name_use_site(use_site: &Arc<Node>) -> bool {
+pub fn is_shorthand_property_name_use_site(use_site: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_shorthand_property_name_use_site"); 
     if !is_identifier(use_site) {
         return false;
     }
@@ -102,7 +102,7 @@ pub fn is_shorthand_property_name_use_site(use_site: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_type_only_export_declaration(node: &Node) -> bool {
+pub fn is_type_only_export_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only_export_declaration"); 
     match node.kind {
         SyntaxKind::ExportSpecifier => {
             node_is_type_only(node)
@@ -127,7 +127,7 @@ pub fn is_type_only_export_declaration(node: &Node) -> bool {
 pub fn is_variable_declaration_initialized_with_require_helper(
     node: &Node,
     allow_accessed_require: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_initialized_with_require_helper"); 
     if !is_in_js_file(node) {
         return false;
     }
@@ -153,7 +153,7 @@ pub fn is_variable_declaration_initialized_with_require_helper(
     !parent_parent_exported && node.type_node().is_none() && is_require_call(&initializer, true)
 }
 
-pub fn literal_is_name(node: &Arc<Node>) -> bool {
+pub fn literal_is_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("literal_is_name"); 
     is_declaration_name(node)
         || node
             .parent()
@@ -162,7 +162,7 @@ pub fn literal_is_name(node: &Arc<Node>) -> bool {
         || is_literal_computed_property_declaration_name(node)
 }
 
-fn set_parent_in_children_visit(node: &Arc<Node>, parent: &mut Option<Arc<Node>>) -> bool {
+fn set_parent_in_children_visit(node: &Arc<Node>, parent: &mut Option<Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("set_parent_in_children_visit"); 
     if let Some(p) = parent.as_ref() {
         node.set_parent(p);
     }
@@ -176,18 +176,18 @@ fn set_parent_in_children_visit(node: &Arc<Node>, parent: &mut Option<Arc<Node>>
     false
 }
 
-pub fn new_parent_in_children_setter() -> impl FnMut(&Arc<Node>) -> bool {
+pub fn new_parent_in_children_setter() -> impl FnMut(&Arc<Node>) -> bool { ::tsox_core::fntrace::enter("new_parent_in_children_setter"); 
     let mut state: Option<Arc<Node>> = None;
     move |node| set_parent_in_children_visit(node, &mut state)
 }
 
-pub fn push_ancestor(ancestors: &[Arc<Node>], parent: Arc<Node>) -> Vec<Arc<Node>> {
+pub fn push_ancestor(ancestors: &[Arc<Node>], parent: Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("push_ancestor"); 
     let mut result = ancestors.to_vec();
     result.push(parent);
     result
 }
 
-pub fn pop_ancestor(ancestors: &[Arc<Node>], node: &Node) -> (Vec<Arc<Node>>, Option<Arc<Node>>) {
+pub fn pop_ancestor(ancestors: &[Arc<Node>], node: &Node) -> (Vec<Arc<Node>>, Option<Arc<Node>>) { ::tsox_core::fntrace::enter("pop_ancestor"); 
     if ancestors.is_empty() {
         return (Vec::new(), node.parent());
     }
@@ -197,14 +197,14 @@ pub fn pop_ancestor(ancestors: &[Arc<Node>], node: &Node) -> (Vec<Arc<Node>>, Op
 
 pub fn select_expression_of_call_or_new_expression_or_decorator(
     node: &Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("select_expression_of_call_or_new_expression_or_decorator"); 
     if is_call_expression(node) || is_new_expression(node) || is_decorator(node) {
         return node.expression().cloned();
     }
     None
 }
 
-pub fn select_tag_of_tagged_template_expression(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn select_tag_of_tagged_template_expression(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("select_tag_of_tagged_template_expression"); 
     if is_tagged_template_expression(node) {
         if let NodeData::TaggedTemplateExpression(d) = &node.data {
             return Some(d.tag.clone());
@@ -213,7 +213,7 @@ pub fn select_tag_of_tagged_template_expression(node: &Arc<Node>) -> Option<Arc<
     None
 }
 
-pub fn select_tag_name_of_jsx_opening_like_element(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn select_tag_name_of_jsx_opening_like_element(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("select_tag_name_of_jsx_opening_like_element"); 
     if is_jsx_opening_element(node) || is_jsx_self_closing_element(node) {
         return Some(super::m3c::tag_name(node).clone());
     }

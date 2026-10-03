@@ -24,12 +24,12 @@ use tsox_frontend::ast::symbol::NodeSymbolMap;
 use crate::mig::m4g::ClassFieldsTransformer;
 use crate::printer::EmitContext;
 
-pub fn is_decorated_class_like(node: &Arc<Node>) -> bool {
+pub fn is_decorated_class_like(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_decorated_class_like"); 
     class_or_constructor_parameter_is_decorated(false, node)
         || child_is_decorated(false, node, None)
 }
 
-pub fn is_anonymous_class_needing_assigned_name(node: &Arc<Node>) -> bool {
+pub fn is_anonymous_class_needing_assigned_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_anonymous_class_needing_assigned_name"); 
     is_class_expression(node)
         && node.name().is_none()
         && is_decorated_class_like(node)
@@ -39,7 +39,7 @@ impl ClassFieldsTransformer {
     pub(crate) fn get_static_properties_and_class_static_block(
         &self,
         node: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_static_properties_and_class_static_block"); 
         let mut result = Vec::new();
         for member in members(node) {
             if is_class_static_block_declaration(member)
@@ -51,7 +51,7 @@ impl ClassFieldsTransformer {
         result
     }
 
-    pub(crate) fn node_has_transform_private_static_elements_flag(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn node_has_transform_private_static_elements_flag(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_has_transform_private_static_elements_flag"); 
         self.emit_context()
             .emit_flags(node)
             .contains(EmitFlags::TRANSFORM_PRIVATE_STATIC_ELEMENTS)
@@ -60,7 +60,7 @@ impl ClassFieldsTransformer {
     pub(crate) fn is_anonymous_class_needing_assigned_name_worker(
         &self,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_anonymous_class_needing_assigned_name_worker"); 
         if is_class_expression(node) && node.name().is_none() {
             let static_properties_or_class_static_blocks =
                 self.get_static_properties_and_class_static_block(node);
@@ -83,7 +83,7 @@ impl ClassFieldsTransformer {
     }
 }
 
-pub fn is_class_this_assignment_block(emit_context: &EmitContext, node: &Arc<Node>) -> bool {
+pub fn is_class_this_assignment_block(emit_context: &EmitContext, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_class_this_assignment_block"); 
     if is_class_static_block_declaration(node) {
         if let NodeData::ClassStaticBlockDeclaration(static_block) = &node.data {
             if let NodeData::Block(body) = &static_block.body.data {
@@ -110,7 +110,7 @@ pub fn is_class_this_assignment_block(emit_context: &EmitContext, node: &Arc<Nod
     false
 }
 
-pub fn is_common_js_alias_export(node: &Arc<Node>, map: &NodeSymbolMap) -> bool {
+pub fn is_common_js_alias_export(node: &Arc<Node>, map: &NodeSymbolMap) -> bool { ::tsox_core::fntrace::enter("is_common_js_alias_export"); 
     if is_binary_expression(node) {
         let binary = node.as_binary_expression();
         if is_identifier(&binary.right) {

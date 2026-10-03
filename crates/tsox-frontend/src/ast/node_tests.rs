@@ -6,7 +6,7 @@ use crate::ast::node_line_map::utf16_len;
 use crate::ast::node_node::Node;
 
 #[test]
-fn identifier_node() {
+fn identifier_node() { ::tsox_core::fntrace::enter("identifier_node"); 
     let node = Node::new(
         SyntaxKind::Identifier,
         NodeData::Identifier(IdentifierData {
@@ -18,14 +18,14 @@ fn identifier_node() {
 }
 
 #[test]
-fn node_ids_are_unique() {
+fn node_ids_are_unique() { ::tsox_core::fntrace::enter("node_ids_are_unique"); 
     let n1 = Node::new(SyntaxKind::Unknown, NodeData::Token);
     let n2 = Node::new(SyntaxKind::Unknown, NodeData::Token);
     assert_ne!(n1.id(), n2.id());
 }
 
 #[test]
-fn line_map_basic() {
+fn line_map_basic() { ::tsox_core::fntrace::enter("line_map_basic"); 
     let lm = LineMap::from_text("abc\ndef\nghi");
     assert_eq!(lm.line_starts, vec![0, 4, 8]);
     assert_eq!(lm.line_at(0), 0);
@@ -36,7 +36,7 @@ fn line_map_basic() {
 }
 
 #[test]
-fn line_map_crlf() {
+fn line_map_crlf() { ::tsox_core::fntrace::enter("line_map_crlf"); 
     let lm = LineMap::from_text("abc\r\ndef\r\nghi");
     assert_eq!(lm.line_starts, vec![0, 5, 10]);
     assert_eq!(lm.line_at(0), 0);
@@ -46,7 +46,7 @@ fn line_map_crlf() {
 }
 
 #[test]
-fn line_map_cr_only() {
+fn line_map_cr_only() { ::tsox_core::fntrace::enter("line_map_cr_only"); 
     let lm = LineMap::from_text("abc\rdef");
     assert_eq!(lm.line_starts, vec![0, 4]);
     assert_eq!(lm.line_at(0), 0);
@@ -54,7 +54,7 @@ fn line_map_cr_only() {
 }
 
 #[test]
-fn line_map_unicode_line_separators() {
+fn line_map_unicode_line_separators() { ::tsox_core::fntrace::enter("line_map_unicode_line_separators"); 
     let lm = LineMap::from_text("ab\u{2028}cd\u{2029}ef");
     assert_eq!(lm.line_starts.len(), 3);
     assert_eq!(lm.line_at(0), 0);
@@ -65,7 +65,7 @@ fn line_map_unicode_line_separators() {
 }
 
 #[test]
-fn line_map_utf16_column_ascii() {
+fn line_map_utf16_column_ascii() { ::tsox_core::fntrace::enter("line_map_utf16_column_ascii"); 
     let text = "abc\ndef";
     let lm = LineMap::from_text(text);
 
@@ -75,7 +75,7 @@ fn line_map_utf16_column_ascii() {
 }
 
 #[test]
-fn line_map_utf16_column_non_ascii() {
+fn line_map_utf16_column_non_ascii() { ::tsox_core::fntrace::enter("line_map_utf16_column_non_ascii"); 
     let text = "café\ndef";
     let lm = LineMap::from_text(text);
 
@@ -85,7 +85,7 @@ fn line_map_utf16_column_non_ascii() {
 }
 
 #[test]
-fn line_map_utf16_column_emoji() {
+fn line_map_utf16_column_emoji() { ::tsox_core::fntrace::enter("line_map_utf16_column_emoji"); 
     let text = "x🦀y";
     let lm = LineMap::from_text(text);
 
@@ -93,7 +93,7 @@ fn line_map_utf16_column_emoji() {
 }
 
 #[test]
-fn utf16_len_basic() {
+fn utf16_len_basic() { ::tsox_core::fntrace::enter("utf16_len_basic"); 
     assert_eq!(utf16_len("abc"), 3);
     assert_eq!(utf16_len("café"), 4);
     assert_eq!(utf16_len("🦀"), 2);

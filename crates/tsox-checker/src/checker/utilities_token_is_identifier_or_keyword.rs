@@ -2,15 +2,15 @@
 
 use crate::checker::utilities::*;
 
-pub fn token_is_identifier_or_keyword(kind: SyntaxKind) -> bool {
+pub fn token_is_identifier_or_keyword(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("token_is_identifier_or_keyword"); 
     (kind as u32) >= (SyntaxKind::Identifier as u32)
 }
 
-pub fn token_is_identifier_or_keyword_or_greater_than(kind: SyntaxKind) -> bool {
+pub fn token_is_identifier_or_keyword_or_greater_than(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("token_is_identifier_or_keyword_or_greater_than"); 
     kind == SyntaxKind::GreaterThanToken || token_is_identifier_or_keyword(kind)
 }
 
-pub fn can_have_locals(kind: SyntaxKind) -> bool {
+pub fn can_have_locals(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("can_have_locals"); 
     matches!(
         kind,
         SyntaxKind::ArrowFunction
@@ -41,23 +41,23 @@ pub fn can_have_locals(kind: SyntaxKind) -> bool {
     )
 }
 
-pub fn is_any_or_unknown_type(t: &Type) -> bool {
+pub fn is_any_or_unknown_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_any_or_unknown_type"); 
     t.flags.intersects(TYPE_FLAGS_ANY_OR_UNKNOWN)
 }
 
-pub fn is_nullable_type(t: &Type) -> bool {
+pub fn is_nullable_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_nullable_type"); 
     t.flags.intersects(TYPE_FLAGS_NULLABLE)
 }
 
-pub fn is_literal_type(t: &Type) -> bool {
+pub fn is_literal_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_literal_type"); 
     t.flags.intersects(TYPE_FLAGS_LITERAL)
 }
 
-pub fn is_unit_type(t: &Type) -> bool {
+pub fn is_unit_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_unit_type"); 
     t.flags.intersects(TYPE_FLAGS_UNIT)
 }
 
-pub fn is_literal_or_all_literal_union(t: &Type) -> bool {
+pub fn is_literal_or_all_literal_union(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_literal_or_all_literal_union"); 
     if t.flags.contains(TypeFlags::Boolean) {
         return true;
     }
@@ -71,103 +71,103 @@ pub fn is_literal_or_all_literal_union(t: &Type) -> bool {
     is_unit_type(t)
 }
 
-pub fn is_string_like_type(t: &Type) -> bool {
+pub fn is_string_like_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_string_like_type"); 
     t.flags.intersects(TYPE_FLAGS_STRING_LIKE)
 }
 
-pub fn is_number_like_type(t: &Type) -> bool {
+pub fn is_number_like_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_number_like_type"); 
     t.flags.intersects(TYPE_FLAGS_NUMBER_LIKE)
 }
 
-pub fn is_boolean_like_type(t: &Type) -> bool {
+pub fn is_boolean_like_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_boolean_like_type"); 
     t.flags.intersects(TYPE_FLAGS_BOOLEAN_LIKE)
 }
 
-pub fn is_enum_like_type(t: &Type) -> bool {
+pub fn is_enum_like_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_enum_like_type"); 
     t.flags.intersects(TYPE_FLAGS_ENUM_LIKE)
 }
 
-pub fn is_primitive_type(t: &Type) -> bool {
+pub fn is_primitive_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_primitive_type"); 
     t.flags.intersects(TYPE_FLAGS_PRIMITIVE)
 }
 
-pub fn is_definitely_falsy_type(t: &Type) -> bool {
+pub fn is_definitely_falsy_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_definitely_falsy_type"); 
     t.flags.intersects(TYPE_FLAGS_DEFINITELY_FALSY)
 }
 
-pub fn is_possibly_falsy_type(t: &Type) -> bool {
+pub fn is_possibly_falsy_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_possibly_falsy_type"); 
     t.flags.intersects(TYPE_FLAGS_POSSIBLY_FALSY)
 }
 
-pub fn is_definitely_non_nullable_type(t: &Type) -> bool {
+pub fn is_definitely_non_nullable_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_definitely_non_nullable_type"); 
     t.flags.intersects(TYPE_FLAGS_DEFINITELY_NON_NULLABLE)
 }
 
-pub fn is_structured_type(t: &Type) -> bool {
+pub fn is_structured_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_structured_type"); 
     t.flags.intersects(TYPE_FLAGS_STRUCTURED_TYPE)
 }
 
-pub fn is_instantiable_type(t: &Type) -> bool {
+pub fn is_instantiable_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_instantiable_type"); 
     t.flags.intersects(TYPE_FLAGS_INSTANTIABLE)
 }
 
-pub fn is_type_variable(t: &Type) -> bool {
+pub fn is_type_variable(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_type_variable"); 
     t.flags.intersects(TYPE_FLAGS_TYPE_VARIABLE)
 }
 
-pub fn is_union_or_intersection_type(t: &Type) -> bool {
+pub fn is_union_or_intersection_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_union_or_intersection_type"); 
     t.flags.intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
 }
 
-pub fn is_object_flags_type(t: &Type) -> bool {
+pub fn is_object_flags_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_object_flags_type"); 
     t.flags.intersects(TYPE_FLAGS_OBJECT_FLAGS_TYPE)
 }
 
-pub fn is_freshable_type(t: &Type) -> bool {
+pub fn is_freshable_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_freshable_type"); 
     t.flags.intersects(TYPE_FLAGS_FRESHABLE)
 }
 
-pub fn is_singleton_type(t: &Type) -> bool {
+pub fn is_singleton_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_singleton_type"); 
     t.flags.intersects(TYPE_FLAGS_SINGLETON)
 }
 
-pub fn is_narrowable_type(t: &Type) -> bool {
+pub fn is_narrowable_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_narrowable_type"); 
     t.flags.intersects(TYPE_FLAGS_NARROWABLE)
 }
 
-pub fn is_intrinsic_type(t: &Type) -> bool {
+pub fn is_intrinsic_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_intrinsic_type"); 
     t.flags.intersects(TYPE_FLAGS_INTRINSIC)
 }
 
-pub fn is_void_like_type(t: &Type) -> bool {
+pub fn is_void_like_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_void_like_type"); 
     t.flags.intersects(TYPE_FLAGS_VOID_LIKE)
 }
 
-pub fn is_class_type(t: &Type) -> bool {
+pub fn is_class_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_class_type"); 
     t.object_flags.contains(ObjectFlags::Class)
 }
 
-pub fn is_interface_type(t: &Type) -> bool {
+pub fn is_interface_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_interface_type"); 
     t.object_flags.contains(ObjectFlags::Interface)
 }
 
-pub fn is_class_or_interface_type(t: &Type) -> bool {
+pub fn is_class_or_interface_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_class_or_interface_type"); 
     t.object_flags.intersects(OBJECT_FLAGS_CLASS_OR_INTERFACE)
 }
 
-pub fn is_type_reference(t: &Type) -> bool {
+pub fn is_type_reference(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_type_reference"); 
     t.object_flags.contains(ObjectFlags::Reference)
 }
 
-pub fn is_anonymous_type(t: &Type) -> bool {
+pub fn is_anonymous_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_anonymous_type"); 
     t.object_flags.contains(ObjectFlags::Anonymous)
 }
 
-pub fn is_mapped_type(t: &Type) -> bool {
+pub fn is_mapped_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_mapped_type"); 
     t.object_flags.contains(ObjectFlags::Mapped)
 }
 
-pub fn is_tuple_type(t: &Type) -> bool {
+pub fn is_tuple_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_tuple_type"); 
     if t.flags.contains(TypeFlags::Object) {
         t.object_flags.contains(ObjectFlags::Tuple)
             || (t.object_flags.contains(ObjectFlags::Reference)
@@ -179,23 +179,23 @@ pub fn is_tuple_type(t: &Type) -> bool {
     }
 }
 
-pub fn is_evolving_array_type(t: &Type) -> bool {
+pub fn is_evolving_array_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_evolving_array_type"); 
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::EvolvingArray)
 }
 
-pub fn is_fresh_object_literal_type(t: &Type) -> bool {
+pub fn is_fresh_object_literal_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_fresh_object_literal_type"); 
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::FreshLiteral)
 }
 
 /// Go symbolToString：well-known symbol 内部名 `__@x` 的显示形式 `[Symbol.x]`
-pub fn property_name_for_display(name: &str) -> String {
+pub fn property_name_for_display(name: &str) -> String { ::tsox_core::fntrace::enter("property_name_for_display"); 
     match name.strip_prefix("__@") {
         Some(stripped) => format!("[Symbol.{stripped}]"),
         None => name.to_string(),
     }
 }
 
-pub fn property_names_for_display(names: &[String]) -> String {
+pub fn property_names_for_display(names: &[String]) -> String { ::tsox_core::fntrace::enter("property_names_for_display"); 
     names
         .iter()
         .map(|n| property_name_for_display(n))
@@ -203,15 +203,15 @@ pub fn property_names_for_display(names: &[String]) -> String {
         .join(", ")
 }
 
-pub fn is_object_literal_type(t: &Type) -> bool {
+pub fn is_object_literal_type(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_object_literal_type"); 
     t.flags.contains(TypeFlags::Object) && t.object_flags.contains(ObjectFlags::ObjectLiteral)
 }
 
-pub fn is_type_usable_as_property_name(t: &Type) -> bool {
+pub fn is_type_usable_as_property_name(t: &Type) -> bool { ::tsox_core::fntrace::enter("is_type_usable_as_property_name"); 
     t.flags.intersects(TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE)
 }
 
-pub fn get_property_name_from_type(t: &Type) -> String {
+pub fn get_property_name_from_type(t: &Type) -> String { ::tsox_core::fntrace::enter("get_property_name_from_type"); 
     if t.flags.contains(TypeFlags::StringLiteral) {
         if let Some(LiteralValue::String(s)) = t.literal_value() {
             return s.clone();
@@ -230,7 +230,7 @@ pub fn get_property_name_from_type(t: &Type) -> String {
     String::new()
 }
 
-pub fn type_to_string(t: &Type) -> String {
+pub fn type_to_string(t: &Type) -> String { ::tsox_core::fntrace::enter("type_to_string"); 
     if let Some(name) = t.intrinsic_name() {
         return name.to_string();
     }
@@ -288,40 +288,40 @@ pub enum AssignmentKind {
 }
 
 impl ExhaustiveState {
-    pub fn is_true(self) -> bool {
+    pub fn is_true(self) -> bool { ::tsox_core::fntrace::enter("is_true"); 
         self == ExhaustiveState::True
     }
 
-    pub fn is_false(self) -> bool {
+    pub fn is_false(self) -> bool { ::tsox_core::fntrace::enter("is_false"); 
         self == ExhaustiveState::False
     }
 
-    pub fn is_unknown(self) -> bool {
+    pub fn is_unknown(self) -> bool { ::tsox_core::fntrace::enter("is_unknown"); 
         self == ExhaustiveState::Unknown
     }
 
-    pub fn is_computing(self) -> bool {
+    pub fn is_computing(self) -> bool { ::tsox_core::fntrace::enter("is_computing"); 
         self == ExhaustiveState::Computing
     }
 }
 
-pub fn is_late_bound_symbol(_symbol: &Symbol) -> bool {
+pub fn is_late_bound_symbol(_symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_late_bound_symbol"); 
     false
 }
 
-pub fn is_value_symbol(symbol: &Symbol) -> bool {
+pub fn is_value_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_value_symbol"); 
     symbol
         .flags
         .intersects(tsox_frontend::ast::SymbolFlags::VALUE)
 }
 
-pub fn is_type_symbol(symbol: &Symbol) -> bool {
+pub fn is_type_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_type_symbol"); 
     symbol
         .flags
         .intersects(tsox_frontend::ast::SymbolFlags::TYPE)
 }
 
-pub fn is_namespace_symbol(symbol: &Symbol) -> bool {
+pub fn is_namespace_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_namespace_symbol"); 
     symbol
         .flags
         .intersects(tsox_frontend::ast::SymbolFlags::NAMESPACE)

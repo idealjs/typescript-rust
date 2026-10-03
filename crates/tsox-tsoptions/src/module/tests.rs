@@ -1,53 +1,53 @@
 use super::*;
 
 #[test]
-fn parse_package_name_simple() {
+fn parse_package_name_simple() { ::tsox_core::fntrace::enter("parse_package_name_simple"); 
     let (pkg, rest) = parse_package_name("foo");
     assert_eq!(pkg, "foo");
     assert_eq!(rest, "");
 }
 
 #[test]
-fn parse_package_name_with_subpath() {
+fn parse_package_name_with_subpath() { ::tsox_core::fntrace::enter("parse_package_name_with_subpath"); 
     let (pkg, rest) = parse_package_name("foo/bar");
     assert_eq!(pkg, "foo");
     assert_eq!(rest, "bar");
 }
 
 #[test]
-fn parse_package_name_scoped() {
+fn parse_package_name_scoped() { ::tsox_core::fntrace::enter("parse_package_name_scoped"); 
     let (pkg, rest) = parse_package_name("@scope/name");
     assert_eq!(pkg, "@scope/name");
     assert_eq!(rest, "");
 }
 
 #[test]
-fn parse_package_name_scoped_with_subpath() {
+fn parse_package_name_scoped_with_subpath() { ::tsox_core::fntrace::enter("parse_package_name_scoped_with_subpath"); 
     let (pkg, rest) = parse_package_name("@scope/name/sub");
     assert_eq!(pkg, "@scope/name");
     assert_eq!(rest, "sub");
 }
 
 #[test]
-fn mangle_scoped_package() {
+fn mangle_scoped_package() { ::tsox_core::fntrace::enter("mangle_scoped_package"); 
     assert_eq!(mangle_scoped_package_name("@scope/name"), "scope__name");
     assert_eq!(mangle_scoped_package_name("foo"), "foo");
 }
 
 #[test]
-fn unmangle_scoped_package() {
+fn unmangle_scoped_package() { ::tsox_core::fntrace::enter("unmangle_scoped_package"); 
     assert_eq!(unmangle_scoped_package_name("scope__name"), "@scope/name");
     assert_eq!(unmangle_scoped_package_name("foo"), "foo");
 }
 
 #[test]
-fn types_package_name() {
+fn types_package_name() { ::tsox_core::fntrace::enter("types_package_name"); 
     assert_eq!(get_types_package_name("foo"), "@types/foo");
     assert_eq!(get_types_package_name("@scope/name"), "@types/scope__name");
 }
 
 #[test]
-fn package_name_from_types() {
+fn package_name_from_types() { ::tsox_core::fntrace::enter("package_name_from_types"); 
     assert_eq!(
         get_package_name_from_types_package_name("@types/foo"),
         "foo"
@@ -59,7 +59,7 @@ fn package_name_from_types() {
 }
 
 #[test]
-fn parse_node_module_from_path() {
+fn parse_node_module_from_path() { ::tsox_core::fntrace::enter("parse_node_module_from_path"); 
     let cases: &[(&str, &str, bool, &str)] = &[
         (
             "file in package",
@@ -122,7 +122,7 @@ fn parse_node_module_from_path() {
 }
 
 #[test]
-fn resolve_module_name_trailing_slash() {
+fn resolve_module_name_trailing_slash() { ::tsox_core::fntrace::enter("resolve_module_name_trailing_slash"); 
     use crate::vfs::{FS, InMemoryFS};
     use std::sync::Arc;
     use tsox_core::core::compiler_options::CompilerOptions;
@@ -135,10 +135,10 @@ fn resolve_module_name_trailing_slash() {
         cwd: String,
     }
     impl ResolutionHost for ResolutionHostStub {
-        fn fs(&self) -> &dyn FS {
+        fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
             &self.fs
         }
-        fn get_current_directory(&self) -> &str {
+        fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
             &self.cwd
         }
     }
@@ -187,7 +187,7 @@ fn resolve_module_name_trailing_slash() {
 }
 
 #[test]
-fn resolve_module_name_trailing_slash_race() {
+fn resolve_module_name_trailing_slash_race() { ::tsox_core::fntrace::enter("resolve_module_name_trailing_slash_race"); 
     use std::thread;
     use tsox_core::core::compiler_options::ModuleKind;
 
@@ -226,7 +226,7 @@ fn resolve_module_name_trailing_slash_race() {
     }
 }
 
-fn build_concurrent_resolver() -> Resolver {
+fn build_concurrent_resolver() -> Resolver { ::tsox_core::fntrace::enter("build_concurrent_resolver"); 
     use crate::vfs::{FS, InMemoryFS};
     use std::sync::Arc;
     use tsox_core::core::compiler_options::CompilerOptions;
@@ -239,10 +239,10 @@ fn build_concurrent_resolver() -> Resolver {
         cwd: String,
     }
     impl ResolutionHost for ResolutionHostStub {
-        fn fs(&self) -> &dyn FS {
+        fn fs(&self) -> &dyn FS { ::tsox_core::fntrace::enter("fs"); 
             &self.fs
         }
-        fn get_current_directory(&self) -> &str {
+        fn get_current_directory(&self) -> &str { ::tsox_core::fntrace::enter("get_current_directory"); 
             &self.cwd
         }
     }
@@ -282,7 +282,7 @@ fn build_concurrent_resolver() -> Resolver {
 }
 
 #[test]
-fn resolve_subpath_nil_contents_race() {
+fn resolve_subpath_nil_contents_race() { ::tsox_core::fntrace::enter("resolve_subpath_nil_contents_race"); 
     use std::thread;
     use tsox_core::core::compiler_options::ModuleKind;
 
@@ -321,7 +321,7 @@ fn resolve_subpath_nil_contents_race() {
 }
 
 #[test]
-fn resolve_peer_dependency_nil_contents_race() {
+fn resolve_peer_dependency_nil_contents_race() { ::tsox_core::fntrace::enter("resolve_peer_dependency_nil_contents_race"); 
     use std::thread;
     use tsox_core::core::compiler_options::ModuleKind;
 

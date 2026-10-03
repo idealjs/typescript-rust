@@ -35,7 +35,7 @@ pub trait R28K4NodeBuilderExt {
     ) -> Vec<Arc<Symbol>>;
 }
 
-fn builder_checker() -> &'static mut Checker {
+fn builder_checker() -> &'static mut Checker { ::tsox_core::fntrace::enter("builder_checker"); 
     unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() }
 }
 
@@ -44,7 +44,7 @@ impl R28K4NodeBuilderExt for NodeBuilderImpl<'_> {
         &mut self,
         chain: &[Arc<Symbol>],
         index: usize,
-    ) -> Option<Arc<NodeList>> {
+    ) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("lookup_instantiated_type_argument_nodes"); 
         if !self.should_write_type_parameters_in_qualified_name(chain, index) {
             return None;
         }
@@ -83,7 +83,7 @@ impl R28K4NodeBuilderExt for NodeBuilderImpl<'_> {
         meaning: SymbolFlags,
         end_of_chain: bool,
         yield_module_symbol: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_chain"); 
         let ch = builder_checker();
         let enclosing = self.ctx.borrow().enclosing_declaration.clone();
         let use_only_external_aliasing = self
@@ -198,7 +198,7 @@ fn sort_by_best_name(
     ch: &Checker,
     a: &SortedSymbolNamePair,
     b: &SortedSymbolNamePair,
-) -> std::cmp::Ordering {
+) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("sort_by_best_name"); 
     let specifier_a = &a.name;
     let specifier_b = &b.name;
     if !specifier_a.is_empty() && !specifier_b.is_empty() {
@@ -220,11 +220,11 @@ thread_local! {
     static APPARENT_ARGUMENT_COUNT: Cell<Option<usize>> = const { Cell::new(None) };
 }
 
-pub fn apparent_argument_count() -> Option<usize> {
+pub fn apparent_argument_count() -> Option<usize> { ::tsox_core::fntrace::enter("apparent_argument_count"); 
     APPARENT_ARGUMENT_COUNT.with(|c| c.get())
 }
 
-pub fn set_apparent_argument_count(value: Option<usize>) {
+pub fn set_apparent_argument_count(value: Option<usize>) { ::tsox_core::fntrace::enter("set_apparent_argument_count"); 
     APPARENT_ARGUMENT_COUNT.with(|c| c.set(value));
 }
 
@@ -232,11 +232,11 @@ pub struct SendCheckerPtr(*mut Checker);
 unsafe impl Send for SendCheckerPtr {}
 
 impl SendCheckerPtr {
-    pub fn from_checker(ch: &Checker) -> Self {
+    pub fn from_checker(ch: &Checker) -> Self { ::tsox_core::fntrace::enter("from_checker"); 
         Self(ch as *const Checker as *mut Checker)
     }
 
-    pub unsafe fn get(&self) -> &'static mut Checker {
+    pub unsafe fn get(&self) -> &'static mut Checker { ::tsox_core::fntrace::enter("get"); 
         unsafe { &mut *self.0 }
     }
 }

@@ -6,7 +6,7 @@ impl Checker {
     pub(crate) fn member_declared_type_for_index_check(
         &mut self,
         member: &Arc<Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("member_declared_type_for_index_check"); 
         match &member.data {
             tsox_frontend::ast::NodeData::GetAccessorDeclaration(d) => {
                 Some(self.infer_function_return_type(Some(member), d.body.as_ref(), d.type_node.as_ref()))
@@ -38,7 +38,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_index_constraints(&mut self, t: &Arc<Type>, declaration: &Arc<Node>) {
+    pub(crate) fn check_index_constraints(&mut self, t: &Arc<Type>, declaration: &Arc<Node>) { ::tsox_core::fntrace::enter("check_index_constraints"); 
         let index_infos = self.get_index_infos_of_type(t);
         if index_infos.is_empty() {
             return;
@@ -306,7 +306,7 @@ impl Checker {
         }
     }
 
-    fn interface_base_types(&mut self, declaration: &Arc<Node>) -> Vec<Arc<Type>> {
+    fn interface_base_types(&mut self, declaration: &Arc<Node>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("interface_base_types"); 
         let tsox_frontend::ast::NodeData::InterfaceDeclaration(d) = &declaration.data else {
             return Vec::new();
         };

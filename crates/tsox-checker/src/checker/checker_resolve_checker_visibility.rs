@@ -13,7 +13,7 @@ use tsox_frontend::ast::ModifierFlags;
 use tsox_frontend::ast::NodeData;
 use tsox_frontend::ast::NodeFlags;
 
-pub(crate) fn fn_like_body(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn fn_like_body(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("fn_like_body"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.body.clone(),
         NodeData::FunctionExpression(d) => Some(d.body.clone()),
@@ -27,7 +27,7 @@ pub(crate) fn fn_like_body(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-fn container_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn container_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("container_parameters"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.parameters.iter().cloned().collect(),
         NodeData::FunctionExpression(d) => d.parameters.iter().cloned().collect(),
@@ -43,7 +43,7 @@ fn container_parameters(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-fn declaration_is_in_parameter(node: &Arc<Node>) -> bool {
+fn declaration_is_in_parameter(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_is_in_parameter"); 
     let mut current = Arc::clone(node);
     loop {
         if current.kind == SyntaxKind::Parameter {
@@ -57,7 +57,7 @@ fn declaration_is_in_parameter(node: &Arc<Node>) -> bool {
 }
 
 impl Checker {
-    fn requires_scope_change_worker(&self, node: &Arc<Node>) -> bool {
+    fn requires_scope_change_worker(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("requires_scope_change_worker"); 
         match node.kind {
             SyntaxKind::ArrowFunction
             | SyntaxKind::FunctionExpression
@@ -105,7 +105,7 @@ impl Checker {
         }
     }
 
-    fn requires_scope_change(&self, param: &Arc<Node>) -> bool {
+    fn requires_scope_change(&self, param: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("requires_scope_change"); 
         let NodeData::ParameterDeclaration(d) = &param.data else {
             return false;
         };
@@ -121,7 +121,7 @@ impl Checker {
         sym: &Arc<Symbol>,
         container: &Arc<Node>,
         child_below: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("use_outer_variable_scope_in_parameter"); 
         if child_below.kind != SyntaxKind::Parameter {
             return false;
         }
@@ -145,7 +145,7 @@ impl Checker {
         child_below: &Arc<Node>,
         sym: &Arc<Symbol>,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("locals_symbol_visible_at"); 
         if container.kind == SyntaxKind::ConditionalType {
             let true_type = match &container.data {
                 NodeData::ConditionalTypeNode(data) => &data.true_type,

@@ -35,14 +35,14 @@ use super::m4m_4::get_non_assignment_operator_for_compound_assignment;
 use super::w11b::should_be_captured_in_temp_variable;
 use super::x6a::is_class_this_assignment_block;
 
-fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> {
+fn with_loc(mut node: Arc<Node>, loc: TextRange) -> Arc<Node> { ::tsox_core::fntrace::enter("with_loc"); 
     if let Some(n) = Arc::get_mut(&mut node) {
         n.loc = loc;
     }
     node
 }
 
-fn binary_operator_token_kind(node: &Node) -> SyntaxKind {
+fn binary_operator_token_kind(node: &Node) -> SyntaxKind { ::tsox_core::fntrace::enter("binary_operator_token_kind"); 
     match &node.data {
         tsox_frontend::ast::node_data_generated::NodeData::BinaryExpression(d) => d.operator_token.kind,
         _ => panic!("expected BinaryExpression"),
@@ -50,7 +50,7 @@ fn binary_operator_token_kind(node: &Node) -> SyntaxKind {
 }
 
 impl ClassFieldsTransformer<'_> {
-    pub fn extract_non_static_non_accessor_modifiers(&self, node: &Arc<Node>) -> Option<NodeList> {
+    pub fn extract_non_static_non_accessor_modifiers(&self, node: &Arc<Node>) -> Option<NodeList> { ::tsox_core::fntrace::enter("extract_non_static_non_accessor_modifiers"); 
         let modifiers = node.modifiers()?;
         let nodes: Vec<Arc<Node>> = modifiers
             .list
@@ -64,7 +64,7 @@ impl ClassFieldsTransformer<'_> {
         Some(NodeList::new(nodes))
     }
 
-    pub fn clear_class_element_and_visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn clear_class_element_and_visit_each_child(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("clear_class_element_and_visit_each_child"); 
         self.set_current_class_element_and(None, node)
     }
 
@@ -72,7 +72,7 @@ impl ClassFieldsTransformer<'_> {
         &mut self,
         class_element: Option<Arc<Node>>,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("set_current_class_element_and"); 
         let same = match (&class_element, &self.current_class_element) {
             (Some(a), Some(b)) => Arc::ptr_eq(a, b),
             (None, None) => true,
@@ -89,7 +89,7 @@ impl ClassFieldsTransformer<'_> {
         }
     }
 
-    pub fn create_call_binding(&mut self, node: &Arc<Node>) -> (Arc<Node>, Arc<Node>) {
+    pub fn create_call_binding(&mut self, node: &Arc<Node>) -> (Arc<Node>, Arc<Node>) { ::tsox_core::fntrace::enter("create_call_binding"); 
         if is_super_property(node) {
             return (self.factory().new_this_expression(), node.clone());
         }
@@ -124,7 +124,7 @@ impl ClassFieldsTransformer<'_> {
         (self.factory().new_this_expression(), node.clone())
     }
 
-    pub fn create_copiable_receiver_expr(&mut self, receiver: &Arc<Node>) -> (Arc<Node>, Option<Arc<Node>>) {
+    pub fn create_copiable_receiver_expr(&mut self, receiver: &Arc<Node>) -> (Arc<Node>, Option<Arc<Node>>) { ::tsox_core::fntrace::enter("create_copiable_receiver_expr"); 
         let mut clone = receiver.clone();
         if !node_is_synthesized(receiver) {
             clone = deep_clone_node(receiver);
@@ -147,7 +147,7 @@ impl ClassFieldsTransformer<'_> {
         receiver: &Arc<Node>,
         name: &Arc<Node>,
         location: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_member_access_for_property_name"); 
         if is_computed_property_name(name) {
             let expression = self.factory().new_element_access_expression(
                 receiver,
@@ -170,7 +170,7 @@ impl ClassFieldsTransformer<'_> {
         expression
     }
 
-    pub fn create_private_identifier_access(&mut self, info: &PrivateIdentifierInfo, receiver: &Arc<Node>) -> Arc<Node> {
+    pub fn create_private_identifier_access(&mut self, info: &PrivateIdentifierInfo, receiver: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_identifier_access"); 
         let receiver = self.visitor().visit_node(receiver);
         self.create_private_identifier_access_helper(info, &receiver)
     }
@@ -179,7 +179,7 @@ impl ClassFieldsTransformer<'_> {
         &mut self,
         info: &PrivateIdentifierInfo,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_identifier_access_helper"); 
         self.emit_context
             .set_comment_range(receiver, TextRange::new(0, receiver.end()));
         match info.kind {
@@ -221,7 +221,7 @@ impl ClassFieldsTransformer<'_> {
         receiver: &Arc<Node>,
         right: &Arc<Node>,
         operator: SyntaxKind,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_identifier_assignment"); 
         let mut receiver = self.visitor().visit_node(receiver);
         let mut right = self.visitor().visit_node(right);
 
@@ -263,7 +263,7 @@ impl ClassFieldsTransformer<'_> {
         }
     }
 
-    pub fn class_contains_constructor_reference(&self, node: &Arc<Node>) -> bool {
+    pub fn class_contains_constructor_reference(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_contains_constructor_reference"); 
         node_members_r37k13(node)
             .iter()
             .any(|member| self.member_contains_constructor_reference(member, node))
@@ -274,7 +274,7 @@ impl ClassFieldsTransformer<'_> {
         receiver: &Arc<Node>,
         initializer: Option<Arc<Node>>,
         weak_map_name: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_instance_field_initializer"); 
         let initializer = initializer.unwrap_or_else(|| self.factory().new_void_zero_expression());
         self.factory()
             .new_method_call(weak_map_name, &self.factory().new_identifier("set"), vec![receiver.clone(), initializer])
@@ -284,7 +284,7 @@ impl ClassFieldsTransformer<'_> {
         &self,
         receiver: &Arc<Node>,
         weak_set_name: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_instance_method_initializer"); 
         self.factory()
             .new_method_call(weak_set_name, &self.factory().new_identifier("add"), vec![receiver.clone()])
     }
@@ -293,7 +293,7 @@ impl ClassFieldsTransformer<'_> {
         &self,
         variable_name: &Arc<Node>,
         initializer: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_private_static_field_initializer"); 
         let initializer = initializer.unwrap_or_else(|| self.factory().new_void_zero_expression());
         self.factory().new_assignment_expression(
             variable_name,
@@ -310,7 +310,7 @@ impl ClassFieldsTransformer<'_> {
         )
     }
 
-    pub fn find_computed_property_name_cache_assignment(&self, name: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn find_computed_property_name_cache_assignment(&self, name: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_computed_property_name_cache_assignment"); 
         let mut node = name.expression().cloned().unwrap_or_else(|| Arc::clone(name));
         loop {
             node = skip_outer_expressions(&node, OuterExpressionKinds::empty());
@@ -327,19 +327,19 @@ impl ClassFieldsTransformer<'_> {
     }
 }
 
-pub fn class_has_class_this_assignment(emit_context: &crate::printer::EmitContext, node: &Arc<Node>) -> bool {
+pub fn class_has_class_this_assignment(emit_context: &crate::printer::EmitContext, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("class_has_class_this_assignment"); 
     node_members_r37k13(node)
         .iter()
         .any(|member| is_class_this_assignment_block(emit_context, member))
 }
 
-pub fn flatten_comma_list(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn flatten_comma_list(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_comma_list"); 
     let mut result = Vec::new();
     flatten_comma_list_worker(node, &mut result);
     result
 }
 
-fn flatten_comma_list_worker(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) {
+fn flatten_comma_list_worker(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("flatten_comma_list_worker"); 
     if is_parenthesized_expression(node) && node_is_synthesized(node) {
         if let Some(expression) = node.expression() {
             flatten_comma_list_worker(&expression, out);

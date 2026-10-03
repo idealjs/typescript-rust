@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn iterate_comment_ranges(text: &str, pos: usize, trailing: bool) -> Vec<CommentRange> {
+pub(crate) fn iterate_comment_ranges(text: &str, pos: usize, trailing: bool) -> Vec<CommentRange> { ::tsox_core::fntrace::enter("iterate_comment_ranges"); 
     let bytes = text.as_bytes();
     let text_len = bytes.len();
     let mut pos = pos;

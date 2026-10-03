@@ -22,7 +22,7 @@ impl Checker {
     pub(crate) fn distribute_intersection_over_unions(
         &mut self,
         types: Vec<Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("distribute_intersection_over_unions"); 
         let (restarted, reduced) = self.intersect_unions_of_primitive_types(types);
         if reduced {
             return self.get_intersection_type(restarted);
@@ -71,7 +71,7 @@ impl Checker {
         &mut self,
         types: &[Arc<Type>],
         count: usize,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("cross_product_intersections"); 
         let mut intersections = Vec::with_capacity(count);
         for i in 0..count {
             let mut constituent = types.to_vec();
@@ -92,7 +92,7 @@ impl Checker {
         intersections
     }
 
-    fn is_union_with_undefined(t: &Arc<Type>) -> bool {
+    fn is_union_with_undefined(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_union_with_undefined"); 
         matches!(&t.data, TypeData::Union(u)
             if u.union_or_intersection
                 .types
@@ -100,7 +100,7 @@ impl Checker {
                 .is_some_and(|f| f.flags.contains(TypeFlags::Undefined)))
     }
 
-    fn is_union_with_null(t: &Arc<Type>) -> bool {
+    fn is_union_with_null(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_union_with_null"); 
         matches!(&t.data, TypeData::Union(u)
             if u.union_or_intersection
                 .types
@@ -109,7 +109,7 @@ impl Checker {
                 .any(|f| f.flags.contains(TypeFlags::Null)))
     }
 
-    fn strip_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn strip_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("strip_undefined"); 
         let TypeData::Union(u) = &t.data else {
             return Arc::clone(t);
         };
@@ -123,7 +123,7 @@ impl Checker {
         self.get_union_type(kept)
     }
 
-    fn strip_null(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn strip_null(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("strip_null"); 
         let TypeData::Union(u) = &t.data else {
             return Arc::clone(t);
         };
@@ -137,7 +137,7 @@ impl Checker {
         self.get_union_type(kept)
     }
 
-    fn constituent_count(t: &Arc<Type>) -> usize {
+    fn constituent_count(t: &Arc<Type>) -> usize { ::tsox_core::fntrace::enter("constituent_count"); 
         if !t
             .flags
             .intersects(TYPE_FLAGS_UNION_OR_INTERSECTION)
@@ -155,11 +155,11 @@ impl Checker {
             .unwrap_or(1)
     }
 
-    fn constituent_count_of_types(types: &[Arc<Type>]) -> usize {
+    fn constituent_count_of_types(types: &[Arc<Type>]) -> usize { ::tsox_core::fntrace::enter("constituent_count_of_types"); 
         types.iter().map(Self::constituent_count).sum()
     }
 
-    fn is_primitive_union(t: &Arc<Type>) -> bool {
+    fn is_primitive_union(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_primitive_union"); 
         let TypeData::Union(u) = &t.data else {
             return false;
         };
@@ -169,14 +169,14 @@ impl Checker {
             .all(|m| !m.flags.intersects(TYPE_FLAGS_NOT_PRIMITIVE_UNION))
     }
 
-    fn union_member_ptr(u: &Arc<Type>, t: &Arc<Type>) -> bool {
+    fn union_member_ptr(u: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("union_member_ptr"); 
         let TypeData::Union(data) = &u.data else {
             return false;
         };
         data.union_or_intersection.types.iter().any(|m| m.id == t.id)
     }
 
-    fn union_contains_type(&self, u: &Arc<Type>, t: &Arc<Type>) -> bool {
+    fn union_contains_type(&self, u: &Arc<Type>, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("union_contains_type"); 
         if Self::union_member_ptr(u, t) {
             return true;
         }
@@ -194,14 +194,14 @@ impl Checker {
         primitive.is_some_and(|p| Self::union_member_ptr(u, &p))
     }
 
-    fn each_union_contains(&self, union_types: &[Arc<Type>], t: &Arc<Type>) -> bool {
+    fn each_union_contains(&self, union_types: &[Arc<Type>], t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("each_union_contains"); 
         union_types.iter().all(|u| self.union_contains_type(u, t))
     }
 
     pub(crate) fn intersect_unions_of_primitive_types(
         &mut self,
         types: Vec<Arc<Type>>,
-    ) -> (Vec<Arc<Type>>, bool) {
+    ) -> (Vec<Arc<Type>>, bool) { ::tsox_core::fntrace::enter("intersect_unions_of_primitive_types"); 
         let Some(index) = types.iter().position(Self::is_primitive_union) else {
             return (types, false);
         };
@@ -246,7 +246,7 @@ impl Checker {
     }
 }
 
-fn new_denormalized_intersection(types: Vec<Arc<Type>>) -> Arc<Type> {
+fn new_denormalized_intersection(types: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("new_denormalized_intersection"); 
     Arc::new(Type::new(
         TypeFlags::Intersection,
         TypeData::Intersection(IntersectionTypeData {

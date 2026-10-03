@@ -9,7 +9,7 @@ impl Checker {
         &mut self,
         prop_name: &str,
         containing_type: &Arc<crate::checker::types::Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_has_static_property"); 
         let Some(sym) = containing_type.symbol.clone() else {
             return false;
         };
@@ -26,7 +26,7 @@ impl Checker {
         &mut self,
         obj_expr: &Arc<Node>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("global_constructor_value_has_property"); 
         if obj_expr.kind != SyntaxKind::Identifier {
             return false;
         }
@@ -50,7 +50,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("property_exists_on_non_nullable_part"); 
         if t.flags.contains(TypeFlags::Union) {
             if let TypeData::Union(u) = &t.data {
                 for ct in &u.union_or_intersection.types {
@@ -73,7 +73,7 @@ impl Checker {
         _node: &Arc<Node>,
         signature: &Arc<Signature>,
         args: &[Arc<Node>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("infer_call_type_arguments"); 
         if signature.type_parameters.is_empty() {
             return Vec::new();
         }

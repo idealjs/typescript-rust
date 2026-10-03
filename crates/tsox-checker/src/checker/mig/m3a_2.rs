@@ -30,7 +30,7 @@ pub fn new_diagnostic_for_node(
     node: Option<&Arc<Node>>,
     message: msg::Message,
     args: Vec<String>,
-) -> ast::Diagnostic {
+) -> ast::Diagnostic { ::tsox_core::fntrace::enter("new_diagnostic_for_node"); 
     let mut file = None;
     let mut loc = TextRange::default();
     if let Some(node) = node {
@@ -45,7 +45,7 @@ pub fn new_diagnostic_chain_for_node(
     node: Option<&Arc<Node>>,
     message: msg::Message,
     args: Vec<String>,
-) -> ast::Diagnostic {
+) -> ast::Diagnostic { ::tsox_core::fntrace::enter("new_diagnostic_chain_for_node"); 
     if let Some(chain) = chain {
         let mut result =
             ast::Diagnostic::new(chain.file.clone(), chain.loc, message, args);
@@ -60,7 +60,7 @@ pub fn find_in_map<K, V, S>(m: &HashMap<K, V, S>, predicate: impl Fn(&V) -> bool
 where
     K: std::hash::Hash + Eq,
     V: Clone + Default,
-{
+{ ::tsox_core::fntrace::enter("find_in_map"); 
     for value in m.values() {
         if predicate(value) {
             return value.clone();
@@ -69,14 +69,14 @@ where
     V::default()
 }
 
-pub fn is_const_type_reference_name(node: &Arc<Node>) -> bool {
+pub fn is_const_type_reference_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_const_type_reference_name"); 
     ast::is_identifier(node)
         && node
             .parent()
             .is_some_and(|p| is_const_type_reference(&p) && p.parent().is_some_and(|gp| ast::is_assertion_expression(&gp)))
 }
 
-pub fn has_dot_dot_dot_token(node: &Arc<Node>) -> bool {
+pub fn has_dot_dot_dot_token(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_dot_dot_dot_token"); 
     let dot_dot_dot_token = match node.kind {
         SyntaxKind::Parameter => Some(&node.as_parameter_declaration().dot_dot_dot_token),
         SyntaxKind::BindingElement => match &node.data {
@@ -96,7 +96,7 @@ pub fn has_dot_dot_dot_token(node: &Arc<Node>) -> bool {
     dot_dot_dot_token.is_some_and(|t| t.is_some())
 }
 
-pub fn compare_element_labels(n1: Option<&Arc<Node>>, n2: Option<&Arc<Node>>) -> Ordering {
+pub fn compare_element_labels(n1: Option<&Arc<Node>>, n2: Option<&Arc<Node>>) -> Ordering { ::tsox_core::fntrace::enter("compare_element_labels"); 
     match (n1, n2) {
         (None, None) => Ordering::Equal,
         (None, Some(_)) => Ordering::Less,
@@ -108,7 +108,7 @@ pub fn compare_element_labels(n1: Option<&Arc<Node>>, n2: Option<&Arc<Node>>) ->
     }
 }
 
-pub fn compare_tuple_types(t1: &TupleTypeData, t2: &TupleTypeData) -> Ordering {
+pub fn compare_tuple_types(t1: &TupleTypeData, t2: &TupleTypeData) -> Ordering { ::tsox_core::fntrace::enter("compare_tuple_types"); 
     if t1.readonly != t2.readonly {
         return if t1.readonly { Ordering::Greater } else { Ordering::Less };
     }
@@ -133,7 +133,7 @@ pub fn compare_tuple_types(t1: &TupleTypeData, t2: &TupleTypeData) -> Ordering {
     Ordering::Equal
 }
 
-pub fn compare_type_mappers(m1: Option<&Arc<TypeMapper>>, m2: Option<&Arc<TypeMapper>>) -> Ordering {
+pub fn compare_type_mappers(m1: Option<&Arc<TypeMapper>>, m2: Option<&Arc<TypeMapper>>) -> Ordering { ::tsox_core::fntrace::enter("compare_type_mappers"); 
     let (Some(m1), Some(m2)) = (m1, m2) else {
         return match (m1, m2) {
             (None, None) => Ordering::Equal,
@@ -148,7 +148,7 @@ pub fn compare_type_mappers(m1: Option<&Arc<TypeMapper>>, m2: Option<&Arc<TypeMa
     (m1.kind as i32).cmp(&(m2.kind as i32))
 }
 
-pub fn get_containing_class_excluding_class_decorators(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_containing_class_excluding_class_decorators(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_containing_class_excluding_class_decorators"); 
     let mut decorator = None;
     let mut current = node.parent();
     while let Some(n) = current {
@@ -172,7 +172,7 @@ pub fn get_containing_class_excluding_class_decorators(node: &Arc<Node>) -> Opti
     ast::get_containing_class(node)
 }
 
-pub fn is_in_name_of_expression_with_type_arguments_or_heritage_type_reference(node: &Arc<Node>) -> bool {
+pub fn is_in_name_of_expression_with_type_arguments_or_heritage_type_reference(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_name_of_expression_with_type_arguments_or_heritage_type_reference"); 
     let mut node = Arc::clone(node);
     while let Some(parent) = node.parent() {
         if parent.kind != SyntaxKind::PropertyAccessExpression && parent.kind != SyntaxKind::QualifiedName {
@@ -186,7 +186,7 @@ pub fn is_in_name_of_expression_with_type_arguments_or_heritage_type_reference(n
     })
 }
 
-pub fn min_and_max<T>(slice: &[T], get_value: impl Fn(&T) -> i64) -> (i64, i64) {
+pub fn min_and_max<T>(slice: &[T], get_value: impl Fn(&T) -> i64) -> (i64, i64) { ::tsox_core::fntrace::enter("min_and_max"); 
     let mut min_value = 0;
     let mut max_value = 0;
     for (i, element) in slice.iter().enumerate() {
@@ -202,7 +202,7 @@ pub fn min_and_max<T>(slice: &[T], get_value: impl Fn(&T) -> i64) -> (i64, i64) 
     (min_value, max_value)
 }
 
-pub fn range_of_type_parameters(source_file: &Arc<SourceFile>, type_parameters: &NodeList) -> TextRange {
+pub fn range_of_type_parameters(source_file: &Arc<SourceFile>, type_parameters: &NodeList) -> TextRange { ::tsox_core::fntrace::enter("range_of_type_parameters"); 
     let text: &str = &source_file.text;
     TextRange::new(
         type_parameters.pos() - 1,
@@ -211,7 +211,7 @@ pub fn range_of_type_parameters(source_file: &Arc<SourceFile>, type_parameters: 
 }
 
 impl Checker {
-    pub fn compare_symbols_worker(&self, s1: Option<&Arc<Symbol>>, s2: Option<&Arc<Symbol>>) -> Ordering {
+    pub fn compare_symbols_worker(&self, s1: Option<&Arc<Symbol>>, s2: Option<&Arc<Symbol>>) -> Ordering { ::tsox_core::fntrace::enter("compare_symbols_worker"); 
         let (Some(s1), Some(s2)) = (s1, s2) else {
             return match (s1, s2) {
                 (None, None) => Ordering::Equal,
@@ -240,7 +240,7 @@ impl Checker {
         ast::get_symbol_id(s1).cmp(&ast::get_symbol_id(s2))
     }
 
-    pub fn compare_nodes(&self, n1: Option<&Arc<Node>>, n2: Option<&Arc<Node>>) -> Ordering {
+    pub fn compare_nodes(&self, n1: Option<&Arc<Node>>, n2: Option<&Arc<Node>>) -> Ordering { ::tsox_core::fntrace::enter("compare_nodes"); 
         let (Some(n1), Some(n2)) = (n1, n2) else {
             return match (n1, n2) {
                 (None, None) => Ordering::Equal,
@@ -273,7 +273,7 @@ impl Checker {
         n1.pos().cmp(&n2.pos())
     }
 
-    pub fn is_mutable_local_variable_declaration(&self, declaration: &Arc<Node>) -> bool {
+    pub fn is_mutable_local_variable_declaration(&self, declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_mutable_local_variable_declaration"); 
         let Some(parent) = declaration.parent() else {
             return false;
         };
@@ -285,23 +285,23 @@ impl Checker {
                         && gp.parent().is_some_and(|gpp| Checker::is_global_source_file(&gpp)))))
     }
 
-    pub fn call_like_expression_may_have_type_arguments(&self, node: &Arc<Node>) -> bool {
+    pub fn call_like_expression_may_have_type_arguments(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("call_like_expression_may_have_type_arguments"); 
         tsox_frontend::ast::mig::m3f_4::is_call_or_new_expression(node)
             || ast::is_tagged_template_expression(node)
             || tsox_frontend::ast::mig::m3g::is_jsx_opening_like_element(node)
     }
 
-    pub fn is_canceled(&self) -> bool {
+    pub fn is_canceled(&self) -> bool { ::tsox_core::fntrace::enter("is_canceled"); 
         self.was_canceled()
     }
 
-    pub fn check_not_canceled(&self) {
+    pub fn check_not_canceled(&self) { ::tsox_core::fntrace::enter("check_not_canceled"); 
         if self.was_canceled() {
             panic!("Checker was previously cancelled");
         }
     }
 
-    pub fn get_packages_map(&mut self) -> &HashMap<String, bool> {
+    pub fn get_packages_map(&mut self) -> &HashMap<String, bool> { ::tsox_core::fntrace::enter("get_packages_map"); 
         if self.packages_map.is_none() {
             let mut packages_map = HashMap::new();
             let resolved_modules = self.program.get_resolved_modules();
@@ -323,12 +323,12 @@ impl Checker {
         self.packages_map.as_ref().unwrap()
     }
 
-    pub fn types_package_exists(&mut self, package_name: &str) -> bool {
+    pub fn types_package_exists(&mut self, package_name: &str) -> bool { ::tsox_core::fntrace::enter("types_package_exists"); 
         let packages_map = self.get_packages_map();
         packages_map.contains_key(&get_types_package_name(package_name))
     }
 
-    pub fn package_bundles_types(&mut self, package_name: &str) -> bool {
+    pub fn package_bundles_types(&mut self, package_name: &str) -> bool { ::tsox_core::fntrace::enter("package_bundles_types"); 
         let packages_map = self.get_packages_map();
         packages_map.get(package_name).copied().unwrap_or(false)
     }
@@ -338,7 +338,7 @@ impl Checker {
         node: Option<&Arc<Node>>,
         suggestion: Option<&Arc<Symbol>>,
         exclude_classes: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_unchecked_js_suggestion"); 
         let Some(node) = node else {
             return false;
         };

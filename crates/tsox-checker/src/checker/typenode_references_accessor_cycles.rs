@@ -5,7 +5,7 @@ use tsox_frontend::ast::NodeData;
 
 impl Checker {
     /// 根标识符可解析、其变量注解型为构造期 error 预置(在途环回落)判定
-    pub(crate) fn type_query_root_in_flight(&self, expr_name: &Arc<Node>) -> bool {
+    pub(crate) fn type_query_root_in_flight(&self, expr_name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_query_root_in_flight"); 
         let mut leftmost = expr_name;
         loop {
             match &leftmost.data {
@@ -36,7 +36,7 @@ impl Checker {
         member: &Arc<Node>,
         kind: SyntaxKind,
         name: &str,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("accessor_sibling"); 
         let parent = member.parent()?;
         let members = match &parent.data {
             NodeData::TypeLiteralNode(d) => &d.members,
@@ -59,7 +59,7 @@ impl Checker {
         &mut self,
         member: &Arc<Node>,
         name: &str,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("type_literal_accessor_member_type"); 
         let getter = Self::accessor_sibling(member, SyntaxKind::GetAccessor, name);
         let setter = Self::accessor_sibling(member, SyntaxKind::SetAccessor, name);
         if let Some(g) = getter
@@ -87,7 +87,7 @@ impl Checker {
         annotation: &Arc<Node>,
         accessor: &Arc<Node>,
         name: &str,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("guarded_type_literal_accessor_annotation"); 
         let t = self.get_type_from_type_node(annotation);
         let cyclic = match &annotation.data {
             NodeData::TypeQueryNode(d) => {
@@ -123,7 +123,7 @@ impl Checker {
 
     /// 索引访问对象位根 TypeReference 指向在途构造中的别名(声明型解析在途或
     /// type_node 缓存为 error 预置)判定
-    fn indexed_access_root_in_flight(&self, object_type: &Arc<Node>) -> bool {
+    fn indexed_access_root_in_flight(&self, object_type: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("indexed_access_root_in_flight"); 
         let NodeData::TypeReferenceNode(tr) = &object_type.data else {
             return false;
         };

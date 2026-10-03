@@ -45,7 +45,7 @@ use tsox_frontend::ast::{
     is_property_access_expression,
 };
 
-pub fn declaration_emit_node_builder_flags() -> NodeBuilderFlags {
+pub fn declaration_emit_node_builder_flags() -> NodeBuilderFlags { ::tsox_core::fntrace::enter("declaration_emit_node_builder_flags"); 
     NodeBuilderFlags::MultilineObjectLiterals
         | NodeBuilderFlags::WriteClassExpressionAsTypeLiteral
         | NodeBuilderFlags::UseTypeOfFunction
@@ -55,18 +55,18 @@ pub fn declaration_emit_node_builder_flags() -> NodeBuilderFlags {
         | NodeBuilderFlags::NoTruncation
 }
 
-pub fn declaration_emit_internal_node_builder_flags() -> NodeBuilderInternalFlags {
+pub fn declaration_emit_internal_node_builder_flags() -> NodeBuilderInternalFlags { ::tsox_core::fntrace::enter("declaration_emit_internal_node_builder_flags"); 
     NodeBuilderInternalFlags::AllowUnresolvedNames
 }
 
-fn deep_clone_modifier_list(modifiers: &Arc<ModifierList>) -> ModifierList {
+fn deep_clone_modifier_list(modifiers: &Arc<ModifierList>) -> ModifierList { ::tsox_core::fntrace::enter("deep_clone_modifier_list"); 
     ModifierList::new(
         modifiers.list.nodes.iter().map(|n| deep_clone_node(n)).collect(),
         modifiers.modifier_flags,
     )
 }
 
-fn class_like_members(class_node: &Arc<Node>) -> &Arc<NodeList> {
+fn class_like_members(class_node: &Arc<Node>) -> &Arc<NodeList> { ::tsox_core::fntrace::enter("class_like_members"); 
     match &class_node.data {
         NodeData::ClassDeclaration(d) => &d.members,
         NodeData::ClassExpression(d) => &d.members,
@@ -74,7 +74,7 @@ fn class_like_members(class_node: &Arc<Node>) -> &Arc<NodeList> {
     }
 }
 
-fn function_type_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+fn function_type_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("function_type_parameters"); 
     match &node.data {
         NodeData::FunctionExpression(d) => d.type_parameters.clone(),
         NodeData::ArrowFunction(d) => d.type_parameters.clone(),
@@ -82,7 +82,7 @@ fn function_type_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> {
     }
 }
 
-fn function_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+fn function_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("function_parameters"); 
     match &node.data {
         NodeData::FunctionExpression(d) => Some(d.parameters.clone()),
         NodeData::ArrowFunction(d) => Some(d.parameters.clone()),
@@ -90,7 +90,7 @@ fn function_parameters(node: &Arc<Node>) -> Option<Arc<NodeList>> {
     }
 }
 
-fn function_asterisk_token(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn function_asterisk_token(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("function_asterisk_token"); 
     match &node.data {
         NodeData::FunctionExpression(d) => d.asterisk_token.clone(),
         _ => None,
@@ -98,7 +98,7 @@ fn function_asterisk_token(node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 impl RuntimeSyntaxTransformer {
-    pub fn get_enum_qualified_element(&mut self, enum_: &Arc<Node>, member: &Arc<Node>) -> Arc<Node> {
+    pub fn get_enum_qualified_element(&mut self, enum_: &Arc<Node>, member: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_enum_qualified_element"); 
         let ns_name = self.get_namespace_container_name(enum_);
         let prop_name = self.get_expression_for_property_name(member);
         let prop = self.get_namespace_qualified_element(ns_name, prop_name);
@@ -112,7 +112,7 @@ impl RuntimeSyntaxTransformer {
         prop
     }
 
-    pub fn get_export_qualified_reference_to_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn get_export_qualified_reference_to_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_export_qualified_reference_to_declaration"); 
         if self.is_export_of_namespace(node) {
             return self.factory().get_external_module_or_namespace_export_name(
                 Some(&self.get_namespace_container_name(self.current_namespace.as_ref().unwrap())),
@@ -130,7 +130,7 @@ impl RuntimeSyntaxTransformer {
         )
     }
 
-    pub(crate) fn record_declaration_in_scope(&mut self, node: &Arc<Node>) {
+    pub(crate) fn record_declaration_in_scope(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("record_declaration_in_scope"); 
         match &node.data {
             NodeData::VariableStatement(d) => {
                 let declaration_list = d.declaration_list.clone();
@@ -163,7 +163,7 @@ impl RuntimeSyntaxTransformer {
         }
     }
 
-    pub(crate) fn get_expression_for_property_name(&mut self, member: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn get_expression_for_property_name(&mut self, member: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_expression_for_property_name"); 
         let name = member.name().cloned().unwrap_or_else(|| member.clone());
         match name.kind {
             SyntaxKind::PrivateIdentifier => self.factory().new_identifier(""),
@@ -188,7 +188,7 @@ impl RuntimeSyntaxTransformer {
         &mut self,
         statements: Vec<Arc<Node>>,
         node: &Arc<Node>,
-    ) -> (Vec<Arc<Node>>, bool) {
+    ) -> (Vec<Arc<Node>>, bool) { ::tsox_core::fntrace::enter("add_var_for_declaration"); 
         self.record_declaration_in_scope(node);
         if !self.is_first_declaration_in_scope(node) {
             return (statements, false);
@@ -248,7 +248,7 @@ impl RuntimeSyntaxTransformer {
         export_name: &Arc<Node>,
         export_value: &Arc<Node>,
         location: Option<&TextRange>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_namespace_export_expression"); 
         let member_name = self.get_namespace_qualified_property(
             self.get_namespace_container_name(self.current_namespace.as_ref().unwrap()),
             export_name.clone(),
@@ -263,7 +263,7 @@ impl RuntimeSyntaxTransformer {
         expression
     }
 
-    pub fn create_export_statement_for_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn create_export_statement_for_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_export_statement_for_declaration"); 
         let export_name = self.factory().get_external_module_or_namespace_export_name(
             Some(&self.get_namespace_container_name(self.current_namespace.as_ref().unwrap())),
             node,
@@ -296,7 +296,7 @@ impl RuntimeSyntaxTransformer {
         expression: &Arc<Node>,
         export_assignment_source_map_range: TextRange,
         original: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_export_assignment"); 
         let export_name = self.get_namespace_qualified_property(
             self.get_namespace_container_name(self.current_namespace.as_ref().unwrap()),
             name.clone(),
@@ -312,7 +312,7 @@ impl RuntimeSyntaxTransformer {
 }
 
 impl DeclarationTransformer {
-    pub(crate) fn factory(&self) -> NodeFactory<'_> {
+    pub(crate) fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         self.transformer.factory()
     }
 
@@ -320,7 +320,7 @@ impl DeclarationTransformer {
         &mut self,
         class_node: &Arc<Node>,
         extra_members: &[Arc<Node>],
-    ) -> NodeList {
+    ) -> NodeList { ::tsox_core::fntrace::enter("build_class_members"); 
         let ctor = get_first_constructor_with_body(class_node);
         let mut parameter_properties: Vec<Arc<Node>> = Vec::new();
         if let Some(ctor) = ctor {
@@ -401,7 +401,7 @@ impl DeclarationTransformer {
         &mut self,
         pattern: &Arc<Node>,
         param: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("walk_binding_pattern"); 
         let mut elems: Vec<Arc<Node>> = Vec::new();
         let elements = match (&pattern.kind, &pattern.data) {
             (
@@ -437,7 +437,7 @@ impl DeclarationTransformer {
         elems
     }
 
-    pub fn collect_this_property_assignments(&mut self, class_node: &Arc<Node>) -> Vec<Arc<Node>> {
+    pub fn collect_this_property_assignments(&mut self, class_node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_this_property_assignments"); 
         let members = class_like_members(class_node).clone();
         let mut seen = std::collections::HashSet::new();
         for member in members.nodes.iter() {
@@ -455,7 +455,7 @@ impl DeclarationTransformer {
         std::mem::take(&mut self.this_property_assignments_collected)
     }
 
-    pub fn get_name_expression_preferring_identifier(&mut self, name_expr: &Arc<Node>) -> Arc<Node> {
+    pub fn get_name_expression_preferring_identifier(&mut self, name_expr: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_name_expression_preferring_identifier"); 
         let mut name_expr = name_expr.clone();
         if is_numeric_literal(&name_expr) {
             name_expr = self
@@ -477,7 +477,7 @@ impl DeclarationTransformer {
         name_expr
     }
 
-    pub fn get_expando_host_id(&self, declaration: &Arc<Node>) -> NodeId {
+    pub fn get_expando_host_id(&self, declaration: &Arc<Node>) -> NodeId { ::tsox_core::fntrace::enter("get_expando_host_id"); 
         let root = if is_variable_declaration(declaration) {
             declaration.parent().unwrap().parent().unwrap()
         } else {
@@ -486,7 +486,7 @@ impl DeclarationTransformer {
         get_node_id(&self.transformer.emit_context().most_original(&root))
     }
 
-    pub fn create_full_expando_block(&mut self, id: NodeId) -> Option<Arc<Node>> {
+    pub fn create_full_expando_block(&mut self, id: NodeId) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_full_expando_block"); 
         if let Some(deferred) = self.deferred_expando_assignments.remove(&id) {
             for assignment in deferred {
                 self.transform_expando_assignment(&assignment);
@@ -536,7 +536,7 @@ impl DeclarationTransformer {
         n
     }
 
-    pub fn transform_expando_assignment(&mut self, node: &Arc<Node>) {
+    pub fn transform_expando_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("transform_expando_assignment"); 
         let left = node.as_binary_expression().left.clone();
         let ns = get_leftmost_access_expression(&left);
         if ns.kind != SyntaxKind::Identifier {
@@ -674,7 +674,7 @@ impl DeclarationTransformer {
         cleanup_diagnostic_context(self);
     }
 
-    pub fn try_get_name_of_assigned_expression(&mut self, unwrapped: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn try_get_name_of_assigned_expression(&mut self, unwrapped: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_name_of_assigned_expression"); 
         let mut name_text = String::new();
         if !is_property_access_expression(unwrapped) && unwrapped.name().is_some() {
             name_text = unwrapped.name().unwrap().text().to_string();
@@ -707,7 +707,7 @@ impl DeclarationTransformer {
         &mut self,
         input: &Arc<Node>,
         name: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_binary_expression_to_export_declaration"); 
         let property_name = input.as_binary_expression().right.clone();
         let property_name = if is_identifier(name) && property_name.text() == name.text() {
             None
@@ -729,7 +729,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn try_get_property_name(&mut self, node: &Arc<Node>) -> String {
+    pub fn try_get_property_name(&mut self, node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("try_get_property_name"); 
         if is_element_access_expression(node) {
             return self.resolver.get_element_access_expression_name(node);
         }
@@ -746,7 +746,7 @@ pub fn extract_expando_host_params(
     Option<Arc<NodeList>>,
     Option<Arc<NodeList>>,
     Option<Arc<Node>>,
-) {
+) { ::tsox_core::fntrace::enter("extract_expando_host_params"); 
     (
         function_type_parameters(node),
         function_parameters(node),
@@ -755,7 +755,7 @@ pub fn extract_expando_host_params(
 }
 
 impl CommonJSModuleTransformer<'_> {
-    pub fn create_import_call_expression_common_js(&mut self, arg: Option<&Arc<Node>>) -> Arc<Node> {
+    pub fn create_import_call_expression_common_js(&mut self, arg: Option<&Arc<Node>>) -> Arc<Node> { ::tsox_core::fntrace::enter("create_import_call_expression_common_js"); 
         let factory = NodeFactory::new(&self.emit_context);
         let need_sync_eval = arg.is_some_and(|arg| !is_simple_inlineable_expression(arg));
 

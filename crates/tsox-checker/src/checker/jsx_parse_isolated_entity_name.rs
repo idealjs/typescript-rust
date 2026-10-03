@@ -15,11 +15,11 @@ bitflags::bitflags! {
     }
 }
 
-pub fn parse_isolated_entity_name(_name: &str) -> Option<Arc<Node>> {
+pub fn parse_isolated_entity_name(_name: &str) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_isolated_entity_name"); 
     None
 }
 
-pub fn mark_as_synthetic(node: &Arc<Node>) -> bool {
+pub fn mark_as_synthetic(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("mark_as_synthetic"); 
     let _ = node;
     false
 }

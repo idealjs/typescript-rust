@@ -54,7 +54,7 @@ pub struct EmitNode {
 }
 
 impl EmitNode {
-    fn copy_from(&mut self, source: &EmitNode) {
+    fn copy_from(&mut self, source: &EmitNode) { ::tsox_core::fntrace::enter("copy_from"); 
         self.flags = source.flags;
         self.emit_flags = source.emit_flags;
         self.comment_range = source.comment_range;
@@ -69,18 +69,18 @@ impl EmitNode {
 }
 
 impl EmitContext {
-    pub fn emit_flags(&self, node: &Arc<Node>) -> EmitFlags {
+    pub fn emit_flags(&self, node: &Arc<Node>) -> EmitFlags { ::tsox_core::fntrace::enter("emit_flags"); 
         if let Some(emit_node) = self.emit_nodes_try_get(node) {
             return emit_node.emit_flags;
         }
         EmitFlags::NONE
     }
 
-    pub fn add_emit_flags(&self, node: &Arc<Node>, flags: EmitFlags) {
+    pub fn add_emit_flags(&self, node: &Arc<Node>, flags: EmitFlags) { ::tsox_core::fntrace::enter("add_emit_flags"); 
         self.emit_nodes_get_mut(node).emit_flags |= flags;
     }
 
-    pub fn comment_range(&self, node: &Arc<Node>) -> TextRange {
+    pub fn comment_range(&self, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("comment_range"); 
         if let Some(emit_node) = self.emit_nodes_try_get(node) {
             if emit_node.flags & HAS_COMMENT_RANGE != 0 {
                 return emit_node.comment_range;
@@ -89,17 +89,17 @@ impl EmitContext {
         node.loc
     }
 
-    pub fn assign_comment_range(&mut self, to: &Arc<Node>, from: &Arc<Node>) {
+    pub fn assign_comment_range(&mut self, to: &Arc<Node>, from: &Arc<Node>) { ::tsox_core::fntrace::enter("assign_comment_range"); 
         let range = self.comment_range(from);
         self.set_comment_range(to, range);
     }
 
-    pub fn assign_source_map_range(&mut self, to: &Arc<Node>, from: &Arc<Node>) {
+    pub fn assign_source_map_range(&mut self, to: &Arc<Node>, from: &Arc<Node>) { ::tsox_core::fntrace::enter("assign_source_map_range"); 
         let range = self.source_map_range(from);
         self.set_source_map_range(to, range);
     }
 
-    pub fn assign_comment_and_source_map_ranges(&self, to: &Arc<Node>, from: &Arc<Node>) {
+    pub fn assign_comment_and_source_map_ranges(&self, to: &Arc<Node>, from: &Arc<Node>) { ::tsox_core::fntrace::enter("assign_comment_and_source_map_ranges"); 
         let comment_range = self.comment_range(from);
         let source_map_range = self.source_map_range(from);
         let mut emit_node = self.emit_nodes_get_mut(to);
@@ -108,11 +108,11 @@ impl EmitContext {
         emit_node.flags |= HAS_COMMENT_RANGE | HAS_SOURCE_MAP_RANGE;
     }
 
-    pub fn assigned_name(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn assigned_name(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("assigned_name"); 
         self.r39k12_assigned_name_get(node)
     }
 
-    pub fn class_this(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn class_this(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_this"); 
         self.r39k12_class_this_get(node)
     }
 
@@ -122,7 +122,7 @@ impl EmitContext {
         kind: SyntaxKind,
         text: &str,
         has_trailing_new_line: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("add_synthetic_leading_comment"); 
         let comment = SynthesizedComment {
             kind,
             loc: TextRange::undefined(),
@@ -140,7 +140,7 @@ impl EmitContext {
         kind: SyntaxKind,
         text: &str,
         has_trailing_new_line: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("add_synthetic_trailing_comment"); 
         let comment = SynthesizedComment {
             kind,
             loc: TextRange::undefined(),
@@ -152,14 +152,14 @@ impl EmitContext {
         node.clone()
     }
 
-    pub fn get_emit_helpers(&self, node: &Arc<Node>) -> Vec<Arc<EmitHelper>> {
+    pub fn get_emit_helpers(&self, node: &Arc<Node>) -> Vec<Arc<EmitHelper>> { ::tsox_core::fntrace::enter("get_emit_helpers"); 
         match self.emit_nodes_try_get(node) {
             Some(emit_node) => emit_node.helpers.clone(),
             None => vec![],
         }
     }
 
-    pub fn get_external_helpers_module_name(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_external_helpers_module_name(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_helpers_module_name"); 
         if let Some(parse_node) = self.parse_node(node) {
             if let Some(emit_node) = self.emit_nodes_try_get(&parse_node) {
                 return emit_node.external_helpers_module_name.clone();

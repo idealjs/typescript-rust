@@ -30,7 +30,7 @@ impl Checker {
         maybe_start: usize,
         propagating_variance_flags: RelationComparisonResult,
         mark_all_as_succeeded: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("reset_maybe_stack"); 
         for i in maybe_start..r21k10_defs::maybe_keys_len() {
             let key = r21k10_defs::maybe_keys_get(i).unwrap();
             r21k10_defs::maybe_keys_set_remove(&key);
@@ -49,7 +49,7 @@ impl Checker {
         target: &Arc<Type>,
         report_errors: bool,
         intersection_state: IntersectionState,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("structured_type_related_to"); 
         let save_error_state = self.get_error_state();
         let mut result =
             self.structured_type_related_to_worker(source, target, report_errors, intersection_state);
@@ -136,7 +136,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_source_intersection_needing_extra_check"); 
         source.flags.intersects(TypeFlags::Intersection)
             && self
                 .get_apparent_type(source)
@@ -155,7 +155,7 @@ impl Checker {
         target: &Arc<Type>,
         unmatched_property: &Arc<Symbol>,
         require_optional_properties: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_unmatched_property"); 
         if let Some(decl) = unmatched_property.value_declaration.clone() {
             if let Some(name) = decl.name() {
                 if ast::is_private_identifier(&name) {
@@ -241,7 +241,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         report_errors: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("try_elaborate_array_like_errors"); 
         if is_tuple_type(source) {
             if source
                 .target_tuple_type()
@@ -281,7 +281,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("try_elaborate_errors_for_primitives_and_objects"); 
         let global_string = self.global_string_type();
         let string_type = self.string_type();
         let global_number = self.global_number_type();
@@ -312,7 +312,7 @@ impl Checker {
         target: &Arc<Type>,
         report_errors: bool,
         intersection_state: IntersectionState,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("structured_type_related_to_worker"); 
         let save_error_state = self.get_error_state();
         let _ = save_error_state;
         let _ = report_errors;
@@ -331,7 +331,7 @@ impl Checker {
         excluded_properties: &HashSet<String>,
         optionals_only: bool,
         intersection_state: IntersectionState,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("properties_related_to"); 
         let _ = relation;
         let _ = source;
         let _ = target;

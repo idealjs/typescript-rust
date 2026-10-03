@@ -3,12 +3,12 @@
 use crate::binder::flow_bind::*;
 
 impl Binder {
-    pub(crate) fn unreachable_flow(&self) -> Arc<FlowNode> {
+    pub(crate) fn unreachable_flow(&self) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("unreachable_flow"); 
         Arc::clone(self.unreachable_flow.as_ref().unwrap())
     }
 
     #[allow(dead_code)]
-    pub(crate) fn new_flow_node(&self, flags: FlowFlags) -> FlowNode {
+    pub(crate) fn new_flow_node(&self, flags: FlowFlags) -> FlowNode { ::tsox_core::fntrace::enter("new_flow_node"); 
         FlowNode::new(flags)
     }
 
@@ -17,7 +17,7 @@ impl Binder {
         flags: FlowFlags,
         antecedent: &Arc<FlowNode>,
         expression: &Arc<Node>,
-    ) -> Arc<FlowNode> {
+    ) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("create_flow_condition"); 
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -51,7 +51,7 @@ impl Binder {
         &mut self,
         antecedent: &Arc<FlowNode>,
         node: &Arc<Node>,
-    ) -> Arc<FlowNode> {
+    ) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("create_flow_assignment"); 
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -76,7 +76,7 @@ impl Binder {
         &mut self,
         antecedent: &Arc<FlowNode>,
         node: &Arc<Node>,
-    ) -> Arc<FlowNode> {
+    ) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("create_flow_call"); 
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -96,7 +96,7 @@ impl Binder {
         &mut self,
         antecedent: &Arc<FlowNode>,
         node: &Arc<Node>,
-    ) -> Arc<FlowNode> {
+    ) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("create_flow_mutation"); 
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -118,7 +118,7 @@ impl Binder {
         result
     }
 
-    pub(crate) fn set_flow_node_referenced(&self, flow: &FlowNode) {
+    pub(crate) fn set_flow_node_referenced(&self, flow: &FlowNode) { ::tsox_core::fntrace::enter("set_flow_node_referenced"); 
         let ptr = flow as *const FlowNode as *mut FlowNode;
         unsafe {
             if (*ptr).flags.contains(FlowFlags::REFERENCED) {
@@ -134,7 +134,7 @@ impl Binder {
         target: &Arc<FlowNode>,
         antecedents: &[Arc<FlowNode>],
         antecedent: &Arc<FlowNode>,
-    ) -> Arc<FlowNode> {
+    ) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("create_reduce_label"); 
         Arc::new(FlowNode {
             flags: FlowFlags::REDUCE_LABEL,
             node: None,
@@ -146,7 +146,7 @@ impl Binder {
         })
     }
 
-    pub(crate) fn new_flow_accumulator() -> Arc<FlowNode> {
+    pub(crate) fn new_flow_accumulator() -> Arc<FlowNode> { ::tsox_core::fntrace::enter("new_flow_accumulator"); 
         Arc::new(FlowNode {
             flags: FlowFlags::BRANCH_LABEL,
             node: None,
@@ -158,7 +158,7 @@ impl Binder {
         })
     }
 
-    pub(crate) fn add_antecedent_to_flow(&self, label: &Arc<FlowNode>, antecedent: &Arc<FlowNode>) {
+    pub(crate) fn add_antecedent_to_flow(&self, label: &Arc<FlowNode>, antecedent: &Arc<FlowNode>) { ::tsox_core::fntrace::enter("add_antecedent_to_flow"); 
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return;
         }
@@ -182,7 +182,7 @@ impl Binder {
         switch_statement: &Arc<Node>,
         clause_start: usize,
         clause_end: usize,
-    ) -> Arc<FlowNode> {
+    ) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("create_flow_switch_clause"); 
         if antecedent.flags.contains(FlowFlags::UNREACHABLE) {
             return Arc::clone(antecedent);
         }
@@ -197,7 +197,7 @@ impl Binder {
         })
     }
 
-    pub(crate) fn bind_if_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_if_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_if_statement"); 
         let mut then_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
         let mut else_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
         let mut post_if_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
@@ -237,7 +237,7 @@ impl Binder {
         self.current_flow = Some(post_if_label.finish(self.unreachable_flow.as_ref().unwrap()));
     }
 
-    pub(crate) fn bind_while_statement(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_while_statement(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_while_statement"); 
         let mut pre_while_label = FlowLabel::new(FlowFlags::LOOP_LABEL);
         let mut pre_body_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);
         let mut post_while_label = FlowLabel::new(FlowFlags::BRANCH_LABEL);

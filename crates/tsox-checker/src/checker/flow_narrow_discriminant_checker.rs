@@ -9,7 +9,7 @@ impl Checker {
         expr: &Arc<Node>,
         target: &FlowRef,
         kind: NarrowKind,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("try_narrow_by_discriminant_property"); 
         let (symbol, node_reference): (Option<Arc<Symbol>>, Option<Arc<Node>>) = match target {
             FlowRef::Symbol(symbol) => (Some(Arc::clone(symbol)), None),
             FlowRef::Node(reference) => (None, Some(Arc::clone(reference))),
@@ -125,7 +125,7 @@ impl Checker {
         type_name_node: &Arc<Node>,
         target: &FlowRef,
         narrow_to_value: bool,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("try_narrow_by_typeof_discriminant"); 
         let FlowRef::Symbol(symbol) = target else {
             return None;
         };
@@ -166,14 +166,14 @@ impl Checker {
         Some(self.rebuild_union_or_never(type_, filtered))
     }
 
-    pub(crate) fn type_matches_typeof_any(&self, t: &Arc<Type>, type_name: &str) -> bool {
+    pub(crate) fn type_matches_typeof_any(&self, t: &Arc<Type>, type_name: &str) -> bool { ::tsox_core::fntrace::enter("type_matches_typeof_any"); 
         let constituents = self.constituent_types(t);
         constituents
             .iter()
             .any(|c| self.constituent_matches_typeof(c, type_name))
     }
 
-    pub(crate) fn type_matches_typeof_all(&self, t: &Arc<Type>, type_name: &str) -> bool {
+    pub(crate) fn type_matches_typeof_all(&self, t: &Arc<Type>, type_name: &str) -> bool { ::tsox_core::fntrace::enter("type_matches_typeof_all"); 
         let constituents = self.constituent_types(t);
         !constituents.is_empty()
             && constituents
@@ -181,7 +181,7 @@ impl Checker {
                 .all(|c| self.constituent_matches_typeof(c, type_name))
     }
 
-    pub(crate) fn constituent_matches_typeof(&self, t: &Arc<Type>, type_name: &str) -> bool {
+    pub(crate) fn constituent_matches_typeof(&self, t: &Arc<Type>, type_name: &str) -> bool { ::tsox_core::fntrace::enter("constituent_matches_typeof"); 
         match type_name {
             "string" => t.flags.intersects(TYPE_FLAGS_STRING_LIKE),
             "number" => t.flags.intersects(TYPE_FLAGS_NUMBER_LIKE),
@@ -202,7 +202,7 @@ impl Checker {
         type_: &Arc<Type>,
         flow: &Arc<FlowNode>,
         target: &FlowRef,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_by_switch_clause"); 
         let Some(switch_stmt) = &flow.switch_statement else {
             return Arc::clone(type_);
         };
@@ -310,7 +310,7 @@ impl Checker {
         &self,
         expr: &Arc<Node>,
         pattern: &Arc<Node>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("binding_pattern_element_name"); 
         if !matches!(
             pattern.kind,
             SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern

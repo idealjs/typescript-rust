@@ -6,7 +6,7 @@ use tsox_core::core::text::TextRange;
 pub(super) fn gather_type_parameters(
     js_doc: &Arc<Node>,
     typedef_or_callback: bool,
-) -> Option<Arc<NodeList>> {
+) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("gather_type_parameters"); 
     let tags = match &js_doc.data {
         NodeData::JSDoc(d) => d.tags.as_ref(),
         _ => return None,

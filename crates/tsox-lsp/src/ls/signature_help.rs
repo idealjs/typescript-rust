@@ -46,7 +46,7 @@ impl LanguageService {
         document_uri: &DocumentUri,
         position: Position,
         _context: &SignatureHelpContext,
-    ) -> Option<SignatureHelp> {
+    ) -> Option<SignatureHelp> { ::tsox_core::fntrace::enter("provide_signature_help"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let offset = lsp_position_to_offset(&source_file.line_map, &position);
         self.get_signature_help_items(offset, &program, &source_file, _context)
@@ -58,7 +58,7 @@ impl LanguageService {
         program: &Arc<Program>,
         source_file: &Arc<SourceFile>,
         _context: &SignatureHelpContext,
-    ) -> Option<SignatureHelp> {
+    ) -> Option<SignatureHelp> { ::tsox_core::fntrace::enter("get_signature_help_items"); 
         let node = find_deepest_node(&source_file.node, position);
 
         let (call_node, argument_index) = find_enclosing_call_and_argument_index(&node, position)?;
@@ -95,7 +95,7 @@ impl LanguageService {
 fn find_enclosing_call_and_argument_index(
     node: &Arc<Node>,
     position: usize,
-) -> Option<(Arc<Node>, usize)> {
+) -> Option<(Arc<Node>, usize)> { ::tsox_core::fntrace::enter("find_enclosing_call_and_argument_index"); 
     let mut current = Arc::clone(node);
     loop {
         match current.kind {
@@ -116,7 +116,7 @@ fn find_enclosing_call_and_argument_index(
     }
 }
 
-fn get_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn get_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_arguments"); 
     match &node.data {
         NodeData::CallExpression(d) => d.arguments.nodes.clone(),
         NodeData::NewExpression(d) => d
@@ -128,7 +128,7 @@ fn get_arguments(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-fn count_arguments_before_position(args: &[Arc<Node>], position: usize) -> usize {
+fn count_arguments_before_position(args: &[Arc<Node>], position: usize) -> usize { ::tsox_core::fntrace::enter("count_arguments_before_position"); 
     let mut index = 0;
     for arg in args {
         if arg.pos() <= position {
@@ -144,7 +144,7 @@ fn count_arguments_before_position(args: &[Arc<Node>], position: usize) -> usize
     index
 }
 
-fn signature_to_info(checker: &Checker, sig: &Arc<Signature>) -> SignatureInformation {
+fn signature_to_info(checker: &Checker, sig: &Arc<Signature>) -> SignatureInformation { ::tsox_core::fntrace::enter("signature_to_info"); 
     let params = &sig.parameters;
     let param_labels: Vec<String> = params
         .iter()
@@ -189,7 +189,7 @@ fn signature_to_info(checker: &Checker, sig: &Arc<Signature>) -> SignatureInform
     }
 }
 
-fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
+fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
     let mut deepest = Arc::clone(node);
     loop {
         let current = Arc::clone(&deepest);
@@ -210,7 +210,7 @@ fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> {
     deepest
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;

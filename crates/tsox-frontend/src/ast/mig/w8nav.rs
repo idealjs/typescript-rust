@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use crate::ast::{Node, SourceFile};
 
-pub fn is_valid_preceding_node(node: &Arc<Node>, source_file: &SourceFile) -> bool {
+pub fn is_valid_preceding_node(node: &Arc<Node>, source_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_valid_preceding_node"); 
     if node.kind == crate::ast::SyntaxKind::EndOfFile {
         return !node.jsdoc(source_file).is_empty();
     }

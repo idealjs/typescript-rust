@@ -9,7 +9,7 @@ pub(super) struct ScanToken {
     pub end: usize,
 }
 
-fn new_scanner(text: &str, jsx: bool) -> Scanner {
+fn new_scanner(text: &str, jsx: bool) -> Scanner { ::tsox_core::fntrace::enter("new_scanner"); 
     let mut scanner = Scanner::new(text.to_string());
     if jsx {
         scanner.set_language_variant(tsox_frontend::ast::LanguageVariant::Jsx);
@@ -21,7 +21,7 @@ fn new_scanner(text: &str, jsx: bool) -> Scanner {
 /// 裸扫描无 parser 驱动，模板续段须自管：TemplateHead（`${` 收尾）入栈，
 /// 栈顶表达式括号深度归零时遇 `}` 重扫为 TemplateMiddle/Tail
 /// （Go 走语法树 FindPrecedingToken 无此问题）
-pub(super) fn scan_tokens(text: &str, jsx: bool, from: usize, to: usize) -> Vec<ScanToken> {
+pub(super) fn scan_tokens(text: &str, jsx: bool, from: usize, to: usize) -> Vec<ScanToken> { ::tsox_core::fntrace::enter("scan_tokens"); 
     let mut scanner = new_scanner(text, jsx);
     let limit = to.min(text.len());
     scanner.set_range(from.min(text.len()), text.len());
@@ -98,7 +98,7 @@ pub(super) fn relevant_tokens(
     jsx: bool,
     from: usize,
     position: usize,
-) -> (Option<ScanToken>, Option<ScanToken>) {
+) -> (Option<ScanToken>, Option<ScanToken>) { ::tsox_core::fntrace::enter("relevant_tokens"); 
     let tokens = scan_tokens(text, jsx, from, position);
     let previous = tokens.last().copied();
     if let Some(prev) = &previous
@@ -113,13 +113,13 @@ pub(super) fn relevant_tokens(
     (previous, previous)
 }
 
-pub(super) fn token_containing(text: &str, jsx: bool, position: usize) -> Option<ScanToken> {
+pub(super) fn token_containing(text: &str, jsx: bool, position: usize) -> Option<ScanToken> { ::tsox_core::fntrace::enter("token_containing"); 
     scan_tokens(text, jsx, 0, position + 1)
         .into_iter()
         .find(|t| t.pos <= position && position < t.end)
 }
 
-pub(super) fn comment_ranges(text: &str, jsx: bool) -> Vec<CommentRange> {
+pub(super) fn comment_ranges(text: &str, jsx: bool) -> Vec<CommentRange> { ::tsox_core::fntrace::enter("comment_ranges"); 
     let mut scanner = new_scanner(text, jsx);
     let mut ranges: Vec<CommentRange> = Vec::new();
     let mut guard = 0usize;
@@ -143,7 +143,7 @@ pub(super) fn comment_ranges(text: &str, jsx: bool) -> Vec<CommentRange> {
     ranges
 }
 
-pub(super) fn is_jsx_file(file: &SourceFile) -> bool {
+pub(super) fn is_jsx_file(file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_jsx_file"); 
     file.file_name.ends_with(".tsx") || file.file_name.ends_with(".jsx")
 }
 
@@ -151,7 +151,7 @@ pub(super) fn enclosing_comment(
     ranges: &[CommentRange],
     text: &str,
     position: usize,
-) -> Option<CommentRange> {
+) -> Option<CommentRange> { ::tsox_core::fntrace::enter("enclosing_comment"); 
     ranges
         .iter()
         .find(|r| {
@@ -162,11 +162,11 @@ pub(super) fn enclosing_comment(
         .copied()
 }
 
-pub(super) fn is_doc_comment(range: &CommentRange, text: &str) -> bool {
+pub(super) fn is_doc_comment(range: &CommentRange, text: &str) -> bool { ::tsox_core::fntrace::enter("is_doc_comment"); 
     text[range.pos..].starts_with("/**") && !text[range.pos..].starts_with("/***")
 }
 
-pub(super) fn line_of_position(text: &str, position: usize) -> usize {
+pub(super) fn line_of_position(text: &str, position: usize) -> usize { ::tsox_core::fntrace::enter("line_of_position"); 
     text[..position.min(text.len())]
         .bytes()
         .filter(|b| *b == b'\n')

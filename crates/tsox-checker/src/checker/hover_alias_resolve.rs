@@ -7,7 +7,7 @@ use tsox_frontend::ast::{Node, NodeData, Symbol, SymbolFlags, SyntaxKind};
 impl Checker {
     /// follow_alias 的解析兜底：export_symbol 链断开时按声明形态
     /// （ImportSpecifier/ImportClause/NamespaceImport/ExportSpecifier）解析目标
-    pub fn follow_alias_resolving(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub fn follow_alias_resolving(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("follow_alias_resolving"); 
         let chained = self.follow_alias(symbol)?;
         if !Arc::ptr_eq(&chained, symbol) {
             return Some(chained);
@@ -16,7 +16,7 @@ impl Checker {
         r
     }
 
-    pub(crate) fn resolve_alias_by_declaration(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_alias_by_declaration(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_alias_by_declaration"); 
         // 合并符号（如 JS 文件里 import 与 @typedef 同名合并）的声明列表混有
         // 非别名声明；alias 解析只看别名形态声明（对齐 Go resolveAlias）
         let decl = symbol
@@ -238,7 +238,7 @@ impl Checker {
     pub(crate) fn module_symbol_of_specifier(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("module_symbol_of_specifier"); 
         let spec = node.text().trim_matches(['"', '\'', '`']).to_string();
         let is_specifier_slot = node.parent().as_ref().is_some_and(|p| {
             let slot = match &p.data {

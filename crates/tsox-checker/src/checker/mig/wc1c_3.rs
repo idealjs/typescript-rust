@@ -34,7 +34,7 @@ use crate::checker::checker_checker::*;
 use std::sync::Arc;
 
 impl Checker {
-    pub fn check_element_access_chain(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_element_access_chain(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_element_access_chain"); 
         let expr_type = self.check_expression_ex(&node.expression().unwrap(), CheckMode::Normal);
         let non_optional_type = self.get_optional_expression_type(&expr_type, &node.expression().unwrap());
         let non_null = self.check_non_null_type(&non_optional_type, &node.expression().unwrap());
@@ -47,7 +47,7 @@ impl Checker {
         node: &Arc<Node>,
         expr_type: &Arc<Type>,
         check_mode: CheckMode,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("check_element_access_expression"); 
         let mut object_type = Arc::clone(expr_type);
         if get_assignment_target_kind(node) != AssignmentKind::None || self.is_method_access_for_call(node) {
             object_type = self.get_widened_type(&object_type);
@@ -96,7 +96,7 @@ impl Checker {
         left_type: &Arc<Type>,
         right: &Arc<Node>,
         lexically_scoped_identifier: Option<&Arc<Symbol>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_private_identifier_property_access"); 
         let properties = self.get_properties_of_type(left_type);
         let mut property_on_type: Option<Arc<Symbol>> = None;
         for symbol in &properties {
@@ -152,7 +152,7 @@ impl Checker {
         signatures: &[Arc<Signature>],
         args: &[Arc<Node>],
         head_message: Option<&'static Message>,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("get_argument_arity_error"); 
         let spread_index = self.get_spread_argument_index(args);
         if spread_index > -1 {
             return new_diagnostic_for_node(Some(&args[spread_index as usize]), A_SPREAD_ARGUMENT_MUST_EITHER_HAVE_A_TUPLE_TYPE_OR_BE_PASSED_TO_A_REST_PARAMETER, vec![]);
@@ -257,7 +257,7 @@ impl Checker {
         containing_type: &Arc<Type>,
         name: &str,
         skip_object_function_property_augment: bool,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("create_union_or_intersection_property"); 
         let mut prop_flags = SymbolFlags::None;
         let mut single_prop: Option<Arc<Symbol>> = None;
         let mut prop_set: Vec<Arc<Symbol>> = Vec::new();
@@ -553,7 +553,7 @@ impl Checker {
     }
 }
 
-pub fn compare_types_equal(s: &Arc<Type>, t: &Arc<Type>) -> Ternary {
+pub fn compare_types_equal(s: &Arc<Type>, t: &Arc<Type>) -> Ternary { ::tsox_core::fntrace::enter("compare_types_equal"); 
     if Arc::ptr_eq(s, t) {
         Ternary::True
     } else {

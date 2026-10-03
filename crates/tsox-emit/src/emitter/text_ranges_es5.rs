@@ -7,13 +7,13 @@ use tsox_frontend::ast::NodeFlags;
 use tsox_frontend::ast::SyntaxKind;
 use tsox_frontend::ast::node_flags::ModifierFlags;
 
-pub(crate) fn needs_es5_downlevel(options: &CompilerOptions) -> bool {
+pub(crate) fn needs_es5_downlevel(options: &CompilerOptions) -> bool { ::tsox_core::fntrace::enter("needs_es5_downlevel"); 
     options.target == ScriptTarget::ES5
 }
 
 pub(crate) fn collect_es5_replacements(
     statements: &[Arc<Node>],
-) -> Vec<(usize, usize, &'static str)> {
+) -> Vec<(usize, usize, &'static str)> { ::tsox_core::fntrace::enter("collect_es5_replacements"); 
     let mut replacements = Vec::new();
     for stmt in statements {
         collect_es5_replacements_recursive(stmt, &mut replacements);
@@ -24,7 +24,7 @@ pub(crate) fn collect_es5_replacements(
 pub(crate) fn collect_es5_replacements_recursive(
     node: &Node,
     replacements: &mut Vec<(usize, usize, &'static str)>,
-) {
+) { ::tsox_core::fntrace::enter("collect_es5_replacements_recursive"); 
     if node.kind == tsox_frontend::ast::SyntaxKind::VariableDeclarationList {
         let flags = node.flags;
         if flags.contains(NodeFlags::Const) {
@@ -42,7 +42,7 @@ pub(crate) fn collect_es5_replacements_recursive(
     });
 }
 
-pub(crate) fn collect_export_modifier_cuts(stmt: &Node, source: &str) -> Vec<(usize, usize)> {
+pub(crate) fn collect_export_modifier_cuts(stmt: &Node, source: &str) -> Vec<(usize, usize)> { ::tsox_core::fntrace::enter("collect_export_modifier_cuts"); 
     let modifiers = match stmt.modifiers() {
         Some(m) => m,
         None => return Vec::new(),

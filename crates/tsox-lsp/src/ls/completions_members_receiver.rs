@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tsox_checker::checker::Checker;
 use tsox_frontend::ast::Node;
 
-pub(super) fn primitive_interface_of(t: &tsox_checker::checker::types::Type) -> Option<&'static str> {
+pub(super) fn primitive_interface_of(t: &tsox_checker::checker::types::Type) -> Option<&'static str> { ::tsox_core::fntrace::enter("primitive_interface_of"); 
     use tsox_checker::checker::types::TypeFlags;
     if t.flags.intersects(TypeFlags::String | TypeFlags::StringLiteral) {
         Some("String")
@@ -18,7 +18,7 @@ pub(super) fn primitive_interface_of(t: &tsox_checker::checker::types::Type) -> 
     }
 }
 
-pub(super) fn source_text_of(checker: &Checker, node: &Arc<Node>) -> Option<(String, Arc<Node>)> {
+pub(super) fn source_text_of(checker: &Checker, node: &Arc<Node>) -> Option<(String, Arc<Node>)> { ::tsox_core::fntrace::enter("source_text_of"); 
     let sf = checker.get_source_file_of_node(node)?;
     let mut cur = Arc::clone(node);
     while cur.kind != tsox_frontend::ast::SyntaxKind::SourceFile {
@@ -27,7 +27,7 @@ pub(super) fn source_text_of(checker: &Checker, node: &Arc<Node>) -> Option<(Str
     Some((sf.text.clone(), cur))
 }
 
-pub(super) fn deepest_node_ending_at(root: &Arc<Node>, end: usize) -> Option<Arc<Node>> {
+pub(super) fn deepest_node_ending_at(root: &Arc<Node>, end: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("deepest_node_ending_at"); 
     use tsox_frontend::ast::node_data_generated::for_each_child;
     // 沿包含 end 的孩子下降（尾随 '.' 会被外层语句吞掉），途经 end==dot 的
     // 最深节点即接收者表达式
@@ -56,11 +56,11 @@ pub(super) fn deepest_node_ending_at(root: &Arc<Node>, end: usize) -> Option<Arc
 
 /// 包含 dot 的最深 PAE/QN：恢复路径的名段缺失使节点 end 越过点，
 /// 无 end==dot 的节点可取时回源接收者表达式
-pub(super) fn deepest_access_containing(root: &Arc<Node>, dot: usize) -> Option<Arc<Node>> {
+pub(super) fn deepest_access_containing(root: &Arc<Node>, dot: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("deepest_access_containing"); 
     use tsox_frontend::ast::node_data_generated::for_each_child;
     use tsox_frontend::ast::SyntaxKind;
     let mut best: Option<Arc<Node>> = None;
-    fn visit(n: &Arc<Node>, dot: usize, best: &mut Option<Arc<Node>>) {
+    fn visit(n: &Arc<Node>, dot: usize, best: &mut Option<Arc<Node>>) { ::tsox_core::fntrace::enter("visit"); 
         let mut children = Vec::new();
         for_each_child(n, |c| {
             children.push(Arc::clone(c));

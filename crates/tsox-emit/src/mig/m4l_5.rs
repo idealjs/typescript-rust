@@ -19,7 +19,7 @@ impl<'a> MetadataTransformer<'a> {
         &mut self,
         list: Option<Arc<ModifierList>>,
         node: &Arc<Node>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("inject_class_type_metadata"); 
         let metadata = self.get_type_metadata(node, node);
         if !metadata.is_empty() {
             let list = list
@@ -73,7 +73,7 @@ impl<'a> MetadataTransformer<'a> {
         list: Option<Arc<ModifierList>>,
         node: &Arc<Node>,
         container: Option<&Arc<Node>>,
-    ) -> Option<Arc<ModifierList>> {
+    ) -> Option<Arc<ModifierList>> { ::tsox_core::fntrace::enter("inject_class_element_type_metadata"); 
         let Some(container) = container else {
             return list;
         };
@@ -126,7 +126,7 @@ impl<'a> MetadataTransformer<'a> {
         &mut self,
         node: &Arc<Node>,
         container: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_metadata"); 
         if !self.legacy_decorators {
             return Vec::new();
         }
@@ -140,7 +140,7 @@ impl<'a> MetadataTransformer<'a> {
         &mut self,
         node: &Arc<Node>,
         container: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_old_type_metadata"); 
         let mut decorators: Vec<Arc<Node>> = Vec::new();
         if self.should_add_type_metadata(node) {
             let serialized = self
@@ -206,7 +206,7 @@ impl<'a> MetadataTransformer<'a> {
         &mut self,
         node: &Arc<Node>,
         container: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_new_type_metadata"); 
         let mut properties: Vec<Arc<Node>> = Vec::new();
         if self.should_add_type_metadata(node) {
             let serialized = self
@@ -319,7 +319,7 @@ impl<'a> MetadataTransformer<'a> {
         Vec::new()
     }
 
-    pub fn should_add_type_metadata(&self, node: &Arc<Node>) -> bool {
+    pub fn should_add_type_metadata(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_add_type_metadata"); 
         matches!(
             node.kind,
             SyntaxKind::MethodDeclaration
@@ -329,11 +329,11 @@ impl<'a> MetadataTransformer<'a> {
         )
     }
 
-    pub fn should_add_return_type_metadata(&self, node: &Arc<Node>) -> bool {
+    pub fn should_add_return_type_metadata(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_add_return_type_metadata"); 
         node.kind == SyntaxKind::MethodDeclaration
     }
 
-    pub fn should_add_param_types_metadata(&self, node: &Arc<Node>) -> bool {
+    pub fn should_add_param_types_metadata(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_add_param_types_metadata"); 
         match node.kind {
             SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
                 get_first_constructor_with_body(node).is_some()

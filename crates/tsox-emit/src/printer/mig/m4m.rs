@@ -32,14 +32,14 @@ pub enum TriviaPositionKey {
 }
 
 impl TriviaPositionKey {
-    fn pos(&self) -> usize {
+    fn pos(&self) -> usize { ::tsox_core::fntrace::enter("pos"); 
         match self {
             TriviaPositionKey::Node(n) => unsafe { (**n).pos() },
             TriviaPositionKey::NodeList(l) => unsafe { (**l).pos() },
         }
     }
 
-    fn end(&self) -> usize {
+    fn end(&self) -> usize { ::tsox_core::fntrace::enter("end"); 
         match self {
             TriviaPositionKey::Node(n) => unsafe { (**n).end() },
             TriviaPositionKey::NodeList(l) => unsafe { (**l).end() },
@@ -54,7 +54,7 @@ pub struct ChangeTrackerWriter {
     pub end: HashMap<TriviaPositionKey, usize>,
 }
 
-pub fn new_change_tracker_writer(newline: &str, indent_size: i32) -> ChangeTrackerWriter {
+pub fn new_change_tracker_writer(newline: &str, indent_size: i32) -> ChangeTrackerWriter { ::tsox_core::fntrace::enter("new_change_tracker_writer"); 
     let indent_size = if indent_size < 0 {
         get_default_indent_size()
     } else {
@@ -71,7 +71,7 @@ pub fn new_change_tracker_writer(newline: &str, indent_size: i32) -> ChangeTrack
 }
 
 impl ChangeTrackerWriter {
-    pub fn get_print_handlers(&mut self) -> PrintHandlers<'_> {
+    pub fn get_print_handlers(&mut self) -> PrintHandlers<'_> { ::tsox_core::fntrace::enter("get_print_handlers"); 
         let ct: *mut ChangeTrackerWriter = self;
         PrintHandlers {
             on_before_emit_node: Some(Box::new(move |node_opt: Option<&Arc<Node>>| {
@@ -107,39 +107,39 @@ impl ChangeTrackerWriter {
         }
     }
 
-    fn set_pos(&mut self, node: TriviaPositionKey) {
+    fn set_pos(&mut self, node: TriviaPositionKey) { ::tsox_core::fntrace::enter("set_pos"); 
         self.pos.insert(node, self.last_non_trivia_position);
     }
 
-    fn set_end(&mut self, node: TriviaPositionKey) {
+    fn set_end(&mut self, node: TriviaPositionKey) { ::tsox_core::fntrace::enter("set_end"); 
         self.end.insert(node, self.last_non_trivia_position);
     }
 
-    fn set_pos_node(&mut self, node: &Node) {
+    fn set_pos_node(&mut self, node: &Node) { ::tsox_core::fntrace::enter("set_pos_node"); 
         self.set_pos(TriviaPositionKey::Node(node as *const Node));
     }
 
-    fn set_end_node(&mut self, node: &Node) {
+    fn set_end_node(&mut self, node: &Node) { ::tsox_core::fntrace::enter("set_end_node"); 
         self.set_end(TriviaPositionKey::Node(node as *const Node));
     }
 
-    fn set_pos_node_list(&mut self, nodes: &NodeList) {
+    fn set_pos_node_list(&mut self, nodes: &NodeList) { ::tsox_core::fntrace::enter("set_pos_node_list"); 
         self.set_pos(TriviaPositionKey::NodeList(nodes as *const NodeList));
     }
 
-    fn set_end_node_list(&mut self, nodes: &NodeList) {
+    fn set_end_node_list(&mut self, nodes: &NodeList) { ::tsox_core::fntrace::enter("set_end_node_list"); 
         self.set_end(TriviaPositionKey::NodeList(nodes as *const NodeList));
     }
 
-    fn get_pos(&self, node: TriviaPositionKey) -> usize {
+    fn get_pos(&self, node: TriviaPositionKey) -> usize { ::tsox_core::fntrace::enter("get_pos"); 
         self.pos[&node]
     }
 
-    fn get_end(&self, node: TriviaPositionKey) -> usize {
+    fn get_end(&self, node: TriviaPositionKey) -> usize { ::tsox_core::fntrace::enter("get_end"); 
         self.end[&node]
     }
 
-    pub fn set_last_non_trivia_position(&mut self, s: &str, force: bool) {
+    pub fn set_last_non_trivia_position(&mut self, s: &str, force: bool) { ::tsox_core::fntrace::enter("set_last_non_trivia_position"); 
         if force || skip_trivia(s, 0) != s.len() {
             self.last_non_trivia_position = self.writer.get_text_pos();
             let mut pos = s.len();
@@ -158,7 +158,7 @@ impl ChangeTrackerWriter {
         &mut self,
         node: Option<&Arc<Node>>,
         _factory: &NodeFactory,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("assign_positions_to_node"); 
         let mut visitor = NodeVisitor {
             factory: tsox_frontend::ast::mig::m3c::NodeFactory::with_counters(
                 tsox_frontend::ast::mig::m3c::NodeFactoryHooks::default(),
@@ -173,7 +173,7 @@ impl ChangeTrackerWriter {
         &mut self,
         node: Option<&Arc<Node>>,
         v: &mut NodeVisitor,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("assign_positions_to_node_worker"); 
         let node = node?;
         let visited = tsox_frontend::ast::mig::m3c::visit_each_child(node, v);
         let mut new_node = if Arc::ptr_eq(&visited, node) {
@@ -201,7 +201,7 @@ impl ChangeTrackerWriter {
         &mut self,
         nodes: Option<&NodeList>,
         v: &mut NodeVisitor,
-    ) -> Option<NodeList> {
+    ) -> Option<NodeList> { ::tsox_core::fntrace::enter("assign_positions_to_node_array"); 
         let nodes = nodes?;
         let mut changed = false;
         let visited: Vec<Arc<Node>> = nodes

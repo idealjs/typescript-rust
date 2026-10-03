@@ -10,7 +10,7 @@ use crate::mig::m4m_4::move_range_past_decorators;
 use tsox_frontend::format::mig::m4o::EmitFlags;
 use tsox_frontend::ast::mig::m3f_3::is_auto_accessor_property_declaration;
 
-fn is_private_identifier_class_element_declaration(member: &Arc<Node>) -> bool {
+fn is_private_identifier_class_element_declaration(member: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_private_identifier_class_element_declaration"); 
     (is_property_declaration(member) || is_method_or_accessor(member))
         && member.name().map(|n| is_private_identifier(&n)).unwrap_or(false)
 }
@@ -34,7 +34,7 @@ impl EsDecoratorTransformer {
         member: &Arc<Node>,
         ci: Option<&mut ClassInfo>,
         create_descriptor: Option<CreateDescriptorFn<'_>>,
-    ) -> PartialResult {
+    ) -> PartialResult { ::tsox_core::fntrace::enter("partial_transform_class_element"); 
         let mut ec = self.transformer.emit_context();
         let mut result = PartialResult {
             modifiers: None,
@@ -255,7 +255,7 @@ impl EsDecoratorTransformer {
         result
     }
 
-    pub fn append_decoration_statement(&mut self, ci: &mut ClassInfo, member: &Arc<Node>, stmt: Arc<Node>) {
+    pub fn append_decoration_statement(&mut self, ci: &mut ClassInfo, member: &Arc<Node>, stmt: Arc<Node>) { ::tsox_core::fntrace::enter("append_decoration_statement"); 
         if is_method_or_accessor(member) || is_auto_accessor_property_declaration(member) {
             if is_static(member) {
                 ci.static_non_field_decoration_statements.push(stmt);
@@ -273,7 +273,7 @@ impl EsDecoratorTransformer {
         }
     }
 
-    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_method_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_method_declaration"); 
         self.enter_class_element(node);
         let taken = self.class_info_stack.take();
         let mut ci = taken.as_ref().map(|c| clone_class_info(c));
@@ -325,7 +325,7 @@ impl EsDecoratorTransformer {
         self.finish_class_element(method, node)
     }
 
-    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_get_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_get_accessor_declaration"); 
         self.enter_class_element(node);
         let taken = self.class_info_stack.take();
         let mut ci = taken.as_ref().map(|c| clone_class_info(c));
@@ -371,7 +371,7 @@ impl EsDecoratorTransformer {
         self.finish_class_element(accessor, node)
     }
 
-    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_set_accessor_declaration(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_set_accessor_declaration"); 
         self.enter_class_element(node);
         let taken = self.class_info_stack.take();
         let mut ci = taken.as_ref().map(|c| clone_class_info(c));
@@ -417,7 +417,7 @@ impl EsDecoratorTransformer {
         self.finish_class_element(accessor, node)
     }
 
-    pub fn finish_class_element(&mut self, updated: Arc<Node>, original: &Arc<Node>) -> Arc<Node> {
+    pub fn finish_class_element(&mut self, updated: Arc<Node>, original: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("finish_class_element"); 
         if updated.id() != original.id() {
             self.transformer.emit_context().assign_comment_range(&updated, original);
             self.transformer
@@ -428,7 +428,7 @@ impl EsDecoratorTransformer {
     }
 }
 
-fn decorators(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn decorators(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("decorators"); 
     node.modifier_nodes()
         .iter()
         .filter(|m| is_decorator(m))

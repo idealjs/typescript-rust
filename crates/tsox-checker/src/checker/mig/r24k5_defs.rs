@@ -11,7 +11,7 @@ pub trait R24K5NodeExt {
 }
 
 impl R24K5NodeExt for Node {
-    fn as_if_statement(&self) -> &IfStatementData {
+    fn as_if_statement(&self) -> &IfStatementData { ::tsox_core::fntrace::enter("as_if_statement"); 
         match &self.data {
             NodeData::IfStatement(d) => d,
             _ => panic!("Expected IfStatement node"),
@@ -20,11 +20,11 @@ impl R24K5NodeExt for Node {
 }
 
 impl Checker {
-    pub fn get_node_check_flags(&mut self, node: &Arc<Node>) -> NodeCheckFlags {
+    pub fn get_node_check_flags(&mut self, node: &Arc<Node>) -> NodeCheckFlags { ::tsox_core::fntrace::enter("get_node_check_flags"); 
         self.node_links.get_or_default(node).flags
     }
 
-    pub fn index_info_is_any_base_type(&self, info: &IndexInfo) -> bool {
+    pub fn index_info_is_any_base_type(&self, info: &IndexInfo) -> bool { ::tsox_core::fntrace::enter("index_info_is_any_base_type"); 
         info.key_type
             .as_ref()
             .is_some_and(|k| Arc::ptr_eq(k, &self.any_type()))
@@ -32,7 +32,7 @@ impl Checker {
 }
 
 // Go core.ModuleKind String（modulekind_stringer_generated.go）
-pub fn module_kind_string(kind: ModuleKind) -> String {
+pub fn module_kind_string(kind: ModuleKind) -> String { ::tsox_core::fntrace::enter("module_kind_string"); 
     match kind {
         ModuleKind::None => "None",
         ModuleKind::CommonJS => "CommonJS",
@@ -53,7 +53,7 @@ pub fn module_kind_string(kind: ModuleKind) -> String {
 }
 
 // Go findFirstSuperCall（checker.go:2932）：不进入嵌套函数体
-pub fn find_first_super_call(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn find_first_super_call(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_super_call"); 
     if is_super_call(node) {
         return Some(Arc::clone(node));
     }
@@ -71,7 +71,7 @@ pub fn find_first_super_call(node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 // Go nodeImmediatelyReferencesSuperOrThis（checker_classes_ctor_super_calls.go）
-pub fn node_immediately_references_super_or_this(node: &Arc<Node>) -> bool {
+pub fn node_immediately_references_super_or_this(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_immediately_references_super_or_this"); 
     match node.kind {
         SyntaxKind::SuperKeyword | SyntaxKind::ThisKeyword => true,
         SyntaxKind::ArrowFunction
@@ -96,7 +96,7 @@ pub fn node_immediately_references_super_or_this(node: &Arc<Node>) -> bool {
     }
 }
 
-fn node_immediately_references_children(node: &Arc<Node>) -> bool {
+fn node_immediately_references_children(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_immediately_references_children"); 
     let mut found = false;
     for_each_child(node, |child| {
         if !found {

@@ -18,7 +18,7 @@ impl PropertyLikeParse {
     pub(crate) const PARAMETER: u8 = 2;
     pub(crate) const CALLBACK_PARAMETER: u8 = 4;
 
-    pub(crate) fn contains(self, flag: u8) -> bool {
+    pub(crate) fn contains(self, flag: u8) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & flag != 0
     }
 }

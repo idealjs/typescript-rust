@@ -7,7 +7,7 @@ use tsox_frontend::ast::{
 };
 
 /// Go AST 的 token 自带 Parent；此处以「包住 token 跨度的最深节点」近似
-pub(super) fn token_parent(root: &Arc<Node>, tok: &ScanToken) -> Option<Arc<Node>> {
+pub(super) fn token_parent(root: &Arc<Node>, tok: &ScanToken) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("token_parent"); 
     let mut current = Arc::clone(root);
     loop {
         let mut next: Option<Arc<Node>> = None;
@@ -34,7 +34,7 @@ pub(super) fn is_completion_list_blocker(
     text: &str,
     position: usize,
     root: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_completion_list_blocker"); 
     let literal_token = context_token.or(containing_token);
     if let Some(tok) = literal_token
         && is_in_string_or_regular_expression_or_template(tok, text, position)
@@ -56,7 +56,7 @@ pub(super) fn is_completion_list_blocker(
         || is_in_jsx_text(context, location, root)
 }
 
-fn is_in_string_or_regular_expression_or_template(tok: &ScanToken, text: &str, position: usize) -> bool {
+fn is_in_string_or_regular_expression_or_template(tok: &ScanToken, text: &str, position: usize) -> bool { ::tsox_core::fntrace::enter("is_in_string_or_regular_expression_or_template"); 
     let is_string = matches!(
         tok.kind,
         SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
@@ -71,7 +71,7 @@ fn is_in_string_or_regular_expression_or_template(tok: &ScanToken, text: &str, p
     position == tok.end && (is_unterminated_literal(tok, text) || is_regex)
 }
 
-fn is_unterminated_literal(tok: &ScanToken, text: &str) -> bool {
+fn is_unterminated_literal(tok: &ScanToken, text: &str) -> bool { ::tsox_core::fntrace::enter("is_unterminated_literal"); 
     let raw = &text[tok.pos.min(text.len())..tok.end.min(text.len())];
     let (quote, body) = match raw.chars().next() {
         Some(quote @ ('"' | '\'' | '`')) => (quote, &raw[1..]),
@@ -80,11 +80,11 @@ fn is_unterminated_literal(tok: &ScanToken, text: &str) -> bool {
     !body.ends_with(quote)
 }
 
-fn is_dot_of_numeric_literal(tok: &ScanToken, text: &str) -> bool {
+fn is_dot_of_numeric_literal(tok: &ScanToken, text: &str) -> bool { ::tsox_core::fntrace::enter("is_dot_of_numeric_literal"); 
     tok.kind == SyntaxKind::NumericLiteral && text[tok.pos..tok.end].ends_with('.')
 }
 
-fn is_in_jsx_text(context: &ScanToken, location: &Arc<Node>, root: &Arc<Node>) -> bool {
+fn is_in_jsx_text(context: &ScanToken, location: &Arc<Node>, root: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_jsx_text"); 
     if context.kind == SyntaxKind::JsxText {
         return true;
     }
@@ -111,21 +111,21 @@ fn is_in_jsx_text(context: &ScanToken, location: &Arc<Node>, root: &Arc<Node>) -
     false
 }
 
-fn is_jsx_opening_like_element(node: &Arc<Node>) -> bool {
+fn is_jsx_opening_like_element(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_opening_like_element"); 
     matches!(
         node.kind,
         SyntaxKind::JsxOpeningElement | SyntaxKind::JsxSelfClosingElement
     )
 }
 
-pub(super) fn same_token(a: &ScanToken, b: Option<&ScanToken>) -> bool {
+pub(super) fn same_token(a: &ScanToken, b: Option<&ScanToken>) -> bool { ::tsox_core::fntrace::enter("same_token"); 
     b.is_some_and(|b| b.pos == a.pos && b.end == a.end)
 }
 
 
 /// Go AST 的 token 直接以声明为 Parent；我们 AST 的标识符/关键字 token
 /// 会包一层叶子节点，此处跳过该包装层
-pub(super) fn go_token_parent(root: &Arc<Node>, tok: &ScanToken) -> Option<Arc<Node>> {
+pub(super) fn go_token_parent(root: &Arc<Node>, tok: &ScanToken) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("go_token_parent"); 
     let deepest = token_parent(root, tok)?;
     if matches!(deepest.kind, SyntaxKind::Identifier | SyntaxKind::PrivateIdentifier)
         || is_keyword_kind(deepest.kind)
@@ -135,7 +135,7 @@ pub(super) fn go_token_parent(root: &Arc<Node>, tok: &ScanToken) -> Option<Arc<N
     Some(deepest)
 }
 
-pub(super) fn is_from_object_type_declaration(tok: &ScanToken, root: &Arc<Node>) -> bool {
+pub(super) fn is_from_object_type_declaration(tok: &ScanToken, root: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_from_object_type_declaration"); 
     let Some(parent) = go_token_parent(root, tok) else {
         return false;
     };
@@ -150,7 +150,7 @@ pub(super) fn is_from_object_type_declaration(tok: &ScanToken, root: &Arc<Node>)
             ))
 }
 
-pub(super) fn is_constructor_parameter_completion(tok: &ScanToken, root: &Arc<Node>) -> bool {
+pub(super) fn is_constructor_parameter_completion(tok: &ScanToken, root: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_constructor_parameter_completion"); 
     let Some(parent) = go_token_parent(root, tok) else {
         return false;
     };
@@ -162,11 +162,11 @@ pub(super) fn is_constructor_parameter_completion(tok: &ScanToken, root: &Arc<No
         && (is_parameter_property_modifier(tok.kind) || is_declaration_name(tok, root))
 }
 
-pub(super) fn is_currently_editing_node(tok: &ScanToken, position: usize) -> bool {
+pub(super) fn is_currently_editing_node(tok: &ScanToken, position: usize) -> bool { ::tsox_core::fntrace::enter("is_currently_editing_node"); 
     tok.pos <= position && position <= tok.end
 }
 
-pub(super) fn is_parameter_property_modifier(kind: SyntaxKind) -> bool {
+pub(super) fn is_parameter_property_modifier(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_parameter_property_modifier"); 
     matches!(
         kind,
         SyntaxKind::PublicKeyword
@@ -176,7 +176,7 @@ pub(super) fn is_parameter_property_modifier(kind: SyntaxKind) -> bool {
     )
 }
 
-fn is_class_member_modifier(kind: SyntaxKind) -> bool {
+fn is_class_member_modifier(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_class_member_modifier"); 
     is_parameter_property_modifier(kind)
         || matches!(
             kind,
@@ -184,7 +184,7 @@ fn is_class_member_modifier(kind: SyntaxKind) -> bool {
         )
 }
 
-pub(super) fn is_class_member_completion_keyword(kind: SyntaxKind) -> bool {
+pub(super) fn is_class_member_completion_keyword(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_class_member_completion_keyword"); 
     matches!(
         kind,
         SyntaxKind::AbstractKeyword
@@ -198,7 +198,7 @@ pub(super) fn is_class_member_completion_keyword(kind: SyntaxKind) -> bool {
     ) || is_class_member_modifier(kind)
 }
 
-pub(super) fn is_declaration_name(tok: &ScanToken, root: &Arc<Node>) -> bool {
+pub(super) fn is_declaration_name(tok: &ScanToken, root: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_name"); 
     let Some(deepest) = token_parent(root, tok) else {
         return false;
     };

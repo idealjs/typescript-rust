@@ -3,7 +3,7 @@
 use crate::checker::checker::*;
 
 impl Checker {
-    pub fn push_signature_return_resolution(&mut self, decl: *const Node) -> bool {
+    pub fn push_signature_return_resolution(&mut self, decl: *const Node) -> bool { ::tsox_core::fntrace::enter("push_signature_return_resolution"); 
         let cycle_start = self
             .signature_return_resolutions
             .iter()
@@ -27,14 +27,14 @@ impl Checker {
         true
     }
 
-    pub fn pop_signature_return_resolution(&mut self) -> bool {
+    pub fn pop_signature_return_resolution(&mut self) -> bool { ::tsox_core::fntrace::enter("pop_signature_return_resolution"); 
         self.signature_return_resolutions
             .pop()
             .map(|e| e.1)
             .unwrap_or(true)
     }
 
-    pub fn set_signature_return_inference_phase(&mut self, decl: *const Node, on: bool) {
+    pub fn set_signature_return_inference_phase(&mut self, decl: *const Node, on: bool) { ::tsox_core::fntrace::enter("set_signature_return_inference_phase"); 
         if let Some(e) = self
             .signature_return_resolutions
             .iter_mut()
@@ -44,13 +44,13 @@ impl Checker {
         }
     }
 
-    pub fn is_resolving_signature_return(&self, decl: *const Node) -> bool {
+    pub fn is_resolving_signature_return(&self, decl: *const Node) -> bool { ::tsox_core::fntrace::enter("is_resolving_signature_return"); 
         self.signature_return_resolutions
             .iter()
             .any(|e| e.0 == decl)
     }
 
-    pub fn partial_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn partial_type_of_function_like(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("partial_type_of_function_like"); 
         let key = Arc::as_ptr(node);
         if self.partial_fn_type_builds.contains(&key) {
             return self.get_any_type();
@@ -61,7 +61,7 @@ impl Checker {
         result
     }
 
-    fn partial_type_of_function_like_inner(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    fn partial_type_of_function_like_inner(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("partial_type_of_function_like_inner"); 
         let parameters = match &node.data {
             tsox_frontend::ast::NodeData::FunctionExpression(data) => &data.parameters,
             tsox_frontend::ast::NodeData::ArrowFunction(data) => &data.parameters,
@@ -99,7 +99,7 @@ impl Checker {
         self.create_function_or_constructor_type(vec![sig], false)
     }
 
-    pub fn report_signature_return_circularity(&mut self, node: &Arc<Node>) {
+    pub fn report_signature_return_circularity(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("report_signature_return_circularity"); 
         let type_node = Self::function_like_return_type_annotation(node);
         let Some(file) = self.get_source_file_of_node(node).or_else(|| self.current_file.clone())
         else {
@@ -127,7 +127,7 @@ impl Checker {
         }
     }
 
-    fn function_like_return_type_annotation(node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn function_like_return_type_annotation(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("function_like_return_type_annotation"); 
         match &node.data {
             NodeData::FunctionDeclaration(d) => d.type_node.clone(),
             NodeData::FunctionExpression(d) => d.type_node.clone(),
@@ -139,7 +139,7 @@ impl Checker {
         }
     }
 
-    fn return_circularity_name(node: &Arc<Node>) -> (Arc<Node>, String) {
+    fn return_circularity_name(node: &Arc<Node>) -> (Arc<Node>, String) { ::tsox_core::fntrace::enter("return_circularity_name"); 
         if let Some(name) = node.name() {
             return (name.clone(), name.text().to_string());
         }

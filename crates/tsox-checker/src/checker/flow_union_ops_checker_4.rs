@@ -3,7 +3,7 @@
 use crate::checker::flow_union_ops::*;
 
 impl Checker {
-    pub(crate) fn const_alias_initializer(&self, expr: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn const_alias_initializer(&self, expr: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("const_alias_initializer"); 
         if expr.kind != SyntaxKind::Identifier {
             return None;
         }
@@ -27,7 +27,7 @@ impl Checker {
         Some(Self::skip_parentheses(init))
     }
 
-    pub(crate) fn symbol_is_const_variable(&self, symbol: &Arc<Symbol>) -> bool {
+    pub(crate) fn symbol_is_const_variable(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_const_variable"); 
         for decl in &symbol.declarations {
             if let Some(parent) = decl.parent() {
                 if parent.kind == SyntaxKind::VariableDeclarationList
@@ -40,7 +40,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn skip_parentheses(node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn skip_parentheses(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("skip_parentheses"); 
         let mut current = Arc::clone(node);
         loop {
             if let NodeData::ParenthesizedExpression(p) = &current.data {
@@ -56,7 +56,7 @@ impl Checker {
         node: &Arc<Node>,
         pre_type: &Arc<Type>,
         target: &FlowRef,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("evolve_array_at_mutation"); 
         let receiver = self.get_array_mutation_receiver(node)?;
         if !self.expr_matches_target(&receiver, target) {
             return None;
@@ -101,7 +101,7 @@ impl Checker {
         Some(evolved)
     }
 
-    pub(crate) fn get_array_mutation_receiver(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn get_array_mutation_receiver(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_array_mutation_receiver"); 
         match &node.data {
             NodeData::CallExpression(call) => {
                 if let NodeData::PropertyAccessExpression(prop) = &call.expression.data {
@@ -119,14 +119,14 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_call_arguments(&self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    pub(crate) fn get_call_arguments(&self, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_call_arguments"); 
         match &node.data {
             NodeData::CallExpression(call) => call.arguments.iter().cloned().collect(),
             _ => Vec::new(),
         }
     }
 
-    pub(crate) fn binding_element_in_var_pattern(element: &Arc<Node>) -> bool {
+    pub(crate) fn binding_element_in_var_pattern(element: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("binding_element_in_var_pattern"); 
         let pattern = element.parent();
         let Some(decl) = pattern.and_then(|p| p.parent()) else {
             return false;
@@ -154,7 +154,7 @@ impl Checker {
         expr: &Arc<Node>,
         target: &FlowRef,
         declared: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("assignment_flow_type"); 
         let evolving = declared.object_flags.contains(ObjectFlags::EvolvingArray)
             || self.is_auto_array_type(declared);
         match &expr.data {

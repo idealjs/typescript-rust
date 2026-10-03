@@ -10,7 +10,7 @@ use std::collections::HashSet;
 use tsox_core::core::compiler_options::ScriptTarget;
 
 impl<'a> RegExpParser<'a> {
-    pub(super) fn scan_disjunction(&mut self, is_in_group: bool) {
+    pub(super) fn scan_disjunction(&mut self, is_in_group: bool) { ::tsox_core::fntrace::enter("scan_disjunction"); 
         loop {
             self.named_capturing_groups.push(HashSet::new());
             self.scan_alternative(is_in_group);
@@ -22,7 +22,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn scan_alternative(&mut self, is_in_group: bool) {
+    pub(super) fn scan_alternative(&mut self, is_in_group: bool) { ::tsox_core::fntrace::enter("scan_alternative"); 
         let mut is_previous_term_quantifiable = false;
         while self.pos < self.body_end {
             let start = self.pos;
@@ -243,7 +243,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn scan_pattern_modifiers(&mut self, curr_flags: u16) -> u16 {
+    pub(super) fn scan_pattern_modifiers(&mut self, curr_flags: u16) -> u16 { ::tsox_core::fntrace::enter("scan_pattern_modifiers"); 
         let mut curr = curr_flags;
         while self.pos < self.body_end {
             let (ch, size) = decode_rune_at(self.text, self.pos);
@@ -278,7 +278,7 @@ impl<'a> RegExpParser<'a> {
         curr
     }
 
-    pub(super) fn scan_digits(&mut self) -> String {
+    pub(super) fn scan_digits(&mut self) -> String { ::tsox_core::fntrace::enter("scan_digits"); 
         let start = self.pos;
         while self.pos < self.body_end && is_digit(self.char()) {
             self.inc_pos(1);
@@ -286,7 +286,7 @@ impl<'a> RegExpParser<'a> {
         self.text[start..self.pos].to_string()
     }
 
-    pub(super) fn scan_word_characters(&mut self) -> String {
+    pub(super) fn scan_word_characters(&mut self) -> String { ::tsox_core::fntrace::enter("scan_word_characters"); 
         let start = self.pos;
         while self.pos < self.body_end && is_word_character(self.char()) {
             self.inc_pos(1);

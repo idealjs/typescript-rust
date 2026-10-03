@@ -3,7 +3,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::Node;
 use tsox_frontend::ast::NodeData;
 
-pub(super) fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> {
+pub(super) fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> { ::tsox_core::fntrace::enter("get_node_name"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => d.name.as_ref().map(|n| identifier_text(n, text)),
         NodeData::InterfaceDeclaration(d) => Some(identifier_text(&d.name, text)),
@@ -32,7 +32,7 @@ pub(super) fn get_node_name(node: &Arc<Node>, text: &str) -> Option<String> {
     }
 }
 
-pub(super) fn get_name_range(node: &Arc<Node>, text: &str, node_start: usize) -> (usize, usize) {
+pub(super) fn get_name_range(node: &Arc<Node>, text: &str, node_start: usize) -> (usize, usize) { ::tsox_core::fntrace::enter("get_name_range"); 
     let name_ref: Option<&Arc<Node>> = match &node.data {
         NodeData::ClassDeclaration(d) => d.name.as_ref(),
         NodeData::FunctionDeclaration(d) => d.name.as_ref(),
@@ -52,11 +52,11 @@ pub(super) fn get_name_range(node: &Arc<Node>, text: &str, node_start: usize) ->
     (node_start, node_start)
 }
 
-pub(super) fn identifier_text(node: &Arc<Node>, text: &str) -> String {
+pub(super) fn identifier_text(node: &Arc<Node>, text: &str) -> String { ::tsox_core::fntrace::enter("identifier_text"); 
     text[node.pos()..node.end()].trim().to_string()
 }
 
-pub(super) fn property_name_text(node: &Arc<Node>, text: &str) -> String {
+pub(super) fn property_name_text(node: &Arc<Node>, text: &str) -> String { ::tsox_core::fntrace::enter("property_name_text"); 
     match &node.data {
         NodeData::Identifier(d) => d.text.clone(),
         NodeData::StringLiteral(d) => format!("\"{}\"", d.text),
@@ -69,13 +69,13 @@ pub(super) fn property_name_text(node: &Arc<Node>, text: &str) -> String {
     }
 }
 
-pub(super) fn binding_name_text(node: &Arc<Node>, text: &str) -> String {
+pub(super) fn binding_name_text(node: &Arc<Node>, text: &str) -> String { ::tsox_core::fntrace::enter("binding_name_text"); 
     match &node.data {
         NodeData::Identifier(d) => d.text.clone(),
         _ => text[node.pos()..node.end()].trim().to_string(),
     }
 }
 
-pub(super) fn module_name_text(node: &Arc<Node>, text: &str) -> String {
+pub(super) fn module_name_text(node: &Arc<Node>, text: &str) -> String { ::tsox_core::fntrace::enter("module_name_text"); 
     text[node.pos()..node.end()].trim().to_string()
 }

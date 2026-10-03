@@ -29,7 +29,7 @@ pub struct ObjectRestSpreadTransformer {
 
 pub type OldParamScope = Option<HashSet<u64>>;
 
-pub fn new_object_rest_spread_transformer(opts: &TransformOptions) -> ObjectRestSpreadTransformer {
+pub fn new_object_rest_spread_transformer(opts: &TransformOptions) -> ObjectRestSpreadTransformer { ::tsox_core::fntrace::enter("new_object_rest_spread_transformer"); 
     ObjectRestSpreadTransformer {
         emit_context: opts.context.clone(),
         compiler_options: Arc::new(opts.compiler_options.clone()),
@@ -40,13 +40,13 @@ pub fn new_object_rest_spread_transformer(opts: &TransformOptions) -> ObjectRest
 }
 
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn factory(&self) -> NodeFactory<'_> {
+    pub(crate) fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
 }
 impl ObjectRestSpreadTransformer {
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !subtree_facts(&node).intersects(SubtreeFacts::CONTAINS_ES_OBJECT_REST_OR_SPREAD)
             && self.parameters_with_preceding_object_rest_or_spread.is_none()
         {
@@ -88,7 +88,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         let data = node.as_source_file_data();
         let visited_statements: Vec<Arc<Node>> = data
             .statements
@@ -110,7 +110,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_parameter(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_parameter(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_parameter"); 
         let data = node.as_parameter_declaration();
         if let Some(params) = &self.parameters_with_preceding_object_rest_or_spread {
             if params.contains(&node.id()) {
@@ -149,7 +149,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn collect_parameters_with_preceding_object_rest_or_spread(&self, node: &Arc<Node>) -> Option<HashSet<u64>> {
+    fn collect_parameters_with_preceding_object_rest_or_spread(&self, node: &Arc<Node>) -> Option<HashSet<u64>> { ::tsox_core::fntrace::enter("collect_parameters_with_preceding_object_rest_or_spread"); 
         let mut result: Option<HashSet<u64>> = None;
         if let Some(list) = node.parameters() {
             for parameter in &list.nodes {
@@ -165,7 +165,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn enter_parameter_list_context(&mut self, node: &Arc<Node>) -> OldParamScope {
+    fn enter_parameter_list_context(&mut self, node: &Arc<Node>) -> OldParamScope { ::tsox_core::fntrace::enter("enter_parameter_list_context"); 
         let old = self.parameters_with_preceding_object_rest_or_spread.take();
         self.parameters_with_preceding_object_rest_or_spread =
             self.collect_parameters_with_preceding_object_rest_or_spread(node);
@@ -174,13 +174,13 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn exit_parameter_list_context(&mut self, scope: OldParamScope) {
+    fn exit_parameter_list_context(&mut self, scope: OldParamScope) { ::tsox_core::fntrace::enter("exit_parameter_list_context"); 
         self.parameters_with_preceding_object_rest_or_spread = scope;
     }
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_constructor_declaration(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_constructor_declaration(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_constructor_declaration"); 
         let old = self.enter_parameter_list_context(&node);
         let body = self.transform_function_body(&node);
         let parameters = self.visit_nodes(node.parameters());
@@ -199,7 +199,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_get_accessor_declaration(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_get_accessor_declaration(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_get_accessor_declaration"); 
         let old = self.enter_parameter_list_context(&node);
         let name = self
             .visit_node(node.name())
@@ -222,7 +222,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_set_accessor_declaration(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_set_accessor_declaration(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_set_accessor_declaration"); 
         let old = self.enter_parameter_list_context(&node);
         let name = self
             .visit_node(node.name())
@@ -245,7 +245,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_method_declaration(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_method_declaration(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_method_declaration"); 
         let old = self.enter_parameter_list_context(&node);
         let data = node.as_method_declaration();
         let name = self
@@ -273,7 +273,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_function_declaration(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_function_declaration(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_function_declaration"); 
         let old = self.enter_parameter_list_context(&node);
         let data = node.as_function_declaration();
         let name = self.visit_node(node.name());
@@ -297,7 +297,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_arrow_function(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_arrow_function(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_arrow_function"); 
         let old = self.enter_parameter_list_context(&node);
         let data = node.as_arrow_function();
         let body = self
@@ -321,7 +321,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_function_expression(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_function_expression(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_function_expression"); 
         let old = self.enter_parameter_list_context(&node);
         let data = node.as_function_expression();
         let name = self.visit_node(node.name());

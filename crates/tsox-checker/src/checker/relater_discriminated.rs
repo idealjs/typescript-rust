@@ -6,13 +6,13 @@ use tsox_frontend::ast::CheckFlags;
 const MAX_DISCRIMINANT_COMBINATIONS: usize = 25;
 
 impl Checker {
-    pub fn get_non_missing_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_non_missing_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_missing_type_of_symbol"); 
         let t = self.get_type_of_symbol(symbol);
         let is_optional = symbol.flags.contains(SymbolFlags::Optional);
         self.remove_missing_type(t, is_optional)
     }
 
-    fn distributed_types(&self, t: &Arc<Type>) -> Vec<Arc<Type>> {
+    fn distributed_types(&self, t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("distributed_types"); 
         if t.flags.contains(TypeFlags::Union)
             && let Some(ui) = t.as_union_or_intersection()
         {
@@ -26,7 +26,7 @@ impl Checker {
         combination_type: &Arc<Type>,
         target_prop: &Arc<Symbol>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("discriminant_prop_type_related"); 
         let target_type = self.get_non_missing_type_of_symbol(target_prop);
         if target_type
             .flags
@@ -43,7 +43,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         excluded: &std::collections::HashSet<String>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("discriminant_target_props_related"); 
         for target_prop in self.get_properties_of_type(target) {
             if excluded.contains(&target_prop.name) {
                 continue;
@@ -81,7 +81,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_related_to_discriminated_type"); 
         // Go typeRelatedToDiscriminatedType：全部子探针 reportErrors=false
         //（"We do not report errors here"），错误统一由 union 成员检查给出
         let was_active = self.silence_relation_chain();
@@ -95,7 +95,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         relation: RelationKind,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("type_related_to_discriminated_type_impl"); 
         let source_properties = self.get_properties_of_type(source);
         let mut discriminant_props: Vec<Arc<Symbol>> = Vec::new();
         for prop in &source_properties {

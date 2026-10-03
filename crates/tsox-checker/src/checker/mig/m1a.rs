@@ -47,7 +47,7 @@ use tsox_core::collections::ordered_set::OrderedSet;
 use tsox_frontend::ast::node_data_generated::{TypeParameterDeclarationData, YieldExpressionData};
 
 impl Checker {
-    pub fn get_ambient_modules(&mut self) -> Vec<Arc<Symbol>> {
+    pub fn get_ambient_modules(&mut self) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_ambient_modules"); 
         let mut modules: Vec<Arc<Symbol>> = Vec::new();
         let mut seen: HashSet<*const Symbol> = HashSet::new();
         for (name, global) in self.globals.entries.iter() {
@@ -59,18 +59,18 @@ impl Checker {
         modules
     }
 
-    pub fn get_emit_resolver(&mut self) -> Arc<EmitResolver> {
+    pub fn get_emit_resolver(&mut self) -> Arc<EmitResolver> { ::tsox_core::fntrace::enter("get_emit_resolver"); 
         new_emit_resolver(self)
     }
 
-    pub fn get_global_diagnostics(&mut self) -> Vec<Diagnostic> {
+    pub fn get_global_diagnostics(&mut self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_global_diagnostics"); 
         if self.was_canceled() {
             panic!("Checker was previously cancelled");
         }
         self.diagnostics.get_global_diagnostics()
     }
 
-    pub fn get_type_at_location(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_type_at_location(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_at_location"); 
         let reparsed = tsox_frontend::ast::mig::m3f::get_reparsed_node_for_node(node);
         self.get_type_of_node(&reparsed)
     }
@@ -79,7 +79,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         location: &Arc<Node>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_symbol_at_location"); 
         let symbol = self.get_export_symbol_of_value_symbol_if_exported(symbol);
         let mut location = Arc::clone(location);
         let parent = location.parent();
@@ -142,12 +142,12 @@ impl Checker {
         self.get_non_missing_type_of_symbol(&symbol)
     }
 
-    pub fn is_deprecated_declaration(&mut self, declaration: &Arc<Node>) -> bool {
+    pub fn is_deprecated_declaration(&mut self, declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_deprecated_declaration"); 
         let flags = self.get_combined_node_flags_cached(declaration);
         tsox_frontend::ast::mig::m3f_4::is_deprecated_declaration_with_cached_flags(declaration, flags)
     }
 
-    pub fn union_types(&self) -> impl Iterator<Item = Arc<Type>> + '_ {
+    pub fn union_types(&self) -> impl Iterator<Item = Arc<Type>> + '_ { ::tsox_core::fntrace::enter("union_types"); 
         self.union_types.values().cloned()
     }
 
@@ -156,7 +156,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         member: &Arc<Node>,
         symbol_flags: SymbolFlags,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_declaration_to_late_bound_symbol"); 
         debug_assert!(
             symbol.check_flags.contains(CheckFlags::Late),
             "Expected a late-bound symbol."
@@ -206,7 +206,7 @@ impl Checker {
         }
     }
 
-    pub fn add_deferred_diagnostic(&mut self, callback: Box<dyn FnOnce() + Send>) {
+    pub fn add_deferred_diagnostic(&mut self, callback: Box<dyn FnOnce() + Send>) { ::tsox_core::fntrace::enter("add_deferred_diagnostic"); 
         self.deferred_diagnostic_callbacks.push(callback);
     }
 
@@ -215,7 +215,7 @@ impl Checker {
         location: &Arc<Node>,
         declarations: &[Arc<Node>],
         deprecated_entity: &str,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("add_deprecated_suggestion"); 
         let diagnostic = new_diagnostic_for_node(
             Some(location),
             tsox_core::diagnostics::messages_generated::X_0_IS_DEPRECATED.clone(),
@@ -230,7 +230,7 @@ impl Checker {
         declaration: &Arc<Node>,
         deprecated_entity: &str,
         signature_string: &str,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("add_deprecated_suggestion_with_signature"); 
         let message = if !deprecated_entity.is_empty() {
             &tsox_core::diagnostics::messages_generated::THE_SIGNATURE_0_OF_1_IS_DEPRECATED
         } else {
@@ -248,7 +248,7 @@ impl Checker {
         &mut self,
         declarations: &[Arc<Node>],
         mut diagnostic: Diagnostic,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("add_deprecated_suggestion_worker"); 
         for declaration in declarations {
             if let Some(deprecated_tag) = tsox_frontend::ast::mig::m3e_4::get_jsdoc_deprecated_tag(declaration) {
                 diagnostic.add_related_info(new_diagnostic_for_node(
@@ -262,7 +262,7 @@ impl Checker {
         self.add_suggestion_diagnostic(diagnostic)
     }
 
-    pub fn add_diagnostic(&mut self, diagnostic: Diagnostic) -> Diagnostic {
+    pub fn add_diagnostic(&mut self, diagnostic: Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("add_diagnostic"); 
         if self.serialization_level < MAX_SERIALIZATION_LEVEL {
             self.diagnostics.add(diagnostic.clone());
             return diagnostic;
@@ -276,7 +276,7 @@ impl Checker {
         message: &tsox_core::diagnostics::Message,
         symbol_name: &str,
         related_nodes: &[Arc<Node>],
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_duplicate_declaration_error"); 
         let error_node = get_adjusted_node_for_error(node).unwrap_or_else(|| Arc::clone(node));
         let Some(mut err) = self.lookup_or_issue_error(
             &error_node,
@@ -324,18 +324,18 @@ impl Checker {
         message: &tsox_core::diagnostics::Message,
         symbol_name: &str,
         source: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_duplicate_declaration_errors_for_symbols"); 
         for node in &target.declarations {
             self.add_duplicate_declaration_error(node, message, symbol_name, &source.declarations);
         }
     }
 }
 
-pub fn accepts_void(t: &Type) -> bool {
+pub fn accepts_void(t: &Type) -> bool { ::tsox_core::fntrace::enter("accepts_void"); 
     t.flags.contains(TypeFlags::Void)
 }
 
-pub fn is_right_side_of_access_expression(node: &Arc<Node>) -> bool {
+pub fn is_right_side_of_access_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_right_side_of_access_expression"); 
     if let Some(parent) = node.parent() {
         match parent.kind {
             SyntaxKind::PropertyAccessExpression => {
@@ -354,7 +354,7 @@ pub fn is_right_side_of_access_expression(node: &Arc<Node>) -> bool {
     false
 }
 
-pub fn new_checker(program: Arc<dyn Program>, tracer: Arc<Tracer>) -> (Box<Checker>, std::sync::Mutex<()>) {
+pub fn new_checker(program: Arc<dyn Program>, tracer: Arc<Tracer>) -> (Box<Checker>, std::sync::Mutex<()>) { ::tsox_core::fntrace::enter("new_checker"); 
     program.bind_source_files();
 
     let c = Checker::new(Arc::clone(&program), Arc::clone(&tracer));
@@ -363,7 +363,7 @@ pub fn new_checker(program: Arc<dyn Program>, tracer: Arc<Tracer>) -> (Box<Check
 }
 
 impl Checker {
-    pub fn add_error_or_suggestion(&mut self, is_error: bool, diagnostic: Diagnostic) {
+    pub fn add_error_or_suggestion(&mut self, is_error: bool, diagnostic: Diagnostic) { ::tsox_core::fntrace::enter("add_error_or_suggestion"); 
         if is_error {
             self.add_diagnostic(diagnostic);
         } else {
@@ -378,7 +378,7 @@ impl Checker {
         s: &CallState,
         failed: &Signature,
         diagnostic: &mut Diagnostic,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_implementation_success_elaboration"); 
         if let Some(declaration) = &failed.declaration {
             if let Some(decl_symbol) = self.symbol_of_node(declaration) {
                 let declarations = &decl_symbol.declarations;
@@ -420,7 +420,7 @@ impl Checker {
         &mut self,
         mut symbols: SymbolTable,
         base_symbols: &[Arc<Symbol>],
-    ) -> SymbolTable {
+    ) -> SymbolTable { ::tsox_core::fntrace::enter("add_inherited_members"); 
         for base in base_symbols {
             if !is_static_private_identifier_property(base) {
                 let replace = match symbols.get(&base.name) {
@@ -439,7 +439,7 @@ impl Checker {
         &mut self,
         mut named_unions: Vec<Arc<Type>>,
         types: &[Arc<Type>],
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("add_named_unions"); 
         for t in types {
             if t.flags.contains(TypeFlags::Union) {
                 if let TypeData::Union(u) = &t.data {
@@ -466,7 +466,7 @@ impl Checker {
         named_unions
     }
 
-    pub fn add_optional_type_marker(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn add_optional_type_marker(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("add_optional_type_marker"); 
         if self.strict_null_checks {
             let optional_type = r28k2_defs::optional_type_of(self);
             return self.get_union_type(vec![Arc::clone(t), optional_type]);
@@ -479,14 +479,14 @@ impl Checker {
         t: &Arc<Type>,
         is_property: bool,
         is_optional: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("add_optionality_ex"); 
         if self.strict_null_checks && is_optional {
             return self.get_optional_type(Arc::clone(t));
         }
         Arc::clone(t)
     }
 
-    pub fn add_suggestion_diagnostic(&mut self, diagnostic: Diagnostic) -> Diagnostic {
+    pub fn add_suggestion_diagnostic(&mut self, diagnostic: Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("add_suggestion_diagnostic"); 
         if self.serialization_level < MAX_SERIALIZATION_LEVEL {
             self.suggestion_diagnostics.add(diagnostic.clone());
             return diagnostic;
@@ -499,7 +499,7 @@ impl Checker {
         mut diagnostic: Diagnostic,
         type_only_declaration: Option<&Arc<Node>>,
         name: &str,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("add_type_only_declaration_related_info"); 
         let Some(type_only_declaration) = type_only_declaration else {
             return diagnostic;
         };
@@ -524,7 +524,7 @@ impl Checker {
         type_set: &mut OrderedSet<Arc<Type>>,
         mut includes: TypeFlags,
         t: &Arc<Type>,
-    ) -> TypeFlags {
+    ) -> TypeFlags { ::tsox_core::fntrace::enter("add_type_to_intersection"); 
         let flags = t.flags;
         if flags.contains(TypeFlags::Intersection) {
             return self.add_types_to_intersection(type_set, includes, &type_types_list(t));
@@ -562,7 +562,7 @@ impl Checker {
         type_set: &mut OrderedSet<Arc<Type>>,
         includes: TypeFlags,
         types: &[Arc<Type>],
-    ) -> TypeFlags {
+    ) -> TypeFlags { ::tsox_core::fntrace::enter("add_types_to_intersection"); 
         let mut includes = includes;
         for t in types {
             let regular = self.get_regular_type_of_literal_type(t);
@@ -574,7 +574,7 @@ impl Checker {
     pub fn add_types_to_union(
         &mut self,
         source_types: &[Arc<Type>],
-    ) -> (Vec<Arc<Type>>, TypeFlags) {
+    ) -> (Vec<Arc<Type>>, TypeFlags) { ::tsox_core::fntrace::enter("add_types_to_union"); 
         let mut types: Vec<Arc<Type>> = Vec::with_capacity(source_types.len());
         let mut includes = TypeFlags::empty();
         let mut add_type = |types: &mut Vec<Arc<Type>>, includes: &mut TypeFlags, t: &Arc<Type>| {
@@ -645,7 +645,7 @@ impl Checker {
         (types, includes)
     }
 
-    pub fn all_types_assignable_to_kind(&mut self, source: &Arc<Type>, kind: TypeFlags) -> bool {
+    pub fn all_types_assignable_to_kind(&mut self, source: &Arc<Type>, kind: TypeFlags) -> bool { ::tsox_core::fntrace::enter("all_types_assignable_to_kind"); 
         self.all_types_assignable_to_kind_ex(source, kind, false)
     }
 
@@ -654,7 +654,7 @@ impl Checker {
         source: &Arc<Type>,
         kind: TypeFlags,
         strict: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("all_types_assignable_to_kind_ex"); 
         if source.flags.contains(TypeFlags::Union) {
             return type_types_list(source)
                 .iter()
@@ -667,7 +667,7 @@ impl Checker {
         &mut self,
         mut types: Vec<Arc<Type>>,
         t: Option<&Arc<Type>>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("append_contextual_property_type_constituent"); 
         let Some(t) = t else {
             return types;
         };
@@ -684,7 +684,7 @@ impl Checker {
         mut index_infos: Vec<Arc<IndexInfo>>,
         new_info: &Arc<IndexInfo>,
         union: bool,
-    ) -> Vec<Arc<IndexInfo>> {
+    ) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("append_index_info"); 
         for i in 0..index_infos.len() {
             let info = &index_infos[i];
             let key_type_matches = info
@@ -724,7 +724,7 @@ impl Checker {
         &mut self,
         mut types: Vec<Arc<Type>>,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("append_local_type_parameters_of_class_or_interface_or_type_alias"); 
         for node in &symbol.declarations {
             if matches!(
                 node.kind,
@@ -748,7 +748,7 @@ impl Checker {
         &mut self,
         mut signatures: Vec<Arc<Signature>>,
         new_signatures: &[Arc<Signature>],
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("append_signatures"); 
         for sig in new_signatures {
             let none_identical = signatures.iter().all(|s| {
                 self.compare_signatures_identical(s, sig, false, false, false) == Ternary::False
@@ -764,7 +764,7 @@ impl Checker {
         &mut self,
         mut types: Vec<Arc<Type>>,
         parameters: Vec<Arc<Node>>,
-    ) -> Vec<Arc<Type>> {
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("append_type_parameters"); 
         for parameter in &parameters {
             if let Some(symbol) = self.symbol_of_node(parameter) {
                 types.push(self.get_type_of_symbol(&symbol));
@@ -773,7 +773,7 @@ impl Checker {
         types
     }
 
-    pub fn are_all_outer_type_parameters_applied(&mut self, t: &Arc<Type>) -> bool {
+    pub fn are_all_outer_type_parameters_applied(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("are_all_outer_type_parameters_applied"); 
         let Some(data) = t.as_interface_type() else {
             return true;
         };
@@ -790,7 +790,7 @@ impl Checker {
         &mut self,
         left: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("are_declaration_flags_identical"); 
         if (tsox_frontend::ast::is_parameter_declaration(left)
             && tsox_frontend::ast::is_variable_declaration(right))
             || (tsox_frontend::ast::is_variable_declaration(left)
@@ -819,7 +819,7 @@ impl Checker {
     ) -> bool
     where
         F: Fn(&Arc<Node>) -> Vec<Arc<Node>>,
-    {
+    { ::tsox_core::fntrace::enter("are_type_parameters_identical"); 
         let max_type_argument_count = target_parameters.len();
         let min_type_argument_count = self.get_min_type_argument_count(target_parameters);
         for declaration in declarations {
@@ -870,7 +870,7 @@ impl Checker {
 }
 
 impl Checker {
-    pub fn assign_binding_element_types(&mut self, pattern: &Arc<Node>, parent_type: &Arc<Type>) {
+    pub fn assign_binding_element_types(&mut self, pattern: &Arc<Node>, parent_type: &Arc<Type>) { ::tsox_core::fntrace::enter("assign_binding_element_types"); 
         let elements = pattern
             .elements()
             .map(|l| l.nodes.clone())
@@ -895,7 +895,7 @@ impl Checker {
         &mut self,
         sig: &mut Signature,
         context: &Signature,
-    ) {
+    ) { ::tsox_core::fntrace::enter("assign_contextual_parameter_types"); 
         let context = Arc::new(context.clone());
         if !context.type_parameters.is_empty() {
             if !sig.type_parameters.is_empty() {
@@ -977,7 +977,7 @@ impl Checker {
         }
     }
 
-    pub fn assign_non_contextual_parameter_types(&mut self, signature: &Signature) {
+    pub fn assign_non_contextual_parameter_types(&mut self, signature: &Signature) { ::tsox_core::fntrace::enter("assign_non_contextual_parameter_types"); 
         if let Some(this_parameter) = &signature.this_parameter {
             self.assign_parameter_type(this_parameter, None);
         }
@@ -990,7 +990,7 @@ impl Checker {
         &mut self,
         parameter: &Arc<Symbol>,
         contextual_type: Option<&Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("assign_parameter_type"); 
         if self
             .value_symbol_links
             .get(parameter)
@@ -1030,16 +1030,16 @@ impl Checker {
         }
     }
 
-    pub fn both_are_big_int_like(&mut self, left: &Arc<Type>, right: &Arc<Type>) -> bool {
+    pub fn both_are_big_int_like(&mut self, left: &Arc<Type>, right: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("both_are_big_int_like"); 
         self.is_type_assignable_to_kind(left, TYPE_FLAGS_BIG_INT_LIKE)
             && self.is_type_assignable_to_kind(right, TYPE_FLAGS_BIG_INT_LIKE)
     }
 
-    pub fn can_get_type_parameters_of_class_or_interface(&mut self, symbol: &Arc<Symbol>) -> bool {
+    pub fn can_get_type_parameters_of_class_or_interface(&mut self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("can_get_type_parameters_of_class_or_interface"); 
         self.get_class_or_interface_like_declaration(symbol).is_some()
     }
 
-    pub fn check_accessor_declaration(&mut self, node: &Arc<Node>) {
+    pub fn check_accessor_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_accessor_declaration"); 
         if !self.check_grammar_function_like_declaration(node)
             && !self.check_grammar_accessor(node)
         {
@@ -1165,7 +1165,7 @@ impl Checker {
         &mut self,
         fn_node: &Arc<Node>,
         return_type: Option<&Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_all_code_paths_in_non_void_function_return_or_throw"); 
         let function_flags = tsox_frontend::ast::mig::m3e::get_function_flags(Some(fn_node));
         let t = return_type.map(|rt| {
             if function_flags
@@ -1258,7 +1258,7 @@ impl Checker {
         &mut self,
         fn_node: &Arc<Node>,
         check_mode: CheckMode,
-    ) -> (Option<Vec<Arc<Type>>>, bool) {
+    ) -> (Option<Vec<Arc<Type>>>, bool) { ::tsox_core::fntrace::enter("check_and_aggregate_return_expression_types"); 
         let function_flags = tsox_frontend::ast::mig::m3e::get_function_flags(Some(fn_node));
         let mut aggregated_types: Vec<Arc<Type>> = Vec::new();
         let mut has_return_with_no_expression = self.function_has_implicit_return(fn_node);
@@ -1348,7 +1348,7 @@ impl Checker {
         &mut self,
         fn_node: &Arc<Node>,
         check_mode: CheckMode,
-    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) {
+    ) -> (Vec<Arc<Type>>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("check_and_aggregate_yield_operand_types"); 
         let is_async = tsox_frontend::ast::mig::m3e::get_function_flags(Some(fn_node))
             .contains(tsox_frontend::ast::mig::m3e::FunctionFlags::ASYNC);
         let mut yield_types: Vec<Arc<Type>> = Vec::new();
@@ -1399,7 +1399,7 @@ impl Checker {
 }
 
 impl CacheHashKey {
-    pub fn is_zero(&self) -> bool {
+    pub fn is_zero(&self) -> bool { ::tsox_core::fntrace::enter("is_zero"); 
         self.hi == 0 && self.lo == 0
     }
 }
@@ -1409,7 +1409,7 @@ impl Checker {
         &mut self,
         error_location: &Arc<Node>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_exporting_primitive_type"); 
         if is_primitive_type_name(name)
             && error_location
                 .parent()
@@ -1429,7 +1429,7 @@ impl Checker {
     fn get_entity_name_for_extending_interface_arc(
         &self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_entity_name_for_extending_interface_arc"); 
         match node.kind {
             SyntaxKind::Identifier
             | SyntaxKind::QualifiedName
@@ -1462,7 +1462,7 @@ impl Checker {
     pub fn check_and_report_error_for_extending_interface(
         &mut self,
         error_location: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_extending_interface"); 
         let expression = self.get_entity_name_for_extending_interface_arc(error_location);
         if let Some(expression) = expression {
             let resolved = self.resolve_entity_name(&expression, SymbolFlags::Interface, false, false, None);
@@ -1486,7 +1486,7 @@ impl Checker {
         name: &str,
         property_with_invalid_initializer: &Arc<Node>,
         result: Option<&Arc<Symbol>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_invalid_initializer"); 
         if !self.compiler_options.get_emit_standard_class_fields() {
             if let Some(error_location) = error_location {
                 if result.is_none()
@@ -1529,7 +1529,7 @@ impl Checker {
         &mut self,
         error_location: &Arc<Node>,
         name: &str,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_missing_prefix"); 
         let is_target = match &error_location.data {
             NodeData::Identifier(d) => d.text == name,
             _ => false,
@@ -1593,7 +1593,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         _resolved: &Arc<Symbol>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_and_report_error_for_resolving_import_alias_to_type_only_symbol"); 
         let decl = match &node.data {
             NodeData::ImportEqualsDeclaration(d) => d,
             _ => return,
@@ -1654,7 +1654,7 @@ impl Checker {
         error_location: &Arc<Node>,
         name: &str,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_using_namespace_as_type_or_value"); 
         if meaning.intersects(SymbolFlags::VALUE & !SymbolFlags::TYPE) {
             let resolved =
                 self.resolve_name(name, error_location, SymbolFlags::NamespaceModule, false);
@@ -1691,7 +1691,7 @@ impl Checker {
         error_location: &Arc<Node>,
         name: &str,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_using_type_as_namespace"); 
         if meaning == SymbolFlags::NAMESPACE {
             let resolved = self.resolve_name(
                 name,
@@ -1738,7 +1738,7 @@ impl Checker {
         error_location: &Arc<Node>,
         name: &str,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_using_type_as_value"); 
         if !meaning.contains(SymbolFlags::VALUE) {
             return false;
         }
@@ -1849,7 +1849,7 @@ impl Checker {
         error_location: &Arc<Node>,
         name: &str,
         meaning: SymbolFlags,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_and_report_error_for_using_value_as_type"); 
         if meaning.intersects(SymbolFlags::TYPE & !SymbolFlags::NAMESPACE) {
             let resolved = self.resolve_name(
                 name,

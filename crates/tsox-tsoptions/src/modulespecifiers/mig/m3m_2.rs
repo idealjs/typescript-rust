@@ -20,15 +20,15 @@ use super::w12::process_ending;
 use tsox_frontend::ast::SourceFile;
 
 impl SourceFileForSpecifierGeneration for SourceFile {
-    fn path(&self) -> &str {
+    fn path(&self) -> &str { ::tsox_core::fntrace::enter("path"); 
         &self.file_name
     }
 
-    fn file_name(&self) -> &str {
+    fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    fn is_js(&self) -> bool {
+    fn is_js(&self) -> bool { ::tsox_core::fntrace::enter("is_js"); 
         matches!(
             self.script_kind,
             tsox_frontend::ast::ScriptKind::Js | tsox_frontend::ast::ScriptKind::Jsx
@@ -52,7 +52,7 @@ pub struct Info {
 pub fn get_info(
     importing_source_file_name: &str,
     host: &dyn ModuleSpecifierGenerationHost,
-) -> Info {
+) -> Info { ::tsox_core::fntrace::enter("get_info"); 
     Info {
         use_case_sensitive_file_names: host.use_case_sensitive_file_names(),
         importing_source_file_name: importing_source_file_name.to_string(),
@@ -68,7 +68,7 @@ enum NodeModulesPathParseState {
     PackageContent,
 }
 
-pub fn get_node_module_path_parts(full_path: &str) -> Option<NodeModulePathParts> {
+pub fn get_node_module_path_parts(full_path: &str) -> Option<NodeModulePathParts> { ::tsox_core::fntrace::enter("get_node_module_path_parts"); 
     let mut top_level_node_modules_index = 0;
     let mut top_level_package_name_index = 0;
     let mut package_root_index = 0;
@@ -133,7 +133,7 @@ pub fn get_node_modules_package_name(
     host: &dyn ModuleSpecifierGenerationHost,
     preferences: &UserPreferences,
     options: &ModuleSpecifierOptions,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_node_modules_package_name"); 
     let info = get_info(&importing_source_file.file_name, host);
     let module_paths = get_all_module_paths(
         &info,
@@ -168,11 +168,11 @@ pub fn get_all_module_paths(
     compiler_options: &CompilerOptions,
     _preferences: &UserPreferences,
     _options: &ModuleSpecifierOptions,
-) -> Vec<ModulePath> {
+) -> Vec<ModulePath> { ::tsox_core::fntrace::enter("get_all_module_paths"); 
     get_all_module_paths_worker(info, imported_file_name, host, compiler_options)
 }
 
-fn sort_module_paths(paths: &mut [ModulePath], use_case_sensitive_file_names: bool) {
+fn sort_module_paths(paths: &mut [ModulePath], use_case_sensitive_file_names: bool) { ::tsox_core::fntrace::enter("sort_module_paths"); 
     paths.sort_by(|a, b| {
         compare_paths_by_redirect(a, b, use_case_sensitive_file_names).cmp(&0)
     });
@@ -183,7 +183,7 @@ fn get_all_module_paths_worker(
     imported_file_name: &str,
     host: &dyn ModuleSpecifierGenerationHost,
     _compiler_options: &CompilerOptions,
-) -> Vec<ModulePath> {
+) -> Vec<ModulePath> { ::tsox_core::fntrace::enter("get_all_module_paths_worker"); 
     let mut all_file_names: OrderedMap<String, ModulePath> = OrderedMap::new();
     let paths = get_each_file_name_of_module(
         &info.importing_source_file_name,
@@ -237,7 +237,7 @@ struct PkgJsonDirAttemptResult {
 fn try_directory_with_package_json(
     parts: &NodeModulePathParts,
     path_obj: &ModulePath,
-) -> PkgJsonDirAttemptResult {
+) -> PkgJsonDirAttemptResult { ::tsox_core::fntrace::enter("try_directory_with_package_json"); 
     let file_len = path_obj.file_name.len();
     let mut root_idx = parts.package_root_index;
     if root_idx > file_len {
@@ -273,7 +273,7 @@ pub fn try_get_module_name_as_node_module(
     user_preferences: &UserPreferences,
     package_name_only: bool,
     _override_mode: ResolutionMode,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("try_get_module_name_as_node_module"); 
     let parts = match get_node_module_path_parts(&path_obj.file_name) {
         Some(parts) => parts,
         None => return String::new(),
@@ -344,7 +344,7 @@ pub fn try_get_module_name_as_node_module(
     crate::module::get_package_name_from_types_package_name(node_modules_directory_name)
 }
 
-pub fn all_keys_start_with_dot(obj: &OrderedMap<String, ExportsOrImports>) -> bool {
+pub fn all_keys_start_with_dot(obj: &OrderedMap<String, ExportsOrImports>) -> bool { ::tsox_core::fntrace::enter("all_keys_start_with_dot"); 
     for k in obj.keys() {
         if !k.starts_with('.') {
             return false;
@@ -353,7 +353,7 @@ pub fn all_keys_start_with_dot(obj: &OrderedMap<String, ExportsOrImports>) -> bo
     true
 }
 
-pub fn get_package_name_from_directory(file_or_directory_path: &str) -> String {
+pub fn get_package_name_from_directory(file_or_directory_path: &str) -> String { ::tsox_core::fntrace::enter("get_package_name_from_directory"); 
     let idx = match file_or_directory_path.rfind("/node_modules/") {
         Some(idx) => idx,
         None => return String::new(),

@@ -1,21 +1,21 @@
 use crate::checker::types::*;
 use std::sync::Arc;
 
-pub(super) fn type_parameters_same(a: &[Arc<Type>], b: &[Arc<Type>]) -> bool {
+pub(super) fn type_parameters_same(a: &[Arc<Type>], b: &[Arc<Type>]) -> bool { ::tsox_core::fntrace::enter("type_parameters_same"); 
     if a.len() != b.len() {
         return false;
     }
     a.iter().zip(b.iter()).all(|(x, y)| Arc::ptr_eq(x, y))
 }
 
-pub(crate) fn type_contains_type_parameter(t: &Arc<Type>) -> bool {
+pub(crate) fn type_contains_type_parameter(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_contains_type_parameter"); 
     type_contains_type_parameter_skipping(t, &[])
 }
 
 pub(crate) fn type_contains_type_parameter_skipping(
     t: &Arc<Type>,
     skip: &[Arc<Type>],
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("type_contains_type_parameter_skipping"); 
     if t.flags.contains(TypeFlags::TypeParameter) {
         return !skip.iter().any(|s| Arc::ptr_eq(s, t));
     }

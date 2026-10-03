@@ -11,7 +11,7 @@ use tsox_frontend::ast::mig::m3h::climb_past_property_access;
 use tsox_frontend::ast::{self, Node, SourceFile, Symbol, SyntaxKind};
 use tsox_frontend::astnav;
 
-fn m5s2_m5u_converters() -> crate::mig::m5u_conv::M5uConverters {
+fn m5s2_m5u_converters() -> crate::mig::m5u_conv::M5uConverters { ::tsox_core::fntrace::enter("m5s2_m5u_converters"); 
     crate::mig::m5u_conv::new_converters(
         crate::ls::lsconv_converters::PositionEncodingKind::Utf16,
         Box::new(crate::ls::lsconv_linemap::compute_lsp_line_starts),
@@ -26,7 +26,7 @@ mod lsproto_lsp {
 pub fn combine_definition_responses(
     results: Vec<super::m5s::DefinitionResponse>,
     links: bool,
-) -> super::m5s::DefinitionResponse {
+) -> super::m5s::DefinitionResponse { ::tsox_core::fntrace::enter("combine_definition_responses"); 
     let mut locations: Vec<Location> = Vec::new();
     let mut definition_links: Vec<crate::ls::types::LocationLink> = Vec::new();
     let mut seen: std::collections::HashSet<(String, u32, u32, u32, u32)> = std::collections::HashSet::new();
@@ -107,7 +107,7 @@ impl LanguageService {
         &self,
         entry: &mut ReferenceEntry,
         feature: super::m5s::SpanFeature,
-    ) -> Option<Location> {
+    ) -> Option<Location> { ::tsox_core::fntrace::enter("get_location_of_entry_for_feature"); 
         self.resolve_entry_source(entry);
         let program = self.get_program();
         let source_file = super::m5t_3::source_file_of_node(&program, entry.node.as_ref()?)?;
@@ -124,7 +124,7 @@ impl LanguageService {
         &self,
         document_uri: &DocumentUri,
         position: Position,
-    ) -> super::m5s::DefinitionResponse {
+    ) -> super::m5s::DefinitionResponse { ::tsox_core::fntrace::enter("provide_definition_worker"); 
         // 客户端能力通道未接线(m5m::ResolvedClientCapabilities 为 raw JSON 空壳),
         // 按 m5t2 先例取 ClientCapabilities 默认孪生,待会话能力回接后恢复真实读取
         let client_supports_link = crate::ls::types::ClientCapabilities::default().text_document.definition.link_support;
@@ -154,7 +154,7 @@ impl LanguageService {
         document_uri: &DocumentUri,
         document_position: Position,
         files_to_search: &[DocumentUri],
-    ) -> super::m5s::MultiDocumentHighlightsOrNull {
+    ) -> super::m5s::MultiDocumentHighlightsOrNull { ::tsox_core::fntrace::enter("provide_document_highlights_worker"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let positions = crate::mig::m5u_conv::from_lsp_position_for_source_file(
             &m5s2_m5u_converters(),
@@ -184,7 +184,7 @@ impl LanguageService {
         program: &Arc<tsox_compile::compiler::Program>,
         source_file: &Arc<SourceFile>,
         files_to_search: &[DocumentUri],
-    ) -> super::m5s::MultiDocumentHighlightsOrNull {
+    ) -> super::m5s::MultiDocumentHighlightsOrNull { ::tsox_core::fntrace::enter("provide_document_highlights_at_position"); 
         let node = astnav::get_touching_property_name(&source_file.node, position)
             .unwrap_or_else(|| Arc::clone(&source_file.node));
 
@@ -267,11 +267,11 @@ impl LanguageService {
         &self,
         params: &lsproto_lsp::ReferenceParams,
         data: &crate::ls::find_all_references::SymbolAndEntriesData,
-    ) -> lsproto_lsp::VSReferencesResponse {
+    ) -> lsproto_lsp::VSReferencesResponse { ::tsox_core::fntrace::enter("provide_vs_references"); 
         self.symbol_and_entries_to_vs_references(params, data)
     }
 
-    pub fn get_signature_usages(&self, signature_decl: &Arc<Node>) -> Vec<SignatureUsage> {
+    pub fn get_signature_usages(&self, signature_decl: &Arc<Node>) -> Vec<SignatureUsage> { ::tsox_core::fntrace::enter("get_signature_usages"); 
         let Some(name) = signature_decl.name() else {
             return Vec::new();
         };
@@ -342,7 +342,7 @@ impl LanguageService {
         symbol: &Arc<Symbol>,
         original_node: &Arc<Node>,
         vs_capability: bool,
-    ) -> crate::ls::mig::m5t2_3::VSClassifiedTextElement {
+    ) -> crate::ls::mig::m5t2_3::VSClassifiedTextElement { ::tsox_core::fntrace::enter("get_definition_kind_and_display_parts"); 
         let program = self.get_program();
         let mut checker = program.build_checker();
 
@@ -379,7 +379,7 @@ impl LanguageService {
         &self,
         entry: &SymbolAndEntries,
         cb: &mut impl FnMut(DocumentUri, Position),
-    ) {
+    ) { ::tsox_core::fntrace::enter("for_each_original_definition_location"); 
         if !entry.can_use_definition_symbol() {
             return;
         }
@@ -427,7 +427,7 @@ impl LanguageService {
 }
 
 impl SymbolAndEntries {
-    pub fn references(&self) -> &[ReferenceEntry] {
+    pub fn references(&self) -> &[ReferenceEntry] { ::tsox_core::fntrace::enter("references"); 
         &self.references
     }
 }

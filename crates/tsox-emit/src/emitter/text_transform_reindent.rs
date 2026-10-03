@@ -1,6 +1,6 @@
 use crate::emitter::UNMAPPED;
 
-pub(crate) fn reindent_and_dedup_tracked(folded: &str, src_offsets: &[u32]) -> (String, Vec<u32>) {
+pub(crate) fn reindent_and_dedup_tracked(folded: &str, src_offsets: &[u32]) -> (String, Vec<u32>) { ::tsox_core::fntrace::enter("reindent_and_dedup_tracked"); 
     let chars: Vec<char> = folded.chars().collect();
     let n = chars.len();
     let mut out_text = String::with_capacity(folded.len());
@@ -70,7 +70,7 @@ pub(crate) fn reindent_and_dedup_tracked(folded: &str, src_offsets: &[u32]) -> (
     (out_text, out_offsets)
 }
 
-pub(crate) fn brace_delta(line: &str) -> i32 {
+pub(crate) fn brace_delta(line: &str) -> i32 { ::tsox_core::fntrace::enter("brace_delta"); 
     let chars: Vec<char> = line.chars().collect();
     let n = chars.len();
     let mut delta = 0i32;
@@ -122,7 +122,7 @@ pub(crate) fn brace_delta(line: &str) -> i32 {
     delta
 }
 
-pub(crate) fn reindent_and_dedup(folded: &str) -> String {
+pub(crate) fn reindent_and_dedup(folded: &str) -> String { ::tsox_core::fntrace::enter("reindent_and_dedup"); 
     let mut out = String::with_capacity(folded.len());
     let mut depth: i32 = 0;
     let had_trailing_newline = folded.ends_with('\n');

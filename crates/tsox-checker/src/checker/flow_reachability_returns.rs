@@ -4,7 +4,7 @@ use crate::checker::flow_impl_chunk::*;
 use tsox_frontend::ast::{ModifierFlags, NodeData, SyntaxKind};
 
 impl Checker {
-    pub fn check_no_implicit_returns(&mut self, node: &Arc<Node>, type_node: Option<&Arc<Node>>) {
+    pub fn check_no_implicit_returns(&mut self, node: &Arc<Node>, type_node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("check_no_implicit_returns"); 
         if !self.compiler_options.no_implicit_returns.is_true() {
             return;
         }
@@ -51,7 +51,7 @@ impl Checker {
         node: &Arc<Node>,
         container: Option<&Arc<Node>>,
         annotated: Option<Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_bare_return_statement"); 
         let never = annotated
             .as_ref()
             .is_some_and(|t| t.flags.contains(TypeFlags::Never));
@@ -111,7 +111,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         type_node: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_all_code_paths_annotated"); 
         if function_like_body(node).map(|b| b.kind) != Some(SyntaxKind::Block) {
             return;
         }
@@ -140,7 +140,7 @@ impl Checker {
         type_node: Option<&Arc<Node>>,
         unwrapped: &Arc<Type>,
         has_explicit_return: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_all_code_paths_error"); 
         let error_loc = type_node.map_or(node.loc, |tn| tn.loc);
         if !has_explicit_return {
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
@@ -181,7 +181,7 @@ pub(crate) fn declared_unwrapped_return_type(
     checker: &mut Checker,
     node: &Arc<Node>,
     type_node: Option<&Arc<Node>>,
-) -> Arc<Type> {
+) -> Arc<Type> { ::tsox_core::fntrace::enter("declared_unwrapped_return_type"); 
     let Some(tn) = type_node else {
         return checker.get_any_type();
     };
@@ -190,7 +190,7 @@ pub(crate) fn declared_unwrapped_return_type(
     checker.unwrap_async_return_type(raw, is_async)
 }
 
-pub fn function_like_body(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn function_like_body(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("function_like_body"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.body.clone(),
         NodeData::FunctionExpression(d) => Some(d.body.clone()),
@@ -203,7 +203,7 @@ pub fn function_like_body(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub(crate) fn function_like_name_loc(node: &Arc<Node>) -> Option<tsox_core::core::text::TextRange> {
+pub(crate) fn function_like_name_loc(node: &Arc<Node>) -> Option<tsox_core::core::text::TextRange> { ::tsox_core::fntrace::enter("function_like_name_loc"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.name.as_ref().map(|n| n.loc),
         NodeData::MethodDeclaration(d) => Some(d.name.loc),

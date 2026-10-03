@@ -2,7 +2,7 @@
 
 use tsox_core::tspath;
 
-pub fn perceived_os_root_length_for_watching(path_components: &[String]) -> usize {
+pub fn perceived_os_root_length_for_watching(path_components: &[String]) -> usize { ::tsox_core::fntrace::enter("perceived_os_root_length_for_watching"); 
     let length = path_components.len();
     if length <= 1 {
         return length;

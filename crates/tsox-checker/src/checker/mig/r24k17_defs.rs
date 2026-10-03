@@ -16,18 +16,18 @@ thread_local! {
         RefCell::new(HashMap::new());
 }
 
-pub(crate) fn signature_composite(sig: &Arc<Signature>) -> Option<Arc<CompositeSignature>> {
+pub(crate) fn signature_composite(sig: &Arc<Signature>) -> Option<Arc<CompositeSignature>> { ::tsox_core::fntrace::enter("signature_composite"); 
     SIGNATURE_COMPOSITES.with(|m| m.borrow().get(&(Arc::as_ptr(sig) as usize)).cloned())
 }
 
-pub(crate) fn set_signature_composite(sig: &Arc<Signature>, composite: CompositeSignature) {
+pub(crate) fn set_signature_composite(sig: &Arc<Signature>, composite: CompositeSignature) { ::tsox_core::fntrace::enter("set_signature_composite"); 
     SIGNATURE_COMPOSITES.with(|m| {
         m.borrow_mut()
             .insert(Arc::as_ptr(sig) as usize, Arc::new(composite))
     });
 }
 
-pub(crate) fn error_node_for_call_node_arc(node: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn error_node_for_call_node_arc(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("error_node_for_call_node_arc"); 
     if is_call_expression(node) {
         if let Some(expr) = node.expression() {
             if is_property_access_expression(expr) {
@@ -41,11 +41,11 @@ pub(crate) fn error_node_for_call_node_arc(node: &Arc<Node>) -> Arc<Node> {
     Arc::clone(node)
 }
 
-pub(crate) fn pattern_for_type_of(t: &Arc<crate::checker::types::Type>) -> Option<Arc<Node>> {
+pub(crate) fn pattern_for_type_of(t: &Arc<crate::checker::types::Type>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("pattern_for_type_of"); 
     PATTERN_FOR_TYPES.with(|m| m.borrow().get(&(Arc::as_ptr(t) as usize)).cloned())
 }
 
-pub(crate) fn set_pattern_for_type(t: &Arc<crate::checker::types::Type>, pattern: Arc<Node>) {
+pub(crate) fn set_pattern_for_type(t: &Arc<crate::checker::types::Type>, pattern: Arc<Node>) { ::tsox_core::fntrace::enter("set_pattern_for_type"); 
     PATTERN_FOR_TYPES.with(|m| {
         m.borrow_mut()
             .insert(Arc::as_ptr(t) as usize, pattern)
@@ -56,7 +56,7 @@ thread_local! {
     static PATTERN_FOR_TYPES: RefCell<HashMap<usize, Arc<Node>>> = RefCell::new(HashMap::new());
 }
 
-pub(crate) fn is_js_literal_type(checker: &mut Checker, t: &Arc<crate::checker::types::Type>) -> bool {
+pub(crate) fn is_js_literal_type(checker: &mut Checker, t: &Arc<crate::checker::types::Type>) -> bool { ::tsox_core::fntrace::enter("is_js_literal_type"); 
     use crate::checker::types::{TypeFlags, TYPE_FLAGS_INSTANTIABLE};
     if checker.no_implicit_any {
         return false;
@@ -98,7 +98,7 @@ impl R24K17FactoryExt for tsox_frontend::ast::mig::m3c::NodeFactory {
         question_dot_token: Option<&Arc<Node>>,
         argument_expression: &Arc<Node>,
         flags: tsox_frontend::ast::NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_element_access_expression"); 
         let mut node = Node::new(
             tsox_frontend::ast::SyntaxKind::ElementAccessExpression,
             tsox_frontend::ast::NodeData::ElementAccessExpression(
@@ -119,7 +119,7 @@ pub(crate) fn is_property_initialized_in_constructor(
     prop_name: &Arc<Node>,
     prop_type: &Arc<crate::checker::types::Type>,
     constructor: &Arc<Node>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_property_initialized_in_constructor"); 
     use tsox_frontend::ast::SyntaxKind;
     use crate::checker::mig::m2h::r22k10_defs::{set_flow_node_of, R22K10FactoryExt};
     use tsox_frontend::ast::mig::m3c::NodeFactory;

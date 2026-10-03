@@ -8,7 +8,7 @@ impl Checker {
         callee_expr: &Arc<Node>,
         callee_type: &Arc<Type>,
         is_new: bool,
-    ) -> Option<Vec<Arc<Signature>>> {
+    ) -> Option<Vec<Arc<Signature>>> { ::tsox_core::fntrace::enter("collect_callee_signatures"); 
         let mut union_signatures: Vec<Arc<Signature>> = Vec::new();
         let sig_kind = if is_new {
             SignatureKind::Construct
@@ -159,7 +159,7 @@ impl Checker {
         Some(self.reorder_candidates(signatures))
     }
 
-    pub(crate) fn reorder_candidates(&self, signatures: &[Arc<Signature>]) -> Vec<Arc<Signature>> {
+    pub(crate) fn reorder_candidates(&self, signatures: &[Arc<Signature>]) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("reorder_candidates"); 
         let mut last_parent: Option<Arc<Node>> = None;
         let mut last_symbol: Option<Arc<Symbol>> = None;
         let mut index: usize = 0;
@@ -209,7 +209,7 @@ impl Checker {
         arguments: &Arc<NodeList>,
         callee_expr: &Arc<Node>,
         is_new: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_uncallable_callee"); 
         if !is_new {
             if callee_expr.kind == SyntaxKind::Identifier
                 && let Some(structured) = callee_type.as_structured()
@@ -266,7 +266,7 @@ impl Checker {
 
 impl Checker {
     // Go unknownSignature：无参任意返回的合成调用签名
-    pub(crate) fn untyped_call_signature(&mut self) -> Arc<Signature> {
+    pub(crate) fn untyped_call_signature(&mut self) -> Arc<Signature> { ::tsox_core::fntrace::enter("untyped_call_signature"); 
         self.build_signature_from_function_like_type_node(
             &Arc::new(NodeList::default()),
             self.get_any_type(),
@@ -277,7 +277,7 @@ impl Checker {
     }
 
     // Go t == globalFunctionType 判定
-    pub(crate) fn is_global_function_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_global_function_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_global_function_type"); 
         t.flags.contains(TypeFlags::Object)
             && self
                 .globals
@@ -287,7 +287,7 @@ impl Checker {
     }
 }
 
-fn ptr_eq_opt<T>(a: &Option<Arc<T>>, b: &Option<Arc<T>>) -> bool {
+fn ptr_eq_opt<T>(a: &Option<Arc<T>>, b: &Option<Arc<T>>) -> bool { ::tsox_core::fntrace::enter("ptr_eq_opt"); 
     match (a, b) {
         (None, None) => true,
         (Some(a), Some(b)) => Arc::ptr_eq(a, b),

@@ -22,7 +22,7 @@ pub struct PackageJsonInfoStub {
 }
 
 impl PackageJsonInfoStub {
-    pub fn exists(&self) -> bool {
+    pub fn exists(&self) -> bool { ::tsox_core::fntrace::enter("exists"); 
         self.exists
     }
 }
@@ -42,7 +42,7 @@ impl Registry {
     pub fn new(
         to_path: Box<dyn Fn(&str) -> tsox_core::tspath::Path + Send + Sync>,
         preferences: UserPreferences,
-    ) -> Registry {
+    ) -> Registry { ::tsox_core::fntrace::enter("new"); 
         Registry {
             to_path,
             user_preferences: preferences,
@@ -60,7 +60,7 @@ impl Registry {
         file_name: &str,
         project_path: &tsox_core::tspath::Path,
         preferences: &UserPreferences,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_prepared_for_importing_file"); 
         let project_bucket = match self.projects.get(project_path) {
             Some(b) => b,
             None => return false,
@@ -92,7 +92,7 @@ impl Registry {
         true
     }
 
-    pub fn node_modules_directories(&self) -> HashMap<tsox_core::tspath::Path, String> {
+    pub fn node_modules_directories(&self) -> HashMap<tsox_core::tspath::Path, String> { ::tsox_core::fntrace::enter("node_modules_directories"); 
         let mut dirs = HashMap::new();
         for (dir_path, dir) in &self.directories {
             if dir.has_node_modules {
@@ -112,11 +112,11 @@ impl Registry {
         _change: &RegistryChange,
         _host: &dyn RegistryCloneHost,
         _logger: Option<&LogTree>,
-    ) -> Result<Registry, String> {
+    ) -> Result<Registry, String> { ::tsox_core::fntrace::enter("clone_registry"); 
         todo!("Registry::clone_registry requires registryBuilder infrastructure")
     }
 
-    pub fn get_cache_stats(&self) -> CacheStats {
+    pub fn get_cache_stats(&self) -> CacheStats { ::tsox_core::fntrace::enter("get_cache_stats"); 
         let mut stats = CacheStats {
             unique_package_count: self.unique_package_count,
             ..Default::default()

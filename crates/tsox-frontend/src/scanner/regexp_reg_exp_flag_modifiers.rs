@@ -4,7 +4,7 @@ pub(super) const REG_EXP_FLAG_MODIFIERS: u16 = crate::scanner::REG_EXP_FLAG_I
     | crate::scanner::REG_EXP_FLAG_M
     | crate::scanner::REG_EXP_FLAG_S;
 
-pub(super) fn char_to_reg_exp_flag(ch: char) -> u16 {
+pub(super) fn char_to_reg_exp_flag(ch: char) -> u16 { ::tsox_core::fntrace::enter("char_to_reg_exp_flag"); 
     match ch {
         'd' => crate::scanner::REG_EXP_FLAG_D,
         'g' => crate::scanner::REG_EXP_FLAG_G,
@@ -18,34 +18,34 @@ pub(super) fn char_to_reg_exp_flag(ch: char) -> u16 {
     }
 }
 
-pub(crate) fn is_digit(c: char) -> bool {
+pub(crate) fn is_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_digit"); 
     c.is_ascii_digit()
 }
 
-pub(crate) fn is_hex_digit(c: char) -> bool {
+pub(crate) fn is_hex_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_hex_digit"); 
     c.is_ascii_hexdigit()
 }
 
-pub(crate) fn is_octal_digit(c: char) -> bool {
+pub(crate) fn is_octal_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_octal_digit"); 
     ('0'..='7').contains(&c)
 }
 
-pub(super) fn is_word_character(c: char) -> bool {
+pub(super) fn is_word_character(c: char) -> bool { ::tsox_core::fntrace::enter("is_word_character"); 
     c.is_ascii_alphanumeric() || c == '_'
 }
 
-pub(crate) fn is_ascii_letter(c: char) -> bool {
+pub(crate) fn is_ascii_letter(c: char) -> bool { ::tsox_core::fntrace::enter("is_ascii_letter"); 
     c.is_ascii_alphabetic()
 }
 
-pub(crate) fn decode_rune_at(text: &str, pos: usize) -> (char, usize) {
+pub(crate) fn decode_rune_at(text: &str, pos: usize) -> (char, usize) { ::tsox_core::fntrace::enter("decode_rune_at"); 
     match text[pos..].chars().next() {
         Some(c) => (c, c.len_utf8()),
         None => ('\0', 0),
     }
 }
 
-pub(super) fn decode_first_rune(s: &str) -> Option<(char, usize)> {
+pub(super) fn decode_first_rune(s: &str) -> Option<(char, usize)> { ::tsox_core::fntrace::enter("decode_first_rune"); 
     let mut chars = s.chars();
     let c = chars.next()?;
     if chars.next().is_some() {
@@ -54,7 +54,7 @@ pub(super) fn decode_first_rune(s: &str) -> Option<(char, usize)> {
     Some((c, c.len_utf8()))
 }
 
-pub(super) fn compare_decimal_strings(a: &str, b: &str) -> i32 {
+pub(super) fn compare_decimal_strings(a: &str, b: &str) -> i32 { ::tsox_core::fntrace::enter("compare_decimal_strings"); 
     let a = a.trim_start_matches('0');
     let b = b.trim_start_matches('0');
     let a = if a.is_empty() { "0" } else { a };
@@ -122,7 +122,7 @@ impl<'a> RegExpParser<'a> {
         flags: u16,
         named_capture_groups: bool,
         script_target: ScriptTarget,
-    ) -> Self {
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
         let any_unicode_mode =
             (flags & (crate::scanner::REG_EXP_FLAG_U | crate::scanner::REG_EXP_FLAG_V)) != 0;
         let unicode_sets_mode = (flags & crate::scanner::REG_EXP_FLAG_V) != 0;
@@ -149,29 +149,29 @@ impl<'a> RegExpParser<'a> {
     }
 
     #[allow(dead_code)]
-    pub fn flags(&self) -> u16 {
+    pub fn flags(&self) -> u16 { ::tsox_core::fntrace::enter("flags"); 
         self.flags
     }
 
-    pub fn errors(&self) -> &[ScannerError] {
+    pub fn errors(&self) -> &[ScannerError] { ::tsox_core::fntrace::enter("errors"); 
         &self.errors
     }
 
     #[allow(dead_code)]
-    pub fn take_errors(&mut self) -> Vec<ScannerError> {
+    pub fn take_errors(&mut self) -> Vec<ScannerError> { ::tsox_core::fntrace::enter("take_errors"); 
         std::mem::take(&mut self.errors)
     }
 
     #[allow(dead_code)]
-    pub fn pos(&self) -> usize {
+    pub fn pos(&self) -> usize { ::tsox_core::fntrace::enter("pos"); 
         self.pos
     }
 
-    pub fn set_pos(&mut self, v: usize) {
+    pub fn set_pos(&mut self, v: usize) { ::tsox_core::fntrace::enter("set_pos"); 
         self.pos = v;
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) { ::tsox_core::fntrace::enter("run"); 
         self.any_unicode_mode_or_non_annex_b = self.any_unicode_mode || !self.annex_b;
 
         self.scan_disjunction(false);

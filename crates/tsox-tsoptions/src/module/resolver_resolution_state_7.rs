@@ -3,7 +3,7 @@
 use crate::module::resolver::*;
 
 impl<'a> ResolutionState<'a> {
-    pub(crate) fn get_candidate_from_type_root(&self, type_root: &str) -> String {
+    pub(crate) fn get_candidate_from_type_root(&self, type_root: &str) -> String { ::tsox_core::fntrace::enter("get_candidate_from_type_root"); 
         let name_for_lookup = if type_root.ends_with("/node_modules/@types")
             || type_root.ends_with("/node_modules/@types/")
         {
@@ -18,7 +18,7 @@ impl<'a> ResolutionState<'a> {
         &self,
         resolved: Option<Resolved>,
         primary: bool,
-    ) -> ResolvedTypeReferenceDirective {
+    ) -> ResolvedTypeReferenceDirective { ::tsox_core::fntrace::enter("create_resolved_type_ref"); 
         match resolved {
             Some(r) if !r.path.is_empty() => {
                 let is_external = r.path.contains("/node_modules/");
@@ -39,7 +39,7 @@ impl<'a> ResolutionState<'a> {
     pub(crate) fn load_module_from_nearest_node_modules_directory(
         &mut self,
         types_scope_only: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_nearest_node_modules_directory"); 
         let ts_ext = self
             .extensions
             .intersection(Extensions::TYPESCRIPT | Extensions::DECLARATION);
@@ -68,7 +68,7 @@ impl<'a> ResolutionState<'a> {
         &mut self,
         ext: Extensions,
         types_scope_only: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_nearest_node_modules_directory_worker"); 
         let mut directory = self.containing_directory.clone();
         loop {
             if tsox_core::tspath::get_base_file_name(&directory) != "node_modules" {
@@ -94,7 +94,7 @@ impl<'a> ResolutionState<'a> {
         ext: Extensions,
         directory: &str,
         types_scope_only: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_immediate_node_modules_directory"); 
         let node_modules_folder = tsox_core::tspath::combine_paths(directory, &["node_modules"]);
         if !self.fs.directory_exists(&node_modules_folder) {
             return CONTINUE_SEARCHING;
@@ -132,7 +132,7 @@ impl<'a> ResolutionState<'a> {
         ext: Extensions,
         module_name: &str,
         node_modules_directory: &str,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_module_from_specific_node_modules_directory"); 
         let candidate = tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
             node_modules_directory,
             &[module_name],
@@ -206,7 +206,7 @@ impl<'a> ResolutionState<'a> {
         ext: Extensions,
         candidate: &str,
         consider_package_dir: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_node_module_from_directory"); 
         self.load_node_module_from_directory_worker(ext, candidate, consider_package_dir)
     }
 
@@ -215,7 +215,7 @@ impl<'a> ResolutionState<'a> {
         ext: Extensions,
         candidate: &str,
         _consider_package_dir: bool,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("load_node_module_from_directory_worker"); 
         let pkg_json_path = tsox_core::tspath::combine_paths(candidate, &["package.json"]);
         let package_info_exists = self.fs.file_exists(&pkg_json_path);
 
@@ -247,7 +247,7 @@ impl<'a> ResolutionState<'a> {
         &mut self,
         ext: Extensions,
         candidate: &str,
-    ) -> Option<Resolved> {
+    ) -> Option<Resolved> { ::tsox_core::fntrace::enter("try_load_module_using_package_json_type_versions"); 
         let pkg_json_path = tsox_core::tspath::combine_paths(candidate, &["package.json"]);
         let content = self.fs.read_file(&pkg_json_path)?;
         let fields = packagejson::parse(&content).ok()?;

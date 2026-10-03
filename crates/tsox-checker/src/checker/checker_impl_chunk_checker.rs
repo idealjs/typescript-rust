@@ -3,7 +3,7 @@
 use crate::checker::checker_impl_chunk::*;
 
 impl Checker {
-    pub fn new(program: Arc<dyn Program>, tracer: Arc<Tracer>) -> Self {
+    pub fn new(program: Arc<dyn Program>, tracer: Arc<Tracer>) -> Self { ::tsox_core::fntrace::enter("new"); 
         let compiler_options = Arc::new(program.options().clone());
         let files = program.source_files().to_vec();
 

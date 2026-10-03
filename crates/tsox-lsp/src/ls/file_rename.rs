@@ -18,11 +18,11 @@ impl LanguageService {
         &self,
         _old_uri: &DocumentUri,
         _new_uri: &DocumentUri,
-    ) -> Vec<RenameFile> {
+    ) -> Vec<RenameFile> { ::tsox_core::fntrace::enter("get_edits_for_file_rename"); 
         Vec::new()
     }
 
-    pub fn create_path_updater(&self, _old_path: &str, _new_path: &str) -> PathUpdater {
+    pub fn create_path_updater(&self, _old_path: &str, _new_path: &str) -> PathUpdater { ::tsox_core::fntrace::enter("create_path_updater"); 
         Box::new(|path: &str| (path.to_string(), false))
     }
 
@@ -32,8 +32,8 @@ impl LanguageService {
         _old_to_new: &PathUpdater,
         _old_path: &str,
         _new_path: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("update_tsconfig_files"); 
     }
 
-    pub fn update_imports_for_file_rename(&self, _program: &Program, _old_to_new: &PathUpdater) {}
+    pub fn update_imports_for_file_rename(&self, _program: &Program, _old_to_new: &PathUpdater) { ::tsox_core::fntrace::enter("update_imports_for_file_rename"); }
 }

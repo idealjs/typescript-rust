@@ -6,7 +6,7 @@ impl Checker {
     pub(crate) fn module_can_have_synthetic_default(
         &mut self,
         module_symbol: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("module_can_have_synthetic_default"); 
         if self.module_has_syntactic_default(module_symbol) {
             return false;
         }
@@ -70,7 +70,7 @@ impl Checker {
                 .is_some_and(|ind| ind.id() == file.node.id())
     }
 
-    pub(crate) fn declaring_dir_of(&self, node: &Arc<Node>) -> Option<String> {
+    pub(crate) fn declaring_dir_of(&self, node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("declaring_dir_of"); 
         self.get_source_file_of_node(node)
             .or_else(|| self.current_file.clone())
             .map(|f| match f.file_name.rfind('/') {

@@ -37,7 +37,7 @@ pub struct SavedNodeBuilderFlags {
 }
 
 impl SavedNodeBuilderFlags {
-    pub fn restore(&self) {
+    pub fn restore(&self) { ::tsox_core::fntrace::enter("restore"); 
         let mut ctx = self.ctx.borrow_mut();
         ctx.flags = self.flags;
         ctx.internal_flags = self.internal_flags;
@@ -49,7 +49,7 @@ pub fn new_node_builder_impl<'a>(
     ch: &'a crate::checker::checker::Checker,
     e: &EmitContextStub,
     id_to_symbol: Option<HashMap<u64, Arc<Symbol>>>,
-) -> NodeBuilderImpl<'a> {
+) -> NodeBuilderImpl<'a> { ::tsox_core::fntrace::enter("new_node_builder_impl"); 
     let id_to_symbol = id_to_symbol.unwrap_or_default();
     let mut b = NodeBuilderImpl::new(ch, id_to_symbol);
     b.pc = r25k8_defs::new_pseudo_checker(ch.strict_null_checks, ch.exact_optional_property_types);
@@ -62,7 +62,7 @@ pub fn new_node_builder_impl<'a>(
 }
 
 impl<'a> NodeBuilderImpl<'a> {
-    pub fn save_restore_flags(&mut self) -> SavedNodeBuilderFlags {
+    pub fn save_restore_flags(&mut self) -> SavedNodeBuilderFlags { ::tsox_core::fntrace::enter("save_restore_flags"); 
         let (flags, internal_flags, depth) = {
             let ctx = self.ctx.borrow();
             (ctx.flags, ctx.internal_flags, ctx.depth)
@@ -75,7 +75,7 @@ impl<'a> NodeBuilderImpl<'a> {
         }
     }
 
-    pub fn check_truncation_length(&mut self) -> bool {
+    pub fn check_truncation_length(&mut self) -> bool { ::tsox_core::fntrace::enter("check_truncation_length"); 
         {
             let ctx = self.ctx.borrow();
             if ctx.truncating {
@@ -97,7 +97,7 @@ impl<'a> NodeBuilderImpl<'a> {
         over
     }
 
-    pub fn check_truncation_length_if_expanding(&mut self) -> bool {
+    pub fn check_truncation_length_if_expanding(&mut self) -> bool { ::tsox_core::fntrace::enter("check_truncation_length_if_expanding"); 
         let expanding = self.ctx.borrow().max_expansion_depth >= 0;
         if expanding && self.check_truncation_length() {
             self.ctx.borrow_mut().expansion_truncated = true;
@@ -106,7 +106,7 @@ impl<'a> NodeBuilderImpl<'a> {
         false
     }
 
-    pub fn is_expandable_type(&mut self, t: &Arc<Type>, is_alias: bool) -> bool {
+    pub fn is_expandable_type(&mut self, t: &Arc<Type>, is_alias: bool) -> bool { ::tsox_core::fntrace::enter("is_expandable_type"); 
         if is_alias {
             if let Some(s) = t.alias.as_ref().and_then(|a| a.symbol.as_ref()) {
                 return !self.ch.is_lib_symbol_for_hover_verbosity(s);
@@ -143,7 +143,7 @@ impl<'a> NodeBuilderImpl<'a> {
         false
     }
 
-    pub fn is_type_on_stack(&mut self, t: &Arc<Type>) -> bool {
+    pub fn is_type_on_stack(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_on_stack"); 
         let ctx = self.ctx.borrow();
         r24k13_defs::type_stack_with(&ctx, |stack| {
             if stack.is_empty() {
@@ -160,7 +160,7 @@ impl<'a> NodeBuilderImpl<'a> {
         })
     }
 
-    pub fn is_actively_expanding(&mut self) -> bool {
+    pub fn is_actively_expanding(&mut self) -> bool { ::tsox_core::fntrace::enter("is_actively_expanding"); 
         let ctx = self.ctx.borrow();
         ctx.max_expansion_depth > 0 && ctx.depth < ctx.max_expansion_depth as usize
     }
@@ -169,7 +169,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         root: &Arc<Node>,
         ref_node: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("append_reference_to_type"); 
         if tsox_frontend::ast::is_import_type_node(root) {
             if let NodeData::ImportTypeNode(imprt) = &root.data {
                 let ids = get_access_stack(ref_node);
@@ -233,7 +233,7 @@ impl<'a> NodeBuilderImpl<'a> {
         expr
     }
 
-    pub fn create_elided_information_placeholder(&mut self) -> Arc<Node> {
+    pub fn create_elided_information_placeholder(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_elided_information_placeholder"); 
         self.ctx.borrow_mut().approximate_length += 3;
         let no_truncation = self.ctx.borrow().flags.contains(NodeBuilderFlags::NoTruncation);
         if !no_truncation {
@@ -250,7 +250,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         list: &[Arc<Type>],
         is_bare_list: bool,
-    ) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+    ) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("map_to_type_nodes"); 
         if list.is_empty() {
             return None;
         }
@@ -363,7 +363,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         existing: &Arc<Node>,
         t: &Arc<Type>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("existing_type_node_is_not_reference_or_is_reference_with_compatible_type_argument_count"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         if !t.object_flags.intersects(ObjectFlags::Reference) {
             return true;
@@ -402,7 +402,7 @@ impl<'a> NodeBuilderImpl<'a> {
     pub fn get_resolved_type_without_abstract_construct_signatures(
         &mut self,
         t: &StructuredType,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_resolved_type_without_abstract_construct_signatures"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         if t.construct_signatures().is_empty() {
             return t.as_type();
@@ -441,7 +441,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         chain: &[Arc<Symbol>],
         index: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_entity_name_from_symbol_chain"); 
         let symbol = &chain[index];
 
         if index == 0 {
@@ -463,7 +463,7 @@ impl<'a> NodeBuilderImpl<'a> {
     }
 }
 
-pub fn get_access_stack(ref_node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn get_access_stack(ref_node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_access_stack"); 
     let mut state = match &ref_node.data {
         NodeData::TypeReferenceNode(tr) => tr.type_name.clone(),
         _ => Arc::clone(ref_node),
@@ -484,7 +484,7 @@ pub fn get_access_stack(ref_node: &Arc<Node>) -> Vec<Arc<Node>> {
 pub fn is_class_instance_side(
     c: &mut crate::checker::checker::Checker,
     t: &Arc<Type>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_class_instance_side"); 
     t.symbol.as_ref().is_some_and(|s| {
         s.flags.intersects(SymbolFlags::Class)
             && (Arc::ptr_eq(t, &c.get_declared_type_of_class_or_interface(s))
@@ -493,7 +493,7 @@ pub fn is_class_instance_side(
     })
 }
 
-pub fn is_identifier_type_reference(node: &Arc<Node>) -> bool {
+pub fn is_identifier_type_reference(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_identifier_type_reference"); 
     tsox_frontend::ast::is_type_reference_node(node)
         && match &node.data {
             NodeData::TypeReferenceNode(tr) => is_identifier(&tr.type_name),
@@ -501,7 +501,7 @@ pub fn is_identifier_type_reference(node: &Arc<Node>) -> bool {
         }
 }
 
-pub fn array_is_homogeneous<T>(array: &[T], comparer: impl Fn(&T, &T) -> bool) -> bool {
+pub fn array_is_homogeneous<T>(array: &[T], comparer: impl Fn(&T, &T) -> bool) -> bool { ::tsox_core::fntrace::enter("array_is_homogeneous"); 
     if array.len() < 2 {
         return true;
     }

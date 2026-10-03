@@ -28,11 +28,11 @@ use crate::checker::types::{
     SignatureKind, SignatureFlags, SymbolFormatFlags, Ternary, Type,
 };
 
-pub fn is_expanding(ctx: &NodeBuilderContext) -> bool {
+pub fn is_expanding(ctx: &NodeBuilderContext) -> bool { ::tsox_core::fntrace::enter("is_expanding"); 
     ctx.max_expansion_depth != -1
 }
 
-pub fn is_hash_private(s: &Arc<Symbol>) -> bool {
+pub fn is_hash_private(s: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_hash_private"); 
     s.value_declaration
         .as_ref()
         .and_then(|d| d.name())
@@ -42,7 +42,7 @@ pub fn is_hash_private(s: &Arc<Symbol>) -> bool {
 pub fn type_elements_to_class_elements(
     f: &crate::checker::nodecopy_builder::NodeFactoryStub,
     members: Vec<Arc<Node>>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("type_elements_to_class_elements"); 
     let mut members = members;
     for i in 0..members.len() {
         let m = &members[i];
@@ -80,7 +80,7 @@ pub fn type_elements_to_class_elements(
 }
 
 impl<'a> NodeBuilderImpl<'a> {
-    pub fn expand_symbol_for_hover(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Node>> {
+    pub fn expand_symbol_for_hover(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("expand_symbol_for_hover"); 
         let mut results: Vec<Arc<Node>> = Vec::new();
         if symbol.flags.intersects(SymbolFlags::ENUM) {
             if let Some(node) = self.expand_enum_decl(symbol) {
@@ -110,7 +110,7 @@ impl<'a> NodeBuilderImpl<'a> {
         results
     }
 
-    pub fn expand_enum_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn expand_enum_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("expand_enum_decl"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let name = symbol.name.clone();
         self.ctx.borrow_mut().approximate_length += 9 + name.len();
@@ -179,7 +179,7 @@ impl<'a> NodeBuilderImpl<'a> {
         ))
     }
 
-    pub fn enum_member_initializer(&mut self, p: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn enum_member_initializer(&mut self, p: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("enum_member_initializer"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let member_decl = p
             .declarations
@@ -190,7 +190,7 @@ impl<'a> NodeBuilderImpl<'a> {
         Some(self.f.new_string_literal(&val, 0))
     }
 
-    pub fn expand_class_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn expand_class_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("expand_class_decl"); 
         let name = symbol.name.clone();
         self.ctx.borrow_mut().approximate_length += 9 + name.len();
 
@@ -218,7 +218,7 @@ impl<'a> NodeBuilderImpl<'a> {
         name: &str,
         class_like_declarations: &[Arc<Node>],
         _original_decl: Option<Arc<Node>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("expand_class_decl_worker"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let local_params = ch
             .get_local_type_parameters_of_class_or_interface_or_type_alias(symbol);
@@ -317,7 +317,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         members: Vec<Arc<Node>>,
         is_static: bool,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("add_class_modifiers"); 
         let mut members = members;
         for i in 0..members.len() {
             let m = &members[i];
@@ -349,7 +349,7 @@ impl<'a> NodeBuilderImpl<'a> {
         members
     }
 
-    pub fn expand_interface_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn expand_interface_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("expand_interface_decl"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let name = symbol.name.clone();
         self.ctx.borrow_mut().approximate_length += 14 + name.len();
@@ -409,7 +409,7 @@ impl<'a> NodeBuilderImpl<'a> {
         ))
     }
 
-    pub fn hover_heritage_clauses(&mut self, declarations: &[Arc<Node>]) -> Vec<Arc<Node>> {
+    pub fn hover_heritage_clauses(&mut self, declarations: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("hover_heritage_clauses"); 
         let mut extends_types: Vec<Arc<Node>> = Vec::new();
         let mut implements_types: Vec<Arc<Node>> = Vec::new();
         for declaration in declarations {
@@ -443,7 +443,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         properties: &[Arc<Symbol>],
         elements: Vec<Arc<Node>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_properties_with_truncation"); 
         let properties: Vec<Arc<Symbol>> = properties
             .iter()
             .filter(|p| !p.flags.intersects(SymbolFlags::Prototype))
@@ -476,7 +476,7 @@ impl<'a> NodeBuilderImpl<'a> {
         static_base_type: Option<&Arc<Type>>,
         is_class: bool,
         symbol: &Arc<Symbol>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_constructors"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let is_non_constructable = !is_class
             && symbol.value_declaration.is_some()
@@ -568,7 +568,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         input: &Arc<Type>,
         base_type: Option<&Arc<Type>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_index_signatures_of_type"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let mut result: Vec<Arc<Node>> = Vec::new();
         for info in ch.get_index_infos_of_type(input) {
@@ -594,7 +594,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         resolved: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_namespace_member"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         if resolved.flags.intersects(SymbolFlags::TypeAlias) {
             return self.serialize_type_alias_for_namespace(resolved, name);
@@ -632,7 +632,7 @@ impl<'a> NodeBuilderImpl<'a> {
         ))
     }
 
-    pub fn expand_module_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> {
+    pub fn expand_module_decl(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("expand_module_decl"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let exports = ch.get_exports_of_symbol(symbol);
         let mut members: Vec<Arc<Symbol>> = Vec::new();
@@ -866,7 +866,7 @@ impl<'a> NodeBuilderImpl<'a> {
         &mut self,
         symbol: &Arc<Symbol>,
         name: &str,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("serialize_type_alias_for_namespace"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         let alias_type = ch.get_declared_type_of_type_alias(symbol);
         let type_params = ch
@@ -893,7 +893,7 @@ impl<'a> NodeBuilderImpl<'a> {
         t: &Arc<Type>,
         base_types: &[Arc<Type>],
         properties: Vec<Arc<Symbol>>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("filter_inherited_properties"); 
         let ch = unsafe { &mut *crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr() };
         if base_types.is_empty() {
             return properties;
@@ -935,7 +935,7 @@ impl<'a> NodeBuilderImpl<'a> {
             .collect()
     }
 
-    pub fn is_namespace_member(&mut self, p: &Arc<Symbol>) -> bool {
+    pub fn is_namespace_member(&mut self, p: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_namespace_member"); 
         p.flags.intersects(SymbolFlags::TYPE | SymbolFlags::NAMESPACE | SymbolFlags::Alias)
             || !((p.flags.intersects(SymbolFlags::Prototype))
                 || p.name == "prototype"

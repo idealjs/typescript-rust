@@ -4,7 +4,7 @@ use super::*;
 use tsox_frontend::ast::NodeData;
 
 
-pub(super) fn type_arguments_of(node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
+pub(super) fn type_arguments_of(node: &Arc<Node>) -> Option<Vec<Arc<Node>>> { ::tsox_core::fntrace::enter("type_arguments_of"); 
     let list = match &node.data {
         NodeData::CallExpression(d) => d.type_arguments.clone(),
         NodeData::NewExpression(d) => d.type_arguments.clone(),
@@ -18,7 +18,7 @@ pub(super) fn type_arguments_of(node: &Arc<Node>) -> Option<Vec<Arc<Node>>> {
     Some(list.iter().cloned().collect())
 }
 
-pub(super) fn callee_expression_of(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(super) fn callee_expression_of(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("callee_expression_of"); 
     match &node.data {
         NodeData::CallExpression(d) => Some(Arc::clone(&d.expression)),
         NodeData::NewExpression(d) => Some(Arc::clone(&d.expression)),
@@ -31,7 +31,7 @@ pub(super) fn callee_expression_of(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub(super) fn single_constraint(checker: &mut Checker, constraints: Vec<Arc<Type>>) -> Option<Arc<Type>> {
+pub(super) fn single_constraint(checker: &mut Checker, constraints: Vec<Arc<Type>>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("single_constraint"); 
     if constraints.is_empty() {
         return None;
     }
@@ -40,7 +40,7 @@ pub(super) fn single_constraint(checker: &mut Checker, constraints: Vec<Arc<Type
 
 pub(super) fn declaration_type_parameters(
     node: &Arc<Node>,
-) -> Option<Arc<tsox_frontend::ast::NodeList>> {
+) -> Option<Arc<tsox_frontend::ast::NodeList>> { ::tsox_core::fntrace::enter("declaration_type_parameters"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.type_parameters.clone(),
         NodeData::FunctionExpression(d) => d.type_parameters.clone(),
@@ -57,7 +57,7 @@ pub(super) fn declaration_type_parameters(
 pub(super) fn type_parameter_nodes_of_type_reference(
     checker: &mut Checker,
     type_ref: &Arc<Node>,
-) -> Vec<Arc<Node>> {
+) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("type_parameter_nodes_of_type_reference"); 
     let NodeData::TypeReferenceNode(d) = &type_ref.data else {
         return Vec::new();
     };
@@ -76,7 +76,7 @@ pub(super) fn type_parameter_nodes_of_type_reference(
 pub(super) fn constraint_type_of_type_parameter_node(
     checker: &mut Checker,
     tp: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("constraint_type_of_type_parameter_node"); 
     let NodeData::TypeParameterDeclaration(d) = &tp.data else {
         return None;
     };
@@ -87,7 +87,7 @@ pub(super) fn constraint_type_of_type_parameter_node(
 pub(super) fn type_argument_constraint(
     checker: &mut Checker,
     node: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("type_argument_constraint"); 
         let parent = node.parent()?;
         let args = type_arguments_of(&parent)?;
         let position = args.iter().position(|a| Arc::ptr_eq(a, node))?;

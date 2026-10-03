@@ -6,7 +6,7 @@ pub(crate) fn module_alias_target_state(
     spec: &Arc<Node>,
     export_decl: &Arc<Node>,
     visited: &mut Vec<usize>,
-) -> u8 {
+) -> u8 { ::tsox_core::fntrace::enter("module_alias_target_state"); 
     let tsox_frontend::ast::NodeData::ExportSpecifier(es) = &spec.data else {
         return 2;
     };
@@ -49,7 +49,7 @@ pub(crate) fn module_alias_target_state(
     2
 }
 
-pub(crate) fn statement_declares_name(stmt: &Arc<Node>, id_text: &str) -> bool {
+pub(crate) fn statement_declares_name(stmt: &Arc<Node>, id_text: &str) -> bool { ::tsox_core::fntrace::enter("statement_declares_name"); 
     let name: Option<&Arc<Node>> = match &stmt.data {
         tsox_frontend::ast::NodeData::FunctionDeclaration(f) => f.name.as_ref(),
         tsox_frontend::ast::NodeData::ClassDeclaration(c) => c.name.as_ref(),
@@ -75,7 +75,7 @@ pub(crate) fn statement_declares_name(stmt: &Arc<Node>, id_text: &str) -> bool {
     name.is_some_and(|n| n.kind == SyntaxKind::Identifier && n.text() == id_text)
 }
 
-pub(crate) fn binding_names_cover(decl: &Arc<Node>, id_text: &str) -> bool {
+pub(crate) fn binding_names_cover(decl: &Arc<Node>, id_text: &str) -> bool { ::tsox_core::fntrace::enter("binding_names_cover"); 
     let tsox_frontend::ast::NodeData::VariableDeclaration(d) = &decl.data else {
         return false;
     };

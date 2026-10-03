@@ -29,7 +29,7 @@ impl LanguageService {
         &self,
         _document_uri: &DocumentUri,
         _position: Position,
-    ) -> Vec<CallHierarchyDeclaration> {
+    ) -> Vec<CallHierarchyDeclaration> { ::tsox_core::fntrace::enter("prepare_call_hierarchy"); 
         Vec::new()
     }
 
@@ -37,7 +37,7 @@ impl LanguageService {
         &self,
         _document_uri: &DocumentUri,
         _position: Position,
-    ) -> Vec<CallHierarchyIncomingCall> {
+    ) -> Vec<CallHierarchyIncomingCall> { ::tsox_core::fntrace::enter("provide_call_hierarchy_incoming_calls"); 
         Vec::new()
     }
 
@@ -45,19 +45,19 @@ impl LanguageService {
         &self,
         _document_uri: &DocumentUri,
         _position: Position,
-    ) -> Vec<CallHierarchyOutgoingCall> {
+    ) -> Vec<CallHierarchyOutgoingCall> { ::tsox_core::fntrace::enter("provide_call_hierarchy_outgoing_calls"); 
         Vec::new()
     }
 }
 
-pub fn is_named_expression(_node: &Arc<Node>) -> bool {
+pub fn is_named_expression(_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_named_expression"); 
     false
 }
 
-pub fn is_variable_like(_node: &Arc<Node>) -> bool {
+pub fn is_variable_like(_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_variable_like"); 
     false
 }
 
-pub fn is_possible_call_hierarchy_declaration(_node: &Arc<Node>) -> bool {
+pub fn is_possible_call_hierarchy_declaration(_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_possible_call_hierarchy_declaration"); 
     false
 }

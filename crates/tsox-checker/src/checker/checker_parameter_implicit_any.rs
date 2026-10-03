@@ -8,7 +8,7 @@ impl Checker {
         node: &Arc<Node>,
         params: &NodeList,
         contextual_param_count: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_parameter_implicit_any"); 
         if !self.no_implicit_any {
             return;
         }
@@ -96,7 +96,7 @@ impl Checker {
     // Go getTypeForBindingElement → widenTypeForVariableLikeDeclaration(nil, elem, true)：
     // 根声明无类型来源（无初始化式/无注解/无上下文）时，模式内无初始化式的
     // 绑定元素逐个报 TS7031（嵌套模式递归到最内层标识符）
-    pub(crate) fn report_implicit_any_binding_elements(&mut self, pattern: &Arc<Node>) {
+    pub(crate) fn report_implicit_any_binding_elements(&mut self, pattern: &Arc<Node>) { ::tsox_core::fntrace::enter("report_implicit_any_binding_elements"); 
         let tsox_frontend::ast::NodeData::BindingPattern(bp) = &pattern.data else {
             return;
         };
@@ -128,7 +128,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn declaration_belongs_to_private_ambient_member(&self, decl: &Arc<Node>) -> bool {
+    pub(crate) fn declaration_belongs_to_private_ambient_member(&self, decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_belongs_to_private_ambient_member"); 
         let mut member = Arc::clone(decl);
         loop {
             match member.kind {
@@ -169,7 +169,7 @@ impl Checker {
         is_private && is_ambient
     }
 
-    fn parameter_name_resolves_as_type(&self, name: &Arc<Node>) -> bool {
+    fn parameter_name_resolves_as_type(&self, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("parameter_name_resolves_as_type"); 
         const TYPE_KEYWORD_NAMES: &[&str] = &[
             "any", "unknown", "never", "void", "undefined", "string", "number", "boolean",
             "bigint", "object", "symbol",
@@ -182,7 +182,7 @@ impl Checker {
             .is_some()
     }
 
-    pub(crate) fn param_has_typed_jsdoc_tag(&self, node: &Arc<Node>, param_name: &str) -> bool {
+    pub(crate) fn param_has_typed_jsdoc_tag(&self, node: &Arc<Node>, param_name: &str) -> bool { ::tsox_core::fntrace::enter("param_has_typed_jsdoc_tag"); 
         let Some(file) = &self.current_file else {
             return false;
         };
@@ -206,8 +206,8 @@ pub(crate) fn jsdoc_param_tag_of_function(
     file: &tsox_frontend::ast::SourceFile,
     func: &Arc<Node>,
     param_name: &str,
-) -> Option<Arc<Node>> {
-    fn tag_matching(jsdoc: &Arc<Node>, param_name: &str) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("jsdoc_param_tag_of_function"); 
+    fn tag_matching(jsdoc: &Arc<Node>, param_name: &str) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("tag_matching"); 
         let tsox_frontend::ast::NodeData::JSDoc(d) = &jsdoc.data else {
             return None;
         };

@@ -23,12 +23,12 @@ pub enum UsingKind {
     Async = 2,
 }
 
-pub fn is_using_variable_declaration_list(node: &Arc<Node>) -> bool {
+pub fn is_using_variable_declaration_list(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_using_variable_declaration_list"); 
     is_variable_declaration_list(node)
         && get_using_kind_of_variable_declaration_list(node) != UsingKind::None
 }
 
-pub fn get_using_kind_of_variable_declaration_list(node: &Arc<Node>) -> UsingKind {
+pub fn get_using_kind_of_variable_declaration_list(node: &Arc<Node>) -> UsingKind { ::tsox_core::fntrace::enter("get_using_kind_of_variable_declaration_list"); 
     let block_scoped = node.flags & NodeFlags::BlockScoped;
     if block_scoped == NodeFlags::AwaitUsing {
         UsingKind::Async
@@ -39,11 +39,11 @@ pub fn get_using_kind_of_variable_declaration_list(node: &Arc<Node>) -> UsingKin
     }
 }
 
-pub fn get_using_kind_of_variable_statement(node: &Arc<Node>) -> UsingKind {
+pub fn get_using_kind_of_variable_statement(node: &Arc<Node>) -> UsingKind { ::tsox_core::fntrace::enter("get_using_kind_of_variable_statement"); 
     get_using_kind_of_variable_declaration_list(&node.as_variable_statement().declaration_list)
 }
 
-pub fn get_using_kind(statement: &Arc<Node>) -> UsingKind {
+pub fn get_using_kind(statement: &Arc<Node>) -> UsingKind { ::tsox_core::fntrace::enter("get_using_kind"); 
     if is_variable_statement(statement) {
         return get_using_kind_of_variable_statement(statement);
     }
@@ -59,7 +59,7 @@ pub struct UsingDeclarationTransformer {
     pub(crate) export_equals_binding: Option<Arc<Node>>,
 }
 
-pub fn new_using_declaration_transformer(opts: &TransformOptions) -> UsingDeclarationTransformer {
+pub fn new_using_declaration_transformer(opts: &TransformOptions) -> UsingDeclarationTransformer { ::tsox_core::fntrace::enter("new_using_declaration_transformer"); 
     UsingDeclarationTransformer {
         emit_context: opts.context.clone(),
         export_bindings: None,
@@ -71,7 +71,7 @@ pub fn new_using_declaration_transformer(opts: &TransformOptions) -> UsingDeclar
 }
 
 
-pub fn get_using_kind_of_statements(statements: &[Arc<Node>]) -> UsingKind {
+pub fn get_using_kind_of_statements(statements: &[Arc<Node>]) -> UsingKind { ::tsox_core::fntrace::enter("get_using_kind_of_statements"); 
     let mut result = UsingKind::None;
     for statement in statements {
         let using_kind = get_using_kind(statement);
@@ -86,20 +86,20 @@ pub fn get_using_kind_of_statements(statements: &[Arc<Node>]) -> UsingKind {
 }
 
 impl UsingDeclarationTransformer {
-    pub(crate) fn factory(&self) -> NodeFactory<'_> {
+    pub(crate) fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
-    pub(crate) fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> Vec<Arc<Node>> {
+    pub(crate) fn visit_slice(&mut self, nodes: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("visit_slice"); 
         nodes.iter().map(|node| self.visit(node.clone())).collect()
     }
 
-    pub(crate) fn visit_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn visit_node(&mut self, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node"); 
         Some(self.visit(node))
     }
 }
 impl UsingDeclarationTransformer {
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !subtree_facts(&node).intersects(SubtreeFacts::CONTAINS_USING) {
             return node;
         }
@@ -114,7 +114,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_source_file(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_source_file"); 
         let sf = node.as_source_file_data();
         let using_kind = get_using_kind_of_statements(&sf.statements.nodes);
         let visited: Arc<Node> = if using_kind != UsingKind::None {
@@ -216,7 +216,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    fn visit_block(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_block(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_block"); 
         let data = node.as_block();
         let using_kind = get_using_kind_of_statements(&data.statements.nodes);
         if using_kind != UsingKind::None {
@@ -238,7 +238,7 @@ impl UsingDeclarationTransformer {
 
 }
 impl UsingDeclarationTransformer {
-    fn visit_for_statement(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_for_statement(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_for_statement"); 
         let data = node.as_for_statement();
         if let Some(initializer) = data.initializer.clone() {
             if is_using_variable_declaration_list(&initializer) {

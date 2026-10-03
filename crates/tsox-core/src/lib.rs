@@ -1,4 +1,5 @@
 pub mod collections;
+pub mod fntrace;
 pub mod core;
 pub mod debug;
 pub mod diagnostics;

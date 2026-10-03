@@ -2,7 +2,7 @@ use crate::checker::tracer::*;
 use std::time::Duration;
 
 #[test]
-fn tracer_basic() {
+fn tracer_basic() { ::tsox_core::fntrace::enter("tracer_basic"); 
     let tracer = Tracer::enabled();
     assert!(tracer.is_enabled());
 
@@ -18,7 +18,7 @@ fn tracer_basic() {
 }
 
 #[test]
-fn tracer_disabled() {
+fn tracer_disabled() { ::tsox_core::fntrace::enter("tracer_disabled"); 
     let tracer = Tracer::new();
     assert!(!tracer.is_enabled());
 
@@ -31,7 +31,7 @@ fn tracer_disabled() {
 }
 
 #[test]
-fn tracer_record_type() {
+fn tracer_record_type() { ::tsox_core::fntrace::enter("tracer_record_type"); 
     let tracer = Tracer::enabled();
     tracer.record_type(1, vec!["String".to_string()], "IntrinsicType");
     tracer.record_type(2, vec!["Number".to_string()], "IntrinsicType");

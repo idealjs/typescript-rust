@@ -62,7 +62,7 @@ pub struct ParserDiagnostic {
     pub range: TextRange,
 }
 
-pub fn script_kind_from_file_name(file_name: &str) -> ScriptKind {
+pub fn script_kind_from_file_name(file_name: &str) -> ScriptKind { ::tsox_core::fntrace::enter("script_kind_from_file_name"); 
     let ext = file_name.rfind('.').map(|i| &file_name[i..]).unwrap_or("");
     match ext {
         ".ts" | ".mts" | ".cts" => ScriptKind::Ts,

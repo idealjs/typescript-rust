@@ -17,7 +17,7 @@ use super::m4p_5::r36k12_defs::{
 use tsox_frontend::ast::mig::x6a::is_enum_const;
 
 impl TypeEraserTransformer {
-    pub(crate) fn visit_import_export_tail(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn visit_import_export_tail(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_import_export_tail"); 
         match node.kind {
             SyntaxKind::ImportEqualsDeclaration => {
                 if is_type_only(node) {
@@ -145,7 +145,7 @@ impl TypeEraserTransformer {
         }
     }
 
-    fn visit_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    fn visit_accessor_declaration(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_accessor_declaration"); 
         if node.body().map(|b| node_is_missing(Some(b))).unwrap_or(true)
             && node.has_syntactic_modifier(ModifierFlags::Abstract)
         {

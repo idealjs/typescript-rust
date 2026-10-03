@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         container: &Arc<Symbol>,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_alias_for_symbol_in_container"); 
         if let Some(parent) = self.get_parent_of_symbol(symbol) {
             if parent.id() == container.id() {
                 return Some(Arc::clone(symbol));
@@ -52,7 +52,7 @@ impl Checker {
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
         use_only_external_aliasing: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_accessible_symbol_chain"); 
         let ctx = AccessibleSymbolChainContext {
             symbol: Arc::clone(symbol),
             enclosing_declaration: enclosing_declaration.cloned(),
@@ -69,7 +69,7 @@ impl Checker {
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
         use_only_external_aliasing: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_accessible_symbol_chain_public"); 
         self.get_accessible_symbol_chain(
             symbol,
             enclosing_declaration,
@@ -81,7 +81,7 @@ impl Checker {
     pub(crate) fn get_accessible_symbol_chain_ex(
         &mut self,
         ctx: AccessibleSymbolChainContext,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_accessible_symbol_chain_ex"); 
         if is_property_or_method_declaration_symbol(&ctx.symbol) {
             return Vec::new();
         }
@@ -131,7 +131,7 @@ impl Checker {
         table_id: SymbolTableId,
         ignore_qualification: bool,
         is_local_name_lookup: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_accessible_symbol_chain_from_symbol_table"); 
         let sym_id = ctx.symbol.id();
         {
             let mut visited_map = ctx.visited_symbol_tables_map.borrow_mut();
@@ -159,7 +159,7 @@ impl Checker {
         &mut self,
         symbols: &SymbolTable,
         table_id: SymbolTableId,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_table_aliases"); 
         let kind = table_id & ST_KIND_MASK;
 
         if kind == ST_KIND_MEMBERS {
@@ -191,7 +191,7 @@ impl Checker {
         table_id: SymbolTableId,
         ignore_qualification: bool,
         is_local_name_lookup: bool,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_symbol_table"); 
         let is_globals = table_id == ST_KIND_GLOBALS;
 
         if let Some(res) = symbols.get(&ctx.symbol.name) {
@@ -273,7 +273,7 @@ impl Checker {
         &self,
         a: &[Arc<Symbol>],
         b: &[Arc<Symbol>],
-    ) -> std::cmp::Ordering {
+    ) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_symbol_chains"); 
         let chain_len = a.len().cmp(&b.len());
         if chain_len != std::cmp::Ordering::Equal {
             return chain_len;

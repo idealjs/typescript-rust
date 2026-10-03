@@ -4,7 +4,7 @@ use std::sync::Arc;
 pub(super) fn symbols_for_statements(
     statements: &[Arc<tsox_frontend::ast::Node>],
     sf: &Arc<tsox_frontend::ast::SourceFile>,
-) -> Vec<Value> {
+) -> Vec<Value> { ::tsox_core::fntrace::enter("symbols_for_statements"); 
     use tsox_frontend::ast::NodeData;
     use tsox_frontend::ast::SyntaxKind;
     let mut result = Vec::new();
@@ -34,7 +34,7 @@ pub(super) fn symbols_for_statements(
 fn document_symbol_for_node(
     node: &Arc<tsox_frontend::ast::Node>,
     sf: &Arc<tsox_frontend::ast::SourceFile>,
-) -> Option<Value> {
+) -> Option<Value> { ::tsox_core::fntrace::enter("document_symbol_for_node"); 
     let name_node = node.name()?;
     let name = identifier_text(name_node)?;
     let kind = symbol_kind_for(node);
@@ -73,7 +73,7 @@ fn document_symbol_for_node(
     Some(sym)
 }
 
-fn identifier_text(node: &Arc<tsox_frontend::ast::Node>) -> Option<String> {
+fn identifier_text(node: &Arc<tsox_frontend::ast::Node>) -> Option<String> { ::tsox_core::fntrace::enter("identifier_text"); 
     use tsox_frontend::ast::NodeData;
     match &node.data {
         NodeData::Identifier(data) => Some(data.text.clone()),
@@ -83,7 +83,7 @@ fn identifier_text(node: &Arc<tsox_frontend::ast::Node>) -> Option<String> {
     }
 }
 
-fn symbol_kind_for(node: &Arc<tsox_frontend::ast::Node>) -> i32 {
+fn symbol_kind_for(node: &Arc<tsox_frontend::ast::Node>) -> i32 { ::tsox_core::fntrace::enter("symbol_kind_for"); 
     use tsox_frontend::ast::NodeFlags;
     use tsox_frontend::ast::SyntaxKind as K;
     match node.kind {
@@ -112,7 +112,7 @@ fn symbol_kind_for(node: &Arc<tsox_frontend::ast::Node>) -> i32 {
 fn child_symbols(
     node: &Arc<tsox_frontend::ast::Node>,
     sf: &Arc<tsox_frontend::ast::SourceFile>,
-) -> Vec<Value> {
+) -> Vec<Value> { ::tsox_core::fntrace::enter("child_symbols"); 
     use tsox_frontend::ast::NodeData;
     match &node.data {
         NodeData::ClassDeclaration(d) => d

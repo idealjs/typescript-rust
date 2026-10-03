@@ -3,7 +3,7 @@
 use crate::checker::checker_assertions_interfaces::*;
 
 impl Checker {
-    pub(crate) fn check_class_function_merge(&mut self, statements: &[Arc<Node>]) {
+    pub(crate) fn check_class_function_merge(&mut self, statements: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_class_function_merge"); 
         let mut groups: std::collections::BTreeMap<String, Vec<Arc<Node>>> =
             std::collections::BTreeMap::new();
         for s in statements {
@@ -69,7 +69,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_function_overloads_recursive(&mut self, statements: &[Arc<Node>]) {
+    pub(crate) fn check_function_overloads_recursive(&mut self, statements: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_function_overloads_recursive"); 
         if self
             .current_file
             .as_ref()
@@ -109,7 +109,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn check_statement_function_overloads(&mut self, statements: &[Arc<Node>]) {
+    pub(crate) fn check_statement_function_overloads(&mut self, statements: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_statement_function_overloads"); 
         let ambient_context = self.ambient_context_depth > 0
             || self
                 .current_file

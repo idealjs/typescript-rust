@@ -3,7 +3,7 @@
 use crate::binder::bind_walk::*;
 
 impl Binder {
-    pub(crate) fn bind_statement_kinds(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn bind_statement_kinds(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("bind_statement_kinds"); 
         match node.kind {
             SyntaxKind::IfStatement => {
                 self.bind_if_statement(node);
@@ -305,7 +305,7 @@ impl Binder {
 }
 
 impl Binder {
-    fn strict_eval_diag_exists(&self, loc: tsox_core::core::text::TextRange, text: String) -> bool {
+    fn strict_eval_diag_exists(&self, loc: tsox_core::core::text::TextRange, text: String) -> bool { ::tsox_core::fntrace::enter("strict_eval_diag_exists"); 
         self.symbol_map
             .binder_diagnostics
             .iter()

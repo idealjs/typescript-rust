@@ -14,7 +14,7 @@ pub enum ModuleInstanceState {
     ConstEnumOnly,
 }
 
-pub fn get_module_instance_state(node: &Arc<Node>) -> ModuleInstanceState {
+pub fn get_module_instance_state(node: &Arc<Node>) -> ModuleInstanceState { ::tsox_core::fntrace::enter("get_module_instance_state"); 
     if let NodeData::ModuleDeclaration(md) = &node.data {
         if let Some(body) = &md.body {
             let mut visited = HashMap::new();
@@ -24,7 +24,7 @@ pub fn get_module_instance_state(node: &Arc<Node>) -> ModuleInstanceState {
     ModuleInstanceState::Instantiated
 }
 
-pub fn is_instantiated_module(node: &Arc<Node>, preserve_const_enums: bool) -> bool {
+pub fn is_instantiated_module(node: &Arc<Node>, preserve_const_enums: bool) -> bool { ::tsox_core::fntrace::enter("is_instantiated_module"); 
     let state = get_module_instance_state(node);
     state == ModuleInstanceState::Instantiated
         || (preserve_const_enums && state == ModuleInstanceState::ConstEnumOnly)
@@ -33,7 +33,7 @@ pub fn is_instantiated_module(node: &Arc<Node>, preserve_const_enums: bool) -> b
 fn get_module_instance_state_cached(
     node: &Arc<Node>,
     visited: &mut HashMap<u64, ModuleInstanceState>,
-) -> ModuleInstanceState {
+) -> ModuleInstanceState { ::tsox_core::fntrace::enter("get_module_instance_state_cached"); 
     let node_id = node.id();
     if let Some(cached) = visited.get(&node_id) {
         return if *cached != ModuleInstanceState::Unknown {
@@ -51,7 +51,7 @@ fn get_module_instance_state_cached(
 fn get_module_instance_state_worker(
     node: &Arc<Node>,
     visited: &mut HashMap<u64, ModuleInstanceState>,
-) -> ModuleInstanceState {
+) -> ModuleInstanceState { ::tsox_core::fntrace::enter("get_module_instance_state_worker"); 
     match node.kind {
         SyntaxKind::InterfaceDeclaration | SyntaxKind::TypeAliasDeclaration
         | SyntaxKind::JSTypeAliasDeclaration => return ModuleInstanceState::NonInstantiated,
@@ -120,7 +120,7 @@ fn get_module_instance_state_worker(
 fn get_module_instance_state_for_alias_target(
     node: &Arc<Node>,
     visited: &mut HashMap<u64, ModuleInstanceState>,
-) -> ModuleInstanceState {
+) -> ModuleInstanceState { ::tsox_core::fntrace::enter("get_module_instance_state_for_alias_target"); 
     let name = if let NodeData::ExportSpecifier(spec) = &node.data {
         spec.property_name.as_ref().unwrap_or(&spec.name)
     } else {
@@ -165,7 +165,7 @@ fn get_module_instance_state_for_alias_target(
     ModuleInstanceState::Instantiated
 }
 
-fn node_has_name(statement: &Arc<Node>, id: &Arc<Node>) -> bool {
+fn node_has_name(statement: &Arc<Node>, id: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_has_name"); 
     if let Some(name) = statement.name() {
         return is_identifier(name) && name.text() == id.text();
     }

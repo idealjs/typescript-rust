@@ -2,7 +2,7 @@ use crate::core::compiler_options::*;
 use crate::core::tristate::Tristate;
 
 #[test]
-fn default_options() {
+fn default_options() { crate::fntrace::enter("default_options"); 
     let opts = CompilerOptions::default();
     assert_eq!(opts.get_emit_script_target(), ScriptTarget::LATEST_STANDARD);
     assert_eq!(opts.get_emit_module_kind(), ModuleKind::ES2022);
@@ -13,14 +13,14 @@ fn default_options() {
 }
 
 #[test]
-fn commonjs_target() {
+fn commonjs_target() { crate::fntrace::enter("commonjs_target"); 
     let mut opts = CompilerOptions::default();
     opts.target = ScriptTarget::ES5;
     assert_eq!(opts.get_emit_module_kind(), ModuleKind::CommonJS);
 }
 
 #[test]
-fn node_next_resolution() {
+fn node_next_resolution() { crate::fntrace::enter("node_next_resolution"); 
     let mut opts = CompilerOptions::default();
     opts.module = ModuleKind::NodeNext;
     assert_eq!(
@@ -30,7 +30,7 @@ fn node_next_resolution() {
 }
 
 #[test]
-fn get_allow_js() {
+fn get_allow_js() { crate::fntrace::enter("get_allow_js"); 
     let mut opts = CompilerOptions::default();
     assert!(!opts.get_allow_js());
     opts.allow_js = Tristate::True;
@@ -41,7 +41,7 @@ fn get_allow_js() {
 }
 
 #[test]
-fn strict_option_value() {
+fn strict_option_value() { crate::fntrace::enter("strict_option_value"); 
     let mut opts = CompilerOptions::default();
 
     assert!(opts.get_strict_option_value(Tristate::Unknown));

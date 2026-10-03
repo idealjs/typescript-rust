@@ -16,7 +16,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         file: &Arc<SourceFile>,
         file_range: TextRange,
-    ) -> (crate::lsp::lsproto_lsp::Location, crate::ls::mig::m5s::SpanFidelity) {
+    ) -> (crate::lsp::lsproto_lsp::Location, crate::ls::mig::m5s::SpanFidelity) { ::tsox_core::fntrace::enter("source_file_range_to_lsp_location"); 
         if !source_file_content_mapper(file).is_empty() {
             let script_view = crate::mig::m5u_conv::SourceFileScriptView { file: Arc::clone(file) };
             let (range, fidelity) = m5w4_m5u_converters().to_lsp_range_for_feature(
@@ -47,7 +47,7 @@ impl crate::ls::language_service::LanguageService {
         file: &Arc<SourceFile>,
         file_range: TextRange,
         feature: crate::ls::mig::m5s::SpanFeature,
-    ) -> (crate::lsp::lsproto_lsp::Location, crate::ls::mig::m5s::SpanFidelity) {
+    ) -> (crate::lsp::lsproto_lsp::Location, crate::ls::mig::m5s::SpanFidelity) { ::tsox_core::fntrace::enter("source_file_range_to_lsp_location_for_feature"); 
         if !source_file_content_mapper(file).is_empty() {
             let script_view = crate::mig::m5u_conv::SourceFileScriptView { file: Arc::clone(file) };
             let (range, fidelity) = m5w4_m5u_converters().to_lsp_range_for_feature(
@@ -77,7 +77,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         file_name: &str,
         position: TextPos,
-    ) -> Option<DocumentPosition> {
+    ) -> Option<DocumentPosition> { ::tsox_core::fntrace::enter("m5w_try_get_generated_position"); 
         let new_pos = self.m5w_try_get_generated_position_worker(file_name, position)?;
         if self.read_file(&new_pos.file_name).is_none() {
             return None;
@@ -89,7 +89,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         file_name: &str,
         position: TextPos,
-    ) -> Option<DocumentPosition> {
+    ) -> Option<DocumentPosition> { ::tsox_core::fntrace::enter("m5w_try_get_generated_position_worker"); 
         if tsox_core::tspath::is_declaration_file_name(file_name) {
             return None;
         }
@@ -132,7 +132,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         file_name: &str,
         position: TextPos,
-    ) -> Option<DocumentPosition> {
+    ) -> Option<DocumentPosition> { ::tsox_core::fntrace::enter("try_get_source_position_worker"); 
         if !tsox_core::tspath::is_declaration_file_name(file_name) {
             return None;
         }
@@ -158,7 +158,7 @@ impl crate::ls::language_service::LanguageService {
     pub fn m5w_get_script(
         &self,
         file_name: &str,
-    ) -> Option<crate::mig::m5u_conv::OriginalTextScript> {
+    ) -> Option<crate::mig::m5u_conv::OriginalTextScript> { ::tsox_core::fntrace::enter("m5w_get_script"); 
         let text = self.read_file(file_name)?;
         Some(crate::mig::m5u_conv::original_text_script(
             file_name.to_string(),
@@ -167,20 +167,20 @@ impl crate::ls::language_service::LanguageService {
     }
 }
 
-pub fn source_file_content_mapper(file: &Arc<SourceFile>) -> String {
+pub fn source_file_content_mapper(file: &Arc<SourceFile>) -> String { ::tsox_core::fntrace::enter("source_file_content_mapper"); 
     tsox_compile::mig::m3l_cm_2::content_mapper_source_file_info(&file.file_name)
         .map(|info| info.content_mapper)
         .unwrap_or_default()
 }
 
-fn m5w4_m5u_converters() -> crate::mig::m5u_conv::M5uConverters {
+fn m5w4_m5u_converters() -> crate::mig::m5u_conv::M5uConverters { ::tsox_core::fntrace::enter("m5w4_m5u_converters"); 
     crate::mig::m5u_conv::new_converters(
         crate::ls::lsconv_converters::PositionEncodingKind::Utf16,
         Box::new(crate::ls::lsconv_linemap::compute_lsp_line_starts),
     )
 }
 
-fn m5w4_span_feature(feature: crate::ls::mig::m5s::SpanFeature) -> crate::mig::m5u_conv::SpanMapFeature {
+fn m5w4_span_feature(feature: crate::ls::mig::m5s::SpanFeature) -> crate::mig::m5u_conv::SpanMapFeature { ::tsox_core::fntrace::enter("m5w4_span_feature"); 
     use crate::ls::mig::m5s::SpanFeature as F;
     match feature {
         F::Definition => crate::mig::m6b_2::FEATURE_DEFINITION as u32,
@@ -191,7 +191,7 @@ fn m5w4_span_feature(feature: crate::ls::mig::m5s::SpanFeature) -> crate::mig::m
     }
 }
 
-fn m5w4_span_fidelity(fidelity: crate::mig::m5u_conv::SpanMapFidelity) -> crate::ls::mig::m5s::SpanFidelity {
+fn m5w4_span_fidelity(fidelity: crate::mig::m5u_conv::SpanMapFidelity) -> crate::ls::mig::m5s::SpanFidelity { ::tsox_core::fntrace::enter("m5w4_span_fidelity"); 
     use crate::ls::mig::m5s::SpanFidelity as F;
     use crate::mig::m5u_conv::SPANMAP_FIDELITY_EXACT;
     use crate::mig::m5u_conv::SPANMAP_FIDELITY_SINGLE_SEGMENT;
@@ -207,10 +207,10 @@ fn m5w4_span_fidelity(fidelity: crate::mig::m5u_conv::SpanMapFidelity) -> crate:
 struct M6bHostAdapter<'a>(&'a dyn crate::ls::host::Host);
 
 impl crate::mig::m6b::Host for M6bHostAdapter<'_> {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.0.use_case_sensitive_file_names()
     }
-    fn get_ecma_line_info(&self, file_name: &str) -> Option<crate::mig::m6b::EcmaLineInfo> {
+    fn get_ecma_line_info(&self, file_name: &str) -> Option<crate::mig::m6b::EcmaLineInfo> { ::tsox_core::fntrace::enter("get_ecma_line_info"); 
         let text = self.0.read_file(file_name)?;
         let line_map = crate::ls::lsconv_linemap::compute_lsp_line_starts(&text);
         Some(crate::mig::m6b::create_ecma_line_info(
@@ -218,7 +218,7 @@ impl crate::mig::m6b::Host for M6bHostAdapter<'_> {
             line_map.line_starts.into_iter().map(|p| p as i32).collect(),
         ))
     }
-    fn read_file(&self, file_name: &str) -> Option<String> {
+    fn read_file(&self, file_name: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         self.0.read_file(file_name)
     }
 }
@@ -226,7 +226,7 @@ impl crate::mig::m6b::Host for M6bHostAdapter<'_> {
 pub fn get_output_declaration_file_name_worker(
     input_file_name: &str,
     options: &CompilerOptions,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_output_declaration_file_name_worker"); 
     let dir = if options.declaration_dir.is_empty() {
         &options.out_dir
     } else {
@@ -248,7 +248,7 @@ pub fn get_output_declaration_file_name_worker(
     change_to_declaration_extension(&output)
 }
 
-fn change_to_declaration_extension(file_name: &str) -> String {
+fn change_to_declaration_extension(file_name: &str) -> String { ::tsox_core::fntrace::enter("change_to_declaration_extension"); 
     use tsox_core::tspath as tsp;
     if tsp::file_extension_is_one_of(
         file_name,

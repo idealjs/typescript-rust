@@ -11,7 +11,7 @@ pub struct DeclarationMapSource {
     pub line_map: Vec<TextPos>,
 }
 
-pub fn new_declaration_map_source(source_file: &Arc<SourceFile>) -> DeclarationMapSource {
+pub fn new_declaration_map_source(source_file: &Arc<SourceFile>) -> DeclarationMapSource { ::tsox_core::fntrace::enter("new_declaration_map_source"); 
     use tsox_frontend::ast::mig::m3b_2;
     let text = m3b_2::original_text(source_file);
     DeclarationMapSource {
@@ -22,15 +22,15 @@ pub fn new_declaration_map_source(source_file: &Arc<SourceFile>) -> DeclarationM
 }
 
 impl DeclarationMapSource {
-    pub fn file_name(&self) -> &str {
+    pub fn file_name(&self) -> &str { ::tsox_core::fntrace::enter("file_name"); 
         &self.file_name
     }
 
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         &self.text
     }
 
-    pub fn ecma_line_map(&self) -> &[TextPos] {
+    pub fn ecma_line_map(&self) -> &[TextPos] { ::tsox_core::fntrace::enter("ecma_line_map"); 
         &self.line_map
     }
 }
@@ -52,7 +52,7 @@ pub struct WriteFileData {
 }
 
 impl Emitter {
-    pub fn emit(&mut self) {
+    pub fn emit(&mut self) { ::tsox_core::fntrace::enter("emit"); 
         let Some(source_file) = self.source_file.clone() else {
             return;
         };
@@ -77,7 +77,7 @@ impl Emitter {
         self.emit_result.diagnostics = self.take_emitter_diagnostics_formatted();
     }
 
-    fn take_emitter_diagnostics_formatted(&mut self) -> Vec<String> {
+    fn take_emitter_diagnostics_formatted(&mut self) -> Vec<String> { ::tsox_core::fntrace::enter("take_emitter_diagnostics_formatted"); 
         self.emitter_diagnostics
             .get_all()
             .iter()

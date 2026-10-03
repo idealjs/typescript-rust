@@ -43,7 +43,7 @@ pub struct NodeVisitorHooks {
 }
 
 impl Default for NodeVisitorHooks {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         NodeVisitorHooks { visit_nodes: None, visit_modifiers: None }
     }
 }
@@ -58,26 +58,26 @@ impl NodeVisitor {
         callback: impl Fn(&Arc<Node>) -> Arc<Node> + 'static,
         _factory: &NodeFactory,
         hooks: NodeVisitorHooks,
-    ) -> NodeVisitor {
+    ) -> NodeVisitor { ::tsox_core::fntrace::enter("new"); 
         NodeVisitor { callback: Box::new(callback), hooks }
     }
 
-    pub fn visit_node(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_node(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_node"); 
         (self.callback)(node)
     }
 
-    pub fn visit_each_child_node(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn visit_each_child_node(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child_node"); 
         (self.callback)(node)
     }
 
-    pub fn visit_nodes(&self, nodes: &Arc<NodeList>) -> Arc<NodeList> {
+    pub fn visit_nodes(&self, nodes: &Arc<NodeList>) -> Arc<NodeList> { ::tsox_core::fntrace::enter("visit_nodes"); 
         if let Some(hook) = &self.hooks.visit_nodes {
             return hook(Some(nodes), self).unwrap_or_else(|| nodes.clone());
         }
         nodes.clone()
     }
 
-    pub fn visit_modifiers(&self, nodes: &Arc<ModifierList>) -> Arc<ModifierList> {
+    pub fn visit_modifiers(&self, nodes: &Arc<ModifierList>) -> Arc<ModifierList> { ::tsox_core::fntrace::enter("visit_modifiers"); 
         if let Some(hook) = &self.hooks.visit_modifiers {
             return hook(Some(nodes), self).unwrap_or_else(|| nodes.clone());
         }
@@ -85,14 +85,14 @@ impl NodeVisitor {
     }
 }
 
-pub fn visit(v: &mut dyn FnMut(&Node) -> bool, node: Option<&Node>) -> bool {
+pub fn visit(v: &mut dyn FnMut(&Node) -> bool, node: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("visit"); 
     if let Some(node) = node {
         return v(node);
     }
     false
 }
 
-pub fn visit_nodes(v: &mut dyn FnMut(&Node) -> bool, nodes: &[Arc<Node>]) -> bool {
+pub fn visit_nodes(v: &mut dyn FnMut(&Node) -> bool, nodes: &[Arc<Node>]) -> bool { ::tsox_core::fntrace::enter("visit_nodes"); 
     for node in nodes {
         if v(node) {
             return true;
@@ -101,21 +101,21 @@ pub fn visit_nodes(v: &mut dyn FnMut(&Node) -> bool, nodes: &[Arc<Node>]) -> boo
     false
 }
 
-pub fn visit_node_list(v: &mut dyn FnMut(&Node) -> bool, node_list: Option<&NodeList>) -> bool {
+pub fn visit_node_list(v: &mut dyn FnMut(&Node) -> bool, node_list: Option<&NodeList>) -> bool { ::tsox_core::fntrace::enter("visit_node_list"); 
     if let Some(node_list) = node_list {
         return visit_nodes(v, &node_list.nodes);
     }
     false
 }
 
-pub fn visit_modifiers(v: &mut dyn FnMut(&Node) -> bool, modifiers: Option<&ModifierList>) -> bool {
+pub fn visit_modifiers(v: &mut dyn FnMut(&Node) -> bool, modifiers: Option<&ModifierList>) -> bool { ::tsox_core::fntrace::enter("visit_modifiers"); 
     if let Some(modifiers) = modifiers {
         return visit_nodes(v, &modifiers.nodes);
     }
     false
 }
 
-pub fn new_node(kind: SyntaxKind, data: NodeData, hooks: &NodeFactoryHooks) -> Node {
+pub fn new_node(kind: SyntaxKind, data: NodeData, hooks: &NodeFactoryHooks) -> Node { ::tsox_core::fntrace::enter("new_node"); 
     let mut n = Node::new(kind, data);
     n.loc = TextRange::undefined();
     if let Some(on_create) = &hooks.on_create {
@@ -125,7 +125,7 @@ pub fn new_node(kind: SyntaxKind, data: NodeData, hooks: &NodeFactoryHooks) -> N
 }
 
 impl NodeFactory {
-    pub fn new_node(&mut self, kind: SyntaxKind, data: NodeData) -> Node {
+    pub fn new_node(&mut self, kind: SyntaxKind, data: NodeData) -> Node { ::tsox_core::fntrace::enter("new_node"); 
         self.node_count += 1;
         new_node(kind, data, &self.hooks)
     }
@@ -135,7 +135,7 @@ pub fn update_node<'a>(
     updated: &'a mut Node,
     original: &Node,
     hooks: &NodeFactoryHooks,
-) -> &'a mut Node {
+) -> &'a mut Node { ::tsox_core::fntrace::enter("update_node"); 
     if !std::ptr::eq(updated as *const Node, original as *const Node) {
         updated.flags = original.flags;
         updated.loc = original.loc;
@@ -152,7 +152,7 @@ pub enum AccessKind {
     ReadWrite,
 }
 
-pub fn reverse_access_kind(a: AccessKind) -> AccessKind {
+pub fn reverse_access_kind(a: AccessKind) -> AccessKind { ::tsox_core::fntrace::enter("reverse_access_kind"); 
     match a {
         AccessKind::Read => AccessKind::Write,
         AccessKind::Write => AccessKind::Read,
@@ -160,7 +160,7 @@ pub fn reverse_access_kind(a: AccessKind) -> AccessKind {
     }
 }
 
-pub fn declaration_is_write_access(decl: Option<&Node>) -> bool {
+pub fn declaration_is_write_access(decl: Option<&Node>) -> bool { ::tsox_core::fntrace::enter("declaration_is_write_access"); 
     let Some(decl) = decl else {
         return false;
     };

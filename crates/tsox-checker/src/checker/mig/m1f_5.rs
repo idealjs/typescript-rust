@@ -60,7 +60,7 @@ impl Checker {
         module_reference: &str,
         ts_extension: &str,
         mode: ResolutionMode,
-    ) -> String {
+    ) -> String { ::tsox_core::fntrace::enter("get_suggested_import_source"); 
         let import_source_without_extension = remove_extension(module_reference, ts_extension);
         if self.module_kind.is_non_node_esm() || mode == ResolutionMode::ESNext {
             let prefer_ts = is_declaration_file_name(module_reference)
@@ -75,7 +75,7 @@ impl Checker {
         import_source_without_extension
     }
 
-    pub fn get_this_argument_of_call(&self, node: &Node) -> Option<Arc<Node>> {
+    pub fn get_this_argument_of_call(&self, node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_this_argument_of_call"); 
         if node.kind == SyntaxKind::BinaryExpression {
             return Some(node.as_binary_expression().right.clone());
         }
@@ -92,7 +92,7 @@ impl Checker {
         None
     }
 
-    pub fn get_this_type(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn get_this_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_this_type"); 
         let container = get_this_container(node, false, false);
         let parent = container.parent_rc();
         if parent.kind == SyntaxKind::ClassDeclaration
@@ -126,7 +126,7 @@ impl Checker {
         self.error_type()
     }
 
-    pub fn get_this_type_argument(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub fn get_this_type_argument(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_this_type_argument"); 
         if t.object_flags.intersects(ObjectFlags::Reference) {
             let target = t.target()?;
             if let Some(global_this) = self.get_or_init_global_this_type() {
@@ -138,7 +138,7 @@ impl Checker {
         None
     }
 
-    pub fn get_this_type_from_contextual_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_this_type_from_contextual_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_this_type_from_contextual_type"); 
         r25k6_defs::map_type_with_checker(self, t, &mut |c, t| {
             if t.flags.intersects(TypeFlags::Intersection) {
                 for ct in t.types()? {
@@ -158,7 +158,7 @@ impl Checker {
         &mut self,
         containing_literal: &Arc<Node>,
         contextual_type: Option<&Arc<Type>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_this_type_of_object_literal_from_contextual_type"); 
         let mut literal = Arc::clone(containing_literal);
         let mut t = contextual_type.cloned();
         while let Some(current) = t {
@@ -176,7 +176,7 @@ impl Checker {
         None
     }
 
-    pub fn get_tuple_base_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_tuple_base_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_tuple_base_type"); 
         let (type_parameters, element_infos, readonly) = match &t.data {
             TypeData::Tuple(d) => {
                 let iface = &d.interface_data;
@@ -211,7 +211,7 @@ impl Checker {
         t: &Arc<Type>,
         index: Number,
         undefined_like_type: Option<&Arc<Type>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_tuple_element_type_out_of_start_count"); 
         r25k6_defs::map_type_with_checker(self, t, &mut |c, t| {
             let rest_type = c.get_rest_type_of_tuple_type(t);
             if let Some(undefined_like_type) = undefined_like_type {
@@ -232,7 +232,7 @@ impl Checker {
         &mut self,
         element_infos: &[TupleElementInfo],
         readonly: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_tuple_target_type"); 
         if element_infos.len() == 1 && element_infos[0].flags.intersects(ElementFlags::Rest) {
             if readonly {
                 return self.global_readonly_array_type();
@@ -253,7 +253,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         type_arguments: &[Arc<Type>],
         alias: Option<&Arc<TypeAlias>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_alias_instantiation"); 
         let t = self.get_declared_type_of_symbol(symbol);
         if t.id == self.intrinsic_marker_type().id {
             if let Some(type_kind) = intrinsic_type_kinds(&symbol.name) {
@@ -305,7 +305,7 @@ impl Checker {
         signatures: &[Arc<Signature>],
         type_arguments: &[Arc<Node>],
         head_message: Option<&'static Message>,
-    ) -> Diagnostic {
+    ) -> Diagnostic { ::tsox_core::fntrace::enter("get_type_argument_arity_error"); 
         let arg_count = type_arguments.len();
         let source_file = self.get_source_file_of_node(node).expect("source file of node");
         let type_argument_list = type_argument_list(node).expect("type argument list");
@@ -372,7 +372,7 @@ impl Checker {
         }
     }
 
-    pub fn get_symbol_of_node(&mut self, node: &Node) -> Option<Arc<Symbol>> {
+    pub fn get_symbol_of_node(&mut self, node: &Node) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_of_node"); 
         get_symbol_of_node_impl(self, node)
     }
 }
@@ -383,7 +383,7 @@ pub(crate) fn get_relation_key(
     intersection_state: IntersectionState,
     is_identity: bool,
     ignore_constraints: bool,
-) -> (CacheHashKey, bool) {
+) -> (CacheHashKey, bool) { ::tsox_core::fntrace::enter("get_relation_key"); 
     let (source, target) = if is_identity && source.id > target.id {
         (target, source)
     } else {
@@ -408,7 +408,7 @@ pub(crate) fn get_relation_key(
 pub(crate) fn get_type_alias_instantiation_key(
     type_arguments: &[Arc<Type>],
     alias: Option<&Arc<TypeAlias>>,
-) -> CacheHashKey {
+) -> CacheHashKey { ::tsox_core::fntrace::enter("get_type_alias_instantiation_key"); 
     get_type_instantiation_key(
         type_arguments,
         alias.map(|a| a.as_ref()),

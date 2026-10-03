@@ -12,7 +12,7 @@ impl Checker {
     pub(crate) fn check_in_expression(
         &mut self,
         data: &tsox_frontend::ast::node_data_generated::BinaryExpressionData,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_in_expression"); 
         let left_type = self.get_type_of_node(&data.left);
         let right_type = self.get_type_of_node(&data.right);
         let silent = self.silent_never_type();
@@ -55,8 +55,8 @@ impl Checker {
         }
     }
 
-    fn has_empty_object_intersection(&self, t: &Arc<Type>) -> bool {
-        fn matches(t: &Arc<Type>, s: &Checker) -> bool {
+    fn has_empty_object_intersection(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_empty_object_intersection"); 
+        fn matches(t: &Arc<Type>, s: &Checker) -> bool { ::tsox_core::fntrace::enter("matches"); 
             (t.symbol.is_none() && s.is_empty_anonymous_object_type(t))
                 || (t.flags.contains(TypeFlags::Intersection)
                     && s.is_empty_anonymous_object_type(&s.get_base_constraint_or_type(t)))

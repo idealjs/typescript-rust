@@ -11,7 +11,7 @@ use crate::ast::node_data_generated::NodeData;
 use crate::ast::syntax_kind_generated::SyntaxKind;
 use crate::ast::utilities::*;
 
-pub fn get_module_specifier_of_bare_or_accessed_require(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_module_specifier_of_bare_or_accessed_require(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_module_specifier_of_bare_or_accessed_require"); 
     if is_variable_declaration_initialized_with_require_helper(node, false) {
         let NodeData::VariableDeclaration(d) = &node.data else {
             return None;
@@ -38,7 +38,7 @@ pub fn get_module_specifier_of_bare_or_accessed_require(node: &Arc<Node>) -> Opt
     None
 }
 
-pub fn get_next_jsdoc_comment_location(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_next_jsdoc_comment_location(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_next_jsdoc_comment_location"); 
     if let Some(parent) = node.parent() {
         match parent.kind {
             SyntaxKind::PropertyAssignment
@@ -64,7 +64,7 @@ pub fn get_next_jsdoc_comment_location(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub fn get_type_annotation_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_type_annotation_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_annotation_node"); 
     match node.kind {
         SyntaxKind::VariableDeclaration
         | SyntaxKind::Parameter
@@ -92,7 +92,7 @@ pub fn get_type_annotation_node(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-fn function_like_type_node(node: &Node) -> Option<&Arc<Node>> {
+fn function_like_type_node(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("function_like_type_node"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.type_node.as_ref(),
         NodeData::ConstructorDeclaration(d) => d.type_node.as_ref(),

@@ -53,16 +53,16 @@ impl ReactNames {
     pub const FRAGMENT: &'static str = "Fragment";
 }
 
-pub fn is_intrinsic_jsx_name(name: &str) -> bool {
+pub fn is_intrinsic_jsx_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_intrinsic_jsx_name"); 
     !name.is_empty() && (name.as_bytes()[0].is_ascii_lowercase() || name.contains('-'))
 }
 
-pub fn is_jsx_intrinsic_tag_name(tag_name: &Arc<Node>) -> bool {
+pub fn is_jsx_intrinsic_tag_name(tag_name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_intrinsic_tag_name"); 
     (is_identifier(tag_name) && is_intrinsic_jsx_name(tag_name.text()))
         || is_jsx_namespaced_name(tag_name)
 }
 
-pub fn jsx_tag_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn jsx_tag_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("jsx_tag_name"); 
     match &node.data {
         NodeData::JsxOpeningElement(data) => Some(Arc::clone(&data.tag_name)),
         NodeData::JsxSelfClosingElement(data) => Some(Arc::clone(&data.tag_name)),
@@ -71,7 +71,7 @@ pub fn jsx_tag_name(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn jsx_attributes(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn jsx_attributes(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("jsx_attributes"); 
     match &node.data {
         NodeData::JsxOpeningElement(data) => Some(Arc::clone(&data.attributes)),
         NodeData::JsxSelfClosingElement(data) => Some(Arc::clone(&data.attributes)),
@@ -79,7 +79,7 @@ pub fn jsx_attributes(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn is_jsx_opening_like_element(node: &Arc<Node>) -> bool {
+pub fn is_jsx_opening_like_element(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jsx_opening_like_element"); 
     matches!(
         node.kind,
         SyntaxKind::JsxOpeningElement | SyntaxKind::JsxSelfClosingElement

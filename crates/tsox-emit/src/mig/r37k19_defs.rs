@@ -11,7 +11,7 @@ pub trait R37K19ArcNodeExt {
 }
 
 impl R37K19ArcNodeExt for Arc<Node> {
-    fn set_loc(&mut self, loc: TextRange) {
+    fn set_loc(&mut self, loc: TextRange) { ::tsox_core::fntrace::enter("set_loc"); 
         if let Some(node) = Arc::get_mut(self) {
             node.loc = loc;
         }

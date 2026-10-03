@@ -9,15 +9,15 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::sync::Arc;
 
-pub fn kind_string(node: &Node) -> String {
+pub fn kind_string(node: &Node) -> String { ::tsox_core::fntrace::enter("kind_string"); 
     format!("{:?}", node.kind)
 }
 
-pub fn kind_value(node: &Node) -> i16 {
+pub fn kind_value(node: &Node) -> i16 { ::tsox_core::fntrace::enter("kind_value"); 
     node.kind as i16
 }
 
-pub fn decorators(node: &Node) -> Vec<Arc<Node>> {
+pub fn decorators(node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("decorators"); 
     node.modifier_nodes()
         .iter()
         .filter(|m| is_decorator(m))
@@ -25,7 +25,7 @@ pub fn decorators(node: &Node) -> Vec<Arc<Node>> {
         .collect()
 }
 
-pub fn iter_children(node: &Node) -> Vec<Arc<Node>> {
+pub fn iter_children(node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("iter_children"); 
     let mut children = Vec::new();
     for_each_child(node, |child| {
         children.push(child.clone());
@@ -34,7 +34,7 @@ pub fn iter_children(node: &Node) -> Vec<Arc<Node>> {
     children
 }
 
-pub fn member_list(node: &Node) -> Option<&Arc<NodeList>> {
+pub fn member_list(node: &Node) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("member_list"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => Some(&d.members),
         NodeData::ClassExpression(d) => Some(&d.members),
@@ -46,14 +46,14 @@ pub fn member_list(node: &Node) -> Option<&Arc<NodeList>> {
     }
 }
 
-pub fn members(node: &Node) -> &[Arc<Node>] {
+pub fn members(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("members"); 
     match member_list(node) {
         Some(list) => &list.nodes,
         None => &[],
     }
 }
 
-pub fn initializer(node: &Node) -> Option<&Arc<Node>> {
+pub fn initializer(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("initializer"); 
     match &node.data {
         NodeData::VariableDeclaration(d) => d.initializer.as_ref(),
         NodeData::ParameterDeclaration(d) => d.initializer.as_ref(),
@@ -69,7 +69,7 @@ pub fn initializer(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn property_name(node: &Node) -> Option<&Arc<Node>> {
+pub fn property_name(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("property_name"); 
     match &node.data {
         NodeData::ImportSpecifier(d) => d.property_name.as_ref(),
         NodeData::ExportSpecifier(d) => d.property_name.as_ref(),
@@ -78,11 +78,11 @@ pub fn property_name(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn property_name_or_name(node: &Node) -> Option<&Arc<Node>> {
+pub fn property_name_or_name(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("property_name_or_name"); 
     property_name(node).or_else(|| node.name())
 }
 
-pub fn is_type_only(node: &Node) -> bool {
+pub fn is_type_only(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_only"); 
     match &node.data {
         NodeData::ImportEqualsDeclaration(d) => d.is_type_only,
         NodeData::ImportSpecifier(d) => d.is_type_only,
@@ -93,7 +93,7 @@ pub fn is_type_only(node: &Node) -> bool {
     }
 }
 
-pub fn label(node: &Node) -> Option<&Arc<Node>> {
+pub fn label(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("label"); 
     match &node.data {
         NodeData::LabeledStatement(d) => Some(&d.label),
         NodeData::BreakStatement(d) => d.label.as_ref(),
@@ -102,7 +102,7 @@ pub fn label(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn module_specifier(node: &Node) -> Option<&Arc<Node>> {
+pub fn module_specifier(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("module_specifier"); 
     match &node.data {
         NodeData::ImportDeclaration(d) => Some(&d.module_specifier),
         NodeData::ExportDeclaration(d) => d.module_specifier.as_ref(),
@@ -111,7 +111,7 @@ pub fn module_specifier(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn import_clause(node: &Node) -> Option<&Arc<Node>> {
+pub fn import_clause(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("import_clause"); 
     match &node.data {
         NodeData::ImportDeclaration(d) => d.import_clause.as_ref(),
         NodeData::JSDocImportTag(d) => d.import_clause.as_ref(),
@@ -119,7 +119,7 @@ pub fn import_clause(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn property_list(node: &Node) -> Option<&Arc<NodeList>> {
+pub fn property_list(node: &Node) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("property_list"); 
     match &node.data {
         NodeData::ObjectLiteralExpression(d) => Some(&d.properties),
         NodeData::JsxAttributes(d) => Some(&d.properties),
@@ -127,14 +127,14 @@ pub fn property_list(node: &Node) -> Option<&Arc<NodeList>> {
     }
 }
 
-pub fn properties(node: &Node) -> &[Arc<Node>] {
+pub fn properties(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("properties"); 
     match property_list(node) {
         Some(list) => &list.nodes,
         None => &[],
     }
 }
 
-pub fn element_list(node: &Node) -> Option<&Arc<NodeList>> {
+pub fn element_list(node: &Node) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("element_list"); 
     match &node.data {
         NodeData::NamedImports(d) => Some(&d.elements),
         NodeData::NamedExports(d) => Some(&d.elements),
@@ -145,14 +145,14 @@ pub fn element_list(node: &Node) -> Option<&Arc<NodeList>> {
     }
 }
 
-pub fn elements(node: &Node) -> &[Arc<Node>] {
+pub fn elements(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("elements"); 
     match element_list(node) {
         Some(list) => &list.nodes,
         None => &[],
     }
 }
 
-pub fn postfix_token(node: &Node) -> Option<&Arc<Node>> {
+pub fn postfix_token(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("postfix_token"); 
     match &node.data {
         NodeData::MethodDeclaration(d) => d.postfix_token.as_ref(),
         NodeData::ShorthandPropertyAssignment(d) => d.postfix_token.as_ref(),
@@ -164,7 +164,7 @@ pub fn postfix_token(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn question_dot_token(node: &Node) -> Option<&Arc<Node>> {
+pub fn question_dot_token(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("question_dot_token"); 
     match &node.data {
         NodeData::ElementAccessExpression(d) => d.question_dot_token.as_ref(),
         NodeData::PropertyAccessExpression(d) => d.question_dot_token.as_ref(),
@@ -174,7 +174,7 @@ pub fn question_dot_token(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn parameter_list(node: &Node) -> Option<&Arc<NodeList>> {
+pub fn parameter_list(node: &Node) -> Option<&Arc<NodeList>> { ::tsox_core::fntrace::enter("parameter_list"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => Some(&d.parameters),
         NodeData::FunctionExpression(d) => Some(&d.parameters),
@@ -193,14 +193,14 @@ pub fn parameter_list(node: &Node) -> Option<&Arc<NodeList>> {
     }
 }
 
-pub fn parameters(node: &Node) -> &[Arc<Node>] {
+pub fn parameters(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("parameters"); 
     match parameter_list(node) {
         Some(list) => &list.nodes,
         None => &[],
     }
 }
 
-pub fn is_locals_container(node: &Node) -> bool {
+pub fn is_locals_container(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_locals_container"); 
     matches!(
         node.kind,
         SyntaxKind::SourceFile
@@ -217,12 +217,12 @@ pub fn is_locals_container(node: &Node) -> bool {
     )
 }
 
-pub fn is_type_or_js_type_alias_declaration(node: &Node) -> bool {
+pub fn is_type_or_js_type_alias_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_or_js_type_alias_declaration"); 
     node.kind == SyntaxKind::TypeAliasDeclaration
         || node.kind == SyntaxKind::JSTypeAliasDeclaration
 }
 
-pub fn is_import_declaration_or_js_import_declaration(node: &Node) -> bool {
+pub fn is_import_declaration_or_js_import_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_import_declaration_or_js_import_declaration"); 
     node.kind == SyntaxKind::ImportDeclaration
         || node.kind == SyntaxKind::JSImportDeclaration
 }
@@ -234,25 +234,25 @@ pub enum AccessKind {
     ReadWrite,
 }
 
-pub fn is_write_only_access(node: &Arc<Node>) -> bool {
+pub fn is_write_only_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_write_only_access"); 
     access_kind(node) == AccessKind::Write
 }
 
-pub fn is_write_access(node: &Arc<Node>) -> bool {
+pub fn is_write_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_write_access"); 
     access_kind(node) != AccessKind::Read
 }
 
 pub fn is_write_access_for_reference(
     name: &Arc<Node>,
     symbols: &crate::ast::symbol_map::NodeSymbolMap,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_write_access_for_reference"); 
     let decl_write = get_declaration_from_name(name, symbols)
         .map(|decl| declaration_is_write_access(&decl))
         .unwrap_or(false);
     (decl_write || name.kind == SyntaxKind::DefaultKeyword) || is_write_access(name)
 }
 
-pub fn reverse_access_kind(a: AccessKind) -> AccessKind {
+pub fn reverse_access_kind(a: AccessKind) -> AccessKind { ::tsox_core::fntrace::enter("reverse_access_kind"); 
     match a {
         AccessKind::Read => AccessKind::Write,
         AccessKind::Write => AccessKind::Read,
@@ -260,7 +260,7 @@ pub fn reverse_access_kind(a: AccessKind) -> AccessKind {
     }
 }
 
-pub fn access_kind(node: &Arc<Node>) -> AccessKind {
+pub fn access_kind(node: &Arc<Node>) -> AccessKind { ::tsox_core::fntrace::enter("access_kind"); 
     let parent = match node.parent() {
         Some(p) => p,
         None => return AccessKind::Read,
@@ -341,7 +341,7 @@ pub fn access_kind(node: &Arc<Node>) -> AccessKind {
     }
 }
 
-pub fn declaration_is_write_access(decl: &Node) -> bool {
+pub fn declaration_is_write_access(decl: &Node) -> bool { ::tsox_core::fntrace::enter("declaration_is_write_access"); 
     use crate::ast::node_flags::NodeFlags;
     if decl.flags.contains(NodeFlags::Ambient) {
         return true;
@@ -396,7 +396,7 @@ pub fn declaration_is_write_access(decl: &Node) -> bool {
     }
 }
 
-fn node_body(node: &Node) -> Option<Arc<Node>> {
+fn node_body(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_body"); 
     match &node.data {
         NodeData::FunctionDeclaration(d) => d.body.clone(),
         NodeData::FunctionExpression(d) => Some(d.body.clone()),
@@ -410,7 +410,7 @@ fn node_body(node: &Node) -> Option<Arc<Node>> {
     }
 }
 
-pub fn is_array_literal_or_object_literal_destructuring_pattern(node: &Arc<Node>) -> bool {
+pub fn is_array_literal_or_object_literal_destructuring_pattern(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_array_literal_or_object_literal_destructuring_pattern"); 
     if !(is_array_literal_expression(node) || is_object_literal_expression(node)) {
         return false;
     }
@@ -442,7 +442,7 @@ pub fn is_array_literal_or_object_literal_destructuring_pattern(node: &Arc<Node>
 pub fn get_declaration_from_name(
     name: &Arc<Node>,
     symbols: &crate::ast::symbol_map::NodeSymbolMap,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_declaration_from_name"); 
     let parent = name.parent()?;
     match name.kind {
         SyntaxKind::StringLiteral
@@ -474,7 +474,7 @@ fn declaration_from_identifier_name(
     name: &Arc<Node>,
     parent: &Arc<Node>,
     symbols: &crate::ast::symbol_map::NodeSymbolMap,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaration_from_identifier_name"); 
     if crate::ast::utilities_declarations::is_declaration(parent) {
         if parent
             .name()
@@ -511,7 +511,7 @@ fn declaration_from_identifier_name(
     None
 }
 
-pub fn get_declaration_name(declaration: &Arc<Node>) -> String {
+pub fn get_declaration_name(declaration: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_declaration_name"); 
     let name =
         crate::ast::utilities_navigation::get_non_assigned_name_of_declaration(declaration);
     if let Some(name) = name {
@@ -551,7 +551,7 @@ pub struct PragmaSpecification {
     pub kind: PragmaKindFlags,
 }
 
-pub fn is_triple_slash(spec: &PragmaSpecification) -> bool {
+pub fn is_triple_slash(spec: &PragmaSpecification) -> bool { ::tsox_core::fntrace::enter("is_triple_slash"); 
     spec.kind & PRAGMA_KIND_TRIPLE_SLASH_XML > 0
 }
 
@@ -561,7 +561,7 @@ pub fn get_resolution_mode_override(
 ) -> (
     tsox_core::core::compiler_options::ResolutionMode,
     bool,
-) {
+) { ::tsox_core::fntrace::enter("get_resolution_mode_override"); 
     use tsox_core::core::compiler_options::ResolutionMode;
     let attributes = match &node.data {
         NodeData::ImportAttributes(d) => &d.attributes,
@@ -597,7 +597,7 @@ pub fn get_resolution_mode_override(
     }
 }
 
-pub fn has_identifier(file: &crate::ast::node_source_file::SourceFile, name: &str) -> bool {
+pub fn has_identifier(file: &crate::ast::node_source_file::SourceFile, name: &str) -> bool { ::tsox_core::fntrace::enter("has_identifier"); 
     let mut identifiers = HashSet::new();
     collect_identifiers_for_source_file(file, &mut identifiers);
     identifiers.contains(name)
@@ -606,8 +606,8 @@ pub fn has_identifier(file: &crate::ast::node_source_file::SourceFile, name: &st
 fn collect_identifiers_for_source_file(
     source_file: &crate::ast::node_source_file::SourceFile,
     identifiers: &mut HashSet<String>,
-) {
-    fn collect(node: &Node, identifiers: &mut HashSet<String>) -> bool {
+) { ::tsox_core::fntrace::enter("collect_identifiers_for_source_file"); 
+    fn collect(node: &Node, identifiers: &mut HashSet<String>) -> bool { ::tsox_core::fntrace::enter("collect"); 
         match node.kind {
             SyntaxKind::Identifier
             | SyntaxKind::PrivateIdentifier
@@ -630,10 +630,10 @@ fn collect_identifiers_for_source_file(
 
 pub fn get_name_table(
     file: &crate::ast::node_source_file::SourceFile,
-) -> HashMap<String, i64> {
+) -> HashMap<String, i64> { ::tsox_core::fntrace::enter("get_name_table"); 
     let mut name_table: HashMap<String, i64> = HashMap::new();
 
-    fn walk(node: &Arc<Node>, file: &crate::ast::node_source_file::SourceFile, name_table: &mut HashMap<String, i64>) -> bool {
+    fn walk(node: &Arc<Node>, file: &crate::ast::node_source_file::SourceFile, name_table: &mut HashMap<String, i64>) -> bool { ::tsox_core::fntrace::enter("walk"); 
         let is_name = (crate::ast::node_data_generated::is_identifier(node)
             && !is_tag_name(node)
             && !node_text(node).is_empty())
@@ -670,7 +670,7 @@ pub fn get_name_table(
     name_table
 }
 
-fn is_tag_name(node: &Arc<Node>) -> bool {
+fn is_tag_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_tag_name"); 
     node.parent()
         .map(|p| {
             crate::ast::utilities_types::is_jsdoc_tag(&p)
@@ -679,7 +679,7 @@ fn is_tag_name(node: &Arc<Node>) -> bool {
         .unwrap_or(false)
 }
 
-fn literal_is_name(node: &Arc<Node>) -> bool {
+fn literal_is_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("literal_is_name"); 
     is_declaration_name(node)
         || node
             .parent()
@@ -689,7 +689,7 @@ fn literal_is_name(node: &Arc<Node>) -> bool {
         || is_literal_computed_property_declaration_name(node)
 }
 
-fn is_declaration_name(name: &Arc<Node>) -> bool {
+fn is_declaration_name(name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_name"); 
     match name.parent() {
         Some(parent) => {
             crate::ast::utilities_declarations::is_declaration(&parent)
@@ -702,7 +702,7 @@ fn is_declaration_name(name: &Arc<Node>) -> bool {
     }
 }
 
-fn is_argument_of_element_access_expression(node: &Arc<Node>) -> bool {
+fn is_argument_of_element_access_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_argument_of_element_access_expression"); 
     match node.parent() {
         Some(parent) => match &parent.data {
             NodeData::ElementAccessExpression(d) => Arc::ptr_eq(&d.argument_expression, node),
@@ -712,7 +712,7 @@ fn is_argument_of_element_access_expression(node: &Arc<Node>) -> bool {
     }
 }
 
-fn is_literal_computed_property_declaration_name(node: &Arc<Node>) -> bool {
+fn is_literal_computed_property_declaration_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_literal_computed_property_declaration_name"); 
     let parent = match node.parent() {
         Some(p) => p,
         None => return false,

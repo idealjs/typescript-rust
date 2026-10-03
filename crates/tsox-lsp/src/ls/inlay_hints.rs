@@ -19,7 +19,7 @@ const INLAY_HINT_KIND_TYPE: i32 = 1;
 const INLAY_HINT_KIND_PARAMETER: i32 = 2;
 
 impl LanguageService {
-    pub fn provide_inlay_hints(&self, document_uri: &DocumentUri, range: Range) -> Vec<InlayHint> {
+    pub fn provide_inlay_hints(&self, document_uri: &DocumentUri, range: Range) -> Vec<InlayHint> { ::tsox_core::fntrace::enter("provide_inlay_hints"); 
         let (program, source_file) = self.get_program_and_file(document_uri);
         let line_map = &source_file.line_map;
 
@@ -40,7 +40,7 @@ impl LanguageService {
         hints
     }
 
-    pub fn provide_inlay_hint(&self, document_uri: &DocumentUri) -> Vec<InlayHint> {
+    pub fn provide_inlay_hint(&self, document_uri: &DocumentUri) -> Vec<InlayHint> { ::tsox_core::fntrace::enter("provide_inlay_hint"); 
         let (_, source_file) = self.get_program_and_file(document_uri);
         let end = source_file.text.len();
         self.provide_inlay_hints(
@@ -66,7 +66,7 @@ fn collect_inlay_hints(
     range_end: usize,
     line_map: &LineMap,
     hints: &mut Vec<InlayHint>,
-) {
+) { ::tsox_core::fntrace::enter("collect_inlay_hints"); 
     if node.end() < range_start || node.pos() > range_end {
         return;
     }
@@ -114,7 +114,7 @@ fn add_parameter_name_hints(
     checker: &mut Checker,
     line_map: &LineMap,
     hints: &mut Vec<InlayHint>,
-) {
+) { ::tsox_core::fntrace::enter("add_parameter_name_hints"); 
     let (signature, _candidate_signatures) =
         checker.get_resolved_signature_for_signature_help(_call_node, data.arguments.len() as i32);
 
@@ -149,7 +149,7 @@ fn add_parameter_name_hints(
     }
 }
 
-fn is_omit_type_hint(name: &str, type_str: &str) -> bool {
+fn is_omit_type_hint(name: &str, type_str: &str) -> bool { ::tsox_core::fntrace::enter("is_omit_type_hint"); 
     let lower_name = name.to_ascii_lowercase();
     let lower_type = type_str.to_ascii_lowercase();
     matches!(
@@ -174,7 +174,7 @@ pub struct InlayHintState<'a> {
     pub result: Vec<InlayHint>,
 }
 
-pub fn is_any_inlay_hint_enabled(prefs: &crate::ls::lsutil::InlayHintsPreferences) -> bool {
+pub fn is_any_inlay_hint_enabled(prefs: &crate::ls::lsutil::InlayHintsPreferences) -> bool { ::tsox_core::fntrace::enter("is_any_inlay_hint_enabled"); 
     prefs.include_inlay_variable_type_hints.is_true_or_unknown()
         || prefs.include_inlay_function_parameter_type_hints.is_true()
         || prefs
@@ -190,14 +190,14 @@ pub fn is_any_inlay_hint_enabled(prefs: &crate::ls::lsutil::InlayHintsPreference
         )
 }
 
-fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize {
+fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
     let line = position.line as usize;
     let character = position.character as usize;
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     line_start + character
 }
 
-fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
+fn offset_to_position(line_map: &LineMap, offset: usize) -> Position { ::tsox_core::fntrace::enter("offset_to_position"); 
     let line = line_of_offset(line_map, offset);
     let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
     Position {
@@ -206,7 +206,7 @@ fn offset_to_position(line_map: &LineMap, offset: usize) -> Position {
     }
 }
 
-fn line_of_offset(line_map: &LineMap, offset: usize) -> usize {
+fn line_of_offset(line_map: &LineMap, offset: usize) -> usize { ::tsox_core::fntrace::enter("line_of_offset"); 
     match line_map.line_starts.binary_search(&(offset as u32)) {
         Ok(idx) => idx,
         Err(idx) => idx.saturating_sub(1),

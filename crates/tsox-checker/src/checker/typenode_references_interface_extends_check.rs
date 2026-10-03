@@ -8,7 +8,7 @@ impl Checker {
         a: &Arc<Type>,
         b: &Arc<Type>,
         depth: u32,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("structured_types_identical"); 
         if Arc::ptr_eq(a, b) {
             return true;
         }
@@ -93,7 +93,7 @@ impl Checker {
         interface_decls: &[Arc<Node>],
         own_result: &Arc<Type>,
         base_types: &[(Arc<Node>, Arc<Type>)],
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_interface_simultaneous_extends"); 
         if base_types.len() < 2 {
             return;
         }
@@ -181,7 +181,7 @@ impl Checker {
         interface_decls: &[Arc<Node>],
         own_result: &Arc<Type>,
         base_types: &[(Arc<Node>, Arc<Type>)],
-    ) {
+    ) { ::tsox_core::fntrace::enter("report_interface_extends_incompatibilities"); 
         let own_structured = match &own_result.data {
             TypeData::Object(o) => Some(&o.structured),
             _ => None,

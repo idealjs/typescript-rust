@@ -11,12 +11,12 @@ thread_local! {
     static HAS_PARSE_ERROR: Cell<bool> = const { Cell::new(false) };
 }
 
-pub(crate) fn set_has_parse_error() {
+pub(crate) fn set_has_parse_error() { ::tsox_core::fntrace::enter("set_has_parse_error"); 
     HAS_PARSE_ERROR.with(|c| c.set(true));
 }
 
 impl Parser {
-    pub(crate) fn finish_node(&mut self, node: &mut ast::Node, pos: usize) -> ast::Node {
+    pub(crate) fn finish_node(&mut self, node: &mut ast::Node, pos: usize) -> ast::Node { ::tsox_core::fntrace::enter("finish_node"); 
         let end = self.node_pos();
         self.finish_node_with_end(node, pos, end)
     }
@@ -26,7 +26,7 @@ impl Parser {
         node: &mut ast::Node,
         pos: usize,
         end: usize,
-    ) -> ast::Node {
+    ) -> ast::Node { ::tsox_core::fntrace::enter("finish_node_with_end"); 
         node.loc = TextRange::new(pos, end);
         node.flags |= self.context_flags_now();
         if HAS_PARSE_ERROR.with(Cell::get) {

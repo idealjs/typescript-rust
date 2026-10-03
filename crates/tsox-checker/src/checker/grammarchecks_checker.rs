@@ -3,7 +3,7 @@
 use crate::checker::grammarchecks::*;
 
 impl Checker {
-    pub(crate) fn grammar_error_on_node(&mut self, node: &Arc<Node>, message: &Message) -> bool {
+    pub(crate) fn grammar_error_on_node(&mut self, node: &Arc<Node>, message: &Message) -> bool { ::tsox_core::fntrace::enter("grammar_error_on_node"); 
         self.grammar_error_on_node_with_args(node, message, &[])
     }
 
@@ -12,7 +12,7 @@ impl Checker {
         node: &Arc<Node>,
         message: &Message,
         args: &[String],
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("grammar_error_on_node_with_args"); 
         let file = self.current_file.clone();
         if file.as_ref().is_some_and(|f| f.has_parse_diagnostics) {
             return false;
@@ -28,7 +28,7 @@ impl Checker {
         start: usize,
         length: usize,
         message: &Message,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("grammar_error_at_pos"); 
         let file = self.current_file.clone();
         if file.as_ref().is_some_and(|f| f.has_parse_diagnostics) {
             return false;
@@ -39,7 +39,7 @@ impl Checker {
         true
     }
 
-    pub(crate) fn grammar_error_on_first_token(&mut self, node: &Arc<Node>, message: &Message) -> bool {
+    pub(crate) fn grammar_error_on_first_token(&mut self, node: &Arc<Node>, message: &Message) -> bool { ::tsox_core::fntrace::enter("grammar_error_on_first_token"); 
         self.grammar_error_on_node(node, message)
     }
 

@@ -27,7 +27,7 @@ pub(crate) enum Field {
     Statements,
 }
 
-fn list_fields(parent: &Arc<Node>) -> Vec<(Field, Arc<NodeList>)> {
+fn list_fields(parent: &Arc<Node>) -> Vec<(Field, Arc<NodeList>)> { ::tsox_core::fntrace::enter("list_fields"); 
     use Field::*;
     
     let data = &parent.data;
@@ -261,7 +261,7 @@ fn list_fields(parent: &Arc<Node>) -> Vec<(Field, Arc<NodeList>)> {
 }
 
 /// Go getOpenTokenForList
-pub(crate) fn open_token_for_list(parent: &Arc<Node>, list: &Arc<NodeList>) -> SyntaxKind {
+pub(crate) fn open_token_for_list(parent: &Arc<Node>, list: &Arc<NodeList>) -> SyntaxKind { ::tsox_core::fntrace::enter("open_token_for_list"); 
     use SyntaxKind::*;
     for (field, l) in list_fields(parent) {
         if !Arc::ptr_eq(&l, list) {
@@ -308,7 +308,7 @@ pub(crate) fn open_token_for_list(parent: &Arc<Node>, list: &Arc<NodeList>) -> S
 }
 
 /// Go getCloseTokenForOpenToken
-pub(crate) fn close_token_for_open_token(kind: SyntaxKind) -> SyntaxKind {
+pub(crate) fn close_token_for_open_token(kind: SyntaxKind) -> SyntaxKind { ::tsox_core::fntrace::enter("close_token_for_open_token"); 
     match kind {
         SyntaxKind::OpenParenToken => SyntaxKind::CloseParenToken,
         SyntaxKind::LessThanToken => SyntaxKind::GreaterThanToken,
@@ -323,7 +323,7 @@ pub(crate) fn get_list_by_range(
     end: usize,
     parent: &Arc<Node>,
     file: &SourceFile,
-) -> Option<(Field, Arc<NodeList>)> {
+) -> Option<(Field, Arc<NodeList>)> { ::tsox_core::fntrace::enter("get_list_by_range"); 
     let r = TextRange::new(start, end);
     for (field, list) in list_fields(parent) {
         if r.contained_by(&get_visual_list_range(parent, list.loc, file)) {
@@ -334,14 +334,14 @@ pub(crate) fn get_list_by_range(
 }
 
 /// Go GetContainingList
-pub(crate) fn get_containing_list(node: &Arc<Node>, file: &SourceFile) -> Option<(Field, Arc<NodeList>)> {
+pub(crate) fn get_containing_list(node: &Arc<Node>, file: &SourceFile) -> Option<(Field, Arc<NodeList>)> { ::tsox_core::fntrace::enter("get_containing_list"); 
     let parent = node.parent()?;
     let start = token_pos_of_node(file, node);
     get_list_by_range(start, node.end(), &parent, file)
 }
 
 /// Go getVisualListRange：把列表范围扩展到前邻 token 末尾与后邻 token 起点之间。
-pub(crate) fn get_visual_list_range(parent: &Arc<Node>, list_loc: TextRange, file: &SourceFile) -> TextRange {
+pub(crate) fn get_visual_list_range(parent: &Arc<Node>, list_loc: TextRange, file: &SourceFile) -> TextRange { ::tsox_core::fntrace::enter("get_visual_list_range"); 
     let _ = parent;
     let prior_end = crate::astnav::find_preceding_token(&file.node, list_loc.pos())
         .map(|t| t.end())
@@ -358,7 +358,7 @@ pub(crate) fn get_visual_list_range(parent: &Arc<Node>, list_loc: TextRange, fil
 }
 
 /// Go isListElement：node 是否为 parent 某个语句/成员列表的元素。
-pub(crate) fn is_list_element(parent: &Arc<Node>, node: &Arc<Node>, file: &SourceFile) -> bool {
+pub(crate) fn is_list_element(parent: &Arc<Node>, node: &Arc<Node>, file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_list_element"); 
     use SyntaxKind::*;
     match parent.kind {
         ClassDeclaration | InterfaceDeclaration => node_in_field(parent, node, file, Field::Members),
@@ -380,7 +380,7 @@ pub(crate) fn is_list_element(parent: &Arc<Node>, node: &Arc<Node>, file: &Sourc
 }
 
 /// Go isMemberListElement
-pub(crate) fn is_member_list_element(parent: &Arc<Node>, node: &Arc<Node>, file: &SourceFile) -> bool {
+pub(crate) fn is_member_list_element(parent: &Arc<Node>, node: &Arc<Node>, file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("is_member_list_element"); 
     use SyntaxKind::*;
     match parent.kind {
         ClassDeclaration | ClassExpression | InterfaceDeclaration | EnumDeclaration
@@ -389,7 +389,7 @@ pub(crate) fn is_member_list_element(parent: &Arc<Node>, node: &Arc<Node>, file:
     }
 }
 
-fn node_in_field(parent: &Arc<Node>, node: &Arc<Node>, file: &SourceFile, want: Field) -> bool {
+fn node_in_field(parent: &Arc<Node>, node: &Arc<Node>, file: &SourceFile, want: Field) -> bool { ::tsox_core::fntrace::enter("node_in_field"); 
     for (field, list) in list_fields(parent) {
         if field != want {
             continue;
@@ -402,7 +402,7 @@ fn node_in_field(parent: &Arc<Node>, node: &Arc<Node>, file: &SourceFile, want: 
     false
 }
 
-fn node_child(parent: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+fn node_child(parent: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("node_child"); 
     let mut hit = None;
     crate::ast::node_data_generated::for_each_child(parent, |c| {
         if c.kind == kind {

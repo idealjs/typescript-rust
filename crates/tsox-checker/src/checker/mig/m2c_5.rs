@@ -43,7 +43,7 @@ impl Checker {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         mut tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("create_late_bound_index_signatures"); 
         let Some(sym) = self.get_symbol_of_declaration(container) else {
             return Vec::new();
         };
@@ -99,7 +99,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("create_literal_const_value"); 
         let Some(node_sym) = self.get_symbol_of_declaration(node) else {
             return None;
         };
@@ -177,7 +177,7 @@ impl Checker {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_return_type_of_signature_declaration"); 
         let signature = self.get_signature_from_declaration(signature_declaration);
         let (mut builder, release) = self.get_node_builder();
         builder.enter_context(Some(enclosing_declaration), flags, internal_flags, tracker);
@@ -202,7 +202,7 @@ impl Checker {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_type_of_declaration"); 
         let symbol = self.get_symbol_of_declaration(declaration);
         let t = match &symbol {
             Some(symbol) => self.get_type_of_symbol(symbol),
@@ -233,7 +233,7 @@ impl Checker {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_type_of_expression"); 
         let (mut builder, release) = self.get_node_builder();
         builder.enter_context(
             Some(enclosing_declaration),
@@ -254,7 +254,7 @@ impl Checker {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("create_type_parameters_of_signature_declaration"); 
         let Some(symbol) = self.get_symbol_of_declaration(signature_declaration) else {
             return Vec::new();
         };
@@ -270,7 +270,7 @@ impl Checker {
         result.unwrap_or_default()
     }
 
-    pub fn get_element_access_expression_name(&mut self, expression: &Arc<Node>) -> String {
+    pub fn get_element_access_expression_name(&mut self, expression: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("get_element_access_expression_name"); 
         let mut resolver = self.get_emit_resolver();
         let reference_resolver = Arc::get_mut(&mut resolver)
             .expect("freshly created emit resolver is uniquely owned")
@@ -281,7 +281,7 @@ impl Checker {
     pub fn get_properties_of_container_function(
         &mut self,
         node: Option<&Arc<Node>>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_properties_of_container_function"); 
         let Some(node) = node else {
             return Vec::new();
         };
@@ -296,7 +296,7 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         prefix_locals: bool,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_export_container"); 
         let mut resolver = self.get_emit_resolver();
         let reference_resolver = Arc::get_mut(&mut resolver)
             .expect("freshly created emit resolver is uniquely owned")
@@ -307,7 +307,7 @@ impl Checker {
     pub fn get_referenced_import_declaration(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_import_declaration"); 
         if !is_parse_tree_node(node) {
             return r26k4_defs::jsx_links(node).import_ref;
         }
@@ -328,14 +328,14 @@ impl Checker {
         &mut self,
         node: &Arc<Node>,
         import_ref: Option<Arc<Node>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("set_referenced_import_declaration"); 
         r26k4_defs::set_jsx_links_import_ref(node, import_ref);
     }
 
     pub fn get_referenced_member_value_declaration(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_member_value_declaration"); 
         let mut resolver = self.get_emit_resolver();
         let reference_resolver = Arc::get_mut(&mut resolver)
             .expect("freshly created emit resolver is uniquely owned")
@@ -346,7 +346,7 @@ impl Checker {
     pub fn get_referenced_value_declaration(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declaration"); 
         if !is_parse_tree_node(node) {
             return None;
         }
@@ -360,7 +360,7 @@ impl Checker {
     pub fn get_referenced_value_declaration_unsafe(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declaration_unsafe"); 
         let mut resolver = self.get_emit_resolver();
         let reference_resolver = Arc::get_mut(&mut resolver)
             .expect("freshly created emit resolver is uniquely owned")
@@ -371,7 +371,7 @@ impl Checker {
     pub fn get_referenced_value_declarations(
         &mut self,
         node: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("get_referenced_value_declarations"); 
         if !is_parse_tree_node(node) {
             return Vec::new();
         }
@@ -386,7 +386,7 @@ impl Checker {
         &mut self,
         type_name: &Arc<Node>,
         location: &Arc<Node>,
-    ) -> TypeReferenceSerializationKind {
+    ) -> TypeReferenceSerializationKind { ::tsox_core::fntrace::enter("get_type_reference_serialization_kind"); 
         let mut is_type_only = false;
         if is_qualified_name(type_name) {
             let root_value_symbol = self.resolve_entity_name(
@@ -490,7 +490,7 @@ impl Checker {
         }
     }
 
-    pub fn is_definitely_reference_to_global_symbol_object(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_definitely_reference_to_global_symbol_object(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_definitely_reference_to_global_symbol_object"); 
         let Some(name) = node.name() else {
             return false;
         };
@@ -536,11 +536,11 @@ impl Checker {
         })
     }
 
-    pub fn is_expando_function_declaration(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_expando_function_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_expando_function_declaration"); 
         self.is_expando_function_declaration_unsafe(node)
     }
 
-    pub fn is_expando_function_declaration_unsafe(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_expando_function_declaration_unsafe(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_expando_function_declaration_unsafe"); 
         if !is_parse_tree_node(node) {
             return false;
         }
@@ -554,7 +554,7 @@ impl Checker {
             })
     }
 
-    pub fn is_implementation_of_overload(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_implementation_of_overload(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_implementation_of_overload"); 
         if node.body().is_some() {
             if is_get_accessor_declaration(node) || is_set_accessor_declaration(node) {
                 return false;
@@ -587,7 +587,7 @@ impl Checker {
         false
     }
 
-    pub fn is_import_required_by_augmentation(&mut self, decl: &Arc<Node>) -> bool {
+    pub fn is_import_required_by_augmentation(&mut self, decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_import_required_by_augmentation"); 
         let Some(file) = get_source_file_of_node(decl) else {
             return false;
         };
@@ -618,14 +618,14 @@ impl Checker {
         false
     }
 
-    pub fn is_late_bound(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_late_bound(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_late_bound"); 
         let Some(symbol) = self.get_symbol_of_declaration_opt(node) else {
             return false;
         };
         symbol.check_flags.intersects(CheckFlags::Late)
     }
 
-    pub fn is_name_resolvable(&mut self, location: &Arc<Node>, name: &str) -> bool {
+    pub fn is_name_resolvable(&mut self, location: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("is_name_resolvable"); 
         self.resolve_name(name, location, SymbolFlags::VALUE | SymbolFlags::TYPE | SymbolFlags::NAMESPACE, false)
         .is_some()
     }
@@ -633,7 +633,7 @@ impl Checker {
     pub fn is_this_property_assignment_declaration_redundant(
         &mut self,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_this_property_assignment_declaration_redundant"); 
         let Some(s) = self.get_symbol_of_declaration_opt(node) else {
             return false;
         };
@@ -669,7 +669,7 @@ impl Checker {
     pub fn is_top_level_value_import_equals_with_entity_name(
         &mut self,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_top_level_value_import_equals_with_entity_name"); 
         if !self.can_collect_symbol_alias_accessibility_data {
             return true;
         }
@@ -691,7 +691,7 @@ impl Checker {
         self.get_emit_resolver().is_alias_resolved_to_value(self, symbol.as_ref(), false)
     }
 
-    pub fn mark_linked_references_recursively(&mut self, file: &Arc<Node>) {
+    pub fn mark_linked_references_recursively(&mut self, file: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_linked_references_recursively"); 
         if !is_parse_tree_node(file) {
             return;
         }
@@ -701,7 +701,7 @@ impl Checker {
         });
     }
 
-    fn mark_linked_references_recursively_visit(&mut self, n: &Arc<Node>) {
+    fn mark_linked_references_recursively_visit(&mut self, n: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_linked_references_recursively_visit"); 
         if is_import_equals_declaration(n)
             && !has_syntactic_modifier(n, ModifierFlags::Export)
         {
@@ -722,7 +722,7 @@ impl Checker {
         declaration: &Arc<Node>,
         symbol: &Arc<Symbol>,
         enclosing_declaration: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("requires_adding_implicit_undefined_ex"); 
         if !is_parse_tree_node(declaration) {
             return false;
         }
@@ -739,7 +739,7 @@ impl Checker {
         declaration: &Arc<Node>,
         symbol: &Arc<Symbol>,
         enclosing_declaration: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("requires_adding_implicit_undefined_unsafe"); 
         if !is_parse_tree_node(declaration) {
             return false;
         }
@@ -758,7 +758,7 @@ impl Checker {
         flags: NodeBuilderFlags,
         internal_flags: NodeBuilderInternalFlags,
         tracker: Option<Box<dyn SymbolTracker>>,
-    ) -> Option<Arc<Node>> {
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_js_type_node_to_type_node"); 
         let (mut builder, release) = self.get_node_builder();
         let result = builder.try_js_type_node_to_type_node(
             type_node,

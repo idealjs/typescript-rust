@@ -2,7 +2,7 @@
 
 use crate::checker::relater_compare::*;
 
-fn parameter_has_type_annotation(p: &Arc<tsox_frontend::ast::Node>) -> bool {
+fn parameter_has_type_annotation(p: &Arc<tsox_frontend::ast::Node>) -> bool { ::tsox_core::fntrace::enter("parameter_has_type_annotation"); 
     matches!(
         &p.data,
         tsox_frontend::ast::NodeData::ParameterDeclaration(d) if d.type_node.is_some()
@@ -10,7 +10,7 @@ fn parameter_has_type_annotation(p: &Arc<tsox_frontend::ast::Node>) -> bool {
 }
 
 impl Checker {
-    pub fn compare_types_identical(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary {
+    pub fn compare_types_identical(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary { ::tsox_core::fntrace::enter("compare_types_identical"); 
         if self.is_type_identical_to(source, target) {
             Ternary::True
         } else {
@@ -22,7 +22,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_types_assignable_simple"); 
         if self.is_type_assignable_to(source, target) {
             Ternary::True
         } else {
@@ -35,7 +35,7 @@ impl Checker {
         source: &Arc<Type>,
         target: &Arc<Type>,
         _report_errors: bool,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_types_assignable_worker"); 
         if self.is_type_assignable_to(source, target) {
             Ternary::True
         } else {
@@ -43,7 +43,7 @@ impl Checker {
         }
     }
 
-    pub fn compare_types_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary {
+    pub fn compare_types_subtype_of(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> Ternary { ::tsox_core::fntrace::enter("compare_types_subtype_of"); 
         if self.is_type_subtype_of(source, target) {
             Ternary::True
         } else {
@@ -57,7 +57,7 @@ impl Checker {
         target: &Arc<Type>,
         error_node: Option<&Arc<tsox_frontend::ast::Node>>,
         head_message: Option<&tsox_core::diagnostics::Message>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_assignable_to"); 
         self.check_type_related_to_and_optionally_elaborate(
             source,
             target,
@@ -76,7 +76,7 @@ impl Checker {
         error_node: Option<&Arc<tsox_frontend::ast::Node>>,
         head_message: Option<&tsox_core::diagnostics::Message>,
         diagnostic_output: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_assignable_to_ex"); 
         self.check_type_related_to_and_optionally_elaborate(
             source,
             target,
@@ -94,7 +94,7 @@ impl Checker {
         target: &Arc<Type>,
         error_node: Option<&Arc<tsox_frontend::ast::Node>>,
         head_message: Option<&tsox_core::diagnostics::Message>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_comparable_to"); 
         self.check_type_related_to_and_optionally_elaborate(
             source,
             target,
@@ -112,7 +112,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         _error_node: Option<&Arc<tsox_frontend::ast::Node>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_type_related_to"); 
         self.is_type_related_to(source, target, relation)
     }
 
@@ -123,7 +123,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_error"); 
         self.elaborate_error_with_head(expr, source, target, relation, None, out)
     }
 
@@ -135,7 +135,7 @@ impl Checker {
         relation: RelationKind,
         head_message: Option<&tsox_core::diagnostics::Message>,
         mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_error_with_head"); 
         // Go elaborateError：泛型条件目标不细化
         if self.is_or_has_generic_conditional(target) {
             return false;
@@ -240,7 +240,7 @@ impl Checker {
         }
     }
 
-    fn type_is_or_has_generic_conditional(t: &Arc<Type>) -> bool {
+    fn type_is_or_has_generic_conditional(t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_or_has_generic_conditional"); 
         if t.flags.contains(TypeFlags::Conditional) {
             return true;
         }
@@ -259,7 +259,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         mut out: Option<&mut Vec<tsox_frontend::ast::Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_object_literal"); 
         if target.flags.intersects(
             TypeFlags::String
                 | TypeFlags::Number
@@ -389,7 +389,7 @@ impl Checker {
         diag: &mut tsox_frontend::ast::Diagnostic,
         target: &Arc<Type>,
         property_name: &str,
-    ) {
+    ) { ::tsox_core::fntrace::enter("attach_expected_type_comes_from"); 
         let target_prop = self.get_property_of_type(target, property_name);
         let target_node = target_prop
             .as_ref()

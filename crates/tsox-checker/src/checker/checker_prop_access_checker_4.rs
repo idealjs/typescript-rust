@@ -9,7 +9,7 @@ impl Checker {
         prop: &Arc<Symbol>,
         node: &Arc<Node>,
         right: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_property_not_used_before_declaration"); 
         // 合成实例成员符号缺 value_declaration/parent，回源 binder 声明符号
         let prop = prop
             .declarations
@@ -78,7 +78,7 @@ impl Checker {
 
     // Go isBlockScopedNameDeclaredBeforeUse（本调用点只涉及属性/类声明，
     // 变量与解构元素分支不在该调用点触发）
-    fn declaration_before_use(&mut self, declaration: &Arc<Node>, usage: &Arc<Node>) -> bool {
+    fn declaration_before_use(&mut self, declaration: &Arc<Node>, usage: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_before_use"); 
         if !same_root(declaration, usage) {
             return true;
         }
@@ -126,7 +126,7 @@ impl Checker {
         static_blocks: &[Arc<Node>],
         start_pos: usize,
         end_pos: usize,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_initialized_in_static_blocks"); 
         let Some(symbol) = self.program.symbol_map().symbol_of(declaration).cloned() else {
             return false;
         };
@@ -175,7 +175,7 @@ impl Checker {
         &self,
         declaration: &Arc<Node>,
         usage: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("usage_in_class_computed_name_or_decorator"); 
         let mut cur = usage.parent();
         while let Some(n) = cur {
             if Arc::ptr_eq(&n, declaration) {
@@ -215,7 +215,7 @@ impl Checker {
         &mut self,
         usage: &Arc<Node>,
         declaration: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_used_in_function_or_instance_property"); 
         let mut cur = Some(usage.clone());
         while let Some(n) = cur {
             if is_function_like_kind(n.kind) && !is_immediately_invoked(&n) {
@@ -272,7 +272,7 @@ impl Checker {
     // Go isInPropertyInitializerOrClassStaticBlock：FindAncestorFalse 表示继续上溯，
     // 仅 Quit 语义（TypeQuery/JsxClosingElement/Block-函数体/ArrowFunction-按参）终止；
     // Block 的父是函数式声明（不含 ArrowFunction，静态块也不算）才终止
-    fn is_in_property_initializer_or_class_static_block(&self, node: &Arc<Node>) -> bool {
+    fn is_in_property_initializer_or_class_static_block(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_property_initializer_or_class_static_block"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
@@ -308,7 +308,7 @@ impl Checker {
         &mut self,
         prop: &Arc<Symbol>,
         value_declaration: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_property_declared_in_ancestor_class"); 
         let Some(parent_class) = value_declaration.parent() else {
             return false;
         };
@@ -335,14 +335,14 @@ impl Checker {
     }
 }
 
-fn is_nested_access(node: &Arc<Node>) -> bool {
+fn is_nested_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_nested_access"); 
     if let NodeData::PropertyAccessExpression(data) = &node.data {
         return is_access_expression(&data.expression);
     }
     false
 }
 
-fn class_members(class: &Arc<Node>) -> Vec<Arc<Node>> {
+fn class_members(class: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("class_members"); 
     match &class.data {
         NodeData::ClassDeclaration(d) => d.members.iter().cloned().collect(),
         NodeData::ClassExpression(d) => d.members.iter().cloned().collect(),
@@ -351,7 +351,7 @@ fn class_members(class: &Arc<Node>) -> Vec<Arc<Node>> {
 }
 
 // 取类首个 extends 子句的基类表达式节点（Go 只看 baseTypes[0]）
-fn class_extends_expression(class: &Arc<Node>) -> Option<Arc<Node>> {
+fn class_extends_expression(class: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("class_extends_expression"); 
     let clauses = match &class.data {
         NodeData::ClassDeclaration(d) => d.heritage_clauses.as_ref()?,
         NodeData::ClassExpression(d) => d.heritage_clauses.as_ref()?,
@@ -371,7 +371,7 @@ fn class_extends_expression(class: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 // Go：装饰器挂在该类自身或其直接成员（方法/存取器/属性/参数）上
-fn decorator_attached_to_class_member(decorator: &Arc<Node>, class: &Arc<Node>) -> bool {
+fn decorator_attached_to_class_member(decorator: &Arc<Node>, class: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("decorator_attached_to_class_member"); 
     let Some(decorated) = decorator.parent() else {
         return false;
     };
@@ -393,12 +393,12 @@ fn decorator_attached_to_class_member(decorator: &Arc<Node>, class: &Arc<Node>) 
     }
 }
 
-fn is_static_method_declaration(decl: &Arc<Node>) -> bool {
+fn is_static_method_declaration(decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_static_method_declaration"); 
     decl.kind == SyntaxKind::MethodDeclaration
         && decl.has_syntactic_modifier(ModifierFlags::Static)
 }
 
-fn is_optional_property_declaration(decl: &Arc<Node>) -> bool {
+fn is_optional_property_declaration(decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_optional_property_declaration"); 
     matches!(
         &decl.data,
         NodeData::PropertyDeclaration(d)
@@ -408,7 +408,7 @@ fn is_optional_property_declaration(decl: &Arc<Node>) -> bool {
     )
 }
 
-fn has_exclamation_token(decl: &Arc<Node>) -> bool {
+fn has_exclamation_token(decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_exclamation_token"); 
     matches!(
         &decl.data,
         NodeData::PropertyDeclaration(d)
@@ -418,25 +418,25 @@ fn has_exclamation_token(decl: &Arc<Node>) -> bool {
     )
 }
 
-fn node_has_ambient_modifier(decl: &Arc<Node>) -> bool {
+fn node_has_ambient_modifier(decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_has_ambient_modifier"); 
     decl.has_syntactic_modifier(ModifierFlags::Ambient)
 }
 
-fn is_this_property(usage: &Arc<Node>) -> bool {
+fn is_this_property(usage: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_this_property"); 
     usage.parent().is_some_and(|p| {
         p.kind == SyntaxKind::PropertyAccessExpression
             && matches!(&p.data, NodeData::PropertyAccessExpression(d) if d.expression.kind == SyntaxKind::ThisKeyword)
     })
 }
 
-fn usage_in_export_introducer(usage: &Arc<Node>) -> bool {
+fn usage_in_export_introducer(usage: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("usage_in_export_introducer"); 
     usage.parent().is_some_and(|p| {
         matches!(p.kind, SyntaxKind::ExportSpecifier)
             || matches!(&p.data, NodeData::ExportAssignment(e) if e.is_export_equals)
     })
 }
 
-fn containing_class(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn containing_class(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("containing_class"); 
     let mut cur = node.parent();
     while let Some(n) = cur {
         if matches!(n.kind, SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression) {
@@ -447,14 +447,14 @@ fn containing_class(node: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-fn nodes_share_class_parent(declaration: &Arc<Node>, usage: &Arc<Node>) -> bool {
+fn nodes_share_class_parent(declaration: &Arc<Node>, usage: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("nodes_share_class_parent"); 
     match (containing_class(declaration), containing_class(usage)) {
         (Some(a), Some(b)) => Arc::ptr_eq(&a, &b),
         _ => false,
     }
 }
 
-fn is_property_initializer(property: &Arc<Node>, candidate: &Arc<Node>) -> bool {
+fn is_property_initializer(property: &Arc<Node>, candidate: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_property_initializer"); 
     matches!(
         &property.data,
         NodeData::PropertyDeclaration(d) if d
@@ -465,7 +465,7 @@ fn is_property_initializer(property: &Arc<Node>, candidate: &Arc<Node>) -> bool 
 }
 
 // Go GetImmediatelyInvokedFunctionExpression：函数体经括号包裹后紧跟调用视为 IIFE
-pub(crate) fn is_immediately_invoked(func: &Arc<Node>) -> bool {
+pub(crate) fn is_immediately_invoked(func: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_immediately_invoked"); 
     let mut wrapper = Arc::clone(func);
     while let Some(p) = wrapper.parent()
         && p.kind == SyntaxKind::ParenthesizedExpression
@@ -482,7 +482,7 @@ fn is_property_immediately_referenced(
     declaration: &Arc<Node>,
     usage: &Arc<Node>,
     stop_at_any_property_declaration: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_property_immediately_referenced"); 
     if usage.loc.pos() + usage.loc.len() > declaration.loc.pos() + declaration.loc.len() {
         return false;
     }
@@ -520,7 +520,7 @@ fn is_property_immediately_referenced(
     true
 }
 
-fn same_root(a: &Arc<Node>, b: &Arc<Node>) -> bool {
+fn same_root(a: &Arc<Node>, b: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("same_root"); 
     let root_of = |mut n: Arc<Node>| loop {
         match n.parent() {
             Some(p) => n = p,

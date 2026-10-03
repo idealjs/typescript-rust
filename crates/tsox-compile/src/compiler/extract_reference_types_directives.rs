@@ -2,7 +2,7 @@
 
 use super::*;
 
-pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective> {
+pub(crate) fn extract_reference_types_directives(text: &str) -> Vec<ReferenceTypesDirective> { ::tsox_core::fntrace::enter("extract_reference_types_directives"); 
     let mut types = Vec::new();
     let mut line_start = 0usize;
     let mask = code_line_mask(text);
@@ -74,7 +74,7 @@ pub(crate) fn load_lib_recursive(
     default_lib_names: &mut std::collections::HashSet<String>,
     visited: &mut std::collections::HashSet<String>,
     diagnostics: &mut Vec<Arc<Diagnostic>>,
-) {
+) { ::tsox_core::fntrace::enter("load_lib_recursive"); 
     if !visited.insert(lib_name.to_string()) {
         return;
     }
@@ -114,7 +114,7 @@ pub(crate) fn load_lib_recursive(
     source_files.push(file);
 }
 
-pub(crate) fn extract_reference_lib_directives(text: &str) -> Vec<String> {
+pub(crate) fn extract_reference_lib_directives(text: &str) -> Vec<String> { ::tsox_core::fntrace::enter("extract_reference_lib_directives"); 
     let mut refs = Vec::new();
     for line in text.lines() {
         let trimmed = line.trim_start();
@@ -130,7 +130,7 @@ pub(crate) fn extract_reference_lib_directives(text: &str) -> Vec<String> {
     refs
 }
 
-pub fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
+pub fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> { ::tsox_core::fntrace::enter("default_lib_file_names"); 
     if !options.lib.is_empty() {
         return options
             .lib
@@ -165,11 +165,11 @@ pub fn default_lib_file_names(options: &CompilerOptions) -> Vec<String> {
 pub(crate) fn parser_diagnostic_to_diagnostic(
     file: Arc<SourceFile>,
     pd: &tsox_frontend::parser::ParserDiagnostic,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("parser_diagnostic_to_diagnostic"); 
     Diagnostic::new(Some(file), pd.range, pd.message, pd.message_args.clone())
 }
 
-pub(crate) fn file_error_diagnostic(file_name: &str, _message: &str) -> Diagnostic {
+pub(crate) fn file_error_diagnostic(file_name: &str, _message: &str) -> Diagnostic { ::tsox_core::fntrace::enter("file_error_diagnostic"); 
     use tsox_core::diagnostics::FILE_0_NOT_FOUND;
     Diagnostic {
         file: None,
@@ -188,7 +188,7 @@ pub(crate) fn file_error_diagnostic(file_name: &str, _message: &str) -> Diagnost
 }
 
 #[allow(dead_code)]
-pub(crate) fn _ensure_script_kind(file_name: &str) -> tsox_frontend::ast::ScriptKind {
+pub(crate) fn _ensure_script_kind(file_name: &str) -> tsox_frontend::ast::ScriptKind { ::tsox_core::fntrace::enter("_ensure_script_kind"); 
     script_kind_from_file_name(file_name)
 }
 
@@ -220,14 +220,14 @@ pub struct FileIncludeReason {
 }
 
 impl FileIncludeReason {
-    pub fn new(kind: FileIncludeKind, file_name: impl Into<String>) -> Self {
+    pub fn new(kind: FileIncludeKind, file_name: impl Into<String>) -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             kind,
             file_name: file_name.into(),
         }
     }
 
-    pub fn is_referenced_file(&self) -> bool {
+    pub fn is_referenced_file(&self) -> bool { ::tsox_core::fntrace::enter("is_referenced_file"); 
         matches!(
             self.kind,
             FileIncludeKind::ReferenceFile

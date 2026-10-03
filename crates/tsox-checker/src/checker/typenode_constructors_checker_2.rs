@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         owner: &Arc<Type>,
         prop: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substituted_member_type_of"); 
         let Some(obj) = owner.as_object() else {
             return self.get_type_of_symbol(prop);
         };
@@ -55,7 +55,7 @@ impl Checker {
         owner_sym: &Arc<Symbol>,
         prop: &Arc<Symbol>,
         args: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_member_type_fallback"); 
         let decl_tps = self.declared_type_parameter_types(owner_sym);
         if decl_tps.len() == args.len() && !decl_tps.is_empty() {
             let raw = self.member_decl_symbol_type(prop);
@@ -67,7 +67,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn declared_type_parameter_types(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> {
+    pub(crate) fn declared_type_parameter_types(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("declared_type_parameter_types"); 
         // 全部声明的类型参数（interface 增强文件的同名 T 是独立符号，须一并
         // 纳入代入表，否则增强成员的类型参数悬空）
         let tp_syms: Vec<Arc<Symbol>> = {
@@ -101,7 +101,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         out: &mut Vec<Arc<Type>>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_free_type_parameters_deep"); 
         match &t.data {
             TypeData::TypeParameter(_) => {
                 if !out.iter().any(|p| Arc::ptr_eq(p, t)) {
@@ -158,7 +158,7 @@ impl Checker {
         &mut self,
         element_types: Vec<Arc<Type>>,
         names: Vec<String>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_tuple_type_named"); 
         let element_infos: Vec<TupleElementInfo> = element_types
             .iter()
             .enumerate()
@@ -187,7 +187,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn create_tuple_type(&mut self, element_types: Vec<Arc<Type>>) -> Arc<Type> {
+    pub(crate) fn create_tuple_type(&mut self, element_types: Vec<Arc<Type>>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_tuple_type"); 
         let element_infos: Vec<TupleElementInfo> = element_types
             .iter()
             .map(|t| TupleElementInfo {
@@ -215,7 +215,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn get_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn get_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_index_type"); 
         // Go getIndexTypeEx（checker.go:27049）：any/never 的 keyof 为
         // string | number | symbol（stringNumberSymbolType）
         if t.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
@@ -332,7 +332,7 @@ impl Checker {
         self.get_union_type(keys)
     }
 
-    fn flattened_key_members(t: &Arc<Type>) -> Vec<Arc<Type>> {
+    fn flattened_key_members(t: &Arc<Type>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("flattened_key_members"); 
         if t.flags.contains(TypeFlags::Never) {
             return Vec::new();
         }
@@ -342,7 +342,7 @@ impl Checker {
         vec![Arc::clone(t)]
     }
 
-    fn literal_type_from_property(&mut self, p: &Arc<Symbol>) -> Arc<Type> {
+    fn literal_type_from_property(&mut self, p: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("literal_type_from_property"); 
         let decl = p
             .value_declaration
             .as_ref()
@@ -358,7 +358,7 @@ impl Checker {
         self.get_string_literal_type(&p.name)
     }
 
-    pub(crate) fn type_node_references_name(node: &Arc<Node>, name: &str) -> bool {
+    pub(crate) fn type_node_references_name(node: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("type_node_references_name"); 
         if node.kind == SyntaxKind::Identifier && node.text() == name {
             return true;
         }
@@ -372,7 +372,7 @@ impl Checker {
 
     pub(crate) fn mapped_constraint_is_bare_keyof(
         m: &crate::checker::types::MappedTypeData,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("mapped_constraint_is_bare_keyof"); 
         let Some(decl) = &m.declaration else {
             return false;
         };
@@ -397,7 +397,7 @@ impl Checker {
 }
 
 impl Checker {
-    fn deferred_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn deferred_index_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("deferred_index_type"); 
         if let Some(cached) = self.index_type_cache.get(&t.id) {
             return Arc::clone(cached);
         }
@@ -415,7 +415,7 @@ impl Checker {
 
     // 类实例型成员是急建合成符号（无注解方法返回 any 驻缓存）：回源 binder
     // 声明符号走惰性体推断（Go 成员即 binder 符号、返回型惰性解析）
-    pub(crate) fn member_decl_symbol_type(&mut self, prop: &Arc<Symbol>) -> Arc<Type> {
+    pub(crate) fn member_decl_symbol_type(&mut self, prop: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("member_decl_symbol_type"); 
         if let Some(decl) = prop.declarations.iter().find(|d| {
             matches!(
                 d.kind,
@@ -443,7 +443,7 @@ impl Checker {
         &mut self,
         method_decl: &Arc<Node>,
         t: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_member_this_type"); 
         let owner = match method_decl.parent() {
             Some(p) => p,
             None => return t,

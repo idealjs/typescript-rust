@@ -14,23 +14,23 @@ pub(crate) const ST_KIND_RESOLVED_EXPORTS: SymbolTableId = 4 << ST_KIND_SHIFT;
 
 pub(crate) const ST_KIND_MASK: SymbolTableId = 0x7 << ST_KIND_SHIFT;
 
-pub(crate) fn symbol_table_id_from_locals(node: &Node) -> SymbolTableId {
+pub(crate) fn symbol_table_id_from_locals(node: &Node) -> SymbolTableId { ::tsox_core::fntrace::enter("symbol_table_id_from_locals"); 
     ST_KIND_LOCALS | node.id()
 }
 
-pub(crate) fn symbol_table_id_from_exports(sym: &Symbol) -> SymbolTableId {
+pub(crate) fn symbol_table_id_from_exports(sym: &Symbol) -> SymbolTableId { ::tsox_core::fntrace::enter("symbol_table_id_from_exports"); 
     ST_KIND_EXPORTS | sym.id()
 }
 
-pub(crate) fn symbol_table_id_from_resolved_exports(sym: &Symbol) -> SymbolTableId {
+pub(crate) fn symbol_table_id_from_resolved_exports(sym: &Symbol) -> SymbolTableId { ::tsox_core::fntrace::enter("symbol_table_id_from_resolved_exports"); 
     ST_KIND_RESOLVED_EXPORTS | sym.id()
 }
 
-pub(crate) fn symbol_table_id_from_members(sym: &Symbol) -> SymbolTableId {
+pub(crate) fn symbol_table_id_from_members(sym: &Symbol) -> SymbolTableId { ::tsox_core::fntrace::enter("symbol_table_id_from_members"); 
     ST_KIND_MEMBERS | sym.id()
 }
 
-pub(crate) fn symbol_table_id_from_globals() -> SymbolTableId {
+pub(crate) fn symbol_table_id_from_globals() -> SymbolTableId { ::tsox_core::fntrace::enter("symbol_table_id_from_globals"); 
     ST_KIND_GLOBALS
 }
 
@@ -44,7 +44,7 @@ pub struct AccessibleSymbolChainContext {
 }
 
 impl Clone for AccessibleSymbolChainContext {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         Self {
             symbol: Arc::clone(&self.symbol),
             enclosing_declaration: self.enclosing_declaration.clone(),
@@ -65,16 +65,16 @@ pub(crate) struct SymbolTableInScope {
     pub(crate) scope_node: Option<Arc<Node>>,
 }
 
-pub(crate) fn has_non_global_augmentation_external_module_symbol(declaration: &Arc<Node>) -> bool {
+pub(crate) fn has_non_global_augmentation_external_module_symbol(declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_non_global_augmentation_external_module_symbol"); 
     declaration.kind == SyntaxKind::ModuleDeclaration
 }
 
-pub(crate) fn has_external_module_symbol(declaration: &Arc<Node>) -> bool {
+pub(crate) fn has_external_module_symbol(declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_external_module_symbol"); 
     declaration.kind == SyntaxKind::ModuleDeclaration
         || (declaration.kind == SyntaxKind::SourceFile)
 }
 
-pub(crate) fn get_qualified_left_meaning(right_meaning: SymbolFlags) -> SymbolFlags {
+pub(crate) fn get_qualified_left_meaning(right_meaning: SymbolFlags) -> SymbolFlags { ::tsox_core::fntrace::enter("get_qualified_left_meaning"); 
     if right_meaning == SymbolFlags::VALUE {
         SymbolFlags::VALUE
     } else {
@@ -82,7 +82,7 @@ pub(crate) fn get_qualified_left_meaning(right_meaning: SymbolFlags) -> SymbolFl
     }
 }
 
-pub(crate) fn is_property_or_method_declaration_symbol(symbol: &Symbol) -> bool {
+pub(crate) fn is_property_or_method_declaration_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_property_or_method_declaration_symbol"); 
     if !symbol.declarations.is_empty() {
         for declaration in &symbol.declarations {
             match declaration.kind {
@@ -99,7 +99,7 @@ pub(crate) fn is_property_or_method_declaration_symbol(symbol: &Symbol) -> bool 
     }
 }
 
-pub(crate) fn is_umd_export_symbol(symbol: &Symbol) -> bool {
+pub(crate) fn is_umd_export_symbol(symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_umd_export_symbol"); 
     !symbol.declarations.is_empty()
         && symbol
             .declarations
@@ -108,6 +108,6 @@ pub(crate) fn is_umd_export_symbol(symbol: &Symbol) -> bool {
             .unwrap_or(false)
 }
 
-pub(crate) fn is_namespace_reexport_declaration(node: &Arc<Node>) -> bool {
+pub(crate) fn is_namespace_reexport_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_namespace_reexport_declaration"); 
     node.kind == SyntaxKind::NamespaceExport
 }

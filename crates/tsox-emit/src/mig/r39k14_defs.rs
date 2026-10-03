@@ -18,14 +18,14 @@ pub trait R39K14NodeExt {
 }
 
 impl R39K14NodeExt for Node {
-    fn as_synthetic_reference_expression(&self) -> &SyntheticReferenceExpressionData {
+    fn as_synthetic_reference_expression(&self) -> &SyntheticReferenceExpressionData { ::tsox_core::fntrace::enter("as_synthetic_reference_expression"); 
         match &self.data {
             ndg::NodeData::SyntheticReferenceExpression(d) => d,
             _ => panic!("AsSyntheticReferenceExpression on wrong node kind"),
         }
     }
 
-    fn as_delete_expression(&self) -> &DeleteExpressionData {
+    fn as_delete_expression(&self) -> &DeleteExpressionData { ::tsox_core::fntrace::enter("as_delete_expression"); 
         match &self.data {
             ndg::NodeData::DeleteExpression(d) => d,
             _ => panic!("AsDeleteExpression on wrong node kind"),
@@ -63,7 +63,7 @@ impl R39K14NodeFactoryExt for NodeFactory<'_> {
         &self,
         expression: &Arc<Node>,
         this_arg: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_synthetic_reference_expression"); 
         Arc::new(Node::new(
             SyntaxKind::SyntheticReferenceExpression,
             ndg::NodeData::SyntheticReferenceExpression(SyntheticReferenceExpressionData {
@@ -73,7 +73,7 @@ impl R39K14NodeFactoryExt for NodeFactory<'_> {
         ))
     }
 
-    fn new_delete_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    fn new_delete_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_delete_expression"); 
         Arc::new(Node::new(
             SyntaxKind::DeleteExpression,
             ndg::NodeData::DeleteExpression(DeleteExpressionData {
@@ -89,7 +89,7 @@ impl R39K14NodeFactoryExt for NodeFactory<'_> {
         question_dot_token: Option<Arc<Node>>,
         name: Option<Arc<Node>>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_property_access_expression"); 
         let original = node.as_property_access_expression();
         let mut updated = Node::new(
             SyntaxKind::PropertyAccessExpression,
@@ -111,7 +111,7 @@ impl R39K14NodeFactoryExt for NodeFactory<'_> {
         question_dot_token: Option<Arc<Node>>,
         argument_expression: Option<Arc<Node>>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_element_access_expression"); 
         let original = node.as_element_access_expression();
         let mut updated = Node::new(
             SyntaxKind::ElementAccessExpression,

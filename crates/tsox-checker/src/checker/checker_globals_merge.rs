@@ -3,7 +3,7 @@ use tsox_frontend::ast::Symbol;
 use tsox_frontend::ast::SymbolFlags;
 
 impl Checker {
-    pub(crate) fn merge_global_entry(&mut self, name: &str, sym: &Arc<Symbol>) {
+    pub(crate) fn merge_global_entry(&mut self, name: &str, sym: &Arc<Symbol>) { ::tsox_core::fntrace::enter("merge_global_entry"); 
         let existing = self.globals.get(name).cloned();
         match existing {
             Some(existing) => {
@@ -26,7 +26,7 @@ impl Checker {
         &mut self,
         target: &Arc<Symbol>,
         source: &Arc<Symbol>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("report_global_merge_conflict"); 
         // Go mergeSymbol：target 为别名时以 resolveSymbol 真身的 flags 判定，
         // 但 reportMergeSymbolError 仍以原别名符号的声明集定位报错
         let judge_flags = if target.flags.contains(SymbolFlags::Alias) {
@@ -78,7 +78,7 @@ impl Checker {
     // Go getTargetOfNamespaceExportDeclaration：`export as namespace X` 的别名
     // 目标是所在文件的外部模块符号（resolveExternalModuleSymbol(parent)），
     // populate_globals 时点通用别名解析未发生，就地按声明形态揭示
-    pub(crate) fn umd_global_alias_target(&self, alias: &Arc<Symbol>) -> Arc<Symbol> {
+    pub(crate) fn umd_global_alias_target(&self, alias: &Arc<Symbol>) -> Arc<Symbol> { ::tsox_core::fntrace::enter("umd_global_alias_target"); 
         for d in &alias.declarations {
             if d.kind == SyntaxKind::NamespaceExportDeclaration {
                 if let Some(parent) = d.parent() {
@@ -94,7 +94,7 @@ impl Checker {
     fn declaration_name_nodes(
         &mut self,
         sym: &Arc<Symbol>,
-    ) -> Vec<(tsox_core::core::text::TextRange, Option<Arc<SourceFile>>)> {
+    ) -> Vec<(tsox_core::core::text::TextRange, Option<Arc<SourceFile>>)> { ::tsox_core::fntrace::enter("declaration_name_nodes"); 
         sym.declarations
             .iter()
             .filter_map(|d| {
@@ -112,7 +112,7 @@ impl Checker {
         message: tsox_core::diagnostics::Message,
         name: &str,
         related: &[(tsox_core::core::text::TextRange, Option<Arc<SourceFile>>)],
-    ) {
+    ) { ::tsox_core::fntrace::enter("push_dup_error_with_related"); 
         let mut diag = tsox_frontend::ast::Diagnostic::new(
             file.clone(),
             loc,
@@ -139,7 +139,7 @@ impl Checker {
         self.diagnostics.add_or_append_related(diag);
     }
 
-    fn source_file_of_root(&self, decl: &Arc<Node>) -> Option<Arc<SourceFile>> {
+    fn source_file_of_root(&self, decl: &Arc<Node>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_of_root"); 
         let mut root = Arc::clone(decl);
         while let Some(p) = root.parent() {
             root = p;

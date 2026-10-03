@@ -13,7 +13,7 @@ pub struct EmitOptions {
     pub write_file: Option<Box<dyn Fn(&str, &str) -> std::io::Result<()> + Send + Sync>>,
 }
 
-pub(crate) fn compute_line_starts(text: &str) -> Vec<usize> {
+pub(crate) fn compute_line_starts(text: &str) -> Vec<usize> { ::tsox_core::fntrace::enter("compute_line_starts"); 
     let mut starts = vec![0];
     for (i, b) in text.bytes().enumerate() {
         if b == b'\n' {
@@ -23,12 +23,12 @@ pub(crate) fn compute_line_starts(text: &str) -> Vec<usize> {
     starts
 }
 
-pub(crate) fn offset_to_line(line_starts: &[usize], offset: usize) -> (i32, usize) {
+pub(crate) fn offset_to_line(line_starts: &[usize], offset: usize) -> (i32, usize) { ::tsox_core::fntrace::enter("offset_to_line"); 
     let line = line_starts.partition_point(|&start| start <= offset) - 1;
     (line as i32, line_starts[line])
 }
 
-pub(crate) fn utf16_column(text: &str, line_start: usize, offset: usize) -> i32 {
+pub(crate) fn utf16_column(text: &str, line_start: usize, offset: usize) -> i32 { ::tsox_core::fntrace::enter("utf16_column"); 
     text[line_start..offset]
         .chars()
         .map(|c| c.len_utf16() as i32)
@@ -45,7 +45,7 @@ pub(crate) struct SourceMapTracker<'a> {
 }
 
 impl<'a> SourceMapTracker<'a> {
-    pub(crate) fn new(source: &'a str) -> Self {
+    pub(crate) fn new(source: &'a str) -> Self { ::tsox_core::fntrace::enter("new"); 
         SourceMapTracker {
             output: String::new(),
             src_offsets: Vec::new(),
@@ -53,14 +53,14 @@ impl<'a> SourceMapTracker<'a> {
         }
     }
 
-    pub(crate) fn push_generated(&mut self, text: &str) {
+    pub(crate) fn push_generated(&mut self, text: &str) { ::tsox_core::fntrace::enter("push_generated"); 
         let char_count = text.chars().count();
         self.output.push_str(text);
         self.src_offsets
             .resize(self.src_offsets.len() + char_count, UNMAPPED);
     }
 
-    pub(crate) fn push_source(&mut self, start: usize, end: usize) {
+    pub(crate) fn push_source(&mut self, start: usize, end: usize) { ::tsox_core::fntrace::enter("push_source"); 
         if start >= end {
             return;
         }
@@ -73,7 +73,7 @@ impl<'a> SourceMapTracker<'a> {
         }
     }
 
-    pub(crate) fn push_source_mapped(&mut self, text: &str, src_pos: usize) {
+    pub(crate) fn push_source_mapped(&mut self, text: &str, src_pos: usize) { ::tsox_core::fntrace::enter("push_source_mapped"); 
         let mut first = true;
         for ch in text.chars() {
             self.output.push(ch);
@@ -86,7 +86,7 @@ impl<'a> SourceMapTracker<'a> {
         }
     }
 
-    pub(crate) fn finish(self) -> (String, Vec<u32>) {
+    pub(crate) fn finish(self) -> (String, Vec<u32>) { ::tsox_core::fntrace::enter("finish"); 
         (self.output, self.src_offsets)
     }
 }
@@ -100,26 +100,26 @@ pub(crate) trait EmitSink {
 }
 
 impl EmitSink for String {
-    fn emit_source(&mut self, source: &str, start: usize, end: usize) {
+    fn emit_source(&mut self, source: &str, start: usize, end: usize) { ::tsox_core::fntrace::enter("emit_source"); 
         self.push_str(&source[start..end]);
     }
-    fn emit_generated(&mut self, text: &str) {
+    fn emit_generated(&mut self, text: &str) { ::tsox_core::fntrace::enter("emit_generated"); 
         self.push_str(text);
     }
-    fn emit_source_mapped(&mut self, text: &str, _src_pos: usize) {
+    fn emit_source_mapped(&mut self, text: &str, _src_pos: usize) { ::tsox_core::fntrace::enter("emit_source_mapped"); 
         self.push_str(text);
     }
 }
 
 impl<'a> EmitSink for SourceMapTracker<'a> {
-    fn emit_source(&mut self, source: &str, start: usize, end: usize) {
+    fn emit_source(&mut self, source: &str, start: usize, end: usize) { ::tsox_core::fntrace::enter("emit_source"); 
         debug_assert!(std::ptr::eq(source.as_ptr(), self.source.as_ptr()));
         self.push_source(start, end);
     }
-    fn emit_generated(&mut self, text: &str) {
+    fn emit_generated(&mut self, text: &str) { ::tsox_core::fntrace::enter("emit_generated"); 
         self.push_generated(text);
     }
-    fn emit_source_mapped(&mut self, text: &str, src_pos: usize) {
+    fn emit_source_mapped(&mut self, text: &str, src_pos: usize) { ::tsox_core::fntrace::enter("emit_source_mapped"); 
         self.push_source_mapped(text, src_pos);
     }
 }
@@ -129,7 +129,7 @@ pub fn emit_source_file(
     options: &CompilerOptions,
     fs: &dyn FS,
     write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
-) -> EmitResult {
+) -> EmitResult { ::tsox_core::fntrace::enter("emit_source_file"); 
     emit_source_file_with_common_dir(source_file, options, fs, "", write_file)
 }
 
@@ -139,7 +139,7 @@ pub fn emit_source_file_with_common_dir(
     _fs: &dyn FS,
     common_source_directory: &str,
     write_file: &dyn Fn(&str, &str) -> std::io::Result<()>,
-) -> EmitResult {
+) -> EmitResult { ::tsox_core::fntrace::enter("emit_source_file_with_common_dir"); 
     let mut result = EmitResult::default();
 
     if source_file.script_kind == tsox_frontend::ast::ScriptKind::Json {
@@ -231,7 +231,7 @@ pub(crate) fn emit_js_with_sourcemap(
     source_file: &SourceFile,
     options: &CompilerOptions,
     js_path: &str,
-) -> (String, Option<String>, String) {
+) -> (String, Option<String>, String) { ::tsox_core::fntrace::enter("emit_js_with_sourcemap"); 
     let js_base_name = tsox_core::tspath::get_base_file_name(js_path);
     let source_root = if options.source_root.is_empty() {
         String::new()
@@ -264,7 +264,7 @@ pub(crate) fn get_js_output_path(
     source_file: &SourceFile,
     options: &CompilerOptions,
     common_source_directory: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_js_output_path"); 
     let file_name = &source_file.file_name;
     let extension = get_output_extension(file_name);
 

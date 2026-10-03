@@ -16,7 +16,7 @@ use tsox_frontend::scanner::mig::m3i::get_text_of_node;
 pub fn get_type_parameter_constraint_visibility_diagnostic_message(
     node: &Arc<Node>,
     _symbol_accessibility_result: &SymbolAccessibilityResult,
-) -> Option<&'static Message> {
+) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_type_parameter_constraint_visibility_diagnostic_message"); 
     let Some(parent) = node.parent() else {
         panic!("This is unknown parent for type parameter: None");
     };
@@ -58,7 +58,7 @@ pub fn get_type_parameter_constraint_visibility_diagnostic_message(
     }
 }
 
-pub fn get_related_suggestion_by_declaration_kind(kind: SyntaxKind) -> Option<&'static Message> {
+pub fn get_related_suggestion_by_declaration_kind(kind: SyntaxKind) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_related_suggestion_by_declaration_kind"); 
     match kind {
         SyntaxKind::ArrowFunction => Some(&diag_msgs::ADD_A_RETURN_TYPE_TO_THE_FUNCTION_EXPRESSION),
         SyntaxKind::FunctionExpression => Some(&diag_msgs::ADD_A_RETURN_TYPE_TO_THE_FUNCTION_EXPRESSION),
@@ -76,7 +76,7 @@ pub fn get_related_suggestion_by_declaration_kind(kind: SyntaxKind) -> Option<&'
     }
 }
 
-pub fn get_error_by_declaration_kind(kind: SyntaxKind) -> Option<&'static Message> {
+pub fn get_error_by_declaration_kind(kind: SyntaxKind) -> Option<&'static Message> { ::tsox_core::fntrace::enter("get_error_by_declaration_kind"); 
     match kind {
         SyntaxKind::FunctionExpression => Some(&diag_msgs::FUNCTION_MUST_HAVE_AN_EXPLICIT_RETURN_TYPE_ANNOTATION_WITH_ISOLATEDDECLARATIONS),
         SyntaxKind::FunctionDeclaration => Some(&diag_msgs::FUNCTION_MUST_HAVE_AN_EXPLICIT_RETURN_TYPE_ANNOTATION_WITH_ISOLATEDDECLARATIONS),
@@ -99,7 +99,7 @@ pub fn get_error_by_declaration_kind(kind: SyntaxKind) -> Option<&'static Messag
     }
 }
 
-pub fn is_declaration_enough_for_errors(node: &Node) -> bool {
+pub fn is_declaration_enough_for_errors(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_declaration_enough_for_errors"); 
     is_export_assignment(node)
         || is_statement(node)
         || is_variable_declaration(node)
@@ -107,11 +107,11 @@ pub fn is_declaration_enough_for_errors(node: &Node) -> bool {
         || is_parameter_declaration(node)
 }
 
-pub fn is_function_like_and_not_constructor(node: &Node) -> bool {
+pub fn is_function_like_and_not_constructor(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_function_like_and_not_constructor"); 
     is_function_like_declaration(node) && !is_constructor_declaration(node)
 }
 
-pub fn find_nearest_declaration(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn find_nearest_declaration(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_nearest_declaration"); 
     let result = find_ancestor(node, is_declaration_enough_for_errors)?;
     if is_export_assignment(&result) {
         return Some(result);
@@ -131,7 +131,7 @@ pub enum FindAncestorResult {
     Quit,
 }
 
-pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult {
+pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult { ::tsox_core::fntrace::enter("to_find_ancestor_result"); 
     if b {
         FindAncestorResult::True
     } else {
@@ -142,7 +142,7 @@ pub fn to_find_ancestor_result(b: bool) -> FindAncestorResult {
 pub fn find_ancestor_or_quit<F>(node: &Arc<Node>, callback: F) -> Option<Arc<Node>>
 where
     F: Fn(&Arc<Node>) -> FindAncestorResult,
-{
+{ ::tsox_core::fntrace::enter("find_ancestor_or_quit"); 
     let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
     while let Some(n) = current {
         match callback(&n) {
@@ -155,7 +155,7 @@ where
     None
 }
 
-pub fn is_parent_for_id_diagnostic(node: &Arc<Node>) -> FindAncestorResult {
+pub fn is_parent_for_id_diagnostic(node: &Arc<Node>) -> FindAncestorResult { ::tsox_core::fntrace::enter("is_parent_for_id_diagnostic"); 
     if is_export_assignment(node) {
         return FindAncestorResult::True;
     }
@@ -165,13 +165,13 @@ pub fn is_parent_for_id_diagnostic(node: &Arc<Node>) -> FindAncestorResult {
     to_find_ancestor_result(!is_parenthesized_expression(node) && !is_assertion_expression(node))
 }
 
-pub fn create_object_literal_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_object_literal_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_object_literal_error"); 
     let mut diag = create_diagnostic_for_node(node, get_error_by_declaration_kind(node.kind), &[]);
     add_parent_declaration_related_info(node, &mut diag);
     diag
 }
 
-pub fn create_return_type_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_return_type_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_return_type_error"); 
     let mut diag = create_diagnostic_for_node(node, get_error_by_declaration_kind(node.kind), &[]);
     add_parent_declaration_related_info(node, &mut diag);
     diag.add_related_info(create_diagnostic_for_node(
@@ -182,7 +182,7 @@ pub fn create_return_type_error(node: &Arc<Node>) -> Diagnostic {
     diag
 }
 
-pub fn create_variable_or_property_error(node: &Arc<Node>) -> Diagnostic {
+pub fn create_variable_or_property_error(node: &Arc<Node>) -> Diagnostic { ::tsox_core::fntrace::enter("create_variable_or_property_error"); 
     let mut diag = create_diagnostic_for_node(node, get_error_by_declaration_kind(node.kind), &[]);
     let name_arg = node
         .name()
@@ -196,7 +196,7 @@ pub fn create_variable_or_property_error(node: &Arc<Node>) -> Diagnostic {
     diag
 }
 
-pub fn add_parent_declaration_related_info(node: &Arc<Node>, diag: &mut Diagnostic) {
+pub fn add_parent_declaration_related_info(node: &Arc<Node>, diag: &mut Diagnostic) { ::tsox_core::fntrace::enter("add_parent_declaration_related_info"); 
     let Some(parent_declaration) = find_nearest_declaration(node) else {
         return;
     };

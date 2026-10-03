@@ -18,7 +18,7 @@ impl<'a> NodeFactory<'a> {
         &self,
         operand: &Arc<Node>,
         operator: SyntaxKind,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_postfix_unary_expression"); 
         Arc::new(Node::new(
             SyntaxKind::PostfixUnaryExpression,
             NodeData::PostfixUnaryExpression(PostfixUnaryExpressionData {
@@ -35,7 +35,7 @@ pub fn expand_pre_or_postfix_increment_or_decrement_expression(
     node: &Arc<Node>,
     expression: &Arc<Node>,
     result_variable: Option<&Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("expand_pre_or_postfix_increment_or_decrement_expression"); 
     let (operator, operand): (SyntaxKind, &Arc<Node>) = if is_prefix_unary_expression(node) {
         match &node.data {
             NodeData::PrefixUnaryExpression(d) => (d.operator, &d.operand),

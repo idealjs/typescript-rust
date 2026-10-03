@@ -14,30 +14,30 @@ pub struct OptionalChainTransformer {
     pub(crate) emit_context: EmitContext,
 }
 
-pub fn new_optional_chain_transformer(opts: &TransformOptions) -> OptionalChainTransformer {
+pub fn new_optional_chain_transformer(opts: &TransformOptions) -> OptionalChainTransformer { ::tsox_core::fntrace::enter("new_optional_chain_transformer"); 
     OptionalChainTransformer {
         emit_context: opts.context.clone(),
     }
 }
 
 impl OptionalChainTransformer {
-    pub(crate) fn factory(&self) -> NodeFactory<'_> {
+    pub(crate) fn factory(&self) -> NodeFactory<'_> { ::tsox_core::fntrace::enter("factory"); 
         NodeFactory::new(&self.emit_context)
     }
 
 }
 impl OptionalChainTransformer {
-    pub(crate) fn visit_node_opt(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub(crate) fn visit_node_opt(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node_opt"); 
         node.map(|node| self.visit(node.clone()))
     }
 
-    pub(crate) fn visit_nodes_slice(&mut self, nodes: &[Arc<Node>]) -> Arc<NodeList> {
+    pub(crate) fn visit_nodes_slice(&mut self, nodes: &[Arc<Node>]) -> Arc<NodeList> { ::tsox_core::fntrace::enter("visit_nodes_slice"); 
         Arc::new(NodeList::new(
             nodes.iter().map(|node| self.visit(node.clone())).collect(),
         ))
     }
 
-    pub(crate) fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_each_child(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         let mut changed = false;
         tsox_frontend::ast::node_data_generated::for_each_child(&node, |child| {
             let visited = self.visit(child.clone());
@@ -55,7 +55,7 @@ impl OptionalChainTransformer {
 
 }
 impl OptionalChainTransformer {
-    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub fn visit(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit"); 
         if !subtree_facts(&node).intersects(SubtreeFacts::CONTAINS_OPTIONAL_CHAINING) {
             return node;
         }
@@ -74,7 +74,7 @@ impl OptionalChainTransformer {
 
 }
 impl OptionalChainTransformer {
-    fn visit_call_expression(&mut self, node: Arc<Node>, capture_this_arg: bool) -> Arc<Node> {
+    fn visit_call_expression(&mut self, node: Arc<Node>, capture_this_arg: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_call_expression"); 
         let data = node.as_call_expression();
         if node.flags.intersects(NodeFlags::OptionalChain) {
             return self.visit_optional_expression(node, capture_this_arg, false);
@@ -117,7 +117,7 @@ impl OptionalChainTransformer {
         node: &Arc<Node>,
         capture_this_arg: bool,
         is_delete: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_parenthesized_expression"); 
         let data = node.as_parenthesized_expression();
         let expr = self.visit_non_optional_expression(&data.expression, capture_this_arg, is_delete);
         if is_synthetic_reference_expression(&expr) {
@@ -139,7 +139,7 @@ impl OptionalChainTransformer {
         node: &Arc<Node>,
         capture_this_arg: bool,
         is_delete: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_property_or_element_access_expression"); 
         if node.flags.intersects(NodeFlags::OptionalChain) {
             return self.visit_optional_expression(node.clone(), capture_this_arg, is_delete);
         }
@@ -204,7 +204,7 @@ impl OptionalChainTransformer {
 
 }
 impl OptionalChainTransformer {
-    fn visit_delete_expression(&mut self, node: Arc<Node>) -> Arc<Node> {
+    fn visit_delete_expression(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_delete_expression"); 
         let data = node.as_delete_expression();
         let unwrapped = skip_parentheses(&data.expression);
         if unwrapped.flags.intersects(NodeFlags::OptionalChain) {
@@ -220,7 +220,7 @@ impl OptionalChainTransformer {
         node: &Arc<Node>,
         capture_this_arg: bool,
         is_delete: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_non_optional_expression"); 
         match node.kind {
             SyntaxKind::ParenthesizedExpression => {
                 self.visit_parenthesized_expression(node, capture_this_arg, is_delete)

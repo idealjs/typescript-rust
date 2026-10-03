@@ -63,38 +63,38 @@ impl EmitFlags {
     pub const NO_COMMENTS: EmitFlags =
         EmitFlags(Self::NO_LEADING_COMMENTS.0 | Self::NO_TRAILING_COMMENTS.0);
 
-    pub fn contains(self, other: EmitFlags) -> bool {
+    pub fn contains(self, other: EmitFlags) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 
-    pub fn intersects(self, other: EmitFlags) -> bool {
+    pub fn intersects(self, other: EmitFlags) -> bool { ::tsox_core::fntrace::enter("intersects"); 
         self.0 & other.0 != 0
     }
 }
 
 impl std::ops::BitOr for EmitFlags {
     type Output = EmitFlags;
-    fn bitor(self, rhs: EmitFlags) -> EmitFlags {
+    fn bitor(self, rhs: EmitFlags) -> EmitFlags { ::tsox_core::fntrace::enter("bitor"); 
         EmitFlags(self.0 | rhs.0)
     }
 }
 
 impl std::ops::BitOrAssign for EmitFlags {
-    fn bitor_assign(&mut self, rhs: EmitFlags) {
+    fn bitor_assign(&mut self, rhs: EmitFlags) { ::tsox_core::fntrace::enter("bitor_assign"); 
         self.0 |= rhs.0;
     }
 }
 
 impl std::ops::BitAnd for EmitFlags {
     type Output = EmitFlags;
-    fn bitand(self, rhs: EmitFlags) -> EmitFlags {
+    fn bitand(self, rhs: EmitFlags) -> EmitFlags { ::tsox_core::fntrace::enter("bitand"); 
         EmitFlags(self.0 & rhs.0)
     }
 }
 
 impl std::ops::Not for EmitFlags {
     type Output = EmitFlags;
-    fn not(self) -> EmitFlags {
+    fn not(self) -> EmitFlags { ::tsox_core::fntrace::enter("not"); 
         EmitFlags(!self.0)
     }
 }
@@ -116,7 +116,7 @@ impl TokenEmitFlags {
     pub const INDENT_LEADING_COMMENTS: TokenEmitFlags = TokenEmitFlags(1 << 1);
     pub const NO_SOURCE_MAPS: TokenEmitFlags = TokenEmitFlags(1 << 2);
 
-    pub fn contains(self, other: TokenEmitFlags) -> bool {
+    pub fn contains(self, other: TokenEmitFlags) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 }
@@ -177,38 +177,38 @@ impl ListFormat {
             | Self::OPTIONAL_IF_EMPTY.0,
     );
 
-    pub fn contains(self, other: ListFormat) -> bool {
+    pub fn contains(self, other: ListFormat) -> bool { ::tsox_core::fntrace::enter("contains"); 
         self.0 & other.0 == other.0
     }
 
-    pub fn intersects(self, other: ListFormat) -> bool {
+    pub fn intersects(self, other: ListFormat) -> bool { ::tsox_core::fntrace::enter("intersects"); 
         self.0 & other.0 != 0
     }
 }
 
 impl std::ops::BitOr for ListFormat {
     type Output = ListFormat;
-    fn bitor(self, rhs: ListFormat) -> ListFormat {
+    fn bitor(self, rhs: ListFormat) -> ListFormat { ::tsox_core::fntrace::enter("bitor"); 
         ListFormat(self.0 | rhs.0)
     }
 }
 
 impl std::ops::BitAnd for ListFormat {
     type Output = ListFormat;
-    fn bitand(self, rhs: ListFormat) -> ListFormat {
+    fn bitand(self, rhs: ListFormat) -> ListFormat { ::tsox_core::fntrace::enter("bitand"); 
         ListFormat(self.0 & rhs.0)
     }
 }
 
 impl std::ops::BitAndAssign for ListFormat {
-    fn bitand_assign(&mut self, rhs: ListFormat) {
+    fn bitand_assign(&mut self, rhs: ListFormat) { ::tsox_core::fntrace::enter("bitand_assign"); 
         self.0 &= rhs.0;
     }
 }
 
 impl std::ops::Not for ListFormat {
     type Output = ListFormat;
-    fn not(self) -> ListFormat {
+    fn not(self) -> ListFormat { ::tsox_core::fntrace::enter("not"); 
         ListFormat(!self.0 & 0x3F_FFFF)
     }
 }
@@ -248,13 +248,13 @@ pub struct EmitContext {
 }
 
 impl EmitContext {
-    pub fn next_auto_generate_id(&self) -> u32 {
+    pub fn next_auto_generate_id(&self) -> u32 { ::tsox_core::fntrace::enter("next_auto_generate_id"); 
         let id = self.next_auto_id.get() + 1;
         self.next_auto_id.set(id);
         id
     }
 
-    pub fn emit_flags(&self, node: &Arc<Node>) -> EmitFlags {
+    pub fn emit_flags(&self, node: &Arc<Node>) -> EmitFlags { ::tsox_core::fntrace::enter("emit_flags"); 
         self.node_emit_flags
             .borrow()
             .get(&node.id())
@@ -262,17 +262,17 @@ impl EmitContext {
             .unwrap_or(EmitFlags::NONE)
     }
 
-    pub fn add_emit_flags(&self, node: &Arc<Node>, flags: EmitFlags) {
+    pub fn add_emit_flags(&self, node: &Arc<Node>, flags: EmitFlags) { ::tsox_core::fntrace::enter("add_emit_flags"); 
         let mut map = self.node_emit_flags.borrow_mut();
         let entry = map.entry(node.id()).or_insert(EmitFlags::NONE);
         *entry = *entry | flags;
     }
 
-    pub fn set_emit_flags(&self, node: &Arc<Node>, flags: EmitFlags) {
+    pub fn set_emit_flags(&self, node: &Arc<Node>, flags: EmitFlags) { ::tsox_core::fntrace::enter("set_emit_flags"); 
         self.node_emit_flags.borrow_mut().insert(node.id(), flags);
     }
 
-    pub fn comment_range(&self, node: &Arc<Node>) -> TextRange {
+    pub fn comment_range(&self, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("comment_range"); 
         self.node_comment_ranges
             .borrow()
             .get(&node.id())
@@ -280,11 +280,11 @@ impl EmitContext {
             .unwrap_or(node.loc)
     }
 
-    pub fn set_comment_range(&self, node: &Arc<Node>, range: TextRange) {
+    pub fn set_comment_range(&self, node: &Arc<Node>, range: TextRange) { ::tsox_core::fntrace::enter("set_comment_range"); 
         self.node_comment_ranges.borrow_mut().insert(node.id(), range);
     }
 
-    pub fn source_map_range(&self, node: &Arc<Node>) -> TextRange {
+    pub fn source_map_range(&self, node: &Arc<Node>) -> TextRange { ::tsox_core::fntrace::enter("source_map_range"); 
         self.node_source_map_ranges
             .borrow()
             .get(&node.id())
@@ -292,29 +292,29 @@ impl EmitContext {
             .unwrap_or(node.loc)
     }
 
-    pub fn set_source_map_range(&self, node: &Arc<Node>, range: TextRange) {
+    pub fn set_source_map_range(&self, node: &Arc<Node>, range: TextRange) { ::tsox_core::fntrace::enter("set_source_map_range"); 
         self.node_source_map_ranges
             .borrow_mut()
             .insert(node.id(), range);
     }
 
-    pub fn set_text_source(&self, node: &Arc<Node>, source: &Arc<Node>) {
+    pub fn set_text_source(&self, node: &Arc<Node>, source: &Arc<Node>) { ::tsox_core::fntrace::enter("set_text_source"); 
         self.node_text_sources
             .borrow_mut()
             .insert(node.id(), source.clone());
     }
 
-    pub fn get_type_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn get_type_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_type_node"); 
         self.node_type_nodes.borrow().get(&node.id()).cloned()
     }
 
-    pub fn set_type_node(&self, node: &Arc<Node>, type_node: &Arc<Node>) {
+    pub fn set_type_node(&self, node: &Arc<Node>, type_node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_type_node"); 
         self.node_type_nodes
             .borrow_mut()
             .insert(node.id(), type_node.clone());
     }
 
-    pub fn parse_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn parse_node(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_node"); 
         self.parsed_nodes.borrow().get(&node.id()).cloned()
     }
 
@@ -322,14 +322,14 @@ impl EmitContext {
         &self,
         node: &Arc<Node>,
         source: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("assign_comment_and_source_map_ranges"); 
         let comment_range = self.comment_range(source);
         let source_map_range = self.source_map_range(source);
         self.set_comment_range(node, comment_range);
         self.set_source_map_range(node, source_map_range);
     }
 
-    pub fn request_emit_helper(&self, helper: EmitHelper) {
+    pub fn request_emit_helper(&self, helper: EmitHelper) { ::tsox_core::fntrace::enter("request_emit_helper"); 
         let mut map = self.requested_emit_helpers.borrow_mut();
         map.entry(helper.name.clone())
             .or_insert_with(|| Arc::new(helper));
@@ -340,7 +340,7 @@ impl EmitContext {
         _source_file: &crate::ast::node_source_file::SourceFile,
         name: &str,
         has_global_name: Option<fn(&str) -> bool>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("is_file_level_unique_name"); 
         if let Some(has_global_name) = has_global_name {
             if has_global_name(name) {
                 return false;
@@ -354,7 +354,7 @@ pub struct NodeFactory {
     pub emit_context: EmitContext,
 }
 
-pub fn new_node_factory(context: EmitContext) -> NodeFactory {
+pub fn new_node_factory(context: EmitContext) -> NodeFactory { ::tsox_core::fntrace::enter("new_node_factory"); 
     NodeFactory {
         emit_context: context,
     }
@@ -371,7 +371,7 @@ pub struct AssignedNameOptions {
     pub ignore_assigned_name: bool,
 }
 
-fn simple_helper(name: &str, import_name: &str) -> EmitHelper {
+fn simple_helper(name: &str, import_name: &str) -> EmitHelper { ::tsox_core::fntrace::enter("simple_helper"); 
     EmitHelper {
         name: name.to_string(),
         scoped: false,
@@ -383,43 +383,43 @@ fn simple_helper(name: &str, import_name: &str) -> EmitHelper {
     }
 }
 
-pub fn metadata_helper() -> EmitHelper {
+pub fn metadata_helper() -> EmitHelper { ::tsox_core::fntrace::enter("metadata_helper"); 
     simple_helper("typescript:metadata", "__metadata")
 }
 
-pub fn param_helper() -> EmitHelper {
+pub fn param_helper() -> EmitHelper { ::tsox_core::fntrace::enter("param_helper"); 
     simple_helper("typescript:param", "__param")
 }
 
-pub fn rest_helper() -> EmitHelper {
+pub fn rest_helper() -> EmitHelper { ::tsox_core::fntrace::enter("rest_helper"); 
     simple_helper("typescript:rest", "__rest")
 }
 
-pub fn run_initializers_helper() -> EmitHelper {
+pub fn run_initializers_helper() -> EmitHelper { ::tsox_core::fntrace::enter("run_initializers_helper"); 
     simple_helper("typescript:runInitializers", "__runInitializers")
 }
 
-pub fn make_template_object_helper() -> EmitHelper {
+pub fn make_template_object_helper() -> EmitHelper { ::tsox_core::fntrace::enter("make_template_object_helper"); 
     simple_helper("typescript:makeTemplateObject", "__makeTemplateObject")
 }
 
-pub fn prop_key_helper() -> EmitHelper {
+pub fn prop_key_helper() -> EmitHelper { ::tsox_core::fntrace::enter("prop_key_helper"); 
     simple_helper("typescript:propKey", "__propKey")
 }
 
-pub fn set_function_name_helper() -> EmitHelper {
+pub fn set_function_name_helper() -> EmitHelper { ::tsox_core::fntrace::enter("set_function_name_helper"); 
     simple_helper("typescript:setFunctionName", "__setFunctionName")
 }
 
-pub fn import_default_helper() -> EmitHelper {
+pub fn import_default_helper() -> EmitHelper { ::tsox_core::fntrace::enter("import_default_helper"); 
     simple_helper("typescript:importDefault", "__importDefault")
 }
 
-pub fn import_star_helper() -> EmitHelper {
+pub fn import_star_helper() -> EmitHelper { ::tsox_core::fntrace::enter("import_star_helper"); 
     simple_helper("typescript:importStar", "__importStar")
 }
 
-pub fn rewrite_relative_import_extensions_helper() -> EmitHelper {
+pub fn rewrite_relative_import_extensions_helper() -> EmitHelper { ::tsox_core::fntrace::enter("rewrite_relative_import_extensions_helper"); 
     simple_helper(
         "typescript:rewriteRelativeImportExtensions",
         "__rewriteRelativeImportExtension",
@@ -427,15 +427,15 @@ pub fn rewrite_relative_import_extensions_helper() -> EmitHelper {
 }
 
 impl NodeFactory {
-    pub fn new_token(&self, kind: SyntaxKind) -> Arc<Node> {
+    pub fn new_token(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_token"); 
         Arc::new(Node::new(kind, NodeData::Token))
     }
 
-    pub fn new_node_list(&self, nodes: &[Arc<Node>]) -> Arc<NodeList> {
+    pub fn new_node_list(&self, nodes: &[Arc<Node>]) -> Arc<NodeList> { ::tsox_core::fntrace::enter("new_node_list"); 
         Arc::new(NodeList::new(nodes.to_vec()))
     }
 
-    pub fn new_identifier(&self, text: &str) -> Arc<Node> {
+    pub fn new_identifier(&self, text: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_identifier"); 
         Arc::new(Node::new(
             SyntaxKind::Identifier,
             NodeData::Identifier(crate::ast::node_data_generated::IdentifierData {
@@ -444,7 +444,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_string_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_string_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal"); 
         Arc::new(Node::new(
             SyntaxKind::StringLiteral,
             NodeData::StringLiteral(crate::ast::node_data_generated::StringLiteralData {
@@ -454,7 +454,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_numeric_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> {
+    pub fn new_numeric_literal(&self, text: &str, token_flags: TokenFlags) -> Arc<Node> { ::tsox_core::fntrace::enter("new_numeric_literal"); 
         Arc::new(Node::new(
             SyntaxKind::NumericLiteral,
             NodeData::NumericLiteral(crate::ast::node_data_generated::NumericLiteralData {
@@ -464,7 +464,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_keyword_expression(&self, kind: SyntaxKind) -> Arc<Node> {
+    pub fn new_keyword_expression(&self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("new_keyword_expression"); 
         self.new_token(kind)
     }
 
@@ -475,7 +475,7 @@ impl NodeFactory {
         type_node: Option<Arc<Node>>,
         operator_token: Arc<Node>,
         right: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_binary_expression"); 
         Arc::new(Node::new(
             SyntaxKind::BinaryExpression,
             NodeData::BinaryExpression(crate::ast::node_data_generated::BinaryExpressionData {
@@ -488,7 +488,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_void_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_void_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_void_expression"); 
         Arc::new(Node::new(
             SyntaxKind::VoidExpression,
             NodeData::VoidExpression(crate::ast::node_data_generated::VoidExpressionData {
@@ -503,7 +503,7 @@ impl NodeFactory {
         question_dot_token: Option<Arc<Node>>,
         name: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_property_access_expression"); 
         let mut node = Node::new(
             SyntaxKind::PropertyAccessExpression,
             NodeData::PropertyAccessExpression(
@@ -525,7 +525,7 @@ impl NodeFactory {
         type_arguments: Option<Arc<NodeList>>,
         arguments: Arc<NodeList>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_call_expression"); 
         let mut node = Node::new(
             SyntaxKind::CallExpression,
             NodeData::CallExpression(crate::ast::node_data_generated::CallExpressionData {
@@ -539,7 +539,7 @@ impl NodeFactory {
         Arc::new(node)
     }
 
-    pub fn new_parenthesized_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_parenthesized_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_parenthesized_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ParenthesizedExpression,
             NodeData::ParenthesizedExpression(
@@ -557,7 +557,7 @@ impl NodeFactory {
         when_true: &Arc<Node>,
         colon_token: Arc<Node>,
         when_false: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_conditional_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ConditionalExpression,
             NodeData::ConditionalExpression(
@@ -576,7 +576,7 @@ impl NodeFactory {
         &self,
         elements: Arc<NodeList>,
         multi_line: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_array_literal_expression"); 
         Arc::new(Node::new(
             SyntaxKind::ArrayLiteralExpression,
             NodeData::ArrayLiteralExpression(
@@ -597,7 +597,7 @@ impl NodeFactory {
         full_signature: Option<Arc<Node>>,
         equals_greater_than_token: Arc<Node>,
         body: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_arrow_function"); 
         Arc::new(Node::new(
             SyntaxKind::ArrowFunction,
             NodeData::ArrowFunction(crate::ast::node_data_generated::ArrowFunctionData {
@@ -612,7 +612,7 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_block(&self, statements: Arc<NodeList>, multi_line: bool) -> Arc<Node> {
+    pub fn new_block(&self, statements: Arc<NodeList>, multi_line: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("new_block"); 
         Arc::new(Node::new(
             SyntaxKind::Block,
             NodeData::Block(crate::ast::node_data_generated::BlockData {
@@ -622,12 +622,12 @@ impl NodeFactory {
         ))
     }
 
-    pub fn new_generated_name_for_node(&self, node: &Arc<Node>) -> Arc<Node> {
+    pub fn new_generated_name_for_node(&self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_generated_name_for_node"); 
         let _ = self.emit_context.next_auto_generate_id();
         self.new_identifier(&node.text())
     }
 
-    pub fn new_string_literal_from_node(&self, text_source_node: &Arc<Node>) -> Arc<Node> {
+    pub fn new_string_literal_from_node(&self, text_source_node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_string_literal_from_node"); 
         let mut text = String::new();
         match text_source_node.kind {
             SyntaxKind::Identifier
@@ -650,15 +650,15 @@ impl NodeFactory {
         node
     }
 
-    pub fn new_this_expression(&self) -> Arc<Node> {
+    pub fn new_this_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_this_expression"); 
         self.new_keyword_expression(SyntaxKind::ThisKeyword)
     }
 
-    pub fn new_true_expression(&self) -> Arc<Node> {
+    pub fn new_true_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_true_expression"); 
         self.new_keyword_expression(SyntaxKind::TrueKeyword)
     }
 
-    pub fn new_logical_or_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    pub fn new_logical_or_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_logical_or_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -668,7 +668,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_logical_and_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    pub fn new_logical_and_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_logical_and_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -678,7 +678,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_strict_equality_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> {
+    pub fn new_strict_equality_expression(&self, left: &Arc<Node>, right: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_strict_equality_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -692,7 +692,7 @@ impl NodeFactory {
         &self,
         left: &Arc<Node>,
         right: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_strict_inequality_expression"); 
         self.new_binary_expression(
             None,
             left,
@@ -702,7 +702,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_void_zero_expression(&self) -> Arc<Node> {
+    pub fn new_void_zero_expression(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("new_void_zero_expression"); 
         self.new_void_expression(&self.new_numeric_literal("0", TokenFlags::default()))
     }
 
@@ -710,7 +710,7 @@ impl NodeFactory {
         &self,
         node: &Arc<Node>,
         outermost_labeled_statement: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("restore_enclosing_label"); 
         let Some(outermost) = outermost_labeled_statement else {
             return node.clone();
         };
@@ -725,7 +725,7 @@ impl NodeFactory {
         self.update_labeled_statement(outermost, &label_node, &inner_label)
     }
 
-    pub fn new_type_check(&self, value: &Arc<Node>, tag: &str) -> Arc<Node> {
+    pub fn new_type_check(&self, value: &Arc<Node>, tag: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_type_check"); 
         if tag == "null" {
             self.new_strict_equality_expression(
                 value,
@@ -746,7 +746,7 @@ impl NodeFactory {
         object: &Arc<Node>,
         method_name: &Arc<Node>,
         arguments_list: &[Arc<Node>],
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_method_call"); 
         let property_access =
             self.new_property_access_expression(object, None, method_name, NodeFlags::empty());
         if is_call_expression(object) && object.flags.contains(NodeFlags::OptionalChain) {
@@ -772,7 +772,7 @@ impl NodeFactory {
         global_object_name: &str,
         method_name: &str,
         arguments_list: &[Arc<Node>],
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_global_method_call"); 
         self.new_method_call(
             &self.new_identifier(global_object_name),
             &self.new_identifier(method_name),
@@ -785,14 +785,14 @@ impl NodeFactory {
         target: &Arc<Node>,
         this_arg: &Arc<Node>,
         arguments_list: &[Arc<Node>],
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_function_call_call"); 
         let mut args = Vec::with_capacity(1 + arguments_list.len());
         args.push(this_arg.clone());
         args.extend(arguments_list.iter().cloned());
         self.new_method_call(target, &self.new_identifier("call"), &args)
     }
 
-    pub fn is_ignorable_paren(&self, node: &Arc<Node>) -> bool {
+    pub fn is_ignorable_paren(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_ignorable_paren"); 
         is_parenthesized_expression(node)
             && node_is_synthesized(node)
             && range_is_synthesized(self.emit_context.source_map_range(node))
@@ -803,7 +803,7 @@ impl NodeFactory {
         &self,
         outer_expression: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_outer_expression"); 
         match outer_expression.kind {
             SyntaxKind::ParenthesizedExpression => {
                 self.update_parenthesized_expression(outer_expression, expression)
@@ -857,7 +857,7 @@ impl NodeFactory {
         outer_expression: Option<&Arc<Node>>,
         inner_expression: &Arc<Node>,
         kinds: OuterExpressionKinds,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("restore_outer_expressions"); 
         if let Some(outer) = outer_expression {
             if is_outer_expression(outer, kinds) && !self.is_ignorable_paren(outer) {
                 let outer_inner = outer
@@ -880,7 +880,7 @@ impl NodeFactory {
     pub fn split_standard_prologue<'a>(
         &self,
         source: &'a [Arc<Node>],
-    ) -> (&'a [Arc<Node>], &'a [Arc<Node>]) {
+    ) -> (&'a [Arc<Node>], &'a [Arc<Node>]) { ::tsox_core::fntrace::enter("split_standard_prologue"); 
         for (i, statement) in source.iter().enumerate() {
             if !is_prologue_directive(statement) {
                 return (&source[..i], &source[i..]);
@@ -892,7 +892,7 @@ impl NodeFactory {
     pub fn split_custom_prologue<'a>(
         &self,
         source: &'a [Arc<Node>],
-    ) -> (&'a [Arc<Node>], &'a [Arc<Node>]) {
+    ) -> (&'a [Arc<Node>], &'a [Arc<Node>]) { ::tsox_core::fntrace::enter("split_custom_prologue"); 
         for (i, statement) in source.iter().enumerate() {
             if is_prologue_directive(statement)
                 || !self
@@ -911,7 +911,7 @@ impl NodeFactory {
         node: &Arc<Node>,
         emit_flags: EmitFlags,
         opts: AssignedNameOptions,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("get_name"); 
         let mut node_name: Option<Arc<Node>> = None;
         if opts.ignore_assigned_name {
             node_name = get_non_assigned_name_of_declaration(node);
@@ -935,13 +935,13 @@ impl NodeFactory {
         self.new_generated_name_for_node(node)
     }
 
-    pub fn new_unscoped_helper_name(&self, name: &str) -> Arc<Node> {
+    pub fn new_unscoped_helper_name(&self, name: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("new_unscoped_helper_name"); 
         let node = self.new_identifier(name);
         self.emit_context.set_emit_flags(&node, EF_HELPER_NAME);
         node
     }
 
-    pub fn new_metadata_helper(&self, metadata_key: &str, metadata_value: &Arc<Node>) -> Arc<Node> {
+    pub fn new_metadata_helper(&self, metadata_key: &str, metadata_value: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_metadata_helper"); 
         self.emit_context.request_emit_helper(metadata_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__metadata"),
@@ -960,7 +960,7 @@ impl NodeFactory {
         expression: &Arc<Node>,
         parameter_offset: usize,
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_param_helper"); 
         self.emit_context.request_emit_helper(param_helper());
         let mut helper = self.new_call_expression(
             &self.new_unscoped_helper_name("__param"),
@@ -983,7 +983,7 @@ impl NodeFactory {
         target: &Arc<Node>,
         name: &Arc<Node>,
         descriptor: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_object_define_property_call"); 
         self.new_call_expression(
             &self.new_property_access_expression(
                 &self.new_identifier("Object"),
@@ -1003,7 +1003,7 @@ impl NodeFactory {
         target: &Arc<Node>,
         property_key: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_reflect_get_call"); 
         self.new_call_expression(
             &self.new_property_access_expression(
                 &self.new_identifier("Reflect"),
@@ -1024,7 +1024,7 @@ impl NodeFactory {
         property_key: &Arc<Node>,
         value: &Arc<Node>,
         receiver: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_reflect_set_call"); 
         self.new_call_expression(
             &self.new_property_access_expression(
                 &self.new_identifier("Reflect"),
@@ -1044,7 +1044,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_immediately_invoked_arrow_function(&self, statements: &[Arc<Node>]) -> Arc<Node> {
+    pub fn new_immediately_invoked_arrow_function(&self, statements: &[Arc<Node>]) -> Arc<Node> { ::tsox_core::fntrace::enter("new_immediately_invoked_arrow_function"); 
         let arrow = self.new_arrow_function(
             None,
             None,
@@ -1069,7 +1069,7 @@ impl NodeFactory {
         elements: &[Arc<Node>],
         computed_temp_variables: &[Arc<Node>],
         location: TextRange,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_rest_helper"); 
         self.emit_context.request_emit_helper(rest_helper());
         let mut property_names: Vec<Arc<Node>> = Vec::new();
         let mut computed_temp_variable_offset = 0;
@@ -1122,7 +1122,7 @@ impl NodeFactory {
         this_arg: &Arc<Node>,
         initializers: &Arc<Node>,
         value: Option<&Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_run_initializers_helper"); 
         self.emit_context.request_emit_helper(run_initializers_helper());
         let arguments: Vec<Arc<Node>> = match value {
             Some(value) => vec![this_arg.clone(), initializers.clone(), value.clone()],
@@ -1141,7 +1141,7 @@ impl NodeFactory {
         &self,
         cooked_array: &Arc<Node>,
         raw_array: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_template_object_helper"); 
         self.emit_context.request_emit_helper(make_template_object_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__makeTemplateObject"),
@@ -1152,7 +1152,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_prop_key_helper(&self, expr: &Arc<Node>) -> Arc<Node> {
+    pub fn new_prop_key_helper(&self, expr: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_prop_key_helper"); 
         self.emit_context.request_emit_helper(prop_key_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__propKey"),
@@ -1168,7 +1168,7 @@ impl NodeFactory {
         fn_: &Arc<Node>,
         name: &Arc<Node>,
         prefix: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_set_function_name_helper"); 
         self.emit_context.request_emit_helper(set_function_name_helper());
         let arguments: Vec<Arc<Node>> = if !prefix.is_empty() {
             vec![
@@ -1188,7 +1188,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_import_default_helper(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_import_default_helper(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_default_helper"); 
         self.emit_context.request_emit_helper(import_default_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__importDefault"),
@@ -1199,7 +1199,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_import_star_helper(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_import_star_helper(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_import_star_helper"); 
         self.emit_context.request_emit_helper(import_star_helper());
         self.new_call_expression(
             &self.new_unscoped_helper_name("__importStar"),
@@ -1214,7 +1214,7 @@ impl NodeFactory {
         &self,
         first_argument: &Arc<Node>,
         preserve_jsx: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_rewrite_relative_import_extensions_helper"); 
         self.emit_context
             .request_emit_helper(rewrite_relative_import_extensions_helper());
         let arguments: Vec<Arc<Node>> = if preserve_jsx {
@@ -1234,7 +1234,7 @@ impl NodeFactory {
         )
     }
 
-    pub fn new_type_of_expression(&self, expression: &Arc<Node>) -> Arc<Node> {
+    pub fn new_type_of_expression(&self, expression: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_type_of_expression"); 
         Arc::new(Node::new(
             SyntaxKind::TypeOfExpression,
             NodeData::TypeOfExpression(crate::ast::node_data_generated::TypeOfExpressionData {
@@ -1248,7 +1248,7 @@ impl NodeFactory {
         node: &Arc<Node>,
         label: &Arc<Node>,
         statement: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_labeled_statement"); 
         let data = match &node.data {
             NodeData::LabeledStatement(d) => d,
             _ => panic!("update_labeled_statement on non-labeled statement"),
@@ -1269,7 +1269,7 @@ impl NodeFactory {
         &self,
         node: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_parenthesized_expression"); 
         let existing = match &node.data {
             NodeData::ParenthesizedExpression(d) => &d.expression,
             _ => panic!("update_parenthesized_expression on non-parenthesized expression"),
@@ -1285,7 +1285,7 @@ impl NodeFactory {
         node: &Arc<Node>,
         type_node: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_type_assertion"); 
         if let NodeData::TypeAssertion(d) = &node.data {
             if Arc::ptr_eq(&d.type_node, type_node) && Arc::ptr_eq(&d.expression, expression) {
                 return node.clone();
@@ -1305,7 +1305,7 @@ impl NodeFactory {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         type_node: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_as_expression"); 
         if let NodeData::AsExpression(d) = &node.data {
             if Arc::ptr_eq(&d.expression, expression) && Arc::ptr_eq(&d.type_node, type_node) {
                 return node.clone();
@@ -1325,7 +1325,7 @@ impl NodeFactory {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         type_node: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_satisfies_expression"); 
         if let NodeData::SatisfiesExpression(d) = &node.data {
             if Arc::ptr_eq(&d.expression, expression) && Arc::ptr_eq(&d.type_node, type_node) {
                 return node.clone();
@@ -1345,7 +1345,7 @@ impl NodeFactory {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         flags: NodeFlags,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_non_null_expression"); 
         let unchanged = match &node.data {
             NodeData::NonNullExpression(d) => Arc::ptr_eq(&d.expression, expression),
             _ => false,
@@ -1368,7 +1368,7 @@ impl NodeFactory {
         node: &Arc<Node>,
         expression: &Arc<Node>,
         type_arguments: Option<Arc<NodeList>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_expression_with_type_arguments"); 
         if let NodeData::ExpressionWithTypeArguments(d) = &node.data {
             let type_arguments_unchanged = match (&d.type_arguments, &type_arguments) {
                 (None, None) => true,
@@ -1394,7 +1394,7 @@ impl NodeFactory {
         &self,
         node: &Arc<Node>,
         expression: &Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_partially_emitted_expression"); 
         let unchanged = match &node.data {
             NodeData::PartiallyEmittedExpression(d) => Arc::ptr_eq(&d.expression, expression),
             _ => false,
@@ -1415,7 +1415,7 @@ impl NodeFactory {
 
 use crate::ast::utilities_navigation::get_non_assigned_name_of_declaration;
 
-pub fn flatten_comma_element(node: &Arc<Node>, expressions: &mut Vec<Arc<Node>>) {
+pub fn flatten_comma_element(node: &Arc<Node>, expressions: &mut Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("flatten_comma_element"); 
     if is_binary_expression(node)
         && node_is_synthesized(node)
         && matches!(
@@ -1433,7 +1433,7 @@ pub fn flatten_comma_element(node: &Arc<Node>, expressions: &mut Vec<Arc<Node>>)
     expressions.push(node.clone());
 }
 
-pub fn flatten_comma_elements(expressions: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn flatten_comma_elements(expressions: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_comma_elements"); 
     let mut result = Vec::new();
     for expression in expressions {
         flatten_comma_element(expression, &mut result);

@@ -4,7 +4,7 @@ use crate::checker::nodebuilder::*;
 use crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 
 impl Checker {
-    pub(crate) fn type_to_type_node_worker(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub(crate) fn type_to_type_node_worker(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_to_type_node_worker"); 
         if let Some(name) = t.intrinsic_name() {
             return self.intrinsic_to_type_node(name);
         }
@@ -93,7 +93,7 @@ impl Checker {
         self.keyword_node(SyntaxKind::AnyKeyword)
     }
 
-    pub(crate) fn intrinsic_to_type_node(&mut self, name: &str) -> Arc<Node> {
+    pub(crate) fn intrinsic_to_type_node(&mut self, name: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("intrinsic_to_type_node"); 
         let kind = match name {
             "any" => SyntaxKind::AnyKeyword,
             "unknown" => SyntaxKind::UnknownKeyword,
@@ -113,7 +113,7 @@ impl Checker {
         self.keyword_node(kind)
     }
 
-    pub(crate) fn literal_value_to_type_node(&mut self, val: &LiteralValue) -> Arc<Node> {
+    pub(crate) fn literal_value_to_type_node(&mut self, val: &LiteralValue) -> Arc<Node> { ::tsox_core::fntrace::enter("literal_value_to_type_node"); 
         let literal = match val {
             LiteralValue::String(s) => self.string_literal_node(s),
             LiteralValue::Number(n) => self.numeric_literal_node(&n.to_string()),
@@ -126,7 +126,7 @@ impl Checker {
         self.literal_type_node(literal)
     }
 
-    pub(crate) fn union_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub(crate) fn union_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("union_to_type_node"); 
         if t.alias.is_none()
             && let TypeData::Union(u) = &t.data
             && let Some(origin) = &u.origin
@@ -169,7 +169,7 @@ impl Checker {
         self.union_type_node(nodes)
     }
 
-    pub(crate) fn intersection_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub(crate) fn intersection_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("intersection_to_type_node"); 
         let types = t.types().unwrap_or(&[]);
         if types.is_empty() {
             return self.keyword_node(SyntaxKind::UnknownKeyword);
@@ -191,7 +191,7 @@ impl Checker {
         self.intersection_type_node(nodes)
     }
 
-    pub(crate) fn type_parameter_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub(crate) fn type_parameter_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("type_parameter_to_type_node"); 
         if let TypeData::TypeParameter(tp) = &t.data {
             if tp.is_this_type {
                 let name = self.identifier("this");
@@ -206,7 +206,7 @@ impl Checker {
         self.type_reference_node(name, None)
     }
 
-    pub(crate) fn tuple_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub(crate) fn tuple_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("tuple_to_type_node"); 
         let TypeData::Tuple(tuple) = &t.data else {
             return self.tuple_type_node(Vec::new());
         };
@@ -234,11 +234,11 @@ impl Checker {
         self.tuple_type_node(elements)
     }
 
-    fn named_tuple_member_node(&mut self, _label: &str, ty: Arc<Node>) -> Arc<Node> {
+    fn named_tuple_member_node(&mut self, _label: &str, ty: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("named_tuple_member_node"); 
         ty
     }
 
-    pub(crate) fn reference_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> {
+    pub(crate) fn reference_to_type_node(&mut self, t: &Arc<Type>) -> Arc<Node> { ::tsox_core::fntrace::enter("reference_to_type_node"); 
         let obj_data = match &t.data {
             TypeData::Object(o) => o,
             TypeData::Interface(i) => &i.object,
@@ -280,7 +280,7 @@ impl Checker {
     pub(crate) fn function_type_to_type_node(
         &mut self,
         structured: &StructuredTypeData,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("function_type_to_type_node"); 
         let sigs = structured.call_signatures();
         if sigs.is_empty() {
             let ret = self.keyword_node(SyntaxKind::UnknownKeyword);
@@ -300,7 +300,7 @@ impl Checker {
     pub(crate) fn type_literal_to_type_node(
         &mut self,
         structured: &StructuredTypeData,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("type_literal_to_type_node"); 
         let mut members: Vec<Arc<Node>> = Vec::new();
 
         for sig in structured.call_signatures() {

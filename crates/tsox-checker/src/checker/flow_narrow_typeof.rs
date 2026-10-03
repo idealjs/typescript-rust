@@ -44,7 +44,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         type_name: &str,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_type_name"); 
         let implied = match type_name {
             "string" => self.string_type(),
             "number" => self.number_type(),
@@ -92,7 +92,7 @@ impl Checker {
         t: &Arc<Type>,
         implied: &Arc<Type>,
         fact: u32,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_type_by_typeof_facts"); 
         if t.is_union() {
             let mapped: Vec<Arc<Type>> = self
                 .constituent_types(t)
@@ -110,7 +110,7 @@ impl Checker {
         t: &Arc<Type>,
         implied: &Arc<Type>,
         fact: u32,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("narrow_constituent_by_typeof_facts"); 
         if self.is_type_related_to(t, implied, RelationKind::StrictSubtype) {
             if self.get_typeof_facts(t) & fact != 0 {
                 return Arc::clone(t);
@@ -126,7 +126,7 @@ impl Checker {
         self.never_type()
     }
 
-    pub(crate) fn get_typeof_facts(&mut self, t: &Arc<Type>) -> u32 {
+    pub(crate) fn get_typeof_facts(&mut self, t: &Arc<Type>) -> u32 { ::tsox_core::fntrace::enter("get_typeof_facts"); 
         if t.flags.intersects(TYPE_FLAGS_INSTANTIABLE | TypeFlags::Intersection) {
             let constrained = self
                 .get_base_constraint_of_type(t)
@@ -228,7 +228,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         types: &[Arc<Type>],
-    ) -> u32 {
+    ) -> u32 { ::tsox_core::fntrace::enter("get_typeof_facts_of_intersection"); 
         let ignore_objects = self.maybe_type_of_kind(t, TYPE_FLAGS_PRIMITIVE);
         let mut ored = 0;
         let mut anded = TYPEOF_FACTS_ALL;
@@ -243,7 +243,7 @@ impl Checker {
         (ored & TYPEOF_OR_FACTS_MASK) | (anded & TYPEOF_AND_FACTS_MASK)
     }
 
-    pub(crate) fn is_empty_object_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_empty_object_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_empty_object_type"); 
         if t.flags.contains(TypeFlags::Object) {
             let Some(structured) = t.as_structured() else {
                 return false;
@@ -269,7 +269,7 @@ impl Checker {
         false
     }
 
-    pub(crate) fn is_function_like_object_type(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_function_like_object_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_function_like_object_type"); 
         if t.object_flags.contains(ObjectFlags::EvolvingArray) {
             return false;
         }
@@ -288,7 +288,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn typeof_ne_facts_of_witness(text: &str) -> u32 {
+    pub(crate) fn typeof_ne_facts_of_witness(text: &str) -> u32 { ::tsox_core::fntrace::enter("typeof_ne_facts_of_witness"); 
         match text {
             "string" => TYPEOF_NE_STRING,
             "number" => TYPEOF_NE_NUMBER,

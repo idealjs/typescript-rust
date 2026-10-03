@@ -3,7 +3,7 @@
 use crate::checker::checker_symbol_types::*;
 
 impl Checker {
-    pub fn get_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> {
+    pub fn get_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_symbol"); 
         // CommonJS require 符号类型为 any（Go getTypeOfVariableOrParameterOrPropertyWorker）
         if self
             .require_symbol
@@ -430,7 +430,7 @@ impl Checker {
         &mut self,
         decl: &Arc<Node>,
         body: &Option<Arc<Node>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_method_return_type"); 
         // Go getReturnTypeOfSignature：方法帧整体即返回型解析窗口,重入计环
         if body.is_some() && !self.push_signature_return_resolution(Arc::as_ptr(decl)) {
             return self.get_any_type();
@@ -464,7 +464,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<tsox_frontend::ast::Symbol>,
         base: Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("attach_function_expando_type"); 
         let mut entries: Vec<(String, Arc<Node>)> = Vec::new();
         for (name, sym) in symbol.exports.iter() {
             if name == tsox_frontend::ast::INTERNAL_SYMBOL_NAME_ASSIGNMENT {
@@ -627,7 +627,7 @@ impl Checker {
         })
     }
 
-    pub(crate) fn add_optional_undefined(&mut self, t: Arc<Type>) -> Arc<Type> {
+    pub(crate) fn add_optional_undefined(&mut self, t: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("add_optional_undefined"); 
         if !self.strict_null_checks {
             return t;
         }
@@ -645,7 +645,7 @@ impl Checker {
         self.get_union_type(vec![t, self.undefined_type()])
     }
 
-    pub(crate) fn strip_optional_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub(crate) fn strip_optional_undefined(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("strip_optional_undefined"); 
         if t.flags.contains(TypeFlags::Union)
             && let Some(ts) = t.types()
         {
@@ -667,7 +667,7 @@ impl Checker {
 }
 impl Checker {
     /// None = 纯 alias 语义已消费完毕，调用方按合并符号的非 alias 意义继续
-    fn get_type_of_symbol_alias_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+    fn get_type_of_symbol_alias_inner(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_symbol_alias_inner"); 
         // import X = require("./m")：binder export_symbol 指向模块符号，Go
         // getTargetOfImportEqualsDeclaration 经 resolveExternalModuleSymbol
         // 再取 export= 符号，优先走该解析

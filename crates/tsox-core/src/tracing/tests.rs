@@ -2,7 +2,7 @@ use super::*;
 use std::collections::HashMap;
 
 #[test]
-fn concurrent_duration_events_use_separate_thread_ids() {
+fn concurrent_duration_events_use_separate_thread_ids() { crate::fntrace::enter("concurrent_duration_events_use_separate_thread_ids"); 
     let tr = Tracer::new();
 
     let end_a = tr.push(
@@ -88,13 +88,13 @@ fn concurrent_duration_events_use_separate_thread_ids() {
 }
 
 #[test]
-fn thread_ids_are_stable_across_first_seen_order() {
+fn thread_ids_are_stable_across_first_seen_order() { crate::fntrace::enter("thread_ids_are_stable_across_first_seen_order"); 
     let first = trace_thread_ids_for_paths(&["/a.ts", "/b.ts"]);
     let second = trace_thread_ids_for_paths(&["/b.ts", "/a.ts"]);
     assert_eq!(first, second);
 }
 
-fn trace_thread_ids_for_paths(paths: &[&str]) -> HashMap<String, usize> {
+fn trace_thread_ids_for_paths(paths: &[&str]) -> HashMap<String, usize> { crate::fntrace::enter("trace_thread_ids_for_paths"); 
     let tr = Tracer::new();
     for path in paths {
         let end = tr.push(
@@ -125,7 +125,7 @@ fn find_event(
     name: &str,
     arg_name: &str,
     arg_value: &TraceArg,
-) -> TraceEvent {
+) -> TraceEvent { crate::fntrace::enter("find_event"); 
     for event in events {
         if event.ph == ph && event.name == name {
             for (k, v) in &event.args {
@@ -138,7 +138,7 @@ fn find_event(
     panic!("failed to find {ph} event {name:?} with {arg_name}={arg_value:?}");
 }
 
-fn assert_thread_name(events: &[TraceEvent], tid: usize, name: &str) {
+fn assert_thread_name(events: &[TraceEvent], tid: usize, name: &str) { crate::fntrace::enter("assert_thread_name"); 
     for event in events {
         if event.ph == "M" && event.name == "thread_name" && event.tid == tid {
             for (k, v) in &event.args {
@@ -151,7 +151,7 @@ fn assert_thread_name(events: &[TraceEvent], tid: usize, name: &str) {
     panic!("failed to find thread_name metadata for thread {tid} named {name:?}");
 }
 
-fn assert_duration_events_are_well_nested_by_thread(events: &[TraceEvent]) {
+fn assert_duration_events_are_well_nested_by_thread(events: &[TraceEvent]) { crate::fntrace::enter("assert_duration_events_are_well_nested_by_thread"); 
     let mut stacks: HashMap<usize, Vec<&TraceEvent>> = HashMap::new();
     for event in events {
         match event.ph {

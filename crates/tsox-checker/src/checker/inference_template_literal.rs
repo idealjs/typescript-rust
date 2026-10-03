@@ -15,7 +15,7 @@ impl Checker {
         state: &mut InferenceState,
         source: &Arc<Type>,
         target: &TemplateLiteralTypeData,
-    ) {
+    ) { ::tsox_core::fntrace::enter("infer_to_template_literal_type"); 
         let matches = self.infer_types_from_template_literal_type(source, target);
         let has_matches = matches.as_ref().is_some_and(|m| !m.is_empty());
         if has_matches || target.texts.iter().all(|t| t.is_empty()) {
@@ -35,7 +35,7 @@ impl Checker {
         &mut self,
         source: &Arc<Type>,
         target: &TemplateLiteralTypeData,
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("infer_types_from_template_literal_type"); 
         if source.flags.contains(TypeFlags::StringLiteral) {
             let value = self.string_literal_value_of(source)?;
             return self.infer_from_literal_parts_to_template_literal(&[value], &[], target);
@@ -62,7 +62,7 @@ impl Checker {
         None
     }
 
-    pub fn get_string_like_type_for_type(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_string_like_type_for_type(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_string_like_type_for_type"); 
         if t.flags.intersects(TypeFlags::Any | TYPE_FLAGS_STRING_LIKE) {
             return Arc::clone(t);
         }
@@ -80,7 +80,7 @@ impl Checker {
         &mut self,
         source: &TemplateLiteralTypeData,
         target: &TemplateLiteralTypeData,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("template_literal_types_definitely_unrelated"); 
         let source_start = &source.texts[0];
         let target_start = &target.texts[0];
         let source_end = &source.texts[source.texts.len() - 1];
@@ -91,7 +91,7 @@ impl Checker {
             || source_end[source_end.len() - end_len..] != target_end[target_end.len() - end_len..]
     }
 
-    fn string_literal_value_of(&self, t: &Arc<Type>) -> Option<String> {
+    fn string_literal_value_of(&self, t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("string_literal_value_of"); 
         if let TypeData::Literal(lit) = &t.data
             && let LiteralValue::String(s) = &lit.value
         {
@@ -105,7 +105,7 @@ impl Checker {
         source_texts: &[String],
         source_types: &[Arc<Type>],
         target: &TemplateLiteralTypeData,
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("infer_from_literal_parts_to_template_literal"); 
         let parts = self.match_literal_like_pattern(source_texts, target)?;
         let mut matches = Vec::with_capacity(parts.len());
         for part in parts {
@@ -131,7 +131,7 @@ impl Checker {
         &mut self,
         source_texts: &[String],
         target: &TemplateLiteralTypeData,
-    ) -> Option<Vec<PartMatch>> {
+    ) -> Option<Vec<PartMatch>> { ::tsox_core::fntrace::enter("match_literal_like_pattern"); 
         let last_source_index = source_texts.len() - 1;
         let source_start_text = source_texts[0].as_str();
         let source_end_text = source_texts[last_source_index].as_str();

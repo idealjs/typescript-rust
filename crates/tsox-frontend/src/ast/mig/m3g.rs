@@ -6,7 +6,7 @@ use super::m3g_3::{skip_outer_expressions, OuterExpressionKinds};
 use super::m3h::{climb_past_property_access, climb_past_property_or_element_access};
 use super::w7a::is_external_module_indicator;
 
-fn is_external_module_node(node: &Arc<Node>) -> bool {
+fn is_external_module_node(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_external_module_node"); 
     if !is_source_file(node) {
         return false;
     }
@@ -20,7 +20,7 @@ fn is_external_module_node(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_jsx_call_like(node: &Node) -> bool {
+pub fn is_jsx_call_like(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_call_like"); 
     matches!(
         node.kind,
         SyntaxKind::JsxOpeningElement
@@ -29,11 +29,11 @@ pub fn is_jsx_call_like(node: &Node) -> bool {
     )
 }
 
-pub fn is_jsx_opening_like_element(node: &Node) -> bool {
+pub fn is_jsx_opening_like_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_opening_like_element"); 
     is_jsx_opening_element(node) || is_jsx_self_closing_element(node)
 }
 
-fn select_expression_of_call_or_new_expression_or_decorator(node: &Node) -> Option<Arc<Node>> {
+fn select_expression_of_call_or_new_expression_or_decorator(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("select_expression_of_call_or_new_expression_or_decorator"); 
     match &node.data {
         NodeData::CallExpression(d) => Some(d.expression.clone()),
         NodeData::NewExpression(d) => Some(d.expression.clone()),
@@ -42,14 +42,14 @@ fn select_expression_of_call_or_new_expression_or_decorator(node: &Node) -> Opti
     }
 }
 
-fn select_tag_of_tagged_template_expression(node: &Node) -> Option<Arc<Node>> {
+fn select_tag_of_tagged_template_expression(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("select_tag_of_tagged_template_expression"); 
     match &node.data {
         NodeData::TaggedTemplateExpression(d) => Some(d.tag.clone()),
         _ => None,
     }
 }
 
-fn select_tag_name_of_jsx_opening_like_element(node: &Node) -> Option<Arc<Node>> {
+fn select_tag_name_of_jsx_opening_like_element(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("select_tag_name_of_jsx_opening_like_element"); 
     match &node.data {
         NodeData::JsxOpeningElement(d) => Some(d.tag_name.clone()),
         NodeData::JsxSelfClosingElement(d) => Some(d.tag_name.clone()),
@@ -63,7 +63,7 @@ fn is_callee_worker(
     callee_selector: &dyn Fn(&Node) -> Option<Arc<Node>>,
     include_element_access: bool,
     skip_past_outer_expressions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_callee_worker"); 
     let mut target: Arc<Node> = if include_element_access {
         climb_past_property_or_element_access(node)
     } else {
@@ -82,7 +82,7 @@ pub fn is_jsx_opening_like_element_tag_name(
     node: &Arc<Node>,
     include_element_access: bool,
     skip_past_outer_expressions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_jsx_opening_like_element_tag_name"); 
     is_callee_worker(
         node,
         &is_jsx_opening_like_element,
@@ -96,7 +96,7 @@ pub fn is_new_expression_target(
     node: &Arc<Node>,
     include_element_access: bool,
     skip_past_outer_expressions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_new_expression_target"); 
     is_callee_worker(
         node,
         &is_new_expression,
@@ -110,7 +110,7 @@ pub fn is_tagged_template_tag(
     node: &Arc<Node>,
     include_element_access: bool,
     skip_past_outer_expressions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_tagged_template_tag"); 
     is_callee_worker(
         node,
         &is_tagged_template_expression,
@@ -120,7 +120,7 @@ pub fn is_tagged_template_tag(
     )
 }
 
-pub fn is_jump_statement_target(node: &Arc<Node>) -> bool {
+pub fn is_jump_statement_target(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_jump_statement_target"); 
     if !is_identifier(node) {
         return false;
     }
@@ -137,11 +137,11 @@ pub fn is_jump_statement_target(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_label_name(node: &Arc<Node>) -> bool {
+pub fn is_label_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_label_name"); 
     is_label_of_labeled_statement(node) || is_jump_statement_target(node)
 }
 
-pub fn is_label_of_labeled_statement(node: &Arc<Node>) -> bool {
+pub fn is_label_of_labeled_statement(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_label_of_labeled_statement"); 
     if !is_identifier(node) {
         return false;
     }
@@ -154,7 +154,7 @@ pub fn is_label_of_labeled_statement(node: &Arc<Node>) -> bool {
     matches!(&parent.data, NodeData::LabeledStatement(d) if Arc::ptr_eq(&d.label, node))
 }
 
-pub fn is_late_visibility_painted_statement(node: &Node) -> bool {
+pub fn is_late_visibility_painted_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_late_visibility_painted_statement"); 
     matches!(
         node.kind,
         SyntaxKind::ImportDeclaration
@@ -171,11 +171,11 @@ pub fn is_late_visibility_painted_statement(node: &Node) -> bool {
     )
 }
 
-pub fn is_let(node: &Arc<Node>) -> bool {
+pub fn is_let(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_let"); 
     get_combined_node_flags(node).intersection(NodeFlags::BlockScoped) == NodeFlags::Let
 }
 
-pub fn is_literal_computed_property_declaration_name(node: &Node) -> bool {
+pub fn is_literal_computed_property_declaration_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_literal_computed_property_declaration_name"); 
     if !is_string_or_numeric_literal_like(node) {
         return false;
     }
@@ -191,7 +191,7 @@ pub fn is_literal_computed_property_declaration_name(node: &Node) -> bool {
     }
 }
 
-pub fn is_literal_like_element_access(node: &Node) -> bool {
+pub fn is_literal_like_element_access(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_literal_like_element_access"); 
     if !is_element_access_expression(node) {
         return false;
     }
@@ -203,7 +203,7 @@ pub fn is_literal_like_element_access(node: &Node) -> bool {
     }
 }
 
-pub fn is_logical_expression(node: &Node) -> bool {
+pub fn is_logical_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_logical_expression"); 
     let mut node = node;
     loop {
         if node.kind == SyntaxKind::ParenthesizedExpression {
@@ -227,7 +227,7 @@ pub fn is_logical_expression(node: &Node) -> bool {
     }
 }
 
-pub fn is_logical_or_coalescing_assignment_expression(node: &Node) -> bool {
+pub fn is_logical_or_coalescing_assignment_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_logical_or_coalescing_assignment_expression"); 
     match &node.data {
         NodeData::BinaryExpression(d) => {
             is_logical_or_coalescing_assignment_operator(d.operator_token.kind)
@@ -236,18 +236,18 @@ pub fn is_logical_or_coalescing_assignment_expression(node: &Node) -> bool {
     }
 }
 
-pub fn is_logical_or_coalescing_binary_expression(node: &Node) -> bool {
+pub fn is_logical_or_coalescing_binary_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_logical_or_coalescing_binary_expression"); 
     match &node.data {
         NodeData::BinaryExpression(d) => is_logical_or_coalescing_binary_operator(d.operator_token.kind),
         _ => false,
     }
 }
 
-pub fn is_modifier(node: &Node) -> bool {
+pub fn is_modifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_modifier"); 
     is_modifier_kind(node.kind)
 }
 
-pub fn is_module_augmentation_external(node: &Arc<Node>) -> bool {
+pub fn is_module_augmentation_external(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_augmentation_external"); 
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -268,7 +268,7 @@ pub fn is_module_augmentation_external(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_module_exports_access_expression(node: &Node) -> bool {
+pub fn is_module_exports_access_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_exports_access_expression"); 
     if is_access_expression(node) {
         if let Some(expression) = node.expression() {
             if is_module_identifier(expression) {
@@ -291,14 +291,14 @@ pub fn is_module_exports_access_expression(node: &Node) -> bool {
     false
 }
 
-pub fn is_module_exports_qualified_name(node: &Node) -> bool {
+pub fn is_module_exports_qualified_name(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_module_exports_qualified_name"); 
     match &node.data {
         NodeData::QualifiedName(d) => is_module_identifier(&d.left) && d.right.text() == "exports",
         _ => false,
     }
 }
 
-pub fn is_name_of_heritage_clause_type_reference(node: &Arc<Node>) -> bool {
+pub fn is_name_of_heritage_clause_type_reference(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_name_of_heritage_clause_type_reference"); 
     let mut current = Arc::clone(node);
     loop {
         let Some(parent) = current.parent() else {
@@ -324,7 +324,7 @@ pub fn is_name_of_heritage_clause_type_reference(node: &Arc<Node>) -> bool {
     parent.parent().is_some_and(|gp| is_heritage_clause(&gp))
 }
 
-pub fn is_named_evaluation_source(node: &Node) -> bool {
+pub fn is_named_evaluation_source(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_named_evaluation_source"); 
     match &node.data {
         NodeData::PropertyAssignment(d) => !is_proto_setter(&d.name),
         NodeData::ShorthandPropertyAssignment(d) => d.object_assignment_initializer.is_some(),

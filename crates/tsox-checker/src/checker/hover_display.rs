@@ -20,7 +20,7 @@ pub(crate) const MEANING_ALL: u8 = 7;
 
 impl Checker {
     /// hover 入口：等价 Go ProvideHover 中段（节点定位由 tsox-lsp 完成）
-    pub fn quick_info_display_for_node(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> {
+    pub fn quick_info_display_for_node(&mut self, node: &Arc<Node>) -> Vec<SymbolDisplayPart> { ::tsox_core::fntrace::enter("quick_info_display_for_node"); 
                 // 限定名链（namespace_qualifier_of 等）依赖显示文件/节点上下文
         self.display_enclosing_file = self.get_source_file_of_node(node);
         self.display_enclosing_node = Some(Arc::clone(node));
@@ -124,7 +124,7 @@ impl Checker {
     }
 
     /// 符号定位（Go getSymbolAtLocationForQuickInfo + 本地解析回退）
-    fn get_symbol_at_location_for_quick_info(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    fn get_symbol_at_location_for_quick_info(&mut self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_at_location_for_quick_info"); 
         // 类型位限定名段（AMap.MassMarks.Data 的 Data）：解析整条限定链
         // （限定链可能是 QualifiedName 或 heritage 位的 PropertyAccessExpression）
         let in_type_chain = node.parent().as_ref().is_some_and(|p| {
@@ -232,7 +232,7 @@ impl Checker {
         node: &Arc<Node>,
         container: &Option<Arc<Node>>,
         meaning: u8,
-    ) {
+    ) { ::tsox_core::fntrace::enter("hover_write_symbol"); 
         // alias 链：以目标符号整体呈现（替换语义）；目标即自身（合并符号的
         // export 别名回查 members 命中本地声明）时落到主体书写
         if symbol.flags.intersects(SymbolFlags::Alias) {
@@ -289,7 +289,7 @@ impl Checker {
 }
 
 /// Go testNode 后的 flag 选择：按位置的语义意义过滤符号意义位
-pub(crate) fn select_flags_by_meaning(flags: &SymbolFlags, meaning: u8) -> SymbolFlags {
+pub(crate) fn select_flags_by_meaning(flags: &SymbolFlags, meaning: u8) -> SymbolFlags { ::tsox_core::fntrace::enter("select_flags_by_meaning"); 
     match meaning {
         MEANING_VALUE => *flags & (SymbolFlags::VALUE | SymbolFlags::Signature),
         MEANING_TYPE => *flags & SymbolFlags::TYPE,
@@ -299,7 +299,7 @@ pub(crate) fn select_flags_by_meaning(flags: &SymbolFlags, meaning: u8) -> Symbo
 }
 
 /// Go ls/utilities.go getContainerNode
-pub(crate) fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_container_node"); 
     let mut cur = node.parent();
     while let Some(n) = cur {
         if matches!(
@@ -324,7 +324,7 @@ pub(crate) fn get_container_node(node: &Arc<Node>) -> Option<Arc<Node>> {
 }
 
 /// Go hover.go shouldGetType：无符号时按类型显示的节点范围
-pub(crate) fn should_get_type(node: &Arc<Node>) -> bool {
+pub(crate) fn should_get_type(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("should_get_type"); 
     match node.kind {
         SyntaxKind::Identifier => {
             !node_in_jsdoc(node)
@@ -344,7 +344,7 @@ pub(crate) fn should_get_type(node: &Arc<Node>) -> bool {
     }
 }
 
-fn node_in_jsdoc(node: &Arc<Node>) -> bool {
+fn node_in_jsdoc(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_in_jsdoc"); 
     let mut cur = node.parent();
     while let Some(n) = cur {
         if matches!(
@@ -363,7 +363,7 @@ fn node_in_jsdoc(node: &Arc<Node>) -> bool {
 
 
 /// Go ls/utilities.go getMeaningFromLocation（精简：覆盖声明名/类型引用/默认值）
-pub(crate) fn get_meaning_from_location(node: &Arc<Node>) -> u8 {
+pub(crate) fn get_meaning_from_location(node: &Arc<Node>) -> u8 { ::tsox_core::fntrace::enter("get_meaning_from_location"); 
     let Some(parent) = node.parent() else {
         return MEANING_VALUE;
     };
@@ -406,7 +406,7 @@ pub(crate) fn get_meaning_from_location(node: &Arc<Node>) -> u8 {
     MEANING_VALUE
 }
 
-fn is_part_of_type_reference(node: &Arc<Node>) -> bool {
+fn is_part_of_type_reference(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_part_of_type_reference"); 
     let mut cur = node.parent();
     while let Some(n) = cur {
         match n.kind {

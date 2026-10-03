@@ -15,17 +15,17 @@ thread_local! {
     static PATTERN_FOR_TYPE: RefCell<Vec<(Arc<Type>, Arc<Node>)>> = const { RefCell::new(Vec::new()) };
 }
 
-pub(crate) fn contextual_binding_patterns_push(node: Arc<Node>) {
+pub(crate) fn contextual_binding_patterns_push(node: Arc<Node>) { ::tsox_core::fntrace::enter("contextual_binding_patterns_push"); 
     CONTEXTUAL_BINDING_PATTERNS.with(|s| s.borrow_mut().push(node));
 }
 
-pub(crate) fn contextual_binding_patterns_pop() {
+pub(crate) fn contextual_binding_patterns_pop() { ::tsox_core::fntrace::enter("contextual_binding_patterns_pop"); 
     CONTEXTUAL_BINDING_PATTERNS.with(|s| {
         s.borrow_mut().pop();
     });
 }
 
-pub(crate) fn pattern_for_type_insert(t: Arc<Type>, node: Arc<Node>) {
+pub(crate) fn pattern_for_type_insert(t: Arc<Type>, node: Arc<Node>) { ::tsox_core::fntrace::enter("pattern_for_type_insert"); 
     PATTERN_FOR_TYPE.with(|s| {
         let mut s = s.borrow_mut();
         match s.iter_mut().find(|(k, _)| Arc::ptr_eq(k, &t)) {
@@ -35,7 +35,7 @@ pub(crate) fn pattern_for_type_insert(t: Arc<Type>, node: Arc<Node>) {
     });
 }
 
-pub(crate) fn pattern_for_type_get(t: &Arc<Type>) -> Option<Arc<Node>> {
+pub(crate) fn pattern_for_type_get(t: &Arc<Type>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("pattern_for_type_get"); 
     PATTERN_FOR_TYPE.with(|s| {
         s.borrow()
             .iter()
@@ -45,7 +45,7 @@ pub(crate) fn pattern_for_type_get(t: &Arc<Type>) -> Option<Arc<Node>> {
 }
 
 impl Checker {
-    pub(crate) fn is_function_object_type_fwd(&mut self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_function_object_type_fwd(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_function_object_type_fwd"); 
         if let Some(sym) = self.get_global_type_by_name("Function")
             && let Some(target) = sym.target().cloned()
         {
@@ -57,7 +57,7 @@ impl Checker {
     pub(crate) fn get_alias_symbol_for_type_node(
         &mut self,
         node: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_alias_symbol_for_type_node"); 
         let mut host = node.parent()?;
         loop {
             let next = if is_parenthesized_type_node(&host)

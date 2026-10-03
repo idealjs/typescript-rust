@@ -49,7 +49,7 @@ use tsox_core::diagnostics::messages_generated::{
 };
 
 impl Checker {
-    pub fn check_non_null_assertion(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_non_null_assertion(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_non_null_assertion"); 
         if node.flags.contains(NodeFlags::OptionalChain) {
             return self.check_non_null_chain(node);
         }
@@ -58,7 +58,7 @@ impl Checker {
         self.get_non_nullable_type(&t)
     }
 
-    pub fn check_non_null_chain(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_non_null_chain(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_non_null_chain"); 
         let expression = node.expression().cloned().unwrap_or_else(|| Arc::clone(node));
         let left_type = self.check_expression_ex(&expression, CheckMode::Normal);
         let non_optional_type = self.get_optional_expression_type(&left_type, &expression);
@@ -66,12 +66,12 @@ impl Checker {
         self.propagate_optional_type_marker(&non_nullable, node, !Arc::ptr_eq(&non_optional_type, &left_type))
     }
 
-    pub fn check_non_null_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_non_null_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_non_null_expression"); 
         let t = self.check_expression_ex(node, CheckMode::Normal);
         self.check_non_null_type(&t, node)
     }
 
-    pub fn check_non_null_type_with_reporter(&mut self, t: &Arc<Type>, node: &Arc<Node>, report_error: NonNullReporter) -> Arc<Type> {
+    pub fn check_non_null_type_with_reporter(&mut self, t: &Arc<Type>, node: &Arc<Node>, report_error: NonNullReporter) -> Arc<Type> { ::tsox_core::fntrace::enter("check_non_null_type_with_reporter"); 
         if self.strict_null_checks && t.flags.contains(TypeFlags::Unknown) {
             if tsox_frontend::ast::is_entity_name_expression(node) {
                 let node_text = entity_name_to_string(node);
@@ -95,7 +95,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn check_non_null_non_void_type(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_non_null_non_void_type(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_non_null_non_void_type"); 
         let non_null_type = self.check_non_null_type(t, node);
         if non_null_type.flags.contains(TypeFlags::Void) {
             if tsox_frontend::ast::is_entity_name_expression(node) {
@@ -114,7 +114,7 @@ impl Checker {
         non_null_type
     }
 
-    pub fn check_nullish_coalesce_operand_left(&mut self, left: &Arc<Node>) {
+    pub fn check_nullish_coalesce_operand_left(&mut self, left: &Arc<Node>) { ::tsox_core::fntrace::enter("check_nullish_coalesce_operand_left"); 
         let left_target = skip_outer_expression_all(left);
         let nullish_semantics = self.get_syntactic_nullishness_semantics(&left_target);
         if nullish_semantics != PredicateSemantics::Sometimes {
@@ -126,7 +126,7 @@ impl Checker {
         }
     }
 
-    pub fn check_nullish_coalesce_operands(&mut self, left: &Arc<Node>, right: &Arc<Node>) {
+    pub fn check_nullish_coalesce_operands(&mut self, left: &Arc<Node>, right: &Arc<Node>) { ::tsox_core::fntrace::enter("check_nullish_coalesce_operands"); 
         let parent = left.parent();
         let grandparent = parent.and_then(|p| p.parent());
         let grandparent_is_binary = grandparent.as_ref().map(|g| tsox_frontend::ast::is_binary_expression(g)).unwrap_or(false);
@@ -165,7 +165,7 @@ impl Checker {
         self.check_nullish_coalesce_operand_left(left);
     }
 
-    pub fn check_object_literal_method(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_object_literal_method(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_object_literal_method"); 
         self.check_grammar_method(node);
         let name = node.name();
         if name.as_ref().map(|n| is_computed_property_name(n)).unwrap_or(false) {
@@ -176,12 +176,12 @@ impl Checker {
         self.instantiate_type_with_single_generic_call_signature(node, &uninstantiated_type, check_mode)
     }
 
-    pub fn check_parenthesized_expression(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_parenthesized_expression(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_parenthesized_expression"); 
         let expression = node.expression().cloned().unwrap_or_else(|| Arc::clone(node));
         self.check_expression_ex(&expression, check_mode)
     }
 
-    pub fn check_postfix_unary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_postfix_unary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_postfix_unary_expression"); 
         let (operand, _operator) = match &node.data {
             NodeData::PostfixUnaryExpression(data) => (Arc::clone(&data.operand), data.operator),
             _ => (Arc::clone(node), SyntaxKind::Unknown),
@@ -202,7 +202,7 @@ impl Checker {
         self.get_unary_result_type(&operand_type)
     }
 
-    pub fn check_prefix_unary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_prefix_unary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_prefix_unary_expression"); 
         let (operator, operand) = match &node.data {
             NodeData::PrefixUnaryExpression(data) => (data.operator, Arc::clone(&data.operand)),
             _ => (SyntaxKind::Unknown, Arc::clone(node)),
@@ -279,7 +279,7 @@ impl Checker {
         }
     }
 
-    pub fn check_private_identifier_expression(&mut self, node: &Arc<Node>) {
+    pub fn check_private_identifier_expression(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_private_identifier_expression"); 
         self.check_grammar_private_identifier_expression(node);
         let symbol = self.get_symbol_for_private_identifier_expression(node);
         if let Some(symbol) = symbol {
@@ -287,11 +287,11 @@ impl Checker {
         }
     }
 
-    pub fn check_property_accessibility(&mut self, node: &Arc<Node>, is_super: bool, writing: bool, t: &Arc<Type>, prop: &Arc<Symbol>) -> bool {
+    pub fn check_property_accessibility(&mut self, node: &Arc<Node>, is_super: bool, writing: bool, t: &Arc<Type>, prop: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("check_property_accessibility"); 
         self.check_property_accessibility_ex(node, is_super, writing, t, prop, true)
     }
 
-    pub fn check_property_accessibility_ex(&mut self, node: &Arc<Node>, is_super: bool, writing: bool, t: &Arc<Type>, prop: &Arc<Symbol>, report_error: bool) -> bool {
+    pub fn check_property_accessibility_ex(&mut self, node: &Arc<Node>, is_super: bool, writing: bool, t: &Arc<Type>, prop: &Arc<Symbol>, report_error: bool) -> bool { ::tsox_core::fntrace::enter("check_property_accessibility_ex"); 
         let mut error_node: Option<Arc<Node>> = None;
         if report_error {
             error_node = match node.kind {
@@ -308,7 +308,7 @@ impl Checker {
         self.check_property_accessibility_at_location(node, is_super, writing, t, prop, error_node.as_ref())
     }
 
-    pub fn check_property_accessibility_at_location(&mut self, location: &Arc<Node>, is_super: bool, writing: bool, containing_type: &Arc<Type>, prop: &Arc<Symbol>, error_node: Option<&Arc<Node>>) -> bool {
+    pub fn check_property_accessibility_at_location(&mut self, location: &Arc<Node>, is_super: bool, writing: bool, containing_type: &Arc<Type>, prop: &Arc<Symbol>, error_node: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("check_property_accessibility_at_location"); 
         let flags = get_declaration_modifier_flags_from_symbol_ex(prop, writing);
         if is_super {
             if flags.contains(ModifierFlags::Abstract) {
@@ -443,7 +443,7 @@ impl Checker {
         true
     }
 
-    pub fn check_qualified_name(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_qualified_name(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_qualified_name"); 
         let (left, right) = match &node.data {
             NodeData::QualifiedName(data) => (Arc::clone(&data.left), Arc::clone(&data.right)),
             _ => (Arc::clone(node), Arc::clone(node)),
@@ -459,7 +459,7 @@ impl Checker {
     }
 
 
-    pub fn check_regular_expression_literal(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_regular_expression_literal(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_regular_expression_literal"); 
         if !self.node_links.get_or_default(node).flags.contains(NodeCheckFlags::TypeChecked) {
             self.node_links.get_or_default(node).flags |= NodeCheckFlags::TypeChecked;
             self.check_grammar_regular_expression_literal(node);
@@ -467,7 +467,7 @@ impl Checker {
         self.global_regexp_type()
     }
 
-    pub fn check_satisfies_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_satisfies_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_satisfies_expression"); 
         let type_node = match &node.data {
             NodeData::SatisfiesExpression(d) => Arc::clone(&d.type_node),
             _ => node.type_node().cloned().unwrap_or_else(|| Arc::clone(node)),
@@ -490,7 +490,7 @@ impl Checker {
         expr_type
     }
 
-    pub fn check_shorthand_property_assignment(&mut self, node: &Arc<Node>, in_destructuring_pattern: bool, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_shorthand_property_assignment(&mut self, node: &Arc<Node>, in_destructuring_pattern: bool, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_shorthand_property_assignment"); 
         let expr = if !in_destructuring_pattern {
             match &node.data {
                 NodeData::ShorthandPropertyAssignment(data) => data.object_assignment_initializer.clone(),
@@ -509,7 +509,7 @@ impl Checker {
         expression_type
     }
 
-    pub fn check_synthetic_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_synthetic_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_synthetic_expression"); 
         let is_spread = match &node.data {
             NodeData::SyntheticExpression(data) => data.is_spread,
             _ => false,
@@ -522,7 +522,7 @@ impl Checker {
         t
     }
 
-    pub fn check_tagged_template_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_tagged_template_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_tagged_template_expression"); 
         if !self.check_grammar_tagged_template_chain(node) {
             if let Some(type_arguments) = tsox_frontend::ast::mig::m3c::type_argument_list(node) {
                 self.check_grammar_type_arguments(node, type_arguments);
@@ -538,7 +538,7 @@ impl Checker {
             .unwrap_or_else(|| self.unknown_type())
     }
 
-    pub fn check_template_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_template_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_template_expression"); 
         let (head, template_spans) = match &node.data {
             NodeData::TemplateExpression(data) => (Arc::clone(&data.head), Arc::clone(&data.template_spans)),
             _ => return Arc::clone(&self.string_type()),
@@ -589,7 +589,7 @@ impl Checker {
         Arc::clone(&self.string_type())
     }
 
-    pub fn check_this_expression(&mut self, node: &Arc<Node>) -> Arc<Type> {
+    pub fn check_this_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_this_expression"); 
         let mut container = get_this_container(node, true, true);
         let mut captured_by_arrow_function = false;
         let mut this_in_computed_property_name = false;
@@ -664,7 +664,7 @@ impl Checker {
         t.unwrap_or_else(|| self.any_type())
     }
 
-    pub fn check_this_in_static_class_field_initializer_in_decorated_class(&mut self, this_expression: &Arc<Node>, container: &Arc<Node>) {
+    pub fn check_this_in_static_class_field_initializer_in_decorated_class(&mut self, this_expression: &Arc<Node>, container: &Arc<Node>) { ::tsox_core::fntrace::enter("check_this_in_static_class_field_initializer_in_decorated_class"); 
         if container.kind == SyntaxKind::PropertyDeclaration
             && tsox_frontend::ast::has_static_modifier(container)
             && self.legacy_decorators
@@ -681,13 +681,13 @@ impl Checker {
         }
     }
 
-    pub fn check_truthiness_expression(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> {
+    pub fn check_truthiness_expression(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_truthiness_expression"); 
         let t = self.check_expression_ex(node, check_mode);
         self.check_truthiness_of_type(node);
         t
     }
 }
 
-pub(crate) fn jsnum_negate(value: tsox_core::jsnum::Number) -> tsox_core::jsnum::Number {
+pub(crate) fn jsnum_negate(value: tsox_core::jsnum::Number) -> tsox_core::jsnum::Number { ::tsox_core::fntrace::enter("jsnum_negate"); 
     tsox_core::jsnum::Number(-value.0)
 }

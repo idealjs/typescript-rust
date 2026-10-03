@@ -9,14 +9,14 @@ use crate::ast::syntax_kind_generated::SyntaxKind;
 use crate::ast::utilities_expressions::is_string_literal_like;
 use crate::ast::utilities_misc::is_import_call;
 
-fn node_contains_position(node: &Node, position: usize) -> bool {
+fn node_contains_position(node: &Node, position: usize) -> bool { ::tsox_core::fntrace::enter("node_contains_position"); 
     !is_token_kind(node.kind)
         && node.loc.pos() <= position
         && (position < node.loc.end()
             || (position == node.loc.end() && node.kind == SyntaxKind::EndOfFile))
 }
 
-pub fn get_node_at_position(file: &SourceFile, position: usize, include_jsdoc: bool) -> Arc<Node> {
+pub fn get_node_at_position(file: &SourceFile, position: usize, include_jsdoc: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("get_node_at_position"); 
     let mut current = Arc::clone(&file.node);
     loop {
         let mut child: Option<Arc<Node>> = None;
@@ -49,7 +49,7 @@ pub fn get_node_at_position(file: &SourceFile, position: usize, include_jsdoc: b
     }
 }
 
-fn find_import_or_require(text: &str, start: usize) -> Option<(usize, usize)> {
+fn find_import_or_require(text: &str, start: usize) -> Option<(usize, usize)> { ::tsox_core::fntrace::enter("find_import_or_require"); 
     let bytes = text.as_bytes();
     let mut index = start.max(0);
     while index < bytes.len() {
@@ -70,7 +70,7 @@ fn find_import_or_require(text: &str, start: usize) -> Option<(usize, usize)> {
     None
 }
 
-pub fn is_require_call(node: &Node, require_string_literal_like_argument: bool) -> bool {
+pub fn is_require_call(node: &Node, require_string_literal_like_argument: bool) -> bool { ::tsox_core::fntrace::enter("is_require_call"); 
     if node.kind != SyntaxKind::CallExpression {
         return false;
     }
@@ -86,7 +86,7 @@ pub fn is_require_call(node: &Node, require_string_literal_like_argument: bool) 
     !require_string_literal_like_argument || is_string_literal_like(&call.arguments.nodes[0])
 }
 
-fn is_literal_import_type_node(node: &Node) -> bool {
+fn is_literal_import_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_literal_import_type_node"); 
     if node.kind != SyntaxKind::ImportType {
         return false;
     }
@@ -107,7 +107,7 @@ pub fn for_each_dynamic_import_or_require_call(
     include_type_space_imports: bool,
     require_string_literal_like_argument: bool,
     mut cb: impl FnMut(&Arc<Node>, &Arc<Node>) -> bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("for_each_dynamic_import_or_require_call"); 
     let is_javascript_file = matches!(file.script_kind, ScriptKind::Js | ScriptKind::Jsx);
     let text = file.text.as_str();
     let mut cursor = find_import_or_require(text, 0);

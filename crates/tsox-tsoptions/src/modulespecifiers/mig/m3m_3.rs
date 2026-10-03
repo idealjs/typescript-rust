@@ -29,7 +29,7 @@ pub struct ResolvedEntrypoint {
 }
 
 impl ResolvedEntrypoint {
-    pub fn symlink_or_realpath(&self) -> &str {
+    pub fn symlink_or_realpath(&self) -> &str { ::tsox_core::fntrace::enter("symlink_or_realpath"); 
         if !self.original_file_name.is_empty() {
             return &self.original_file_name;
         }
@@ -44,7 +44,7 @@ pub fn process_entrypoint_ending(
     options: &CompilerOptions,
     importing_source_file: &dyn SourceFileForSpecifierGeneration,
     allowed_endings: &[ModuleSpecifierEnding],
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("process_entrypoint_ending"); 
     let mut specifier = entrypoint.module_specifier.clone();
     if entrypoint.ending == Ending::Fixed {
         return specifier;

@@ -47,7 +47,7 @@ pub struct Binder {
 }
 
 impl Default for Binder {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
@@ -61,7 +61,7 @@ pub(crate) enum DeclareTarget {
 }
 
 impl Binder {
-    pub fn new() -> Self {
+    pub fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             symbol_map: NodeSymbolMap::new(),
             current_source_file: None,
@@ -85,7 +85,7 @@ impl Binder {
         }
     }
 
-    pub fn bind_source_file(&mut self, file: &Arc<SourceFile>) -> &NodeSymbolMap {
+    pub fn bind_source_file(&mut self, file: &Arc<SourceFile>) -> &NodeSymbolMap { ::tsox_core::fntrace::enter("bind_source_file"); 
         self.current_source_file = Some(Arc::clone(file));
 
         self.set_parent_pointers(&file.node);
@@ -153,7 +153,7 @@ impl Binder {
         &self.symbol_map
     }
 
-    fn declare_common_js_variable(&mut self, file_node: &Arc<Node>, name: &str) {
+    fn declare_common_js_variable(&mut self, file_node: &Arc<Node>, name: &str) { ::tsox_core::fntrace::enter("declare_common_js_variable"); 
         if self
             .symbol_map
             .locals
@@ -200,7 +200,7 @@ impl Binder {
             .insert(name.to_string(), symbol);
     }
 
-    pub(crate) fn set_parent_pointers(&mut self, node: &Arc<Node>) {
+    pub(crate) fn set_parent_pointers(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_parent_pointers"); 
         use tsox_frontend::ast::node_data_generated::for_each_child;
         let mut children: Vec<Arc<Node>> = Vec::new();
         for_each_child(node, |child| {
@@ -218,7 +218,7 @@ impl Binder {
     }
 }
 
-pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap {
+pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap { ::tsox_core::fntrace::enter("bind_source_file"); 
     let mut binder = Binder::new();
     binder.bind_source_file(file);
     std::mem::take(&mut binder.symbol_map)
@@ -226,7 +226,7 @@ pub fn bind_source_file(file: &Arc<SourceFile>) -> NodeSymbolMap {
 
 /// parse 后立即回填 parent 指针：program 的 import 收集处理期即需父链
 /// （ImportType 来源判定等），binder 后续调用幂等
-pub fn wire_parent_pointers(file: &Arc<SourceFile>) {
+pub fn wire_parent_pointers(file: &Arc<SourceFile>) { ::tsox_core::fntrace::enter("wire_parent_pointers"); 
     let mut binder = Binder::new();
     binder.set_parent_pointers(&file.node);
 }

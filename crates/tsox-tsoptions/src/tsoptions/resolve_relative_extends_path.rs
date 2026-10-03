@@ -7,7 +7,7 @@ pub(crate) fn resolve_relative_extends_path(
     config_dir: &str,
     current_dir: &str,
     fs: &dyn FS,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("resolve_relative_extends_path"); 
     let base =
         tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(&config_dir, &[s]));
 
@@ -39,7 +39,7 @@ pub(crate) fn resolve_config_via_node_modules(
     module_name: &str,
     containing_directory: &str,
     fs: &dyn FS,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("resolve_config_via_node_modules"); 
     let mut result: Option<String> = None;
     tsox_core::tspath::for_each_ancestor_directory(containing_directory, |ancestor| {
         if tsox_core::tspath::get_base_file_name(ancestor) == "node_modules" {
@@ -62,7 +62,7 @@ pub(crate) fn load_config_from_node_modules(
     module_name: &str,
     node_modules_dir: &str,
     fs: &dyn FS,
-) -> Option<String> {
+) -> Option<String> { ::tsox_core::fntrace::enter("load_config_from_node_modules"); 
     let (package_name, _rest) = crate::module::parse_package_name(module_name);
 
     let candidate = tsox_core::tspath::normalize_path(&tsox_core::tspath::combine_paths(
@@ -109,7 +109,7 @@ pub(crate) fn load_config_from_node_modules(
 
 pub(crate) fn json_object_to_options(
     obj: &tsox_core::json::Map<String, tsox_core::json::Value>,
-) -> (HashMap<String, OptValue>, Vec<Diagnostic>) {
+) -> (HashMap<String, OptValue>, Vec<Diagnostic>) { ::tsox_core::fntrace::enter("json_object_to_options"); 
     let mut out = HashMap::new();
     let mut errors = Vec::new();
     for (k, v) in obj {
@@ -130,7 +130,7 @@ pub(crate) fn json_object_to_options(
     (out, errors)
 }
 
-pub(crate) fn json_to_opt_value(v: &tsox_core::json::Value) -> OptValue {
+pub(crate) fn json_to_opt_value(v: &tsox_core::json::Value) -> OptValue { ::tsox_core::fntrace::enter("json_to_opt_value"); 
     match v {
         tsox_core::json::Value::Bool(b) => OptValue::Bool(*b),
         tsox_core::json::Value::String(s) => OptValue::Str(s.clone()),
@@ -155,7 +155,7 @@ pub(crate) fn json_to_opt_value(v: &tsox_core::json::Value) -> OptValue {
 
 pub(crate) const CONFIG_DIR_TEMPLATE: &str = "${configDir}";
 
-pub(crate) fn starts_with_config_dir_template(value: &str) -> bool {
+pub(crate) fn starts_with_config_dir_template(value: &str) -> bool { ::tsox_core::fntrace::enter("starts_with_config_dir_template"); 
     value
         .to_ascii_lowercase()
         .starts_with(&CONFIG_DIR_TEMPLATE.to_ascii_lowercase())
@@ -164,7 +164,7 @@ pub(crate) fn starts_with_config_dir_template(value: &str) -> bool {
 pub(crate) fn get_substituted_path_with_config_dir_template(
     value: &str,
     base_path: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_substituted_path_with_config_dir_template"); 
     let replaced = value.replacen(CONFIG_DIR_TEMPLATE, "./", 1);
     tsox_core::tspath::get_normalized_absolute_path(&replaced, base_path)
 }
@@ -172,7 +172,7 @@ pub(crate) fn get_substituted_path_with_config_dir_template(
 pub(crate) fn get_substituted_string_array_with_config_dir_template(
     list: &[String],
     base_path: &str,
-) -> Option<Vec<String>> {
+) -> Option<Vec<String>> { ::tsox_core::fntrace::enter("get_substituted_string_array_with_config_dir_template"); 
     let mut result: Option<Vec<String>> = None;
     for (i, element) in list.iter().enumerate() {
         if starts_with_config_dir_template(element) {
@@ -186,7 +186,7 @@ pub(crate) fn get_substituted_string_array_with_config_dir_template(
 pub(crate) fn handle_config_dir_template_substitution(
     options: &mut CompilerOptions,
     base_path: &str,
-) {
+) { ::tsox_core::fntrace::enter("handle_config_dir_template_substitution"); 
     if let Some(paths) = options.paths.as_mut() {
         let mut changed = false;
         for (_, targets) in paths.iter_mut() {
@@ -246,7 +246,7 @@ pub(crate) fn handle_config_dir_template_substitution(
     }
 }
 
-pub(crate) fn resolve_file_path_options(options: &mut CompilerOptions, base_path: &str) {
+pub(crate) fn resolve_file_path_options(options: &mut CompilerOptions, base_path: &str) { ::tsox_core::fntrace::enter("resolve_file_path_options"); 
     let resolve = |s: &str| -> String {
         if s.is_empty() {
             return s.to_string();
@@ -273,7 +273,7 @@ pub(crate) fn resolve_file_path_options(options: &mut CompilerOptions, base_path
     }
 }
 
-pub(crate) fn merge_compiler_options(dst: &mut CompilerOptions, src: &CompilerOptions) {
+pub(crate) fn merge_compiler_options(dst: &mut CompilerOptions, src: &CompilerOptions) { ::tsox_core::fntrace::enter("merge_compiler_options"); 
     let empty = HashSet::new();
     merge_compiler_options_with_skip(dst, src, &empty);
 }

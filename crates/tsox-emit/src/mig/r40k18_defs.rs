@@ -19,7 +19,7 @@ pub trait R40K18EmitResolverExt {
 }
 
 impl R40K18EmitResolverExt for EmitResolver {
-    fn get_constant_value(&self, node: &Arc<Node>) -> Option<ConstantValue> {
+    fn get_constant_value(&self, node: &Arc<Node>) -> Option<ConstantValue> { ::tsox_core::fntrace::enter("get_constant_value"); 
         if node.kind == SyntaxKind::EnumMember {
             return evaluate_enum_member(node, None);
         }
@@ -44,7 +44,7 @@ impl R40K18EmitResolverExt for EmitResolver {
     }
 }
 
-fn enum_member_access_path(node: &Arc<Node>) -> Option<(Option<String>, String)> {
+fn enum_member_access_path(node: &Arc<Node>) -> Option<(Option<String>, String)> { ::tsox_core::fntrace::enter("enum_member_access_path"); 
     match &node.data {
         NodeData::PropertyAccessExpression(d) => {
             Some((entity_name_text(&d.expression), d.name.text().to_string()))
@@ -63,7 +63,7 @@ fn enum_member_access_path(node: &Arc<Node>) -> Option<(Option<String>, String)>
     }
 }
 
-fn entity_name_text(node: &Arc<Node>) -> Option<String> {
+fn entity_name_text(node: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("entity_name_text"); 
     match &node.data {
         NodeData::Identifier(d) => Some(d.text.clone()),
         NodeData::PropertyAccessExpression(d) => Some(d.name.text().to_string()),
@@ -71,13 +71,13 @@ fn entity_name_text(node: &Arc<Node>) -> Option<String> {
     }
 }
 
-fn collect_enum_declarations(node: &Arc<Node>) -> Vec<Arc<Node>> {
+fn collect_enum_declarations(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_enum_declarations"); 
     let mut result = Vec::new();
     collect_enum_declarations_into(node, &mut result);
     result
 }
 
-fn collect_enum_declarations_into(node: &Arc<Node>, result: &mut Vec<Arc<Node>>) {
+fn collect_enum_declarations_into(node: &Arc<Node>, result: &mut Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("collect_enum_declarations_into"); 
     if node.kind == SyntaxKind::EnumDeclaration {
         result.push(Arc::clone(node));
     }
@@ -87,14 +87,14 @@ fn collect_enum_declarations_into(node: &Arc<Node>, result: &mut Vec<Arc<Node>>)
     });
 }
 
-fn enum_declaration_name(enum_decl: &Arc<Node>) -> Option<String> {
+fn enum_declaration_name(enum_decl: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("enum_declaration_name"); 
     match &enum_decl.data {
         NodeData::EnumDeclaration(d) => Some(d.name.text().to_string()),
         _ => None,
     }
 }
 
-fn is_enum_const(enum_decl: &Arc<Node>) -> bool {
+fn is_enum_const(enum_decl: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_enum_const"); 
     enum_decl.flags.contains(NodeFlags::Const)
 }
 
@@ -102,7 +102,7 @@ fn enum_member_value_by_name(
     enum_decl: &Arc<Node>,
     member_name: &str,
     enums: &[Arc<Node>],
-) -> Option<ConstantValue> {
+) -> Option<ConstantValue> { ::tsox_core::fntrace::enter("enum_member_value_by_name"); 
     let NodeData::EnumDeclaration(d) = &enum_decl.data else {
         return None;
     };
@@ -119,14 +119,14 @@ fn enum_member_value_by_name(
     None
 }
 
-fn member_name_text(member: &Arc<Node>) -> Option<String> {
+fn member_name_text(member: &Arc<Node>) -> Option<String> { ::tsox_core::fntrace::enter("member_name_text"); 
     match &member.data {
         NodeData::EnumMember(d) => Some(d.name.text().to_string()),
         _ => None,
     }
 }
 
-fn evaluate_enum_member(member: &Arc<Node>, _parent: Option<&Arc<Node>>) -> Option<ConstantValue> {
+fn evaluate_enum_member(member: &Arc<Node>, _parent: Option<&Arc<Node>>) -> Option<ConstantValue> { ::tsox_core::fntrace::enter("evaluate_enum_member"); 
     let source_file = get_source_file_of_node(member)?;
     let enums = collect_enum_declarations(&source_file);
     evaluate_enum_member_with(member, &enums, None, 0)
@@ -137,7 +137,7 @@ fn evaluate_enum_member_with(
     enums: &[Arc<Node>],
     auto_value: Option<f64>,
     depth: u32,
-) -> Option<ConstantValue> {
+) -> Option<ConstantValue> { ::tsox_core::fntrace::enter("evaluate_enum_member_with"); 
     let NodeData::EnumMember(d) = &member.data else {
         return None;
     };
@@ -156,7 +156,7 @@ fn evaluate_enum_member_with(
     }
 }
 
-fn to_constant_value(value: Option<EvalValue>) -> Option<ConstantValue> {
+fn to_constant_value(value: Option<EvalValue>) -> Option<ConstantValue> { ::tsox_core::fntrace::enter("to_constant_value"); 
     match value {
         Some(EvalValue::Number(v)) => Some(ConstantValue::Number(v)),
         Some(EvalValue::String(v)) => Some(ConstantValue::String(v)),
@@ -171,7 +171,7 @@ struct EnumMemberResolver<'a> {
 }
 
 impl EnumMemberResolver<'_> {
-    fn resolve(&mut self, expr: &Arc<Node>, _location: Option<&Arc<Node>>) -> EvalResult {
+    fn resolve(&mut self, expr: &Arc<Node>, _location: Option<&Arc<Node>>) -> EvalResult { ::tsox_core::fntrace::enter("resolve"); 
         if self.depth >= MAX_ENUM_MEMBER_DEPTH {
             return EvalResult::none();
         }
@@ -192,7 +192,7 @@ impl EnumMemberResolver<'_> {
     }
 }
 
-fn to_eval_value(value: &ConstantValue) -> Option<EvalValue> {
+fn to_eval_value(value: &ConstantValue) -> Option<EvalValue> { ::tsox_core::fntrace::enter("to_eval_value"); 
     match value {
         ConstantValue::Number(v) => Some(EvalValue::Number(*v)),
         ConstantValue::String(v) => Some(EvalValue::String(v.clone())),
@@ -205,7 +205,7 @@ pub trait R40K18EmitContextExt {
 }
 
 impl R40K18EmitContextExt for EmitContext {
-    fn set_emit_flags_shared(&self, node: &Arc<Node>, flags: EmitFlags) {
+    fn set_emit_flags_shared(&self, node: &Arc<Node>, flags: EmitFlags) { ::tsox_core::fntrace::enter("set_emit_flags_shared"); 
         self.emit_nodes_get_mut(node).emit_flags = flags;
     }
 }

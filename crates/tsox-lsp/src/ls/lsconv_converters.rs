@@ -21,11 +21,11 @@ pub struct Converters {
 }
 
 impl Converters {
-    pub fn new(position_encoding: PositionEncodingKind) -> Self {
+    pub fn new(position_encoding: PositionEncodingKind) -> Self { ::tsox_core::fntrace::enter("new"); 
         Converters { position_encoding }
     }
 
-    pub fn to_lsp_range(&self, script: &dyn Script, pos: usize, end: usize) -> Range {
+    pub fn to_lsp_range(&self, script: &dyn Script, pos: usize, end: usize) -> Range { ::tsox_core::fntrace::enter("to_lsp_range"); 
         Range {
             start: self.position_to_line_and_character(script, pos),
             end: self.position_to_line_and_character(script, end),
@@ -36,7 +36,7 @@ impl Converters {
         &self,
         script: &dyn Script,
         line_and_character: &Position,
-    ) -> usize {
+    ) -> usize { ::tsox_core::fntrace::enter("line_and_character_to_position"); 
         let text = script.text();
         let line_map = compute_lsp_line_starts(text);
         let line = line_and_character.line as usize;
@@ -77,7 +77,7 @@ impl Converters {
         pos
     }
 
-    pub fn position_to_line_and_character(&self, script: &dyn Script, position: usize) -> Position {
+    pub fn position_to_line_and_character(&self, script: &dyn Script, position: usize) -> Position { ::tsox_core::fntrace::enter("position_to_line_and_character"); 
         let text = script.text();
         let position = std::cmp::min(position, text.len());
 
@@ -103,7 +103,7 @@ impl Converters {
         }
     }
 
-    pub fn to_lsp_location(&self, script: &dyn Script, pos: usize, end: usize) -> Location {
+    pub fn to_lsp_location(&self, script: &dyn Script, pos: usize, end: usize) -> Location { ::tsox_core::fntrace::enter("to_lsp_location"); 
         Location {
             uri: DocumentUri(file_name_to_document_uri(script.file_name())),
             range: self.to_lsp_range(script, pos, end),
@@ -111,7 +111,7 @@ impl Converters {
     }
 }
 
-pub fn file_name_to_document_uri(file_name: &str) -> String {
+pub fn file_name_to_document_uri(file_name: &str) -> String { ::tsox_core::fntrace::enter("file_name_to_document_uri"); 
     if tsox_checker::bundled::is_bundled(file_name) {
         return file_name.to_string();
     }
@@ -139,7 +139,7 @@ pub fn file_name_to_document_uri(file_name: &str) -> String {
     format!("file://{file_name}")
 }
 
-pub fn language_kind_to_script_kind(language_id: &str) -> u8 {
+pub fn language_kind_to_script_kind(language_id: &str) -> u8 { ::tsox_core::fntrace::enter("language_kind_to_script_kind"); 
     match language_id {
         "typescript" => 3,
         "typescriptreact" => 4,
@@ -150,7 +150,7 @@ pub fn language_kind_to_script_kind(language_id: &str) -> u8 {
     }
 }
 
-fn utf8_char_len(first_byte: u8) -> usize {
+fn utf8_char_len(first_byte: u8) -> usize { ::tsox_core::fntrace::enter("utf8_char_len"); 
     if first_byte < 0x80 {
         1
     } else if first_byte < 0xC0 {
@@ -164,7 +164,7 @@ fn utf8_char_len(first_byte: u8) -> usize {
     }
 }
 
-fn utf16_len_of_char(c: char) -> usize {
+fn utf16_len_of_char(c: char) -> usize { ::tsox_core::fntrace::enter("utf16_len_of_char"); 
     let code = c as u32;
     if code >= 0x10000 { 2 } else { 1 }
 }

@@ -8,7 +8,7 @@ pub fn evaluate_expression(
     expr: &Arc<Node>,
     location: Option<&Arc<Node>>,
     evaluate_entity: EvaluateEntity<'_>,
-) -> EvalResult {
+) -> EvalResult { ::tsox_core::fntrace::enter("evaluate_expression"); 
     // Go SkipOuterExpressions(OEKParentheses)：括号不阻断常量求值
     let mut expr = Arc::clone(expr);
     while expr.kind == SyntaxKind::ParenthesizedExpression {
@@ -215,7 +215,7 @@ fn evaluate_template_expression(
     data: &TemplateExpressionData,
     location: Option<&Arc<Node>>,
     evaluate_entity: EvaluateEntity<'_>,
-) -> EvalResult {
+) -> EvalResult { ::tsox_core::fntrace::enter("evaluate_template_expression"); 
     let head_text = match &data.head.data {
         NodeData::TemplateHead(d) => d.text.clone(),
         _ => String::new(),
@@ -256,7 +256,7 @@ fn evaluate_template_expression(
     )
 }
 
-fn is_entity_name_expression(node: &Arc<Node>) -> bool {
+fn is_entity_name_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression"); 
     match node.kind {
         SyntaxKind::Identifier => true,
         SyntaxKind::PropertyAccessExpression => {

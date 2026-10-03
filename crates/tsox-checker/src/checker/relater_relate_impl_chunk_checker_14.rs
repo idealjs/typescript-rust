@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         source: &Arc<Signature>,
         contextual: &Arc<Signature>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("instantiate_signature_in_context_of"); 
         if source.type_parameters.is_empty() {
             return Arc::clone(source);
         }
@@ -84,7 +84,7 @@ impl Checker {
         self.get_signature_instantiation(source, &inferred)
     }
 
-    pub fn get_canonical_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> {
+    pub fn get_canonical_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_canonical_signature"); 
         if sig.type_parameters.is_empty() {
             return Arc::clone(sig);
         }
@@ -112,13 +112,13 @@ impl Checker {
         self.get_signature_instantiation(sig, &type_arguments)
     }
 
-    pub fn get_base_constraint_or_type(&self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_base_constraint_or_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_base_constraint_or_type"); 
         self.get_base_constraint_of_type(t)
             .or_else(|| self.get_constraint_of_type_parameter(t))
             .unwrap_or_else(|| Arc::clone(t))
     }
 
-    pub fn type_flags_is_generic_object_type(&self, t: &Arc<Type>) -> bool {
+    pub fn type_flags_is_generic_object_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_flags_is_generic_object_type"); 
         if t.flags
             .intersects(TYPE_FLAGS_UNION_OR_INTERSECTION | TypeFlags::Substitution)
         {
@@ -147,7 +147,7 @@ impl Checker {
         }
     }
 
-    pub fn type_flags_is_generic_index_type(&self, t: &Arc<Type>) -> bool {
+    pub fn type_flags_is_generic_index_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_flags_is_generic_index_type"); 
         if t.flags
             .intersects(TYPE_FLAGS_UNION_OR_INTERSECTION | TypeFlags::Substitution)
         {
@@ -161,7 +161,7 @@ impl Checker {
         )
     }
 
-    pub fn get_single_call_signature(&self, t: &Arc<Type>) -> Option<Arc<Signature>> {
+    pub fn get_single_call_signature(&self, t: &Arc<Type>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_single_call_signature"); 
         let sigs = self.get_signatures_of_type(t, SignatureKind::Call);
         if sigs.len() == 1 {
             sigs.into_iter().next()
@@ -170,7 +170,7 @@ impl Checker {
         }
     }
 
-    pub fn get_non_nullable_type_of(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    pub fn get_non_nullable_type_of(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_nullable_type_of"); 
         if t.flags.contains(TypeFlags::Union)
             && let Some(constituents) = t.types()
         {
@@ -186,7 +186,7 @@ impl Checker {
         Arc::clone(t)
     }
 
-    pub fn type_is_undefined_or_null(&self, t: &Arc<Type>) -> bool {
+    pub fn type_is_undefined_or_null(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_undefined_or_null"); 
         if t.flags.intersects(
             TypeFlags::Undefined | TypeFlags::Null | TypeFlags::Any | TypeFlags::Unknown,
         ) {
@@ -202,7 +202,7 @@ impl Checker {
         }
     }
 
-    pub fn is_instantiated_generic_parameter(&mut self, sig: &Arc<Signature>, pos: usize) -> bool {
+    pub fn is_instantiated_generic_parameter(&mut self, sig: &Arc<Signature>, pos: usize) -> bool { ::tsox_core::fntrace::enter("is_instantiated_generic_parameter"); 
         let Some(target) = &sig.target else {
             return false;
         };
@@ -212,7 +212,7 @@ impl Checker {
         }
     }
 
-    pub fn is_generic_type(&self, t: &Arc<Type>) -> bool {
+    pub fn is_generic_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_type"); 
         if t.flags.contains(TypeFlags::TypeParameter) {
             return true;
         }
@@ -230,7 +230,7 @@ impl Checker {
         object_type: &Arc<Type>,
         index_type: &Arc<Type>,
         access_flags: AccessFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("try_get_indexed_access_type"); 
         if object_type.flags.contains(TypeFlags::Any) || index_type.flags.contains(TypeFlags::Any) {
             return Some(self.any_type());
         }

@@ -59,7 +59,7 @@ pub struct FormatCodeSettings {
     pub indent_multi_line_object_literal_beginning_on_blank_line: Tristate,
 }
 
-pub fn get_default_format_code_settings() -> FormatCodeSettings {
+pub fn get_default_format_code_settings() -> FormatCodeSettings { ::tsox_core::fntrace::enter("get_default_format_code_settings"); 
     FormatCodeSettings {
         editor_settings: EditorSettings {
             tab_size: 4,
@@ -110,7 +110,7 @@ pub struct FormatContext {
 pub fn with_format_code_settings(
     settings: FormatCodeSettings,
     new_line_character: &str,
-) -> FormatContext {
+) -> FormatContext { ::tsox_core::fntrace::enter("with_format_code_settings"); 
     FormatContext {
         settings,
         new_line_character: new_line_character.to_string(),
@@ -124,7 +124,7 @@ pub struct TextChange {
     pub new_text: String,
 }
 
-pub fn format_document(ctx: &FormatContext, source_file: &Arc<SourceFile>) -> Vec<TextChange> {
+pub fn format_document(ctx: &FormatContext, source_file: &Arc<SourceFile>) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_document"); 
     api::format_document_with(ctx, source_file)
 }
 
@@ -133,23 +133,23 @@ pub fn format_selection(
     source_file: &Arc<SourceFile>,
     start: usize,
     end: usize,
-) -> Vec<TextChange> {
+) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_selection"); 
     api::format_selection_with(ctx, source_file, start, end)
 }
 
-pub fn format_on_semicolon(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+pub fn format_on_semicolon(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_semicolon"); 
     api::format_on_semicolon_with(ctx, source_file, position)
 }
 
-pub fn format_on_enter(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+pub fn format_on_enter(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_enter"); 
     api::format_on_enter_with(ctx, source_file, position)
 }
 
-pub fn format_on_opening_curly(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+pub fn format_on_opening_curly(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_opening_curly"); 
     api::format_on_opening_curly_with(ctx, source_file, position)
 }
 
-pub fn format_on_closing_curly(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> {
+pub fn format_on_closing_curly(ctx: &FormatContext, source_file: &Arc<SourceFile>, position: usize) -> Vec<TextChange> { ::tsox_core::fntrace::enter("format_on_closing_curly"); 
     api::format_on_closing_curly_with(ctx, source_file, position)
 }
 

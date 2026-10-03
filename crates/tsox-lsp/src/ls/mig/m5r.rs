@@ -65,7 +65,7 @@ pub struct SymbolOriginInfoObjectLiteralMethod {
 }
 
 impl SymbolOriginInfo {
-    pub fn as_object_literal_method(&self) -> &SymbolOriginInfoObjectLiteralMethod {
+    pub fn as_object_literal_method(&self) -> &SymbolOriginInfoObjectLiteralMethod { ::tsox_core::fntrace::enter("as_object_literal_method"); 
         match &self.data {
             Some(SymbolOriginInfoData::ObjectLiteralMethod(d)) => d,
             _ => panic!("symbolOriginInfo: data is not objectLiteralMethod"),
@@ -73,50 +73,50 @@ impl SymbolOriginInfo {
     }
 }
 
-pub fn origin_is_ignore(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_ignore(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_ignore"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_IGNORE != 0)
 }
 
-pub fn origin_includes_symbol_name(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_includes_symbol_name(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_includes_symbol_name"); 
     origin_is_computed_property_name(origin)
 }
 
-pub fn origin_is_computed_property_name(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_computed_property_name(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_computed_property_name"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_COMPUTED_PROPERTY_NAME != 0)
 }
 
-pub fn origin_is_object_literal_method(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_object_literal_method(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_object_literal_method"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_OBJECT_LITERAL_METHOD != 0)
 }
 
-pub fn origin_is_this_type_node(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_this_type_node(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_this_type_node"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_THIS_TYPE != 0)
 }
 
-pub fn origin_is_type_only_alias(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_type_only_alias(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_type_only_alias"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_TYPE_ONLY_ALIAS != 0)
 }
 
-pub fn origin_is_symbol_member(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_symbol_member(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_symbol_member"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_SYMBOL_MEMBER != 0)
 }
 
-pub fn origin_is_nullable_member(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_nullable_member(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_nullable_member"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_NULLABLE != 0)
 }
 
-pub fn origin_is_promise(origin: Option<&SymbolOriginInfo>) -> bool {
+pub fn origin_is_promise(origin: Option<&SymbolOriginInfo>) -> bool { ::tsox_core::fntrace::enter("origin_is_promise"); 
     origin.map_or(false, |o| o.kind & SYMBOL_ORIGIN_INFO_KIND_PROMISE != 0)
 }
 
-pub fn symbol_name(origin: &SymbolOriginInfo) -> String {
+pub fn symbol_name(origin: &SymbolOriginInfo) -> String { ::tsox_core::fntrace::enter("symbol_name"); 
     match &origin.data {
         Some(SymbolOriginInfoData::ComputedPropertyName { symbol_name }) => symbol_name.clone(),
         _ => panic!("symbolOriginInfo: unknown data type for symbol_name()"),
     }
 }
 
-pub fn get_source_from_origin(origin: Option<&SymbolOriginInfo>) -> String {
+pub fn get_source_from_origin(origin: Option<&SymbolOriginInfo>) -> String { ::tsox_core::fntrace::enter("get_source_from_origin"); 
     if origin_is_this_type_node(origin) {
         return COMPLETION_SOURCE_THIS_PROPERTY.to_string();
     }
@@ -129,21 +129,21 @@ pub fn get_source_from_origin(origin: Option<&SymbolOriginInfo>) -> String {
 pub fn get_nullable_symbol_origin_info_kind(
     kind: SymbolOriginInfoKind,
     insert_question_dot: bool,
-) -> SymbolOriginInfoKind {
+) -> SymbolOriginInfoKind { ::tsox_core::fntrace::enter("get_nullable_symbol_origin_info_kind"); 
     if insert_question_dot {
         return kind | SYMBOL_ORIGIN_INFO_KIND_NULLABLE;
     }
     kind
 }
 
-pub fn str_ptr_is_empty(v: Option<&String>) -> bool {
+pub fn str_ptr_is_empty(v: Option<&String>) -> bool { ::tsox_core::fntrace::enter("str_ptr_is_empty"); 
     match v {
         None => true,
         Some(s) => s.is_empty(),
     }
 }
 
-pub fn str_ptr_to(v: &str) -> Option<String> {
+pub fn str_ptr_to(v: &str) -> Option<String> { ::tsox_core::fntrace::enter("str_ptr_to"); 
     if v.is_empty() {
         None
     } else {
@@ -151,11 +151,11 @@ pub fn str_ptr_to(v: &str) -> Option<String> {
     }
 }
 
-pub fn starts_with_quote(s: &str) -> bool {
+pub fn starts_with_quote(s: &str) -> bool { ::tsox_core::fntrace::enter("starts_with_quote"); 
     matches!(s.chars().next(), Some('"') | Some('\''))
 }
 
-pub fn trim_element_access(text: &str) -> String {
+pub fn trim_element_access(text: &str) -> String { ::tsox_core::fntrace::enter("trim_element_access"); 
     let mut text = text.strip_prefix('[').unwrap_or(text);
     text = text.strip_suffix(']').unwrap_or(text);
     if text.starts_with('\'') && text.ends_with('\'') && text.len() >= 2 {
@@ -167,7 +167,7 @@ pub fn trim_element_access(text: &str) -> String {
     text.to_string()
 }
 
-pub fn is_string_literal_or_template(node: &Arc<Node>) -> bool {
+pub fn is_string_literal_or_template(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_string_literal_or_template"); 
     matches!(
         node.kind,
         ast::SyntaxKind::StringLiteral
@@ -177,11 +177,11 @@ pub fn is_string_literal_or_template(node: &Arc<Node>) -> bool {
     )
 }
 
-pub fn is_named_imports_or_exports(node: &Arc<Node>) -> bool {
+pub fn is_named_imports_or_exports(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_named_imports_or_exports"); 
     ast::is_named_imports(node) || ast::is_named_exports(node)
 }
 
-pub fn is_type_script_only_keyword(kind: ast::SyntaxKind) -> bool {
+pub fn is_type_script_only_keyword(kind: ast::SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_type_script_only_keyword"); 
     use ast::SyntaxKind as K;
     matches!(
         kind,
@@ -215,7 +215,7 @@ pub fn is_type_script_only_keyword(kind: ast::SyntaxKind) -> bool {
     )
 }
 
-pub fn is_function_like_body_keyword(kind: ast::SyntaxKind) -> bool {
+pub fn is_function_like_body_keyword(kind: ast::SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_function_like_body_keyword"); 
     use ast::SyntaxKind as K;
     kind == K::AsyncKeyword
         || kind == K::AwaitKeyword
@@ -226,7 +226,7 @@ pub fn is_function_like_body_keyword(kind: ast::SyntaxKind) -> bool {
         || (!ast::mig::m3f_4::is_contextual_keyword(kind) && !is_class_member_completion_keyword(kind))
 }
 
-pub fn is_class_member_completion_keyword(kind: ast::SyntaxKind) -> bool {
+pub fn is_class_member_completion_keyword(kind: ast::SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_class_member_completion_keyword"); 
     use ast::SyntaxKind as K;
     matches!(
         kind,
@@ -241,18 +241,18 @@ pub fn is_class_member_completion_keyword(kind: ast::SyntaxKind) -> bool {
     ) || ast::mig::m3f_4::is_class_member_modifier(kind)
 }
 
-pub fn is_interface_or_type_literal_completion_keyword(kind: ast::SyntaxKind) -> bool {
+pub fn is_interface_or_type_literal_completion_keyword(kind: ast::SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_interface_or_type_literal_completion_keyword"); 
     kind == ast::SyntaxKind::ReadonlyKeyword
 }
 
-pub fn is_contextual_keyword_in_auto_importable_expression_space(keyword: &str) -> bool {
+pub fn is_contextual_keyword_in_auto_importable_expression_space(keyword: &str) -> bool { ::tsox_core::fntrace::enter("is_contextual_keyword_in_auto_importable_expression_space"); 
     matches!(
         keyword,
         "abstract" | "async" | "await" | "declare" | "module" | "namespace" | "type" | "satisfies" | "as"
     )
 }
 
-pub fn is_equality_operator_kind(kind: ast::SyntaxKind) -> bool {
+pub fn is_equality_operator_kind(kind: ast::SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_equality_operator_kind"); 
     use ast::SyntaxKind as K;
     matches!(
         kind,
@@ -260,12 +260,12 @@ pub fn is_equality_operator_kind(kind: ast::SyntaxKind) -> bool {
     )
 }
 
-pub fn is_member_completion_kind(kind: crate::ls::completions::CompletionKind) -> bool {
+pub fn is_member_completion_kind(kind: crate::ls::completions::CompletionKind) -> bool { ::tsox_core::fntrace::enter("is_member_completion_kind"); 
     use crate::ls::completions::CompletionKind as K;
     matches!(kind, K::ObjectLiteralMember | K::Member | K::PropertyAccess)
 }
 
-pub fn get_line_end_of_position(file: &Arc<SourceFile>, pos: usize) -> usize {
+pub fn get_line_end_of_position(file: &Arc<SourceFile>, pos: usize) -> usize { ::tsox_core::fntrace::enter("get_line_end_of_position"); 
     let line = tsox_emit::mig::m4m_2::get_ecma_line_of_position(file, pos);
     let line_starts = tsox_frontend::format::mig::m4t_3::get_ecma_line_starts(file);
     let last_char_pos = if line + 1 >= line_starts.len() {
@@ -284,7 +284,7 @@ pub fn get_line_end_of_position(file: &Arc<SourceFile>, pos: usize) -> usize {
     last_char_pos
 }
 
-pub fn is_abstract_constructor_symbol(symbol: &Arc<Symbol>) -> bool {
+pub fn is_abstract_constructor_symbol(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_abstract_constructor_symbol"); 
     if symbol.flags & ast::SymbolFlags::Class != ast::SymbolFlags::None {
         let declaration = ast::mig::x4ast::get_class_like_declaration_of_symbol(symbol);
         return declaration.is_some()
@@ -293,7 +293,7 @@ pub fn is_abstract_constructor_symbol(symbol: &Arc<Symbol>) -> bool {
     false
 }
 
-pub fn is_deprecated(symbol: &Arc<Symbol>, type_checker: &mut Checker) -> bool {
+pub fn is_deprecated(symbol: &Arc<Symbol>, type_checker: &mut Checker) -> bool { ::tsox_core::fntrace::enter("is_deprecated"); 
     let aliased = type_checker.skip_alias(symbol);
     let declarations = &aliased.declarations;
     !declarations.is_empty()
@@ -304,13 +304,13 @@ pub fn is_recommended_completion_match(
     local_symbol: &Arc<Symbol>,
     recommended_completion: &Arc<Symbol>,
     type_checker: &mut Checker,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_recommended_completion_match"); 
     Arc::ptr_eq(local_symbol, recommended_completion)
         || local_symbol.flags & ast::SymbolFlags::ExportValue != ast::SymbolFlags::None
             && Arc::ptr_eq(&type_checker.get_export_symbol_of_symbol(local_symbol), recommended_completion)
 }
 
-pub fn is_static_property(symbol: &Arc<Symbol>) -> bool {
+pub fn is_static_property(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_static_property"); 
     symbol
         .value_declaration
         .as_ref()
@@ -320,15 +320,15 @@ pub fn is_static_property(symbol: &Arc<Symbol>) -> bool {
         })
 }
 
-pub fn is_literal(t: &tsox_checker::checker::Type) -> bool {
+pub fn is_literal(t: &tsox_checker::checker::Type) -> bool { ::tsox_core::fntrace::enter("is_literal"); 
     t.is_string_literal() || t.is_number_literal() || t.is_big_int_literal()
 }
 
-pub fn is_checked_file(file: &Arc<SourceFile>, compiler_options: &core::compiler_options::CompilerOptions) -> bool {
+pub fn is_checked_file(file: &Arc<SourceFile>, compiler_options: &core::compiler_options::CompilerOptions) -> bool { ::tsox_core::fntrace::enter("is_checked_file"); 
     !ast::is_source_file_js(file) || ast::mig::m3f_4::is_check_js_enabled_for_file(file, compiler_options)
 }
 
-pub fn is_context_token_value_location(context_token: &Arc<Node>) -> bool {
+pub fn is_context_token_value_location(context_token: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_context_token_value_location"); 
     let parent_kind = context_token.parent().map(|p| p.kind);
     context_token.kind == ast::SyntaxKind::TypeOfKeyword
         && parent_kind == Some(ast::SyntaxKind::TypeQuery)
@@ -336,7 +336,7 @@ pub fn is_context_token_value_location(context_token: &Arc<Node>) -> bool {
             && parent_kind == Some(ast::SyntaxKind::TypePredicate)
 }
 
-pub fn is_context_token_type_location(context_token: Option<&Arc<Node>>) -> bool {
+pub fn is_context_token_type_location(context_token: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_context_token_type_location"); 
     let Some(context_token) = context_token else {
         return false;
     };
@@ -363,7 +363,7 @@ pub fn non_alias_can_be_referenced_at_type_location(
     symbol: &Arc<Symbol>,
     type_checker: &mut Checker,
     seen_modules: &mut HashSet<u64>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("non_alias_can_be_referenced_at_type_location"); 
     symbol.flags & ast::SymbolFlags::TYPE != ast::SymbolFlags::None
         || type_checker.is_unknown_symbol(symbol)
             && symbol.flags & ast::SymbolFlags::MODULE != ast::SymbolFlags::None
@@ -378,7 +378,7 @@ pub fn symbol_can_be_referenced_at_type_location(
     symbol: &Arc<Symbol>,
     type_checker: &mut Checker,
     seen_modules: &mut HashSet<u64>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("symbol_can_be_referenced_at_type_location"); 
     non_alias_can_be_referenced_at_type_location(symbol, type_checker, seen_modules)
         || non_alias_can_be_referenced_at_type_location(
             &type_checker.skip_alias(
@@ -392,7 +392,7 @@ pub fn symbol_can_be_referenced_at_type_location(
         )
 }
 
-pub fn get_properties_for_completion(t: &Arc<tsox_checker::checker::Type>, type_checker: &mut Checker) -> Vec<Arc<Symbol>> {
+pub fn get_properties_for_completion(t: &Arc<tsox_checker::checker::Type>, type_checker: &mut Checker) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_properties_for_completion"); 
     if t.is_union() {
         type_checker.get_all_possible_properties_of_types(t.types().unwrap_or(&[]))
     } else {
@@ -400,7 +400,7 @@ pub fn get_properties_for_completion(t: &Arc<tsox_checker::checker::Type>, type_
     }
 }
 
-pub fn get_left_most_name(e: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_left_most_name(e: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_left_most_name"); 
     if ast::is_identifier(e) {
         Some(e.clone())
     } else if ast::is_property_access_expression(e) {
@@ -411,7 +411,7 @@ pub fn get_left_most_name(e: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn is_in_type_parameter_default(context_token: &Arc<Node>) -> bool {
+pub fn is_in_type_parameter_default(context_token: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_type_parameter_default"); 
     let mut node = context_token.clone();
     let mut parent = context_token.parent();
     while let Some(p) = parent {
@@ -431,14 +431,14 @@ pub fn is_in_type_parameter_default(context_token: &Arc<Node>) -> bool {
     false
 }
 
-pub fn keyword_for_node(node: &Arc<Node>) -> ast::SyntaxKind {
+pub fn keyword_for_node(node: &Arc<Node>) -> ast::SyntaxKind { ::tsox_core::fntrace::enter("keyword_for_node"); 
     if ast::is_identifier(node) {
         return scanner::mig::m3i::identifier_to_keyword_kind(node);
     }
     node.kind
 }
 
-pub fn is_snippet_scope(scope_node: &Arc<Node>) -> bool {
+pub fn is_snippet_scope(scope_node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_snippet_scope"); 
     use ast::SyntaxKind as K;
     match scope_node.kind {
         K::SourceFile | K::TemplateExpression | K::JsxExpression | K::Block => true,
@@ -450,14 +450,14 @@ pub fn quote_property_name(
     file: &Arc<SourceFile>,
     preferences: &UserPreferences,
     name: &str,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("quote_property_name"); 
     if name.chars().next().map_or(false, |c| c.is_ascii_digit()) {
         return name.to_string();
     }
     super::m5q_3::quote(file, preferences, name)
 }
 
-pub fn modifier_like_kind(node: Option<&Arc<Node>>) -> ast::SyntaxKind {
+pub fn modifier_like_kind(node: Option<&Arc<Node>>) -> ast::SyntaxKind { ::tsox_core::fntrace::enter("modifier_like_kind"); 
     let Some(node) = node else {
         return ast::SyntaxKind::Unknown;
     };
@@ -473,7 +473,7 @@ pub fn modifier_like_kind(node: Option<&Arc<Node>>) -> ast::SyntaxKind {
     ast::SyntaxKind::Unknown
 }
 
-pub fn get_word_length_and_start(file: &Arc<SourceFile>, position: usize) -> (usize, char) {
+pub fn get_word_length_and_start(file: &Arc<SourceFile>, position: usize) -> (usize, char) { ::tsox_core::fntrace::enter("get_word_length_and_start"); 
     const WORD_SEPARATORS: &str = "`~!@%^&*()-=+[{]}\\|;:'\",.<>/?";
     let text = &file.text[..position.min(file.text.len())];
     let mut total_size = 0usize;
@@ -493,7 +493,7 @@ pub fn get_word_length_and_start(file: &Arc<SourceFile>, position: usize) -> (us
     (total_size, word_start)
 }
 
-pub fn is_object_literal_method_completion_candidate_declaration(declaration: Option<&Arc<Node>>) -> bool {
+pub fn is_object_literal_method_completion_candidate_declaration(declaration: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_object_literal_method_completion_candidate_declaration"); 
     use ast::SyntaxKind as K;
     match declaration {
         None => false,
@@ -504,11 +504,11 @@ pub fn is_object_literal_method_completion_candidate_declaration(declaration: Op
     }
 }
 
-pub fn is_object_literal_method_symbol(symbol: &Arc<Symbol>) -> bool {
+pub fn is_object_literal_method_symbol(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_object_literal_method_symbol"); 
     symbol.flags & (ast::SymbolFlags::Property | ast::SymbolFlags::Method) != ast::SymbolFlags::None
 }
 
-pub fn is_type_keyword_token_or_identifier(node: &Arc<Node>) -> bool {
+pub fn is_type_keyword_token_or_identifier(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_keyword_token_or_identifier"); 
     ast::mig::m3g_2::is_type_keyword_token(node)
         || ast::is_identifier(node) && scanner::mig::m3i::identifier_to_keyword_kind(node) == ast::SyntaxKind::TypeKeyword
 }
@@ -517,7 +517,7 @@ pub fn is_variable_declaration_list_but_not_type_argument(
     node: &Arc<Node>,
     file: &Arc<SourceFile>,
     type_checker: &mut Checker,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_list_but_not_type_argument"); 
     node.parent()
         .map_or(false, |p| {
             p.kind == ast::SyntaxKind::VariableDeclarationList
@@ -529,7 +529,7 @@ pub fn is_possibly_type_argument_position(
     token: &Arc<Node>,
     source_file: &Arc<SourceFile>,
     type_checker: &mut Checker,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_possibly_type_argument_position"); 
     crate::ls::mig::m5x_5::get_possible_type_arguments_info(token, source_file)
         .map_or(false, |info| {
             ast::mig::m3g_3::is_part_of_type_node(&info.called)
@@ -543,7 +543,7 @@ pub fn is_possibly_type_argument_position(
         })
 }
 
-pub fn is_module_specifier_missing_or_empty(specifier: Option<&Arc<Node>>) -> bool {
+pub fn is_module_specifier_missing_or_empty(specifier: Option<&Arc<Node>>) -> bool { ::tsox_core::fntrace::enter("is_module_specifier_missing_or_empty"); 
     let Some(specifier) = specifier else {
         return true;
     };
@@ -563,7 +563,7 @@ pub fn is_module_specifier_missing_or_empty(specifier: Option<&Arc<Node>>) -> bo
     node.text().is_empty()
 }
 
-pub fn is_tag_with_type_expression(tag: &Arc<Node>) -> bool {
+pub fn is_tag_with_type_expression(tag: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_tag_with_type_expression"); 
     use ast::SyntaxKind as K;
     match tag.kind {
         K::JSDocParameterTag
@@ -583,7 +583,7 @@ pub fn is_tag_with_type_expression(tag: &Arc<Node>) -> bool {
     }
 }
 
-fn jsdoc_tag_type_expression(tag: &Arc<Node>) -> Option<Arc<Node>> {
+fn jsdoc_tag_type_expression(tag: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("jsdoc_tag_type_expression"); 
     use ast::node_data_generated::NodeData;
     match &tag.data {
         NodeData::JSDocParameterOrPropertyTag(d) => d.type_expression.clone(),
@@ -596,7 +596,7 @@ fn jsdoc_tag_type_expression(tag: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn try_get_type_expression_from_tag(tag: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn try_get_type_expression_from_tag(tag: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("try_get_type_expression_from_tag"); 
     let mut type_expression: Option<Arc<Node>> = None;
     if is_tag_with_type_expression(tag) {
         if ast::is_jsdoc_template_tag(tag) {
@@ -625,7 +625,7 @@ pub fn try_get_type_expression_from_tag(tag: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub fn get_potentially_invalid_import_specifier(named_bindings: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+pub fn get_potentially_invalid_import_specifier(named_bindings: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_potentially_invalid_import_specifier"); 
     let named_bindings = named_bindings?;
     if named_bindings.kind != ast::SyntaxKind::NamedImports {
         return None;
@@ -645,7 +645,7 @@ pub fn get_potentially_invalid_import_specifier(named_bindings: Option<&Arc<Node
         .map(|e| Arc::clone(e))
 }
 
-pub fn supplemental_file_index(file: &Arc<SourceFile>) -> Option<i32> {
+pub fn supplemental_file_index(file: &Arc<SourceFile>) -> Option<i32> { ::tsox_core::fntrace::enter("supplemental_file_index"); 
     let canonical = canonical_source_file(file)?;
     for (i, supplemental) in canonical.supplemental_source_files().iter().enumerate() {
         if Arc::ptr_eq(supplemental, file) {
@@ -655,14 +655,14 @@ pub fn supplemental_file_index(file: &Arc<SourceFile>) -> Option<i32> {
     panic!("supplemental source file is not linked from its canonical source file")
 }
 
-fn canonical_source_file(_file: &Arc<SourceFile>) -> Option<Arc<SourceFile>> {
+fn canonical_source_file(_file: &Arc<SourceFile>) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("canonical_source_file"); 
     None
 }
 
 pub fn source_file_for_supplemental_file_index(
     file: &Arc<SourceFile>,
     index: Option<i32>,
-) -> Option<Arc<SourceFile>> {
+) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("source_file_for_supplemental_file_index"); 
     let index = index?;
     let supplemental = file.supplemental_source_files();
     if index >= 0 && (index as usize) < supplemental.len() {
@@ -672,7 +672,7 @@ pub fn source_file_for_supplemental_file_index(
     }
 }
 
-pub fn keyword_for_node_pub(node: &Arc<Node>) -> ast::SyntaxKind {
+pub fn keyword_for_node_pub(node: &Arc<Node>) -> ast::SyntaxKind { ::tsox_core::fntrace::enter("keyword_for_node_pub"); 
     keyword_for_node(node)
 }
 
@@ -680,7 +680,7 @@ pub fn set_member_declared_by_spread_assignment(
     declaration: &Arc<Node>,
     members: &mut HashSet<String>,
     type_checker: &mut Checker,
-) {
+) { ::tsox_core::fntrace::enter("set_member_declared_by_spread_assignment"); 
     let Some(expression) = declaration.expression() else {
         return;
     };
@@ -708,7 +708,7 @@ impl crate::ls::language_service::LanguageService {
         &self,
         location: Option<&Arc<Node>>,
         file: &Arc<SourceFile>,
-    ) -> Option<lsproto::Range> {
+    ) -> Option<lsproto::Range> { ::tsox_core::fntrace::enter("get_optional_replacement_span"); 
         let location = location?;
         if location.kind == ast::SyntaxKind::Identifier || location.kind == ast::SyntaxKind::PrivateIdentifier {
             let start = astnav::get_start_of_node(location, file, false);
@@ -725,7 +725,7 @@ impl crate::ls::language_service::LanguageService {
         file: &Arc<SourceFile>,
         context_token: Option<&Arc<Node>>,
         position: usize,
-    ) -> Option<lsproto::Range> {
+    ) -> Option<lsproto::Range> { ::tsox_core::fntrace::enter("get_replacement_range_for_context_token"); 
         let context_token = context_token?;
         use ast::SyntaxKind as K;
         match context_token.kind {

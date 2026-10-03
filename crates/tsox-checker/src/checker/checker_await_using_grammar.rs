@@ -11,7 +11,7 @@ impl Checker {
     pub(crate) fn check_grammar_await_or_await_using_declaration_list(
         &mut self,
         node: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_await_or_await_using_declaration_list"); 
         let container = crate::checker::utilities_get_assignment_target::
             get_containing_function_or_class_static_block(node);
         let Some(container) = container else {
@@ -44,7 +44,7 @@ impl Checker {
         true
     }
 
-    fn check_top_level_await_using_thresholds(&mut self, node: &Arc<Node>) -> bool {
+    fn check_top_level_await_using_thresholds(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_top_level_await_using_thresholds"); 
         let Some(source_file) = self.current_file.clone() else {
             return false;
         };

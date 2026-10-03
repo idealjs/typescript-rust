@@ -20,7 +20,7 @@ pub struct ProjectReferenceParseTask {
 }
 
 impl ProjectReferenceParseTask {
-    pub fn parse(&mut self, project_reference_parser: &ProjectReferenceParser) {
+    pub fn parse(&mut self, project_reference_parser: &ProjectReferenceParser) { ::tsox_core::fntrace::enter("parse"); 
         let loader = match project_reference_parser.loader.as_ref() {
             None => return,
             Some(loader) => Arc::clone(loader),
@@ -51,7 +51,7 @@ impl ProjectReferenceParseTask {
 
 pub fn create_project_reference_parse_tasks(
     project_references: &[String],
-) -> Vec<ProjectReferenceParseTask> {
+) -> Vec<ProjectReferenceParseTask> { ::tsox_core::fntrace::enter("create_project_reference_parse_tasks"); 
     project_references
         .iter()
         .map(|config_name| ProjectReferenceParseTask {
@@ -69,7 +69,7 @@ pub struct ProjectReferenceParser {
 }
 
 impl Default for ProjectReferenceParser {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             loader: None,
             wg: new_work_group(true),
@@ -79,7 +79,7 @@ impl Default for ProjectReferenceParser {
 }
 
 impl ProjectReferenceParser {
-    pub fn parse(&mut self, tasks: Vec<ProjectReferenceParseTask>, loader: Arc<Mutex<FileLoader>>) {
+    pub fn parse(&mut self, tasks: Vec<ProjectReferenceParseTask>, loader: Arc<Mutex<FileLoader>>) { ::tsox_core::fntrace::enter("parse"); 
         {
             let mut loader_guard = loader.lock().unwrap();
             Arc::get_mut(&mut loader_guard.project_reference_file_mapper)
@@ -96,11 +96,11 @@ impl ProjectReferenceParser {
         self.init_mapper(&mut tasks);
     }
 
-    fn loader_wait(&self) {
+    fn loader_wait(&self) { ::tsox_core::fntrace::enter("loader_wait"); 
         self.wg.run_and_wait();
     }
 
-    pub fn start(&mut self, tasks: &mut [Arc<Mutex<ProjectReferenceParseTask>>]) {
+    pub fn start(&mut self, tasks: &mut [Arc<Mutex<ProjectReferenceParseTask>>]) { ::tsox_core::fntrace::enter("start"); 
         let loader = match self.loader.as_ref() {
             None => return,
             Some(loader) => Arc::clone(loader),
@@ -134,7 +134,7 @@ impl ProjectReferenceParser {
         }
     }
 
-    pub fn init_mapper(&mut self, tasks: &mut [Arc<Mutex<ProjectReferenceParseTask>>]) {
+    pub fn init_mapper(&mut self, tasks: &mut [Arc<Mutex<ProjectReferenceParseTask>>]) { ::tsox_core::fntrace::enter("init_mapper"); 
         let loader = match self.loader.as_ref() {
             None => return,
             Some(loader) => Arc::clone(loader),
@@ -188,7 +188,7 @@ impl ProjectReferenceParser {
         }
     }
 
-    fn tasks_by_file_name_size(&self) -> usize {
+    fn tasks_by_file_name_size(&self) -> usize { ::tsox_core::fntrace::enter("tasks_by_file_name_size"); 
         self.tasks_by_file_name.len()
     }
 
@@ -198,7 +198,7 @@ impl ProjectReferenceParser {
         seen: &mut Set<usize>,
         mapper: &mut ProjectReferenceFileMapper,
         dts_directories: &mut Set<Path>,
-    ) -> Vec<Path> {
+    ) -> Vec<Path> { ::tsox_core::fntrace::enter("init_mapper_worker"); 
         if tasks.is_empty() {
             return Vec::new();
         }

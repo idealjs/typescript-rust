@@ -6,7 +6,7 @@ impl Checker {
     pub fn iife_contextual_signature(
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("iife_contextual_signature"); 
         let mut parent = node.parent()?;
         while parent.kind == SyntaxKind::ParenthesizedExpression {
             parent = parent.parent()?;
@@ -65,7 +65,7 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_initializer_expression"); 
         use tsox_frontend::ast::NodeData;
 
         let declaration = node.parent().as_ref()?;
@@ -118,7 +118,7 @@ impl Checker {
     pub(crate) fn get_contextual_type_from_binding_element(
         &mut self,
         binding_element: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_from_binding_element"); 
         use tsox_frontend::ast::NodeData;
 
         let binding_pattern = binding_element.parent().as_ref()?;
@@ -163,7 +163,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_element_type_of_array(&mut self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> {
+    pub(crate) fn get_element_type_of_array(&mut self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_element_type_of_array"); 
         if let TypeData::Tuple(tuple) = &t.data {
             if index < tuple.element_infos.len() {
                 if let Some(ref elem) = tuple.element_infos[index].type_ {
@@ -178,7 +178,7 @@ impl Checker {
         None
     }
 
-    pub(crate) fn property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> {
+    pub(crate) fn property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("property_type_of_type"); 
         let prop = self.get_property_of_type(t, name)?;
         Some(self.get_type_of_symbol(&prop))
     }
@@ -186,7 +186,7 @@ impl Checker {
     pub(crate) fn get_contextual_type_for_call_or_new(
         &mut self,
         node: &tsox_frontend::ast::Node,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_call_or_new"); 
         use tsox_frontend::ast::NodeData;
 
         let parent = node.parent().as_ref()?;
@@ -208,7 +208,7 @@ impl Checker {
     pub(crate) fn get_return_type_annotation_of_function(
         &mut self,
         node: &tsox_frontend::ast::Node,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_annotation_of_function"); 
         use tsox_frontend::ast::NodeData;
 
         let type_node = match &node.data {
@@ -228,7 +228,7 @@ impl Checker {
         &mut self,
         _node: &Arc<tsox_frontend::ast::Node>,
         _context_flags: ContextFlags,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_return_expression"); 
         let mut current = _node.parent().as_ref()?.clone();
         loop {
             match current.kind {
@@ -251,7 +251,7 @@ impl Checker {
     pub fn contextual_return_type_of(
         &mut self,
         fn_node: &Arc<tsox_frontend::ast::Node>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("contextual_return_type_of"); 
         use tsox_frontend::ast::NodeData;
 
         let type_node = match &fn_node.data {

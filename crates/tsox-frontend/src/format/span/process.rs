@@ -21,7 +21,7 @@ use super::super::lists;
 use super::super::util;
 
 impl FormatSpanWorker {
-    pub(super) fn get_current_indentation_at_position(&self, pos: usize) -> i64 {
+    pub(super) fn get_current_indentation_at_position(&self, pos: usize) -> i64 { ::tsox_core::fntrace::enter("get_current_indentation_at_position"); 
         let start_line_position = util::line_start_position_for_position(&self.source_file, pos);
         util::find_first_non_whitespace_column(
             &self.source_file,
@@ -41,7 +41,7 @@ impl FormatSpanWorker {
         undecorated_node_start_line: usize,
         indentation: i64,
         delta: i64,
-    ) {
+    ) { ::tsox_core::fntrace::enter("process_node"); 
         if !self
             .original_range
             .overlaps(&util::with_token_start(&self.source_file, node))
@@ -94,7 +94,7 @@ impl FormatSpanWorker {
         indenter: &IndenterRef,
         node_start_line: usize,
         undecorated_node_start_line: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("execute_process_node_visitor"); 
         enum Item {
             Node(Arc<Node>),
             List(Arc<crate::ast::node::NodeList>),
@@ -186,7 +186,7 @@ impl FormatSpanWorker {
         parent: &Arc<Node>,
         parent_start_line: usize,
         parent_dynamic_indentation: &IndenterRef,
-    ) {
+    ) { ::tsox_core::fntrace::enter("process_child_nodes"); 
         let list_start_token = lists::open_token_for_list(parent, nodes);
 
         let mut list_dynamic_indentation = Arc::clone(parent_dynamic_indentation);
@@ -474,7 +474,7 @@ impl FormatSpanWorker {
         inherited_indentation: i64,
         parent_dynamic_indentation: &IndenterRef,
         effective_parent_start_line: usize,
-    ) -> (i64, i64) {
+    ) -> (i64, i64) { ::tsox_core::fntrace::enter("compute_indentation"); 
         let mut delta: i64 = 0;
         // Go 此处传 nil sourceFile
         if should_indent_child_node(&self.options, node, None, None, false) {
@@ -530,7 +530,7 @@ impl FormatSpanWorker {
     /// Go 的 ThisNodeHasError 标记（finishNode 时 hasParseError）在本移植的
     /// parser 中未落地；扫描期错误（冲突标记等）落在成员与前一 token 的间隙
     /// 时，Go 同样会把该成员标记为 error member，此处按间隙重叠补齐判定。
-    fn member_gap_has_parse_error(&self, child_start_pos: usize) -> bool {
+    fn member_gap_has_parse_error(&self, child_start_pos: usize) -> bool { ::tsox_core::fntrace::enter("member_gap_has_parse_error"); 
         if self.source_file.parse_error_spans.is_empty() {
             return false;
         }
@@ -549,7 +549,7 @@ impl FormatSpanWorker {
         end_pos: usize,
         parent_start_line: usize,
         inherited_indentation: i64,
-    ) -> i64 {
+    ) -> i64 { ::tsox_core::fntrace::enter("try_compute_indentation_for_list_item"); 
         let r2 = TextRange::new(start_pos, end_pos);
         if self.original_range.overlaps(&r2) || r2.contained_by(&self.original_range) {
             if inherited_indentation != -1 {

@@ -5,7 +5,7 @@ use tsox_frontend::ast::{Node, Symbol, SyntaxKind};
 use crate::checker::checker::Checker;
 use crate::checker::types::{ObjectFlags, Type, TypeFlags, UnionReduction};
 
-pub fn is_entity_name_expression_local(node: &Node) -> bool {
+pub fn is_entity_name_expression_local(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression_local"); 
     node.kind == SyntaxKind::Identifier
         || (node.kind == SyntaxKind::PropertyAccessExpression
             && node
@@ -19,7 +19,7 @@ impl Checker {
         t: &Arc<Type>,
         include: TypeFlags,
         include_origin: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_literal_type_from_properties"); 
         // 现行 get_union_type_ex 无 origin 形参(r24k7 交接同类缺口),Go origin 实参无处挂载,留交接
         let _ = include_origin;
         let props = self.get_properties_of_type(t);
@@ -50,7 +50,7 @@ impl Checker {
         prop: &Arc<Symbol>,
         include: TypeFlags,
         include_non_public: bool,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_literal_type_from_property_ex"); 
         if include_non_public
             || !crate::checker::exports::get_declaration_modifier_flags_from_symbol(prop)
                 .intersects(tsox_frontend::ast::ModifierFlags::NonPublicAccessibilityModifier)

@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn build_info_roundtrip() {
+fn build_info_roundtrip() { ::tsox_core::fntrace::enter("build_info_roundtrip"); 
     let info = BuildInfo::new(
         &[
             ("/src/foo.ts".to_string(), "const x = 1;".to_string()),
@@ -18,7 +18,7 @@ fn build_info_roundtrip() {
 }
 
 #[test]
-fn up_to_date_check() {
+fn up_to_date_check() { ::tsox_core::fntrace::enter("up_to_date_check"); 
     let files = vec![("/src/foo.ts".to_string(), "const x = 1;".to_string())];
     let info = BuildInfo::new(&files, "/src", "hash123", &[]);
 
@@ -31,7 +31,7 @@ fn up_to_date_check() {
 }
 
 #[test]
-fn build_info_file_path() {
+fn build_info_file_path() { ::tsox_core::fntrace::enter("build_info_file_path"); 
     let path = BuildInfo::get_ts_build_info_file_path("/src/tsconfig.json", "/src/dist", "");
     assert_eq!(path, "/src/dist/tsconfig.tsbuildinfo");
 

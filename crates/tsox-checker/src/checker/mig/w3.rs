@@ -29,13 +29,13 @@ pub static TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1_WITH_EXACT_OPTIONAL_PROPERTY_TYPES
 use super::wc3::NodeAccessExt;
 
 impl TupleTypeData {
-    pub fn element_flags(&self) -> Vec<ElementFlags> {
+    pub fn element_flags(&self) -> Vec<ElementFlags> { ::tsox_core::fntrace::enter("element_flags"); 
         self.element_infos.iter().map(|info| info.flags).collect()
     }
 }
 
 impl Checker {
-    pub fn each_type_contained_in(&self, source: &Arc<Type>, types: &[Arc<Type>]) -> bool {
+    pub fn each_type_contained_in(&self, source: &Arc<Type>, types: &[Arc<Type>]) -> bool { ::tsox_core::fntrace::enter("each_type_contained_in"); 
         if let TypeData::Union(data) = &source.data {
             return !data
                 .union_or_intersection
@@ -50,7 +50,7 @@ impl Checker {
         &'a mut self,
         node: &Arc<Node>,
         get_invalid_text_diagnostic: impl Fn() -> (Option<&'static str>, Vec<String>) + Clone + 'static,
-    ) -> impl Iterator<Item = JsxElaborationElement> + 'a {
+    ) -> impl Iterator<Item = JsxElaborationElement> + 'a { ::tsox_core::fntrace::enter("generate_jsx_children"); 
         let mut member_offset = 0usize;
         let mut children: Vec<Arc<Node>> = Vec::new();
         tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
@@ -74,7 +74,7 @@ impl Checker {
         child: &Arc<Node>,
         name_type: &Arc<Type>,
         get_invalid_text_diagnostic: impl Fn() -> (Option<&'static str>, Vec<String>) + Clone + 'static,
-    ) -> JsxElaborationElement {
+    ) -> JsxElaborationElement { ::tsox_core::fntrace::enter("get_elaboration_element_for_jsx_child"); 
         match child.kind {
             SyntaxKind::JsxExpression => JsxElaborationElement {
                 error_node: Some(Arc::clone(child)),
@@ -120,7 +120,7 @@ impl Checker {
         target: &Arc<Type>,
         relation: RelationKind,
         mut diagnostic_output: Option<&mut Vec<Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_iterable_or_array_like_target_elementwise"); 
         let tuple_or_array_like_target_parts =
             filter_type_self(self, target, |checker, t| checker.is_array_or_tuple_like_type(t));
         let non_tuple_or_array_like_target_parts = filter_type_self(self, target, |checker, t| {
@@ -270,7 +270,7 @@ impl Checker {
         error_message: Option<&'static str>,
         diagnostic_factory: Option<&dyn Fn(&Arc<Node>) -> Arc<Diagnostic>>,
         mut diagnostic_output: Option<&mut Vec<Diagnostic>>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("elaborate_element"); 
         let target_prop_type =
             self.get_best_match_indexed_access_type_or_undefined(source, target, name_type);
         let target_prop_type = match target_prop_type {

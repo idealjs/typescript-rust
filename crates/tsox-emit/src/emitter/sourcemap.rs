@@ -10,7 +10,7 @@ pub(crate) fn generate_source_map_from_offsets(
     source: &str,
     source_line_starts: &[usize],
     _source_file: &SourceFile,
-) {
+) { ::tsox_core::fntrace::enter("generate_source_map_from_offsets"); 
     let out_chars: Vec<char> = output.chars().collect();
     let mut gen_line: i32 = 0;
     let mut gen_col: i32 = 0;

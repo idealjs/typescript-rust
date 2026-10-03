@@ -5,7 +5,7 @@ pub struct LspLineMap {
     pub ascii_only: bool,
 }
 
-pub fn compute_lsp_line_starts(text: &str) -> LspLineMap {
+pub fn compute_lsp_line_starts(text: &str) -> LspLineMap { ::tsox_core::fntrace::enter("compute_lsp_line_starts"); 
     let mut line_starts = Vec::with_capacity(text.matches('\n').count() + 1);
     let mut ascii_only = true;
 
@@ -46,7 +46,7 @@ pub fn compute_lsp_line_starts(text: &str) -> LspLineMap {
 }
 
 impl LspLineMap {
-    pub fn compute_index_of_line_start(&self, target_pos: usize) -> usize {
+    pub fn compute_index_of_line_start(&self, target_pos: usize) -> usize { ::tsox_core::fntrace::enter("compute_index_of_line_start"); 
         match self.line_starts.binary_search(&target_pos) {
             Ok(idx) => idx,
             Err(idx) => {
@@ -60,7 +60,7 @@ impl LspLineMap {
     }
 }
 
-fn utf8_char_len(first_byte: u8) -> usize {
+fn utf8_char_len(first_byte: u8) -> usize { ::tsox_core::fntrace::enter("utf8_char_len"); 
     if first_byte < 0x80 {
         1
     } else if first_byte < 0xC0 {

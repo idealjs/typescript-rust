@@ -11,7 +11,7 @@ use tsox_core::locale::Locale;
 use crate::ast::deep_clone_node::deep_clone_node;
 use super::m3g_3::set_parent_in_children;
 
-fn force_mut<T: ?Sized>(arc: &mut Arc<T>) -> &mut T {
+fn force_mut<T: ?Sized>(arc: &mut Arc<T>) -> &mut T { ::tsox_core::fntrace::enter("force_mut"); 
     let ptr: *mut T = match Arc::get_mut(arc) {
         Some(v) => v as *mut T,
         None => Arc::as_ptr(arc) as *mut T,
@@ -19,15 +19,15 @@ fn force_mut<T: ?Sized>(arc: &mut Arc<T>) -> &mut T {
     unsafe { &mut *ptr }
 }
 
-fn clone_node_list(list: &NodeList) -> NodeList {
+fn clone_node_list(list: &NodeList) -> NodeList { ::tsox_core::fntrace::enter("clone_node_list"); 
     NodeList { loc: list.loc, nodes: list.nodes.clone() }
 }
 
-fn clone_modifier_list(list: &ModifierList) -> ModifierList {
+fn clone_modifier_list(list: &ModifierList) -> ModifierList { ::tsox_core::fntrace::enter("clone_modifier_list"); 
     ModifierList { list: clone_node_list(&list.list), modifier_flags: list.modifier_flags }
 }
 
-fn relocate_list_tail(list: &mut NodeList, has_trailing_comma: bool) {
+fn relocate_list_tail(list: &mut NodeList, has_trailing_comma: bool) { ::tsox_core::fntrace::enter("relocate_list_tail"); 
     if has_trailing_comma {
         if let Some(last) = list.nodes.last_mut() {
             force_mut(last).loc = TextRange { pos: -2, end: -2 };
@@ -36,7 +36,7 @@ fn relocate_list_tail(list: &mut NodeList, has_trailing_comma: bool) {
     list.loc = TextRange { pos: -1, end: -1 };
 }
 
-pub fn get_deep_clone_visitor(f: &NodeFactory, synthetic_location: bool) -> NodeVisitor {
+pub fn get_deep_clone_visitor(f: &NodeFactory, synthetic_location: bool) -> NodeVisitor { ::tsox_core::fntrace::enter("get_deep_clone_visitor"); 
     let mut visitor: Option<NodeVisitor> = None;
     let v = NodeVisitor::new(
         move |node: &Arc<Node>| -> Arc<Node> {
@@ -105,7 +105,7 @@ pub fn get_deep_clone_visitor(f: &NodeFactory, synthetic_location: bool) -> Node
 }
 
 impl NodeFactory {
-    pub fn deep_clone_reparse(&self, node: Option<Arc<Node>>) -> Option<Arc<Node>> {
+    pub fn deep_clone_reparse(&self, node: Option<Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("deep_clone_reparse"); 
         let mut node = node?;
         let visited = get_deep_clone_visitor(self, false).visit_node(&node);
         set_parent_in_children(&visited);
@@ -119,7 +119,7 @@ impl NodeFactory {
         Some(node)
     }
 
-    pub fn deep_clone_reparse_modifiers(&self, modifiers: &Arc<ModifierList>) -> Arc<ModifierList> {
+    pub fn deep_clone_reparse_modifiers(&self, modifiers: &Arc<ModifierList>) -> Arc<ModifierList> { ::tsox_core::fntrace::enter("deep_clone_reparse_modifiers"); 
         get_deep_clone_visitor(self, false).visit_modifiers(modifiers)
     }
 }
@@ -139,100 +139,100 @@ pub enum RepopulateDiagnosticKind {
 }
 
 impl Diagnostic {
-    pub fn file(&self) -> Option<Arc<SourceFile>> {
+    pub fn file(&self) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("file"); 
         self.file.clone()
     }
 
-    pub fn pos(&self) -> i32 {
+    pub fn pos(&self) -> i32 { ::tsox_core::fntrace::enter("pos"); 
         self.loc.pos
     }
 
-    pub fn end(&self) -> i32 {
+    pub fn end(&self) -> i32 { ::tsox_core::fntrace::enter("end"); 
         self.loc.end
     }
 
-    pub fn len(&self) -> i32 {
+    pub fn len(&self) -> i32 { ::tsox_core::fntrace::enter("len"); 
         self.loc.end - self.loc.pos
     }
 
-    pub fn loc(&self) -> TextRange {
+    pub fn loc(&self) -> TextRange { ::tsox_core::fntrace::enter("loc"); 
         self.loc
     }
 
-    pub fn code(&self) -> i32 {
+    pub fn code(&self) -> i32 { ::tsox_core::fntrace::enter("code"); 
         self.code
     }
 
-    pub fn category(&self) -> Category {
+    pub fn category(&self) -> Category { ::tsox_core::fntrace::enter("category"); 
         self.category
     }
 
-    pub fn message_key(&self) -> Key {
+    pub fn message_key(&self) -> Key { ::tsox_core::fntrace::enter("message_key"); 
         self.message_key
     }
 
-    pub fn message_args(&self) -> &[String] {
+    pub fn message_args(&self) -> &[String] { ::tsox_core::fntrace::enter("message_args"); 
         &self.message_args
     }
 
-    pub fn message_chain(&self) -> &[Diagnostic] {
+    pub fn message_chain(&self) -> &[Diagnostic] { ::tsox_core::fntrace::enter("message_chain"); 
         &self.message_chain
     }
 
-    pub fn related_information(&self) -> &[Diagnostic] {
+    pub fn related_information(&self) -> &[Diagnostic] { ::tsox_core::fntrace::enter("related_information"); 
         &self.related_information
     }
 
-    pub fn reports_unnecessary(&self) -> bool {
+    pub fn reports_unnecessary(&self) -> bool { ::tsox_core::fntrace::enter("reports_unnecessary"); 
         self.reports_unnecessary
     }
 
-    pub fn reports_deprecated(&self) -> bool {
+    pub fn reports_deprecated(&self) -> bool { ::tsox_core::fntrace::enter("reports_deprecated"); 
         self.reports_deprecated
     }
 
-    pub fn repopulate_info(&self) -> Option<&RepopulateDiagnosticInfo> {
+    pub fn repopulate_info(&self) -> Option<&RepopulateDiagnosticInfo> { ::tsox_core::fntrace::enter("repopulate_info"); 
         None
     }
 
-    pub fn set_file(&mut self, file: Option<Arc<SourceFile>>) {
+    pub fn set_file(&mut self, file: Option<Arc<SourceFile>>) { ::tsox_core::fntrace::enter("set_file"); 
         self.file = file;
     }
 
-    pub fn set_location(&mut self, loc: TextRange) {
+    pub fn set_location(&mut self, loc: TextRange) { ::tsox_core::fntrace::enter("set_location"); 
         self.loc = loc;
     }
 
-    pub fn set_category(&mut self, category: Category) {
+    pub fn set_category(&mut self, category: Category) { ::tsox_core::fntrace::enter("set_category"); 
         self.category = category;
     }
 
-    pub fn set_external_data(&mut self, source: String, message_text: String) -> &mut Diagnostic {
+    pub fn set_external_data(&mut self, source: String, message_text: String) -> &mut Diagnostic { ::tsox_core::fntrace::enter("set_external_data"); 
         let _ = (source, message_text);
         self
     }
 
-    pub fn set_message_chain(&mut self, message_chain: Vec<Diagnostic>) -> &mut Diagnostic {
+    pub fn set_message_chain(&mut self, message_chain: Vec<Diagnostic>) -> &mut Diagnostic { ::tsox_core::fntrace::enter("set_message_chain"); 
         self.message_chain = message_chain;
         self
     }
 
-    pub fn add_message_chain(&mut self, message_chain: Diagnostic) -> &mut Diagnostic {
+    pub fn add_message_chain(&mut self, message_chain: Diagnostic) -> &mut Diagnostic { ::tsox_core::fntrace::enter("add_message_chain"); 
         self.message_chain.push(message_chain);
         self
     }
 
-    pub fn set_related_info(&mut self, related_information: Vec<Diagnostic>) -> &mut Diagnostic {
+    pub fn set_related_info(&mut self, related_information: Vec<Diagnostic>) -> &mut Diagnostic { ::tsox_core::fntrace::enter("set_related_info"); 
         self.related_information = related_information;
         self
     }
 
-    pub fn add_related_info(&mut self, related_information: Diagnostic) -> &mut Diagnostic {
+    pub fn add_related_info(&mut self, related_information: Diagnostic) -> &mut Diagnostic { ::tsox_core::fntrace::enter("add_related_info"); 
         self.related_information.push(related_information);
         self
     }
 
-    pub fn localize(&self, locale: Locale) -> String {
+    pub fn localize(&self, locale: Locale) -> String { ::tsox_core::fntrace::enter("localize"); 
         if self.message.is_none() && !self.message_text().is_empty() {
             return self.message_text().to_string();
         }
@@ -284,7 +284,7 @@ pub fn new_diagnostic_from_text(
     related_information: Vec<Diagnostic>,
     reports_unnecessary: bool,
     reports_deprecated: bool,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("new_diagnostic_from_text"); 
     Diagnostic {
         file,
         loc,
@@ -305,7 +305,7 @@ pub fn new_diagnostic_chain(
     chain: Option<&Diagnostic>,
     message: Message,
     args: Vec<String>,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("new_diagnostic_chain"); 
     if let Some(chain) = chain {
         let mut d = Diagnostic::new(chain.file.clone(), chain.loc, message, args);
         d.add_message_chain(chain_clone_shallow(chain));
@@ -315,19 +315,19 @@ pub fn new_diagnostic_chain(
     Diagnostic::new(None, TextRange::default(), message, args)
 }
 
-fn chain_clone_shallow(chain: &Diagnostic) -> Diagnostic {
+fn chain_clone_shallow(chain: &Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("chain_clone_shallow"); 
     clone_diagnostic_shallow(chain)
 }
 
-fn clone_related(related: &[Diagnostic]) -> Vec<Diagnostic> {
+fn clone_related(related: &[Diagnostic]) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("clone_related"); 
     related.iter().map(clone_diagnostic_shallow).collect()
 }
 
-pub fn clone_diagnostic_shallow(d: &Diagnostic) -> Diagnostic {
+pub fn clone_diagnostic_shallow(d: &Diagnostic) -> Diagnostic { ::tsox_core::fntrace::enter("clone_diagnostic_shallow"); 
     d.clone()
 }
 
-pub fn new_compiler_diagnostic(message: Message, args: Vec<String>) -> Diagnostic {
+pub fn new_compiler_diagnostic(message: Message, args: Vec<String>) -> Diagnostic { ::tsox_core::fntrace::enter("new_compiler_diagnostic"); 
     Diagnostic::new(None, TextRange::undefined(), message, args)
 }
 
@@ -338,7 +338,7 @@ pub fn new_external_diagnostic(
     category: Category,
     code: i32,
     message_text: String,
-) -> Diagnostic {
+) -> Diagnostic { ::tsox_core::fntrace::enter("new_external_diagnostic"); 
     let mut d = Diagnostic::new(
         None,
         loc,
@@ -352,7 +352,7 @@ pub fn new_external_diagnostic(
 }
 
 impl DiagnosticsCollection {
-    pub fn lookup(&self, diagnostic: &Diagnostic) -> Option<Diagnostic> {
+    pub fn lookup(&self, diagnostic: &Diagnostic) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("lookup"); 
         let inner = self.inner.lock().unwrap();
         let diagnostics: &[Diagnostic] = match diagnostic.file.as_ref() {
             Some(file) => inner
@@ -372,12 +372,12 @@ impl DiagnosticsCollection {
         binary_search_diagnostic(diagnostics, diagnostic).cloned()
     }
 
-    fn lookup_post_sort(&self, diagnostic: &Diagnostic) -> Option<Diagnostic> {
+    fn lookup_post_sort(&self, diagnostic: &Diagnostic) -> Option<Diagnostic> { ::tsox_core::fntrace::enter("lookup_post_sort"); 
         let inner = self.inner.lock().unwrap();
         binary_search_diagnostic(&inner.non_file_diagnostics, diagnostic).cloned()
     }
 
-    pub fn get_global_diagnostics(&self) -> Vec<Diagnostic> {
+    pub fn get_global_diagnostics(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_global_diagnostics"); 
         let mut inner = self.inner.lock().unwrap();
         if !inner.non_file_diagnostics_sorted {
             inner.non_file_diagnostics.sort_by(compare_diagnostics);
@@ -390,7 +390,7 @@ impl DiagnosticsCollection {
 fn binary_search_diagnostic<'a>(
     diagnostics: &'a [Diagnostic],
     target: &Diagnostic,
-) -> Option<&'a Diagnostic> {
+) -> Option<&'a Diagnostic> { ::tsox_core::fntrace::enter("binary_search_diagnostic"); 
     let mut low = 0usize;
     let mut high = diagnostics.len();
     while low < high {
@@ -404,14 +404,14 @@ fn binary_search_diagnostic<'a>(
     None
 }
 
-fn get_diagnostic_path(d: &Diagnostic) -> &str {
+fn get_diagnostic_path(d: &Diagnostic) -> &str { ::tsox_core::fntrace::enter("get_diagnostic_path"); 
     if let Some(file) = &d.file {
         return &file.file_name;
     }
     ""
 }
 
-pub fn equal_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> bool {
+pub fn equal_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("equal_diagnostics"); 
     if std::ptr::eq(d1, d2) {
         return true;
     }
@@ -424,7 +424,7 @@ pub fn equal_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> bool {
             .all(|(r1, r2)| equal_diagnostics(r1, r2))
 }
 
-pub fn equal_diagnostics_no_related_info(d1: &Diagnostic, d2: &Diagnostic) -> bool {
+pub fn equal_diagnostics_no_related_info(d1: &Diagnostic, d2: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("equal_diagnostics_no_related_info"); 
     if std::ptr::eq(d1, d2) {
         return true;
     }
@@ -443,7 +443,7 @@ pub fn equal_diagnostics_no_related_info(d1: &Diagnostic, d2: &Diagnostic) -> bo
             .all(|(c1, c2)| equal_message_chain(c1, c2))
 }
 
-fn get_diagnostic_message_identity(diagnostic: &Diagnostic) -> String {
+fn get_diagnostic_message_identity(diagnostic: &Diagnostic) -> String { ::tsox_core::fntrace::enter("get_diagnostic_message_identity"); 
     if !diagnostic.message_text().is_empty() {
         return diagnostic.message_text().to_string();
     }
@@ -455,7 +455,7 @@ fn get_diagnostic_message_identity(diagnostic: &Diagnostic) -> String {
     diagnostic.message_key.to_string()
 }
 
-fn equal_message_chain(c1: &Diagnostic, c2: &Diagnostic) -> bool {
+fn equal_message_chain(c1: &Diagnostic, c2: &Diagnostic) -> bool { ::tsox_core::fntrace::enter("equal_message_chain"); 
     if std::ptr::eq(c1, c2) {
         return true;
     }
@@ -469,7 +469,7 @@ fn equal_message_chain(c1: &Diagnostic, c2: &Diagnostic) -> bool {
             .all(|(a, b)| equal_message_chain(a, b))
 }
 
-fn compare_message_chain_size(c1: &[Diagnostic], c2: &[Diagnostic]) -> std::cmp::Ordering {
+fn compare_message_chain_size(c1: &[Diagnostic], c2: &[Diagnostic]) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_message_chain_size"); 
     let c = c2.len().cmp(&c1.len());
     if c != std::cmp::Ordering::Equal {
         return c;
@@ -483,7 +483,7 @@ fn compare_message_chain_size(c1: &[Diagnostic], c2: &[Diagnostic]) -> std::cmp:
     std::cmp::Ordering::Equal
 }
 
-fn compare_message_chain_content(c1: &[Diagnostic], c2: &[Diagnostic]) -> std::cmp::Ordering {
+fn compare_message_chain_content(c1: &[Diagnostic], c2: &[Diagnostic]) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_message_chain_content"); 
     for i in 0..c1.len() {
         let c = c1[i].message_args.cmp(&c2[i].message_args);
         if c != std::cmp::Ordering::Equal {
@@ -499,7 +499,7 @@ fn compare_message_chain_content(c1: &[Diagnostic], c2: &[Diagnostic]) -> std::c
     std::cmp::Ordering::Equal
 }
 
-fn compare_related_info(r1: &[Diagnostic], r2: &[Diagnostic]) -> std::cmp::Ordering {
+fn compare_related_info(r1: &[Diagnostic], r2: &[Diagnostic]) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_related_info"); 
     let c = r2.len().cmp(&r1.len());
     if c != std::cmp::Ordering::Equal {
         return c;
@@ -513,7 +513,7 @@ fn compare_related_info(r1: &[Diagnostic], r2: &[Diagnostic]) -> std::cmp::Order
     std::cmp::Ordering::Equal
 }
 
-pub fn compare_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> std::cmp::Ordering {
+pub fn compare_diagnostics(d1: &Diagnostic, d2: &Diagnostic) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_diagnostics"); 
     use std::cmp::Ordering;
     if std::ptr::eq(d1, d2) {
         return Ordering::Equal;

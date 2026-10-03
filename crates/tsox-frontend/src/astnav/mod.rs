@@ -4,7 +4,7 @@ pub(crate) use crate::ast::{
 };
 pub(crate) use std::sync::Arc;
 
-pub(crate) fn collect_children(node: &Node) -> Vec<Arc<Node>> {
+pub(crate) fn collect_children(node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_children"); 
     let mut children = Vec::new();
     for_each_child(node, |child| {
         children.push(Arc::clone(child));
@@ -13,13 +13,13 @@ pub(crate) fn collect_children(node: &Node) -> Vec<Arc<Node>> {
     children
 }
 
-pub fn get_token_at_position(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+pub fn get_token_at_position(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_token_at_position"); 
     get_token_at_position_inner(source_file, position, None, None)
 }
 
 /// 对齐 Go astnav.GetTouchingPropertyName：谓词（属性名字面量/关键字/#私有名）
 /// 同时作为 includePrecedingTokenAtEndPosition，位置在 token 结尾时回退前 token
-pub fn get_touching_property_name(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+pub fn get_touching_property_name(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_touching_property_name"); 
     let pred = |n: &Arc<Node>| {
         is_property_name_literal(n)
             || is_keyword_kind(n.kind)
@@ -33,7 +33,7 @@ pub fn get_touching_property_name(source_file: &Arc<Node>, position: usize) -> O
 pub fn get_touching_property_name_with_jsdoc(
     file: &Arc<SourceFile>,
     position: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_touching_property_name_with_jsdoc"); 
     let pred = |n: &Arc<Node>| {
         is_property_name_literal(n)
             || is_keyword_kind(n.kind)
@@ -48,7 +48,7 @@ fn get_token_at_position_inner(
     position: usize,
     predicate: Option<&dyn Fn(&Arc<Node>) -> bool>,
     jsdoc_of: Option<&dyn Fn(&Arc<Node>) -> Vec<Arc<Node>>>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_token_at_position_inner"); 
     let mut current = Arc::clone(source_file);
     loop {
         let mut prev_subtree: Option<Arc<Node>> = None;
@@ -127,7 +127,7 @@ fn get_token_at_position_inner(
     Some(current)
 }
 
-fn collect_tokens_in_order(node: &Arc<Node>, visit: &mut impl FnMut(&Arc<Node>) -> bool) {
+fn collect_tokens_in_order(node: &Arc<Node>, visit: &mut impl FnMut(&Arc<Node>) -> bool) { ::tsox_core::fntrace::enter("collect_tokens_in_order"); 
     if is_token_kind(node.kind) {
         visit(node);
         return;
@@ -138,14 +138,14 @@ fn collect_tokens_in_order(node: &Arc<Node>, visit: &mut impl FnMut(&Arc<Node>) 
     }
 }
 
-pub fn find_preceding_token(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+pub fn find_preceding_token(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_preceding_token"); 
     find_last_token_ending_at_or_before(source_file, position)
 }
 
 pub(crate) fn find_last_token_ending_at_or_before(
     node: &Arc<Node>,
     position: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_last_token_ending_at_or_before"); 
     if node.pos() >= position {
         return None;
     }
@@ -167,14 +167,14 @@ pub(crate) fn find_last_token_ending_at_or_before(
     None
 }
 
-pub fn find_next_token(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+pub fn find_next_token(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_next_token"); 
     find_first_token_starting_after(source_file, position)
 }
 
 pub(crate) fn find_first_token_starting_after(
     node: &Arc<Node>,
     position: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_token_starting_after"); 
     if node.end() <= position {
         return None;
     }
@@ -196,7 +196,7 @@ pub(crate) fn find_first_token_starting_after(
     None
 }
 
-pub fn find_child_of_kind(containing_node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+pub fn find_child_of_kind(containing_node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_child_of_kind"); 
     let mut result = None;
     for_each_child(containing_node, |child| {
         if child.kind == kind {
@@ -212,15 +212,15 @@ pub fn get_start_of_node(
     node: &Arc<Node>,
     _source_file: &SourceFile,
     _include_jsdoc: bool,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_start_of_node"); 
     node.pos()
 }
 
-pub fn get_end_of_node(node: &Arc<Node>) -> usize {
+pub fn get_end_of_node(node: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("get_end_of_node"); 
     node.end()
 }
 
-pub fn is_missing_node(node: &Node) -> bool {
+pub fn is_missing_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_missing_node"); 
     node.pos() == node.end() && (node.pos() as i32) >= 0 && node.kind != SyntaxKind::EndOfFile
 }
 
@@ -228,7 +228,7 @@ pub fn get_position_of_line_and_character(
     source_file: &SourceFile,
     line: usize,
     character: usize,
-) -> usize {
+) -> usize { ::tsox_core::fntrace::enter("get_position_of_line_and_character"); 
     let line_map = &source_file.line_map;
     if line >= line_map.line_starts.len() {
         return source_file.text.len();
@@ -261,7 +261,7 @@ pub fn get_position_of_line_and_character(
 pub fn get_line_and_character_of_position(
     source_file: &SourceFile,
     position: usize,
-) -> (usize, usize) {
+) -> (usize, usize) { ::tsox_core::fntrace::enter("get_line_and_character_of_position"); 
     let line_map = &source_file.line_map;
     let line = line_map.line_at(position);
     let character = line_map.utf16_column_at(&source_file.text, position);
@@ -271,11 +271,11 @@ pub fn get_line_and_character_of_position(
 pub fn get_touching_property_name_astnav(
     source_file: &Arc<Node>,
     position: usize,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_touching_property_name_astnav"); 
     get_touching_property_name(source_file, position)
 }
 
-pub fn get_touching_token(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> {
+pub fn get_touching_token(source_file: &Arc<Node>, position: usize) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_touching_token"); 
     get_token_at_position(source_file, position)
 }
 

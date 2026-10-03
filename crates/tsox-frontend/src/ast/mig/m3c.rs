@@ -20,7 +20,7 @@ pub struct NodeFactory {
 }
 
 impl NodeFactory {
-    pub fn with_counters(hooks: NodeFactoryHooks, text_count: usize, node_count: usize) -> Self {
+    pub fn with_counters(hooks: NodeFactoryHooks, text_count: usize, node_count: usize) -> Self { ::tsox_core::fntrace::enter("with_counters"); 
         Self { hooks, text_count, node_count }
     }
 
@@ -29,7 +29,7 @@ impl NodeFactory {
         text: &str,
         statements: Arc<crate::ast::node::NodeList>,
         end_of_file_token: Arc<Node>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("new_source_file"); 
         self.node_count += 1;
         Arc::new(Node::new(
             SyntaxKind::SourceFile,
@@ -46,7 +46,7 @@ impl NodeFactory {
         node: &SourceFile,
         statements: Option<Arc<crate::ast::node::NodeList>>,
         end_of_file_token: Option<Arc<Node>>,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("update_source_file"); 
         update_source_file(self, node, statements, end_of_file_token)
     }
 }
@@ -59,17 +59,17 @@ impl NodeVisitor {
     pub fn visit_top_level_statements(
         &self,
         node: &Arc<Node>,
-    ) -> Option<Arc<crate::ast::node::NodeList>> {
+    ) -> Option<Arc<crate::ast::node::NodeList>> { ::tsox_core::fntrace::enter("visit_top_level_statements"); 
         statement_list(node).map(|l| Arc::clone(l))
     }
 
-    pub fn visit_token(&self, token: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn visit_token(&self, token: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_token"); 
         Some(Arc::clone(token))
     }
 }
 
 
-pub fn question_token(node: &Node) -> Option<&Arc<Node>> {
+pub fn question_token(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("question_token"); 
     match &node.data {
         NodeData::ParameterDeclaration(d) => d.question_token.as_ref(),
         NodeData::ConditionalExpression(d) => Some(&d.question_token),
@@ -79,7 +79,7 @@ pub fn question_token(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-fn postfix_token_fallback(node: &Node) -> Option<&Arc<Node>> {
+fn postfix_token_fallback(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("postfix_token_fallback"); 
     let postfix = match &node.data {
         NodeData::MethodDeclaration(d) => d.postfix_token.as_ref()?,
         NodeData::MethodSignatureDeclaration(d) => d.postfix_token.as_ref()?,
@@ -96,7 +96,7 @@ fn postfix_token_fallback(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn raw_text(node: &Node) -> &str {
+pub fn raw_text(node: &Node) -> &str { ::tsox_core::fntrace::enter("raw_text"); 
     match &node.data {
         NodeData::TemplateHead(d) => &d.raw_text,
         NodeData::TemplateMiddle(d) => &d.raw_text,
@@ -108,7 +108,7 @@ pub fn raw_text(node: &Node) -> &str {
 pub fn symbol<'a>(
     node: &'a Node,
     map: &'a crate::ast::symbol_map::NodeSymbolMap,
-) -> Option<&'a Arc<crate::ast::symbol::Symbol>> {
+) -> Option<&'a Arc<crate::ast::symbol::Symbol>> { ::tsox_core::fntrace::enter("symbol"); 
     match &node.data {
         NodeData::VariableDeclaration(_)
         | NodeData::ParameterDeclaration(_)
@@ -140,7 +140,7 @@ pub fn symbol<'a>(
     }
 }
 
-pub fn tag_name(node: &Node) -> &Arc<Node> {
+pub fn tag_name(node: &Node) -> &Arc<Node> { ::tsox_core::fntrace::enter("tag_name"); 
     match &node.data {
         NodeData::JsxOpeningElement(d) => &d.tag_name,
         NodeData::JsxClosingElement(d) => &d.tag_name,
@@ -159,7 +159,7 @@ pub fn tag_name(node: &Node) -> &Arc<Node> {
     }
 }
 
-pub fn type_argument_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList>> {
+pub fn type_argument_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList>> { ::tsox_core::fntrace::enter("type_argument_list"); 
     match &node.data {
         NodeData::CallExpression(d) => d.type_arguments.as_ref(),
         NodeData::NewExpression(d) => d.type_arguments.as_ref(),
@@ -174,11 +174,11 @@ pub fn type_argument_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList
     }
 }
 
-pub fn type_arguments(node: &Node) -> &[Arc<Node>] {
+pub fn type_arguments(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("type_arguments"); 
     type_argument_list(node).map(|l| l.nodes.as_slice()).unwrap_or(&[])
 }
 
-pub fn type_parameter_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList>> {
+pub fn type_parameter_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList>> { ::tsox_core::fntrace::enter("type_parameter_list"); 
     match &node.data {
         NodeData::ClassDeclaration(d) => d.type_parameters.as_ref(),
         NodeData::ClassExpression(d) => d.type_parameters.as_ref(),
@@ -203,11 +203,11 @@ pub fn type_parameter_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeLis
     }
 }
 
-pub fn type_parameters(node: &Node) -> &[Arc<Node>] {
+pub fn type_parameters(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("type_parameters"); 
     type_parameter_list(node).map(|l| l.nodes.as_slice()).unwrap_or(&[])
 }
 
-pub fn statement_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList>> {
+pub fn statement_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList>> { ::tsox_core::fntrace::enter("statement_list"); 
     match &node.data {
         NodeData::SourceFile(d) => Some(&d.statements),
         NodeData::Block(d) => Some(&d.statements),
@@ -217,11 +217,11 @@ pub fn statement_list(node: &Node) -> Option<&Arc<crate::ast::node::NodeList>> {
     }
 }
 
-pub fn statements(node: &Node) -> &[Arc<Node>] {
+pub fn statements(node: &Node) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("statements"); 
     statement_list(node).map(|l| l.nodes.as_slice()).unwrap_or(&[])
 }
 
-pub fn statement(node: &Node) -> &Arc<Node> {
+pub fn statement(node: &Node) -> &Arc<Node> { ::tsox_core::fntrace::enter("statement"); 
     match &node.data {
         NodeData::DoStatement(d) => &d.statement,
         NodeData::WhileStatement(d) => &d.statement,
@@ -233,7 +233,7 @@ pub fn statement(node: &Node) -> &Arc<Node> {
     }
 }
 
-pub fn type_expression(node: &Node) -> Option<&Arc<Node>> {
+pub fn type_expression(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("type_expression"); 
     match &node.data {
         NodeData::JSDocParameterOrPropertyTag(d) => d.type_expression.as_ref(),
         NodeData::JSDocReturnTag(d) => d.type_expression.as_ref(),
@@ -246,7 +246,7 @@ pub fn type_expression(node: &Node) -> Option<&Arc<Node>> {
     }
 }
 
-pub fn visit_each_child(node: &Arc<Node>, v: &mut NodeVisitor) -> Arc<Node> {
+pub fn visit_each_child(node: &Arc<Node>, v: &mut NodeVisitor) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
     match &node.data {
         NodeData::SourceFile(d) => {
             let statements = v.visit_top_level_statements(node);
@@ -266,17 +266,17 @@ pub fn visit_each_child(node: &Arc<Node>, v: &mut NodeVisitor) -> Arc<Node> {
     }
 }
 
-pub fn visit_each_child_node_default(node: &Arc<Node>, _v: &mut NodeVisitor) -> Arc<Node> {
+pub fn visit_each_child_node_default(node: &Arc<Node>, _v: &mut NodeVisitor) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child_node_default"); 
     Arc::clone(node)
 }
 
-pub fn visit_each_child_source_file(file: &SourceFile, v: &mut NodeVisitor) -> Arc<Node> {
+pub fn visit_each_child_source_file(file: &SourceFile, v: &mut NodeVisitor) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child_source_file"); 
     let statements = v.visit_top_level_statements(&file.node);
     let end_of_file_token = v.visit_token(&file_end_of_file_token(file));
     v.factory.update_source_file(file, statements, end_of_file_token)
 }
 
-fn file_end_of_file_token(file: &SourceFile) -> Arc<Node> {
+fn file_end_of_file_token(file: &SourceFile) -> Arc<Node> { ::tsox_core::fntrace::enter("file_end_of_file_token"); 
     match &file.node.data {
         NodeData::SourceFile(d) => Arc::clone(&d.end_of_file_token),
         _ => panic!("node is not a source file"),
@@ -287,7 +287,7 @@ pub fn clone_node(
     updated: Arc<Node>,
     original: &Arc<Node>,
     hooks: &NodeFactoryHooks,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("clone_node"); 
     if !Arc::ptr_eq(&updated, original) {
         let updated_mut = unsafe { unsafe_mutable(&updated) };
         updated_mut.flags = original.flags;
@@ -302,15 +302,15 @@ pub fn clone_node(
     updated
 }
 
-unsafe fn unsafe_mutable(node: &Arc<Node>) -> &mut Node {
+unsafe fn unsafe_mutable(node: &Arc<Node>) -> &mut Node { ::tsox_core::fntrace::enter("unsafe_mutable"); 
     &mut *(Arc::as_ptr(node) as *mut Node)
 }
 
-pub fn text_count(f: &NodeFactory) -> usize {
+pub fn text_count(f: &NodeFactory) -> usize { ::tsox_core::fntrace::enter("text_count"); 
     f.text_count
 }
 
-pub fn release_arenas(f: &mut NodeFactory) {
+pub fn release_arenas(f: &mut NodeFactory) { ::tsox_core::fntrace::enter("release_arenas"); 
     *f = NodeFactory::with_counters(f.hooks.clone(), f.text_count, f.node_count);
 }
 
@@ -319,7 +319,7 @@ pub fn update_source_file(
     node: &SourceFile,
     statements: Option<Arc<crate::ast::node::NodeList>>,
     end_of_file_token: Option<Arc<Node>>,
-) -> Arc<Node> {
+) -> Arc<Node> { ::tsox_core::fntrace::enter("update_source_file"); 
     let cur_statements = statement_list(&node.node);
     let cur_eof = file_end_of_file_token(node);
     let statements_changed = !option_list_same(&statements, cur_statements);
@@ -339,7 +339,7 @@ pub fn update_source_file(
 fn option_list_same(
     a: &Option<Arc<crate::ast::node::NodeList>>,
     b: Option<&Arc<crate::ast::node::NodeList>>,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("option_list_same"); 
     match (a, b) {
         (Some(x), Some(y)) => Arc::ptr_eq(x, y),
         (None, None) => true,

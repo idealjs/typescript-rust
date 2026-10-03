@@ -8,7 +8,7 @@ pub trait WorkGroup: Send {
     fn run_and_wait(&self);
 }
 
-pub fn new_work_group(single_threaded: bool) -> Box<dyn WorkGroup> {
+pub fn new_work_group(single_threaded: bool) -> Box<dyn WorkGroup> { crate::fntrace::enter("new_work_group"); 
     if single_threaded {
         Box::new(SingleThreadedWorkGroup::new())
     } else {
@@ -22,7 +22,7 @@ pub(crate) struct ParallelWorkGroup {
 }
 
 impl ParallelWorkGroup {
-    fn new() -> Self {
+    fn new() -> Self { crate::fntrace::enter("new"); 
         Self {
             done: Arc::new(AtomicBool::new(false)),
             threads: Mutex::new(Vec::new()),
@@ -31,7 +31,7 @@ impl ParallelWorkGroup {
 }
 
 impl WorkGroup for ParallelWorkGroup {
-    fn queue(&self, f: Box<dyn FnOnce() + Send>) {
+    fn queue(&self, f: Box<dyn FnOnce() + Send>) { crate::fntrace::enter("queue"); 
         if self.done.load(Ordering::SeqCst) {
             panic!("Queue called after RunAndWait returned");
         }
@@ -39,7 +39,7 @@ impl WorkGroup for ParallelWorkGroup {
         self.threads.lock().unwrap().push(handle);
     }
 
-    fn run_and_wait(&self) {
+    fn run_and_wait(&self) { crate::fntrace::enter("run_and_wait"); 
         let threads = std::mem::take(&mut *self.threads.lock().unwrap());
         for handle in threads {
             handle.join().expect("worker thread panicked");
@@ -54,7 +54,7 @@ pub(crate) struct SingleThreadedWorkGroup {
 }
 
 impl SingleThreadedWorkGroup {
-    fn new() -> Self {
+    fn new() -> Self { crate::fntrace::enter("new"); 
         Self {
             done: AtomicBool::new(false),
             fns: Mutex::new(Vec::new()),
@@ -63,14 +63,14 @@ impl SingleThreadedWorkGroup {
 }
 
 impl WorkGroup for SingleThreadedWorkGroup {
-    fn queue(&self, f: Box<dyn FnOnce() + Send>) {
+    fn queue(&self, f: Box<dyn FnOnce() + Send>) { crate::fntrace::enter("queue"); 
         if self.done.load(Ordering::SeqCst) {
             panic!("Queue called after RunAndWait returned");
         }
         self.fns.lock().unwrap().push(f);
     }
 
-    fn run_and_wait(&self) {
+    fn run_and_wait(&self) { crate::fntrace::enter("run_and_wait"); 
         loop {
             let f = self.fns.lock().unwrap().pop();
             match f {

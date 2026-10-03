@@ -25,7 +25,7 @@ use tsox_frontend::ast::{Diagnostic, Node, NodeData};
 use crate::checker::mig::m1e::r20k2_defs::is_in_js_file;
 
 impl Checker {
-    pub fn create_name_resolver(&self) -> NameResolver {
+    pub fn create_name_resolver(&self) -> NameResolver { ::tsox_core::fntrace::enter("create_name_resolver"); 
         NameResolver {
             compiler_options: self.compiler_options.clone(),
             get_symbol_of_declaration: Self::get_symbol_of_declaration,
@@ -43,7 +43,7 @@ impl Checker {
         }
     }
 
-    pub fn create_name_resolver_for_suggestion(&self) -> NameResolver {
+    pub fn create_name_resolver_for_suggestion(&self) -> NameResolver { ::tsox_core::fntrace::enter("create_name_resolver_for_suggestion"); 
         NameResolver {
             compiler_options: self.compiler_options.clone(),
             get_symbol_of_declaration: Self::get_symbol_of_declaration,
@@ -61,7 +61,7 @@ impl Checker {
         }
     }
 
-    pub fn choose_overload(&mut self, s: &mut CallState, relation: &Relation) -> Option<Arc<Signature>> {
+    pub fn choose_overload(&mut self, s: &mut CallState, relation: &Relation) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("choose_overload"); 
         s.candidates_for_argument_error = None;
         s.candidate_for_argument_arity_error = None;
         s.candidate_for_type_argument_error = None;
@@ -202,7 +202,7 @@ impl Checker {
         type_argument_nodes: &[Arc<Node>],
         report_errors: bool,
         head_message: Option<&'static tsox_core::diagnostics::Message>,
-    ) -> Option<Vec<Arc<Type>>> {
+    ) -> Option<Vec<Arc<Type>>> { ::tsox_core::fntrace::enter("check_type_arguments"); 
         let is_java_script = signature.declaration.as_deref().map(is_in_js_file).unwrap_or(false);
         let type_parameters = signature.type_parameters.clone();
         let mapped: Vec<Arc<Type>> = type_argument_nodes
@@ -265,7 +265,7 @@ impl Checker {
         &mut self,
         sources: &[Arc<Symbol>],
         types: &[Arc<Type>],
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("create_combined_symbol_from_types"); 
         let union = self.get_union_type_ex(types.to_vec(), UnionReduction::Subtype);
         self.create_combined_symbol_for_overload_failure(sources, &union)
     }
@@ -274,7 +274,7 @@ impl Checker {
         &mut self,
         sources: &[Arc<Symbol>],
         t: &Arc<Type>,
-    ) -> Arc<Symbol> {
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("create_combined_symbol_for_overload_failure"); 
         self.create_symbol_with_type(sources.first().unwrap(), t)
     }
 

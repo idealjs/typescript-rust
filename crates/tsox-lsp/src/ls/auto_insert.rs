@@ -17,15 +17,15 @@ impl LanguageService {
     pub fn provide_on_auto_insert(
         &self,
         _params: &VsOnAutoInsertParams,
-    ) -> Option<VsOnAutoInsertResponseItem> {
+    ) -> Option<VsOnAutoInsertResponseItem> { ::tsox_core::fntrace::enter("provide_on_auto_insert"); 
         None
     }
 }
 
-pub fn is_unclosed_tag(_element: &Arc<Node>) -> bool {
+pub fn is_unclosed_tag(_element: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_unclosed_tag"); 
     false
 }
 
-pub fn is_unclosed_fragment(_fragment: &Arc<Node>) -> bool {
+pub fn is_unclosed_fragment(_fragment: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_unclosed_fragment"); 
     false
 }

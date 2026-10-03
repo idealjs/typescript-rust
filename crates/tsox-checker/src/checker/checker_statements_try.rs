@@ -6,7 +6,7 @@ impl Checker {
     // Go checkTryStatement / checkCatchClause：try 块、catch 参数、catch 块、
     // finally 块逐段检查；catch 参数类型注解限定 any/unknown（TS1196）、
     // 初始化器非法（TS1197）、catch 参与块内块级变量同名（TS2483）
-    pub(crate) fn check_try_statement(&mut self, node: &Arc<Node>, ambient_reported: bool) {
+    pub(crate) fn check_try_statement(&mut self, node: &Arc<Node>, ambient_reported: bool) { ::tsox_core::fntrace::enter("check_try_statement"); 
         let tsox_frontend::ast::NodeData::TryStatement(data) = &node.data else {
             return;
         };
@@ -20,7 +20,7 @@ impl Checker {
         let _ = ambient_reported;
     }
 
-    fn check_catch_clause(&mut self, node: &Arc<Node>) {
+    fn check_catch_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_catch_clause"); 
         let tsox_frontend::ast::NodeData::CatchClause(data) = &node.data else {
             return;
         };
@@ -59,7 +59,7 @@ impl Checker {
     }
 
     // Go checkCatchClause 末段：catch 参数名与块内 let/const 同名报 TS2483
-    fn check_catch_clause_redeclarations(&mut self, catch_clause: &Arc<Node>, block: &Arc<Node>) {
+    fn check_catch_clause_redeclarations(&mut self, catch_clause: &Arc<Node>, block: &Arc<Node>) { ::tsox_core::fntrace::enter("check_catch_clause_redeclarations"); 
         let sym_map = self.program.symbol_map();
         let Some(catch_locals) = sym_map.locals.get(&catch_clause.id()) else {
             return;
@@ -89,6 +89,6 @@ impl Checker {
     }
 }
 
-fn first_token_loc(node: &Arc<Node>) -> tsox_core::core::text::TextRange {
+fn first_token_loc(node: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("first_token_loc"); 
     tsox_core::core::text::TextRange::new(node.loc.pos(), node.loc.pos())
 }

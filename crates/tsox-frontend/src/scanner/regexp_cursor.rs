@@ -2,7 +2,7 @@ use crate::scanner::regexp::RegExpParser;
 use crate::scanner::{DiagnosticKind, ScannerError};
 
 impl<'a> RegExpParser<'a> {
-    pub(super) fn inc_pos(&mut self, n: i32) {
+    pub(super) fn inc_pos(&mut self, n: i32) { ::tsox_core::fntrace::enter("inc_pos"); 
         if n >= 0 {
             self.pos = self.pos.wrapping_add(n as usize);
         } else {
@@ -10,7 +10,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn char(&self) -> char {
+    pub(super) fn char(&self) -> char { ::tsox_core::fntrace::enter("char"); 
         if self.pos < self.body_end {
             self.text.as_bytes()[self.pos] as char
         } else {
@@ -18,7 +18,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn char_at(&self, offset: usize) -> char {
+    pub(super) fn char_at(&self, offset: usize) -> char { ::tsox_core::fntrace::enter("char_at"); 
         match self.pos.checked_add(offset) {
             Some(p) if p < self.body_end => self.text.as_bytes()[p] as char,
             _ => '\0',
@@ -26,7 +26,7 @@ impl<'a> RegExpParser<'a> {
     }
 
     #[allow(dead_code)]
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
         self.text
     }
 
@@ -39,7 +39,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn is_class_content_exit(&self, ch: char) -> bool {
+    pub(super) fn is_class_content_exit(&self, ch: char) -> bool { ::tsox_core::fntrace::enter("is_class_content_exit"); 
         ch == ']' || self.pos >= self.body_end
     }
 
@@ -48,7 +48,7 @@ impl<'a> RegExpParser<'a> {
         msg: tsox_core::diagnostics::Message,
         pos: usize,
         length: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("error"); 
         self.errors.push(ScannerError {
             kind: DiagnosticKind::RegexMessage(msg),
             pos,
@@ -62,7 +62,7 @@ impl<'a> RegExpParser<'a> {
         pos: usize,
         length: usize,
         arg: char,
-    ) {
+    ) { ::tsox_core::fntrace::enter("error_arg"); 
         self.errors.push(ScannerError {
             kind: DiagnosticKind::RegexMessageWithArg(msg, arg),
             pos,
@@ -70,7 +70,7 @@ impl<'a> RegExpParser<'a> {
         });
     }
 
-    pub(super) fn scan_expected_char(&mut self, ch: char) {
+    pub(super) fn scan_expected_char(&mut self, ch: char) { ::tsox_core::fntrace::enter("scan_expected_char"); 
         if self.char() == ch {
             self.inc_pos(1);
         } else {
@@ -83,7 +83,7 @@ impl<'a> RegExpParser<'a> {
         flag: u16,
         pos: usize,
         size: usize,
-    ) {
+    ) { ::tsox_core::fntrace::enter("check_regular_expression_flag_availability"); 
         let available_from = match flag {
             crate::scanner::REG_EXP_FLAG_D => {
                 Some(tsox_core::core::compiler_options::ScriptTarget::ES2022)
@@ -107,7 +107,7 @@ impl<'a> RegExpParser<'a> {
         }
     }
 
-    pub(super) fn scan_source_character(&mut self) -> String {
+    pub(super) fn scan_source_character(&mut self) -> String { ::tsox_core::fntrace::enter("scan_source_character"); 
         if self.pos >= self.body_end {
             return String::new();
         }

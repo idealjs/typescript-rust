@@ -40,7 +40,7 @@ pub enum ExportSyntax {
 }
 
 impl ExportSyntax {
-    pub fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
         match self {
             ExportSyntax::None => "None",
             ExportSyntax::Modifier => "Modifier",
@@ -76,7 +76,7 @@ pub struct Export {
 }
 
 impl Default for Export {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self {
             export_id: ExportID::default(),
             module_file_name: String::new(),
@@ -95,7 +95,7 @@ impl Default for Export {
 }
 
 impl Export {
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &str { ::tsox_core::fntrace::enter("name"); 
         if !self.local_name.is_empty() {
             &self.local_name
         } else if self.export_id.export_name == INTERNAL_SYMBOL_NAME_EXPORT_EQUALS {
@@ -105,12 +105,12 @@ impl Export {
         }
     }
 
-    pub fn is_renameable(&self) -> bool {
+    pub fn is_renameable(&self) -> bool { ::tsox_core::fntrace::enter("is_renameable"); 
         self.export_id.export_name == INTERNAL_SYMBOL_NAME_EXPORT_EQUALS
             || self.export_id.export_name == INTERNAL_SYMBOL_NAME_DEFAULT
     }
 
-    pub fn ambient_module_name(&self) -> &str {
+    pub fn ambient_module_name(&self) -> &str { ::tsox_core::fntrace::enter("ambient_module_name"); 
         if !tsox_core::tspath::is_external_module_name_relative(&self.export_id.module_id) {
             &self.export_id.module_id
         } else {
@@ -118,18 +118,18 @@ impl Export {
         }
     }
 
-    pub fn is_unresolved_alias(&self) -> bool {
+    pub fn is_unresolved_alias(&self) -> bool { ::tsox_core::fntrace::enter("is_unresolved_alias"); 
         self.flags == SymbolFlags::Alias
     }
 }
 
 impl crate::ls::autoimport_index::Named for Export {
-    fn name(&self) -> &str {
+    fn name(&self) -> &str { ::tsox_core::fntrace::enter("name"); 
         Export::name(self)
     }
 }
 
-pub fn symbol_to_export(_symbol: &Symbol, _ch: &Checker) -> Option<Export> {
+pub fn symbol_to_export(_symbol: &Symbol, _ch: &Checker) -> Option<Export> { ::tsox_core::fntrace::enter("symbol_to_export"); 
     todo!("symbol_to_export requires checker.IsExternalModuleSymbol and ast helpers")
 }
 

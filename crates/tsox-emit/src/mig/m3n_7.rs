@@ -68,7 +68,7 @@ pub struct ThisPropertyAssignmentKey {
 }
 
 impl PartialEq for ThisPropertyAssignmentKey {
-    fn eq(&self, other: &Self) -> bool {
+    fn eq(&self, other: &Self) -> bool { ::tsox_core::fntrace::enter("eq"); 
         self.name == other.name
             && self.is_static == other.is_static
             && self.is_private == other.is_private
@@ -83,7 +83,7 @@ impl PartialEq for ThisPropertyAssignmentKey {
 impl Eq for ThisPropertyAssignmentKey {}
 
 impl std::hash::Hash for ThisPropertyAssignmentKey {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { ::tsox_core::fntrace::enter("hash"); 
         self.name.hash(state);
         self.is_static.hash(state);
         self.is_private.hash(state);
@@ -97,7 +97,7 @@ pub fn get_this_property_assignment_key(
     name: Option<&Arc<Node>>,
     node: &Arc<Node>,
     is_static: bool,
-) -> ThisPropertyAssignmentKey {
+) -> ThisPropertyAssignmentKey { ::tsox_core::fntrace::enter("get_this_property_assignment_key"); 
     let is_private = name.map(|n| is_private_identifier(n)).unwrap_or(false);
     if let Some(name) = name {
         if !is_dynamic_name(name) {
@@ -164,7 +164,7 @@ pub fn new_declaration_transformer(
     compiler_options: CompilerOptions,
     declaration_file_path: String,
     declaration_map_path: String,
-) -> DeclarationTransformer {
+) -> DeclarationTransformer { ::tsox_core::fntrace::enter("new_declaration_transformer"); 
     let isolated_declarations = compiler_options.isolated_declarations.is_true();
     let strip_internal = compiler_options.strip_internal.is_true();
     let state = SymbolTrackerSharedState {
@@ -211,13 +211,13 @@ pub fn new_declaration_transformer(
 }
 
 impl DeclarationTransformer {
-    pub fn get_diagnostics(&self) -> Vec<Diagnostic> {
+    pub fn get_diagnostics(&self) -> Vec<Diagnostic> { ::tsox_core::fntrace::enter("get_diagnostics"); 
         let mut diagnostics = self.state.diagnostics.clone();
         diagnostics.extend(self.tracker.state.diagnostics.iter().cloned());
         diagnostics
     }
 
-    pub fn install_expando_function_error_reporter(&mut self) {
+    pub fn install_expando_function_error_reporter(&mut self) { ::tsox_core::fntrace::enter("install_expando_function_error_reporter"); 
         let isolated_declarations = self.tracker.state.isolated_declarations;
         let host = self.host.clone();
         self.tracker.state.report_expando_function_errors =
@@ -249,7 +249,7 @@ impl DeclarationTransformer {
             }));
     }
 
-    pub fn collect_file_references(&mut self, source_file: &Arc<SourceFile>) {
+    pub fn collect_file_references(&mut self, source_file: &Arc<SourceFile>) { ::tsox_core::fntrace::enter("collect_file_references"); 
         for reference in &source_file.referenced_files {
             self.raw_referenced_files.push(ReferencedFilePair {
                 file: Arc::clone(source_file),
@@ -265,7 +265,7 @@ impl DeclarationTransformer {
     pub fn append_cjs_exports(
         &self,
         combined_statements: Arc<NodeList>,
-    ) -> Arc<NodeList> {
+    ) -> Arc<NodeList> { ::tsox_core::fntrace::enter("append_cjs_exports"); 
         let mut result: Vec<Arc<Node>> = Vec::new();
         if let Some(cjs_export_assignment) = &self.cjs_export_assignment {
             result.push(Arc::clone(cjs_export_assignment));
@@ -282,7 +282,7 @@ impl DeclarationTransformer {
     pub fn transform_and_replace_late_painted_statements(
         &mut self,
         statements: &Arc<NodeList>,
-    ) -> Arc<NodeList> {
+    ) -> Arc<NodeList> { ::tsox_core::fntrace::enter("transform_and_replace_late_painted_statements"); 
         loop {
             if self.state.late_marked_statements.is_empty() {
                 break;
@@ -348,7 +348,7 @@ impl DeclarationTransformer {
         self.factory().new_node_list(results)
     }
 
-    pub fn transform_top_level_declaration(&mut self, input: Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_top_level_declaration(&mut self, input: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_top_level_declaration"); 
         if !self.state.late_marked_statements.is_empty() {
             self.state
                 .late_marked_statements
@@ -427,7 +427,7 @@ impl DeclarationTransformer {
         result
     }
 
-    pub fn transform_type_alias_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_type_alias_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_type_alias_declaration"); 
         self.needs_declare = false;
         let ta = input.as_type_alias_declaration();
         let type_parameters = self.visitor().visit_nodes(
@@ -447,7 +447,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_interface_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_interface_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_interface_declaration"); 
         let id = input.as_interface_declaration();
         let type_parameters = self.visitor().visit_nodes(
             id.type_parameters
@@ -472,7 +472,7 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn transform_module_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> {
+    pub fn transform_module_declaration(&mut self, input: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_module_declaration"); 
         let mods = self.ensure_modifiers(input);
         let save_needs_declare = self.needs_declare;
         self.needs_declare = false;
@@ -552,15 +552,15 @@ impl DeclarationTransformer {
         ))
     }
 
-    pub fn get_referenced_files(&self, output_file_path: &str) -> Vec<FileReference> {
+    pub fn get_referenced_files(&self, output_file_path: &str) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_referenced_files"); 
         super::m3n_9::get_referenced_files(self, output_file_path)
     }
 
-    pub fn get_lib_references(&self) -> Vec<FileReference> {
+    pub fn get_lib_references(&self) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_lib_references"); 
         super::m3n_9::get_lib_references(self)
     }
 
-    pub fn get_type_references(&self) -> Vec<FileReference> {
+    pub fn get_type_references(&self) -> Vec<FileReference> { ::tsox_core::fntrace::enter("get_type_references"); 
         super::m3n_9::get_type_references(self)
     }
 }
@@ -568,17 +568,17 @@ impl DeclarationTransformer {
 fn declaration_transformer_visit(
     _transformer: &mut Transformer,
     node: Arc<Node>,
-) -> Option<Arc<Node>> {
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaration_transformer_visit"); 
     Some(node)
 }
 
 pub fn throw_diagnostic(
     _result: &SymbolAccessibilityResult,
-) -> Option<SymbolAccessibilityDiagnostic> {
+) -> Option<SymbolAccessibilityDiagnostic> { ::tsox_core::fntrace::enter("throw_diagnostic"); 
     panic!("Diagnostic emitted without context")
 }
 
-pub fn node_or_syntax_list_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
+pub fn node_or_syntax_list_children(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("node_or_syntax_list_children"); 
     if is_syntax_list(node) {
         syntax_list_children(node)
     } else {
@@ -586,11 +586,11 @@ pub fn node_or_syntax_list_children(node: &Arc<Node>) -> Vec<Arc<Node>> {
     }
 }
 
-pub fn flatten_syntax_lists(nodes: &[Arc<Node>]) -> Vec<Arc<Node>> {
+pub fn flatten_syntax_lists(nodes: &[Arc<Node>]) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("flatten_syntax_lists"); 
     nodes.iter().flat_map(node_or_syntax_list_children).collect()
 }
 
-pub fn create_empty_exports(factory: &NodeFactory) -> Arc<Node> {
+pub fn create_empty_exports(factory: &NodeFactory) -> Arc<Node> { ::tsox_core::fntrace::enter("create_empty_exports"); 
     let elements = factory.new_node_list(Vec::new());
     factory.new_export_declaration(
         None,
@@ -601,7 +601,7 @@ pub fn create_empty_exports(factory: &NodeFactory) -> Arc<Node> {
     )
 }
 
-pub fn has_internal_annotation(comment_range: CommentRange, source_file: &SourceFile) -> bool {
+pub fn has_internal_annotation(comment_range: CommentRange, source_file: &SourceFile) -> bool { ::tsox_core::fntrace::enter("has_internal_annotation"); 
     let text = &source_file.text[comment_range.pos..comment_range.end];
     text.contains("@internal")
 }

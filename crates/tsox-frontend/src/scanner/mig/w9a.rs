@@ -4,7 +4,7 @@
 //!
 //! 交接:stringutil::is_line_break 与 core::NewLineKindLF::get_new_line_character 为缺失依赖,按命名约定调用。
 
-pub(crate) fn normalize_js_doc_type_source_text(text: &str) -> String {
+pub(crate) fn normalize_js_doc_type_source_text(text: &str) -> String { ::tsox_core::fntrace::enter("normalize_js_doc_type_source_text"); 
     let line_starts = tsox_core::core::mig::m3j::compute_ecma_line_starts(text);
     if line_starts.len() == 1 {
         return super::m3i::strip_leading_jsdoc_comment(text);

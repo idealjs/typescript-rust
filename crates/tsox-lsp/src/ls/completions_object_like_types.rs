@@ -15,7 +15,7 @@ pub(super) fn type_literal_in_type_argument_completion(
     checker: &mut Checker,
     context_token: Option<&ScanToken>,
     root: &Arc<Node>,
-) -> Option<Vec<Arc<Symbol>>> {
+) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("type_literal_in_type_argument_completion"); 
     let context = context_token?;
     let parent = token_parent(root, context)?;
     let type_literal = match context.kind {
@@ -63,7 +63,7 @@ pub(super) fn type_literal_in_type_argument_completion(
 pub(super) fn constraint_of_type_argument_property(
     checker: &mut Checker,
     node: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("constraint_of_type_argument_property"); 
     if tsox_frontend::ast::is_type_node(node)
         && let Some(constraint) = checker.get_type_argument_constraint(node)
     {
@@ -99,7 +99,7 @@ fn parameter_jsdoc_type(
     checker: &mut Checker,
     file: &Arc<SourceFile>,
     param: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("parameter_jsdoc_type"); 
     let func = param.parent()?;
     let index = function_parameter_index(&func, param)?;
     let mut position = 0usize;
@@ -140,7 +140,7 @@ fn parameter_jsdoc_type(
     None
 }
 
-fn function_parameter_index(func: &Arc<Node>, param: &Arc<Node>) -> Option<usize> {
+fn function_parameter_index(func: &Arc<Node>, param: &Arc<Node>) -> Option<usize> { ::tsox_core::fntrace::enter("function_parameter_index"); 
     let params = match &func.data {
         NodeData::FunctionDeclaration(d) => &d.parameters,
         NodeData::FunctionExpression(d) => &d.parameters,
@@ -156,7 +156,7 @@ pub(super) fn binding_pattern_type_members(
     checker: &mut Checker,
     file: &Arc<SourceFile>,
     container: &Arc<Node>,
-) -> Option<Vec<Arc<Symbol>>> {
+) -> Option<Vec<Arc<Symbol>>> { ::tsox_core::fntrace::enter("binding_pattern_type_members"); 
     let t = binding_pattern_type(checker, file, container)?;
     let props = if t.flags.contains(TypeFlags::Union) {
         common_properties_of_union(checker, &t)
@@ -177,7 +177,7 @@ fn binding_pattern_type(
     checker: &mut Checker,
     file: &Arc<SourceFile>,
     pattern: &Arc<Node>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("binding_pattern_type"); 
     let parent = pattern.parent()?;
     match parent.kind {
         SyntaxKind::BindingElement => {
@@ -218,14 +218,14 @@ fn binding_pattern_type(
 }
 
 
-fn element_index(pattern: &Arc<Node>, element: &Arc<Node>) -> Option<usize> {
+fn element_index(pattern: &Arc<Node>, element: &Arc<Node>) -> Option<usize> { ::tsox_core::fntrace::enter("element_index"); 
     let NodeData::BindingPattern(d) = &pattern.data else {
         return None;
     };
     d.elements.iter().position(|e| Arc::ptr_eq(e, element))
 }
 
-fn common_properties_of_union(checker: &mut Checker, t: &Arc<Type>) -> Vec<Arc<Symbol>> {
+fn common_properties_of_union(checker: &mut Checker, t: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("common_properties_of_union"); 
     let mut members = union_member_types(t);
     let Some(first) = members.first().cloned() else {
         return Vec::new();

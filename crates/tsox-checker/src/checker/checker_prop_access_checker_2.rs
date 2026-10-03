@@ -4,7 +4,7 @@ use crate::checker::checker_prop_access::*;
 use tsox_frontend::ast::mig::m3b::is_write_access;
 
 impl Checker {
-    pub(crate) fn check_property_access(&mut self, node: &Arc<Node>) {
+    pub(crate) fn check_property_access(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_property_access"); 
         let (obj_expr, question_dot, name) = match &node.data {
             tsox_frontend::ast::NodeData::PropertyAccessExpression(data) => (
                 &data.expression,
@@ -314,7 +314,7 @@ impl Checker {
         obj_type: &Arc<Type>,
         name_text: &str,
         name: &Arc<Node>,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("global_this_property_access_error"); 
         if self
             .global_this_symbol
             .as_ref()
@@ -347,7 +347,7 @@ impl Checker {
         node: &Arc<Node>,
         t: &Arc<Type>,
         invoke_form: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("report_possibly_null_or_undefined"); 
         if !self.strict_null_checks || !type_is_possibly_undefined(t) {
             return false;
         }
@@ -437,7 +437,7 @@ impl Checker {
         &self,
         name_text: &str,
         target: &Arc<Type>,
-    ) -> Option<String> {
+    ) -> Option<String> { ::tsox_core::fntrace::enter("suggestion_for_nonexistent_property"); 
         let st = target.as_structured()?;
         let rune_len = name_text.chars().count();
         let maximum_length_difference = 2.max((rune_len as f64 * 0.34) as usize);

@@ -107,46 +107,46 @@ pub struct KeyBuilder {
 }
 
 impl Default for KeyBuilder {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
 impl KeyBuilder {
-    pub fn new() -> KeyBuilder {
+    pub fn new() -> KeyBuilder { ::tsox_core::fntrace::enter("new"); 
         KeyBuilder {
             hi: 0xcbf2_9ce4_8422_2325,
             lo: 0x9e37_79b9_7f4a_7c15,
         }
     }
 
-    pub fn write_byte(&mut self, b: u8) {
+    pub fn write_byte(&mut self, b: u8) { ::tsox_core::fntrace::enter("write_byte"); 
         self.hi = (self.hi ^ u64::from(b)).wrapping_mul(0x100_0000_01b3);
         self.lo = (self.lo ^ (u64::from(b) << 1 | 1)).wrapping_mul(0x100_0000_01b3);
     }
 
-    pub fn write_u32(&mut self, v: u32) {
+    pub fn write_u32(&mut self, v: u32) { ::tsox_core::fntrace::enter("write_u32"); 
         self.write_u64(u64::from(v));
     }
 
-    pub fn write_u64(&mut self, v: u64) {
+    pub fn write_u64(&mut self, v: u64) { ::tsox_core::fntrace::enter("write_u64"); 
         for b in v.to_le_bytes() {
             self.write_byte(b);
         }
     }
 
-    pub fn write_type(&mut self, t: &Type) {
+    pub fn write_type(&mut self, t: &Type) { ::tsox_core::fntrace::enter("write_type"); 
         self.write_u64(u64::from(t.id));
     }
 
-    pub fn write_types(&mut self, types: &[Arc<Type>]) {
+    pub fn write_types(&mut self, types: &[Arc<Type>]) { ::tsox_core::fntrace::enter("write_types"); 
         self.write_u64(types.len() as u64);
         for t in types {
             self.write_type(t);
         }
     }
 
-    pub fn write_alias(&mut self, alias: Option<&TypeAlias>) {
+    pub fn write_alias(&mut self, alias: Option<&TypeAlias>) { ::tsox_core::fntrace::enter("write_alias"); 
         match alias {
             None => self.write_byte(0),
             Some(a) => {
@@ -163,7 +163,7 @@ impl KeyBuilder {
         }
     }
 
-    pub fn hash(&self) -> crate::checker::types_cached_type_kind::CacheHashKey {
+    pub fn hash(&self) -> crate::checker::types_cached_type_kind::CacheHashKey { ::tsox_core::fntrace::enter("hash"); 
         crate::checker::types_cached_type_kind::CacheHashKey::new(self.hi, self.lo)
     }
 }
@@ -179,15 +179,15 @@ pub struct StructuredType {
 }
 
 impl StructuredType {
-    pub fn as_type(&self) -> Arc<Type> {
+    pub fn as_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("as_type"); 
         Arc::clone(&self.typ)
     }
 
-    pub fn call_signatures(&self) -> &[Arc<Signature>] {
+    pub fn call_signatures(&self) -> &[Arc<Signature>] { ::tsox_core::fntrace::enter("call_signatures"); 
         &self.signatures[..self.call_signature_count]
     }
 
-    pub fn construct_signatures(&self) -> &[Arc<Signature>] {
+    pub fn construct_signatures(&self) -> &[Arc<Signature>] { ::tsox_core::fntrace::enter("construct_signatures"); 
         &self.signatures[self.call_signature_count..]
     }
 }

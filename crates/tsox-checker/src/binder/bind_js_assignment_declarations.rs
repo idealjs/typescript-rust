@@ -19,9 +19,9 @@ pub(crate) enum JsDeclarationKind {
     ObjectDefinePropertyExports,
 }
 
-pub(crate) fn get_assignment_declaration_kind(node: &Arc<Node>) -> JsDeclarationKind {
+pub(crate) fn get_assignment_declaration_kind(node: &Arc<Node>) -> JsDeclarationKind { ::tsox_core::fntrace::enter("get_assignment_declaration_kind"); 
     // JavaScriptFile 标志只落在 SourceFile 节点上；沿祖先判定
-    fn is_in_js(n: &Arc<Node>) -> bool {
+    fn is_in_js(n: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_js"); 
         let mut cur = Some(Arc::clone(n));
         while let Some(c) = cur {
             if c.flags.contains(NodeFlags::JavaScriptFile) {
@@ -79,20 +79,20 @@ pub(crate) fn get_assignment_declaration_kind(node: &Arc<Node>) -> JsDeclaration
     }
 }
 
-pub(crate) fn expression_is_alias(node: &Arc<Node>) -> bool {
+pub(crate) fn expression_is_alias(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("expression_is_alias"); 
     matches!(node.kind, SyntaxKind::Identifier | SyntaxKind::QualifiedName)
         || node.kind == SyntaxKind::ClassExpression
 }
 
-pub(crate) fn is_exports_identifier(node: &Arc<Node>) -> bool {
+pub(crate) fn is_exports_identifier(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_exports_identifier"); 
     matches!(&node.data, NodeData::Identifier(i) if i.text == "exports")
 }
 
-pub(crate) fn is_module_identifier(node: &Arc<Node>) -> bool {
+pub(crate) fn is_module_identifier(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_identifier"); 
     matches!(&node.data, NodeData::Identifier(i) if i.text == "module")
 }
 
-pub(crate) fn is_module_exports_access_expression(node: &Arc<Node>) -> bool {
+pub(crate) fn is_module_exports_access_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_exports_access_expression"); 
     if is_access_expression(node) && is_module_identifier(&access_expression_base(node)) {
         if let Some(name) = get_element_or_property_access_name(node) {
             return name.text() == "exports";
@@ -101,14 +101,14 @@ pub(crate) fn is_module_exports_access_expression(node: &Arc<Node>) -> bool {
     false
 }
 
-fn is_access_expression(node: &Arc<Node>) -> bool {
+fn is_access_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_access_expression"); 
     matches!(
         node.kind,
         SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression
     )
 }
 
-fn access_expression_base(node: &Arc<Node>) -> Arc<Node> {
+fn access_expression_base(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("access_expression_base"); 
     match &node.data {
         NodeData::PropertyAccessExpression(d) => Arc::clone(&d.expression),
         NodeData::ElementAccessExpression(d) => Arc::clone(&d.expression),
@@ -116,18 +116,18 @@ fn access_expression_base(node: &Arc<Node>) -> Arc<Node> {
     }
 }
 
-fn bin_left_expression(left: &Arc<Node>) -> Arc<Node> {
+fn bin_left_expression(left: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("bin_left_expression"); 
     access_expression_base(left)
 }
 
-fn bin_left_name(left: &Arc<Node>) -> Option<Arc<Node>> {
+fn bin_left_name(left: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("bin_left_name"); 
     match &left.data {
         NodeData::PropertyAccessExpression(d) => Some(Arc::clone(&d.name)),
         _ => None,
     }
 }
 
-fn is_entity_name_expression(node: &Arc<Node>) -> bool {
+fn is_entity_name_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_entity_name_expression"); 
     match &node.data {
         NodeData::Identifier(i) => !matches!(i.text.as_str(), "this" | "super" | "null" | "true" | "false"),
         NodeData::PropertyAccessExpression(d) => is_entity_name_expression(&d.expression),
@@ -136,7 +136,7 @@ fn is_entity_name_expression(node: &Arc<Node>) -> bool {
 }
 
 /// Go GetElementOrPropertyAccessName：属性访问名或字符串/数字字面量下标
-pub(crate) fn get_element_or_property_access_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_element_or_property_access_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_element_or_property_access_name"); 
     match &node.data {
         NodeData::PropertyAccessExpression(d) => Some(Arc::clone(&d.name)),
         NodeData::ElementAccessExpression(d) => {
@@ -156,7 +156,7 @@ pub(crate) fn get_element_or_property_access_name(node: &Arc<Node>) -> Option<Ar
     }
 }
 
-fn is_bindable_object_define_property_call(call: &tsox_frontend::ast::CallExpressionData) -> bool {
+fn is_bindable_object_define_property_call(call: &tsox_frontend::ast::CallExpressionData) -> bool { ::tsox_core::fntrace::enter("is_bindable_object_define_property_call"); 
     if call.arguments.nodes.len() != 3 {
         return false;
     }
@@ -174,11 +174,11 @@ fn is_bindable_object_define_property_call(call: &tsox_frontend::ast::CallExpres
         && is_bindable_static_name_expression(&call.arguments.nodes[0])
 }
 
-fn is_module_exports_style_object(node: &Arc<Node>) -> bool {
+fn is_module_exports_style_object(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_exports_style_object"); 
     matches!(&node.data, NodeData::Identifier(i) if i.text == "Object")
 }
 
-fn is_bindable_static_name_expression(node: &Arc<Node>) -> bool {
+fn is_bindable_static_name_expression(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_bindable_static_name_expression"); 
     match &node.data {
         NodeData::Identifier(i) => {
             !matches!(i.text.as_str(), "this" | "super" | "null" | "true" | "false")
@@ -201,7 +201,7 @@ impl Binder {
     /// Go bindModuleExportsAssignment：module.exports = expr 在文件模块的
     /// exports 表里声明 "export=" 符号（container 固定取文件符号——嵌套在
     /// IIFE 等函数体内的赋值同样落到文件 exports）
-    pub(crate) fn bind_module_exports_assignment(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_module_exports_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_module_exports_assignment"); 
         if !self.set_common_js_module_indicator(node) {
             return;
         }
@@ -235,7 +235,7 @@ impl Binder {
 
     /// Go bindExportsOrObjectDefineProperty：exports.name = expr 与
     /// Object.defineProperty(exports, 'name', ...) 的具名导出
-    pub(crate) fn bind_exports_or_object_define_property(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_exports_or_object_define_property(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_exports_or_object_define_property"); 
         if !self.set_common_js_module_indicator(node) {
             return;
         }
@@ -256,7 +256,7 @@ impl Binder {
         );
     }
 
-    pub(crate) fn set_common_js_module_indicator(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn set_common_js_module_indicator(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("set_common_js_module_indicator"); 
         let Some(file) = self.current_source_file.clone() else {
             return false;
         };

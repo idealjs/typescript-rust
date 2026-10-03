@@ -24,7 +24,7 @@ struct RegexPatternCacheKey {
     case_insensitive: bool,
 }
 
-fn regex_pattern_cache() -> &'static Mutex<HashMap<RegexPatternCacheKey, Option<regex::Regex>>> {
+fn regex_pattern_cache() -> &'static Mutex<HashMap<RegexPatternCacheKey, Option<regex::Regex>>> { ::tsox_core::fntrace::enter("regex_pattern_cache"); 
     static CACHE: OnceLock<Mutex<HashMap<RegexPatternCacheKey, Option<regex::Regex>>>> =
         OnceLock::new();
     CACHE.get_or_init(|| Mutex::new(HashMap::new()))
@@ -34,7 +34,7 @@ pub fn compare_paths_by_redirect(
     a: &ModulePath,
     b: &ModulePath,
     use_case_sensitive_file_names: bool,
-) -> i32 {
+) -> i32 { ::tsox_core::fntrace::enter("compare_paths_by_redirect"); 
     let c = compare_booleans(b.is_redirect, a.is_redirect);
     if c != 0 {
         return c;
@@ -53,11 +53,11 @@ pub fn compare_paths_by_redirect(
     )
 }
 
-pub fn path_is_bare_specifier(path: &str) -> bool {
+pub fn path_is_bare_specifier(path: &str) -> bool { ::tsox_core::fntrace::enter("path_is_bare_specifier"); 
     !tspath::path_is_absolute(path) && !tspath::path_is_relative(path)
 }
 
-pub fn is_excluded_by_regex(module_specifier: &str, excludes: &[String]) -> bool {
+pub fn is_excluded_by_regex(module_specifier: &str, excludes: &[String]) -> bool { ::tsox_core::fntrace::enter("is_excluded_by_regex"); 
     for pattern in excludes {
         let re = match string_to_regex(pattern) {
             Some(re) => re,
@@ -70,7 +70,7 @@ pub fn is_excluded_by_regex(module_specifier: &str, excludes: &[String]) -> bool
     false
 }
 
-pub fn string_to_regex(pattern: &str) -> Option<regex::Regex> {
+pub fn string_to_regex(pattern: &str) -> Option<regex::Regex> { ::tsox_core::fntrace::enter("string_to_regex"); 
     let mut case_insensitive = false;
     let mut pattern = pattern.to_string();
 
@@ -123,14 +123,14 @@ pub fn string_to_regex(pattern: &str) -> Option<regex::Regex> {
     compiled
 }
 
-pub fn ensure_path_is_non_module_name(path: &str) -> String {
+pub fn ensure_path_is_non_module_name(path: &str) -> String { ::tsox_core::fntrace::enter("ensure_path_is_non_module_name"); 
     if path_is_bare_specifier(path) {
         return format!("./{}", path);
     }
     path.to_string()
 }
 
-pub fn get_js_extension_for_declaration_file_extension(ext: &str) -> String {
+pub fn get_js_extension_for_declaration_file_extension(ext: &str) -> String { ::tsox_core::fntrace::enter("get_js_extension_for_declaration_file_extension"); 
     match ext {
         tspath::EXTENSION_DTS => tspath::EXTENSION_JS.to_string(),
         tspath::EXTENSION_DMTS => tspath::EXTENSION_MJS.to_string(),
@@ -139,7 +139,7 @@ pub fn get_js_extension_for_declaration_file_extension(ext: &str) -> String {
     }
 }
 
-pub fn try_get_real_file_name_for_non_js_declaration_file_name(file_name: &str) -> String {
+pub fn try_get_real_file_name_for_non_js_declaration_file_name(file_name: &str) -> String { ::tsox_core::fntrace::enter("try_get_real_file_name_for_non_js_declaration_file_name"); 
     let base_name = tspath::get_base_file_name(file_name);
     if !file_name.ends_with(tspath::EXTENSION_TS)
         || !base_name.contains(".d.")
@@ -154,7 +154,7 @@ pub fn try_get_real_file_name_for_non_js_declaration_file_name(file_name: &str) 
     format!("{}{}", before, ext)
 }
 
-pub fn get_js_extension_for_file(file_name: &str, options: &CompilerOptions) -> String {
+pub fn get_js_extension_for_file(file_name: &str, options: &CompilerOptions) -> String { ::tsox_core::fntrace::enter("get_js_extension_for_file"); 
     let result = crate::module::mig::m3i::try_get_js_extension_for_file(file_name, options);
     if result.is_empty() {
         panic!(
@@ -166,7 +166,7 @@ pub fn get_js_extension_for_file(file_name: &str, options: &CompilerOptions) -> 
     result.to_string()
 }
 
-pub fn extension_from_path(path: &str) -> &str {
+pub fn extension_from_path(path: &str) -> &str { ::tsox_core::fntrace::enter("extension_from_path"); 
     let ext = tspath::try_get_extension_from_path(path);
     if ext.is_empty() {
         panic!("File {} has unknown extension.", path);
@@ -174,7 +174,7 @@ pub fn extension_from_path(path: &str) -> &str {
     ext
 }
 
-pub fn try_get_any_file_from_path(host: &dyn ModuleSpecifierGenerationHost, path: &str) -> bool {
+pub fn try_get_any_file_from_path(host: &dyn ModuleSpecifierGenerationHost, path: &str) -> bool { ::tsox_core::fntrace::enter("try_get_any_file_from_path"); 
     let ext_groups = crate::mig::m5i_3::get_supported_extensions(
         &CompilerOptions {
             allow_js: Tristate::True,
@@ -200,7 +200,7 @@ pub fn get_paths_relative_to_root_dirs(
     path: &str,
     root_dirs: &[String],
     use_case_sensitive_file_names: bool,
-) -> Vec<String> {
+) -> Vec<String> { ::tsox_core::fntrace::enter("get_paths_relative_to_root_dirs"); 
     let mut results = Vec::new();
     for root_dir in root_dirs {
         let relative_path =
@@ -212,7 +212,7 @@ pub fn get_paths_relative_to_root_dirs(
     results
 }
 
-pub fn is_path_relative_to_parent(path: &str) -> bool {
+pub fn is_path_relative_to_parent(path: &str) -> bool { ::tsox_core::fntrace::enter("is_path_relative_to_parent"); 
     path.starts_with("..")
 }
 
@@ -220,7 +220,7 @@ pub fn get_relative_path_if_in_same_volume(
     path: &str,
     directory_path: &str,
     use_case_sensitive_file_names: bool,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("get_relative_path_if_in_same_volume"); 
     let relative_path = tspath::get_relative_path_to_directory_or_url(
         directory_path,
         path,
@@ -237,7 +237,7 @@ pub fn get_relative_path_if_in_same_volume(
     relative_path
 }
 
-pub fn package_json_paths_are_equal(a: &str, b: &str, options: ComparePathsOptions) -> bool {
+pub fn package_json_paths_are_equal(a: &str, b: &str, options: ComparePathsOptions) -> bool { ::tsox_core::fntrace::enter("package_json_paths_are_equal"); 
     if a == b {
         return true;
     }
@@ -247,7 +247,7 @@ pub fn package_json_paths_are_equal(a: &str, b: &str, options: ComparePathsOptio
     tspath_mig::compare_paths(a, b, &options) == 0
 }
 
-pub fn prefers_ts_extension(allowed_endings: &[ModuleSpecifierEnding]) -> bool {
+pub fn prefers_ts_extension(allowed_endings: &[ModuleSpecifierEnding]) -> bool { ::tsox_core::fntrace::enter("prefers_ts_extension"); 
     let js_priority = allowed_endings
         .iter()
         .position(|e| *e == ModuleSpecifierEnding::JsExtension);
@@ -260,7 +260,7 @@ pub fn prefers_ts_extension(allowed_endings: &[ModuleSpecifierEnding]) -> bool {
     false
 }
 
-pub fn replace_first_star(s: &str, replacement: &str) -> String {
+pub fn replace_first_star(s: &str, replacement: &str) -> String { ::tsox_core::fntrace::enter("replace_first_star"); 
     match s.find('*') {
         Some(idx) => format!("{}{}{}", &s[..idx], replacement, &s[idx + 1..]),
         None => s.to_string(),

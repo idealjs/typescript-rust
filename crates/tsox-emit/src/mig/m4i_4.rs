@@ -21,7 +21,7 @@ use crate::mig::m4n_5::r36k29_defs::R36K29NodeExt;
 use crate::mig::m4e_2::{FlattenLevel, flatten_destructuring_binding};
 use r39k09_defs::R39K09ObjectRestSpreadTxExt;
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn transform_function_body(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn transform_function_body(&mut self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("transform_function_body"); 
         self.emit_context.start_variable_environment();
         let mut body = self.visit_node(node.body());
         let mut extras = self.emit_context.end_variable_environment();
@@ -90,7 +90,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn collect_object_rest_assignments(&mut self, node: &Arc<Node>) -> Vec<Arc<Node>> {
+    fn collect_object_rest_assignments(&mut self, node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("collect_object_rest_assignments"); 
         let mut contains_preceding_object_rest_or_spread = false;
         let mut results: Vec<Arc<Node>> = Vec::new();
         for parameter in tsox_frontend::ast::mig::m3b::parameters(node) {
@@ -201,7 +201,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn new_flattened_variable_statement(&mut self, declarations: &Arc<Node>) -> Arc<Node> {
+    fn new_flattened_variable_statement(&mut self, declarations: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("new_flattened_variable_statement"); 
         let decls: Vec<Arc<Node>> = if declarations.kind == SyntaxKind::SyntaxList {
             declarations.as_syntax_list().children.clone()
         } else {
@@ -219,7 +219,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn visit_catch_clause(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_catch_clause(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_catch_clause"); 
         let data = node.as_catch_clause();
         let variable_declaration = data.variable_declaration.clone();
         if let Some(vd) = &variable_declaration {
@@ -291,7 +291,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn visit_variable_statement(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_variable_statement(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_variable_statement"); 
         if has_syntactic_modifier(&node, ModifierFlags::Export) {
             let old_in_exported_variable_statement = self.in_exported_variable_statement;
             self.in_exported_variable_statement = true;
@@ -304,7 +304,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn visit_variable_declaration(&mut self, node: Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_variable_declaration(&mut self, node: Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_variable_declaration"); 
         if self.in_exported_variable_statement {
             self.in_exported_variable_statement = false;
             let result = self.visit_variable_declaration_worker(&node, true);
@@ -316,7 +316,7 @@ impl ObjectRestSpreadTransformer {
 
 }
 impl ObjectRestSpreadTransformer {
-    fn visit_variable_declaration_worker(&mut self, node: &Arc<Node>, exported: bool) -> Arc<Node> {
+    fn visit_variable_declaration_worker(&mut self, node: &Arc<Node>, exported: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_variable_declaration_worker"); 
         if is_binding_pattern(node.name().unwrap())
             && subtree_facts(node).intersects(SubtreeFacts::CONTAINS_OBJECT_REST_OR_SPREAD)
         {
@@ -337,12 +337,12 @@ impl ObjectRestSpreadTransformer {
 }
 
 impl ObjectRestSpreadTransformer {
-    pub(crate) fn visit_node(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+    pub(crate) fn visit_node(&mut self, node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("visit_node"); 
         let node = node?;
         Some(self.visit(node.clone()))
     }
 
-    pub(crate) fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> {
+    pub(crate) fn visit_each_child(&mut self, node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("visit_each_child"); 
         if node.kind == SyntaxKind::SourceFile {
             return self.visit(node.clone());
         }

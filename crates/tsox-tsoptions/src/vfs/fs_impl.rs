@@ -3,16 +3,16 @@ use super::in_memory::{InMemoryFS, decode_with_bom, parent_dir, strip_path_prefi
 use super::types::{Entries, FileInfo};
 
 impl FS for InMemoryFS {
-    fn use_case_sensitive_file_names(&self) -> bool {
+    fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
         self.case_sensitive
     }
 
-    fn file_exists(&self, path: &str) -> bool {
+    fn file_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("file_exists"); 
         let resolved = self.resolve_symlinks(path);
         self.lookup_file_key(&resolved).is_some()
     }
 
-    fn read_file(&self, path: &str) -> Option<String> {
+    fn read_file(&self, path: &str) -> Option<String> { ::tsox_core::fntrace::enter("read_file"); 
         let resolved = self.resolve_symlinks(path);
         let files = self.files.read().unwrap();
         let content = if let Some(c) = files.get(&resolved) {
@@ -29,7 +29,7 @@ impl FS for InMemoryFS {
         Some(decode_with_bom(content))
     }
 
-    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn write_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("write_file"); 
         let resolved = self.resolve_symlinks(path);
 
         if let Some(parent) = parent_dir(&resolved) {
@@ -55,7 +55,7 @@ impl FS for InMemoryFS {
         Ok(())
     }
 
-    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> {
+    fn append_file(&self, path: &str, data: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("append_file"); 
         let resolved = self.resolve_symlinks(path);
         let mut files = self.files.write().unwrap();
         let key = if self.case_sensitive {
@@ -73,7 +73,7 @@ impl FS for InMemoryFS {
         Ok(())
     }
 
-    fn remove(&self, path: &str) -> std::io::Result<()> {
+    fn remove(&self, path: &str) -> std::io::Result<()> { ::tsox_core::fntrace::enter("remove"); 
         if let Some(key) = self.lookup_symlink_stored_key(path) {
             self.symlinks.write().unwrap().remove(&key);
             return Ok(());
@@ -119,12 +119,12 @@ impl FS for InMemoryFS {
         Ok(())
     }
 
-    fn directory_exists(&self, path: &str) -> bool {
+    fn directory_exists(&self, path: &str) -> bool { ::tsox_core::fntrace::enter("directory_exists"); 
         let resolved = self.resolve_symlinks(path);
         self.lookup_dir_key(&resolved).is_some()
     }
 
-    fn get_accessible_entries(&self, path: &str) -> Entries {
+    fn get_accessible_entries(&self, path: &str) -> Entries { ::tsox_core::fntrace::enter("get_accessible_entries"); 
         let mut entries = Entries::default();
         let resolved = self.resolve_symlinks(path);
         let prefix = if resolved.ends_with('/') {
@@ -161,7 +161,7 @@ impl FS for InMemoryFS {
         entries
     }
 
-    fn stat(&self, path: &str) -> Option<FileInfo> {
+    fn stat(&self, path: &str) -> Option<FileInfo> { ::tsox_core::fntrace::enter("stat"); 
         let is_symlink = self.lookup_symlink_key(path).is_some();
         let resolved = self.resolve_symlinks(path);
         if let Some(key) = self.lookup_file_key(&resolved) {
@@ -185,7 +185,7 @@ impl FS for InMemoryFS {
         })
     }
 
-    fn realpath(&self, path: &str) -> String {
+    fn realpath(&self, path: &str) -> String { ::tsox_core::fntrace::enter("realpath"); 
         let resolved = self.resolve_symlinks(path);
         if let Some(key) = self.lookup_file_key(&resolved) {
             return key;

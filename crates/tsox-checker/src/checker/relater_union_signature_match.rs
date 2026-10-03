@@ -14,7 +14,7 @@ impl Checker {
         signature_lists: &[Vec<Arc<Signature>>],
         signature: &Arc<Signature>,
         list_index: usize,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("find_matching_signatures"); 
         if !signature.type_parameters.is_empty() {
             if list_index > 0 {
                 return Vec::new();
@@ -57,7 +57,7 @@ impl Checker {
         partial_match: bool,
         ignore_this_types: bool,
         ignore_return_types: bool,
-    ) -> Option<Arc<Signature>> {
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("find_matching_signature_in_list"); 
         for candidate in signature_list {
             let related = self.compare_signatures_identical_ex(
                 candidate,
@@ -83,7 +83,7 @@ impl Checker {
         partial_match: bool,
         ignore_this_types: bool,
         ignore_return_types: bool,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_signatures_identical_ex"); 
         if Arc::ptr_eq(source, target) {
             return Ternary::True;
         }
@@ -194,7 +194,7 @@ impl Checker {
         source: &Arc<Signature>,
         target: &Arc<Signature>,
         partial_match: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("signatures_match_arity"); 
         let source_parameter_count = self.get_parameter_count(source);
         let target_parameter_count = self.get_parameter_count(target);
         let source_min = self.get_min_argument_count(source);
@@ -215,7 +215,7 @@ impl Checker {
         partial_match: bool,
         source: &Arc<Type>,
         target: &Arc<Type>,
-    ) -> Ternary {
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_types_for_match"); 
         if partial_match {
             self.compare_types_subtype_of(source, target)
         } else {

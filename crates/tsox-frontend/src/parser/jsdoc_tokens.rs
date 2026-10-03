@@ -3,7 +3,7 @@
 use crate::parser::jsdoc::*;
 
 impl crate::parser::Parser {
-    pub(crate) fn parse_optional_jsdoc(&mut self, kind: SyntaxKind) -> bool {
+    pub(crate) fn parse_optional_jsdoc(&mut self, kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("parse_optional_jsdoc"); 
         if self.token == kind {
             self.next_token_jsdoc();
             true
@@ -12,7 +12,7 @@ impl crate::parser::Parser {
         }
     }
 
-    pub(crate) fn parse_expected_jsdoc(&mut self, kind: SyntaxKind) {
+    pub(crate) fn parse_expected_jsdoc(&mut self, kind: SyntaxKind) { ::tsox_core::fntrace::enter("parse_expected_jsdoc"); 
         if !self.parse_optional_jsdoc(kind) {
             self.parse_error_at_current_token(
                 tsox_core::diagnostics::X_0_EXPECTED,
@@ -21,7 +21,7 @@ impl crate::parser::Parser {
         }
     }
 
-    pub(crate) fn parse_expected_token_jsdoc(&mut self, kind: SyntaxKind) -> Arc<Node> {
+    pub(crate) fn parse_expected_token_jsdoc(&mut self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_expected_token_jsdoc"); 
         if self.token == kind {
             let node = self.create_token_node_jsdoc();
             self.next_token_jsdoc();
@@ -35,7 +35,7 @@ impl crate::parser::Parser {
         }
     }
 
-    pub(crate) fn create_token_node_jsdoc(&self) -> Arc<Node> {
+    pub(crate) fn create_token_node_jsdoc(&self) -> Arc<Node> { ::tsox_core::fntrace::enter("create_token_node_jsdoc"); 
         Arc::new(Node::with_loc(
             self.token,
             NodeData::Token,
@@ -48,7 +48,7 @@ impl crate::parser::Parser {
         kind: SyntaxKind,
         pos: usize,
         end: usize,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_missing_node"); 
         Arc::new(Node::with_loc(
             kind,
             NodeData::Token,

@@ -7,7 +7,7 @@ impl Checker {
         &mut self,
         base: &Arc<Type>,
         arg_types: &[Arc<Type>],
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_value_type_for_type_query"); 
         if arg_types.is_empty() {
             return Arc::clone(base);
         }

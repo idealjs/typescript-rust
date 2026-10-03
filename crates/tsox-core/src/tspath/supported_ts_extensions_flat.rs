@@ -36,7 +36,7 @@ pub const EXTENSIONS_TO_REMOVE: &[&str] = &[
     EXTENSION_JSON,
 ];
 
-pub fn extension_is_ts(ext: &str) -> bool {
+pub fn extension_is_ts(ext: &str) -> bool { crate::fntrace::enter("extension_is_ts"); 
     ext == EXTENSION_TS
         || ext == EXTENSION_TSX
         || ext == EXTENSION_DTS
@@ -47,7 +47,7 @@ pub fn extension_is_ts(ext: &str) -> bool {
         || (ext.len() >= 7 && &ext[..3] == ".d." && &ext[ext.len() - 3..] == ".ts")
 }
 
-pub fn remove_file_extension(path: &str) -> String {
+pub fn remove_file_extension(path: &str) -> String { crate::fntrace::enter("remove_file_extension"); 
     for ext in EXTENSIONS_TO_REMOVE {
         if path.ends_with(ext) {
             return path[..path.len() - ext.len()].to_string();
@@ -56,7 +56,7 @@ pub fn remove_file_extension(path: &str) -> String {
     path.to_string()
 }
 
-pub fn try_get_extension_from_path(p: &str) -> &str {
+pub fn try_get_extension_from_path(p: &str) -> &str { crate::fntrace::enter("try_get_extension_from_path"); 
     for ext in EXTENSIONS_TO_REMOVE {
         if file_extension_is(p, ext) {
             return ext;
@@ -65,31 +65,31 @@ pub fn try_get_extension_from_path(p: &str) -> &str {
     ""
 }
 
-pub fn remove_extension(path: &str, extension: &str) -> String {
+pub fn remove_extension(path: &str, extension: &str) -> String { crate::fntrace::enter("remove_extension"); 
     path[..path.len() - extension.len()].to_string()
 }
 
-pub fn file_extension_is_one_of(path: &str, extensions: &[&str]) -> bool {
+pub fn file_extension_is_one_of(path: &str, extensions: &[&str]) -> bool { crate::fntrace::enter("file_extension_is_one_of"); 
     extensions.iter().any(|ext| file_extension_is(path, ext))
 }
 
-pub fn has_ts_file_extension(path: &str) -> bool {
+pub fn has_ts_file_extension(path: &str) -> bool { crate::fntrace::enter("has_ts_file_extension"); 
     file_extension_is_one_of(path, SUPPORTED_TS_EXTENSIONS_FLAT)
 }
 
-pub fn has_js_file_extension(path: &str) -> bool {
+pub fn has_js_file_extension(path: &str) -> bool { crate::fntrace::enter("has_js_file_extension"); 
     file_extension_is_one_of(path, SUPPORTED_JS_EXTENSIONS_FLAT)
 }
 
-pub fn has_json_file_extension(path: &str) -> bool {
+pub fn has_json_file_extension(path: &str) -> bool { crate::fntrace::enter("has_json_file_extension"); 
     file_extension_is(path, EXTENSION_JSON)
 }
 
-pub fn is_declaration_file_name(file_name: &str) -> bool {
+pub fn is_declaration_file_name(file_name: &str) -> bool { crate::fntrace::enter("is_declaration_file_name"); 
     !get_declaration_file_extension(file_name).is_empty()
 }
 
-pub fn get_declaration_file_extension(file_name: &str) -> String {
+pub fn get_declaration_file_extension(file_name: &str) -> String { crate::fntrace::enter("get_declaration_file_extension"); 
     let base = get_base_file_name(file_name);
     for ext in &[EXTENSION_DTS, EXTENSION_DCTS, EXTENSION_DMTS] {
         if base.ends_with(ext) {
@@ -104,7 +104,7 @@ pub fn get_declaration_file_extension(file_name: &str) -> String {
     String::new()
 }
 
-pub fn change_extension(path: &str, new_extension: &str) -> String {
+pub fn change_extension(path: &str, new_extension: &str) -> String { crate::fntrace::enter("change_extension"); 
     let pathext = get_any_extension_from_path(path, &[], false);
     if !pathext.is_empty() {
         let result = &path[..path.len() - pathext.len()];
@@ -119,7 +119,7 @@ pub fn change_extension(path: &str, new_extension: &str) -> String {
     path.to_string()
 }
 
-pub fn get_any_extension_from_path(path: &str, extensions: &[&str], ignore_case: bool) -> String {
+pub fn get_any_extension_from_path(path: &str, extensions: &[&str], ignore_case: bool) -> String { crate::fntrace::enter("get_any_extension_from_path"); 
     if !extensions.is_empty() {
         let path = remove_trailing_directory_separator(path);
         for extension in extensions {
@@ -146,7 +146,7 @@ pub fn get_any_extension_from_path(path: &str, extensions: &[&str], ignore_case:
     String::new()
 }
 
-pub fn contains_ignored_path(path: &str) -> bool {
+pub fn contains_ignored_path(path: &str) -> bool { crate::fntrace::enter("contains_ignored_path"); 
     let ignored_paths = ["/node_modules/.", "/.git", ".#"];
     ignored_paths.iter().any(|p| path.contains(p))
 }
@@ -155,7 +155,7 @@ pub fn starts_with_directory(
     file_name: &str,
     directory_name: &str,
     use_case_sensitive_file_names: bool,
-) -> bool {
+) -> bool { crate::fntrace::enter("starts_with_directory"); 
     if directory_name.is_empty() {
         return false;
     }
@@ -182,7 +182,7 @@ pub struct ComparePathsOptions {
 }
 
 impl ComparePathsOptions {
-    pub(crate) fn equality_comparer(&self) -> impl Fn(&str, &str) -> bool {
+    pub(crate) fn equality_comparer(&self) -> impl Fn(&str, &str) -> bool { crate::fntrace::enter("equality_comparer"); 
         let case_sensitive = self.use_case_sensitive_file_names;
         move |a: &str, b: &str| -> bool {
             if case_sensitive {
@@ -197,7 +197,7 @@ impl ComparePathsOptions {
 pub fn get_normalized_absolute_path_without_root(
     file_name: &str,
     current_directory: &str,
-) -> String {
+) -> String { crate::fntrace::enter("get_normalized_absolute_path_without_root"); 
     let absolute_path = get_normalized_absolute_path(file_name, current_directory);
     let root_length = get_root_length(&absolute_path);
     absolute_path[root_length..].to_string()
@@ -207,7 +207,7 @@ pub(crate) fn get_path_components_relative_to(
     from: &str,
     to: &str,
     options: &ComparePathsOptions,
-) -> Vec<String> {
+) -> Vec<String> { crate::fntrace::enter("get_path_components_relative_to"); 
     let from_components =
         reduce_path_components(&get_path_components(from, &options.current_directory));
     let to_components =
@@ -250,7 +250,7 @@ pub fn get_relative_path_to_directory_or_url(
     relative_or_absolute_path: &str,
     is_absolute_path_an_url: bool,
     options: &ComparePathsOptions,
-) -> String {
+) -> String { crate::fntrace::enter("get_relative_path_to_directory_or_url"); 
     let mut path_components =
         get_path_components_relative_to(directory_path_or_url, relative_or_absolute_path, options);
 
@@ -269,7 +269,7 @@ pub fn get_relative_path_to_directory_or_url(
     get_path_from_path_components(&path_components)
 }
 
-pub fn convert_to_relative_path(path: &str, options: &ComparePathsOptions) -> String {
+pub fn convert_to_relative_path(path: &str, options: &ComparePathsOptions) -> String { crate::fntrace::enter("convert_to_relative_path"); 
     if !is_rooted_disk_path(path) {
         return path.to_string();
     }

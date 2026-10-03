@@ -3,7 +3,7 @@ use crate::fourslash::session::Session;
 
 // ---- B3 quickinfo ----
 
-fn completion_labels_at(s: &mut Session, marker: Option<&str>, prefix: &str) -> Vec<String> {
+fn completion_labels_at(s: &mut Session, marker: Option<&str>, prefix: &str) -> Vec<String> { ::tsox_core::fntrace::enter("completion_labels_at"); 
     let (file_name, position) = match marker {
         // Go "" 指无名 marker（/**/）：解析产出 name=Some("") 的空名 marker，
         // 兼容 name=None 形态
@@ -52,8 +52,8 @@ fn completion_labels_at(s: &mut Session, marker: Option<&str>, prefix: &str) -> 
 fn compare_completion_entries(
     a: &crate::ls::types_completion::CompletionItem,
     b: &crate::ls::types_completion::CompletionItem,
-) -> std::cmp::Ordering {
-    fn ci_then_sensitive(a: &str, b: &str) -> std::cmp::Ordering {
+) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("compare_completion_entries"); 
+    fn ci_then_sensitive(a: &str, b: &str) -> std::cmp::Ordering { ::tsox_core::fntrace::enter("ci_then_sensitive"); 
         a.to_lowercase()
             .cmp(&b.to_lowercase())
             .then_with(|| a.cmp(b))
@@ -64,7 +64,7 @@ fn compare_completion_entries(
 }
 
 /// Go VerifyCompletions(t, <marker>, nil)：期望补全列表为空
-pub fn verify_completions_empty_at(s: &mut Session, marker: Option<&str>) {
+pub fn verify_completions_empty_at(s: &mut Session, marker: Option<&str>) { ::tsox_core::fntrace::enter("verify_completions_empty_at"); 
     let labels = completion_labels_at(s, marker, "");
     assert!(
         labels.is_empty(),
@@ -74,7 +74,7 @@ pub fn verify_completions_empty_at(s: &mut Session, marker: Option<&str>) {
 }
 
 /// Go Items.Exact：label 序列严格相等（数量+顺序）
-pub fn verify_completions_exact_at(s: &mut Session, marker: Option<&str>, expected: &[&str]) {
+pub fn verify_completions_exact_at(s: &mut Session, marker: Option<&str>, expected: &[&str]) { ::tsox_core::fntrace::enter("verify_completions_exact_at"); 
     let labels = completion_labels_at(s, marker, "exact");
     let expected: Vec<&str> = expected.to_vec();
     assert_eq!(
@@ -86,7 +86,7 @@ pub fn verify_completions_exact_at(s: &mut Session, marker: Option<&str>, expect
 }
 
 /// Go Items.Unsorted：无序集合精确等价（存在性 + 总数）
-pub fn verify_completions_unsorted_at(s: &mut Session, marker: Option<&str>, expected: &[&str]) {
+pub fn verify_completions_unsorted_at(s: &mut Session, marker: Option<&str>, expected: &[&str]) { ::tsox_core::fntrace::enter("verify_completions_unsorted_at"); 
     let labels = completion_labels_at(s, marker, "unsorted");
     let actual: Vec<String> = labels.clone();
     let mut remaining: Vec<String> = labels;
@@ -112,7 +112,7 @@ pub fn verify_completions_include_exclude_at(
     marker: Option<&str>,
     includes: &[&str],
     excludes: &[&str],
-) {
+) { ::tsox_core::fntrace::enter("verify_completions_include_exclude_at"); 
     let labels = completion_labels_at(s, marker, "includes/excludes");
     for want in includes {
         assert!(

@@ -77,7 +77,7 @@ pub fn start_tracing<'a>(
     trace_dir: &str,
     config_file_path: &str,
     deterministic: bool,
-) -> Result<Tracing<'a>, String> {
+) -> Result<Tracing<'a>, String> { crate::fntrace::enter("start_tracing"); 
     let mut tr = Tracing {
         fs,
         trace_dir: trace_dir.to_string(),
@@ -139,7 +139,7 @@ pub fn start_tracing<'a>(
     Ok(tr)
 }
 
-pub fn trace_thread_key_from_args(args: &HashMap<String, Box<dyn std::any::Any>>) -> Option<TraceThreadKey> {
+pub fn trace_thread_key_from_args(args: &HashMap<String, Box<dyn std::any::Any>>) -> Option<TraceThreadKey> { crate::fntrace::enter("trace_thread_key_from_args"); 
     if args.is_empty() {
         return None;
     }
@@ -176,7 +176,7 @@ pub const TRACE_THREAD_ARG_KEYS: &[&str] = &[
 ];
 
 impl Tracing<'_> {
-    pub fn timestamp(&mut self) -> f64 {
+    pub fn timestamp(&mut self) -> f64 { crate::fntrace::enter("timestamp"); 
         if self.deterministic {
             self.timestamp_counter += 1;
             return self.timestamp_counter as f64;
@@ -184,7 +184,7 @@ impl Tracing<'_> {
         self.start_time.elapsed().as_nanos() as f64 / 1000.0
     }
 
-    pub fn write_event(&mut self, event: TraceEvent) {
+    pub fn write_event(&mut self, event: TraceEvent) { crate::fntrace::enter("write_event"); 
         let mut obj = serde_json::Map::new();
         obj.insert("pid".to_string(), event.pid.into());
         obj.insert("tid".to_string(), event.tid.into());
@@ -210,7 +210,7 @@ impl Tracing<'_> {
         let _ = write!(self.trace_content, "{}", serde_json::Value::Object(obj));
     }
 
-    pub fn thread_id_locked(&mut self, args: &HashMap<String, Box<dyn std::any::Any>>) -> i32 {
+    pub fn thread_id_locked(&mut self, args: &HashMap<String, Box<dyn std::any::Any>>) -> i32 { crate::fntrace::enter("thread_id_locked"); 
         let Some(key) = trace_thread_key_from_args(args) else {
             return MAIN_THREAD_ID;
         };
@@ -225,7 +225,7 @@ impl Tracing<'_> {
     }
 }
 
-fn json_arg(value: &Box<dyn std::any::Any>) -> serde_json::Value {
+fn json_arg(value: &Box<dyn std::any::Any>) -> serde_json::Value { crate::fntrace::enter("json_arg"); 
     if let Some(v) = value.downcast_ref::<bool>() {
         (*v).into()
     } else if let Some(v) = value.downcast_ref::<i32>() {

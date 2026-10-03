@@ -3,7 +3,7 @@
 use crate::checker::emitresolver::*;
 
 impl Checker {
-    pub fn is_declaration_visible(&mut self, node: &Arc<Node>) -> bool {
+    pub fn is_declaration_visible(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_visible"); 
         let cached = self
             .declaration_links
             .get(node)
@@ -17,7 +17,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn determine_if_declaration_is_visible(&mut self, node: &Arc<Node>) -> bool {
+    pub(crate) fn determine_if_declaration_is_visible(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("determine_if_declaration_is_visible"); 
         match node.kind {
             SyntaxKind::BindingElement => node
                 .parent
@@ -143,7 +143,7 @@ impl Checker {
         }
     }
 
-    pub fn precalculate_declaration_emit_visibility(&mut self, file: &Arc<tsox_frontend::ast::SourceFile>) {
+    pub fn precalculate_declaration_emit_visibility(&mut self, file: &Arc<tsox_frontend::ast::SourceFile>) { ::tsox_core::fntrace::enter("precalculate_declaration_emit_visibility"); 
         if self
             .declaration_file_links
             .get(file)
@@ -179,7 +179,7 @@ impl Checker {
         self.scope_stack = saved_scope_stack;
     }
 
-    pub(crate) fn alias_marking_visitor(&mut self, node: &Arc<Node>) {
+    pub(crate) fn alias_marking_visitor(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("alias_marking_visitor"); 
         match node.kind {
             SyntaxKind::BinaryExpression => {
                 if Self::is_common_js_module_exports(node) {
@@ -211,7 +211,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn mark_linked_aliases(&mut self, node: &Arc<Node>) {
+    pub(crate) fn mark_linked_aliases(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("mark_linked_aliases"); 
         let export_symbol = self.resolve_export_symbol_for_alias(node);
         let mut export_symbol = export_symbol;
 
@@ -255,7 +255,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn resolve_export_symbol_for_alias(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn resolve_export_symbol_for_alias(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_export_symbol_for_alias"); 
         let parent = node.parent()?;
         match parent.kind {
             SyntaxKind::ExportAssignment | SyntaxKind::BinaryExpression => {

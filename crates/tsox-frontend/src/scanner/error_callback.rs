@@ -102,11 +102,11 @@ pub const TOKEN_FLAGS_IS_INVALID: TokenFlags = TOKEN_FLAGS_OCTAL
     | TOKEN_FLAGS_CONTAINS_INVALID_SEPARATOR
     | TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
 
-pub fn token_flags_contains(flags: TokenFlags, bit: TokenFlags) -> bool {
+pub fn token_flags_contains(flags: TokenFlags, bit: TokenFlags) -> bool { ::tsox_core::fntrace::enter("token_flags_contains"); 
     (flags & bit) == bit
 }
 
-pub fn token_flags_intersects(flags: TokenFlags, mask: TokenFlags) -> bool {
+pub fn token_flags_intersects(flags: TokenFlags, mask: TokenFlags) -> bool { ::tsox_core::fntrace::enter("token_flags_intersects"); 
     (flags & mask) != 0
 }
 
@@ -114,7 +114,7 @@ pub(crate) static TEXT_TO_KEYWORD: OnceLock<HashMap<&'static str, SyntaxKind>> =
 
 pub(crate) static TEXT_TO_TOKEN: OnceLock<HashMap<&'static str, SyntaxKind>> = OnceLock::new();
 
-pub(crate) fn keywords() -> &'static HashMap<&'static str, SyntaxKind> {
+pub(crate) fn keywords() -> &'static HashMap<&'static str, SyntaxKind> { ::tsox_core::fntrace::enter("keywords"); 
     TEXT_TO_KEYWORD.get_or_init(|| {
         let mut m = HashMap::new();
         m.insert("abstract", SyntaxKind::AbstractKeyword);
@@ -206,7 +206,7 @@ pub(crate) fn keywords() -> &'static HashMap<&'static str, SyntaxKind> {
     })
 }
 
-pub(crate) fn punctuation() -> &'static HashMap<&'static str, SyntaxKind> {
+pub(crate) fn punctuation() -> &'static HashMap<&'static str, SyntaxKind> { ::tsox_core::fntrace::enter("punctuation"); 
     TEXT_TO_TOKEN.get_or_init(|| {
         let mut m = HashMap::new();
         m.insert("{", SyntaxKind::OpenBraceToken);
@@ -274,11 +274,11 @@ pub(crate) fn punctuation() -> &'static HashMap<&'static str, SyntaxKind> {
     })
 }
 
-pub fn string_to_keyword(text: &str) -> Option<SyntaxKind> {
+pub fn string_to_keyword(text: &str) -> Option<SyntaxKind> { ::tsox_core::fntrace::enter("string_to_keyword"); 
     keywords().get(text).copied()
 }
 
-pub fn string_to_token(text: &str) -> Option<SyntaxKind> {
+pub fn string_to_token(text: &str) -> Option<SyntaxKind> { ::tsox_core::fntrace::enter("string_to_token"); 
     punctuation().get(text).copied()
 }
 

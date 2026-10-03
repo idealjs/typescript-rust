@@ -12,15 +12,15 @@ thread_local! {
     static PRE_SWITCH_CASE_FLOW: std::cell::RefCell<Option<Arc<FlowNode>>> = const { std::cell::RefCell::new(None) };
 }
 
-pub(crate) fn pre_switch_case_flow() -> Option<Arc<FlowNode>> {
+pub(crate) fn pre_switch_case_flow() -> Option<Arc<FlowNode>> { ::tsox_core::fntrace::enter("pre_switch_case_flow"); 
     PRE_SWITCH_CASE_FLOW.with(|f| f.borrow().clone())
 }
 
-pub(crate) fn set_pre_switch_case_flow(flow: Option<Arc<FlowNode>>) {
+pub(crate) fn set_pre_switch_case_flow(flow: Option<Arc<FlowNode>>) { ::tsox_core::fntrace::enter("set_pre_switch_case_flow"); 
     PRE_SWITCH_CASE_FLOW.with(|f| *f.borrow_mut() = flow);
 }
 
-fn finish_flow_label_node(b: &Binder, label: &Arc<FlowNode>) -> Arc<FlowNode> {
+fn finish_flow_label_node(b: &Binder, label: &Arc<FlowNode>) -> Arc<FlowNode> { ::tsox_core::fntrace::enter("finish_flow_label_node"); 
     if label.antecedents.is_empty() {
         return Arc::clone(b.unreachable_flow.as_ref().unwrap());
     }
@@ -34,14 +34,14 @@ pub(crate) fn set_clause_fallthrough_flow_node(
     b: &mut Binder,
     clause: &Arc<Node>,
     flow: Option<Arc<FlowNode>>,
-) {
+) { ::tsox_core::fntrace::enter("set_clause_fallthrough_flow_node"); 
     if let Some(flow) = flow {
         b.symbol_map.set_flow_node(clause, flow);
     }
 }
 
 impl Binder {
-    pub(crate) fn bind_case_block(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_case_block(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_case_block"); 
         let switch_statement = node.parent().unwrap();
         let clauses: Vec<Arc<Node>> = match &node.data {
             NodeData::CaseBlock(d) => d.clauses.nodes.clone(),
@@ -99,7 +99,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_case_or_default_clause(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_case_or_default_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_case_or_default_clause"); 
         let clause_expression: Option<Arc<Node>> = match &node.data {
             NodeData::CaseOrDefaultClause(d) if node.kind == SyntaxKind::CaseClause => {
                 Some(Arc::clone(&d.expression))
@@ -119,7 +119,7 @@ impl Binder {
         self.bind_each(&statements);
     }
 
-    pub(crate) fn bind_class_like_declaration(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_class_like_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_class_like_declaration"); 
         let name = node.name().cloned();
         match node.kind {
             SyntaxKind::ClassDeclaration => {
@@ -153,7 +153,7 @@ impl Binder {
         exports.insert(prototype_symbol.name.clone(), Arc::clone(&prototype_symbol));
         prototype_symbol.set_parent(&symbol);
     }
-    pub(crate) fn bind_common_js_type_exports(&mut self, module_symbol: &Arc<Symbol>) {
+    pub(crate) fn bind_common_js_type_exports(&mut self, module_symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("bind_common_js_type_exports"); 
         let module_exports = get_exports(module_symbol);
         if let Some(export_equals) = module_exports
             .get(INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
@@ -178,7 +178,7 @@ impl Binder {
         node: Option<&Arc<Node>>,
         true_target: &Arc<FlowNode>,
         false_target: &Arc<FlowNode>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("bind_condition"); 
         if let Some(node) = node {
             self.bind(node);
         }
@@ -208,7 +208,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_deferred_expando_assignment(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_deferred_expando_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_deferred_expando_assignment"); 
         let parent = get_parent_of_property_assignment(node);
         let mut symbol = self.lookup_entity_option(&parent, self.block_scope_container.as_ref());
         if symbol.is_none() {
@@ -239,7 +239,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_deferred_expando_assignments(&mut self) {
+    pub(crate) fn bind_deferred_expando_assignments(&mut self) { ::tsox_core::fntrace::enter("bind_deferred_expando_assignments"); 
         let assignments = std::mem::take(&mut self.expando_assignments);
         for info in &assignments {
             self.container = info.container.clone();
@@ -249,20 +249,20 @@ impl Binder {
         self.expando_assignments = assignments;
     }
 
-    pub(crate) fn bind_each(&mut self, nodes: &[Arc<Node>]) {
+    pub(crate) fn bind_each(&mut self, nodes: &[Arc<Node>]) { ::tsox_core::fntrace::enter("bind_each"); 
         for node in nodes {
             self.bind(node);
         }
     }
 
-    pub(crate) fn bind_each_child(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_each_child(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_each_child"); 
         for_each_child(node, |n| {
             self.bind(n);
             false
         });
     }
 
-    pub(crate) fn bind_each_statement_functions_first(&mut self, statements: &Arc<NodeList>) {
+    pub(crate) fn bind_each_statement_functions_first(&mut self, statements: &Arc<NodeList>) { ::tsox_core::fntrace::enter("bind_each_statement_functions_first"); 
         for node in &statements.nodes {
             if node.kind == SyntaxKind::FunctionDeclaration {
                 self.bind(node);
@@ -275,7 +275,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_enum_declaration(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_enum_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_enum_declaration"); 
         if is_enum_const(node) {
             self.bind_block_scoped_declaration(
                 node,
@@ -291,7 +291,7 @@ impl Binder {
         }
     }
 
-    pub(crate) fn bind_expando_property_assignment(&mut self, node: &Arc<Node>) {
+    pub(crate) fn bind_expando_property_assignment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("bind_expando_property_assignment"); 
         self.expando_assignments.push(ExpandoAssignmentInfo {
             node: Arc::clone(node),
             container: self.container.clone(),

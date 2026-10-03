@@ -7,7 +7,7 @@ impl Checker {
         class: &Arc<Node>,
         base: &Arc<Node>,
         out: &mut Vec<String>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("collect_unimplemented_abstract_members"); 
         for member in Self::class_members_of(base).iter() {
             let (name_node, is_abstract_member) = match &member.data {
                 tsox_frontend::ast::NodeData::PropertyDeclaration(d) => (
@@ -42,8 +42,8 @@ impl Checker {
         }
     }
 
-    pub(crate) fn first_return_expression(body: Option<&Arc<Node>>) -> Option<Arc<Node>> {
-        fn walk(n: &Arc<Node>) -> Option<Arc<Node>> {
+    pub(crate) fn first_return_expression(body: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("first_return_expression"); 
+        fn walk(n: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("walk"); 
             if let tsox_frontend::ast::NodeData::ReturnStatement(d) = &n.data
                 && let Some(e) = &d.expression
             {
@@ -61,7 +61,7 @@ impl Checker {
         body.and_then(walk)
     }
 
-    pub(crate) fn chain_implements(class: &Arc<Node>, name: &str) -> bool {
+    pub(crate) fn chain_implements(class: &Arc<Node>, name: &str) -> bool { ::tsox_core::fntrace::enter("chain_implements"); 
         for member in Self::class_members_of(class).iter() {
             let (name_node, is_abstract) = match &member.data {
                 tsox_frontend::ast::NodeData::PropertyDeclaration(d) => (
@@ -94,13 +94,13 @@ impl Checker {
     pub(crate) fn assignments_to_name(
         body: &Arc<Node>,
         name: &str,
-    ) -> Vec<(tsox_core::core::text::TextRange, Arc<Node>)> {
+    ) -> Vec<(tsox_core::core::text::TextRange, Arc<Node>)> { ::tsox_core::fntrace::enter("assignments_to_name"); 
         let mut found = Vec::new();
         fn walk(
             n: &Arc<Node>,
             name: &str,
             found: &mut Vec<(tsox_core::core::text::TextRange, Arc<Node>)>,
-        ) {
+        ) { ::tsox_core::fntrace::enter("walk"); 
             if let tsox_frontend::ast::NodeData::BinaryExpression(data) = &n.data
                 && data.operator_token.kind == SyntaxKind::EqualsToken
                 && data.left.kind == SyntaxKind::Identifier
@@ -117,7 +117,7 @@ impl Checker {
         found
     }
 
-    pub fn resolve_qualified_symbol(&mut self, name: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub fn resolve_qualified_symbol(&mut self, name: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_qualified_symbol"); 
         match self.resolve_qualified_symbol_traced(name) {
             Ok(s) => Some(s),
             Err(_) => None,
@@ -127,7 +127,7 @@ impl Checker {
     pub fn resolve_qualified_symbol_traced(
         &mut self,
         name: &Arc<Node>,
-    ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> {
+    ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> { ::tsox_core::fntrace::enter("resolve_qualified_symbol_traced"); 
         match &name.data {
             tsox_frontend::ast::NodeData::Identifier(_) => match self.resolve_identifier(name) {
                 Some(s) => Ok(s),
@@ -162,7 +162,7 @@ impl Checker {
         left: &Arc<Node>,
         right: &Arc<Node>,
         entity_name_ctx: bool,
-    ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> {
+    ) -> Result<Arc<Symbol>, (Arc<Node>, String, String)> { ::tsox_core::fntrace::enter("resolve_qualified_tail"); 
         {
             let mut symbol = self.resolve_qualified_symbol_traced(left)?;
             let path_so_far = qualified_name_text(left);
@@ -355,7 +355,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn ambient_ancestor(&self, node: &Arc<Node>) -> bool {
+    pub(crate) fn ambient_ancestor(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("ambient_ancestor"); 
         let mut cur = node.parent();
         while let Some(a) = cur {
             if a.has_syntactic_modifier(ModifierFlags::Ambient) {

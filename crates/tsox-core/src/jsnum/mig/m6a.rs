@@ -1,15 +1,15 @@
 use crate::jsnum::number::Number;
 use crate::stringutil;
 
-pub fn is_all_hex_digits(s: &str) -> bool {
+pub fn is_all_hex_digits(s: &str) -> bool { crate::fntrace::enter("is_all_hex_digits"); 
     s.chars().all(|r| stringutil::is_hex_digit(r))
 }
 
-pub fn is_all_octal_digits(s: &str) -> bool {
+pub fn is_all_octal_digits(s: &str) -> bool { crate::fntrace::enter("is_all_octal_digits"); 
     s.chars().all(|r| stringutil::is_octal_digit(r))
 }
 
-pub fn is_str_white_space(r: char) -> bool {
+pub fn is_str_white_space(r: char) -> bool { crate::fntrace::enter("is_str_white_space"); 
     // LineTerminator
     if matches!(r, '\n' | '\r' | '\u{2028}' | '\u{2029}') {
         return true;
@@ -22,14 +22,14 @@ pub fn is_str_white_space(r: char) -> bool {
     is_unicode_space_separator(r)
 }
 
-fn is_unicode_space_separator(r: char) -> bool {
+fn is_unicode_space_separator(r: char) -> bool { crate::fntrace::enter("is_unicode_space_separator"); 
     matches!(
         r,
         '\u{0020}' | '\u{00A0}' | '\u{1680}' | '\u{2000}'..='\u{200A}' | '\u{202F}' | '\u{205F}' | '\u{3000}'
     )
 }
 
-pub fn try_parse_int(s: &str) -> Option<Number> {
+pub fn try_parse_int(s: &str) -> Option<Number> { crate::fntrace::enter("try_parse_int"); 
     let mut i: i64 = 0;
     let mut err: Option<()> = None;
     let mut has_int_result = false;
@@ -94,7 +94,7 @@ pub fn try_parse_int(s: &str) -> Option<Number> {
     Some(Number(f))
 }
 
-fn pseudo_big_int_to_f64(bi: &crate::jsnum::pseudo_big_int::PseudoBigInt) -> f64 {
+fn pseudo_big_int_to_f64(bi: &crate::jsnum::pseudo_big_int::PseudoBigInt) -> f64 { crate::fntrace::enter("pseudo_big_int_to_f64"); 
     if bi.is_zero() {
         return 0.0;
     }
@@ -106,7 +106,7 @@ fn pseudo_big_int_to_f64(bi: &crate::jsnum::pseudo_big_int::PseudoBigInt) -> f64
     }
 }
 
-pub fn parse_float_string(s: &str) -> f64 {
+pub fn parse_float_string(s: &str) -> f64 { crate::fntrace::enter("parse_float_string"); 
     let mut a: &str;
     let mut b: &str = "";
     let mut c: &str = "";
@@ -180,14 +180,14 @@ pub fn parse_float_string(s: &str) -> f64 {
     string_to_float64(&sb)
 }
 
-fn cut_any<'a>(s: &'a str, cutset: &str) -> (&'a str, &'a str, bool) {
+fn cut_any<'a>(s: &'a str, cutset: &str) -> (&'a str, &'a str, bool) { crate::fntrace::enter("cut_any"); 
     match s.find(|r: char| cutset.contains(r)) {
         Some(i) => (&s[..i], &s[i + 1..], true),
         None => (s, "", false),
     }
 }
 
-pub fn trim_leading_zeros(s: &str) -> &str {
+pub fn trim_leading_zeros(s: &str) -> &str { crate::fntrace::enter("trim_leading_zeros"); 
     if s.starts_with('0') {
         let s = s.trim_start_matches('0');
         if s.is_empty() {
@@ -198,7 +198,7 @@ pub fn trim_leading_zeros(s: &str) -> &str {
     s
 }
 
-pub fn trim_trailing_zeros(s: &str) -> &str {
+pub fn trim_trailing_zeros(s: &str) -> &str { crate::fntrace::enter("trim_trailing_zeros"); 
     if s.ends_with('0') {
         let s = s.trim_end_matches('0');
         if s.is_empty() {
@@ -209,17 +209,17 @@ pub fn trim_trailing_zeros(s: &str) -> &str {
     s
 }
 
-pub fn string_to_float64(s: &str) -> f64 {
+pub fn string_to_float64(s: &str) -> f64 { crate::fntrace::enter("string_to_float64"); 
     match s.parse::<f64>() {
         Ok(f) => f,
         Err(_) => f64::NAN,
     }
 }
 
-pub fn is_all_digits(s: &str) -> bool {
+pub fn is_all_digits(s: &str) -> bool { crate::fntrace::enter("is_all_digits"); 
     s.chars().all(|r| stringutil::is_digit(r))
 }
 
-pub fn is_all_binary_digits(s: &str) -> bool {
+pub fn is_all_binary_digits(s: &str) -> bool { crate::fntrace::enter("is_all_binary_digits"); 
     s.chars().all(|r| r == '0' || r == '1')
 }

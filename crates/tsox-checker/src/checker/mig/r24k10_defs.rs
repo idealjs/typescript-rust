@@ -12,7 +12,7 @@ pub(crate) enum IntrinsicTypeKind {
     NoInfer,
 }
 
-pub(crate) fn intrinsic_type_kinds(name: &str) -> Option<IntrinsicTypeKind> {
+pub(crate) fn intrinsic_type_kinds(name: &str) -> Option<IntrinsicTypeKind> { ::tsox_core::fntrace::enter("intrinsic_type_kinds"); 
     match name {
         "Uppercase" => Some(IntrinsicTypeKind::Uppercase),
         "Lowercase" => Some(IntrinsicTypeKind::Lowercase),
@@ -24,7 +24,7 @@ pub(crate) fn intrinsic_type_kinds(name: &str) -> Option<IntrinsicTypeKind> {
 }
 
 impl Checker {
-    pub(crate) fn get_or_init_global_this_type(&mut self) -> Option<Arc<Type>> {
+    pub(crate) fn get_or_init_global_this_type(&mut self) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_or_init_global_this_type"); 
         if let Some(t) = self.global_this_type.get() {
             return Some(Arc::clone(t));
         }

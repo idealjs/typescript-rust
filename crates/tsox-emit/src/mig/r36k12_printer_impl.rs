@@ -11,7 +11,7 @@ use crate::mig::m4p::Printer;
 use crate::mig::m4p_5::r36k12_defs::LF_NAMED_IMPORTS_OR_EXPORTS_ELEMENTS;
 
 impl Printer {
-    pub fn emit_module_export_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_module_export_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_module_export_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node),
             SyntaxKind::StringLiteral => self.emit_string_literal(node),
@@ -19,7 +19,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_module_reference(&mut self, node: &Arc<Node>) {
+    pub fn emit_module_reference(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_module_reference"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_reference(node),
             SyntaxKind::QualifiedName => self.emit_qualified_name(node),
@@ -28,7 +28,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_qualified_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_qualified_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_qualified_name"); 
         let state = self.enter_node(node);
         let (left, right) = match &node.data {
             NodeData::QualifiedName(d) => (d.left.clone(), d.right.clone()),
@@ -40,7 +40,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_member_name(&mut self, node: &Arc<Node>) {
+    pub fn emit_member_name(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_member_name"); 
         match node.kind {
             SyntaxKind::Identifier => self.emit_identifier_name(node),
             SyntaxKind::PrivateIdentifier => self.emit_private_identifier(node),
@@ -48,7 +48,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_namespace_import(&mut self, node: &Arc<Node>) {
+    pub fn emit_namespace_import(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_namespace_import"); 
         let state = self.enter_node(node);
         let name = match &node.data {
             NodeData::NamespaceImport(d) => d.name.clone(),
@@ -62,7 +62,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_named_imports(&mut self, node: &Arc<Node>) {
+    pub fn emit_named_imports(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_named_imports"); 
         let state = self.enter_node(node);
         let elements = match &node.data {
             NodeData::NamedImports(d) => d.elements.clone(),
@@ -79,7 +79,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_named_import_bindings(&mut self, node: Option<&Arc<Node>>) {
+    pub fn emit_named_import_bindings(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("emit_named_import_bindings"); 
         let Some(node) = node else {
             return;
         };
@@ -90,7 +90,7 @@ impl Printer {
         }
     }
 
-    pub fn emit_namespace_export(&mut self, node: &Arc<Node>) {
+    pub fn emit_namespace_export(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_namespace_export"); 
         let state = self.enter_node(node);
         let name = match &node.data {
             NodeData::NamespaceExport(d) => d.name.clone(),
@@ -104,7 +104,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_named_exports(&mut self, node: &Arc<Node>) {
+    pub fn emit_named_exports(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_named_exports"); 
         let state = self.enter_node(node);
         let elements = match &node.data {
             NodeData::NamedExports(d) => d.elements.clone(),
@@ -121,7 +121,7 @@ impl Printer {
         self.exit_node(node, state);
     }
 
-    pub fn emit_named_export_bindings(&mut self, node: &Arc<Node>) {
+    pub fn emit_named_export_bindings(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("emit_named_export_bindings"); 
         match node.kind {
             SyntaxKind::NamespaceExport => self.emit_namespace_export(node),
             SyntaxKind::NamedExports => self.emit_named_exports(node),

@@ -3,7 +3,7 @@
 use super::*;
 
 impl NameGenerationScope {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             next: None,
             temp_flags: TEMP_FLAGS_AUTO,

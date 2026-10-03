@@ -11,7 +11,7 @@ use tsox_core::core::text::TextRange;
 use tsox_core::diagnostics;
 
 impl Parser {
-    pub(crate) fn skip_range_trivia(&self, text_range: TextRange) -> TextRange {
+    pub(crate) fn skip_range_trivia(&self, text_range: TextRange) -> TextRange { ::tsox_core::fntrace::enter("skip_range_trivia"); 
         TextRange::new(
             skip_trivia(self.scanner.text(), text_range.pos()),
             text_range.end(),
@@ -20,7 +20,7 @@ impl Parser {
 }
 
 impl Parser {
-    pub(crate) fn reparse_jsdoc_comment(&mut self, node: &Arc<Node>, tag: &Arc<Node>) {
+    pub(crate) fn reparse_jsdoc_comment(&mut self, node: &Arc<Node>, tag: &Arc<Node>) { ::tsox_core::fntrace::enter("reparse_jsdoc_comment"); 
         let (comment_loc, comment_nodes) = match &tag.data {
             NodeData::JSDoc(d) => (d.comment.loc, d.comment.nodes.clone()),
             NodeData::JSDocParameterOrPropertyTag(d) => match &d.comment {
@@ -49,7 +49,7 @@ impl Parser {
         t: &Arc<Node>,
         e: &Arc<Node>,
         is_assertion: bool,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("make_new_cast"); 
         let (kind, data) = if is_assertion {
             (
                 SyntaxKind::AsExpression,
@@ -70,7 +70,7 @@ impl Parser {
         Arc::new(Node::with_loc(kind, data, TextRange::new(e.pos(), e.end())))
     }
 }
-fn is_double_quoted_string(node: &Arc<Node>) -> bool {
+fn is_double_quoted_string(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_double_quoted_string"); 
     crate::ast::is_string_literal(node)
         && matches!(
             &node.data,
@@ -79,14 +79,14 @@ fn is_double_quoted_string(node: &Arc<Node>) -> bool {
         )
 }
 
-pub(crate) fn skip_to(text: &str, pos: usize, s: &str) -> Option<usize> {
+pub(crate) fn skip_to(text: &str, pos: usize, s: &str) -> Option<usize> { ::tsox_core::fntrace::enter("skip_to"); 
     if pos >= text.len() {
         return None;
     }
     text[pos..].find(s).map(|i| pos + i)
 }
 
-pub(crate) fn type_has_arrow_function_blocking_parse_error(node: &Arc<Node>) -> bool {
+pub(crate) fn type_has_arrow_function_blocking_parse_error(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_has_arrow_function_blocking_parse_error"); 
     match node.kind {
         SyntaxKind::TypeReference => match &node.data {
             NodeData::TypeReferenceNode(d) => crate::astnav::is_missing_node(&d.type_name),
@@ -112,7 +112,7 @@ pub(crate) fn find_matching_parameter(
     fun: &Arc<Node>,
     parameter_tag: &Arc<Node>,
     js_doc: &Arc<Node>,
-) -> Option<(Arc<Node>, bool)> {
+) -> Option<(Arc<Node>, bool)> { ::tsox_core::fntrace::enter("find_matching_parameter"); 
     let mut tag_index: isize = -1;
     let mut param_count: isize = -1;
     if let NodeData::JSDoc(d) = &js_doc.data {
@@ -148,7 +148,7 @@ pub(crate) fn find_matching_parameter(
     None
 }
 
-pub(crate) fn skip_satisfies_expressions(node: Option<&Arc<Node>>) -> Option<Arc<Node>> {
+pub(crate) fn skip_satisfies_expressions(node: Option<&Arc<Node>>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("skip_satisfies_expressions"); 
     let mut node = node.cloned();
     while let Some(n) = node.clone() {
         if n.kind != SyntaxKind::SatisfiesExpression {
@@ -159,7 +159,7 @@ pub(crate) fn skip_satisfies_expressions(node: Option<&Arc<Node>>) -> Option<Arc
     node
 }
 
-pub fn get_function_like_host(host: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_function_like_host(host: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_function_like_host"); 
     let mut fun: Option<Arc<Node>> = Some(host.clone());
     match host.kind {
         SyntaxKind::VariableStatement => {
@@ -199,7 +199,7 @@ pub(crate) struct ClassLikeBase {
     pub members: Arc<NodeList>,
 }
 
-pub(crate) fn get_class_like_data(parent: &Arc<Node>) -> Option<ClassLikeBase> {
+pub(crate) fn get_class_like_data(parent: &Arc<Node>) -> Option<ClassLikeBase> { ::tsox_core::fntrace::enter("get_class_like_data"); 
     match &parent.data {
         NodeData::ClassDeclaration(d) => Some(ClassLikeBase {
             type_parameters: d.type_parameters.clone(),
@@ -215,7 +215,7 @@ pub(crate) fn get_class_like_data(parent: &Arc<Node>) -> Option<ClassLikeBase> {
     }
 }
 
-pub(crate) fn get_language_variant(script_kind: ScriptKind) -> crate::ast::LanguageVariant {
+pub(crate) fn get_language_variant(script_kind: ScriptKind) -> crate::ast::LanguageVariant { ::tsox_core::fntrace::enter("get_language_variant"); 
     match script_kind {
         ScriptKind::Tsx | ScriptKind::Jsx | ScriptKind::Js | ScriptKind::Json => {
             crate::ast::LanguageVariant::Jsx
@@ -224,6 +224,6 @@ pub(crate) fn get_language_variant(script_kind: ScriptKind) -> crate::ast::Langu
     }
 }
 
-pub(crate) fn is_keyword_or_punctuation(token: SyntaxKind) -> bool {
+pub(crate) fn is_keyword_or_punctuation(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword_or_punctuation"); 
     crate::ast::is_keyword_kind(token) || crate::ast::is_punctuation_kind(token)
 }

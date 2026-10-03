@@ -19,24 +19,24 @@ pub(crate) struct M1dKeyBuilder {
 }
 
 impl M1dKeyBuilder {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new() -> Self { ::tsox_core::fntrace::enter("new"); 
         Self {
             hasher: std::collections::hash_map::DefaultHasher::new(),
         }
     }
-    pub(crate) fn write_byte(&mut self, b: u8) {
+    pub(crate) fn write_byte(&mut self, b: u8) { ::tsox_core::fntrace::enter("write_byte"); 
         std::hash::Hasher::write_u8(&mut self.hasher, b);
     }
-    pub(crate) fn write_type(&mut self, t: &Arc<Type>) {
+    pub(crate) fn write_type(&mut self, t: &Arc<Type>) { ::tsox_core::fntrace::enter("write_type"); 
         std::hash::Hasher::write_u32(&mut self.hasher, t.id);
     }
-    pub(crate) fn write_types(&mut self, types: &[Arc<Type>]) {
+    pub(crate) fn write_types(&mut self, types: &[Arc<Type>]) { ::tsox_core::fntrace::enter("write_types"); 
         std::hash::Hasher::write_u32(&mut self.hasher, types.len() as u32);
         for t in types {
             self.write_type(t);
         }
     }
-    pub(crate) fn write_alias(&mut self, alias: &Option<Box<TypeAlias>>) {
+    pub(crate) fn write_alias(&mut self, alias: &Option<Box<TypeAlias>>) { ::tsox_core::fntrace::enter("write_alias"); 
         if let Some(alias) = alias {
             if let Some(symbol) = &alias.symbol {
                 std::hash::Hasher::write_u64(&mut self.hasher, symbol.id());
@@ -48,12 +48,12 @@ impl M1dKeyBuilder {
             std::hash::Hasher::write_u8(&mut self.hasher, 0);
         }
     }
-    pub(crate) fn hash(self) -> u64 {
+    pub(crate) fn hash(self) -> u64 { ::tsox_core::fntrace::enter("hash"); 
         std::hash::Hasher::finish(&self.hasher)
     }
 }
 
-pub(crate) fn get_alias_key(alias: &Option<Box<TypeAlias>>) -> u64 {
+pub(crate) fn get_alias_key(alias: &Option<Box<TypeAlias>>) -> u64 { ::tsox_core::fntrace::enter("get_alias_key"); 
     let mut b = M1dKeyBuilder::new();
     b.write_alias(alias);
     b.hash()
@@ -63,7 +63,7 @@ pub(crate) fn get_conditional_type_key(
     type_arguments: &[Arc<Type>],
     alias: &Option<Box<TypeAlias>>,
     for_constraint: bool,
-) -> u64 {
+) -> u64 { ::tsox_core::fntrace::enter("get_conditional_type_key"); 
     let mut b = M1dKeyBuilder::new();
     b.write_types(type_arguments);
     b.write_alias(alias);
@@ -73,14 +73,14 @@ pub(crate) fn get_conditional_type_key(
     b.hash()
 }
 
-pub(crate) fn get_adjusted_node_for_error(node: &Arc<Node>) -> Arc<Node> {
+pub(crate) fn get_adjusted_node_for_error(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_adjusted_node_for_error"); 
     if let Some(name) = get_name_of_declaration(node) {
         return name;
     }
     Arc::clone(node)
 }
 
-pub(crate) fn get_base_type_node_of_class(t: &Arc<Type>) -> Option<Arc<Node>> {
+pub(crate) fn get_base_type_node_of_class(t: &Arc<Type>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_base_type_node_of_class"); 
     if let Some(symbol) = &t.symbol {
         let decl = get_class_like_declaration_of_symbol(symbol);
         if let Some(decl) = decl {
@@ -94,7 +94,7 @@ impl Checker {
     pub(crate) fn get_constraint_or_unknown_from_type_parameter(
         &mut self,
         t: &Arc<Type>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_constraint_or_unknown_from_type_parameter"); 
         self.get_constraint_from_type_parameter(t)
     }
 
@@ -103,7 +103,7 @@ impl Checker {
         node: &Arc<Node>,
         type_parameters: &[Arc<Type>],
         index: usize,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_effective_type_argument_at_index"); 
         if let Some(args) = node.type_arguments() {
             if index < args.nodes.len() {
                 return self.get_type_from_type_node(&args.nodes[index]);
@@ -113,7 +113,7 @@ impl Checker {
         Arc::clone(&effective[index])
     }
 
-    pub(crate) fn get_constraint_from_indexed_access(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn get_constraint_from_indexed_access(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_from_indexed_access"); 
         let d = t.indexed_access_data()?;
         let object_type = d.object_type.as_ref()?;
         let index_type = d.index_type.as_ref()?;
@@ -153,7 +153,7 @@ impl Checker {
     pub(crate) fn get_constraint_from_conditional_type(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_from_conditional_type"); 
         if let Some(constraint) = self.get_constraint_of_distributive_conditional_type(t) {
             return Some(constraint);
         }
@@ -163,7 +163,7 @@ impl Checker {
     pub(crate) fn get_constraint_of_distributive_conditional_type(
         &mut self,
         t: &Arc<Type>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_constraint_of_distributive_conditional_type"); 
         if let Some(cached) = t.resolved_constraint_of_distributive() {
             if cached.id != self.no_constraint_type().id {
                 return Some(cached);
@@ -198,7 +198,7 @@ impl Checker {
         resolved
     }
 
-    pub(crate) fn get_base_type_variable_of_class(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> {
+    pub(crate) fn get_base_type_variable_of_class(&mut self, symbol: &Arc<Symbol>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_base_type_variable_of_class"); 
         let class_type = self.get_declared_type_of_class_or_interface(symbol);
         let base_constructor_type = self.get_base_constructor_type_of_class(&class_type)?;
         if base_constructor_type.flags.contains(TYPE_FLAGS_TYPE_VARIABLE) {
@@ -219,7 +219,7 @@ impl Checker {
     pub(crate) fn get_declared_type_of_class_or_interface(
         &mut self,
         symbol: &Arc<Symbol>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_class_or_interface"); 
         let links = self.declared_type_links.get(symbol);
         if let Some(links) = links {
             if let Some(t) = &links.declared_type {
@@ -232,7 +232,7 @@ impl Checker {
     pub(crate) fn get_declaration_node_flags_from_symbol(
         &mut self,
         s: &Arc<Symbol>,
-    ) -> tsox_frontend::ast::NodeFlags {
+    ) -> tsox_frontend::ast::NodeFlags { ::tsox_core::fntrace::enter("get_declaration_node_flags_from_symbol"); 
         if let Some(value_declaration) = &s.value_declaration {
             return self.get_combined_node_flags_cached(value_declaration);
         }
@@ -242,14 +242,14 @@ impl Checker {
     pub(crate) fn get_combined_node_flags_cached(
         &mut self,
         node: &Arc<Node>,
-    ) -> tsox_frontend::ast::NodeFlags {
+    ) -> tsox_frontend::ast::NodeFlags { ::tsox_core::fntrace::enter("get_combined_node_flags_cached"); 
         self.get_combined_node_flags(node)
     }
 
     pub(crate) fn get_combined_modifier_flags_cached(
         &mut self,
         node: &Arc<Node>,
-    ) -> tsox_frontend::ast::ModifierFlags {
+    ) -> tsox_frontend::ast::ModifierFlags { ::tsox_core::fntrace::enter("get_combined_modifier_flags_cached"); 
         if self
             .last_combined_modifier_flags_node
             .as_ref()
@@ -266,7 +266,7 @@ impl Checker {
     pub(crate) fn get_effective_property_name_for_property_name_node(
         &mut self,
         node: &Arc<Node>,
-    ) -> (String, bool) {
+    ) -> (String, bool) { ::tsox_core::fntrace::enter("get_effective_property_name_for_property_name_node"); 
         let name = get_property_name_for_property_name_node(node);
         if !name.is_empty() || !is_computed_property_name(node) {
             if !name.is_empty() {
@@ -290,7 +290,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         name: &str,
-    ) -> Option<Arc<IndexInfo>> {
+    ) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_applicable_index_info_for_name"); 
         if is_late_bound_name(name) {
             return self.get_applicable_index_info(t, &self.es_symbol_type());
         }
@@ -303,7 +303,7 @@ impl Checker {
         t: &Arc<Type>,
         type_argument_nodes: &[Arc<Node>],
         _location: &Arc<Node>,
-    ) -> Vec<Arc<Signature>> {
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_constructors_for_type_arguments"); 
         let type_arg_count = type_argument_nodes.len();
         self.get_signatures_of_type(t, SignatureKind::Construct)
             .into_iter()
@@ -317,7 +317,7 @@ impl Checker {
     pub(crate) fn get_cannot_resolve_module_name_error_for_specific_module(
         &mut self,
         module_name: &Arc<Node>,
-    ) -> Option<tsox_core::diagnostics::Message> {
+    ) -> Option<tsox_core::diagnostics::Message> { ::tsox_core::fntrace::enter("get_cannot_resolve_module_name_error_for_specific_module"); 
         if is_string_literal(module_name) {
             if node_core_modules().get(module_name.text()).copied().unwrap_or(false) {
                 if self.compiler_options.uses_wildcard_types() {

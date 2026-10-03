@@ -11,7 +11,7 @@ pub fn format_diagnostics_with_color_and_context(
     output: &mut dyn std::io::Write,
     diags: &[Diagnostic],
     format_opts: &FormattingOptions,
-) {
+) { ::tsox_core::fntrace::enter("format_diagnostics_with_color_and_context"); 
     if diags.is_empty() {
         return;
     }
@@ -27,7 +27,7 @@ pub fn format_diagnostic_with_color_and_context(
     output: &mut dyn std::io::Write,
     diagnostic: &Diagnostic,
     format_opts: &FormattingOptions,
-) {
+) { ::tsox_core::fntrace::enter("format_diagnostic_with_color_and_context"); 
     if let Some(file) = diagnostic.file_like() {
         let pos = diagnostic.ast_pos();
         write_location(output, file.as_ref(), pos, format_opts, write_with_style_and_reset);
@@ -109,7 +109,7 @@ pub fn write_code_snippet(
     squiggle_color: &str,
     indent: &str,
     format_opts: &FormattingOptions,
-) {
+) { ::tsox_core::fntrace::enter("write_code_snippet"); 
     let text = source_file.text();
     let line_map = source_file.ecma_line_map();
     let (first_line, first_line_char) = super::super::line_and_character(line_map, text, start);
@@ -197,7 +197,7 @@ pub fn flatten_diagnostic_message(
     d: &Diagnostic,
     new_line: &str,
     locale: &Locale,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("flatten_diagnostic_message"); 
     let mut output = Vec::new();
     write_flattened_diagnostic_message(&mut output, d, new_line, locale);
     String::from_utf8(output).unwrap_or_default()
@@ -208,7 +208,7 @@ pub fn write_flattened_ast_diagnostic_message(
     diagnostic: &Diagnostic,
     newline: &str,
     locale: &Locale,
-) {
+) { ::tsox_core::fntrace::enter("write_flattened_ast_diagnostic_message"); 
     write_flattened_diagnostic_message(writer, &wrap_ast_diagnostic_owned(diagnostic), newline, locale)
 }
 
@@ -217,7 +217,7 @@ pub fn write_flattened_diagnostic_message(
     diagnostic: &Diagnostic,
     newline: &str,
     locale: &Locale,
-) {
+) { ::tsox_core::fntrace::enter("write_flattened_diagnostic_message"); 
     let args: Vec<&str> = diagnostic.message_args.iter().map(|s| s.as_str()).collect();
     match &diagnostic.message {
         Some(msg) => {
@@ -242,7 +242,7 @@ pub fn flatten_diagnostic_message_chain(
     new_line: &str,
     locale: &Locale,
     level: usize,
-) {
+) { ::tsox_core::fntrace::enter("flatten_diagnostic_message_chain"); 
     let _ = std::io::Write::write_all(writer, new_line.as_bytes());
     for _ in 0..level {
         let _ = std::io::Write::write_all(writer, b"  ");
@@ -269,7 +269,7 @@ pub struct ErrorSummary {
     pub sorted_files: Vec<String>,
 }
 
-pub fn get_error_summary(diags: &[Diagnostic]) -> ErrorSummary {
+pub fn get_error_summary(diags: &[Diagnostic]) -> ErrorSummary { ::tsox_core::fntrace::enter("get_error_summary"); 
     let mut total_error_count = 0usize;
     let mut global_errors = Vec::new();
     let mut errors_by_file: std::collections::BTreeMap<String, Vec<Diagnostic>> =
@@ -305,7 +305,7 @@ pub fn write_error_summary_text(
     output: &mut dyn std::io::Write,
     all_diagnostics: &[Diagnostic],
     format_opts: &FormattingOptions,
-) {
+) { ::tsox_core::fntrace::enter("write_error_summary_text"); 
     let error_summary = get_error_summary(all_diagnostics);
     let total_error_count = error_summary.total_error_count;
     if total_error_count == 0 {
@@ -377,7 +377,7 @@ pub fn write_tabular_errors_display(
     output: &mut dyn std::io::Write,
     error_summary: &ErrorSummary,
     format_opts: &FormattingOptions,
-) {
+) { ::tsox_core::fntrace::enter("write_tabular_errors_display"); 
     let max_errors = error_summary
         .errors_by_file
         .iter()
@@ -418,7 +418,7 @@ pub fn pretty_path_for_file_error(
     file: Option<&str>,
     file_errors: &[Diagnostic],
     format_opts: &FormattingOptions,
-) -> String {
+) -> String { ::tsox_core::fntrace::enter("pretty_path_for_file_error"); 
     let Some(file_name) = file else {
         return String::new();
     };
@@ -452,7 +452,7 @@ pub fn write_format_diagnostics(
     output: &mut dyn std::io::Write,
     diagnostics: &[Diagnostic],
     format_opts: &FormattingOptions,
-) {
+) { ::tsox_core::fntrace::enter("write_format_diagnostics"); 
     for diagnostic in diagnostics {
         write_format_diagnostic(output, diagnostic, format_opts);
     }
@@ -462,7 +462,7 @@ pub fn write_format_diagnostic(
     output: &mut dyn std::io::Write,
     diagnostic: &Diagnostic,
     format_opts: &FormattingOptions,
-) {
+) { ::tsox_core::fntrace::enter("write_format_diagnostic"); 
     if let Some(file) = &diagnostic.file {
         let (line, character) = super::super::line_and_character(
             &file.line_map,
@@ -502,7 +502,7 @@ pub fn try_clear_screen(
     output: &mut dyn std::io::Write,
     diag: &Diagnostic,
     options: &tsox_core::core::compiler_options::CompilerOptions,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("try_clear_screen"); 
     if !options.preserve_watch_output.is_true()
         && !options.extended_diagnostics.is_true()
         && !options.diagnostics.is_true()

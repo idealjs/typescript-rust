@@ -15,54 +15,54 @@ pub(crate) struct R23KeyBuilder {
 }
 
 impl Default for R23KeyBuilder {
-    fn default() -> Self {
+    fn default() -> Self { ::tsox_core::fntrace::enter("default"); 
         Self::new()
     }
 }
 
 impl R23KeyBuilder {
-    pub fn new() -> R23KeyBuilder {
+    pub fn new() -> R23KeyBuilder { ::tsox_core::fntrace::enter("new"); 
         R23KeyBuilder {
             hi: 0xcbf2_9ce4_8422_2325,
             lo: 0x9e37_79b9_7f4a_7c15,
         }
     }
 
-    pub fn hash(&self) -> CacheHashKey {
+    pub fn hash(&self) -> CacheHashKey { ::tsox_core::fntrace::enter("hash"); 
         CacheHashKey::new(self.hi, self.lo)
     }
 
-    pub fn write_byte(&mut self, b: u8) {
+    pub fn write_byte(&mut self, b: u8) { ::tsox_core::fntrace::enter("write_byte"); 
         self.hi = (self.hi ^ u64::from(b)).wrapping_mul(0x100_0000_01b3);
         self.lo = (self.lo ^ (u64::from(b) << 1 | 1)).wrapping_mul(0x100_0000_01b3);
     }
 
-    pub fn write_u64(&mut self, v: u64) {
+    pub fn write_u64(&mut self, v: u64) { ::tsox_core::fntrace::enter("write_u64"); 
         for b in v.to_le_bytes() {
             self.write_byte(b);
         }
     }
 
-    pub fn write_u32(&mut self, v: u32) {
+    pub fn write_u32(&mut self, v: u32) { ::tsox_core::fntrace::enter("write_u32"); 
         self.write_u64(u64::from(v));
     }
 
-    pub fn write_int(&mut self, value: i32) {
+    pub fn write_int(&mut self, value: i32) { ::tsox_core::fntrace::enter("write_int"); 
         self.write_u64(value as i64 as u64);
     }
 
-    pub fn write_type(&mut self, t: &Type) {
+    pub fn write_type(&mut self, t: &Type) { ::tsox_core::fntrace::enter("write_type"); 
         self.write_u64(u64::from(t.id));
     }
 
-    pub fn write_types(&mut self, types: &[Arc<Type>]) {
+    pub fn write_types(&mut self, types: &[Arc<Type>]) { ::tsox_core::fntrace::enter("write_types"); 
         self.write_u64(types.len() as u64);
         for t in types {
             self.write_type(t);
         }
     }
 
-    pub fn write_alias(&mut self, alias: Option<&crate::checker::types::TypeAlias>) {
+    pub fn write_alias(&mut self, alias: Option<&crate::checker::types::TypeAlias>) { ::tsox_core::fntrace::enter("write_alias"); 
         match alias {
             None => self.write_byte(0),
             Some(a) => {
@@ -79,7 +79,7 @@ impl R23KeyBuilder {
         }
     }
 
-    pub fn write_node(&mut self, node: Option<&Arc<Node>>) {
+    pub fn write_node(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("write_node"); 
         if let Some(node) = node {
             self.write_u64(node.id());
         }
@@ -87,7 +87,7 @@ impl R23KeyBuilder {
 }
 
 impl Default for IterationTypes {
-    fn default() -> IterationTypes {
+    fn default() -> IterationTypes { ::tsox_core::fntrace::enter("default"); 
         IterationTypes {
             yield_type: None,
             return_type: None,
@@ -99,7 +99,7 @@ impl Default for IterationTypes {
 pub(crate) fn some_type_self<F>(checker: &mut Checker, t: &Arc<Type>, f: F) -> bool
 where
     F: Fn(&mut Checker, &Arc<Type>) -> bool,
-{
+{ ::tsox_core::fntrace::enter("some_type_self"); 
     if t.flags.intersects(TypeFlags::Union) {
         if let Some(types) = t.types() {
             return types.iter().any(|u| f(checker, u));
@@ -112,7 +112,7 @@ pub(crate) fn map_type_self(
     checker: &mut Checker,
     t: &Arc<Type>,
     f: &mut dyn FnMut(&mut Checker, &Arc<Type>) -> Option<Arc<Type>>,
-) -> Option<Arc<Type>> {
+) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("map_type_self"); 
     if t.flags.contains(TypeFlags::Never) {
         return Some(Arc::clone(t));
     }
@@ -147,7 +147,7 @@ pub(crate) fn map_type_self(
 pub(crate) fn filter_type_self<F>(checker: &mut Checker, t: &Arc<Type>, mut f: F) -> Arc<Type>
 where
     F: FnMut(&mut Checker, &Arc<Type>) -> bool,
-{
+{ ::tsox_core::fntrace::enter("filter_type_self"); 
     if t.flags.intersects(TypeFlags::Union) {
         let types: Vec<Arc<Type>> = t.types().unwrap_or(&[]).to_vec();
         let filtered: Vec<Arc<Type>> = types

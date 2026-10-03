@@ -12,7 +12,7 @@ enum ScanMode {
 }
 
 impl ScanMode {
-    fn is_code(&self) -> bool {
+    fn is_code(&self) -> bool { ::tsox_core::fntrace::enter("is_code"); 
         matches!(self, ScanMode::Code { .. })
     }
 }
@@ -20,7 +20,7 @@ impl ScanMode {
 // Go scanner processComment 语义：三斜线指令只出自单行注释。
 // 块注释/字符串/模板字面量内部的 /// 行不是注释，不产出指令。
 // 行首扫描状态为 Code 的行才允许提取 directive。
-pub(crate) fn code_line_mask(text: &str) -> Vec<bool> {
+pub(crate) fn code_line_mask(text: &str) -> Vec<bool> { ::tsox_core::fntrace::enter("code_line_mask"); 
     let bytes = text.as_bytes();
     let mut mask = Vec::new();
     let mut stack: Vec<ScanMode> = vec![ScanMode::Code { depth: 0 }];
@@ -112,14 +112,14 @@ pub(crate) struct ReferencePathDirective {
     pub(crate) value_range: (usize, usize),
 }
 
-fn supported_reference_extensions() -> &'static [&'static str] {
+fn supported_reference_extensions() -> &'static [&'static str] { ::tsox_core::fntrace::enter("supported_reference_extensions"); 
     &[".ts", ".tsx", ".d.ts"]
 }
 
 pub(crate) fn extract_reference_path_directives(
     text: &str,
     containing_file: &str,
-) -> Vec<ReferencePathDirective> {
+) -> Vec<ReferencePathDirective> { ::tsox_core::fntrace::enter("extract_reference_path_directives"); 
     let mut refs = Vec::new();
     let base_dir = tsox_core::tspath::get_directory_path(containing_file);
     let mask = code_line_mask(text);
@@ -175,7 +175,7 @@ pub(crate) fn resolve_reference_path(
     resolved: &str,
     raw: &str,
     containing_file: &str,
-) -> Result<String, (tsox_core::diagnostics::Message, Vec<String>)> {
+) -> Result<String, (tsox_core::diagnostics::Message, Vec<String>)> { ::tsox_core::fntrace::enter("resolve_reference_path"); 
     use tsox_core::diagnostics::messages_generated as msg;
     let has_extension = resolved.rsplit('/').next().unwrap_or("").contains('.');
     let raw_normalized = raw.replace('\\', "/");

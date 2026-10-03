@@ -4,7 +4,7 @@ use crate::checker::relater_relate_impl_chunk::*;
 use std::sync::Arc;
 
 impl Checker {
-    pub(crate) fn check_type_base_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn check_type_base_constraint(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("check_type_base_constraint"); 
         if t.flags.intersects(TypeFlags::Union | TypeFlags::Intersection)
             && let Some(constituents) = t.types()
         {
@@ -51,7 +51,7 @@ impl Checker {
         Some(base)
     }
 
-    fn resolve_indexed_access_base(&mut self, t: &Arc<Type>) -> Arc<Type> {
+    fn resolve_indexed_access_base(&mut self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_indexed_access_base"); 
         let ia = match &t.data {
             TypeData::IndexedAccess(ia) => ia,
             _ => return Arc::clone(t),
@@ -66,7 +66,7 @@ impl Checker {
         resolved
     }
 
-    pub(crate) fn constraint_of_conditional_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+    pub(crate) fn constraint_of_conditional_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("constraint_of_conditional_type"); 
         let ct = match &t.data {
             TypeData::Conditional(ct) => ct,
             _ => return None,

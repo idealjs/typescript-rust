@@ -1,7 +1,7 @@
 use crate::checker::utilities::*;
 use std::sync::OnceLock;
 
-fn make_intrinsic(flags: TypeFlags, name: &str) -> Type {
+fn make_intrinsic(flags: TypeFlags, name: &str) -> Type { ::tsox_core::fntrace::enter("make_intrinsic"); 
     Type::new(
         flags,
         TypeData::Intrinsic(IntrinsicTypeData {
@@ -10,7 +10,7 @@ fn make_intrinsic(flags: TypeFlags, name: &str) -> Type {
     )
 }
 
-fn make_string_literal(s: &str) -> Type {
+fn make_string_literal(s: &str) -> Type { ::tsox_core::fntrace::enter("make_string_literal"); 
     Type::new(
         TypeFlags::StringLiteral,
         TypeData::Literal(LiteralTypeData {
@@ -21,7 +21,7 @@ fn make_string_literal(s: &str) -> Type {
     )
 }
 
-fn make_number_literal(n: f64) -> Type {
+fn make_number_literal(n: f64) -> Type { ::tsox_core::fntrace::enter("make_number_literal"); 
     Type::new(
         TypeFlags::NumberLiteral,
         TypeData::Literal(LiteralTypeData {
@@ -33,7 +33,7 @@ fn make_number_literal(n: f64) -> Type {
 }
 
 #[test]
-fn test_type_flag_helpers() {
+fn test_type_flag_helpers() { ::tsox_core::fntrace::enter("test_type_flag_helpers"); 
     let any = make_intrinsic(TypeFlags::Any, "any");
     assert!(is_any_or_unknown_type(&any));
     assert!(is_intrinsic_type(&any));
@@ -51,7 +51,7 @@ fn test_type_flag_helpers() {
 }
 
 #[test]
-fn test_literal_type_helpers() {
+fn test_literal_type_helpers() { ::tsox_core::fntrace::enter("test_literal_type_helpers"); 
     let s = make_string_literal("hello");
     assert!(is_literal_type(&s));
     assert!(is_string_like_type(&s));
@@ -65,7 +65,7 @@ fn test_literal_type_helpers() {
 }
 
 #[test]
-fn test_get_property_name_from_type() {
+fn test_get_property_name_from_type() { ::tsox_core::fntrace::enter("test_get_property_name_from_type"); 
     let s = make_string_literal("foo");
     assert_eq!(get_property_name_from_type(&s), "foo");
 
@@ -74,7 +74,7 @@ fn test_get_property_name_from_type() {
 }
 
 #[test]
-fn test_type_to_string() {
+fn test_type_to_string() { ::tsox_core::fntrace::enter("test_type_to_string"); 
     let any = make_intrinsic(TypeFlags::Any, "any");
     assert_eq!(type_to_string(&any), "any");
 
@@ -89,7 +89,7 @@ fn test_type_to_string() {
 }
 
 #[test]
-fn test_can_have_locals() {
+fn test_can_have_locals() { ::tsox_core::fntrace::enter("test_can_have_locals"); 
     assert!(can_have_locals(SyntaxKind::SourceFile));
     assert!(can_have_locals(SyntaxKind::FunctionDeclaration));
     assert!(can_have_locals(SyntaxKind::Block));
@@ -99,7 +99,7 @@ fn test_can_have_locals() {
 }
 
 #[test]
-fn test_token_is_identifier_or_keyword() {
+fn test_token_is_identifier_or_keyword() { ::tsox_core::fntrace::enter("test_token_is_identifier_or_keyword"); 
     assert!(token_is_identifier_or_keyword(SyntaxKind::Identifier));
 
     assert!(!token_is_identifier_or_keyword(SyntaxKind::PlusToken));
@@ -107,7 +107,7 @@ fn test_token_is_identifier_or_keyword() {
 }
 
 #[test]
-fn test_exhaustive_state() {
+fn test_exhaustive_state() { ::tsox_core::fntrace::enter("test_exhaustive_state"); 
     assert!(ExhaustiveState::True.is_true());
     assert!(ExhaustiveState::False.is_false());
     assert!(ExhaustiveState::Unknown.is_unknown());
@@ -116,7 +116,7 @@ fn test_exhaustive_state() {
 }
 
 #[test]
-fn test_specific_type_checks() {
+fn test_specific_type_checks() { ::tsox_core::fntrace::enter("test_specific_type_checks"); 
     let any = make_intrinsic(TypeFlags::Any, "any");
     assert!(is_type_any(&any));
     assert!(!is_type_unknown(&any));
@@ -150,7 +150,7 @@ fn test_specific_type_checks() {
 }
 
 #[test]
-fn test_symbol_name_helpers() {
+fn test_symbol_name_helpers() { ::tsox_core::fntrace::enter("test_symbol_name_helpers"); 
     assert!(is_computed_property_name("[foo]"));
     assert!(!is_computed_property_name("foo"));
     assert!(is_internal_symbol_name(
@@ -160,7 +160,7 @@ fn test_symbol_name_helpers() {
 }
 
 #[test]
-fn test_numeric_literal_helpers() {
+fn test_numeric_literal_helpers() { ::tsox_core::fntrace::enter("test_numeric_literal_helpers"); 
     assert!(is_numeric_literal_name("42"));
     assert!(is_numeric_literal_name("3.14"));
     assert!(!is_numeric_literal_name("hello"));

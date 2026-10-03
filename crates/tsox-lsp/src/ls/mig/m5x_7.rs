@@ -15,23 +15,23 @@ pub struct M5xCaseClauseTrackerState {
 }
 
 impl M5xCaseClauseTrackerState {
-    pub fn add_value_string(&mut self, value: &str) {
+    pub fn add_value_string(&mut self, value: &str) { ::tsox_core::fntrace::enter("add_value_string"); 
         self.existing_strings.insert(value.to_string());
     }
 
-    pub fn add_value_number(&mut self, value: &str) {
+    pub fn add_value_number(&mut self, value: &str) { ::tsox_core::fntrace::enter("add_value_number"); 
         self.existing_numbers.insert(value.to_string());
     }
 
-    pub fn has_value_string(&self, value: &str) -> bool {
+    pub fn has_value_string(&self, value: &str) -> bool { ::tsox_core::fntrace::enter("has_value_string"); 
         self.existing_strings.contains(value)
     }
 
-    pub fn has_value_number(&self, value: &str) -> bool {
+    pub fn has_value_number(&self, value: &str) -> bool { ::tsox_core::fntrace::enter("has_value_number"); 
         self.existing_numbers.contains(value)
     }
 
-    pub fn has_value_big_int(&self, value: &str) -> bool {
+    pub fn has_value_big_int(&self, value: &str) -> bool { ::tsox_core::fntrace::enter("has_value_big_int"); 
         self.existing_big_ints.contains(value)
     }
 }
@@ -39,7 +39,7 @@ impl M5xCaseClauseTrackerState {
 pub fn new_case_clause_tracker(
     type_checker: &mut tsox_checker::checker::Checker,
     clauses: &[Arc<Node>],
-) -> M5xCaseClauseTrackerState {
+) -> M5xCaseClauseTrackerState { ::tsox_core::fntrace::enter("new_case_clause_tracker"); 
     let mut c = M5xCaseClauseTrackerState {
         existing_strings: HashSet::new(),
         existing_numbers: HashSet::new(),
@@ -80,7 +80,7 @@ pub fn new_case_clause_tracker(
     c
 }
 
-pub fn find_containing_list(node: &Arc<Node>, file: &Arc<SourceFile>) -> Option<Arc<Node>> {
+pub fn find_containing_list(node: &Arc<Node>, file: &Arc<SourceFile>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_containing_list"); 
     let mut list: Option<Arc<Node>> = None;
     let Some(parent) = node.parent() else {
         return None;
@@ -94,7 +94,7 @@ fn visit_nodes(
     file: &Arc<SourceFile>,
     target: &Arc<Node>,
     list: &mut Option<Arc<Node>>,
-) {
+) { ::tsox_core::fntrace::enter("visit_nodes"); 
     for child in ast::mig::m3b::iter_children(container) {
         if range_contains_range(child.loc, target.loc) {
             *list = Some(Arc::clone(&child));
@@ -103,7 +103,7 @@ fn visit_nodes(
     }
 }
 
-pub fn is_equality_operator_kind(kind: SyntaxKind) -> bool {
+pub fn is_equality_operator_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_equality_operator_kind"); 
     matches!(
         kind,
         SyntaxKind::EqualsEqualsEqualsToken
@@ -116,7 +116,7 @@ pub fn is_equality_operator_kind(kind: SyntaxKind) -> bool {
 pub fn get_switched_type(
     case_clause: &Arc<Node>,
     type_checker: &mut tsox_checker::checker::Checker,
-) -> Option<Arc<tsox_checker::checker::types::Type>> {
+) -> Option<Arc<tsox_checker::checker::types::Type>> { ::tsox_core::fntrace::enter("get_switched_type"); 
     let switch_statement = crate::ls::mig::m5x_3::case_clause_parent_switch_statement(case_clause)?;
     let expression = crate::ls::mig::m5x_3::switch_statement_expression(&switch_statement)?;
     Some(type_checker.get_type_at_location(&expression))
@@ -126,27 +126,27 @@ pub fn get_range_of_node(
     node: &Arc<Node>,
     file: &Arc<SourceFile>,
     end_node: Option<&Arc<Node>>,
-) -> TextRange {
+) -> TextRange { ::tsox_core::fntrace::enter("get_range_of_node"); 
     let start = tsox_frontend::astnav::get_start_of_node(node, file, false);
     let end = end_node.map(|n| n.end()).unwrap_or_else(|| node.end());
     TextRange::new(start, end)
 }
 
-pub fn is_module_specifier_like(node: &Arc<Node>) -> bool {
+pub fn is_module_specifier_like(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_module_specifier_like"); 
     ast::is_string_literal_like(node)
         || (ast::is_template_expression(node)
             && crate::ls::mig::m5x_3::template_expression_head(node)
                 .map_or(false, |head| ast::node_text(&head).is_empty()))
 }
 
-pub fn is_parameter_declaration(node: &Arc<Node>) -> bool {
+pub fn is_parameter_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_parameter_declaration"); 
     node.kind == SyntaxKind::Parameter
 }
 
 pub fn get_possible_type_arguments_info_worker(
     token_in: &Arc<Node>,
     source_file: &Arc<SourceFile>,
-) -> Option<super::m5x_5::M5xPossibleTypeArgumentInfo> {
+) -> Option<super::m5x_5::M5xPossibleTypeArgumentInfo> { ::tsox_core::fntrace::enter("get_possible_type_arguments_info_worker"); 
     let mut token = Arc::clone(token_in);
     let mut token_at_position = if ast::is_identifier(&token) || token.kind == SyntaxKind::LessThanToken {
         Some(Arc::clone(&token))

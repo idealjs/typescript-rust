@@ -8,7 +8,7 @@ use super::m3g::is_literal_like_element_access;
 use super::m3g_3::{is_variable_declaration_initialized_to_require, skip_outer_expressions, OuterExpressionKinds};
 use super::m3h::{climb_past_property_access, climb_past_property_or_element_access};
 
-pub fn is_alias_symbol_declaration(node: &Arc<Node>) -> bool {
+pub fn is_alias_symbol_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_alias_symbol_declaration"); 
     match node.kind {
         SyntaxKind::ImportEqualsDeclaration
         | SyntaxKind::NamespaceExportDeclaration
@@ -36,7 +36,7 @@ pub fn is_alias_symbol_declaration(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_argument_expression_of_element_access(node: &Arc<Node>) -> bool {
+pub fn is_argument_expression_of_element_access(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_argument_expression_of_element_access"); 
     match node.parent() {
         Some(parent) if parent.kind == SyntaxKind::ElementAccessExpression => match &parent.data
         {
@@ -47,7 +47,7 @@ pub fn is_argument_expression_of_element_access(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_array_binding_or_assignment_element(node: &Node) -> bool {
+pub fn is_array_binding_or_assignment_element(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_array_binding_or_assignment_element"); 
     match node.kind {
         SyntaxKind::BindingElement
         | SyntaxKind::OmittedExpression
@@ -61,12 +61,12 @@ pub fn is_array_binding_or_assignment_element(node: &Node) -> bool {
     }
 }
 
-pub fn is_assignment_pattern(node: &Node) -> bool {
+pub fn is_assignment_pattern(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_assignment_pattern"); 
     node.kind == SyntaxKind::ArrayLiteralExpression
         || node.kind == SyntaxKind::ObjectLiteralExpression
 }
 
-pub fn get_assignment_target(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_assignment_target(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_assignment_target"); 
     let mut node = Arc::clone(node);
     loop {
         let parent = node.parent()?;
@@ -125,11 +125,11 @@ pub fn get_assignment_target(node: &Arc<Node>) -> Option<Arc<Node>> {
     }
 }
 
-pub fn is_assignment_target(node: &Arc<Node>) -> bool {
+pub fn is_assignment_target(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_assignment_target"); 
     get_assignment_target(node).is_some()
 }
 
-pub fn is_async_function(node: &Arc<Node>) -> bool {
+pub fn is_async_function(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_async_function"); 
     match node.kind {
         SyntaxKind::FunctionDeclaration
         | SyntaxKind::FunctionExpression
@@ -150,11 +150,11 @@ pub fn is_async_function(node: &Arc<Node>) -> bool {
     }
 }
 
-pub fn is_auto_accessor_property_declaration(node: &Node) -> bool {
+pub fn is_auto_accessor_property_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_auto_accessor_property_declaration"); 
     is_property_declaration(node) && has_accessor_modifier(node)
 }
 
-fn node_arguments(node: &Arc<Node>) -> Option<Arc<NodeList>> {
+fn node_arguments(node: &Arc<Node>) -> Option<Arc<NodeList>> { ::tsox_core::fntrace::enter("node_arguments"); 
     match &node.data {
         NodeData::CallExpression(d) => Some(Arc::clone(&d.arguments)),
         NodeData::NewExpression(d) => d.arguments.clone(),
@@ -162,7 +162,7 @@ fn node_arguments(node: &Arc<Node>) -> Option<Arc<NodeList>> {
     }
 }
 
-pub fn is_bindable_object_define_property_call(node: &Arc<Node>) -> bool {
+pub fn is_bindable_object_define_property_call(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_bindable_object_define_property_call"); 
     let args = node_arguments(node);
     if args.as_ref().is_some_and(|args| args.nodes.len() == 3) {
         let args = args.unwrap();
@@ -182,7 +182,7 @@ pub fn is_bindable_object_define_property_call(node: &Arc<Node>) -> bool {
     false
 }
 
-pub fn is_bindable_static_access_expression(node: &Arc<Node>, exclude_this_keyword: bool) -> bool {
+pub fn is_bindable_static_access_expression(node: &Arc<Node>, exclude_this_keyword: bool) -> bool { ::tsox_core::fntrace::enter("is_bindable_static_access_expression"); 
     (is_property_access_expression(node)
         && ((!exclude_this_keyword
             && node.expression().is_some_and(|e| e.kind == SyntaxKind::ThisKeyword))
@@ -196,7 +196,7 @@ pub fn is_bindable_static_access_expression(node: &Arc<Node>, exclude_this_keywo
 pub fn is_bindable_static_element_access_expression(
     node: &Arc<Node>,
     exclude_this_keyword: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_bindable_static_element_access_expression"); 
     is_literal_like_element_access(node)
         && ((!exclude_this_keyword
             && node.expression().is_some_and(|e| e.kind == SyntaxKind::ThisKeyword))
@@ -206,17 +206,17 @@ pub fn is_bindable_static_element_access_expression(
                 .is_some_and(|e| is_bindable_static_access_expression(e, true)))
 }
 
-pub fn is_bindable_static_name_expression(node: &Arc<Node>, exclude_this_keyword: bool) -> bool {
+pub fn is_bindable_static_name_expression(node: &Arc<Node>, exclude_this_keyword: bool) -> bool { ::tsox_core::fntrace::enter("is_bindable_static_name_expression"); 
     is_entity_name_expression(node)
         || is_bindable_static_access_expression(node, exclude_this_keyword)
 }
 
-pub fn is_block_or_catch_scoped(declaration: &Arc<Node>) -> bool {
+pub fn is_block_or_catch_scoped(declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_block_or_catch_scoped"); 
     get_combined_node_flags(declaration).contains(NodeFlags::BlockScoped)
         || is_catch_clause_variable_declaration_or_binding_element(declaration)
 }
 
-pub fn is_block_scope(node: &Node, parent_node: &Node) -> bool {
+pub fn is_block_scope(node: &Node, parent_node: &Node) -> bool { ::tsox_core::fntrace::enter("is_block_scope"); 
     match node.kind {
         SyntaxKind::SourceFile
         | SyntaxKind::CaseBlock
@@ -239,7 +239,7 @@ pub fn is_block_scope(node: &Node, parent_node: &Node) -> bool {
     }
 }
 
-fn select_expression_of_call_or_new_expression_or_decorator(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn select_expression_of_call_or_new_expression_or_decorator(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("select_expression_of_call_or_new_expression_or_decorator"); 
     if is_call_expression(node) || is_new_expression(node) || is_decorator(node) {
         return node.expression().map(Arc::clone);
     }
@@ -251,7 +251,7 @@ pub(crate) fn is_callee_worker(
     pred: fn(&Node) -> bool,
     include_element_access: bool,
     skip_past_outer_expressions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_callee_worker"); 
     let target = if include_element_access {
         climb_past_property_or_element_access(node)
     } else {
@@ -275,7 +275,7 @@ pub fn is_call_expression_target(
     node: &Arc<Node>,
     include_element_access: bool,
     skip_past_outer_expressions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_call_expression_target"); 
     is_callee_worker(
         node,
         is_call_expression,
@@ -288,7 +288,7 @@ pub fn is_call_or_new_expression_target(
     node: &Arc<Node>,
     include_element_access: bool,
     skip_past_outer_expressions: bool,
-) -> bool {
+) -> bool { ::tsox_core::fntrace::enter("is_call_or_new_expression_target"); 
     is_callee_worker(
         node,
         is_call_or_new_expression,

@@ -38,25 +38,25 @@ pub mod r39k24_defs;
 
 use crate::printer::EmitContext;
 
-fn generated_name_key(emit_context: &EmitContext, name: &Arc<Node>) -> *const Node {
+fn generated_name_key(emit_context: &EmitContext, name: &Arc<Node>) -> *const Node { ::tsox_core::fntrace::enter("generated_name_key"); 
     let node_for_name = emit_context.get_node_for_generated_name(name);
     Arc::as_ptr(&node_for_name)
 }
 
 type TransformerFactory = fn(&super::m3m::TransformOptions) -> Option<Box<super::m4k_2::Transformer>>;
 
-fn shell_transformer_visit(_tx: &mut super::m4k_2::Transformer, node: Arc<Node>) -> Option<Arc<Node>> {
+fn shell_transformer_visit(_tx: &mut super::m4k_2::Transformer, node: Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("shell_transformer_visit"); 
     Some(node)
 }
 
-fn boxed_shell_transformer(opts: &super::m3m::TransformOptions) -> Box<super::m4k_2::Transformer> {
+fn boxed_shell_transformer(opts: &super::m3m::TransformOptions) -> Box<super::m4k_2::Transformer> { ::tsox_core::fntrace::enter("boxed_shell_transformer"); 
     Box::new(super::m4k_2::Transformer::new(
         shell_transformer_visit,
         Some(opts.context.clone()),
     ))
 }
 
-fn es_decorator_and_class_fields(opts: &super::m3m::TransformOptions) -> Option<Box<super::m4k_2::Transformer>> {
+fn es_decorator_and_class_fields(opts: &super::m3m::TransformOptions) -> Option<Box<super::m4k_2::Transformer>> { ::tsox_core::fntrace::enter("es_decorator_and_class_fields"); 
     chain(vec![
         (|opts: &super::m3m::TransformOptions| new_es_decorator_transformer(opts).map(Box::new)) as TransformerFactory,
         (|opts: &super::m3m::TransformOptions| {
@@ -147,7 +147,7 @@ pub const NEW_ES2016_TRANSFORMER: TransformerFactory = |opts| {
     ])(opts)
 };
 
-pub fn get_es_transformer(opts: &super::m3m::TransformOptions) -> Option<Box<super::m4k_2::Transformer>> {
+pub fn get_es_transformer(opts: &super::m3m::TransformOptions) -> Option<Box<super::m4k_2::Transformer>> { ::tsox_core::fntrace::enter("get_es_transformer"); 
     let options = &opts.compiler_options;
     match options.get_emit_script_target() {
         ScriptTarget::ESNext => es_decorator_and_class_fields(opts),
@@ -164,14 +164,14 @@ pub fn get_es_transformer(opts: &super::m3m::TransformOptions) -> Option<Box<sup
 }
 
 impl ClassFieldsTransformer {
-    pub fn end_class_lexical_environment(&mut self) {
+    pub fn end_class_lexical_environment(&mut self) { ::tsox_core::fntrace::enter("end_class_lexical_environment"); 
         self.lexical_environment = self
             .lexical_environment
             .take()
             .and_then(|env| env.previous.map(|previous| *previous));
     }
 
-    pub fn get_class_lexical_environment(&mut self) -> &mut super::m4g::ClassLexicalEnvironment {
+    pub fn get_class_lexical_environment(&mut self) -> &mut super::m4g::ClassLexicalEnvironment { ::tsox_core::fntrace::enter("get_class_lexical_environment"); 
         let env = self
             .lexical_environment
             .as_mut()
@@ -187,7 +187,7 @@ impl ClassFieldsTransformer {
         env.data.as_mut().unwrap()
     }
 
-    pub fn get_private_identifier_environment(&mut self) -> &mut PrivateEnvironment {
+    pub fn get_private_identifier_environment(&mut self) -> &mut PrivateEnvironment { ::tsox_core::fntrace::enter("get_private_identifier_environment"); 
         let env = self
             .lexical_environment
             .as_mut()
@@ -205,11 +205,11 @@ impl ClassFieldsTransformer {
         env.private_env.as_mut().unwrap()
     }
 
-    pub fn add_pending_expressions(&mut self, exprs: Vec<Arc<Node>>) {
+    pub fn add_pending_expressions(&mut self, exprs: Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("add_pending_expressions"); 
         self.pending_expressions.extend(exprs);
     }
 
-    pub fn set_private_identifier(&mut self, name: &Arc<Node>, info: PrivateIdentifierInfo) {
+    pub fn set_private_identifier(&mut self, name: &Arc<Node>, info: PrivateIdentifierInfo) { ::tsox_core::fntrace::enter("set_private_identifier"); 
         if self.emit_context().has_auto_generate_info(name) {
             let key = generated_name_key(&self.emit_context(), name);
             let env = self.get_private_identifier_environment();
@@ -224,7 +224,7 @@ impl ClassFieldsTransformer {
         &self,
         env: &'a PrivateEnvironment,
         name: &Arc<Node>,
-    ) -> Option<&'a PrivateIdentifierInfo> {
+    ) -> Option<&'a PrivateIdentifierInfo> { ::tsox_core::fntrace::enter("get_private_identifier"); 
         if self.emit_context().has_auto_generate_info(name) {
             let key = generated_name_key(&self.emit_context(), name);
             return env.generated_identifiers.get(&key);
@@ -236,7 +236,7 @@ impl ClassFieldsTransformer {
         &mut self,
         node: &Arc<Node>,
         name: &Arc<Node>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_private_identifier_property_declaration_to_environment"); 
         let lex = self.get_class_lexical_environment();
         let brand_check_identifier = if lex.class_this.is_some() {
             lex.class_this.clone()
@@ -304,7 +304,7 @@ impl ClassFieldsTransformer {
         lex: &super::m4g::ClassLexicalEnvironment,
         is_static: bool,
         is_valid: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_private_identifier_method_to_environment"); 
         let method_name = self.create_hoisted_variable_for_private_name(name, "");
         let weak_set_name = self.current_weak_set_name();
         let brand_check_identifier = if is_static {
@@ -334,7 +334,7 @@ impl ClassFieldsTransformer {
         is_static: bool,
         is_valid: bool,
         previous_info: Option<&PrivateIdentifierInfo>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_private_identifier_get_accessor_to_environment"); 
         let getter_name = self.create_hoisted_variable_for_private_name(name, "_get");
         let weak_set_name = self.current_weak_set_name();
         let brand_check_identifier = if is_static {
@@ -377,7 +377,7 @@ impl ClassFieldsTransformer {
         is_static: bool,
         is_valid: bool,
         previous_info: Option<&PrivateIdentifierInfo>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_private_identifier_set_accessor_to_environment"); 
         let setter_name = self.create_hoisted_variable_for_private_name(name, "_set");
         let weak_set_name = self.current_weak_set_name();
         let brand_check_identifier = if is_static {
@@ -419,7 +419,7 @@ impl ClassFieldsTransformer {
         lex: &super::m4g::ClassLexicalEnvironment,
         is_static: bool,
         is_valid: bool,
-    ) {
+    ) { ::tsox_core::fntrace::enter("add_private_identifier_auto_accessor_to_environment"); 
         let getter_name = self.create_hoisted_variable_for_private_name(name, "_get");
         let setter_name = self.create_hoisted_variable_for_private_name(name, "_set");
         let weak_set_name = self.current_weak_set_name();
@@ -444,7 +444,7 @@ impl ClassFieldsTransformer {
         );
     }
 
-    pub fn add_private_identifier_to_environment(&mut self, node: &Arc<Node>) {
+    pub fn add_private_identifier_to_environment(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("add_private_identifier_to_environment"); 
         let name = node.name().expect("PrivateIdentifier should have a name");
         let is_static = has_static_modifier(node);
         self.get_private_identifier_environment();
@@ -487,14 +487,14 @@ impl ClassFieldsTransformer {
         }
     }
 
-    fn current_weak_set_name(&mut self) -> Option<Arc<Node>> {
+    fn current_weak_set_name(&mut self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("current_weak_set_name"); 
         self.lexical_environment
             .as_mut()
             .and_then(|lex| lex.private_env.as_mut())
             .and_then(|env| env.data.weak_set_name.clone())
     }
 
-    fn current_private_identifier_slot(&mut self, name: &Arc<Node>) -> Option<&mut PrivateIdentifierInfo> {
+    fn current_private_identifier_slot(&mut self, name: &Arc<Node>) -> Option<&mut PrivateIdentifierInfo> { ::tsox_core::fntrace::enter("current_private_identifier_slot"); 
         let emit_context = self.emit_context();
         let has_auto_generate = emit_context.has_auto_generate_info(name);
         let env = self
@@ -517,7 +517,7 @@ impl ClassFieldsTransformer {
         name_text: &str,
         node: &Arc<Node>,
         suffix: &str,
-    ) -> Arc<Node> {
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("create_hoisted_variable_for_class"); 
         let class_name_text = self
             .get_private_identifier_environment()
             .data
@@ -558,7 +558,7 @@ impl ClassFieldsTransformer {
         identifier
     }
 
-    pub fn create_hoisted_variable_for_class_from_node(&mut self, name: &Arc<Node>, suffix: &str) -> Arc<Node> {
+    pub fn create_hoisted_variable_for_class_from_node(&mut self, name: &Arc<Node>, suffix: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("create_hoisted_variable_for_class_from_node"); 
         let env = self.get_private_identifier_environment();
         let prefix = match &env.data.class_name {
             Some(class_name) => format!("_{}_", class_name.text()),
@@ -585,7 +585,7 @@ impl ClassFieldsTransformer {
         identifier
     }
 
-    pub fn create_hoisted_variable_for_private_name(&mut self, name: &Arc<Node>, suffix: &str) -> Arc<Node> {
+    pub fn create_hoisted_variable_for_private_name(&mut self, name: &Arc<Node>, suffix: &str) -> Arc<Node> { ::tsox_core::fntrace::enter("create_hoisted_variable_for_private_name"); 
         if self.emit_context().has_auto_generate_info(name) {
             return self.create_hoisted_variable_for_class_from_node(name, suffix);
         }
@@ -596,7 +596,7 @@ impl ClassFieldsTransformer {
         self.create_hoisted_variable_for_class(&text, name, suffix)
     }
 
-    pub fn access_private_identifier(&self, name: &Arc<Node>) -> Option<PrivateIdentifierInfo> {
+    pub fn access_private_identifier(&self, name: &Arc<Node>) -> Option<PrivateIdentifierInfo> { ::tsox_core::fntrace::enter("access_private_identifier"); 
         let mut env = self.lexical_environment.as_ref();
         while let Some(current) = env {
             if let Some(private_env) = &current.private_env {
@@ -617,7 +617,7 @@ impl ClassFieldsTransformer {
         statements: Vec<Arc<Node>>,
         methods: &[Arc<Node>],
         receiver: &Arc<Node>,
-    ) -> Vec<Arc<Node>> {
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("add_instance_method_statements"); 
         if !self.should_transform_private_elements_or_class_static_blocks || methods.is_empty() {
             return statements;
         }
@@ -642,7 +642,7 @@ fn get_private_identifier_in<'a>(
     emit_context: &EmitContext,
     env: &'a PrivateEnvironment,
     name: &Arc<Node>,
-) -> Option<&'a PrivateIdentifierInfo> {
+) -> Option<&'a PrivateIdentifierInfo> { ::tsox_core::fntrace::enter("get_private_identifier_in"); 
     if emit_context.has_auto_generate_info(name) {
         let key = generated_name_key(emit_context, name);
         return env.generated_identifiers.get(&key);
@@ -650,7 +650,7 @@ fn get_private_identifier_in<'a>(
     env.members.get(name.text())
 }
 
-fn requires_block_scoped_var_r36k24(t: &ClassFieldsTransformer) -> bool {
+fn requires_block_scoped_var_r36k24(t: &ClassFieldsTransformer) -> bool { ::tsox_core::fntrace::enter("requires_block_scoped_var_r36k24"); 
     t.in_iteration_statement
         && t.current_class_container.is_some()
         && is_class_expression(t.current_class_container.as_ref().unwrap())
@@ -658,7 +658,7 @@ fn requires_block_scoped_var_r36k24(t: &ClassFieldsTransformer) -> bool {
 
 fn clone_class_lexical_environment_shallow(
     env: &super::m4g::ClassLexicalEnvironment,
-) -> super::m4g::ClassLexicalEnvironment {
+) -> super::m4g::ClassLexicalEnvironment { ::tsox_core::fntrace::enter("clone_class_lexical_environment_shallow"); 
     super::m4g::ClassLexicalEnvironment {
         facts: env.facts,
         class_constructor: env.class_constructor.clone(),
@@ -668,7 +668,7 @@ fn clone_class_lexical_environment_shallow(
 }
 
 impl Clone for PrivateIdentifierKind {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         *self
     }
 }
@@ -676,7 +676,7 @@ impl Clone for PrivateIdentifierKind {
 impl Copy for PrivateIdentifierKind {}
 
 impl Clone for PrivateIdentifierInfo {
-    fn clone(&self) -> Self {
+    fn clone(&self) -> Self { ::tsox_core::fntrace::enter("clone"); 
         PrivateIdentifierInfo {
             kind: self.kind,
             brand_check_identifier: self.brand_check_identifier.clone(),

@@ -3,7 +3,7 @@ use crate::ast::symbol::*;
 use std::sync::Arc;
 
 #[test]
-fn symbol_flags_composites() {
+fn symbol_flags_composites() { ::tsox_core::fntrace::enter("symbol_flags_composites"); 
     let flags = SymbolFlags::Function.union(SymbolFlags::Class);
     assert!(flags.contains(SymbolFlags::Function));
     assert!(flags.contains(SymbolFlags::Class));
@@ -11,7 +11,7 @@ fn symbol_flags_composites() {
 }
 
 #[test]
-fn symbol_creation() {
+fn symbol_creation() { ::tsox_core::fntrace::enter("symbol_creation"); 
     let sym = Symbol::new(SymbolFlags::Function, "foo");
     assert_eq!(sym.name, "foo");
     assert!(sym.flags.contains(SymbolFlags::Function));
@@ -19,7 +19,7 @@ fn symbol_creation() {
 }
 
 #[test]
-fn symbol_table_operations() {
+fn symbol_table_operations() { ::tsox_core::fntrace::enter("symbol_table_operations"); 
     let mut table = SymbolTable::new();
     let sym = Arc::new(Symbol::new(SymbolFlags::VARIABLE, "x"));
     table.insert("x", sym);
@@ -29,7 +29,7 @@ fn symbol_table_operations() {
 }
 
 #[test]
-fn flow_flags() {
+fn flow_flags() { ::tsox_core::fntrace::enter("flow_flags"); 
     let flags = FlowFlags::START | FlowFlags::ASSIGNMENT;
     assert!(flags.contains(FlowFlags::START));
     assert!(flags.contains(FlowFlags::ASSIGNMENT));
@@ -37,7 +37,7 @@ fn flow_flags() {
 }
 
 #[test]
-fn node_symbol_map() {
+fn node_symbol_map() { ::tsox_core::fntrace::enter("node_symbol_map"); 
     let node = Arc::new(Node::new(
         crate::ast::SyntaxKind::Identifier,
         crate::ast::NodeData::Identifier(crate::ast::IdentifierData {
@@ -52,7 +52,7 @@ fn node_symbol_map() {
 }
 
 #[test]
-fn container_flags() {
+fn container_flags() { ::tsox_core::fntrace::enter("container_flags"); 
     let flags = ContainerFlags::IS_CONTAINER | ContainerFlags::HAS_LOCALS;
     assert!(flags.contains(ContainerFlags::IS_CONTAINER));
     assert!(flags.contains(ContainerFlags::HAS_LOCALS));

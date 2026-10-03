@@ -25,7 +25,7 @@ fn write_type_reference(
     ignore_constraints: bool,
     constrained: &mut bool,
     type_parameters: &mut Vec<Arc<Type>>,
-) {
+) { ::tsox_core::fntrace::enter("write_type_reference"); 
     if let Some(target) = ref_.target() {
         b.write_type(target);
     }
@@ -66,25 +66,25 @@ fn write_type_reference(
 }
 
 impl KeyBuilder {
-    pub fn write_string(&mut self, s: &str) {
+    pub fn write_string(&mut self, s: &str) { ::tsox_core::fntrace::enter("write_string"); 
         for byte in s.as_bytes() {
             self.write_byte(*byte);
         }
     }
 
-    pub fn write_uint32(&mut self, v: u32) {
+    pub fn write_uint32(&mut self, v: u32) { ::tsox_core::fntrace::enter("write_uint32"); 
         self.write_u32(v);
     }
 
-    pub fn write_uint64(&mut self, v: u64) {
+    pub fn write_uint64(&mut self, v: u64) { ::tsox_core::fntrace::enter("write_uint64"); 
         self.write_u64(v);
     }
 
-    pub fn write_int(&mut self, value: i32) {
+    pub fn write_int(&mut self, value: i32) { ::tsox_core::fntrace::enter("write_int"); 
         self.write_u64(value as i64 as u64);
     }
 
-    pub fn write_symbol(&mut self, s: &Arc<Symbol>) {
+    pub fn write_symbol(&mut self, s: &Arc<Symbol>) { ::tsox_core::fntrace::enter("write_symbol"); 
         self.write_u64(get_symbol_id(s));
     }
 
@@ -93,7 +93,7 @@ impl KeyBuilder {
         source: &Arc<Type>,
         target: &Arc<Type>,
         ignore_constraints: bool,
-    ) -> bool {
+    ) -> bool { ::tsox_core::fntrace::enter("write_generic_type_references"); 
         let mut constrained = false;
         let mut type_parameters: Vec<Arc<Type>> = Vec::with_capacity(8);
         write_type_reference(
@@ -116,11 +116,11 @@ impl KeyBuilder {
         constrained
     }
 
-    pub fn write_node_id(&mut self, id: u64) {
+    pub fn write_node_id(&mut self, id: u64) { ::tsox_core::fntrace::enter("write_node_id"); 
         self.write_u64(id);
     }
 
-    pub fn write_node(&mut self, node: Option<&Arc<Node>>) {
+    pub fn write_node(&mut self, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("write_node"); 
         if let Some(node) = node {
             let id = get_node_id(node);
             self.write_node_id(id);

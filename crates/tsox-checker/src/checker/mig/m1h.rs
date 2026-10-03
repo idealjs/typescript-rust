@@ -23,9 +23,9 @@ use crate::checker::checker::*;
 use std::sync::Arc;
 
 impl Checker {
-    pub fn initialize_closures(&mut self) {}
+    pub fn initialize_closures(&mut self) { ::tsox_core::fntrace::enter("initialize_closures"); }
 
-    pub fn initialize_iteration_resolvers(&mut self) {}
+    pub fn initialize_iteration_resolvers(&mut self) { ::tsox_core::fntrace::enter("initialize_iteration_resolvers"); }
 
     pub fn include_mixin_type(
         &mut self,
@@ -33,7 +33,7 @@ impl Checker {
         types: &[Arc<Type>],
         mixin_flags: &[bool],
         index: usize,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("include_mixin_type"); 
         let mut mixed_types: Vec<Arc<Type>> = Vec::new();
         for i in 0..types.len() {
             if i == index {
@@ -55,7 +55,7 @@ impl Checker {
         candidate: &Arc<Signature>,
         args: &[Arc<Node>],
         check_mode: CheckMode,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("infer_signature_instantiation_for_overload_failure"); 
         let inference_flags = if is_in_js_file(node) {
             InferenceFlags::AnyDefault
         } else {
@@ -74,7 +74,7 @@ impl Checker {
         apparent_type: &Arc<Type>,
         kind: SignatureKind,
         related_information: Option<Diagnostic>,
-    ) {
+    ) { ::tsox_core::fntrace::enter("invocation_error"); 
         let mut diagnostic = self.invocation_error_details(error_target, apparent_type, kind);
         if let Some(d) = diagnostic.as_mut() {
             if let Some(related) = related_information {
@@ -92,7 +92,7 @@ impl Checker {
         apparent_type: &Arc<Type>,
         kind: SignatureKind,
         diagnostic: &Diagnostic,
-    ) {
+    ) { ::tsox_core::fntrace::enter("invocation_error_recovery"); 
         let symbol = match &apparent_type.symbol {
             Some(symbol) => Arc::clone(symbol),
             None => return,
@@ -128,7 +128,7 @@ impl Checker {
         &mut self,
         type1: Option<&Arc<Type>>,
         type2: Option<&Arc<Type>>,
-    ) -> Option<Arc<Type>> {
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("intersect_types"); 
         match (type1, type2) {
             (None, t2) => t2.map(Arc::clone),
             (t1, None) => t1.map(Arc::clone),
@@ -142,7 +142,7 @@ impl Checker {
         &mut self,
         sig: &Arc<Signature>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("instantiate_signature"); 
         let erase_type_parameters = m.is_some_and(|m| is_permissive_mapper(m));
         self.instantiate_signature_ex(sig, m, erase_type_parameters)
     }
@@ -152,7 +152,7 @@ impl Checker {
         sig: &Arc<Signature>,
         m: Option<&Arc<TypeMapper>>,
         erase_type_parameters: bool,
-    ) -> Arc<Signature> {
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("instantiate_signature_ex"); 
         let mut m = m.map(Arc::clone);
         let mut fresh_type_parameters: Vec<Arc<Type>> = Vec::new();
         if !sig.type_parameters.is_empty() && !erase_type_parameters {
@@ -196,7 +196,7 @@ impl Checker {
         &mut self,
         info: &Arc<IndexInfo>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Arc<IndexInfo> {
+    ) -> Arc<IndexInfo> { ::tsox_core::fntrace::enter("instantiate_index_info"); 
         let value_type = match &info.value_type {
             Some(v) => Arc::clone(v),
             None => return Arc::clone(info),
@@ -222,7 +222,7 @@ impl Checker {
         &mut self,
         symbols: &SymbolTable,
         m: Option<&Arc<TypeMapper>>,
-    ) -> SymbolTable {
+    ) -> SymbolTable { ::tsox_core::fntrace::enter("instantiate_symbol_table"); 
         if symbols.is_empty() {
             return SymbolTable::new();
         }
@@ -241,7 +241,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("instantiate_symbol"); 
         let mut symbol = Arc::clone(symbol);
         if m.is_some_and(|m| m.maps_this_only()) && is_thisless(&symbol) {
             return Some(symbol);
@@ -298,7 +298,7 @@ impl Checker {
         &mut self,
         t: &Arc<Type>,
         m: Option<&Arc<TypeMapper>>,
-    ) -> Arc<Type> {
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_type"); 
         self.instantiate_type_with_alias(t, m, None)
     }
 }

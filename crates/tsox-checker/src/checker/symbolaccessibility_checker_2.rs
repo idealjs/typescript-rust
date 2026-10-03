@@ -9,7 +9,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_with_alternative_containers"); 
         let additional_containers: Vec<Arc<Symbol>> = container
             .declarations
             .iter()
@@ -93,7 +93,7 @@ impl Checker {
         &mut self,
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_alternative_containing_modules"); 
         let enclosing_declaration = match enclosing_declaration {
             Some(enc) => enc,
             None => return Vec::new(),
@@ -141,7 +141,7 @@ impl Checker {
         &self,
         symbol: &Arc<Symbol>,
         meaning: SymbolFlags,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_variable_declaration_of_object_literal"); 
         if !meaning.intersects(SymbolFlags::VALUE) {
             return None;
         }
@@ -157,7 +157,7 @@ impl Checker {
     pub(crate) fn get_external_module_container(
         &self,
         declaration: &Arc<Node>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_external_module_container"); 
         if has_external_module_symbol(declaration) {
             return self.get_symbol_of_declaration(declaration);
         }
@@ -175,7 +175,7 @@ impl Checker {
     pub(crate) fn get_external_module_container_of_symbol(
         &self,
         symbol: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_external_module_container_of_symbol"); 
         for d in &symbol.declarations {
             if let Some(sym) = self.get_external_module_container(d) {
                 return Some(sym);
@@ -188,7 +188,7 @@ impl Checker {
         &self,
         d: &Arc<Node>,
         container: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> {
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_file_symbol_if_file_symbol_export_equals_container"); 
         let file_symbol = self.get_external_module_container(d)?;
         let exported = file_symbol
             .exports
@@ -208,7 +208,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         enclosing_declaration: Option<&Arc<Node>>,
         meaning: SymbolFlags,
-    ) -> Vec<Arc<Symbol>> {
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_containers_of_symbol"); 
         let container = self.get_parent_of_symbol(symbol);
 
         if let Some(ref container) = container {

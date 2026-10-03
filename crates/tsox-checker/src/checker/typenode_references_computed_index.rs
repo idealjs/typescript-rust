@@ -11,7 +11,7 @@ impl Checker {
         &mut self,
         member: &Arc<Node>,
         existing: &[Arc<crate::checker::IndexInfo>],
-    ) -> Option<crate::checker::IndexInfo> {
+    ) -> Option<crate::checker::IndexInfo> { ::tsox_core::fntrace::enter("implied_index_info_of_computed_member"); 
         let name = member.name()?;
         let NodeData::ComputedPropertyName(cd) = &name.data else {
             return None;
@@ -63,7 +63,7 @@ impl Checker {
         })
     }
 
-    fn computed_member_index_value_type(&mut self, member: &Arc<Node>) -> Arc<Type> {
+    fn computed_member_index_value_type(&mut self, member: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("computed_member_index_value_type"); 
         match &member.data {
             NodeData::MethodDeclaration(d) => {
                 self.push_scope(member);

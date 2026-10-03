@@ -4,7 +4,7 @@ use std::sync::Arc;
 pub fn find_ancestor<F>(node: &Arc<Node>, callback: F) -> Option<Arc<Node>>
 where
     F: Fn(&Node) -> bool,
-{
+{ ::tsox_core::fntrace::enter("find_ancestor"); 
     let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
     while let Some(n) = current {
         if callback(&n) {
@@ -15,15 +15,15 @@ where
     None
 }
 
-pub fn find_ancestor_kind(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> {
+pub fn find_ancestor_kind(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_kind"); 
     find_ancestor(node, |n| n.kind == kind)
 }
 
-pub fn get_source_file_of_node(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_source_file_of_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_source_file_of_node"); 
     find_ancestor_kind(node, SyntaxKind::SourceFile)
 }
 
-pub fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
+pub fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_node_descendant_of"); 
     let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
     while let Some(n) = current {
         if Arc::ptr_eq(&n, ancestor) {
@@ -34,7 +34,7 @@ pub fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool {
     false
 }
 
-pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
+pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_root_declaration"); 
     let mut current = Arc::clone(node);
     while current.kind == SyntaxKind::BindingElement {
         let Some(parent) = current.parent() else {
@@ -48,18 +48,18 @@ pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> {
     current
 }
 
-pub fn get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags {
+pub fn get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("get_combined_modifier_flags"); 
     get_combined_flags(node, |n| n.syntactic_modifier_flags())
 }
 
-pub fn get_combined_node_flags(node: &Arc<Node>) -> NodeFlags {
+pub fn get_combined_node_flags(node: &Arc<Node>) -> NodeFlags { ::tsox_core::fntrace::enter("get_combined_node_flags"); 
     get_combined_flags(node, |n| n.flags)
 }
 
 fn get_combined_flags<F, T: std::ops::BitOr<Output = T>>(node: &Arc<Node>, get_flags: F) -> T
 where
     F: Fn(&Node) -> T,
-{
+{ ::tsox_core::fntrace::enter("get_combined_flags"); 
     let root = get_root_declaration(node);
     let mut flags = get_flags(&root);
     let mut current = if root.kind == SyntaxKind::VariableDeclaration {
@@ -81,7 +81,7 @@ where
     flags
 }
 
-pub fn get_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_name_of_declaration"); 
     let non_assigned = get_non_assigned_name_of_declaration(declaration);
     if non_assigned.is_some() {
         return non_assigned;
@@ -95,7 +95,7 @@ pub fn get_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<Node>> {
     None
 }
 
-pub(crate) fn get_non_assigned_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<Node>> {
+pub(crate) fn get_non_assigned_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_non_assigned_name_of_declaration"); 
     match declaration.kind {
         SyntaxKind::ExportAssignment => {
             if let Some(expr) = declaration.expression() {
@@ -109,7 +109,7 @@ pub(crate) fn get_non_assigned_name_of_declaration(declaration: &Arc<Node>) -> O
     }
 }
 
-fn get_assigned_name(node: &Arc<Node>) -> Option<Arc<Node>> {
+fn get_assigned_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_assigned_name"); 
     let parent = node.parent()?;
     match parent.kind {
         SyntaxKind::PropertyAssignment => parent.name().map(Arc::clone),

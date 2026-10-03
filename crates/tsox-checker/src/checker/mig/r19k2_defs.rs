@@ -36,15 +36,15 @@ pub const TYPE_FLAGS_INCLUDES_ERROR: TypeFlags = TypeFlags::Reserved2;
 
 static NEXT_CHECKER_ID: AtomicU32 = AtomicU32::new(1);
 
-pub fn next_checker_id() -> u32 {
+pub fn next_checker_id() -> u32 { ::tsox_core::fntrace::enter("next_checker_id"); 
     NEXT_CHECKER_ID.fetch_add(1, AtomicOrdering::Relaxed)
 }
 
-pub fn get_adjusted_node_for_error(node: &Arc<Node>) -> Option<Arc<Node>> {
+pub fn get_adjusted_node_for_error(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_adjusted_node_for_error"); 
     Some(Arc::clone(node))
 }
 
-pub fn is_static_private_identifier_property(s: &Arc<Symbol>) -> bool {
+pub fn is_static_private_identifier_property(s: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_static_private_identifier_property"); 
     let Some(declaration) = &s.value_declaration else {
         return false;
     };
@@ -55,7 +55,7 @@ pub fn is_static_private_identifier_property(s: &Arc<Symbol>) -> bool {
         .contains(ModifierFlags::Static)
 }
 
-pub fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool {
+pub fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_export_assignment_expression_name"); 
     let mut current = Arc::clone(node);
     while let Some(parent) = current.parent() {
         if parent.kind != SyntaxKind::PropertyAccessExpression
@@ -74,7 +74,7 @@ pub fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool {
             .is_some_and(|e| Arc::ptr_eq(&e, &current))
 }
 
-pub fn is_literal_import_type_node(node: &Arc<Node>) -> bool {
+pub fn is_literal_import_type_node(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_literal_import_type_node"); 
     node.kind == SyntaxKind::ImportType
         && matches!(
             &node.data,
@@ -82,7 +82,7 @@ pub fn is_literal_import_type_node(node: &Arc<Node>) -> bool {
         )
 }
 
-pub fn compare_diagnostics(a: &Diagnostic, b: &Diagnostic) -> i32 {
+pub fn compare_diagnostics(a: &Diagnostic, b: &Diagnostic) -> i32 { ::tsox_core::fntrace::enter("compare_diagnostics"); 
     match tsox_frontend::ast::mig::m3d_2::compare_diagnostics(a, b) {
         std::cmp::Ordering::Less => -1,
         std::cmp::Ordering::Equal => 0,
@@ -91,18 +91,18 @@ pub fn compare_diagnostics(a: &Diagnostic, b: &Diagnostic) -> i32 {
 }
 
 impl Checker {
-    pub fn assignable_relation(&self) -> Relation {
+    pub fn assignable_relation(&self) -> Relation { ::tsox_core::fntrace::enter("assignable_relation"); 
         Relation::new(RelationKind::Assignable)
     }
 
-    pub(crate) fn symbol_of_node(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> {
+    pub(crate) fn symbol_of_node(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("symbol_of_node"); 
         self.symbol_node_links
             .get(node)
             .and_then(|l| l.resolved_symbol.clone())
     }
 }
 
-pub fn symbol_of_node(node: &Arc<Node>) -> Option<Arc<Symbol>> {
+pub fn symbol_of_node(node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("symbol_of_node"); 
     let ptr = crate::checker::mig::m2c_5::r26k4_defs::builder_checker_ptr();
     if ptr.is_null() {
         return None;
