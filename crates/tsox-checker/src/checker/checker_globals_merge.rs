@@ -105,7 +105,7 @@ impl Checker {
             .collect()
     }
 
-    fn push_dup_error_with_related(
+    pub(crate) fn push_dup_error_with_related(
         &mut self,
         file: &Option<Arc<SourceFile>>,
         loc: tsox_core::core::text::TextRange,

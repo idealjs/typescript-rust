@@ -3,8 +3,9 @@
 use crate::checker::checker_classes::*;
 
 // Go checkObjectTypeForDuplicateDeclarations：同名属性/访问器组合在
-// binder 合并后由 checker 报 Duplicate identifier；属性间类型不一致另报
-// Subsequent property declarations must have the same type
+// binder 合并后由 checker 报 Duplicate identifier；计算名经 lateBindMember
+// 解析后并入同名组（见 checker_class_dup_declarations_late.rs）；类型
+// 一致性 TS2717 见 checker_class_dup_declarations_types.rs
 impl Checker {
     // 组内首个匹配成员的原始名（源文本，字符串保留引号）
     fn raw_member_display_name(
@@ -18,92 +19,7 @@ impl Checker {
             .and_then(|n| self.node_source_text(&n).or_else(|| Some(n.text().to_string())))
     }
 
-    pub(crate) fn check_type_literal_duplicate_declarations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_type_literal_duplicate_declarations"); 
-        let members: &[Arc<Node>] = match &node.data {
-            tsox_frontend::ast::NodeData::TypeLiteralNode(d) => &d.members.nodes,
-            _ => return,
-        };
-        let member_name = |m: &Arc<Node>| -> Option<String> {
-            let n = m.name()?;
-            match n.kind {
-                SyntaxKind::Identifier | SyntaxKind::StringLiteral => Some(n.text().to_string()),
-                SyntaxKind::NumericLiteral => {
-                    Some(tsox_core::jsnum::Number::from_string(n.text()).to_string())
-                }
-                _ => None,
-            }
-        };
-        let mut seen: std::collections::HashMap<String, Vec<&Arc<Node>>> =
-            std::collections::HashMap::new();
-        for m in members.iter() {
-            if m.kind == SyntaxKind::PropertySignature
-                && let Some(name) = member_name(m)
-            {
-                seen.entry(name).or_default().push(m);
-            }
-        }
-        for (_, group) in seen.iter() {
-            if group.len() > 1 {
-                let display = group
-                    .first()
-                    .and_then(|m| m.name())
-                    .and_then(|n| self.node_source_text(&n).or_else(|| Some(n.text().to_string())))
-                    .unwrap_or_default();
-                for m in group.iter() {
-                    let Some(name_node) = m.name() else { continue };
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        self.current_file.clone(),
-                        name_node.loc,
-                        tsox_core::diagnostics::messages_generated::DUPLICATE_IDENTIFIER_0,
-                        vec![display.clone()],
-                    ));
-                }
-                let later = group.last().copied();
-                let first = group.first().copied();
-                if let (Some(first), Some(later)) = (first, later) {
-                    let first_t =
-                        member_type_of(first).map(|tn| self.get_type_from_type_node(&tn));
-                    let later_t =
-                        member_type_of(later).map(|tn| self.get_type_from_type_node(&tn));
-                    if let (Some(f), Some(l)) = (first_t, later_t) {
-                        let f_str = self.type_to_string(&f);
-                        let l_str = self.type_to_string(&l);
-                        if f_str != l_str {
-                            let display = later
-                                .name()
-                                .and_then(|n| {
-                                    self.node_source_text(&n)
-                                        .or_else(|| Some(n.text().to_string()))
-                                })
-                                .unwrap_or_default();
-                            let loc = later.name().map(|n| n.loc).unwrap_or(later.loc);
-                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                                self.current_file.clone(),
-                                loc,
-                                tsox_core::diagnostics::messages_generated::
-                                    SUBSEQUENT_PROPERTY_DECLARATIONS_MUST_HAVE_THE_SAME_TYPE_PROPERTY_0_MUST_BE_OF_TYPE_1_BUT_HERE_HAS_TYPE_2,
-                                vec![display, f_str, l_str],
-                            ));
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-fn member_type_of(m: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("member_type_of"); 
-    match &m.data {
-        tsox_frontend::ast::NodeData::PropertySignatureDeclaration(d) => {
-            let tn = Arc::clone(&d.type_node);
-            (tn.kind != SyntaxKind::MissingDeclaration).then_some(tn)
-        }
-        _ => None,
-    }
-}
-
-impl Checker {
-    pub(crate) fn check_class_type_for_duplicate_declarations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_type_for_duplicate_declarations"); 
+    pub(crate) fn check_class_type_for_duplicate_declarations(&mut self, node: &Arc<Node>) {
         let members: &[Arc<Node>] = match &node.data {
             tsox_frontend::ast::NodeData::ClassDeclaration(d) => &d.members.nodes,
             tsox_frontend::ast::NodeData::InterfaceDeclaration(d) => &d.members.nodes,
@@ -112,34 +28,7 @@ impl Checker {
         self.check_members_duplicate_declarations(members);
     }
 
-    fn check_members_duplicate_declarations(&mut self, members: &[Arc<Node>]) { ::tsox_core::fntrace::enter("check_members_duplicate_declarations"); 
-
-        let member_name = |m: &Arc<Node>| -> Option<String> {
-            let n = m.name()?;
-            match n.kind {
-                SyntaxKind::Identifier
-                | SyntaxKind::StringLiteral
-                | SyntaxKind::PrivateIdentifier => Some(n.text().to_string()),
-                SyntaxKind::NumericLiteral => {
-                    Some(tsox_core::jsnum::Number::from_string(n.text()).to_string())
-                }
-                SyntaxKind::ComputedPropertyName => {
-                    let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &n.data else {
-                        return None;
-                    };
-                    match cd.expression.kind {
-                        SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
-                            Some(cd.expression.text().to_string())
-                        }
-                        _ => crate::binder::symbols_binder_4::well_known_symbol_member_name(
-                            &cd.expression,
-                        ),
-                    }
-                }
-                _ => None,
-            }
-        };
-
+    fn check_members_duplicate_declarations(&mut self, members: &[Arc<Node>]) {
         let is_param_prop = |p: &Arc<Node>| {
             p.syntactic_modifier_flags().intersects(
                 ModifierFlags::Public
@@ -165,9 +54,32 @@ impl Checker {
             })
             .collect();
 
+        // Go getResolvedMembersOrExportsOfSymbol：先解析全部成员名
+        //（计算名经 checkComputedPropertyName 定型），后续按符号视角查重
+        let mut resolved: std::collections::HashMap<u64, Option<(String, bool)>> =
+            std::collections::HashMap::new();
+        for m in members.iter() {
+            if m.kind == SyntaxKind::Constructor {
+                continue;
+            }
+            let name = self.duplicate_member_name(m);
+            resolved.insert(m.id(), name);
+        }
+
+        self.check_member_late_merge_conflicts(members, &resolved);
+
+        // Go checkPropertyOrAccessor 状态机：kind 1=属性 2=访问器；
+        // 第二个属性或属性跟访问器组合时报错（state 3 封口）
         let kind_of = |m: &Arc<Node>| -> Option<u8> {
             match m.kind {
-                SyntaxKind::PropertyDeclaration | SyntaxKind::PropertySignature => Some(1),
+                SyntaxKind::PropertyDeclaration => Some(
+                    if m.has_syntactic_modifier(ModifierFlags::Accessor) {
+                        2
+                    } else {
+                        1
+                    },
+                ),
+                SyntaxKind::PropertySignature => Some(1),
                 SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => Some(2),
                 _ => None,
             }
@@ -195,34 +107,64 @@ impl Checker {
                     }
                     let name = p.name().unwrap().text().to_string();
                     if record((name.clone(), false), 1, &mut states) {
-                        self.report_duplicate_class_member(members, &name, false, &param_props);
+                        self.report_duplicate_class_member(
+                            members,
+                            &name,
+                            false,
+                            &param_props,
+                            &resolved,
+                        );
                     }
                 }
                 continue;
             }
             let Some(kind) = kind_of(m) else { continue };
-            let Some(name) = member_name(m) else { continue };
+            let Some((name, _)) = resolved.get(&m.id()).cloned().flatten() else {
+                continue;
+            };
             let is_static = m.has_syntactic_modifier(ModifierFlags::Static);
             if record((name.clone(), is_static), kind, &mut states) {
-                self.report_duplicate_class_member(members, &name, is_static, &param_props);
+                self.report_duplicate_class_member(
+                    members,
+                    &name,
+                    is_static,
+                    &param_props,
+                    &resolved,
+                );
             }
         }
 
-        self.check_class_property_type_consistency(members, member_name);
+        self.check_class_property_type_consistency(members);
     }
 
+    // Go reportDuplicateMemberErrors：对每个解析名匹配的成员报错
     fn report_duplicate_class_member(
         &mut self,
         members: &[Arc<Node>],
         name: &str,
         is_static: bool,
         param_props: &[(String, &Arc<Node>)],
-    ) { ::tsox_core::fntrace::enter("report_duplicate_class_member"); 
-        // 基线显示首个声明的原始名（含字符串引号、0.0 原样）
+        resolved: &std::collections::HashMap<u64, Option<(String, bool)>>,
+    ) {
+        // Go symbolToString：合并入早绑定符号取首个声明名字原文，纯晚绑定
+        // 符号取计算名原文（`[foo]`）
         let display: String = members
             .iter()
             .filter(|m| m.kind != SyntaxKind::Constructor)
             .find_map(|m| self.raw_member_display_name(m, name, is_static))
+            .or_else(|| {
+                members.iter().find_map(|m| {
+                    let (n, is_late) = resolved.get(&m.id()).cloned().flatten()?;
+                    (n == name
+                        && is_late
+                        && m.has_syntactic_modifier(ModifierFlags::Static) == is_static)
+                        .then(|| {
+                            m.name()
+                                .and_then(|nn| self.node_source_text(&nn))
+                                .unwrap_or_else(|| n.clone())
+                        })
+                })
+            })
             .unwrap_or_else(|| name.to_string());
         for m in members.iter() {
             if m.kind == SyntaxKind::Constructor {
@@ -239,31 +181,11 @@ impl Checker {
                 }
                 continue;
             }
-            let matches = m
-                .name()
-                .and_then(|n| match n.kind {
-                    SyntaxKind::Identifier
-                    | SyntaxKind::StringLiteral => Some(n.text().to_string()),
-                    SyntaxKind::NumericLiteral => {
-                        Some(tsox_core::jsnum::Number::from_string(n.text()).to_string())
-                    }
-                    SyntaxKind::ComputedPropertyName => {
-                        let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &n.data
-                        else {
-                            return None;
-                        };
-                        match cd.expression.kind {
-                            SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral => {
-                                Some(cd.expression.text().to_string())
-                            }
-                            _ => crate::binder::symbols_binder_4::well_known_symbol_member_name(
-                                &cd.expression,
-                            ),
-                        }
-                    }
-                    _ => None,
-                })
-                .is_some_and(|n| n == name)
+            let matches = resolved
+                .get(&m.id())
+                .cloned()
+                .flatten()
+                .is_some_and(|(n, _)| n == name)
                 && m.has_syntactic_modifier(ModifierFlags::Static) == is_static;
             if matches {
                 let loc = m.name().map(|n| n.loc).unwrap_or(m.loc);
@@ -299,6 +221,7 @@ fn self_member_name_text(m: &Arc<Node>, name: &str, is_static: bool) -> Option<S
     (matched == name && m.has_syntactic_modifier(ModifierFlags::Static) == is_static)
         .then(|| n.text().to_string())
 }
+<<<<<<< HEAD
 impl Checker {
     // Go errorNextVariableOrPropertyDeclarationMustHaveSameType（属性合并后
     // 逐对类型不一致在后续声明处报 TS2717）
@@ -389,3 +312,5 @@ impl Checker {
         }
     }
 }
+=======
+>>>>>>> b3f7d6c825 (fix(checker): 类/接口成员查重接入 lateBindMember 计算名解析与 mergeSymbol 冲突链)
