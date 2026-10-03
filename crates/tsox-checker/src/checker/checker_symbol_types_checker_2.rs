@@ -533,6 +533,10 @@ impl Checker {
                             NodeData::Identifier(i) => Some(i.text.clone()),
                             NodeData::StringLiteral(s) => Some(s.text.clone()),
                             NodeData::NumericLiteral(num) => Some(num.text.clone()),
+                            // Go getLiteralTypeFromPropertyName（checker.go:28363）：
+                            // bigint 名经 GetPropertyNameForPropertyNameNode 取文本
+                            // 作 string 字面量索引
+                            NodeData::BigIntLiteral(b) => Some(b.text.clone()),
                             _ => None,
                         });
                         let seg = renamed.clone().or_else(|| {
@@ -991,10 +995,22 @@ impl Checker {
             }
             let result = self.get_type_of_property_of_type(&t, name);
             if result.is_none() && diagnostics_allowed {
-                let display = self.boxed_declared_type_for_display(&t);
-                let type_str = self.type_to_string(&display);
                 let name_node = Self::binding_element_name_node(elem)
                     .unwrap_or_else(|| Arc::clone(elem));
+                // Go checkIndexedAccess（checker.go:28801）：索引节点为 bigint
+                // 字面量时不报属性缺失，改报 TS2538 且类型参数固定 "bigint"
+                if name_node.kind == tsox_frontend::ast::SyntaxKind::BigIntLiteral {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        name_node.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            TYPE_0_CANNOT_BE_USED_AS_AN_INDEX_TYPE,
+                        vec!["bigint".to_string()],
+                    ));
+                    return None;
+                }
+                let display = self.boxed_declared_type_for_display(&t);
+                let type_str = self.type_to_string(&display);
                 self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                     self.current_file.clone(),
                     name_node.loc,
