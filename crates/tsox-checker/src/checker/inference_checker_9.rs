@@ -102,7 +102,8 @@ impl Checker {
             inferred_type = self.get_type_from_inference(inference);
         }
 
-        let raw_constraint = self.get_constraint_of_type_parameter(&inference.type_parameter);
+        let raw_constraint =
+            self.get_resolved_constraint_of_type_parameter(&inference.type_parameter);
         let instantiated_constraint =
             raw_constraint.map(|c| self.instantiate_inference_constraint(context, index, &c));
 
@@ -171,6 +172,25 @@ impl Checker {
                 self.unknown_type()
             }
         })
+    }
+
+    /// Go getConstraintOfTypeParameter→getConstraintFromTypeParameter
+    /// （checker.go:18053/18072）：克隆（实例化）类型参数的约束经
+    /// target+mapper 惰性实例化，克隆链止于声明参数的已解析约束
+    fn get_resolved_constraint_of_type_parameter(
+        &mut self,
+        t: &Arc<Type>,
+    ) -> Option<Arc<Type>> {
+        let (constraint, target, mapper) = match t.as_type_parameter() {
+            Some(tp) => (tp.constraint.clone(), tp.target.clone(), tp.mapper.clone()),
+            None => return None,
+        };
+        if constraint.is_some() {
+            return constraint;
+        }
+        let target = target?;
+        let target_constraint = self.get_resolved_constraint_of_type_parameter(&target)?;
+        Some(self.instantiate_type(&target_constraint, mapper.as_ref()))
     }
 
     /// Go instantiateType(constraint, nonFixingMapper)：约束中的推断类型参数
