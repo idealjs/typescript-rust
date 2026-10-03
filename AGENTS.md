@@ -37,7 +37,9 @@ flowchart TD
   - `corpus_results.csv` / `corpus_skips.csv`——FAIL 全量 / SKIP 全量（水位与选例出发点）；
   - `corpus_rust_trace.csv`——Rust 侧 FAIL 对齐函数调用序列（trace 中间产物在 `.traces/`，gitignore，每次全量重刷后由脚本汇总为本 CSV）；
   - `corpus_go_trace.csv`——Go 侧函数调用序列（一次性数据，oracle 源码不变不重采）；
-  - `corpus_types_anchor.csv`——每例 .types **首分歧锚点**（本地 .types 发射器输出 vs Go reference 的第一个类型分歧行，含行号与两侧上下文），由 `tools/types_anchor.py` 从 `.traces/types/` 产出；与 trace 同级，subagent 定位用；
+  - `corpus_rust_types.csv`——Rust 侧**全量** .types 输出（6284 例，`tools/types_csv.py rust` 从 `.traces/types/` 汇总；每次全量后刷新）；
+  - `corpus_go_types.csv`——Go 侧全量 .types reference（6512 例，`tools/types_csv.py go` 一次性产出，oracle 不变不重采）；
+  - `corpus_types_anchor.csv`——每例 .types **首分歧锚点**（本地 vs Go reference 的第一个类型分歧行+两侧上下文），由 `tools/types_anchor.py` 从两侧 types CSV 提取，与 trace 同级；
   - `corpus_stack_diff.csv`——两侧执行栈差集（go_only / rust_only），由 `tools/stack_diff.py` 产出。
   分片 `/tmp/flywheel_shards/` 汇总以上数据供 subagent 直接读取。
 - **逐例整合与验证（N 次，波末执行）**：workflow 整波完成通知后，主 agent 逐个 worktree 处理其结果——cherry-pick 该 worktree 分支上的 commit 到整合分支 → 全量（带 `TSOX_FN_TRACE_DIR` + `TSOX_TYPES_EMIT_DIR`，约 2 分钟）→ 判定，循环 N 次。**每次全量同步刷新全部 CSV**（上述数据体系全部五份）——回归发生时归因数据（trace 差集变化、.types 锚点位移）与水位数据同刻更新，可直接用于处置与下一波选例。全量已降至 2 分钟，逐例验证成本可承受，收益是**回归精确归因到单个 commit**（N 个改动不混批）；编译失败同样逐例暴露（机械错可最小修复并标注，逻辑错原样记录）。
