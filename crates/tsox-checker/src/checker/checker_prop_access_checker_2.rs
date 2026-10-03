@@ -205,6 +205,9 @@ impl Checker {
             }
         }
 
+        // Go checkPropertyAccessExpressionOrQualifiedName：reportNonexistentProperty
+        // 经 addDeferredDiagnostic 推迟到文件检查收尾（报告时打印容器型会物化
+        // 成员型，推断窗口内提前报会打出 any）
         let display_type = if obj_type.flags.contains(TypeFlags::IndexedAccess) {
             self.constraint_of_indexed_access(&obj_type)
                 .unwrap_or_else(|| Arc::clone(&obj_type))
@@ -216,6 +219,27 @@ impl Checker {
         } else {
             Arc::clone(&obj_type)
         };
+        if self
+            .deferred_nonexistent_property_seen
+            .insert(name.id())
+        {
+            self.deferred_nonexistent_property.push((
+                Arc::clone(name),
+                Arc::clone(&display_type),
+                Arc::clone(&obj_type),
+            ));
+        }
+        return;
+    }
+
+    pub(crate) fn report_nonexistent_property_deferred(
+        &mut self,
+        name: &Arc<Node>,
+        display_type: &Arc<Type>,
+        obj_type: &Arc<Type>,
+    ) { ::tsox_core::fntrace::enter("report_nonexistent_property_deferred");
+        let name_text = name.text();
+        let file = self.current_file.clone();
         let mut type_str = self.type_to_string(&display_type);
         if display_type
             .symbol
@@ -307,6 +331,48 @@ impl Checker {
         };
         diag.message_chain = chain;
         self.diagnostics.add(diag);
+    }
+
+    pub(crate) fn produce_deferred_nonexistent_property_diagnostics(&mut self) { ::tsox_core::fntrace::enter("produce_deferred_nonexistent_property_diagnostics");
+        let mut index = 0;
+        while index < self.deferred_nonexistent_property.len() {
+            let (name, display_type, obj_type) = self.deferred_nonexistent_property[index].clone();
+            // Go 报告点在文件检查收尾（produceDeferredDiagnostics），容器型按
+            // 终态取值；入队时的型可能取自外层字面量构建窗口的部分快照，
+            // 此处按访问表达式现取容器型
+            let (display_type, obj_type) = match name
+                .parent()
+                .as_ref()
+                .and_then(|access| access.expression())
+            {
+                Some(expr) => {
+                    let obj_type = self.get_type_of_node(&expr);
+                    let display_type = self.nonexistent_property_display_type(&obj_type);
+                    (display_type, obj_type)
+                }
+                None => (display_type, obj_type),
+            };
+            self.report_nonexistent_property_deferred(&name, &display_type, &obj_type);
+            index += 1;
+        }
+        self.deferred_nonexistent_property.clear();
+        self.deferred_nonexistent_property_seen.clear();
+    }
+
+    // Go reportNonexistentProperty 实参选择：索引访问型取约束、this 型参数取
+    // 约束，其余原样
+    pub(crate) fn nonexistent_property_display_type(&mut self, obj_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("nonexistent_property_display_type");
+        if obj_type.flags.contains(TypeFlags::IndexedAccess) {
+            self.constraint_of_indexed_access(obj_type)
+                .unwrap_or_else(|| Arc::clone(obj_type))
+        } else if crate::checker::mapper::is_this_type_parameter(obj_type)
+            && let crate::checker::types::TypeData::TypeParameter(tp) = &obj_type.data
+            && let Some(constraint) = &tp.constraint
+        {
+            Arc::clone(constraint)
+        } else {
+            Arc::clone(obj_type)
+        }
     }
 
     pub(crate) fn global_this_property_access_error(

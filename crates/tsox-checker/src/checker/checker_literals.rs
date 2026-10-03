@@ -142,6 +142,10 @@ impl Checker {
         let mut fell_back_to_any = false;
         let mut spread_acc: Option<Arc<Type>> = None;
         let mut spread_error = false;
+        let mut computed_props: Vec<Arc<Symbol>> = Vec::new();
+        let mut has_computed_string_property = false;
+        let mut has_computed_number_property = false;
+        let mut has_computed_symbol_property = false;
         let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
         let empty_snapshot =
             self.object_literal_type_from_pairs(Vec::new(), literal_symbol.clone());
@@ -202,6 +206,38 @@ impl Checker {
                     }
                     let name = self.get_property_name_from_node(&data.name);
                     if name.is_empty() {
+                        if data.name.kind == SyntaxKind::ComputedPropertyName {
+                            // Go checkObjectLiteral：非字面量计算名成员仍以初始
+                            // 化式加宽型入 propertiesArray，并按计算名型的可赋
+                            // 性归入 number/symbol/string 索引桶，最终型经
+                            // getObjectLiteralIndexInfo 带索引签名，不退化 any
+                            let name_type = self.check_computed_property_name_type(&data.name);
+                            let value_type =
+                                self.property_assignment_type(prop, &data.initializer, node, "");
+                            let mut prop_symbol = Symbol::new(SymbolFlags::Property, name.clone());
+                            prop_symbol.value_declaration = Some(Arc::clone(prop));
+                            prop_symbol
+                                .declarations
+                                .push(Arc::clone(prop));
+                            let prop_symbol = Arc::new(prop_symbol);
+                            self.value_symbol_links.insert(
+                                &prop_symbol,
+                                crate::checker::types::ValueSymbolLinks {
+                                    resolved_type: Some(Arc::clone(&value_type)),
+                                    ..Default::default()
+                                },
+                            );
+                            computed_props.push(prop_symbol);
+                            if self.is_type_assignable_to(&name_type, &self.number_type()) {
+                                has_computed_number_property = true;
+                            } else if self.is_type_assignable_to(&name_type, &self.es_symbol_type())
+                            {
+                                has_computed_symbol_property = true;
+                            } else if self.is_type_assignable_to(&name_type, &self.string_type()) {
+                                has_computed_string_property = true;
+                            }
+                            continue;
+                        }
                         fell_back_to_any = true;
                         break;
                     }
@@ -282,6 +318,20 @@ impl Checker {
             if !prop_pairs.is_empty() {
                 let segment =
                     self.object_literal_type_from_pairs(prop_pairs, literal_symbol.clone());
+                // Go checkObjectLiteral：spread 段边界先以当前桶物化段型
+                //（createObjectLiteralType 含计算名索引签名）再重置桶
+                let segment = self.attach_object_literal_computed_index_infos(
+                    segment,
+                    node,
+                    &computed_props,
+                    has_computed_string_property,
+                    has_computed_number_property,
+                    has_computed_symbol_property,
+                );
+                computed_props = Vec::new();
+                has_computed_string_property = false;
+                has_computed_number_property = false;
+                has_computed_symbol_property = false;
                 self.get_spread_type(
                     &spread,
                     &segment,
@@ -314,10 +364,82 @@ impl Checker {
                 self.in_flight_object_literal_types.insert(node.id(), snapshot);
             }
 
-            self.object_literal_type_from_pairs(prop_pairs, literal_symbol)
+            let built = self.object_literal_type_from_pairs(prop_pairs, literal_symbol);
+            self.attach_object_literal_computed_index_infos(
+                built,
+                node,
+                &computed_props,
+                has_computed_string_property,
+                has_computed_number_property,
+                has_computed_symbol_property,
+            )
         };
         self.in_flight_object_literal_types.remove(&node.id());
         result
+    }
+
+    // Go createObjectLiteralType 尾段：hasComputed* 桶非空时经
+    // getObjectLiteralIndexInfo 生成 string/number/symbol 索引签名
+    fn attach_object_literal_computed_index_infos(
+        &mut self,
+        t: Arc<crate::checker::types::Type>,
+        node: &Arc<Node>,
+        computed_props: &[Arc<Symbol>],
+        has_computed_string_property: bool,
+        has_computed_number_property: bool,
+        has_computed_symbol_property: bool,
+    ) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("attach_object_literal_computed_index_infos");
+        if !has_computed_string_property
+            && !has_computed_number_property
+            && !has_computed_symbol_property
+        {
+            return t;
+        }
+        let obj = match &t.data {
+            crate::checker::types::TypeData::Object(o) => o.clone(),
+            _ => return t,
+        };
+        let is_readonly = self.is_const_context(node);
+        let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
+        if has_computed_string_property {
+            let key = self.string_type();
+            index_infos.push(Arc::new(
+                self.get_object_literal_index_info(is_readonly, computed_props, &key),
+            ));
+        }
+        if has_computed_number_property {
+            let key = self.number_type();
+            index_infos.push(Arc::new(
+                self.get_object_literal_index_info(is_readonly, computed_props, &key),
+            ));
+        }
+        if has_computed_symbol_property {
+            let key = self.es_symbol_type();
+            index_infos.push(Arc::new(
+                self.get_object_literal_index_info(is_readonly, computed_props, &key),
+            ));
+        }
+        Arc::new(crate::checker::types::Type {
+            flags: t.flags,
+            object_flags: t.object_flags,
+            id: crate::checker::types::next_type_id(),
+            symbol: t.symbol.clone(),
+            alias: t.alias.clone(),
+            data: crate::checker::types::TypeData::Object(
+                crate::checker::types::ObjectTypeData {
+                    node: None,
+                    structured: crate::checker::types::StructuredTypeData {
+                        members: obj.structured.members.clone(),
+                        properties: obj.structured.properties.clone(),
+                        index_infos,
+                        ..Default::default()
+                    },
+                    target: None,
+                    mapper: None,
+                    type_arguments: Vec::new(),
+                },
+            ),
+        })
     }
 
     fn object_literal_accessor_type(&mut self, node: &Arc<Node>, name: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("object_literal_accessor_type"); 

@@ -51,6 +51,10 @@ impl Checker {
 
         self.check_unused_renamed_binding_elements(&file_node);
 
+        // Go checkSourceFile：checkDeferredNodes 之后再 produceDeferredDiagnostics，
+        // TS2339 打印容器型时方法返回型已推断完成
+        self.produce_deferred_nonexistent_property_diagnostics();
+
         self.pop_scope();
         self.current_file = None;
         self.current_file_id = 0;
