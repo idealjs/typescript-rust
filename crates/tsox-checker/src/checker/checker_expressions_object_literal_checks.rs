@@ -70,6 +70,29 @@ impl Checker {
                 }
             }
 
+            // Go checkGrammarObjectLiteralExpression（grammarchecks.go:1133）：
+            // PropertyAssignment/ShorthandPropertyAssignment 的 bigint 字面量名
+            // 报 TS1539，不因文件含解析错误而跳过
+            for prop in data.properties.iter() {
+                if !matches!(
+                    prop.kind,
+                    SyntaxKind::PropertyAssignment | SyntaxKind::ShorthandPropertyAssignment
+                ) {
+                    continue;
+                }
+                if let Some(name_node) = prop.name()
+                    && name_node.kind == SyntaxKind::BigIntLiteral
+                {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        name_node.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            A_BIGINT_LITERAL_CANNOT_BE_USED_AS_A_PROPERTY_NAME,
+                        Vec::new(),
+                    ));
+                }
+            }
+
             if !is_destructuring_assignment_target
                 && !self
                     .current_file

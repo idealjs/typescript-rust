@@ -62,6 +62,17 @@ impl Checker {
             else {
                 continue;
             };
+            // Go checkVariableLikeDeclaration（checker.go:6270）：
+            // bigint 字面量名报 TS1539
+            if psd.name.kind == SyntaxKind::BigIntLiteral {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    psd.name.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        A_BIGINT_LITERAL_CANNOT_BE_USED_AS_A_PROPERTY_NAME,
+                    Vec::new(),
+                ));
+            }
             if psd.type_node.kind == SyntaxKind::MissingDeclaration {
                 continue;
             }

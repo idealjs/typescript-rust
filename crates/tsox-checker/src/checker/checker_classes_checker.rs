@@ -22,6 +22,17 @@ impl Checker {
         match node.kind {
             SyntaxKind::PropertyDeclaration => {
                 if let tsox_frontend::ast::NodeData::PropertyDeclaration(data) = &node.data {
+                    // Go checkVariableLikeDeclaration（checker.go:6270）：
+                    // bigint 字面量名报 TS1539
+                    if data.name.kind == SyntaxKind::BigIntLiteral {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            data.name.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                A_BIGINT_LITERAL_CANNOT_BE_USED_AS_A_PROPERTY_NAME,
+                            Vec::new(),
+                        ));
+                    }
                     self.check_computed_property_name(&data.name);
 
                     let ambient = self.ambient_context_depth > 0
