@@ -25,6 +25,10 @@ impl Checker {
                 );
 
                 self.check_cjs_reserved_top_level_name(node, name);
+
+                if !node.flags.contains(tsox_frontend::ast::NodeFlags::Ambient) {
+                    self.check_class_name_collision_with_object(name);
+                }
             }
         }
 
