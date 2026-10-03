@@ -3,8 +3,7 @@
 use crate::checker::checker_statements::*;
 
 impl Checker {
-    pub fn check_class_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_declaration"); 
-        self.check_grammar_modifiers(node);
+    pub fn check_class_declaration(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_declaration");
         self.check_grammar_class_declaration_heritage_clauses(node);
         self.check_exports_on_merged_declarations(node);
         self.check_type_parameters_on_node(node);

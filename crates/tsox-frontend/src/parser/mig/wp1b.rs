@@ -501,52 +501,6 @@ impl Parser {
         false
     }
 
-    pub(crate) fn parse_decorated_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_decorated_expression"); 
-        let pos = self.node_pos();
-        let jsdoc = self.jsdoc_scanner_info();
-        let modifiers = self.parse_modifiers_ex(true, false, false);
-        if self.token == SyntaxKind::ClassKeyword {
-            return self.parse_class_declaration_or_expression(pos, jsdoc, modifiers, SyntaxKind::ClassExpression);
-        }
-        self.parse_error_at(self.node_pos(), self.node_pos(), diagnostics::EXPRESSION_EXPECTED, &[]);
-        let mut n = Node::new(
-            SyntaxKind::MissingDeclaration,
-            NodeData::MissingDeclaration(crate::ast::node_data_generated::MissingDeclarationData { modifiers }),
-        );
-        self.finish_node_arc(&mut n, pos)
-    }
-
-    pub(crate) fn parse_modifiers_ex(
-        &mut self,
-        _allow_decorators: bool,
-        _permit_const_as_modifier: bool,
-        _stop_on_start_of_class_static_block: bool,
-    ) -> Option<Arc<crate::ast::node_node_list::ModifierList>> { ::tsox_core::fntrace::enter("parse_modifiers_ex"); 
-        let mut nodes: Vec<Arc<Node>> = Vec::new();
-        while crate::ast::is_modifier_kind(self.token) {
-            let pos = self.node_pos();
-            let kind = self.token;
-            self.next_token();
-            let mut m = Node::new(kind, NodeData::Token);
-            nodes.push(Arc::new(self.finish_node(&mut m, pos)));
-        }
-        if nodes.is_empty() {
-            return None;
-        }
-        let flags = crate::ast::utilities_modifiers::modifiers_to_flags(&nodes);
-        Some(Arc::new(crate::ast::node_node_list::ModifierList::new(nodes, flags)))
-    }
-
-    pub(crate) fn parse_class_declaration_or_expression(
-        &mut self,
-        _pos: usize,
-        _jsdoc: super::m4b::JSDocScannerInfo,
-        modifiers: Option<Arc<crate::ast::node_node_list::ModifierList>>,
-        _kind: SyntaxKind,
-    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_declaration_or_expression"); 
-        self.parse_class_declaration_with_modifiers(modifiers)
-    }
-
     pub(crate) fn parse_expected_matching_brackets(
         &mut self,
         open_kind: SyntaxKind,

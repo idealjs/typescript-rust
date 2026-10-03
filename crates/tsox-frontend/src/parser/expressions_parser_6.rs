@@ -98,6 +98,7 @@ impl Parser {
             SyntaxKind::LessThanToken if self.language_variant == LanguageVariant::Jsx => {
                 self.parse_jsx_element_or_fragment(true)
             }
+            SyntaxKind::AtToken => self.parse_decorated_expression(),
             SyntaxKind::FunctionKeyword => self.parse_function_expression(),
             SyntaxKind::ClassKeyword => self.parse_class_expression(),
 

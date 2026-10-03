@@ -352,8 +352,25 @@ impl Checker {
                 && self.check_grammar_for_use_strict_simple_parameter_list(node))
     }
 
-    pub fn check_grammar_class_like_declaration(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_like_declaration"); 
-        false
+    pub fn check_grammar_class_like_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_like_declaration");
+        if self.check_grammar_class_declaration_heritage_clauses(node) {
+            return true;
+        }
+        let type_parameters: Option<&tsox_frontend::ast::NodeList> = match &node.data {
+            NodeData::ClassDeclaration(d) => d.type_parameters.as_deref(),
+            NodeData::ClassExpression(d) => d.type_parameters.as_deref(),
+            _ => None,
+        };
+        let Some(type_parameters) = type_parameters else {
+            return false;
+        };
+        let file = self
+            .get_source_file_of_node(node)
+            .or_else(|| self.current_file.clone());
+        match file {
+            Some(file) => self.check_grammar_type_parameter_list(type_parameters, &file),
+            None => false,
+        }
     }
 
     pub fn check_grammar_arrow_function(
@@ -615,13 +632,16 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_class_declaration_heritage_clauses(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_declaration_heritage_clauses"); 
+    pub fn check_grammar_class_declaration_heritage_clauses(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_declaration_heritage_clauses");
         use tsox_core::diagnostics::messages_generated as msg;
         let heritage = match &node.data {
             NodeData::ClassDeclaration(d) => d.heritage_clauses.as_ref(),
             NodeData::ClassExpression(d) => d.heritage_clauses.as_ref(),
             _ => return false,
         };
+        if self.check_grammar_modifiers(node) {
+            return false;
+        }
         let Some(clauses) = heritage else {
             return false;
         };

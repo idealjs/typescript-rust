@@ -108,6 +108,14 @@ impl Parser {
 
     pub(crate) fn parse_class_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_expression"); 
         let pos = self.token_pos();
+        self.parse_class_expression_with_modifiers(pos, None)
+    }
+
+    pub(crate) fn parse_class_expression_with_modifiers(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_expression_with_modifiers");
         self.next_token();
 
         let name = if self.is_binding_identifier()
@@ -126,7 +134,7 @@ impl Parser {
         Arc::new(Node::with_loc(
             SyntaxKind::ClassExpression,
             NodeData::ClassExpression(ClassExpressionData {
-                modifiers: None,
+                modifiers,
                 name,
                 type_parameters,
                 heritage_clauses,
