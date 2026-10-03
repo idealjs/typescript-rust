@@ -1,7 +1,9 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_impl_chunk_6::*;
+use crate::checker::mig::m1b::jsnum_from_string;
 use crate::checker::mig::m1b::parse_pseudo_big_int;
+use crate::checker::mig::m1b_4::jsnum_negate;
 use tsox_core::diagnostics::messages_generated::OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1;
 
 impl Checker {
@@ -121,6 +123,21 @@ impl Checker {
                         return self.number_type();
                     }
                     match data.operator {
+                        SyntaxKind::MinusToken
+                            if data.operand.kind == SyntaxKind::NumericLiteral =>
+                        {
+                            let value =
+                                jsnum_negate(jsnum_from_string(data.operand.text()));
+                            let literal = self.get_number_literal_type(value);
+                            return self.get_fresh_type_of_literal_type(&literal);
+                        }
+                        SyntaxKind::PlusToken
+                            if data.operand.kind == SyntaxKind::NumericLiteral =>
+                        {
+                            let value = jsnum_from_string(data.operand.text());
+                            let literal = self.get_number_literal_type(value);
+                            return self.get_fresh_type_of_literal_type(&literal);
+                        }
                         SyntaxKind::ExclamationToken => return self.boolean_type(),
 
                         SyntaxKind::DeleteKeyword => return self.boolean_type(),
