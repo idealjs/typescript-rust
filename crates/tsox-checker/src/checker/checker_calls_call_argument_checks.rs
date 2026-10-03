@@ -373,10 +373,11 @@ impl Checker {
                 self.pop_contextual_type();
                 t
             } else {
-                // Go isSignatureApplicable(checker.go:9446)：定型后签名对每个
+                // Go isSignatureApplicable(checker.go:9812)：定型后签名对每个
                 // 非 CS 实参 checkExpressionWithContextualType(paramType, nil)
-                // 重检，元组/Iterable 等上下文在适用性判定现场成立
-                self.clear_node_type_cache_under(arg);
+                // 复检；已检查节点按缓存型返回（checker.go:7941 走 links.type），
+                // 首轮型即终局（assignParameterType checker.go:10976 一次性冻结），
+                // 不带参数位重跑子树
                 self.active_inferential_contextual = Some((arg.id(), Arc::clone(&param_type)));
                 let t = self.get_type_of_node(arg);
                 self.active_inferential_contextual = None;
