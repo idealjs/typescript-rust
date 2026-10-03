@@ -82,4 +82,68 @@ impl Checker {
 
         None
     }
+
+    // Go nameresolver.go KindExpressionWithTypeArguments 分支：extends 基类表达式
+    // 内的名字若落在所在类的成员（类型参数）上，解析失败（TS2562 由调用侧报告）
+    pub(crate) fn base_expression_type_parameters_hit(
+        &self,
+        node: &Arc<Node>,
+        name: &str,
+        type_meaning: SymbolFlags,
+    ) -> bool {
+        let symbol_map = self.program.symbol_map();
+        let mut child = Arc::clone(node);
+        let mut ancestor = node.parent();
+        while let Some(a) = ancestor {
+            if a.kind == SyntaxKind::ExpressionWithTypeArguments {
+                if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(d) = &a.data
+                    && Arc::ptr_eq(&child, &d.expression)
+                    && let Some(clause) = a.parent()
+                    && matches!(
+                        &clause.data,
+                        tsox_frontend::ast::NodeData::HeritageClause(h)
+                            if h.token == SyntaxKind::ExtendsKeyword
+                    )
+                    && let Some(container) = clause.parent()
+                    && tsox_frontend::ast::is_class_like(&container)
+                    && let Some(container_sym) = symbol_map.symbols.get(&container.id())
+                    && let Some(member) = container_sym.members.get(name)
+                    && member.flags.intersects(type_meaning)
+                {
+                    return true;
+                }
+            }
+            if let Some(locals) = symbol_map.locals.get(&a.id())
+                && !Self::is_global_source_file(&a)
+                && let Some(sym) = locals.get(name)
+                && sym.flags.intersects(type_meaning)
+            {
+                return false;
+            }
+            if matches!(
+                a.kind,
+                SyntaxKind::ClassDeclaration
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::InterfaceDeclaration
+            ) {
+                if let Some(sym) = symbol_map.symbols.get(&a.id())
+                    && let Some(member) = sym.members.get(name)
+                    && member.flags.intersects(type_meaning)
+                    && crate::binder::nameresolver_get_local_symbol_for_export_default::is_type_parameter_symbol_declared_in_container(
+                        member, &a,
+                    )
+                {
+                    return false;
+                }
+                if a.kind == SyntaxKind::ClassExpression
+                    && a.name().is_some_and(|n| n.text() == name)
+                {
+                    return false;
+                }
+            }
+            child = Arc::clone(&a);
+            ancestor = a.parent();
+        }
+        false
+    }
 }

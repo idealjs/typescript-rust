@@ -47,6 +47,26 @@ impl Checker {
             );
             self.diagnostics.add(diag);
         }
+        // Go nameresolver.go KindExpressionWithTypeArguments 分支：基类表达式内
+        // 名字落在所在类类型参数上时报 TS2562，且早退跳过 2304 补救链
+        if type_name.kind == SyntaxKind::Identifier
+            && self.base_expression_type_parameters_hit(
+                type_name,
+                type_name.text(),
+                SymbolFlags::TYPE,
+            )
+        {
+            let file = self
+                .get_source_file_of_node(type_name)
+                .or_else(|| self.current_file.clone());
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                type_name.loc,
+                tsox_core::diagnostics::messages_generated::BASE_CLASS_EXPRESSIONS_CANNOT_REFERENCE_CLASS_TYPE_PARAMETERS,
+                vec![],
+            ));
+            return self.unresolved_type();
+        }
         let mut symbol = if type_name.kind == SyntaxKind::Identifier {
             match self.resolve_identifier_use(type_name, SymbolFlags::TYPE | SymbolFlags::NAMESPACE) {
                 Some(s) => s,
