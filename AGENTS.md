@@ -8,26 +8,30 @@
 
 ### 语料修复飞轮
 
-主 agent 是唯一构建者、测试者与循环驱动者；subagent 全程**纯文本**（隔离 worktree 内只修**一个用例**，禁构建禁测试，输出独立 commit）。
+主 agent 是循环驱动者与判定口径持有者：全量校验在 workflow 内以 world.run 于各 worktree 上**串行**执行（命令集经用户确认），波收尾线性整合与水位分析在主 agent；subagent 全程**纯文本**（隔离 worktree 内只修**一个用例**，禁构建禁测试，输出独立 commit）。
 
-**修复模型**：GLM-5.3-Flash · low 思考档。
+**修复模型**：GLM-5.3-Flash · max 思考档。
 
-**架构约束**：一个 workflow 只做**单波并发修复**——N 个并发位 = N 个用例，每个 subagent 只修一个用例，不做组内串行循环；跨多波的目标用例总数由主 agent 分波达成，不在 workflow 内循环。
+**架构约束**：一个 workflow = **修复波 + 波内串行验证**两段。修复波是唯一并发段——N 个并发位 = N 个用例，每个 subagent 只修一个用例；验证段串行——逐 worktree 在其上直接跑全量校验（不 pick、不建整合分支、无任何合并），一次只跑一个（一个校验命令或一个退回 subagent）。回归退回在**同 run 内**以对原 agent 的后续 ask 完成（同名 agent 上下文延续；原 agent 即 workflow 开头修复波所创建，退回后该例**回到开头的修复段**续修，随后再入串行验证），无需 amend；停止退回与留队由 workflow 自身判定。波收尾的线性整合与下波分发在主 agent，不在 workflow 内跨波循环。
 
 ```mermaid
 flowchart TD
-    START["波入口（主 agent）<br/>① 全量测试基线就绪（数据体系五份 CSV 全部最新）<br/>② 挑选 N 例分发给 workflow"]
-    START --> WF["单波 workflow：N 个 subagent 并发<br/>每人一例 · 预建隔离 worktree · 纯文本禁测 · GLM-5.3-Flash low<br/>（整波完成后通知一次）"]
-    WF --> PICK["主循环：取下一个 worktree 的结果<br/>cherry-pick 该例 commit 到整合分支（线性，禁 merge）"]
-    PICK --> FULL["主循环：cargo test --release 全量<br/>（带 TSOX_FN_TRACE_DIR + TSOX_TYPES_EMIT_DIR）<br/>约 2 分钟，每例 pick 后必跑<br/>同步刷新五份 CSV"]
-    FULL --> VERDICT{"该 commit 的净效果"}
-    VERDICT -->|"目标例绿且无回归"| NEXT["保留"]
-    VERDICT -->|"回归 / 未过"| HANDLE["记录归因（回归-改动相关分析）<br/>锁定到该 commit，留给后续轮次处理"]
-    HANDLE --> MORE{"还有未处理的 worktree？"}
-    NEXT --> MORE
-    MORE -->|是| PICK
-    MORE -->|"否：本波 N 个 worktree 处理完"| ANALYSIS["主 agent：归纳分析<br/>corpus_results.csv 水位 / 下波选例"]
-    ANALYSIS --> DECIDE{"FAIL = 0 或用户叫停？"}
+    START["波入口（主 agent）<br/>全量基线就绪（五份 CSV 最新）· 挑选 N 例分发"]
+    subgraph WFBOX["workflow 内（修复并发；验证与退回串行；无 pick · 无合并）"]
+        WF["修复波（并发）：N 个 subagent<br/>每人一例 · 隔离 worktree · 纯文本禁测"]
+        WF --> VERIFY
+        VERIFY["串行验证：逐个 worktree 在其上直接跑全量<br/>约 2 分钟 · 同步刷新五份 CSV"]
+        VERIFY --> VERDICT{"验证结果"}
+        VERDICT -->|"目标例通过且无回归"| MORE{"还有未处理的 worktree？"}
+        VERDICT -->|"回归 / 未过"| REG["记录归因<br/>回归例信息退回原 agent，在原 worktree 续修"]
+        MORE -->|"是"| VERIFY
+        MORE -->|"否"| DONE["波产出：已验证分支 + 归因记录 + 留队清单"]
+        REG -->|"回到 workflow 开头"| WF
+    end
+    START --> WF
+    DONE --> INTEG["波收尾整合（主 agent）：新建干净分支<br/>各分支 commit 按处理序 cherry-pick（禁 merge）<br/>最终全量一次，检查各分支合并后的整体效果"]
+    INTEG --> ANALYSIS["主 agent：水位归纳分析与下波选例<br/>（corpus_results.csv + corpus_types_anchor.csv）"]
+    ANALYSIS --> DECIDE{"FAIL = 0 且 anchor 差异 = 0，或用户叫停？"}
     DECIDE -->|否| START
     DECIDE -->|是| END["结束 · 汇总报告"]
 ```
@@ -42,11 +46,11 @@ flowchart TD
   - `corpus_types_anchor.csv`——每例 .types **首分歧锚点**（本地 vs Go reference 的第一个类型分歧行+两侧上下文），由 `tools/types_anchor.py` 从两侧 types CSV 提取，与 trace 同级；
   - `corpus_stack_diff.csv`——两侧执行栈差集（go_only / rust_only），由 `tools/stack_diff.py` 产出。
   分片 `/tmp/flywheel_shards/` 汇总以上数据供 subagent 直接读取。
-- **逐例整合与验证（N 次，波末执行）**：workflow 整波完成通知后，主 agent 逐个 worktree 处理其结果——cherry-pick 该 worktree 分支上的 commit 到整合分支 → 全量（带 `TSOX_FN_TRACE_DIR` + `TSOX_TYPES_EMIT_DIR`，约 2 分钟）→ 判定，循环 N 次。**每次全量同步刷新全部 CSV**（上述数据体系全部五份）——回归发生时归因数据（trace 差集变化、.types 锚点位移）与水位数据同刻更新，可直接用于处置与下一波选例。全量已降至 2 分钟，逐例验证成本可承受，收益是**回归精确归因到单个 commit**（N 个改动不混批）；编译失败同样逐例暴露（机械错可最小修复并标注，逻辑错原样记录）。
-- **回归处置**：某 commit 引入回归时**只记录归因、当场不修**——按「回归-改动相关分析」锁定到该 commit（真回归 vs 假绿暴露、波及例清单），该 commit 可保留或回退由归因结论决定；修复动作留给后续轮次（回归例进下一波选例或专项分片）。
+- **波内串行验证（workflow 内，逐 worktree）**：修复波整波完成后，脚本进入串行段——逐个 worktree 直接在其上跑全量（带 `TSOX_FN_TRACE_DIR` + `TSOX_TYPES_EMIT_DIR`，约 2 分钟）→ 刷新五份 CSV → 判定，处理完一个再取下一个。每个 worktree 分支只含本例改动，**回归天然归因到该分支的 commit**（N 个改动不混批）；编译失败同样逐例暴露（机械错可最小修复并标注，逻辑错原样记录）。**回归退回（串行）**：回归/未过时记录归因后，把回归例信息（新 FAIL 清单 + anchor/trace 位移）作为后续 ask 退回该 worktree 的原 agent——同名 agent 上下文延续，该轮唯一在跑的 subagent——退回后该例**回到 workflow 开头的修复段**：原 agent 在原 worktree 续修追加 commit，随后再次进入串行验证；按最新水位更新各例回归清单（已消化项移除）。停止退回与留队由 workflow 自身判定，留队例随波产出交主 agent 入留队池。**波收尾整合（主 agent，workflow 外）**：全部验证完后新建干净分支，各分支按处理序逐 commit cherry-pick 线性化（禁 merge，同「产出整合纪律」），最终全量一次以暴露跨例互斥。
+- **回归处置**：某 commit 引入回归时**只记录归因、不当场修**——按「回归-改动相关分析」锁定到该 commit（真回归 vs 假绿暴露、波及例清单），该 commit 可保留或回退由归因结论决定；修复动作经**波内串行退回**原 agent 在原 worktree 续修（见架构约束），不再顺延到后续波次。
 - **subagent 契约（单例分片）**：隔离 worktree；只读 repo / Go oracle（`/home/cqh/workspace/typescript-go`）/ 分片失败信息（三层锚点：.types 首分歧 → 错误 diff → 执行栈对照，见 `/tmp/flywheel_shards/` 与仓库根 trace CSV）；禁止任何 cargo/编译/测试/探针；禁止 skip/改断言/改基线消错与空壳实现；符号不存在三选一（grep 等价接线 / 按 Go 最小真实实现 / 保留错误记交接）；按根因独立 commit（只 add crates/ 生产路径）；汇报 rootCause（双侧源码行号）与**函数变更表**（缺表打回）。时限为期望值（目标 30 分钟级，非硬截点），单根因约 10 分钟无进展换思路或收尾交接。
-- **异常路由**：深水例（两轮不收敛）入留队池待人工或主 agent 插桩通道；「错错相抵」型回红（前置修复互斥）一律新建 worktree 重审而非续修；新增 skip / 基线变更必须人工确认。
-- **收敛**：FAIL = 0 + 回归归零 + 汇总报告。
+- **异常路由**：深水例（两轮不收敛）入留队池待人工或主 agent 插桩通道；新增 skip / 基线变更必须人工确认。
+- **收敛**：FAIL = 0 + 回归归零 + `corpus_types_anchor.csv` 差异抹平（全量 .types 与 Go reference 零首分歧，含已 PASS 用例的隐藏类型分歧）+ 汇总报告。
 
 函数靠齐追踪表：`python3 tools/gen_func_alignment.py` 生成仓库根 `func_alignment.csv`（静态抓取 Go/Rust 两侧全部函数名，camelCase↔snake_case 由脚本归一为 `norm_name` 排序键，单表左右对照）。该表与仓库根 CSV 同为 subagent 只读。
 

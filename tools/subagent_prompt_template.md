@@ -49,3 +49,23 @@
 - rootCause 引用双侧源码 文件:行号；functionTable 必交：
   | commit | 文件 | Rust 函数(增/改/删) | 对齐的 Go 函数 | 用例效果 |
 ```
+
+## 退回模板正文（波内串行验证段使用：回归例信息退回原 agent 的后续 ask）
+
+```
+# 退回：{{用例名}}（原修复 commit {{原 commit 短 hash}} 引入回归）
+
+## 背景
+你此前在 {{worktree}}（分支 {{branch}}）修复 {{用例名}} 的 commit 已在波内串行验证：原例{{绿 / 未过}}，但波及回归 {{回归例清单}}（本轮 corpus_results.diff 新增 FAIL）。
+本轮目标：在原 worktree 分支上**追加**修复 commit，使原例与全部回归例同时绿。你的首个任务上下文仍在，但主仓数据已刷新，先重读：git -C {{worktree}} log --oneline -5、最新 corpus_results.csv / corpus_types_anchor.csv 中回归例行、分片 /tmp/flywheel_shards/。
+
+## 回归例信息
+{{每例：例名 + 新 FAIL 摘要 + .types 首分歧锚点（本地 vs Go reference）+ 归因到本 commit 的依据}}
+
+## 纪律
+同首任务：纯文本禁测、只改 crates/ 生产代码、只 add crates/ 生产路径、progress_notes.md 不入库、Bash 连续 3 次失败即收尾汇报。
+
+## 汇报
+- rootCause：回归成因 + 与原修复的关系（真回归 / 假绿暴露）。
+- functionTable 同首任务格式；commit 填 git -C {{worktree}} rev-parse HEAD 完整 hash。
+```
