@@ -12,3 +12,4 @@ corpus_results.prev.csv
 corpus_results.diff
 corpus_skips.prev.csv
 corpus_skips.diff
+.traces/

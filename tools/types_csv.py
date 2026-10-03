@@ -24,7 +24,15 @@ def summarize(src_dir, out_path):
             with open(os.path.join(src_dir, fn), encoding="utf-8", errors="replace") as fi:
                 content = fi.read()
             line_count = content.count("\n")
-            escaped = content.replace("\\", "\\\\").replace("\n", "\\n").replace('"', '""')
+            cleaned = (
+                content
+                .replace("\u2028", " ")
+                .replace("\u2029", " ")
+                .replace("\u0085", " ")
+                .replace("\x0b", " ")
+                .replace("\x0c", " ")
+            )
+            escaped = cleaned.replace("\\", "\\\\").replace("\n", "\\n").replace('"', '""')
             fo.write(f'{stem},{line_count},"{escaped}"\n')
             n += 1
     print(f"{out_path}: {n} 例")
