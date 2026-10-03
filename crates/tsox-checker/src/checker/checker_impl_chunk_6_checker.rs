@@ -376,7 +376,7 @@ impl Checker {
             }
             final_type
         } else {
-            self.get_any_type()
+            self.error_type()
         }
     }
 
