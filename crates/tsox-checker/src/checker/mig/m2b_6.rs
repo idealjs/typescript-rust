@@ -100,7 +100,7 @@ impl Checker {
             let name = self.symbol_to_string(&symbol);
             self.error_message(
                 &declaration,
-                msg::X_0IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_BASE_EXPRESSION,
+                msg::X_0_IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_BASE_EXPRESSION,
                 &[name],
             );
             set_resolved_base_constructor_type(t, self.error_type());
@@ -123,14 +123,12 @@ impl Checker {
                 vec![text],
             );
             if base_constructor_type.flags.contains(TypeFlags::TypeParameter) {
+                let constraint = self.get_constraint_from_type_parameter(&base_constructor_type);
                 let ctor_return = self
-                    .get_constraint_from_type_parameter(&base_constructor_type)
-                    .and_then(|constraint| {
-                        self.get_signatures_of_type(&constraint, SignatureKind::Construct)
-                            .into_iter()
-                            .next()
-                            .and_then(|sig| self.get_return_type_of_signature(&sig))
-                    })
+                    .get_signatures_of_type(&constraint, SignatureKind::Construct)
+                    .into_iter()
+                    .next()
+                    .and_then(|sig| self.get_return_type_of_signature(&sig))
                     .map(|ty| self.type_to_string(&ty))
                     .unwrap_or_else(|| "unknown".to_string());
                 if let Some(tp_symbol) = &base_constructor_type.symbol
