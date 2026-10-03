@@ -4,50 +4,49 @@
 
 - git commit 只在用户明确指示时执行（如「提交一下」）；文档或代码修改后只落盘，不主动提交
 - 主分支（main）不频繁小步提交，提交时机与粒度由用户决定
-- 合并 subagent 分支一律用 rebase 方式：把分支提交 rebase 到目标分支后 fast-forward（或等价的 rebase-merge），不产生 merge commit
+- **产出整合纪律**：workflow/subagent 修复完成后，整合一律新建干净分支 + 逐 commit cherry-pick（或等价 rebase 线性化），禁止 merge commit——merge 历史混乱、无法人工识别每个改动的来源与顺序。主仓合入同口径：分支上的修复 commit 保持线性可追溯。
 
 ### 语料修复飞轮
 
-主 agent 是唯一构建者与测试者；subagent 全程**纯文本**（在隔离 worktree 内操作，禁构建、禁跑测试，输出 patch / 独立 commit），由主 agent 按分发顺序统一合并。
+主 agent 是唯一构建者、测试者与循环驱动者；subagent 全程**纯文本**（隔离 worktree 内只修**一个用例**，禁构建禁测试，输出独立 commit）。
+
+**修复模型**：GLM-5.3 · low 思考档。
+
+**架构约束**：一个 workflow 只做**单波并发修复**——N 个并发位 = N 个用例，每个 subagent 只修一个用例，不做组内串行循环；跨多波的目标用例总数由主 agent 分波达成，不在 workflow 内循环。
 
 ```mermaid
 flowchart TD
-    START["飞轮入口（主 agent 串行）<br/>锁定基线：commit / corpus_skips / ignore / 基线 diff"]
-    START --> NR["主 agent：cargo test --no-run<br/>ulimit -v 4194304 · TSOX_SUBMODULE_LIMIT=0"]
-    NR --> NRQ{"零编译错误？"}
-    NRQ -->|否| CUT_C["脚本机械切割编译错误<br/>按 crate / 错误码 / 错误签名 → 单文件分片队列"]
-    CUT_C --> DISP_C["主 agent 派发一片 = 一个文件<br/>修复 subagent（隔离 worktree · 纯文本）<br/>只读：repo / Go oracle / 编译错误 / 基线 diff<br/>禁止：任何 cargo · 编译 · 测试<br/>输出：patch / 独立 commit"]
-    DISP_C --> MERGE_C["主 agent 合并：rebase / cherry-pick<br/>冲突就地解决 · 修复记录追加到 todos/corpus-fix-notes.md"]
-    MERGE_C --> WAIT_C{"编译分片队列发完？"}
-    WAIT_C -->|否：并发名额一空立即补发| DISP_C
-    WAIT_C -->|是| NR
-    NRQ -->|是| RUN["主 agent：全量语料测试<br/>cargo test --release --no-fail-fast"]
-    RUN --> EXP["主 agent 导出<br/>corpus_results.csv / corpus_skips.csv"]
-    EXP --> TQ{"FAIL = 0？"}
-    TQ -->|否| CUT_T["脚本机械切割 FAIL<br/>按错误签名 → 单用例分片队列<br/>flaky 候选单独标记"]
-    CUT_T --> DISP_T["主 agent 派发一片 = 一个用例<br/>修复 subagent（隔离 worktree · 纯文本）<br/>只读：repo / Go oracle / 失败信息 / 基线 diff<br/>允许：改生产代码 + 测试代码<br/>禁止：任何 cargo · 编译 · 测试<br/>输出：patch / 独立 commit"]
-    DISP_T --> MERGE_T["主 agent 合并：rebase / cherry-pick<br/>冲突就地解决 · 修复记录追加到 todos/corpus-fix-notes.md"]
-    MERGE_T --> WAIT_T{"测试分片队列发完？"}
-    WAIT_T -->|否：并发名额一空立即补发| DISP_T
-    WAIT_T -->|是| NR
-    TQ -->|是| CHK{"新增 skip / ignore / flaky？"}
-    CHK -->|否| END["结束 · 汇总报告<br/>编译零错误 / FAIL 清零 / skip 无新增 / diff 清单"]
-    CHK -->|是| HUMAN["人工确认：保留或撤回"]
-    CUT_T -.->|"flaky / 超时 / OOM：主 agent 隔离重跑"| RUN
-    MERGE_C -.->|"熔断：max_round / max_attempts / 无进展"| HUMAN
-    MERGE_T -.->|"熔断：max_round / max_attempts / 无进展"| HUMAN
+    START["波入口（主 agent）<br/>① 全量测试基线就绪（数据体系五份 CSV 全部最新）<br/>② 挑选 N 例分发给 workflow"]
+    START --> WF["单波 workflow：N 个 subagent 并发<br/>每人一例 · 预建隔离 worktree · 纯文本禁测 · GLM-5.3 low<br/>（整波完成后通知一次）"]
+    WF --> PICK["主循环：取下一个 worktree 的结果<br/>cherry-pick 该例 commit 到整合分支（线性，禁 merge）"]
+    PICK --> FULL["主循环：cargo test --release 全量<br/>（带 TSOX_FN_TRACE_DIR + TSOX_TYPES_EMIT_DIR）<br/>约 2 分钟，每例 pick 后必跑<br/>同步刷新五份 CSV"]
+    FULL --> VERDICT{"该 commit 的净效果"}
+    VERDICT -->|"目标例绿且无回归"| NEXT["保留"]
+    VERDICT -->|"回归 / 未过"| HANDLE["记录归因（回归-改动相关分析）<br/>锁定到该 commit，留给后续轮次处理"]
+    HANDLE --> MORE{"还有未处理的 worktree？"}
+    NEXT --> MORE
+    MORE -->|是| PICK
+    MORE -->|"否：本波 N 个 worktree 处理完"| ANALYSIS["主 agent：归纳分析<br/>corpus_results.csv 水位 / 下波选例"]
+    ANALYSIS --> DECIDE{"FAIL = 0 或用户叫停？"}
+    DECIDE -->|否| START
+    DECIDE -->|是| END["结束 · 汇总报告"]
 ```
 
-- **基线锁定（入口）**：主 agent 串行记录当前 commit、corpus_skips 状态、ignore 清单、基线 diff，作为本轮飞轮的对照基线。
-- **编译闸门**：`cargo test --no-run`（ulimit -v 4194304，TSOX_SUBMODULE_LIMIT=0）。有编译错误则脚本机械切割（按 crate / 错误码 / 错误签名），进入编译分片循环；零错误才放行测试闸门。
-- **测试闸门**：`cargo test --release --no-fail-fast` 全量语料 → `corpus_csv_export.py` 出双表。FAIL > 0 则脚本机械切割（按错误签名 / 用例簇，flaky 候选单独标记），进入测试分片循环；测试修复合并后**必须回到编译闸门**（改动可能引入编译错）。
-- **分发（两轮同规，多 subagent 并发 · 2026-09-30 用户拍板，废止 2026-09-29 单发串行口径）**：脚本机械切割出全量分片队列，主 agent **并发派发多片**（8-12 个在飞 subagent）：编译轮一片一个文件、测试轮一片一个用例；subagent 一律**后台运行**（完成经系统通知收集，主 agent 不阻塞等待），名额一空立即从队列补发。主 agent 在**派发前**为每片**预建隔离 worktree**（`git worktree add` + 独立分支，确认干净基线后再派发），subagent 的全部操作（含所有 git 命令）只发生在其 worktree 内，**与主工作树完全分离**；派发 prompt 首步要求 subagent 验证 `pwd` 位于其 worktree。为降低合并冲突，同批并发片尽量分属不同根因域（binder / parser / checker 等错开）。每片修复返回即合并（合并由主 agent 串行执行，后到分片按基线前移处理冲突），并把该次修复记录（文件/用例、根因、对照的 Go 源、改动点、结果与 CSV 变化）追加到仓库级笔记 `todos/corpus-fix-notes.md`（最新在上；系统记忆已清空，仓库内文件是唯一留存）；队列发完回对应闸门做一次复验。
-- **subagent 契约（纯文本）**：隔离 worktree；只读 repo / Go oracle（`/home/cqh/workspace/typescript-go`）/ 派发 prompt 内联的错误清单与基线 diff；禁止任何 cargo 命令、编译、测试；测试分片允许改生产代码 + 测试代码；按根因增量独立 commit；汇报**函数变更表**（缺表打回）。30 分钟预算（剩 6 分钟强制收尾）、单根因 10 分钟熔断、Bash 连续 3 次故障写交接退出。**禁止用空壳实现消错**：恒返 `None`/空函数体/`let _ =` 丢弃结果/捏造常量值/删真实逻辑换占位，均属编造行为迁就编译——符号不存在时只允许三选一：grep 到真实等价符号改接线、按 Go 移植最小真实实现、保留错误记交接留给下一轮。主 agent 收集时抽查 diff，发现 None 化/空壳模式整轮回滚重派。
-- **合并**：主 agent 每片返回即 rebase / cherry-pick 回主仓，冲突按 Go 语义就地解决；全部片发完后回对应闸门做一次复验（不逐片复验）。
-- **异常路由**：flaky / 超时 / OOM 由主 agent 隔离重跑判定，不入分片；熔断条件（max_round / max_attempts / 无进展）触发即停轮交人工；轮末新增 skip / ignore / flaky 必须人工确认保留或撤回，未经批注不得视为收敛。
-- **收敛**：编译零错误 + FAIL = 0 + skip 无新增 + diff 清单，四项齐备飞轮结束。
+- **选例**：从 `corpus_results.csv` 挑选 N 例（排除在飞/留队用例，同族错开或取代表例）启动单波 workflow。
+- **数据体系（仓库根 CSV，全量后同步刷新）**：
+  - `corpus_results.csv` / `corpus_skips.csv`——FAIL 全量 / SKIP 全量（水位与选例出发点）；
+  - `corpus_rust_trace.csv`——Rust 侧 FAIL 对齐函数调用序列（trace 中间产物在 `.traces/`，gitignore，每次全量重刷后由脚本汇总为本 CSV）；
+  - `corpus_go_trace.csv`——Go 侧函数调用序列（一次性数据，oracle 源码不变不重采）；
+  - `corpus_types_anchor.csv`——每例 .types **首分歧锚点**（本地 .types 发射器输出 vs Go reference 的第一个类型分歧行，含行号与两侧上下文），由 `tools/types_anchor.py` 从 `.traces/types/` 产出；与 trace 同级，subagent 定位用；
+  - `corpus_stack_diff.csv`——两侧执行栈差集（go_only / rust_only），由 `tools/stack_diff.py` 产出。
+  分片 `/tmp/flywheel_shards/` 汇总以上数据供 subagent 直接读取。
+- **逐例整合与验证（N 次，波末执行）**：workflow 整波完成通知后，主 agent 逐个 worktree 处理其结果——cherry-pick 该 worktree 分支上的 commit 到整合分支 → 全量（带 `TSOX_FN_TRACE_DIR` + `TSOX_TYPES_EMIT_DIR`，约 2 分钟）→ 判定，循环 N 次。**每次全量同步刷新全部 CSV**（上述数据体系全部五份）——回归发生时归因数据（trace 差集变化、.types 锚点位移）与水位数据同刻更新，可直接用于处置与下一波选例。全量已降至 2 分钟，逐例验证成本可承受，收益是**回归精确归因到单个 commit**（N 个改动不混批）；编译失败同样逐例暴露（机械错可最小修复并标注，逻辑错原样记录）。
+- **回归处置**：某 commit 引入回归时**只记录归因、当场不修**——按「回归-改动相关分析」锁定到该 commit（真回归 vs 假绿暴露、波及例清单），该 commit 可保留或回退由归因结论决定；修复动作留给后续轮次（回归例进下一波选例或专项分片）。
+- **subagent 契约（单例分片）**：隔离 worktree；只读 repo / Go oracle（`/home/cqh/workspace/typescript-go`）/ 分片失败信息（三层锚点：.types 首分歧 → 错误 diff → 执行栈对照，见 `/tmp/flywheel_shards/` 与仓库根 trace CSV）；禁止任何 cargo/编译/测试/探针；禁止 skip/改断言/改基线消错与空壳实现；符号不存在三选一（grep 等价接线 / 按 Go 最小真实实现 / 保留错误记交接）；按根因独立 commit（只 add crates/ 生产路径）；汇报 rootCause（双侧源码行号）与**函数变更表**（缺表打回）。时限为期望值（目标 30 分钟级，非硬截点），单根因约 10 分钟无进展换思路或收尾交接。
+- **异常路由**：深水例（两轮不收敛）入留队池待人工或主 agent 插桩通道；「错错相抵」型回红（前置修复互斥）一律新建 worktree 重审而非续修；新增 skip / 基线变更必须人工确认。
+- **收敛**：FAIL = 0 + 回归归零 + 汇总报告。
 
-函数靠齐追踪表：`python3 tools/gen_func_alignment.py` 生成仓库根 `func_alignment.csv`（静态抓取 Go/Rust 两侧全部函数名，camelCase↔snake_case 由脚本归一为 `norm_name` 排序键，单表左右对照：已匹配的两侧同行展示，未匹配按 go_only/rust_only 标注且同名/近名行相邻；match_type 按 exact/suffix_variant/fuzzy/go_only/rust_only 分级）。每次修复中某个 Go 函数被靠齐后，主 agent 在收集裁决时执行 `--mark --go <函数名> --status yes|partial|no --round <轮次> --note <备注>` 标记该行；重新生成保留已有标记。该表与仓库根 CSV 同为 subagent 只读，用于快速掌握哪些 Go 函数已靠齐、哪些尚无对应。
+函数靠齐追踪表：`python3 tools/gen_func_alignment.py` 生成仓库根 `func_alignment.csv`（静态抓取 Go/Rust 两侧全部函数名，camelCase↔snake_case 由脚本归一为 `norm_name` 排序键，单表左右对照）。该表与仓库根 CSV 同为 subagent 只读。
 
 **靠齐判定纪律（不可违反）**：我们在做的是**按名称匹配迁移，只以 `func_alignment.csv` 表格数据为准**。不得随意以其他方式（报告声称、语义判断、探针观察等）认为匹配完成。
 
@@ -109,7 +108,7 @@ flowchart TD
 
 超限的表现是进程被提前杀死或输出不完整；此时按内存/死循环根因排查（受控探针测斜率、变体二分）。
 
-- 批量/全量测试运行后，执行 `python3 tools/corpus_csv_export.py fullrun.log` 更新仓库根 `corpus_results.csv`：只记 FAIL 用例，表头 `key,seconds`，key 为 `compiler/<用例名>`，按 key 字典序；脚本自动将上一轮存为 `corpus_results.prev.csv` 并生成 `corpus_results.diff`
+- 批量/全量测试运行后，执行 `python3 tools/corpus_csv_export.py fullrun.log` 更新仓库根 `corpus_results.csv`（FAIL 全量，表头 `key`，key 为 `compiler/<用例名>`，按 key 字典序）与 `corpus_skips.csv`（SKIP 全量，无 baseline 过滤）；脚本自动将上一轮存为 `.prev.csv` 并生成 `.diff`
 
 ## 文档规范
 
