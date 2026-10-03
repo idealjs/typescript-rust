@@ -298,7 +298,21 @@ impl Checker {
 
     pub fn check_grammar_numeric_literal(&mut self, _node: &Arc<Node>) {}
 
-    pub fn check_grammar_big_int_literal(&mut self, _node: &Arc<Node>) -> bool {
+    pub fn check_grammar_big_int_literal(&mut self, node: &Arc<Node>) -> bool {
+        let literal_type = node.parent().is_some_and(|p| {
+            tsox_frontend::ast::is_literal_type_node(&p)
+                || (tsox_frontend::ast::is_prefix_unary_expression(&p)
+                    && p.parent().is_some_and(|gp| tsox_frontend::ast::is_literal_type_node(&gp)))
+        });
+        if !literal_type
+            && !node.flags.contains(NodeFlags::Ambient)
+            && self.language_version < tsox_core::core::compiler_options::ScriptTarget::ES2020
+        {
+            return self.grammar_error_on_node(
+                node,
+                &BIGINT_LITERALS_ARE_NOT_AVAILABLE_WHEN_TARGETING_LOWER_THAN_ES2020,
+            );
+        }
         false
     }
 

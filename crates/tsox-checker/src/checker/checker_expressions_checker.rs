@@ -13,12 +13,14 @@ impl Checker {
             }
             SyntaxKind::NumericLiteral
             | SyntaxKind::StringLiteral
-            | SyntaxKind::BigIntLiteral
             | SyntaxKind::TrueKeyword
             | SyntaxKind::FalseKeyword
             | SyntaxKind::NullKeyword
             | SyntaxKind::RegularExpressionLiteral
             | SyntaxKind::NoSubstitutionTemplateLiteral => {}
+            SyntaxKind::BigIntLiteral => {
+                self.check_grammar_big_int_literal(node);
+            }
             SyntaxKind::ThisKeyword => {
                 self.check_this_expression_reference(node);
             }
