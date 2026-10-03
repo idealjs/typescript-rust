@@ -102,13 +102,21 @@ impl Checker {
         self.check_type_assignable_to(&generator_instantiation, return_type, Some(error_node), None)
     }
 
-    pub fn check_identifier(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_identifier"); 
+    pub fn check_identifier(&mut self, node: &Arc<Node>, check_mode: CheckMode) -> Arc<Type> { ::tsox_core::fntrace::enter("check_identifier");
         if tsox_frontend::ast::is_this_in_type_query(node) {
             return self.check_this_expression(node);
         }
         let symbol = match self.get_resolved_symbol(node) {
             Some(symbol) if !symbol_option_ptr_eq(&Some(Arc::clone(&symbol)), &self.unknown_symbol) => symbol,
-            _ => return self.error_type(),
+            // Go checkIdentifier 的符号由 resolveName 即时解析并驻留
+            // nodeLinks；本仓普通读引用的类型走 get_type_of_identifier
+            //（不经 symbol_node_links），本函数被直接调用时（如 extends
+            // 基类值位求值）链接为空，按 Go resolveName 语义节点锚定
+            // 按需解析（与当前检查到哪个文件无关）并回填链接
+            _ => match self.get_resolved_symbol_on_demand(node) {
+                Some(symbol) if !symbol_option_ptr_eq(&Some(Arc::clone(&symbol)), &self.unknown_symbol) => symbol,
+                _ => return self.error_type(),
+            },
         };
         if symbol_option_ptr_eq(&Some(Arc::clone(&symbol)), &self.arguments_symbol) {
             if super::m1b::r25k1_defs::is_in_property_initializer_or_class_static_block_ex(node, true) {
