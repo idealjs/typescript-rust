@@ -3,6 +3,8 @@ use std::sync::Arc;
 use tsox_frontend::ast::Node;
 
 use crate::checker::checker::*;
+use crate::checker::utilities_has_only_expression_initialization::get_assignment_target_kind;
+use crate::checker::utilities_token_is_identifier_or_keyword::AssignmentKind;
 
 impl Checker {
     pub(crate) fn get_type_of_element_access(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_element_access"); 
@@ -86,6 +88,44 @@ impl Checker {
         }
         let obj_type = obj_checked;
         let effective_arg = self.effective_index_arg_type(arg_expr);
+
+        // Go checkElementAccessExpression（checker.go:8654-8657）：写目标的泛型对象类型
+        //（非 this 型参数）置 NoIndexSignatures；getPropertyTypeForIndexType
+        //（checker.go:28649-28715）：命名属性命中优先，仅当无命中且适用索引签名
+        // 键型非 number 时只可读（TS2862），按 Go 返回错误类型收口阻断后续报错
+        if get_assignment_target_kind(node) != AssignmentKind::None
+            && self.is_generic_object_type(&obj_type)
+            && !self.is_this_type_parameter(&obj_type)
+        {
+            let early_name = self
+                .property_name_from_index(&effective_arg)
+                .or_else(|| self.literal_element_access_name(arg_expr));
+            let named_hit = early_name
+                .as_ref()
+                .is_some_and(|name| self.get_property_of_type(&obj_type, name).is_some());
+            if !named_hit {
+                let string_key = self.string_type();
+                let index_info = self
+                    .get_applicable_index_info(&obj_type, &effective_arg)
+                    .or_else(|| self.get_index_info_of_type(&obj_type, &string_key));
+                if let Some(info) = &index_info
+                    && !info
+                        .key_type
+                        .as_ref()
+                        .is_some_and(|k| Arc::ptr_eq(k, &self.number_type()))
+                {
+                    let arg = self.type_to_string(&obj_type);
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        node.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            TYPE_0_IS_GENERIC_AND_CAN_ONLY_BE_INDEXED_FOR_READING,
+                        vec![arg],
+                    ));
+                    return self.error_type();
+                }
+            }
+        }
 
         if obj_type.flags.contains(TypeFlags::Union)
             && let Some(members) = obj_type.types().map(|ts| ts.to_vec())
