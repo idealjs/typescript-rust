@@ -188,26 +188,54 @@ impl Parser {
         ))
     }
 
-    pub(crate) fn parse_entity_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_entity_name"); 
+    pub(crate) fn parse_entity_name(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_entity_name");
+        self.parse_entity_name_with_diagnostic(None)
+    }
+
+    pub(crate) fn parse_entity_name_with_diagnostic(
+        &mut self,
+        diagnostic: Option<&'static tsox_core::diagnostics::Message>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_entity_name_with_diagnostic");
         let pos = self.token_pos();
 
-        match self.token {
-            SyntaxKind::NullKeyword | SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword => {
-                let text = self.scanner.token_text().to_string();
-                let text_str = text.as_str();
-                self.parse_error_at_current_token(
-                    tsox_core::diagnostics::messages_generated::
-                        IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE,
-                    &[text_str],
-                );
+        if let Some(msg) = diagnostic {
+            // Go parseEntityNameOfTypeReference → createIdentifierWithDiagnostic：
+            // 标识符或关键字一律作名字消费；其余 token 报 diagnostic 并留 missing 不消费
+            if !(self.is_identifier() || is_keyword(self.token)) {
+                if self.token == SyntaxKind::EndOfFileToken {
+                    let cur = self.token_pos();
+                    self.parse_error_at(cur, cur, *msg, &[]);
+                } else {
+                    self.parse_error_at_current_token(*msg, &[]);
+                }
+                let cur = self.node_pos();
+                return Arc::new(Node::with_loc(
+                    SyntaxKind::Identifier,
+                    NodeData::Identifier(crate::ast::IdentifierData {
+                        text: String::new(),
+                    }),
+                    TextRange::new(cur, cur),
+                ));
             }
-            SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral | SyntaxKind::StringLiteral => {
-                self.parse_error_at_current_token(
-                    tsox_core::diagnostics::messages_generated::IDENTIFIER_EXPECTED,
-                    &[],
-                );
+        } else {
+            match self.token {
+                SyntaxKind::NullKeyword | SyntaxKind::TrueKeyword | SyntaxKind::FalseKeyword => {
+                    let text = self.scanner.token_text().to_string();
+                    let text_str = text.as_str();
+                    self.parse_error_at_current_token(
+                        tsox_core::diagnostics::messages_generated::
+                            IDENTIFIER_EXPECTED_0_IS_A_RESERVED_WORD_THAT_CANNOT_BE_USED_HERE,
+                        &[text_str],
+                    );
+                }
+                SyntaxKind::NumericLiteral | SyntaxKind::BigIntLiteral | SyntaxKind::StringLiteral => {
+                    self.parse_error_at_current_token(
+                        tsox_core::diagnostics::messages_generated::IDENTIFIER_EXPECTED,
+                        &[],
+                    );
+                }
+                _ => {}
             }
-            _ => {}
         }
         // Go parseIdentifierName：类型位的实体名接受任何关键字作名字
         //（`<const>expr` 的 const 即此形态，checker isConstTypeReference 特判）

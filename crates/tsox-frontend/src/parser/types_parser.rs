@@ -268,7 +268,9 @@ impl Parser {
 
     pub(crate) fn parse_type_reference(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_reference"); 
         let pos = self.token_pos();
-        let type_name = self.parse_entity_name();
+        // Go parseEntityNameOfTypeReference：类型引用实体名缺失报 Type_expected
+        let type_name =
+            self.parse_entity_name_with_diagnostic(Some(&tsox_core::diagnostics::messages_generated::TYPE_EXPECTED));
         let type_arguments = if !self.has_preceding_line_break() {
             self.parse_optional_type_arguments()
         } else {
