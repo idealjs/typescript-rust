@@ -284,7 +284,19 @@ impl Checker {
         false
     }
 
-    pub fn check_grammar_property(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_property"); 
+    pub fn check_grammar_property(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_property"); 
+        if let Some(parent) = node.parent() {
+            if tsox_frontend::ast::is_interface_declaration(&parent) {
+                if let Some(initializer) = tsox_frontend::ast::mig::m3b::initializer(node) {
+                    if !tsox_frontend::astnav::is_missing_node(initializer) {
+                        return self.grammar_error_on_node(
+                            initializer,
+                            &AN_INTERFACE_PROPERTY_CANNOT_HAVE_AN_INITIALIZER,
+                        );
+                    }
+                }
+            }
+        }
         false
     }
 
