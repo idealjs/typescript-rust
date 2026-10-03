@@ -43,6 +43,16 @@ impl Program {
             diagnostics.push(Arc::new(deprecation));
         }
 
+        if options.downlevel_iteration != Tristate::Unknown {
+            diagnostics.push(Arc::new(Diagnostic::new(
+                None,
+                TextRange::default(),
+                tsox_core::diagnostics::messages_generated::
+                    OPTION_0_HAS_BEEN_REMOVED_PLEASE_REMOVE_IT_FROM_YOUR_CONFIGURATION,
+                vec!["downlevelIteration".to_string()],
+            )));
+        }
+
         if !options.lib.is_empty() && options.no_lib.is_true() {
             diagnostics.push(Arc::new(Diagnostic::new(
                 None,
