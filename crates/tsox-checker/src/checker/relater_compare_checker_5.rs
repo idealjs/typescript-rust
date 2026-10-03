@@ -30,15 +30,6 @@ impl Checker {
         false
     }
 
-    pub fn find_matching_signatures(
-        &mut self,
-        _signature_lists: &[Vec<Arc<Signature>>],
-        _signature: &Arc<Signature>,
-        _list_index: usize,
-    ) -> Vec<Arc<Signature>> {
-        Vec::new()
-    }
-
     pub fn is_matching_signature(
         &mut self,
         source: &Arc<Signature>,

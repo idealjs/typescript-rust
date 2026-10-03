@@ -2,7 +2,92 @@
 
 use crate::checker::checker_union_signatures::*;
 
+fn same_signature_slice(a: &[Arc<Signature>], b: &[Arc<Signature>]) -> bool {
+    a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| Arc::ptr_eq(x, y))
+}
+
 impl Checker {
+    /// Go getUnionSignatures 空结果判定（checker.go:22349）：任一成分签
+    /// 名表为空、跨成分匹配全无命中、且兜底分支（至多一个成分多重载、
+    /// 类型参数同一守卫）被否决时结果为空
+    pub(crate) fn union_call_signatures_empty(
+        &mut self,
+        signature_lists: &[Vec<Arc<Signature>>],
+    ) -> bool {
+        let mut index_with_length_over_one = 0usize;
+        let mut count_length_over_one = 0usize;
+        for (i, list) in signature_lists.iter().enumerate() {
+            if list.is_empty() {
+                return true;
+            }
+            if list.len() > 1 {
+                index_with_length_over_one = i;
+                count_length_over_one += 1;
+            }
+            for signature in list {
+                if !self
+                    .find_matching_signatures(signature_lists, signature, i)
+                    .is_empty()
+                {
+                    return false;
+                }
+            }
+        }
+        if count_length_over_one > 1 {
+            return true;
+        }
+        let master_list = &signature_lists[index_with_length_over_one];
+        let mut results_type_parameters: Vec<Vec<Arc<Type>>> = master_list
+            .iter()
+            .map(|sig| sig.type_parameters.clone())
+            .collect();
+        for signatures in signature_lists {
+            if same_signature_slice(signatures, master_list) {
+                continue;
+            }
+            let Some(signature) = signatures.first() else {
+                return true;
+            };
+            let guarded = !signature.type_parameters.is_empty()
+                && results_type_parameters.iter().any(|type_parameters| {
+                    !type_parameters.is_empty()
+                        && !self.compare_type_parameters_identical(
+                            &signature.type_parameters,
+                            type_parameters,
+                        )
+                });
+            if guarded {
+                return true;
+            }
+            for type_parameters in results_type_parameters.iter_mut() {
+                if type_parameters.is_empty() {
+                    *type_parameters = signature.type_parameters.clone();
+                }
+            }
+        }
+        false
+    }
+
+    /// Go resolveUnionTypeMembers（checker.go:22289）：globalFunctionType
+    /// 成分贡献 unknownSignature，其余成分贡献各自调用签名表
+    pub(crate) fn union_leaf_call_signature_lists(
+        &mut self,
+        leaves: &[Arc<Type>],
+    ) -> Vec<Vec<Arc<Signature>>> {
+        leaves
+            .iter()
+            .map(|m| {
+                if self.is_global_function_type(m) {
+                    vec![self.untyped_call_signature()]
+                } else {
+                    m.as_structured()
+                        .map(|s| s.call_signatures().to_vec())
+                        .unwrap_or_default()
+                }
+            })
+            .collect()
+    }
+
     pub fn get_union_signatures(
         &mut self,
         signature_lists: &[Vec<Arc<Signature>>],

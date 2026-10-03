@@ -352,6 +352,7 @@ pub(crate) mod relater_relation;
 pub(crate) mod relater_tests;
 pub(crate) mod relater_type_arguments;
 pub(crate) mod relater_type_params;
+pub(crate) mod relater_union_signature_match;
 pub(crate) mod services_checker_4;
 pub(crate) mod services_checker_5;
 pub(crate) mod services_type_argument_constraints;

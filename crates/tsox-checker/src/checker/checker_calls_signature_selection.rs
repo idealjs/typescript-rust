@@ -79,6 +79,16 @@ impl Checker {
                             || self.is_global_function_type(m)
                     });
                 if all_callable {
+                    // Go resolveUnionTypeMembers→getUnionSignatures（checker.go:
+                    // 22285、22349）：联合类型的调用签名是各成分的公共集，
+                    // 公共集为空则联合不可调用（报 "Each member of the
+                    // union type ..."）；解析侧仍维持下方逐成员拼接（composite
+                    // 分布语义），仅可调用与否按公共集空否判定
+                    let leaf_lists = self.union_leaf_call_signature_lists(&expanded_leaves);
+                    if self.union_call_signatures_empty(&leaf_lists) {
+                        self.report_invocation_error(callee_expr, callee_type, is_new);
+                        return None;
+                    }
                     // Go getUnionSignatures 产出的组合签名携带 composite(原始
                     // 签名表),推断与上下文定型会分布回原始签名(上下文敏感
                     // 实参参数取并集)。本地组合无 composite 分布,真交集参数
@@ -256,7 +266,7 @@ impl Checker {
 
 impl Checker {
     // Go unknownSignature：无参任意返回的合成调用签名
-    fn untyped_call_signature(&mut self) -> Arc<Signature> {
+    pub(crate) fn untyped_call_signature(&mut self) -> Arc<Signature> {
         self.build_signature_from_function_like_type_node(
             &Arc::new(NodeList::default()),
             self.get_any_type(),
@@ -267,7 +277,7 @@ impl Checker {
     }
 
     // Go t == globalFunctionType 判定
-    fn is_global_function_type(&self, t: &Arc<Type>) -> bool {
+    pub(crate) fn is_global_function_type(&self, t: &Arc<Type>) -> bool {
         t.flags.contains(TypeFlags::Object)
             && self
                 .globals
