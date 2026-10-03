@@ -10,7 +10,8 @@ fn parse_basic_options() { ::tsox_core::fntrace::enter("parse_basic_options");
     let parsed = parse_command_line(&args, "/proj", None);
     assert!(parsed.compiler_options.no_emit.is_true());
     assert!(parsed.compiler_options.strict.is_true());
-    assert!(parsed.compiler_options.strict_null_checks.is_true());
+    // Go parsinghelpers.go:503 解析层只写 strict 本身，捆绑项读取侧解析（不写透）
+    assert!(parsed.compiler_options.strict_null_checks.is_unknown());
     assert_eq!(parsed.compiler_options.target, ScriptTarget::ES2020);
     assert_eq!(parsed.file_names, vec!["/proj/src/a.ts"]);
 }
@@ -665,7 +666,8 @@ fn test_parse_tsconfig_extends_merges_options() { ::tsox_core::fntrace::enter("t
 
     assert_eq!(parsed.compiler_options.out_dir, "/proj/dist");
 
-    assert!(parsed.compiler_options.strict_null_checks.is_true());
+    // 同 parse_basic_options：strict 不写透捆绑项（对齐 Go setSetting）
+    assert!(parsed.compiler_options.strict_null_checks.is_unknown());
 }
 
 #[test]
