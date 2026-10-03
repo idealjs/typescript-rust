@@ -158,145 +158,88 @@ impl Checker {
             if data.expression.kind == SyntaxKind::CallExpression {
                 return self.resolve_mixin_base_instance_type(type_ref, &data.expression);
             }
-            // Go getBaseConstructorTypeOfClass：heritage 表达式按值位求值，
-            // var+interface 合并名（如 lib 的 var Iterator: IteratorConstructor）
-            // 取 var 侧构造类型，而非把节点当类型引用解析
-            let own_type = type_ref
-                .parent()
-                .and_then(|clause| clause.parent())
-                .and_then(|class| {
-                    if matches!(
-                        class.kind,
-                        SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
-                    ) {
-                        self.class_instance_type_cache.get(&class.id()).cloned()
-                    } else {
-                        None
-                    }
-                });
-            let base_constructor_type = match own_type {
-                Some(ref own) => self.get_base_constructor_type_of_class(own),
-                None => Some(self.check_expression_ex(&data.expression, crate::checker::checker::CheckMode::Normal)),
-            };
-            let Some(base_constructor_type) = base_constructor_type else {
-                return self.get_any_type();
-            };
-            if self.is_error_type(&base_constructor_type) {
-                return self.get_any_type();
-            }
-            let apparent = self.get_apparent_type(&base_constructor_type);
-            if !apparent
-                .flags
-                .intersects(TypeFlags::Object | TypeFlags::Intersection | TypeFlags::Any)
-            {
-                return self.get_any_type();
-            }
-            // Go resolveBaseTypesOfClass：符号是类且声明的裸泛型未被外层实参
-            // 捕获时按类型引用取基型（默认实参在此填充），否则按构造函数分支
-            // 实例化构造签名取返回型
-            let original_base_type = apparent
-                .symbol
-                .as_ref()
-                .map(|s| self.get_declared_type_of_symbol(s));
-            let is_class_reference = apparent
-                .symbol
-                .as_ref()
-                .is_some_and(|s| s.flags.contains(SymbolFlags::Class))
-                && original_base_type
-                    .is_some_and(|t| self.are_all_outer_type_parameters_applied(&t));
-            if is_class_reference {
-                let Some(symbol) = apparent.symbol.clone() else {
-                    return self.get_any_type();
-                };
-                if self.type_resolution_stack.len() >= 200 {
-                    return self.get_any_type();
+            let entity_symbol = match data.expression.kind {
+                SyntaxKind::Identifier => self.resolve_identifier(&data.expression),
+                SyntaxKind::PropertyAccessExpression => {
+                    self.resolve_entity_name_class_symbol(&data.expression)
                 }
-                let Some(class_node) = symbol
-                    .declarations
-                    .iter()
-                    .find(|d| d.kind == SyntaxKind::ClassDeclaration)
-                    .cloned()
-                else {
-                    return self.get_type_from_type_node(type_ref);
-                };
-                let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
-                if self.is_resolving(key, TypeResolutionProperty::ResolvedBaseTypes) {
-                    self.mark_type_resolution_cycle(key, TypeResolutionProperty::ResolvedBaseTypes);
-                    return self.get_any_type();
-                }
-                let heritage_args = data.type_arguments.clone();
-                let base_tps: Vec<Arc<tsox_frontend::ast::Symbol>> = match &class_node.data {
-                    tsox_frontend::ast::NodeData::ClassDeclaration(cd) => match &cd.type_parameters
-                    {
-                        Some(tps) => tps
-                            .iter()
-                            .filter_map(|tp| {
-                                self.program.symbol_map().symbol_of(tp).map(Arc::clone)
-                            })
-                            .collect(),
-                        None => Vec::new(),
-                    },
-                    _ => Vec::new(),
-                };
-                let mut pushed_args: Option<Vec<Arc<Type>>> = None;
-                if let Some(args) = &heritage_args
-                    && !base_tps.is_empty()
+                _ => None,
+            };
+            if let Some(symbol) = entity_symbol {
                 {
-                    let mut arg_types: Vec<Arc<Type>> =
-                        args.iter().map(|a| self.get_type_from_type_node(a)).collect();
-                    if arg_types.len() < base_tps.len() {
-                        // Go createTypeReference：实参不足时按类型参数默认值填充
-                        let tp_types = self.declared_type_parameter_types(&symbol);
-                        let min = self.get_min_type_argument_count(&tp_types);
-                        arg_types = self.fill_missing_type_arguments(
-                            &arg_types,
-                            &tp_types,
-                            min,
-                            false,
-                        );
+                    if symbol.flags.contains(SymbolFlags::Class) {
+                        if self.type_resolution_stack.len() >= 200 {
+                            return self.get_any_type();
+                        }
+
+                        if let Some(class_node) = symbol
+                            .declarations
+                            .iter()
+                            .find(|d| d.kind == SyntaxKind::ClassDeclaration)
+                            .cloned()
+                        {
+                            let key = Arc::as_ptr(&symbol) as *const tsox_frontend::ast::Symbol;
+                            if self.is_resolving(key, TypeResolutionProperty::ResolvedBaseTypes) {
+                                self.mark_type_resolution_cycle(
+                                    key,
+                                    TypeResolutionProperty::ResolvedBaseTypes,
+                                );
+                                return self.get_any_type();
+                            }
+
+                            let heritage_args = data.type_arguments.clone();
+                            let base_tps: Vec<Arc<tsox_frontend::ast::Symbol>> =
+                                match &class_node.data {
+                                    tsox_frontend::ast::NodeData::ClassDeclaration(cd) => {
+                                        match &cd.type_parameters {
+                                            Some(tps) => tps
+                                                .iter()
+                                                .filter_map(|tp| {
+                                                    self.program
+                                                        .symbol_map()
+                                                        .symbol_of(tp)
+                                                        .map(Arc::clone)
+                                                })
+                                                .collect(),
+                                            None => Vec::new(),
+                                        }
+                                    }
+                                    _ => Vec::new(),
+                                };
+                            let mut pushed_args: Option<Vec<Arc<Type>>> = None;
+                            let _pushed = if let Some(args) = &heritage_args
+                                && !base_tps.is_empty()
+                            {
+                                let arg_types: Vec<Arc<Type>> = args
+                                    .iter()
+                                    .map(|a| self.get_type_from_type_node(a))
+                                    .collect();
+                                if arg_types.len() == base_tps.len() {
+                                    pushed_args = Some(arg_types);
+                                    true
+                                } else {
+                                    false
+                                }
+                            } else {
+                                false
+                            };
+                            let instance = if let Some(arg_types) = pushed_args {
+                                self.instantiate_class_instance_type(
+                                    &class_node,
+                                    &symbol,
+                                    &base_tps,
+                                    &arg_types,
+                                )
+                            } else {
+                                self.push_scope(&class_node);
+                                let i = self.build_class_instance_type_with_base(&class_node);
+                                self.pop_scope();
+                                i
+                            };
+                            return instance;
+                        }
                     }
-                    if arg_types.len() == base_tps.len() {
-                        pushed_args = Some(arg_types);
-                    }
                 }
-                if let Some(arg_types) = pushed_args {
-                    return self.instantiate_class_instance_type(
-                        &class_node,
-                        &symbol,
-                        &base_tps,
-                        &arg_types,
-                    );
-                }
-                self.push_scope(&class_node);
-                let instance = self.build_class_instance_type_with_base(&class_node);
-                self.pop_scope();
-                return instance;
-            } else if apparent.flags.contains(TypeFlags::Any) {
-                return apparent;
-            } else if !apparent.flags.intersects(TypeFlags::Object | TypeFlags::Intersection) {
-                return self.get_any_type();
-            } else {
-                let type_arg_nodes: Vec<Arc<Node>> = data
-                    .type_arguments
-                    .as_ref()
-                    .map(|tl| tl.nodes.clone())
-                    .unwrap_or_default();
-                let constructors = self.get_instantiated_constructors_for_type_arguments(
-                    &apparent,
-                    &type_arg_nodes,
-                    Some(type_ref),
-                );
-                if constructors.is_empty() {
-                    self.error_message(
-                        &data.expression,
-                        tsox_core::diagnostics::messages_generated::NO_BASE_CONSTRUCTOR_HAS_THE_SPECIFIED_NUMBER_OF_TYPE_ARGUMENTS,
-                        &[],
-                    );
-                    return self.get_any_type();
-                }
-                return self
-                    .get_return_type_of_signature(&constructors[0])
-                    .unwrap_or_else(|| self.get_any_type());
             }
         }
 
