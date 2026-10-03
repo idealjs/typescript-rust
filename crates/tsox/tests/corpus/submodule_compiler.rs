@@ -1320,6 +1320,12 @@ fn build_and_check(
         all.push((**d).clone());
     }
     let program_len = all.len();
+    all.extend(
+        program
+            .get_program_diagnostics()
+            .iter()
+            .map(|d| (**d).clone()),
+    );
     all.extend(program.get_semantic_diagnostics());
     let check_elapsed = t_check.elapsed();
 
