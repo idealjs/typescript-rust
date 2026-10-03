@@ -346,6 +346,13 @@ impl Checker {
     }
 
     pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_identifier"); 
+        if let Some(parent) = node.parent()
+            && parent.kind == SyntaxKind::MetaProperty
+            && tsox_frontend::ast::mig::m3g_2::is_right_side_of_qualified_name_or_property_access(node)
+        {
+            let t = self.get_type_of_expression(&parent);
+            return self.get_regular_type_of_literal_type(&t);
+        }
         if let Some(symbol) = self.resolve_identifier(node) {
             let module_without_value = if symbol.flags.intersects(SymbolFlags::Alias) {
                 let effective = self.resolve_alias_base(Arc::clone(&symbol));
