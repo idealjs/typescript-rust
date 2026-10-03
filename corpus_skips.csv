@@ -150,6 +150,7 @@ compiler/commonSourceDir4.ts
 compiler/commonjsAccessExports.ts
 compiler/complexRecursiveCollections.ts
 compiler/computedEnumMemberSyntacticallyString2.ts
+compiler/conditionalTypeDoesntSpinForever.ts
 compiler/constInClassExpression.ts
 compiler/constructorPropertyJs.ts
 compiler/constructorWithIncompleteTypeAnnotation.ts
@@ -463,6 +464,7 @@ compiler/jsxHasLiteralType.tsx
 compiler/jsxImportSourceCheckJs.ts
 compiler/jsxPreserveWithJsInput.ts
 compiler/keyofDoesntContainSymbols.ts
+compiler/largeControlFlowGraph.ts
 compiler/lateBoundAssignmentCandidateJS1.ts
 compiler/lateBoundAssignmentCandidateJS2.ts
 compiler/lateBoundAssignmentCandidateJS3.ts
@@ -504,6 +506,7 @@ compiler/moduleResolution_explicitNodeModulesImport_implicitAny.ts
 compiler/namespacesWithTypeAliasOnlyExportsMerge.ts
 compiler/narrowingPastLastAssignment.ts
 compiler/narrowingPlainJsNoCrash1.ts
+compiler/nestedSpreadsAndWidening.ts
 compiler/noCollisionThisExpressionAndLocalVarInFunction.ts
 compiler/noCollisionThisExpressionInFunctionAndVarInGlobal.ts
 compiler/noCrashOnParameterNamedRequire.ts
@@ -697,3 +700,4 @@ compiler/unusedTypeParameters_templateTag.ts
 compiler/unusedTypeParameters_templateTag2.ts
 compiler/useBeforeDeclaration_propertyAssignment.ts
 compiler/usedImportNotElidedInJs.ts
+compiler/varianceComputationNoCrash.ts

@@ -39,7 +39,6 @@ compiler/collisionArgumentsClassConstructor.ts
 compiler/collisionArgumentsClassMethod.ts
 compiler/collisionArgumentsFunction.ts
 compiler/commonJsExportTypeDeclarationError.ts
-compiler/commonSourceDir2.ts
 compiler/commonSourceDirectory_dts.ts
 compiler/complicatedGenericRecursiveBaseClassReference.ts
 compiler/complicatedIndexedAccessKeyofReliesOnKeyofNeverUpperBound.ts
@@ -81,7 +80,6 @@ compiler/contextualTypingArrayDestructuringWithDefaults.ts
 compiler/contextualTypingGenericFunction2.ts
 compiler/contextualTypingWithFixedTypeParameters1.ts
 compiler/contextuallyTypeAsyncFunctionReturnTypeFromUnion.ts
-compiler/contextuallyTypeGeneratorReturnTypeFromUnion.ts
 compiler/contextuallyTypedJsxAttribute.ts
 compiler/contextuallyTypedJsxAttribute2.tsx
 compiler/contextuallyTypedJsxChildren.tsx
@@ -130,7 +128,6 @@ compiler/declarationEmitExpressionWithNonlocalPrivateUniqueSymbol.ts
 compiler/declarationEmitForMixinsWithStaticAccessors1.ts
 compiler/declarationEmitHigherOrderRetainedGenerics.ts
 compiler/declarationEmitInferredObjectLiteralWithThis.ts
-compiler/declarationEmitInterfaceWithNonEntityNameExpressionHeritage.ts
 compiler/declarationEmitInvalidExport.ts
 compiler/declarationEmitInvalidReference.ts
 compiler/declarationEmitIsolatedDeclarationErrorNotEmittedForNonEmittedFile.ts
@@ -145,7 +142,6 @@ compiler/declarationEmitReadonlyComputedProperty.ts
 compiler/declarationEmitRedundantTripleSlashModuleAugmentation.ts
 compiler/declarationEmitReexportedSymlinkReference2.ts
 compiler/declarationEmitReexportedSymlinkReference3.ts
-compiler/declarationEmitRelativeModuleError.ts
 compiler/declarationEmitResolvePackageJsonExportsFalse.ts
 compiler/declarationEmitSetAccessorNoParameter.ts
 compiler/declarationEmitSimpleComputedNames1.ts
@@ -169,7 +165,6 @@ compiler/decoratorMetadataWithImportDeclarationNameCollision4.ts
 compiler/decoratorMetadataWithImportDeclarationNameCollision5.ts
 compiler/decoratorMetadataWithImportDeclarationNameCollision7.ts
 compiler/decoratorUsedBeforeDeclaration.ts
-compiler/decoratorWithNegativeLiteralTypeNoCrash.ts
 compiler/decoratorsOnComputedProperties.ts
 compiler/deduplicatePackages.ts
 compiler/deepKeysIndexing.ts
@@ -255,7 +250,6 @@ compiler/errorForUsingPropertyOfTypeAsType03.ts
 compiler/errorInfoForRelatedIndexTypesNoConstraintElaboration.ts
 compiler/errorMessagesIntersectionTypes03.ts
 compiler/errorOnEnumReferenceInCondition.ts
-compiler/errorOnInitializerInInterfaceProperty.ts
 compiler/errorOnInitializerInObjectTypeLiteralProperty.ts
 compiler/errorSpanForUnclosedJsxTag.tsx
 compiler/errorsForCallAndAssignmentAreSimilar.ts
@@ -319,7 +313,6 @@ compiler/externalModuleImmutableBindings.ts
 compiler/extractInferenceImprovement.ts
 compiler/fallbackToBindingPatternForTypeInference.ts
 compiler/fatarrowfunctionsOptionalArgsErrors2.ts
-compiler/filesEmittingIntoSameOutput.ts
 compiler/findLast.ts
 compiler/fixingTypeParametersRepeatedly2.ts
 compiler/flatArrayNoExcessiveStackDepth.ts
@@ -420,7 +413,6 @@ compiler/incompatibleAssignmentOfIdenticallyNamedTypes.ts
 compiler/incompleteDottedExpressionAtEOF.ts
 compiler/incorrectNumberOfTypeArgumentsDuringErrorReporting.ts
 compiler/incorrectRecursiveMappedTypeConstraint.ts
-compiler/incrementalInvalid.ts
 compiler/indexAt.ts
 compiler/indexSignatureAndMappedType.ts
 compiler/indexSignatureInOtherFile.ts
@@ -474,7 +466,6 @@ compiler/inheritedOverloadedSpecializedSignatures.ts
 compiler/inheritedStringIndexersFromDifferentBaseTypes.ts
 compiler/initializedDestructuringAssignmentTypes.ts
 compiler/inlineConditionalHasSimilarAssignability.ts
-compiler/inlineSourceMap2.ts
 compiler/inlinedAliasAssignableToConstraintSameAsAlias.ts
 compiler/instanceofNarrowReadonlyArray.ts
 compiler/instanceofOnInstantiationExpression.ts
@@ -487,7 +478,6 @@ compiler/interMixingModulesInterfaces5.ts
 compiler/interfaceClassMerging.ts
 compiler/interfaceDeclaration1.ts
 compiler/interfaceDeclaration4.ts
-compiler/interfaceMayNotBeExtendedWitACall.ts
 compiler/interfaceMemberValidation.ts
 compiler/interfaceMergeWithNonGenericTypeArguments.ts
 compiler/interfaceWithMultipleDeclarations.ts
@@ -499,7 +489,6 @@ compiler/intersectionsOfLargeUnions.ts
 compiler/intersectionsOfLargeUnions2.ts
 compiler/intraBindingPatternReferences.ts
 compiler/invalidOptionalChainFromNewExpression.ts
-compiler/invalidReferenceSyntax1.ts
 compiler/invariantGenericErrorElaboration.ts
 compiler/invocationErrorRecovery.ts
 compiler/invocationExpressionInFunctionParameter.ts
@@ -522,7 +511,6 @@ compiler/isolatedModulesExportDeclarationType.ts
 compiler/isolatedModulesExportImportUninstantiatedNamespace.ts
 compiler/isolatedModulesGlobalNamespacesAndEnums.ts
 compiler/isolatedModulesReExportType.ts
-compiler/isolatedModulesRequiresPreserveConstEnum.ts
 compiler/isolatedModulesShadowGlobalTypeNotValue.ts
 compiler/isolatedModulesSketchyAliasLocalMerge.ts
 compiler/iterableTReturnTNext.ts
@@ -613,7 +601,6 @@ compiler/mergedInstantiationAssignment.ts
 compiler/metadataImportType.ts
 compiler/missingDomElements.ts
 compiler/missingImportAfterModuleImport.ts
-compiler/misspelledNewMetaProperty.ts
 compiler/mixedExports.ts
 compiler/mixinOverMappedTypeNoCrash.ts
 compiler/mixinPrivateAndProtected.ts
@@ -685,7 +672,6 @@ compiler/noImplicitAnyMissingSetAccessor.ts
 compiler/noImplicitAnyStringIndexerOnObject.ts
 compiler/noImplicitAnyUnionNormalizedObjectLiteral1.ts
 compiler/noLibAndNoUncheckedIndexedAccessDestructuringArray.ts
-compiler/noSymbolForMergeCrash.ts
 compiler/noTypeToStringRecursion.ts
 compiler/noTypeToStringStackOverflow.ts
 compiler/noUncheckedIndexedAccessCompoundAssignments.ts
@@ -701,7 +687,6 @@ compiler/nonIdenticalTypeConstraints.ts
 compiler/nonNullableWithNullableGenericIndexedAccessArg.ts
 compiler/normalizedIntersectionTooComplex.ts
 compiler/null.ts
-compiler/nullKeyword.ts
 compiler/numberVsBigIntOperations.ts
 compiler/objectBindingPatternContextuallyTypesArgument.ts
 compiler/objectBindingPattern_restElementWithPropertyName.ts
@@ -723,9 +708,6 @@ compiler/optionalParamArgsTest.ts
 compiler/optionalParamTypeComparison.ts
 compiler/optionalPropertiesSyntax.ts
 compiler/optionalTupleElementsAndUndefined.ts
-compiler/optionsCompositeWithIncrementalFalse.ts
-compiler/optionsInlineSourceMapMapRoot.ts
-compiler/optionsInlineSourceMapSourcemap.ts
 compiler/orderMattersForSignatureGroupIdentity.ts
 compiler/overEagerReturnTypeSpecialization.ts
 compiler/overload1.ts
@@ -765,7 +747,6 @@ compiler/patternAmbientModuleAugmentationMergedSymbol.ts
 compiler/performanceComparisonOfStructurallyIdenticalInterfacesWithGenericSignatures.ts
 compiler/potentiallyUncalledDecorators.ts
 compiler/predicateSemantics.ts
-compiler/prefixedNumberLiteralAssignToNumberLiteralType.ts
 compiler/prettyContextNotDebugAssertion.ts
 compiler/primitiveUnionDetection.ts
 compiler/privacyGloImportParseErrors.ts
@@ -782,8 +763,6 @@ compiler/promisePermutations2.ts
 compiler/promisePermutations3.ts
 compiler/promiseTry.ts
 compiler/propertiesAndIndexers.ts
-compiler/propertyAccess4.ts
-compiler/propertyAccess5.ts
 compiler/protectedAccessThroughContextualThis.ts
 compiler/quickIntersectionCheckCorrectlyCachesErrors.ts
 compiler/quickinfoTypeAtReturnPositionsInaccurate.ts
@@ -1002,9 +981,6 @@ compiler/unspecializedConstraints.ts
 compiler/untypedModuleImport_withAugmentation2.ts
 compiler/unusedInvalidTypeArguments.ts
 compiler/unusedLocalsInMethod4.ts
-compiler/unusedTypeParameters6.ts
-compiler/unusedTypeParameters7.ts
-compiler/unusedTypeParameters8.ts
 compiler/useUnknownInCatchVariables01.ts
 compiler/vararg.ts
 compiler/variableDeclarationInStrictMode1.ts
