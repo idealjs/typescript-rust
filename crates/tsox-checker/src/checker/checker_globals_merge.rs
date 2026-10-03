@@ -40,6 +40,10 @@ impl Checker {
         if judge_flags & get_excluded_symbol_flags(source.flags) == SymbolFlags::empty() {
             return false;
         }
+        if target.flags.intersects(SymbolFlags::NamespaceModule) {
+            self.report_cannot_augment_with_value_exports(target, source);
+            return true;
+        }
         let message = if source.flags.intersects(SymbolFlags::ENUM)
             || judge_flags.intersects(SymbolFlags::ENUM)
         {
