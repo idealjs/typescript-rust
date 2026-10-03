@@ -35,17 +35,28 @@ impl Checker {
 
     pub(crate) fn grammar_error_at_pos(
         &mut self,
+        node_for_file: &Arc<Node>,
+        start: usize,
+        length: usize,
+        message: &Message,
+    ) -> bool { ::tsox_core::fntrace::enter("grammar_error_at_pos");
+        self.grammar_error_at_pos_with_args(node_for_file, start, length, message, &[])
+    }
+
+    pub(crate) fn grammar_error_at_pos_with_args(
+        &mut self,
         _node_for_file: &Arc<Node>,
         start: usize,
         length: usize,
         message: &Message,
-    ) -> bool { ::tsox_core::fntrace::enter("grammar_error_at_pos"); 
+        args: &[String],
+    ) -> bool { ::tsox_core::fntrace::enter("grammar_error_at_pos_with_args");
         let file = self.current_file.clone();
         if file.as_ref().is_some_and(|f| f.has_parse_diagnostics) {
             return false;
         }
         let loc = tsox_core::core::text::TextRange::new(start, start + length);
-        let diagnostic = tsox_frontend::ast::Diagnostic::new(file, loc, *message, Vec::new());
+        let diagnostic = tsox_frontend::ast::Diagnostic::new(file, loc, *message, args.to_vec());
         self.diagnostics.add(diagnostic);
         true
     }

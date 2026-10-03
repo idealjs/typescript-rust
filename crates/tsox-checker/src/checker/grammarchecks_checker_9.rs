@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::grammarchecks::*;
+use tsox_frontend::ast::is_call_expression;
 
 impl Checker {
     pub fn check_grammar_name_in_let_or_const_declarations(&mut self, name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_name_in_let_or_const_declarations"); 
@@ -272,7 +273,68 @@ impl Checker {
         }
     }
 
-    pub fn check_grammar_meta_property(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_meta_property"); 
+    pub fn check_grammar_meta_property(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_meta_property");
+        let keyword_token = match &node.data {
+            NodeData::MetaProperty(data) => data.keyword_token,
+            _ => return false,
+        };
+        let Some(name_node) = node.name() else {
+            return false;
+        };
+        let name_text = name_node.text();
+
+        match keyword_token {
+            SyntaxKind::NewKeyword => {
+                if name_text != "target" {
+                    return self.grammar_error_on_node_with_args(
+                        name_node,
+                        &X_0_IS_NOT_A_VALID_META_PROPERTY_FOR_KEYWORD_1_DID_YOU_MEAN_2,
+                        &[
+                            name_text.to_string(),
+                            token_to_string(keyword_token).to_string(),
+                            "target".to_string(),
+                        ],
+                    );
+                }
+            }
+            SyntaxKind::ImportKeyword => {
+                if name_text != "meta" {
+                    let is_callee = node.parent().as_ref().is_some_and(|parent| {
+                        is_call_expression(parent)
+                            && parent.expression().is_some_and(|expr| Arc::ptr_eq(expr, node))
+                    });
+                    if name_text == "defer" {
+                        if !is_callee {
+                            return self.grammar_error_at_pos_with_args(
+                                node,
+                                node.end(),
+                                0,
+                                &X_0_EXPECTED,
+                                &["(".to_string()],
+                            );
+                        }
+                    } else if is_callee {
+                        return self.grammar_error_on_node_with_args(
+                            name_node,
+                            &X_0_IS_NOT_A_VALID_META_PROPERTY_FOR_KEYWORD_IMPORT_DID_YOU_MEAN_META_OR_DEFER,
+                            &[name_text.to_string()],
+                        );
+                    } else {
+                        return self.grammar_error_on_node_with_args(
+                            name_node,
+                            &X_0_IS_NOT_A_VALID_META_PROPERTY_FOR_KEYWORD_1_DID_YOU_MEAN_2,
+                            &[
+                                name_text.to_string(),
+                                token_to_string(keyword_token).to_string(),
+                                "meta".to_string(),
+                            ],
+                        );
+                    }
+                }
+            }
+            _ => {}
+        }
+
         false
     }
 
