@@ -519,6 +519,16 @@ impl Checker {
                 return Some(prop);
             }
         }
+        // Go getContextualTypeForElementExpression（checker.go:31763）：无同名
+        // 上下文属性时回落 getIteratedTypeOrElementType（Element 用途），
+        // 类型参数成分经约束取得元素型（如 Actions extends ActionsArray<State>）
+        if let Some(iterated) = self.get_iterated_type_or_element_type(
+            crate::checker::checker_iteration::IterationUse::Element,
+            t,
+            None,
+        ) {
+            return Some(iterated);
+        }
         if let Some(elem) = self.get_type_arguments(t).into_iter().next() {
             return Some(elem);
         }

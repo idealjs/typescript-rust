@@ -771,7 +771,26 @@ impl Checker {
         &mut self,
         node: &Arc<tsox_frontend::ast::Node>,
         ctx_type: &Arc<Type>,
-    ) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_context_sensitive_arg"); 
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_context_sensitive_arg");
+        if !matches!(
+            &node.data,
+            tsox_frontend::ast::NodeData::ArrowFunction(_) | tsox_frontend::ast::NodeData::FunctionExpression(_)
+        ) {
+            // Go isSignatureApplicable（checker.go:9812-9813）经
+            // checkExpressionWithContextualType（checker.go:7941）把参数位压入
+            // contextualInfos，对任意形态实参生效：对象/数组字面量等非函数
+            // CS 实参的嵌套成员由此取得实例化参数位
+            self.refresh_contextual_freeze_under(node);
+            let pushed = self.active_inferential_contextual.is_none();
+            if pushed {
+                self.active_inferential_contextual = Some((node.id(), Arc::clone(ctx_type)));
+            }
+            let t = self.get_type_of_node(node);
+            if pushed {
+                self.active_inferential_contextual = None;
+            }
+            return t;
+        }
         // Go getContextualSignature：联合上下文逐成分取调用签名（跳过
         // undefined 等无签名成分），单一命中即用
         let ctx_sig = if let Some(members) = ctx_type.types().filter(|_| ctx_type.is_union()) {
@@ -867,10 +886,48 @@ impl Checker {
         self.create_function_or_constructor_type(vec![sig], false)
     }
 
-    pub(crate) fn clear_node_type_cache_under(&mut self, node: &Arc<tsox_frontend::ast::Node>) { ::tsox_core::fntrace::enter("clear_node_type_cache_under"); 
+    pub(crate) fn clear_node_type_cache_under(&mut self, node: &Arc<tsox_frontend::ast::Node>) { ::tsox_core::fntrace::enter("clear_node_type_cache_under");
         self.type_node_links.data.remove(&node.id());
         tsox_frontend::ast::node_data_generated::for_each_child(node, |c| {
             self.clear_node_type_cache_under(c);
+            false
+        });
+    }
+
+    /// Go assignParameterType（checker.go:10976）与 NodeCheckFlagsContextChecked
+    /// （checker.go:10715）都是一次性冻结；本地推断轮次可能先以劣化上下文定型，
+    /// 非函数 CS 实参重定型前失效子树内这些冻结，后轮实例化参数位才能覆盖
+    fn refresh_contextual_freeze_under(&mut self, node: &Arc<tsox_frontend::ast::Node>) { ::tsox_core::fntrace::enter("refresh_contextual_freeze_under");
+        use tsox_frontend::ast::NodeData;
+        self.type_node_links.data.remove(&node.id());
+        if matches!(
+            &node.data,
+            NodeData::ArrowFunction(_) | NodeData::FunctionExpression(_) | NodeData::MethodDeclaration(_)
+        ) {
+            if let Some(links) = self.node_links.get_mut(node) {
+                links.flags.remove(NodeCheckFlags::ContextChecked);
+            }
+            let params: Vec<Arc<tsox_frontend::ast::Node>> = match &node.data {
+                NodeData::ArrowFunction(d) => d.parameters.iter().cloned().collect(),
+                NodeData::FunctionExpression(d) => d.parameters.iter().cloned().collect(),
+                NodeData::MethodDeclaration(d) => d.parameters.iter().cloned().collect(),
+                _ => Vec::new(),
+            };
+            let mut symbols: Vec<Arc<Symbol>> = Vec::new();
+            if let Some(sym) = self.program.symbol_map().symbol_of(node) {
+                symbols.push(Arc::clone(sym));
+            }
+            for param in &params {
+                if let Some(sym) = self.program.symbol_map().symbol_of(param) {
+                    symbols.push(Arc::clone(sym));
+                }
+            }
+            for sym in symbols {
+                self.value_symbol_links.data.remove(&sym.id());
+            }
+        }
+        tsox_frontend::ast::node_data_generated::for_each_child(node, |c| {
+            self.refresh_contextual_freeze_under(c);
             false
         });
     }
