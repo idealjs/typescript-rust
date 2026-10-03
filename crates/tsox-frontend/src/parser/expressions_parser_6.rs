@@ -36,13 +36,14 @@ impl Parser {
                 let pos = self.token_pos();
                 let end = self.token_end();
                 self.next_token();
-                Arc::new(Node::with_loc(
+                Arc::new(Node::with_loc_flags(
                     SyntaxKind::BigIntLiteral,
                     NodeData::BigIntLiteral(BigIntLiteralData {
                         text,
                         token_flags: 0,
                     }),
                     TextRange::new(pos, end),
+                    self.context_flags_now(),
                 ))
             }
             SyntaxKind::StringLiteral => {

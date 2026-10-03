@@ -55,7 +55,15 @@ impl Parser {
         } else {
             self.make_modifier_list_with_decorators(modifiers, decorators)
         });
-        match self.token {
+        // Go parseDeclaration：declare 修饰的声明在解析期间置 Ambient 上下文
+        let saved_ambient = self.ambient_context;
+        if modifiers
+            .as_ref()
+            .is_some_and(|m| m.flags().contains(ModifierFlags::Ambient))
+        {
+            self.ambient_context = true;
+        }
+        let result = match self.token {
             SyntaxKind::FunctionKeyword => {
                 self.parse_function_declaration_with_modifiers(modifiers)
             }
@@ -103,15 +111,18 @@ impl Parser {
                         .map(|n| n.pos())
                         .unwrap_or_else(|| self.token_pos());
                     let end = self.token_pos();
-                    return Arc::new(Node::with_loc(
+                    Arc::new(Node::with_loc(
                         SyntaxKind::MissingDeclaration,
                         NodeData::MissingDeclaration(MissingDeclarationData { modifiers }),
                         TextRange::new(start, end),
-                    ));
+                    ))
+                } else {
+                    self.parse_expression_statement()
                 }
-                self.parse_expression_statement()
             }
-        }
+        };
+        self.ambient_context = saved_ambient;
+        result
     }
 
     pub(crate) fn parse_function_declaration(&mut self) -> Arc<Node> {

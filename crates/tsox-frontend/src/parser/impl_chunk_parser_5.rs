@@ -246,7 +246,7 @@ impl Parser {
     }
 
 
-    /// Go parser contextFlags：节点创建时的 await/yield 上下文
+    /// Go parser contextFlags：节点创建时的 await/yield/ambient 上下文
     pub(crate) fn context_flags_now(&self) -> crate::ast::node_flags::NodeFlags {
         let mut flags = crate::ast::node_flags::NodeFlags::empty();
         if self.await_context {
@@ -254,6 +254,9 @@ impl Parser {
         }
         if self.yield_context {
             flags |= crate::ast::node_flags::NodeFlags::YieldContext;
+        }
+        if self.ambient_context {
+            flags |= crate::ast::node_flags::NodeFlags::Ambient;
         }
         flags
     }
@@ -419,13 +422,14 @@ impl Parser {
                 let pos = self.token_pos();
                 let end = self.token_end();
                 self.next_token();
-                Arc::new(Node::with_loc(
+                Arc::new(Node::with_loc_flags(
                     SyntaxKind::BigIntLiteral,
                     NodeData::BigIntLiteral(BigIntLiteralData {
                         text,
                         token_flags: 0,
                     }),
                     TextRange::new(pos, end),
+                    self.context_flags_now(),
                 ))
             }
             SyntaxKind::OpenBracketToken => {

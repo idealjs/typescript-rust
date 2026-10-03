@@ -90,6 +90,7 @@ pub(crate) struct ParserState {
     await_context: bool,
     decorator_context: bool,
     disallow_in_context: bool,
+    ambient_context: bool,
     parsing_contexts: u32,
     diagnostics_len: usize,
 }
@@ -106,6 +107,7 @@ impl Parser {
             await_context: self.await_context,
             decorator_context: self.decorator_context,
             disallow_in_context: self.disallow_in_context,
+            ambient_context: self.ambient_context,
             parsing_contexts: self.parsing_contexts,
             diagnostics_len: self.diagnostics.len(),
         }
@@ -120,6 +122,7 @@ impl Parser {
         self.await_context = state.await_context;
         self.decorator_context = state.decorator_context;
         self.disallow_in_context = state.disallow_in_context;
+        self.ambient_context = state.ambient_context;
         self.parsing_contexts = state.parsing_contexts;
         self.diagnostics.truncate(state.diagnostics_len);
         self.scanner = state.scanner;

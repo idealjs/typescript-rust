@@ -18,6 +18,7 @@ impl Parser {
             await_context: false,
             decorator_context: false,
             disallow_in_context: false,
+            ambient_context: false,
             parsing_contexts: 0,
         };
 
@@ -69,6 +70,9 @@ impl Parser {
         };
         let mut parser = Parser::new_with_language_variant(text.clone(), language_variant);
         parser.set_javascript_file(matches!(script_kind, ScriptKind::Js | ScriptKind::Jsx));
+        if tsox_core::tspath::is_declaration_file_name(file_name) {
+            parser.ambient_context = true;
+        }
         let (statements, end_of_file) = if matches!(script_kind, ScriptKind::Json) {
             parser.parse_json_text()
         } else {

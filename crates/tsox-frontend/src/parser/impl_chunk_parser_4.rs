@@ -314,6 +314,7 @@ impl Parser {
             await_context: self.await_context,
             decorator_context: self.decorator_context,
             disallow_in_context: self.disallow_in_context,
+            ambient_context: self.ambient_context,
             parsing_contexts: self.parsing_contexts,
         }
     }
