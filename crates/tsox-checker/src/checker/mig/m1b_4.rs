@@ -568,7 +568,9 @@ impl Checker {
         let mut evaluated: Option<String> = None;
         let parent = node.parent();
         if !parent.as_ref().map(|p| tsox_frontend::ast::is_tagged_template_expression(p)).unwrap_or(false) {
-            let result = self.evaluate_entity(node, Some(node));
+            let mut entity_fn =
+                |expr: &Arc<Node>, loc: Option<&Arc<Node>>| self.evaluate_entity(expr, loc);
+            let result = tsox_frontend::evaluator::evaluate_expression(node, Some(node), &mut entity_fn);
             evaluated = result.value.and_then(|v| match v {
                 tsox_frontend::evaluator::EvalValue::String(s) => Some(s),
                 _ => None,
