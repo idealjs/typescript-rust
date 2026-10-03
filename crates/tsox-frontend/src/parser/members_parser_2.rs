@@ -82,6 +82,12 @@ impl Parser {
     pub(crate) fn parse_heritage_clause_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_heritage_clause_element"); 
         let pos = self.token_pos();
         let expression = self.parse_left_hand_side_expression();
+        // Go parseExpressionWithTypeArguments（parser.go:2000）：左端已按实例化
+        // 表达式形态产出 ExpressionWithTypeArguments 时原样返回，不再包一层
+        // heritage 元素（双包会让类型实参挂到嵌套外层 EWTAS 的 expression 位）
+        if expression.kind == SyntaxKind::ExpressionWithTypeArguments {
+            return expression;
+        }
         let type_arguments = self.parse_optional_type_arguments();
         let end = type_arguments
             .as_ref()
