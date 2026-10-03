@@ -192,7 +192,11 @@ impl Checker {
                 .current_file
                 .as_ref()
                 .is_some_and(|f| f.is_declaration_file)
-            && let Some(sym) = self.program.symbol_map().symbol_of(node)
+            && let Some(sym) = self
+                .globals
+                .get(mdd.name.text())
+                .cloned()
+                .or_else(|| self.program.symbol_map().symbol_of(node).cloned())
         {
             if sym.flags.contains(SymbolFlags::ValueModule)
                 && sym.declarations.len() > 1
@@ -210,16 +214,32 @@ impl Checker {
                             .get_source_file_of_node(d)
                             .is_some_and(|f| f.is_declaration_file)
                 });
-                if let Some(fc) = first_non_ambient
-                    && node.loc.pos() < fc.loc.pos()
-                {
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        self.current_file.clone(),
-                        mdd.name.loc,
-                        tsox_core::diagnostics::messages_generated::
-                            A_NAMESPACE_DECLARATION_CANNOT_BE_LOCATED_PRIOR_TO_A_CLASS_OR_FUNCTION_WITH_WHICH_IT_IS_MERGED,
-                        Vec::new(),
-                    ));
+                if let Some(fc) = first_non_ambient {
+                    // Go checkModuleDeclaration：跨文件合并报 TS2433，
+                    // 同文件 namespace 先于 class/function 报 TS2434
+                    let node_file = self.get_source_file_of_node(node);
+                    let fc_file = self.get_source_file_of_node(fc);
+                    let different_file = match (&node_file, &fc_file) {
+                        (Some(a), Some(b)) => !Arc::ptr_eq(a, b),
+                        _ => false,
+                    };
+                    if different_file {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            mdd.name.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                A_NAMESPACE_DECLARATION_CANNOT_BE_IN_A_DIFFERENT_FILE_FROM_A_CLASS_OR_FUNCTION_WITH_WHICH_IT_IS_MERGED,
+                            Vec::new(),
+                        ));
+                    } else if node.loc.pos() < fc.loc.pos() {
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                            self.current_file.clone(),
+                            mdd.name.loc,
+                            tsox_core::diagnostics::messages_generated::
+                                A_NAMESPACE_DECLARATION_CANNOT_BE_LOCATED_PRIOR_TO_A_CLASS_OR_FUNCTION_WITH_WHICH_IT_IS_MERGED,
+                            Vec::new(),
+                        ));
+                    }
                 }
             }
         }

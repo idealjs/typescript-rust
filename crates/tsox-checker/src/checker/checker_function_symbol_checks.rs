@@ -43,18 +43,35 @@ impl Checker {
         ));
     }
 
-    pub fn check_function_or_constructor_symbol(&mut self, symbol: &Arc<Symbol>) { ::tsox_core::fntrace::enter("check_function_or_constructor_symbol"); 
+    pub fn check_function_or_constructor_symbol(&mut self, symbol: &Arc<Symbol>) {
+        // Go getSymbolOfDeclaration = getMergedSymbol：跨文件脚本符号由
+        // populate_globals 并入首文件符号；节点侧符号可能缺其他文件声明，
+        // 经 globals 取合并符号（声明集无交集则维持原符号，防跨作用域重名）
+        let resolved = match self.globals.get(&symbol.name) {
+            Some(g)
+                if Arc::ptr_eq(g, symbol)
+                    || g.declarations.iter().any(|d| {
+                        symbol
+                            .declarations
+                            .iter()
+                            .any(|s| Arc::ptr_eq(s, d))
+                    }) =>
+            {
+                Arc::clone(g)
+            }
+            _ => Arc::clone(symbol),
+        };
         let already = self
             .value_symbol_links
-            .get_or_default(symbol)
+            .get_or_default(&resolved)
             .function_or_constructor_checked;
         if already {
             return;
         }
         self.value_symbol_links
-            .get_or_default(symbol)
+            .get_or_default(&resolved)
             .function_or_constructor_checked = true;
-        self.check_function_or_constructor_symbol_worker(symbol);
+        self.check_function_or_constructor_symbol_worker(&resolved);
     }
 
     fn effective_declaration_flags(&self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("effective_declaration_flags"); 
@@ -116,14 +133,14 @@ impl Checker {
         let mut last_seen_non_ambient: Option<Arc<Node>> = None;
         let mut duplicate_function_declaration = false;
         let mut multiple_constructor_implementation = false;
+        let mut has_non_ambient_class = false;
         let mut function_declarations: Vec<Arc<Node>> = Vec::new();
 
         for node in &declarations {
             let in_ambient_context = node.flags.contains(NodeFlags::Ambient)
                 || node.has_syntactic_modifier(ModifierFlags::Ambient)
                 || self
-                    .current_file
-                    .as_ref()
+                    .get_source_file_of_node(node)
                     .is_some_and(|f| f.is_declaration_file)
                 || node.parent().is_some_and(|cls| {
                     (cls.flags.contains(NodeFlags::Ambient)
@@ -141,6 +158,13 @@ impl Checker {
                         SyntaxKind::InterfaceDeclaration | SyntaxKind::TypeLiteral
                     )
                 });
+            if matches!(
+                node.kind,
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+            ) && !in_ambient_context
+            {
+                has_non_ambient_class = true;
+            }
             if Self::is_function_like_declaration_kind(node.kind) {
                 let current_flags = self.effective_declaration_flags(node);
                 some_node_flags |= current_flags;
@@ -198,6 +222,60 @@ impl Checker {
                     &name,
                     tsox_core::diagnostics::messages_generated::DUPLICATE_FUNCTION_IMPLEMENTATION,
                 );
+            }
+        }
+        // Go checkFunctionOrMethodDeclaration 尾段：非 ambient class 与 function
+        // 合并符号上，类声明报 TS2813、带体函数声明报 TS2814，互挂 TS6506
+        if has_non_ambient_class
+            && !is_constructor
+            && symbol.flags.intersects(SymbolFlags::Function)
+            && !declarations.is_empty()
+        {
+            let related: Vec<(
+                tsox_core::core::text::TextRange,
+                Option<Arc<SourceFile>>,
+            )> = declarations
+                .iter()
+                .filter(|d| d.kind == SyntaxKind::ClassDeclaration)
+                .filter_map(|d| {
+                    let n = tsox_frontend::ast::utilities::get_name_of_declaration(d)
+                        .unwrap_or_else(|| Arc::clone(d));
+                    Some((n.loc, self.get_source_file_of_node(&n)))
+                })
+                .collect();
+            for d in &declarations {
+                let (message, args): (tsox_core::diagnostics::Message, Vec<String>) = match d.kind
+                {
+                    SyntaxKind::ClassDeclaration => (
+                        tsox_core::diagnostics::messages_generated::
+                            CLASS_DECLARATION_CANNOT_IMPLEMENT_OVERLOAD_LIST_FOR_0,
+                        vec![symbol.name.clone()],
+                    ),
+                    SyntaxKind::FunctionDeclaration => (
+                        tsox_core::diagnostics::messages_generated::
+                            FUNCTION_WITH_BODIES_CAN_ONLY_MERGE_WITH_CLASSES_THAT_ARE_AMBIENT,
+                        Vec::new(),
+                    ),
+                    _ => continue,
+                };
+                let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(d)
+                    .unwrap_or_else(|| Arc::clone(d));
+                let file = self
+                    .get_source_file_of_node(&name_node)
+                    .or_else(|| self.current_file.clone());
+                let mut diag =
+                    tsox_frontend::ast::Diagnostic::new(file, name_node.loc, message, args);
+                for (rloc, rfile) in &related {
+                    diag.related_information
+                        .push(tsox_frontend::ast::Diagnostic::new(
+                            rfile.clone(),
+                            *rloc,
+                            tsox_core::diagnostics::messages_generated::
+                                CONSIDER_ADDING_A_DECLARE_MODIFIER_TO_THIS_CLASS,
+                            Vec::new(),
+                        ));
+                }
+                self.diagnostics.add_or_append_related(diag);
             }
         }
         if let Some(last) = &last_seen_non_ambient
