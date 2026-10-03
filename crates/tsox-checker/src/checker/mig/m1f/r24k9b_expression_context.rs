@@ -71,7 +71,7 @@ pub(crate) fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::en
         }
         SyntaxKind::PrivateIdentifier => node.parent().is_some_and(|p| {
             matches!(&p.data, NodeData::BinaryExpression(b)
-                if Arc::ptr_eq(&b.left, node) && b.operator_token.kind == SyntaxKind::InKeyword)
+                if std::ptr::eq(b.left.as_ref(), node) && b.operator_token.kind == SyntaxKind::InKeyword)
         }),
         SyntaxKind::Identifier => {
             let Some(p) = node.parent() else {
@@ -182,15 +182,15 @@ fn is_jsx_tag_name(node: &Node) -> bool {
     match parent.kind {
         SyntaxKind::JsxOpeningElement => matches!(
             &parent.data,
-            NodeData::JsxOpeningElement(d) if Arc::ptr_eq(&d.tag_name, node)
+            NodeData::JsxOpeningElement(d) if std::ptr::eq(d.tag_name.as_ref(), node)
         ),
         SyntaxKind::JsxClosingElement => matches!(
             &parent.data,
-            NodeData::JsxClosingElement(d) if Arc::ptr_eq(&d.tag_name, node)
+            NodeData::JsxClosingElement(d) if std::ptr::eq(d.tag_name.as_ref(), node)
         ),
         SyntaxKind::JsxSelfClosingElement => matches!(
             &parent.data,
-            NodeData::JsxSelfClosingElement(d) if Arc::ptr_eq(&d.tag_name, node)
+            NodeData::JsxSelfClosingElement(d) if std::ptr::eq(d.tag_name.as_ref(), node)
         ),
         _ => false,
     }

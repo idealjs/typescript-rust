@@ -456,7 +456,7 @@ impl Checker {
                     properties: props,
                     index_infos,
                     signatures,
-                    call_signature_count: derived_call_count + base_data.call_signatures().len(),
+                    call_signature_count: derived_call_count + base_call_signatures.len(),
                     ..Default::default()
                 },
                 ..Default::default()
