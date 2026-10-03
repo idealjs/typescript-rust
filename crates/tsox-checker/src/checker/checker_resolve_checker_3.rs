@@ -44,11 +44,19 @@ impl Checker {
             }
 
             let (effective_target, cloned_from) = if !target.flags.intersects(SymbolFlags::Transient) {
-                // Go resolveSymbol：UMD（export as namespace）别名无 export_symbol
-                // 直连目标，须经完整别名解析揭示真身模块符号后再克隆
-                let resolved_target = if target.declarations.iter().any(|d| {
-                    d.kind == tsox_frontend::ast::SyntaxKind::NamespaceExportDeclaration
-                }) {
+                // Go resolveSymbolEx：非局部别名先解析真身再比对 excludes；
+                // UMD（export as namespace）别名无 export_symbol 直连目标，
+                // 同样经完整别名解析揭示真身模块符号后再克隆
+                let alias_excludes = SymbolFlags::VALUE | SymbolFlags::TYPE | SymbolFlags::NAMESPACE;
+                let is_non_local = target.flags
+                    & (SymbolFlags::Alias | alias_excludes)
+                    == SymbolFlags::Alias
+                    || (target.flags.intersects(SymbolFlags::Alias)
+                        && target.flags.intersects(SymbolFlags::Assignment));
+                let resolved_target = if is_non_local
+                    || target.declarations.iter().any(|d| {
+                        d.kind == tsox_frontend::ast::SyntaxKind::NamespaceExportDeclaration
+                    }) {
                     self.resolve_alias_base(Arc::clone(target))
                 } else {
                     self.resolve_symbol(target)
