@@ -343,11 +343,18 @@ impl Binder {
                     // 导出同住 exports 表但不是模块成员，冲突走 declareSymbol
                     // 报错路径（cloduleWithDuplicateMember1）
                     .filter(|d| {
-                        d.parent().is_some_and(|p| {
+                        let mut p = d.parent();
+                        while let Some(cur) = p.filter(|c| {
                             matches!(
-                                p.kind,
-                                SyntaxKind::ModuleBlock | SyntaxKind::SourceFile
+                                c.kind,
+                                SyntaxKind::VariableDeclarationList
+                                    | SyntaxKind::VariableStatement
                             )
+                        }) {
+                            p = cur.parent();
+                        }
+                        p.is_some_and(|p| {
+                            matches!(p.kind, SyntaxKind::ModuleBlock | SyntaxKind::SourceFile)
                         })
                     })
                     .map(|d| self.module_member_is_exported(d))
