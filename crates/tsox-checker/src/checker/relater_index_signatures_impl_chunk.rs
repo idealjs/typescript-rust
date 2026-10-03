@@ -145,6 +145,9 @@ impl Checker {
     }
 
     pub fn get_index_infos_of_type(&mut self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_infos_of_type"); 
+        // Go getIndexInfosOfType（checker.go:20096-20098）：
+        // getIndexInfosOfStructuredType(getReducedApparentType(t))，类型参数按约束取索引信息
+        let t = self.get_reduced_apparent_type(t);
         if t.is_intersection()
             && let Some(constituents) = t.types().map(|ts| ts.to_vec())
         {
@@ -196,7 +199,7 @@ impl Checker {
             && obj.structured.index_infos.is_empty()
         {
             let inst = self.resolve_interface_type_ex(sym, Some(obj.type_arguments.clone()));
-            if !Arc::ptr_eq(&inst, t)
+            if !Arc::ptr_eq(&inst, &t)
                 && let Some(infos) = inst.as_structured().map(|s| s.index_infos.clone())
                 && !infos.is_empty()
             {
@@ -214,7 +217,7 @@ impl Checker {
                     .is_some_and(|k| k.flags.contains(TypeFlags::Number))
             });
             if !has_number_index
-                && let Some(info) = self.tuple_number_index_info(t, tuple)
+                && let Some(info) = self.tuple_number_index_info(&t, tuple)
             {
                 infos.push(info);
             }
