@@ -1,4 +1,5 @@
 #![allow(unused_imports)]
+use crate::checker::inference::InferencePriority;
 
 use crate::checker::checker_prop_access::*;
 
