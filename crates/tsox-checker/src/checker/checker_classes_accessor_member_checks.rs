@@ -145,6 +145,12 @@ impl Checker {
         }
         if let Some(tn) = &type_node {
             self.check_type_annotation(tn);
+            // Go checkSignatureDeclaration：checkSourceElement(returnTypeNode)
+            // 解析注解本体（checkTypeReferenceNode→getTypeFromTypeNode）；
+            // 静态/无体成员不再经类型构造路径解析，2694 族在此产生
+            self.push_scope(node);
+            let _ = self.get_type_from_type_node(tn);
+            self.pop_scope();
         }
 
         if self.no_implicit_any
