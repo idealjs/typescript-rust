@@ -50,6 +50,9 @@ impl Checker {
                     }
                 }
             }
+            if !Arc::ptr_eq(dst, src) {
+                self.record_merged_symbol(dst, src);
+            }
         }
     }
 
