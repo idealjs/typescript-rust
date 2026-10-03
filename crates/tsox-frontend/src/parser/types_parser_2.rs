@@ -202,7 +202,7 @@ impl Parser {
             // Go parseEntityNameOfTypeReference → createIdentifierWithDiagnostic：
             // 标识符或关键字一律作名字消费；其余 token 报 diagnostic 并留 missing 不消费
             if !(self.is_identifier() || is_keyword(self.token)) {
-                if self.token == SyntaxKind::EndOfFileToken {
+                if self.token == SyntaxKind::EndOfFile {
                     let cur = self.token_pos();
                     self.parse_error_at(cur, cur, *msg, &[]);
                 } else {
