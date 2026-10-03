@@ -223,15 +223,17 @@ pub fn get_source_file_path_in_new_dir_worker(
     current_directory: &str,
     common_source_directory: &str,
     use_case_sensitive_file_names: bool,
-) -> String { ::tsox_core::fntrace::enter("get_source_file_path_in_new_dir_worker"); 
-    let options = ComparePathsOptions {
+) -> String { ::tsox_core::fntrace::enter("get_source_file_path_in_new_dir_worker");
+    let source_file_path = tsox_core::tspath::get_normalized_absolute_path(file_name, current_directory);
+    let source_file_path = match tsox_core::tspath::mig::m3j::trim_file_path_prefix(
+        &source_file_path,
+        common_source_directory,
         use_case_sensitive_file_names,
-        current_directory: current_directory.to_string(),
+    ) {
+        (trimmed, true) => trimmed,
+        (path, false) => path,
     };
-    combine_paths(
-        new_dir_path,
-        &[&get_relative_path_from_directory(common_source_directory, file_name, &options)],
-    )
+    combine_paths(new_dir_path, &[&source_file_path])
 }
 
 pub fn get_common_source_directory(
