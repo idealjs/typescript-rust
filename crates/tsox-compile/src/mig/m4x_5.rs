@@ -860,11 +860,13 @@ impl Program {
             );
         }
 
-        if matches!(module_kind, ModuleKind::Node16 | ModuleKind::NodeNext)
-            && !matches!(
-                module_resolution,
-                ModuleResolutionKind::Node16 | ModuleResolutionKind::NodeNext
-            )
+        if matches!(
+            module_kind,
+            ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext
+        ) && !matches!(
+            module_resolution,
+            ModuleResolutionKind::Node16 | ModuleResolutionKind::NodeNext
+        )
         {
             let module_kind_name = emit_module_kind_name(module_kind);
             let module_resolution_name = if module_kind == ModuleKind::NodeNext {
@@ -880,7 +882,10 @@ impl Program {
         } else if matches!(
             module_resolution,
             ModuleResolutionKind::Node16 | ModuleResolutionKind::NodeNext
-        ) && !matches!(module_kind, ModuleKind::Node16 | ModuleKind::NodeNext)
+        ) && !matches!(
+            module_kind,
+            ModuleKind::Node16 | ModuleKind::Node18 | ModuleKind::Node20 | ModuleKind::NodeNext
+        )
         {
             let module_resolution_name = module_resolution_kind_name(module_resolution);
             ctx.create_option_value_diagnostic(
