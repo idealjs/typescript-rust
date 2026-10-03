@@ -134,6 +134,7 @@ pub(crate) mod checker_modules_checker_3;
 pub(crate) mod checker_modules_checker_4;
 pub(crate) mod checker_modules_checker_5;
 pub(crate) mod checker_object_literal_is_destructuring_target;
+pub(crate) mod checker_parameter_initializer_reference;
 pub(crate) mod checker_operators;
 pub(crate) mod checker_operators_in_expression;
 pub(crate) mod checker_operators_relational;

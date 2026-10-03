@@ -178,6 +178,8 @@ impl Checker {
 
             self.check_block_scoped_variable_used_before_declaration(node, &symbol, name);
 
+            self.check_parameter_initializer_reference(node, &symbol);
+
             self.check_variable_used_before_assigned(node, &symbol, name);
 
             let in_bundled_lib = self
