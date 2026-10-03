@@ -117,12 +117,8 @@ impl Checker {
                 .as_ref()
                 .is_some_and(|f| !f.file_name.starts_with("bundled://"))
         {
-            let raw = data.name.text();
-            let module_name = raw.trim_matches(['"', '\'']);
-            let relative = module_name.starts_with("./")
-                || module_name.starts_with("../")
-                || module_name.starts_with(".\\")
-                || module_name.starts_with("..\\");
+            let module_name = data.name.text().trim_matches(['"', '\'']);
+            let relative = tsox_core::tspath::is_external_module_name_relative(module_name);
             let ambient = node.has_syntactic_modifier(ModifierFlags::Ambient)
                 || self.ambient_context_depth > 0
                 || self
