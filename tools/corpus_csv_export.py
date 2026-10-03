@@ -6,6 +6,7 @@
 
 产出(仓库根):
   corpus_results.csv        本轮失败用例,表头 key,按 key 字典序（2026-10-02 用户拍板：耗时列移除）
+  corpus_skips.csv          全量 SKIP 用例表（2026-10-03 用户拍板：去 baseline 过滤，纯数据表）
 
   *.prev.csv / *.diff       上一轮副本与两轮机械差异
 
@@ -85,12 +86,18 @@ def main():
 
     fails, skips = scan(log)
     results = os.path.join(ROOT, "corpus_results.csv")
+    skips_csv = os.path.join(ROOT, "corpus_skips.csv")
     stash_prev(results)
+    stash_prev(skips_csv)
 
     emit(fails, results)
     print(f"corpus_results.csv ({len(fails)} failed cases)")
 
+    emit(skips, skips_csv)
+    print(f"corpus_skips.csv ({len(skips)} skipped cases, 全量无 baseline 过滤)")
+
     write_diff(results)
+    write_diff(skips_csv)
 
 
 if __name__ == "__main__":
