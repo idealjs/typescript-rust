@@ -149,7 +149,33 @@ impl Checker {
         ));
     }
 
-    pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_base_class_instance_type"); 
+    /// Go checkExpression→resolveEntityName(Value)：heritage 位实体名按值含义
+    /// 解析（经 resolve_name/resolve_qualified_name，别名循环解引用到目标
+    /// 符号）后取其值型；binder 节点链接缺失时 check_expression_ex 会静默得
+    /// errorType，故实体名形态必须先走实体名解析
+    pub(crate) fn check_heritage_value_expression(&mut self, expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("check_heritage_value_expression");
+        if matches!(
+            expr.kind,
+            SyntaxKind::Identifier
+                | SyntaxKind::PropertyAccessExpression
+                | SyntaxKind::QualifiedName
+        ) {
+            if let Some(symbol) =
+                self.resolve_entity_name(expr, SymbolFlags::VALUE, true, false, Some(expr))
+            {
+                let is_unknown = self
+                    .unknown_symbol
+                    .as_ref()
+                    .is_some_and(|u| Arc::ptr_eq(u, &symbol));
+                if !is_unknown {
+                    return self.get_type_of_symbol(&symbol);
+                }
+            }
+        }
+        self.check_expression_ex(expr, crate::checker::checker::CheckMode::Normal)
+    }
+
+    pub(crate) fn resolve_base_class_instance_type(&mut self, type_ref: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_base_class_instance_type");
         if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(data) = &type_ref.data {
             // Go resolveBaseTypesOfClass 非 class 符号分支（mixin 形态）：
             // extends 表达式是调用时，实例基型 = 基构造类型首个构造签名的
@@ -176,7 +202,7 @@ impl Checker {
                 });
             let base_constructor_type = match own_type {
                 Some(ref own) => self.get_base_constructor_type_of_class(own),
-                None => Some(self.check_expression_ex(&data.expression, crate::checker::checker::CheckMode::Normal)),
+                None => Some(self.check_heritage_value_expression(&data.expression)),
             };
             let Some(base_constructor_type) = base_constructor_type else {
                 return self.get_any_type();

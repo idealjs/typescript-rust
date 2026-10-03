@@ -88,7 +88,7 @@ impl Checker {
             return Some(error);
         }
         let expression = base_type_node.expression().unwrap();
-        let base_constructor_type = self.check_expression_ex(expression, CheckMode::Normal);
+        let base_constructor_type = self.check_heritage_value_expression(&expression);
         if base_constructor_type
             .flags
             .intersects(TypeFlags::Object | TypeFlags::Intersection)
