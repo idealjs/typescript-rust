@@ -203,52 +203,7 @@ pub(crate) fn is_resolving_default_sentinel(target_default: &Arc<Type>, _t: &Arc
         .is_some_and(|m| m.id == target_default.id)
 }
 
-pub(crate) fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_node"); 
-    match node.kind {
-        SyntaxKind::SuperKeyword
-        | SyntaxKind::NullKeyword
-        | SyntaxKind::TrueKeyword
-        | SyntaxKind::FalseKeyword
-        | SyntaxKind::RegularExpressionLiteral
-        | SyntaxKind::ArrayLiteralExpression
-        | SyntaxKind::ObjectLiteralExpression
-        | SyntaxKind::PropertyAccessExpression
-        | SyntaxKind::ElementAccessExpression
-        | SyntaxKind::CallExpression
-        | SyntaxKind::NewExpression
-        | SyntaxKind::TaggedTemplateExpression
-        | SyntaxKind::AsExpression
-        | SyntaxKind::TypeAssertionExpression
-        | SyntaxKind::SatisfiesExpression
-        | SyntaxKind::NonNullExpression
-        | SyntaxKind::ParenthesizedExpression
-        | SyntaxKind::FunctionExpression
-        | SyntaxKind::ClassExpression
-        | SyntaxKind::ArrowFunction
-        | SyntaxKind::VoidExpression
-        | SyntaxKind::DeleteExpression
-        | SyntaxKind::TypeOfExpression
-        | SyntaxKind::PrefixUnaryExpression
-        | SyntaxKind::PostfixUnaryExpression
-        | SyntaxKind::BinaryExpression
-        | SyntaxKind::ConditionalExpression
-        | SyntaxKind::SpreadElement
-        | SyntaxKind::TemplateExpression
-        | SyntaxKind::OmittedExpression
-        | SyntaxKind::JsxElement
-        | SyntaxKind::JsxSelfClosingElement
-        | SyntaxKind::JsxFragment
-        | SyntaxKind::YieldExpression
-        | SyntaxKind::AwaitExpression => true,
-        SyntaxKind::MetaProperty => node.parent().map_or(true, |parent| {
-            !(is_import_call(&parent)
-                && parent
-                    .expression()
-                    .is_some_and(|e| std::ptr::eq(e.as_ref(), node)))
-        }),
-        _ => false,
-    }
-}
+pub(crate) use super::r24k9b_expression_context::{is_expression_node, is_in_expression_context};
 
 pub(crate) fn primitive_type_alias_suggestions() -> Vec<(&'static str, Arc<Symbol>)> { ::tsox_core::fntrace::enter("primitive_type_alias_suggestions"); 
     [
