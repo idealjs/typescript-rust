@@ -405,7 +405,50 @@ impl Checker {
                 self.check_class_declaration(node);
             }
             SyntaxKind::InterfaceDeclaration => {
-                self.check_interface_declaration(node);
+                self.check_type_parameters_on_node(node);
+                self.check_exports_on_merged_declarations(node);
+                if !self.check_grammar_modifiers(node) {
+                    self.check_grammar_interface_declaration(node);
+                }
+                if let Some(parent) = node.parent()
+                    && !self.container_allows_block_scoped_variable(&parent)
+                    && let Some(name) = node.name()
+                {
+                    self.grammar_error_on_node_with_args(
+                        &name,
+                        &tsox_core::diagnostics::messages_generated::
+                            X_0_DECLARATIONS_CAN_ONLY_BE_DECLARED_INSIDE_A_BLOCK,
+                        &["interface".to_string()],
+                    );
+                }
+                self.check_exports_on_merged_declarations(node);
+
+                if let tsox_frontend::ast::NodeData::InterfaceDeclaration(data) = &node.data {
+                    self.check_reserved_type_name(
+                        &data.name,
+                        &tsox_core::diagnostics::messages_generated::INTERFACE_NAME_CANNOT_BE_0,
+                    );
+                    self.check_class_type_for_duplicate_declarations(node);
+                    self.check_interface_members(&data.members);
+                }
+
+                let iface_sym = self.program.symbol_map().symbol_of(node).cloned();
+                if let Some(sym) = iface_sym {
+                    let iface_type = self.resolve_interface_type(&sym, None);
+
+                    self.check_index_constraints(&iface_type, node);
+                }
+                if let tsox_frontend::ast::NodeData::InterfaceDeclaration(data) = &node.data {
+                    self.check_property_signature_member_types(&data.members);
+                    // Go checkSourceElements(members)（checker.go:5288）内
+                    // checkPropertySignature → checkGrammarProperty 的接口分支：
+                    // 属性签名初始化器报 TS1246
+                    for member in data.members.iter() {
+                        if member.kind == SyntaxKind::PropertySignature {
+                            let _ = self.check_grammar_property(member);
+                        }
+                    }
+                }
             }
             SyntaxKind::TypeAliasDeclaration
             | SyntaxKind::ImportDeclaration
