@@ -262,6 +262,20 @@ impl Checker {
                         .as_ref()
                         .map(|(_, s)| *s)
                         .unwrap_or(self.this_container_stack.last() == Some(&ThisContainerKind::StaticMember));
+                    // Go checkSuperExpression（checker.go:8417-8422）：
+                    // IsStatic(container) || isCallExpression → getBaseConstructorTypeOfClass
+                    let is_call_expression = node.parent().is_some_and(|p| {
+                        matches!(&p.data,
+                            tsox_frontend::ast::NodeData::CallExpression(c) if Arc::ptr_eq(&c.expression, node))
+                    });
+                    if (is_static_member || is_call_expression)
+                        && let Some(sym) = self.symbol_of_node(&class)
+                    {
+                        let class_type = self.get_declared_type_of_symbol(&sym);
+                        if let Some(t) = self.get_base_constructor_type_of_class(&class_type) {
+                            return t;
+                        }
+                    }
                     if let Some(heritage) =
                         crate::checker::checker_classes_ctor_super_calls::class_extends_heritage_element(&class)
                     {
