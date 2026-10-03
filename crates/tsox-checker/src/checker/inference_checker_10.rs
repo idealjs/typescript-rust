@@ -235,6 +235,14 @@ impl Checker {
                 return Some(Arc::clone(t));
             }
         }
+        // Go getContextualType（checker.go:31071）：contextualInfos 栈先于父节点
+        // 分派被查询（#52575/#52589：检查窗口内压入的上下文型对嵌套重入查询
+        // 保持稳定，不经调用推断重推导）；缓存型（isCache）只对无旗标查询可见
+        let include_caches = _context_flags == ContextFlags::None;
+        let index = self.find_contextual_node(node, include_caches);
+        if index >= 0 {
+            return self.contextual_infos[index as usize].t.clone();
+        }
         let parent = match node.parent() {
             Some(p) => Arc::clone(&p),
             None => return None,

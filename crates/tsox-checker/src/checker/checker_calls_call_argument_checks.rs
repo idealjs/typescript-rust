@@ -348,7 +348,15 @@ impl Checker {
             let arg_type = if self.is_context_sensitive(arg) {
                 let t = self.type_of_context_sensitive_arg(arg, &param_type);
                 if !sig.type_parameters.is_empty() {
+                    // Go chooseOverload 二阶段（checker.go:9665）：CS 实参经
+                    // checkExpressionWithContextualType 重检，参数型压入
+                    // contextualInfos 栈（checker.go:7944），体内嵌套重入的
+                    // getContextualType 读栈上的实例化型，不经调用推断重推导
+                    //（裸 T[P] 泄漏即 TS7006 误报源，contextualTypeCaching）
+                    let context_node = self.get_context_node(arg);
+                    self.push_contextual_type(&context_node, &param_type, false);
                     self.check_expression(arg);
+                    self.pop_contextual_type();
                 }
                 t
             } else {
