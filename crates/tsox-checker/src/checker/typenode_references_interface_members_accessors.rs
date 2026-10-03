@@ -140,6 +140,10 @@ impl Checker {
             return;
         }
         let name = self.member_declaration_name(&data.name);
+        // Go declareSymbolEx：__missing 名成员不入容器符号表
+        if name == crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING {
+            return;
+        }
         if name.is_empty() {
             return;
         }
@@ -180,6 +184,10 @@ impl Checker {
             return;
         }
         let name = self.member_declaration_name(&data.name);
+        // Go declareSymbolEx：__missing 名成员不入容器符号表
+        if name == crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING {
+            return;
+        }
         if name.is_empty() {
             return;
         }
