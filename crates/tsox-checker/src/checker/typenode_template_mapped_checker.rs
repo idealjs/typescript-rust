@@ -119,6 +119,26 @@ impl Checker {
             _ => return self.error_type(),
         };
         let constraint_type = self.get_type_from_type_node(&constraint_node);
+        // Go checkMappedType（checker.go:3516-3533）：name type（as 子句）或
+        // 约束型须可赋给 string | number | symbol，锚点分别取 NameType /
+        // 类型参数约束节点（本节点经 type_node 缓存只解析一次）
+        {
+            let string_number_symbol = self.string_number_symbol_type();
+            match data.name_type.clone() {
+                Some(nt) => {
+                    let name_type = self.get_type_from_type_node(&nt);
+                    self.check_type_assignable_to(&name_type, &string_number_symbol, Some(&nt), None);
+                }
+                None => {
+                    self.check_type_assignable_to(
+                        &constraint_type,
+                        &string_number_symbol,
+                        Some(&constraint_node),
+                        None,
+                    );
+                }
+            }
+        }
         let mapped_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
 
         if data.type_node.is_none()
