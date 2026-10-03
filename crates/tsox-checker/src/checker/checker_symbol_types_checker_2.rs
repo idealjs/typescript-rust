@@ -763,9 +763,10 @@ impl Checker {
             _ => None,
         };
         let ctx = call_ctx.or_else(|| self.get_contextual_type(&host, ContextFlags::None))?;
-        // Go getContextuallyTypedParameterType：经 getContextualSignature 门控
-        //（多重载且 noImplicitAny 关闭时无上下文签名，参数走隐式 any）
-        let gated = self.get_contextual_call_signature(&ctx, &host)?;
+        // Go getContextuallyTypedParameterType → getContextualSignature（联合
+        // 逐成分、全同才用；多重载且 noImplicitAny 关闭时无上下文签名，
+        // 参数走隐式 any）
+        let gated = self.contextual_signature_of_type(&ctx, &host)?;
         let sig = self.substitute_explicit_call_type_args(&call, &gated);
         let is_rest = matches!(&param.data, NodeData::ParameterDeclaration(pd) if pd.dot_dot_dot_token.is_some());
         let is_this_param = param_index == 0

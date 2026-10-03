@@ -46,6 +46,17 @@ impl Checker {
             NodeData::NewExpression(data) => Some(self.get_type_of_node(&data.expression)),
             _ => None,
         }?;
+        // Go getSignaturesOfType → getReducedApparentType：延迟条件型 callee 的
+        // 调用签名经默认基约束（分支约束之并）取得（collectCalleeSignatures
+        // 同策略）；否则 conditional 无结构签名，实参上下文型整链落空
+        let expression_type = if expression_type.flags.contains(TypeFlags::Conditional) {
+            match self.deferred_default_constraint_of_conditional(&expression_type) {
+                Some(c) if !c.flags.contains(TypeFlags::Never) => c,
+                _ => expression_type,
+            }
+        } else {
+            expression_type
+        };
         let kind = if is_new {
             SignatureKind::Construct
         } else {
@@ -329,11 +340,13 @@ impl Checker {
 
         let contextual_type = self.get_contextual_type(&object_literal, _context_flags)?;
 
-        // Go getContextualTypeForObjectLiteralElement 经
-        // getApparentTypeOfContextualType：对象字面量的联合上下文型先经
-        // 判别式成员筛选（discriminateContextualTypeByObjectMembers）
+        // Go getApparentTypeOfContextualType（checker.go:32471）：判别前联合
+        // 各成分先经 getApparentType（string→String 接口等），再按对象字面量
+        // 成员判别——否则原始 primitive 成分在判别中被当 FALSE 剔除，
+        // string.normalize 之类成员不再进入属性型并集（Go 保留其报 TS7006）
         let contextual_type = if contextual_type.is_union() {
-            self.discriminate_contextual_type_by_object_members(&object_literal, &contextual_type)
+            let apparent = self.map_contextual_constituents_to_apparent(&contextual_type);
+            self.discriminate_contextual_type_by_object_members(&object_literal, &apparent)
         } else {
             contextual_type
         };
@@ -359,6 +372,41 @@ impl Checker {
         }?;
 
         self.get_type_of_property_of_contextual_type(&contextual_type, &name)
+    }
+
+    /// Go getApparentTypeOfContextualType 的成分映射（checker.go:32483）：
+    /// mapped 型保持原样，其余成分取 apparent 型；成分全未变时保留原联合
+    fn map_contextual_constituents_to_apparent(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        let TypeData::Union(u) = &t.data else {
+            return Arc::clone(t);
+        };
+        let mut mapped: Vec<Arc<Type>> = Vec::with_capacity(u.union_or_intersection.types.len());
+        let mut changed = false;
+        for c in &u.union_or_intersection.types {
+            let m = if c
+                .object_flags
+                .contains(crate::checker::types::ObjectFlags::Mapped)
+            {
+                Arc::clone(c)
+            } else {
+                let a = self.get_apparent_type(c);
+                if Arc::ptr_eq(&a, c) {
+                    Arc::clone(c)
+                } else {
+                    changed = true;
+                    a
+                }
+            };
+            mapped.push(m);
+        }
+        if changed {
+            self.get_union_type_ex(
+                mapped,
+                crate::checker::types::UnionReduction::None,
+            )
+        } else {
+            Arc::clone(t)
+        }
     }
 
     pub(crate) fn get_contextual_type_for_array_literal_element(

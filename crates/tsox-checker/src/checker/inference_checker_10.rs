@@ -337,6 +337,17 @@ impl Checker {
         node: &Arc<tsox_frontend::ast::Node>,
     ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_contextual_signature"); 
         let t = self.get_contextual_type(node, ContextFlags::Signature)?;
+        self.contextual_signature_of_type(&t, node)
+    }
+
+    /// Go getContextualSignature（checker.go:10826）：非联合直接取
+    /// getContextualCallSignature；联合逐成分取签名、缺签名的成分跳过、
+    /// 收集到的签名两两不恒等（忽略 this/返回型）即放弃，恰一个用之
+    pub(crate) fn contextual_signature_of_type(
+        &mut self,
+        t: &Arc<Type>,
+        node: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Signature>> {
         if let TypeData::Union(u) = &t.data {
             let mut first: Option<Arc<Signature>> = None;
             for current in &u.union_or_intersection.types {
@@ -346,7 +357,7 @@ impl Checker {
                 match &first {
                     None => first = Some(signature),
                     Some(f) => {
-                        if f.parameters.len() != signature.parameters.len() {
+                        if !self.signatures_identical_ignoring_returns(f, &signature) {
                             return None;
                         }
                     }
@@ -354,7 +365,37 @@ impl Checker {
             }
             return first;
         }
-        self.get_contextual_call_signature(&t, node)
+        self.get_contextual_call_signature(t, node)
+    }
+
+    /// Go compareSignaturesIdentical（relater.go:2317，partialMatch=false、
+    /// ignoreThisTypes=true、ignoreReturnTypes=true）：参数数、rest 位、
+    /// 逐参数型恒等；返回型不比
+    fn signatures_identical_ignoring_returns(
+        &mut self,
+        a: &Arc<Signature>,
+        b: &Arc<Signature>,
+    ) -> bool {
+        if a.parameters.len() != b.parameters.len() {
+            return false;
+        }
+        let a_rest = a
+            .flags
+            .contains(crate::checker::types::SignatureFlags::HasRestParameter);
+        let b_rest = b
+            .flags
+            .contains(crate::checker::types::SignatureFlags::HasRestParameter);
+        if a_rest != b_rest {
+            return false;
+        }
+        for (pa, pb) in a.parameters.iter().zip(b.parameters.iter()) {
+            let ta = self.get_type_of_symbol(pa);
+            let tb = self.get_type_of_symbol(pb);
+            if !self.is_type_identical_to(&ta, &tb) {
+                return false;
+            }
+        }
+        true
     }
 
     pub(crate) fn get_contextual_call_signature(

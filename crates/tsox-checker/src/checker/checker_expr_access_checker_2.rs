@@ -91,37 +91,28 @@ impl Checker {
         {
             let resolved = self.get_indexed_access_type(o, i);
             if !matches!(resolved.intrinsic_name(), Some("any") | Some("error")) {
-                return self.first_call_signature(&resolved);
+                return self.contextual_signature_of_type(&resolved, node);
             }
         }
-        self.first_call_signature(&t)
-    }
-
-    pub(crate) fn first_call_signature(&mut self, t: &Arc<Type>) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("first_call_signature"); 
-        if let TypeData::Union(u) = &t.data {
-            for constituent in &u.union_or_intersection.types {
-                if constituent
-                    .flags
-                    .intersects(TypeFlags::Undefined | TypeFlags::Null)
-                {
-                    continue;
-                }
-                if let Some(sig) = self.first_call_signature(constituent) {
-                    return Some(sig);
-                }
-            }
-            return None;
-        }
-        let structured = t.as_structured()?;
-        structured.call_signatures().first().cloned()
+        // Go getContextualSignature：联合上下文型逐成分取签名、全同才用，
+        // 不再取首个含签名成分（string.normalize 与自定义 normalize 不同型
+        // 时须报 TS7006 而非错配首个）
+        self.contextual_signature_of_type(&t, node)
     }
 
     pub(crate) fn contextual_param_count_for_arg(
         &mut self,
         callee_expr: &Arc<Node>,
         arg_index: usize,
-    ) -> usize { ::tsox_core::fntrace::enter("contextual_param_count_for_arg"); 
-        let t = self.get_type_of_node(callee_expr);
+    ) -> usize {
+        let mut t = self.get_type_of_node(callee_expr);
+        // Go getSignaturesOfType：延迟条件型 callee 的签名经默认基约束取得
+        if t.flags.contains(TypeFlags::Conditional) {
+            match self.deferred_default_constraint_of_conditional(&t) {
+                Some(c) if !c.flags.contains(TypeFlags::Never) => t = c,
+                _ => {}
+            }
+        }
         if t.flags.contains(TypeFlags::Any) {
             if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &callee_expr.data
             {
