@@ -268,7 +268,7 @@ impl Checker {
         (min, max)
     }
 
-    fn type_parameter_has_default(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_parameter_has_default"); 
+    pub(crate) fn type_parameter_has_default(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_parameter_has_default");
         if let crate::checker::types::TypeData::TypeParameter(tp) = &t.data
             && tp.resolved_default_type.get().is_some()
         {
@@ -346,15 +346,26 @@ impl Checker {
             // 泛型 callee 的实参在 walk 期被 check_call_arg_with_context 跳过
             //（防未固定 T 污染），此处定型完成后补跑表达式检查（体内语句诊断）
             let arg_type = if self.is_context_sensitive(arg) {
-                // Go isSignatureApplicable（checker.go:9812）对每个实参压入
-                // getTypeAtPosition(signature, i)，适用性复检的 signature 是
-                // 实例化后的 checkCandidate，参数位已代入推断实参；推断轮内
-                // 压入的未固定参数位也在使用点经 instantiateContextualType
-                // （checker.go:32609）配 nonFixingMapper 代入。压未代入型会让
-                // 箭头参数以裸 T 定型缓存（Awaited<T> vs string TS2345），
-                // 未推断参数位代入后仍为裸 T，约束解析语义不变
+                // Go 二轮 CS 窗口（checker.go:9601-9610 经 10012）压候选签名
+                // 未固定参数位，使用点 instantiateContextualType
+                //（checker.go:32609-32621）有条件代入：round-1 池存在候选或
+                // 默认型才代入，否则保持 base 形态走 apparent 约束解析。
+                // 无条件代入让单 CS 实参泛型调用的箭头取到自身形状签名遮蔽
+                // TS7006（contextuallyTypedParametersWithInitializers1 40,5）；
+                // 无条件压 base 让 arrayFromAsync 的 str 以裸 Awaited<T> 定型
+                //（TS2345）。代入判据 = 非 CS 实参来源的候选池非空
                 let context_node = self.get_context_node(arg);
-                self.push_contextual_type(&context_node, &param_type, false);
+                let window_type =
+                    if matches!(
+                        arg.kind,
+                        SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
+                    ) && !self.cs_excluded_inference_has_candidates(&sig, &arguments.nodes)
+                    {
+                        Arc::clone(&base_param_type)
+                    } else {
+                        Arc::clone(&param_type)
+                    };
+                self.push_contextual_type(&context_node, &window_type, false);
                 let t = self.type_of_context_sensitive_arg(arg, &param_type);
                 if !sig.type_parameters.is_empty() {
                     self.check_expression(arg);

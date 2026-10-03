@@ -73,7 +73,7 @@ impl Checker {
         _node: &Arc<Node>,
         signature: &Arc<Signature>,
         args: &[Arc<Node>],
-    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("infer_call_type_arguments"); 
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("infer_call_type_arguments");
         if signature.type_parameters.is_empty() {
             return Vec::new();
         }
@@ -85,5 +85,62 @@ impl Checker {
         let mut context = InferenceContext::new(inferences);
         context.signature = Some(Arc::clone(signature));
         self.infer_type_arguments(_node, signature, args, &mut context)
+    }
+
+    // Go instantiateContextualType（checker.go:32609-32621）代入门槛的
+    // round-1 候选池：CS 函数实参在 SkipContextSensitive 轮只产 anyFunctionType
+    // 占位（checker.go:10659-10676），不把箭头自身形状喂进参数位窗口的
+    // 推断池；hasInferenceCandidatesOrDefault（inference.go:1728）
+    pub fn cs_excluded_inference_has_candidates(
+        &mut self,
+        signature: &Arc<Signature>,
+        args: &[Arc<Node>],
+    ) -> bool { ::tsox_core::fntrace::enter("cs_excluded_inference_has_candidates");
+        if signature.type_parameters.is_empty() {
+            return false;
+        }
+        let inferences: Vec<InferenceInfo> = signature
+            .type_parameters
+            .iter()
+            .map(|p| InferenceInfo::new(Arc::clone(p)))
+            .collect();
+        let mut context = InferenceContext::new(inferences);
+        context.signature = Some(Arc::clone(signature));
+        let has_rest = signature.has_rest_parameter();
+        let rest_index = if has_rest {
+            signature.parameters.len().saturating_sub(1)
+        } else {
+            usize::MAX
+        };
+        for (i, arg) in args.iter().enumerate() {
+            if matches!(
+                arg.kind,
+                SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
+            ) && self.is_context_sensitive(arg)
+            {
+                continue;
+            }
+            let param_type = if has_rest && i >= rest_index {
+                let rest_type = self.get_type_of_symbol(&signature.parameters[rest_index]);
+                self.get_array_element_type(&rest_type)
+            } else if i < signature.parameters.len() {
+                self.get_type_of_symbol(&signature.parameters[i])
+            } else {
+                continue;
+            };
+            if self.could_contain_type_variables(&param_type) {
+                let arg_type = self.get_type_of_node(arg);
+                self.infer_types(
+                    &mut context.inferences,
+                    Some(arg_type),
+                    Some(param_type),
+                    InferencePriority::None,
+                    false,
+                );
+            }
+        }
+        context.inferences.iter().any(|inf| {
+            !inf.candidates.is_empty() || self.type_parameter_has_default(&inf.type_parameter)
+        })
     }
 }
