@@ -10,6 +10,13 @@ impl Checker {
             .as_ref()
             .is_some_and(|c| c.kind == SyntaxKind::ClassStaticBlockDeclaration)
         {
+            // Go checkReturnStatement：表达式先于容器检查（错位 return 也要
+            // 解析标识符产出 TS2304），再报 static block 文法错
+            if let tsox_frontend::ast::NodeData::ReturnStatement(data) = &node.data
+                && let Some(expr) = &data.expression
+            {
+                self.check_expression(expr);
+            }
             let file = self.current_file.clone();
             self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
                 file,
