@@ -703,6 +703,10 @@ impl Program {
             use_source_of_project_reference: program_opts.use_source_of_project_reference,
             tracing: program_tracing,
         });
+        let mut program = program;
+        Arc::get_mut(&mut program)
+            .expect("program is uniquely owned before checker pool init")
+            .verify_compiler_options();
         program.init_checker_pool();
         program
     }
