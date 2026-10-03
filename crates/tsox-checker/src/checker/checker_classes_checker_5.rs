@@ -188,7 +188,9 @@ impl Checker {
                     }
 
                     self.push_ts2304_suppression();
-                    let base_type = self.get_type_from_heritage_type_reference(type_ref);
+                    // Go checkClassDeclaration：extends 基型走 getBaseTypes
+                    // （值位基构造类型解析），非 implements 的类型引用路径
+                    let base_type = self.resolve_base_class_instance_type(type_ref);
                     self.pop_ts2304_suppression();
 
                     self.check_base_constructor_type(&ewa.expression);
