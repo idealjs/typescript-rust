@@ -6,7 +6,8 @@
 use std::sync::Arc;
 use tsox_frontend::ast::{is_import_call, Node, NodeData, SyntaxKind};
 
-pub(crate) fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_node");
+#[doc(hidden)]
+pub fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_expression_node");
     match node.kind {
         SyntaxKind::SuperKeyword
         | SyntaxKind::NullKeyword
@@ -92,7 +93,8 @@ pub(crate) fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::en
     }
 }
 
-pub(crate) fn is_in_expression_context(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_expression_context");
+#[doc(hidden)]
+pub fn is_in_expression_context(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_expression_context");
     let Some(parent) = node.parent() else {
         return false;
     };

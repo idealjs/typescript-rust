@@ -437,13 +437,24 @@ fn process_case(content: &str, basename: &str) -> Vec<ConfigOutcome> {
                             && t.contains("true")
                     });
                     match catch_unwind(|| {
-                        let (diags, program_len) = build_and_check(
+                        let (diags, program_len, types_text) = build_and_check(
                             &compiler_options,
                             &parsed.units,
                             no_implicit_refs,
                             tsconfig.as_ref().map(|(c, _)| c.file_names.as_slice()),
                             &parsed.symlinks,
                         );
+                        if let (Some(dir), Some(text)) =
+                            (std::env::var_os("TSOX_TYPES_EMIT_DIR"), types_text.as_ref())
+                        {
+                            let stem = std::env::var("TSOX_TYPES_STEM").unwrap_or_default();
+                            let file = if suffix.is_empty() {
+                                format!("{stem}.types")
+                            } else {
+                                format!("{stem}({suffix}).types")
+                            };
+                            let _ = std::fs::write(std::path::Path::new(&dir).join(file), text);
+                        }
                         render_errors_baseline(&diags, program_len, compiler_options.pretty.is_true())
                     }) {
                         Ok(actual) => CaseOutcome::Output(actual),
@@ -490,6 +501,10 @@ fn run_case(
     let fn_trace_path = std::env::var_os("TSOX_FN_TRACE_DIR")
         .map(|d| std::path::Path::new(&d).join(format!("{stem}.txt")).to_string_lossy().into_owned())
         .unwrap_or_default();
+
+    let types_dir = std::env::var_os("TSOX_TYPES_EMIT_DIR");
+    let types_stem = types_dir.as_ref().map(|_| stem.replace('/', "_")).unwrap_or_default();
+    let types_header = types_dir.as_ref().map(|_| format!("tests/cases/compiler/{basename}")).unwrap_or_default();
     let _ = std::fs::remove_file(&out_path);
     let worker = Command::new(exe)
         .arg("--exact")
@@ -502,6 +517,9 @@ fn run_case(
         .env("TSOX_SUBMODULE_WORKER", case_path)
         .env("TSOX_SUBMODULE_OUT", &out_path)
         .env("TSOX_FN_TRACE", &fn_trace_path)
+        .env("TSOX_TYPES_EMIT_DIR", std::env::var_os("TSOX_TYPES_EMIT_DIR").unwrap_or_default())
+        .env("TSOX_TYPES_HEADER", &types_header)
+        .env("TSOX_TYPES_STEM", &types_stem)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(if std::env::var_os("TSOX_PROBE_PHASES").is_some() {
@@ -1142,7 +1160,7 @@ fn build_and_check(
     no_implicit_references: bool,
     tsconfig_file_names: Option<&[String]>,
     symlinks: &[(String, String)],
-) -> (Vec<Diagnostic>, usize) {
+) -> (Vec<Diagnostic>, usize, Option<String>) {
     let fs = Arc::new(InMemoryFS::new());
     fs.insert_dir("/proj");
 
@@ -1304,6 +1322,28 @@ fn build_and_check(
     let program_len = all.len();
     all.extend(program.get_semantic_diagnostics());
     let check_elapsed = t_check.elapsed();
+
+    let mut types_text: Option<String> = None;
+    if std::env::var_os("TSOX_TYPES_EMIT_DIR").is_some() {
+        let mut units_sf: Vec<(String, String, Arc<tsox_frontend::ast::SourceFile>)> = Vec::new();
+        for u in units {
+            let abs = if tsox_core::tspath::is_rooted_disk_path(&u.name) {
+                tsox_core::tspath::normalize_path(&u.name)
+            } else {
+                tsox_core::tspath::normalize_path(&format!("/proj/{}", u.name))
+            };
+            if let Some(sf) = program.get_source_file_by_path(&abs) {
+                units_sf.push((u.name.clone(), u.content.clone(), sf));
+            }
+        }
+        let header = std::env::var("TSOX_TYPES_HEADER").unwrap_or_default();
+        if !units_sf.is_empty() && !header.is_empty() {
+            let mut checker = program.get_type_checker();
+            types_text = Some(crate::common::types_baseline::generate(
+                &mut checker, &header, &units_sf,
+            ));
+        }
+    }
     if let Some(path) = std::env::var_os("TSOX_PROBE_PHASES") {
         use std::io::Write as _;
         let mut f = std::fs::OpenOptions::new()
@@ -1318,7 +1358,7 @@ fn build_and_check(
         )
         .ok();
     }
-    (all, program_len)
+    (all, program_len, types_text)
 }
 
 fn render_errors_baseline(diags: &[Diagnostic], program_len: usize, pretty: bool) -> String {

@@ -203,7 +203,8 @@ pub(crate) fn is_resolving_default_sentinel(target_default: &Arc<Type>, _t: &Arc
         .is_some_and(|m| m.id == target_default.id)
 }
 
-pub(crate) use super::r24k9b_expression_context::{is_expression_node, is_in_expression_context};
+#[doc(hidden)]
+pub use crate::checker::mig::m1f::r24k9b_expression_context::{is_expression_node, is_in_expression_context};
 
 pub(crate) fn primitive_type_alias_suggestions() -> Vec<(&'static str, Arc<Symbol>)> { ::tsox_core::fntrace::enter("primitive_type_alias_suggestions"); 
     [

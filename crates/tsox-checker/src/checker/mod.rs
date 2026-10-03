@@ -95,7 +95,8 @@ pub(crate) mod checker_expressions_checker_4;
 pub(crate) mod checker_expressions_expression_secondary_checks;
 pub(crate) mod checker_expressions_object_literal_checks;
 pub(crate) mod checker_expressions_object_literal_spread_overrides;
-pub(crate) mod checker_get_excluded_symbol_flags;
+#[doc(hidden)]
+pub mod checker_get_excluded_symbol_flags;
 pub(crate) mod checker_heritage_retry_limit;
 pub(crate) mod checker_impl_chunk;
 pub(crate) mod checker_impl_chunk_5;
@@ -425,7 +426,8 @@ pub(crate) mod types_impl_chunk_3;
 #[cfg(test)]
 pub(crate) mod types_tests;
 pub(crate) mod types_type_flags_instantiable_non_primitive;
-pub(crate) mod types_type_id;
+#[doc(hidden)]
+pub mod types_type_id;
 pub(crate) mod utilities_get_assignment_target;
 pub mod utilities_has_only_expression_initialization;
 pub(crate) mod utilities_is_optional_symbol;

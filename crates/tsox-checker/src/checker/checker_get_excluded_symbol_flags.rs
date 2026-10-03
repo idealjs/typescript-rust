@@ -191,7 +191,8 @@ pub(crate) fn is_statement_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace
     )
 }
 
-pub(crate) fn is_declaration_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_name"); 
+#[doc(hidden)]
+pub fn is_declaration_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_name"); 
     let Some(parent) = node.parent() else {
         return false;
     };
