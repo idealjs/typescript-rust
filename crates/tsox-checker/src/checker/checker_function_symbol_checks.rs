@@ -74,24 +74,8 @@ impl Checker {
         self.check_function_or_constructor_symbol_worker(&resolved);
     }
 
-    fn effective_declaration_flags(&self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("effective_declaration_flags"); 
-        let mut flags = node.syntactic_modifier_flags();
-        let parent_is_classish = node.parent().is_some_and(|p| {
-            matches!(
-                p.kind,
-                SyntaxKind::InterfaceDeclaration
-                    | SyntaxKind::ClassDeclaration
-                    | SyntaxKind::ClassExpression
-            )
-        });
-        if !parent_is_classish && node.flags.contains(NodeFlags::Ambient) {
-            flags |= ModifierFlags::Ambient;
-        }
-        flags & FLAGS_TO_CHECK
-    }
-
     /// declare namespace/module 祖先（ambient 语境，成员无自身标志）
-    fn has_ambient_ancestor(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_ambient_ancestor"); 
+    pub(crate) fn has_ambient_ancestor(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_ambient_ancestor"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
@@ -166,7 +150,7 @@ impl Checker {
                 has_non_ambient_class = true;
             }
             if Self::is_function_like_declaration_kind(node.kind) {
-                let current_flags = self.effective_declaration_flags(node);
+                let current_flags = self.get_effective_declaration_flags(node, FLAGS_TO_CHECK);
                 some_node_flags |= current_flags;
                 all_node_flags &= current_flags;
                 let optional = is_optional_declaration(node);
@@ -354,7 +338,7 @@ impl Checker {
             return;
         }
         let canonical = Self::canonical_overload(&overloads, implementation);
-        let canonical_flags = self.effective_declaration_flags(canonical);
+        let canonical_flags = self.get_effective_declaration_flags(canonical, FLAGS_TO_CHECK);
         let mut groups: Vec<(Arc<Node>, Vec<&Arc<Node>>)> = Vec::new();
         for o in &overloads {
             let file = self
@@ -368,10 +352,12 @@ impl Checker {
         }
         for (_, overloads_in_file) in &groups {
             let canonical_in_file = Self::canonical_overload(overloads_in_file, implementation);
-            let canonical_flags_in_file = self.effective_declaration_flags(canonical_in_file);
+            let canonical_flags_in_file =
+                self.get_effective_declaration_flags(canonical_in_file, FLAGS_TO_CHECK);
             for o in overloads_in_file {
-                let deviation = self.effective_declaration_flags(o) ^ canonical_flags;
-                let deviation_in_file = self.effective_declaration_flags(o) ^ canonical_flags_in_file;
+                let o_flags = self.get_effective_declaration_flags(o, FLAGS_TO_CHECK);
+                let deviation = o_flags ^ canonical_flags;
+                let deviation_in_file = o_flags ^ canonical_flags_in_file;
                 let name = o.name().unwrap_or(o);
                 if deviation_in_file.contains(ModifierFlags::Export) {
                     self.emit_node_error(

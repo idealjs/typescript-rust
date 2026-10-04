@@ -176,6 +176,17 @@ impl EmitResolver {
 }
 
 impl Checker {
+    /// Go parser 以 contextFlags 给 declare 子树与 .d.ts 全部节点注入
+    /// NodeFlagsAmbient；本地 parser 声明节点不带该位，按树形重建等价判定
+    pub(crate) fn node_in_ambient_context(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_in_ambient_context"); 
+        node.flags.intersects(NodeFlags::Ambient)
+            || has_syntactic_modifier(node, ModifierFlags::Ambient)
+            || self
+                .get_source_file_of_node(node)
+                .is_some_and(|f| f.is_declaration_file)
+            || Self::has_ambient_ancestor(node)
+    }
+
     pub fn get_effective_declaration_flags(
         &mut self,
         n: &Arc<Node>,
@@ -186,7 +197,7 @@ impl Checker {
         let in_class_like_container = parent.as_deref().is_some_and(|p| {
             is_interface_declaration(p) || is_class_declaration(p) || is_class_expression(p)
         });
-        if !in_class_like_container && n.flags.intersects(NodeFlags::Ambient) {
+        if !in_class_like_container && self.node_in_ambient_context(n) {
             if let Some(container) = get_enclosing_container(n) {
                 let in_global_scope_augmentation_module_block = parent.as_deref()
                     .is_some_and(is_module_block)

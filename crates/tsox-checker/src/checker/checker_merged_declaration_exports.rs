@@ -211,7 +211,7 @@ impl Checker {
                         | SyntaxKind::ClassExpression
                 )
             })
-            && node.flags.contains(tsox_frontend::ast::NodeFlags::Ambient)
+            && self.node_in_ambient_context(node)
             && !flags.contains(ModifierFlags::Ambient)
             && Self::enclosing_export_context_container(node)
                 .is_some_and(|c| c.flags.contains(tsox_frontend::ast::NodeFlags::ExportContext))
