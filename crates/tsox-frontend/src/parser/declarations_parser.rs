@@ -310,7 +310,7 @@ impl Parser {
             self.parse_delimited_list(ParsingContext::EnumMembers, Self::parse_enum_member);
         self.expect(SyntaxKind::CloseBraceToken);
         let end = self.node_pos();
-        Arc::new(Node::with_loc(
+        Arc::new(Node::with_loc_flags(
             SyntaxKind::EnumDeclaration,
             NodeData::EnumDeclaration(EnumDeclarationData {
                 modifiers,
@@ -318,10 +318,11 @@ impl Parser {
                 members: Arc::new(members),
             }),
             TextRange::new(pos, end),
+            self.context_flags_now(),
         ))
     }
 
-    pub(crate) fn parse_namespace_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_namespace_declaration"); 
+    pub(crate) fn parse_namespace_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_namespace_declaration");
         self.parse_namespace_declaration_with_modifiers(None)
     }
 }
