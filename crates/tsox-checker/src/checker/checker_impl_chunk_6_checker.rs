@@ -31,7 +31,26 @@ impl Checker {
         result
     }
 
-    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node"); 
+    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node");
+        // Go getTypeOfNode（checker.go:33787-33818）：class extends 的 EWT 既非
+        // type node 也非 expression node，落 classType 分支取第一个基类型
+        if node.kind == SyntaxKind::ExpressionWithTypeArguments {
+            if let Some((class_decl, is_implements)) = tsox_frontend::ast::mig::m3g_3::try_get_class_implementing_or_extending_heritage_clause_element(node)
+            {
+                if !is_implements {
+                    let Some(symbol) = self.symbol_of_node(&class_decl) else {
+                        return self.error_type();
+                    };
+                    let class_type = self.get_declared_type_of_class_or_interface(&symbol);
+                    if let Some(base) = self.get_base_types(&class_type).into_iter().next() {
+                        let this_argument =
+                            crate::checker::mig::wc2::r22k3_defs::interface_this_type(&class_type);
+                        return self.get_type_with_this_argument(&base, this_argument.as_ref(), false);
+                    }
+                    return self.error_type();
+                }
+            }
+        }
         // Go getTypeOfNode：类型节点整体委托 getTypeFromTypeNode（含 NamedTupleMember 等）
         if tsox_frontend::ast::is_type_node(node) {
             return self.get_type_from_type_node(node);
@@ -345,7 +364,7 @@ impl Checker {
         }
     }
 
-    pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_identifier"); 
+    pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_identifier");
         if let Some(parent) = node.parent()
             && parent.kind == SyntaxKind::MetaProperty
             && tsox_frontend::ast::mig::m3g_2::is_right_side_of_qualified_name_or_property_access(node)
