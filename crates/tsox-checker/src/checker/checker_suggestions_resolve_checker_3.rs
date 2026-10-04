@@ -328,8 +328,10 @@ impl Checker {
                 }
             }
         }
-        // Go getTargetOfNamespaceExportDeclaration：export as namespace 的
-        // UMD 别名目标 = 所在外部模块符号经 resolveExternalModuleSymbol
+        // Go getTargetOfNamespaceExportDeclaration → resolveExternalModuleSymbol(
+        // parent, dontResolveAlias=true)：export= 别名符号原样返回（getMergedSymbol，
+        // 不就地解析），递归解析与环检测由 resolve_alias_base 的 is_pure_alias
+        // 分支承担（Go resolveIndirectionAlias → resolveAlias）
         if let Some(decl) = symbol
             .declarations
             .iter()
@@ -338,7 +340,13 @@ impl Checker {
                 .parent()
                 .and_then(|p| self.program.symbol_map().symbol_of(&p).cloned())
         {
-            return Some(self.resolve_external_module_symbol_go(&parent_sym));
+            if let Some(ee) = parent_sym
+                .exports
+                .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)
+            {
+                return Some(self.get_merged_symbol(ee));
+            }
+            return Some(parent_sym);
         }
         Some(symbol)
     }
