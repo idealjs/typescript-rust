@@ -188,14 +188,28 @@ impl Checker {
                     } else if let tsox_frontend::ast::NodeData::Identifier(id_data) =
                         &ewa.expression.data
                     {
-                        // Go checkIdentifier→resolveName(Value) 失败进
-                        // onFailedToResolveSymbol：NamespaceModule 含义命中时
-                        // checkAndReportErrorForUsingNamespaceAsTypeOrValue 报 TS2708
-                        self.check_and_report_error_for_using_namespace_as_type_or_value(
-                            &ewa.expression,
-                            id_data.text.as_str(),
-                            SymbolFlags::VALUE | SymbolFlags::ExportValue,
-                        );
+                        // Go 仅当 getResolvedSymbol→resolveName(Value|ExportValue)
+                        // 返回 nil（getSymbol：flags 直配或 alias 目标
+                        // getSymbolFlags 命中，解析失败的别名按 All 视为命中）
+                        // 才进 onFailedToResolveSymbol 链，由
+                        // checkAndReportErrorForUsingNamespaceAsTypeOrValue 报
+                        // TS2708；import 别名（含解析失败模块）为非 nil 不报
+                        let name_text = id_data.text.as_str();
+                        if self
+                            .resolve_name(
+                                name_text,
+                                &ewa.expression,
+                                SymbolFlags::VALUE | SymbolFlags::ExportValue,
+                                false,
+                            )
+                            .is_none()
+                        {
+                            self.check_and_report_error_for_using_namespace_as_type_or_value(
+                                &ewa.expression,
+                                name_text,
+                                SymbolFlags::VALUE | SymbolFlags::ExportValue,
+                            );
+                        }
                     }
 
                     self.push_ts2304_suppression();
