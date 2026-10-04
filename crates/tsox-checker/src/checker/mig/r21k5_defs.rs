@@ -47,8 +47,9 @@ impl Checker {
             .unwrap_or_else(|| self.any_type())
     }
 
-    pub fn get_alias_for_type_node(&mut self, node: &Arc<Node>) -> Option<TypeAlias> { ::tsox_core::fntrace::enter("get_alias_for_type_node"); 
-        let _ = node;
-        None
+    pub fn get_alias_for_type_node(&mut self, node: &Arc<Node>) -> Option<crate::checker::types::TypeAlias> { ::tsox_core::fntrace::enter("get_alias_for_type_node"); 
+        let symbol = self.get_alias_symbol_for_type_node(node)?;
+        let type_arguments = self.get_type_arguments_for_alias_symbol(Some(&symbol));
+        Some(crate::checker::types::TypeAlias::new(Some(symbol), type_arguments))
     }
 }
