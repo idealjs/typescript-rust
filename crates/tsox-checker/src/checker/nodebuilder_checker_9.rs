@@ -666,11 +666,43 @@ impl Checker {
                 + &self.declared_type_param_suffix(t, sym);
         }
 
+        // Go typeToTypeNodeHelper → symbolToTypeNode → lookupSymbolChain：
+        // 具名符号型从渲染上下文取可及链（nodebuilderimpl.go:1105-1192），
+        // import a = x.c 的接口 c 在 a 就地可见处显示 a
+        if let Some(chain_name) = self.accessible_chain_type_name(sym) {
+            return format!("{}{}", chain_name, self.declared_type_param_suffix(t, sym));
+        }
+
         format!(
             "{}{}",
             sym.name.clone(),
             self.declared_type_param_suffix(t, sym)
         )
+    }
+
+    pub(crate) fn accessible_chain_type_name(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+        if symbol.flags.intersects(SymbolFlags::Alias) {
+            return None;
+        }
+        let enclosing = self.display_enclosing_node.clone();
+        let chain = self.get_accessible_symbol_chain(
+            symbol,
+            enclosing.as_ref(),
+            SymbolFlags::TYPE,
+            false,
+        );
+        // 仅当链头是异于目标符号的别名（就地经 import 别名可见）时接管显示；
+        // 直名可见（链=[自身]/空）与限定路径维持既有输出
+        if chain.len() != 1 || !chain[0].flags.intersects(SymbolFlags::Alias) {
+            return None;
+        }
+        if Arc::ptr_eq(&chain[0], symbol) {
+            return None;
+        }
+        if self.needs_qualification(&chain[0], enclosing.as_ref(), SymbolFlags::TYPE) {
+            return None;
+        }
+        Some(chain[0].name.clone())
     }
 
     fn declared_type_param_suffix(&self, t: &Arc<Type>, sym: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("declared_type_param_suffix"); 
