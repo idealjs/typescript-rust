@@ -3768,6 +3768,7 @@ pub fn node_type(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace::ente
 
         NodeData::VariableDeclaration(d) => d.type_node.as_ref(),
         NodeData::ParameterDeclaration(d) => d.type_node.as_ref(),
+        NodeData::TypeAliasDeclaration(d) => Some(&d.type_node),
         NodeData::FunctionDeclaration(d) => d.type_node.as_ref(),
         NodeData::FunctionExpression(d) => d.type_node.as_ref(),
         NodeData::ArrowFunction(d) => d.type_node.as_ref(),
