@@ -42,7 +42,17 @@ impl Checker {
                         return self.error_type();
                     };
                     let class_type = self.get_declared_type_of_class_or_interface(&symbol);
-                    if let Some(base) = self.get_base_types(&class_type).into_iter().next() {
+                    let base = self
+                        .get_base_types(&class_type)
+                        .into_iter()
+                        .next()
+                        .or_else(|| {
+                            crate::checker::checker_classes_ctor_super_calls::class_extends_heritage_element(
+                                &class_decl,
+                            )
+                            .map(|element| self.resolve_base_class_instance_type(&element))
+                        });
+                    if let Some(base) = base {
                         let this_argument =
                             crate::checker::mig::wc2::r22k3_defs::interface_this_type(&class_type);
                         return self.get_type_with_this_argument(&base, this_argument.as_ref(), false);
