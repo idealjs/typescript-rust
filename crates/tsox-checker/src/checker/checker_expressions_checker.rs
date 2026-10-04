@@ -162,7 +162,9 @@ impl Checker {
             }
             SyntaxKind::PropertyAccessExpression => {
                 if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &node.data {
-                    self.check_expression(&data.expression);
+                    // Go checkPropertyAccessExpression：left 经 checkExpression，
+                    // checkExpressionEx 尾部 isConstEnumObjectType 钩子报 TS2748
+                    let _ = self.check_expression_ex(&data.expression, CheckMode::Normal);
                 }
                 self.check_property_access(node);
             }
