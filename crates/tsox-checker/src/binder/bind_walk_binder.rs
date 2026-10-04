@@ -224,16 +224,12 @@ impl Binder {
                 self.declare_symbol(node, SymbolFlags::TypeAlias, SymbolFlags::TYPE);
             }
             SyntaxKind::EnumDeclaration => {
-                // Go bindEnumDeclaration（binder.go:1225-1232）：IsEnumConst
-                // 按 const 修饰符分派 ConstEnum/RegularEnum
-                let includes = if node
-                    .has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Const)
-                {
-                    SymbolFlags::ConstEnum
+                // Go bindEnumDeclaration：isEnumConst 分 ConstEnum/RegularEnum
+                if tsox_frontend::ast::mig::x6a::is_enum_const(node) {
+                    self.declare_symbol(node, SymbolFlags::ConstEnum, SymbolFlags::ConstEnumExcludes);
                 } else {
-                    SymbolFlags::RegularEnum
-                };
-                self.declare_symbol(node, includes, SymbolFlags::VALUE | SymbolFlags::TYPE);
+                    self.declare_symbol(node, SymbolFlags::RegularEnum, SymbolFlags::RegularEnumExcludes);
+                }
             }
             SyntaxKind::ModuleDeclaration => {
                 self.bind_module_declaration(node);
