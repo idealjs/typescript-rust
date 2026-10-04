@@ -280,7 +280,12 @@ cloned.set_parent(&symbol);
         }
     }
 
-    pub fn get_symbol_at_location(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_at_location"); 
+    pub fn get_symbol_at_location(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbol_at_location");
+        if tsox_frontend::ast::mig::m3f_4::is_declaration_name_or_import_property_name(node) {
+            return node
+                .parent()
+                .and_then(|parent| self.get_symbol_of_declaration(&parent));
+        }
         if let Some(sym) = self.program.symbol_map().symbol_of(node) {
             return Some(Arc::clone(sym));
         }
