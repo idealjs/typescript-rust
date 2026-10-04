@@ -83,26 +83,30 @@ pub fn is_in_name_of_expression_with_type_arguments(node: &Node) -> bool { ::tso
 }
 
 pub fn is_in_right_side_of_import_or_export_assignment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_right_side_of_import_or_export_assignment");
-    // Go checker/utilities.go:1235-1241：沿限定名上爬到顶，判所在声明
-    let Some(mut cur) = node.parent() else {
-        return false;
-    };
-    while cur.kind == SyntaxKind::QualifiedName {
-        let Some(next) = cur.parent() else {
-            return false;
+    // Go checker/utilities.go:1235-1241：实体名沿「宿主是限定名」上爬至顶，
+    // 再判宿主是否 import equals 的 moduleReference 或 export assignment
+    // 表达式（x.c 的 x 与 c 同判入右段，左右段之分在
+    // getSymbolOfPartOfRightHandSideOfImportEquals 的 case1/case2）
+    let mut cur: Option<Arc<Node>> = None;
+    loop {
+        let cur_ref: &Node = cur.as_deref().unwrap_or(node);
+        let Some(parent) = cur_ref.parent() else {
+            break;
         };
-        cur = next;
+        if parent.kind != SyntaxKind::QualifiedName {
+            return match &parent.data {
+                NodeData::ImportEqualsDeclaration(d) => {
+                    std::ptr::eq(d.module_reference.as_ref(), cur_ref)
+                }
+                NodeData::ExportAssignment(e) => {
+                    std::ptr::eq(e.expression.as_ref(), cur_ref)
+                }
+                _ => false,
+            };
+        }
+        cur = Some(parent);
     }
-    match cur.parent() {
-        Some(decl) => match &decl.data {
-            NodeData::ImportEqualsDeclaration(d) => {
-                std::ptr::eq(d.module_reference.as_ref(), cur.as_ref())
-            }
-            NodeData::ExportAssignment(e) => std::ptr::eq(e.expression.as_ref(), cur.as_ref()),
-            _ => false,
-        },
-        None => false,
-    }
+    false
 }
 
 pub fn is_class_instance_property(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_instance_property"); 
