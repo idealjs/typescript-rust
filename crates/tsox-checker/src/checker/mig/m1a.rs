@@ -771,8 +771,9 @@ impl Checker {
         parameters: Vec<Arc<Node>>,
     ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("append_type_parameters"); 
         for parameter in &parameters {
-            if let Some(symbol) = self.symbol_of_node(parameter) {
-                // Go appendTypeParameters（checker.go:25237）取类型参数声明类型
+            // Go appendTypeParameters（checker.go:25237）经 getSymbolOfDeclaration
+            // 取 binder 挂的声明符号；symbol_node_links 只记引用位解析，声明节点恒空
+            if let Some(symbol) = self.get_symbol_of_declaration(parameter) {
                 types.push(self.get_declared_type_of_type_parameter(&symbol));
             }
         }
