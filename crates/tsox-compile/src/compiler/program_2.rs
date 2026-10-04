@@ -298,6 +298,11 @@ impl Program {
                         // createResolvedModuleHandlingSymlink（resolver.go:1193-1206）
                         // 按 isExternalLibraryImport 完成，此处直接取 resolved_file_name
                         let resolved_path = resolved_module.resolved_file_name.clone();
+                        if !allow_js
+                            && tsox_core::tspath::has_js_file_extension(&resolved_path)
+                        {
+                            continue;
+                        }
                         if resolved_module.is_external_library_import {
                             source_files_found_searching_node_modules
                                 .insert(tsox_core::tspath::normalize_path(&resolved_path));
@@ -468,6 +473,11 @@ impl Program {
                         resolver.resolve_module_name(&module_ref, &file.file_name, mode, None);
                     if resolved.as_ref().is_some_and(|m| m.is_resolved()) {
                         let resolved_path = resolved.as_ref().unwrap().resolved_file_name.as_str();
+                        if !allow_js
+                            && tsox_core::tspath::has_js_file_extension(resolved_path)
+                        {
+                            continue;
+                        }
                         if resolved
                             .as_ref()
                             .is_some_and(|m| m.is_external_library_import)
