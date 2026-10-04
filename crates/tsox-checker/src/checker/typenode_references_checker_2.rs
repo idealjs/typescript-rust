@@ -243,7 +243,19 @@ impl Checker {
 
         if symbol.flags == SymbolFlags::Alias {
             let alias_name = type_name.text().to_string();
-            if let Some(target) = self.resolve_import_alias_target_symbol(&symbol) {
+            // Go getTypeReferenceType（checker.go:24507-24514）：别名符号落
+            // tryGetDeclaredTypeOfSymbol → getDeclaredTypeOfAlias → resolveAlias，
+            // 内部 import a = X.Y 实体名与 require 模块同达
+            let target = self.resolve_import_alias_target_symbol(&symbol).or_else(|| {
+                let resolved = self.resolve_alias(&symbol);
+                let unknown = self.unknown_symbol();
+                if Arc::ptr_eq(&resolved, &unknown) {
+                    None
+                } else {
+                    Some(resolved)
+                }
+            });
+            if let Some(target) = target {
                 let target_has_type_meaning = target.flags.intersects(
                     SymbolFlags::Interface
                         | SymbolFlags::Class
