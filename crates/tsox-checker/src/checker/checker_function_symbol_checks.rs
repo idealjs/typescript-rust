@@ -75,7 +75,7 @@ impl Checker {
     }
 
     /// declare namespace/module 祖先（ambient 语境，成员无自身标志）
-    pub(crate) fn has_ambient_ancestor(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_ambient_ancestor"); 
+    fn has_ambient_ancestor(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_ambient_ancestor"); 
         let mut cur = node.parent();
         while let Some(n) = cur {
             match n.kind {
