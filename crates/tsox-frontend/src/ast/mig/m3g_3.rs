@@ -156,7 +156,7 @@ fn is_in_expression_context(node: &Node) -> bool { ::tsox_core::fntrace::enter("
     let same = |n: &Option<Arc<Node>>| n.as_ref().is_some_and(|n| std::ptr::eq(n.as_ref(), node));
     match parent.kind {
         SyntaxKind::VariableDeclaration
-        | SyntaxKind::ParameterDeclaration
+        | SyntaxKind::Parameter
         | SyntaxKind::PropertyDeclaration
         | SyntaxKind::PropertySignature
         | SyntaxKind::EnumMember
@@ -826,8 +826,8 @@ pub fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is
                 matches!(
                     &p.data,
                     NodeData::BinaryExpression(be)
-                        if std::sync::Arc::ptr_eq(&be.left, node)
-                            && be.operator == SyntaxKind::InKeyword
+                        if std::ptr::eq(be.left.as_ref(), node)
+                            && be.operator_token.kind == SyntaxKind::InKeyword
                 )
             })
         }
