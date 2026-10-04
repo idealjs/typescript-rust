@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::utilities::*;
+use tsox_frontend::ast::NodeData;
 
 pub fn is_private_within_ambient(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_private_within_ambient"); 
     (tsox_frontend::ast::has_syntactic_modifier(node, ModifierFlags::Private))
@@ -81,9 +82,27 @@ pub fn is_in_name_of_expression_with_type_arguments(node: &Node) -> bool { ::tso
     false
 }
 
-pub fn is_in_right_side_of_import_or_export_assignment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_right_side_of_import_or_export_assignment"); 
-    let _ = node;
-    false
+pub fn is_in_right_side_of_import_or_export_assignment(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_right_side_of_import_or_export_assignment");
+    // Go checker/utilities.go:1235-1241：沿限定名上爬到顶，判所在声明
+    let Some(mut cur) = node.parent() else {
+        return false;
+    };
+    while cur.kind == SyntaxKind::QualifiedName {
+        let Some(next) = cur.parent() else {
+            return false;
+        };
+        cur = next;
+    }
+    match cur.parent() {
+        Some(decl) => match &decl.data {
+            NodeData::ImportEqualsDeclaration(d) => {
+                std::ptr::eq(d.module_reference.as_ref(), cur.as_ref())
+            }
+            NodeData::ExportAssignment(e) => std::ptr::eq(e.expression.as_ref(), cur.as_ref()),
+            _ => false,
+        },
+        None => false,
+    }
 }
 
 pub fn is_class_instance_property(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_class_instance_property"); 
