@@ -165,11 +165,12 @@ impl Checker {
         let mut location = enclosing_declaration.cloned();
 
         while let Some(loc) = location {
-            if can_have_locals(loc.kind) {
+            if can_have_locals(loc.kind) && !matches!(
+                loc.kind,
+                SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
+            ) {
                 if let Some(locals) = self.program.symbol_map().locals_of(&loc) {
-                    let is_global_source_file = loc.kind == SyntaxKind::SourceFile
-                        && !Checker::is_external_or_common_js_module(&loc);
-                    if !is_global_source_file && !locals.is_empty() {
+                    if !locals.is_empty() {
                         result.push(SymbolTableInScope {
                             table: locals.clone(),
                             table_id: symbol_table_id_from_locals(&loc),
@@ -188,6 +189,30 @@ impl Checker {
                     {
                     } else {
                         if let Some(sym) = self.get_symbol_of_declaration(&loc) {
+                            // Go binder：外部模块容器顶层声明（含 namespace
+                            // import 别名）统一落容器 locals，本仓 binder 分落
+                            // locals（import 默认绑定）与容器符号 members——
+                            // 二表合并充当文件 locals 可达面（locals 优先）
+                            let mut scope = SymbolTable::new();
+                            if let Some(locals) = self.program.symbol_map().locals_of(&loc) {
+                                for (k, v) in locals.iter() {
+                                    scope.insert(k.clone(), Arc::clone(v));
+                                }
+                            }
+                            for (k, v) in sym.members.iter() {
+                                if scope.get(k).is_none() {
+                                    scope.insert(k.clone(), Arc::clone(v));
+                                }
+                            }
+                            if !scope.is_empty() {
+                                result.push(SymbolTableInScope {
+                                    table: scope,
+                                    table_id: symbol_table_id_from_locals(&loc),
+                                    ignore_qualification: false,
+                                    is_local_name_lookup: true,
+                                    scope_node: Some(Arc::clone(&loc)),
+                                });
+                            }
                             if !sym.exports.is_empty() {
                                 result.push(SymbolTableInScope {
                                     table: sym.exports.clone(),
