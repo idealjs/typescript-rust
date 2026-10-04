@@ -37,7 +37,7 @@ if [ "${1:-}" = "--anchor" ]; then
   wline=$(printf '%s\n' "$out" | grep -E '^\[w0\]' | tail -1)
   estatus=$(printf '%s\n' "$wline" | awk '{print $3}')
   [ -z "$estatus" ] && estatus=CRASH
-  python3 "$MAIN/tools/types_one_diff.py" "$TDIR/$STEM.types" "$STEM" > /tmp/flywheel_adiff_$TAG.txt 2>&1
+  python3 "$MAIN/tools/types_one_diff.py" "$TDIR" "$STEM" > /tmp/flywheel_adiff_$TAG.txt 2>&1
   tmatch=$(head -1 /tmp/flywheel_adiff_$TAG.txt)
   # 验收只看 .types 全等：errors 基线回归/失败属预期（anchor 抹平波口径），仅性能问题（崩溃致无 .types）会连带判 FAIL
   if [ "$tmatch" = "TYPES_MATCH" ]; then st=PASS; else st=FAIL; fi

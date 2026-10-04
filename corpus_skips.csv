@@ -57,6 +57,7 @@ compiler/arrayBindingPatternOmittedExpressions.ts
 compiler/arrowExpressionBodyJSDoc.ts
 compiler/arrowExpressionJs.ts
 compiler/arrowFunctionJSDocAnnotation.ts
+compiler/automaticTypeDirectiveResolutionBundler.ts
 compiler/binderBinaryExpressionStress.ts
 compiler/binderBinaryExpressionStressJs.ts
 compiler/blockScopedVariablesUseBeforeDef.ts
@@ -190,7 +191,9 @@ compiler/declarationEmitMixinPrivateProtected.ts
 compiler/declarationEmitMonorepoBaseUrl.ts
 compiler/declarationEmitPathMappingMonorepo.ts
 compiler/declarationEmitPathMappingMonorepo2.ts
+compiler/declarationEmitPatternAmbientModuleImportAttributes.ts
 compiler/declarationEmitPrefersPathKindBasedOnBundling.ts
+compiler/declarationEmitSubpathImportsReexport.ts
 compiler/decoratorInJsFile.ts
 compiler/decoratorInJsFile1.ts
 compiler/deduplicateImportsInSystem.ts
@@ -242,6 +245,7 @@ compiler/es6-umd2.ts
 compiler/es6ImportWithJsDocTags.ts
 compiler/esDecoratorsClassFieldsCrash.ts
 compiler/excessPropertyErrorsSuppressed.ts
+compiler/excessiveStackDepthFlatArray.ts
 compiler/expandoContextualTypes.tsx
 compiler/expandoFunctionContextualTypesJs.ts
 compiler/expandoFunctionSymbolPropertyJs.ts
@@ -265,7 +269,6 @@ compiler/genericCallInferenceInConditionalTypes1.ts
 compiler/genericDefaultsJs.ts
 compiler/genericInferenceDefaultTypeParameterJsxReact.tsx
 compiler/genericMethodOverspecialization.ts
-compiler/ignoredJsxAttributes.tsx
 compiler/implementsInClassExpression.ts
 compiler/impliedNodeFormatEmit1.ts
 compiler/impliedNodeFormatEmit2.ts
@@ -273,6 +276,7 @@ compiler/impliedNodeFormatEmit3.ts
 compiler/impliedNodeFormatEmit4.ts
 compiler/importAttributeTypeOnlyImports.ts
 compiler/importAttributeTypesJsImports.ts
+compiler/importAttributesDeclarationEmit.ts
 compiler/importDeclFromTypeNodeInJsSource.ts
 compiler/importDeclarationInModuleDeclaration2.ts
 compiler/importHelpersNoHelpers.ts
@@ -293,6 +297,7 @@ compiler/inferenceContextualReturnTypeUnion2.ts
 compiler/instanceofOperator.ts
 compiler/intersectionConstructorReductionCrash.ts
 compiler/intersectionWithConflictingPrivates.ts
+compiler/intersectionsOfLargeUnions2.ts
 compiler/invalidJsdocType.ts
 compiler/invalidUnicodeEscapeSequance.ts
 compiler/invalidUnicodeEscapeSequance2.ts
@@ -477,16 +482,17 @@ compiler/jsxComplexSignatureHasApplicabilityError.tsx
 compiler/jsxComponentTypeErrors.tsx
 compiler/jsxDeclarationsWithEsModuleInteropNoCrash.tsx
 compiler/jsxElementType.tsx
+compiler/jsxElementTypeLiteralWithGeneric.tsx
 compiler/jsxEmptyExpressionNotCountedAsChild.tsx
 compiler/jsxExcessPropsAndAssignability.tsx
 compiler/jsxFragmentFactoryNoUnusedLocals.tsx
 compiler/jsxFunctionTypeChildren_promoted.tsx
+compiler/jsxGenericComponentWithSpreadingResultOfGenericFunction.tsx
 compiler/jsxHasLiteralType.tsx
 compiler/jsxImportSourceCheckJs.ts
-compiler/jsxIntrinsicElementsTypeArgumentErrorSkipsTrivia.tsx
-compiler/jsxIssuesErrorWhenTagExpectsTooManyArguments.tsx
+compiler/jsxIntrinsicElementsCompatability.tsx
+compiler/jsxIntrinsicUnions.tsx
 compiler/jsxNamespacedNameNotComparedToNonMatchingIndexSignature.tsx
-compiler/jsxPartialSpread.tsx
 compiler/jsxPreserveWithJsInput.ts
 compiler/jsxRuntimePragma.ts
 compiler/jsxUnicodeEscapeSequence.tsx
@@ -614,7 +620,6 @@ compiler/reactHOCSpreadprops.tsx
 compiler/reactImportDropped.ts
 compiler/reactImportUnusedInNewJSXEmit.tsx
 compiler/reactReadonlyHOCAssignabilityReal.tsx
-compiler/reactTagNameComponentWithPropsNoOOM.tsx
 compiler/reactTagNameComponentWithPropsNoOOM2.tsx
 compiler/recursiveResolveDeclaredMembers.ts
 compiler/reexportMissingDefault5.ts
@@ -651,6 +656,7 @@ compiler/requireOfJsonFileWithoutOutDir.ts
 compiler/requireOfJsonFileWithoutResolveJsonModule.ts
 compiler/requireOfJsonFileWithoutResolveJsonModuleAndPathMapping.ts
 compiler/requireOfJsonFile_PathMapping.ts
+compiler/resolutionModeOverrideWithOtherAttributes.ts
 compiler/resolveNameWithNamspace.ts
 compiler/resolvingClassDeclarationWhenInBaseTypeResolution.ts
 compiler/returnTypePredicateIsInstantiateInContextOfTarget.tsx
@@ -742,4 +748,3 @@ compiler/unusedTypeParameters_templateTag.ts
 compiler/unusedTypeParameters_templateTag2.ts
 compiler/useBeforeDeclaration_propertyAssignment.ts
 compiler/usedImportNotElidedInJs.ts
-compiler/varianceComputationNoCrash.ts

@@ -1,11 +1,12 @@
 /* zcode-workflow
-description: 语料修复飞轮单波 workflow（anchor 抹平型，fix37 形态）：修复波并发修复 anchor .types
-  首分歧（完成即入队）+ 串行 anchor 快检（tools/wave_verify.sh --anchor：目标例 .types 与 Go
-  参考全文一致即出队；errors 基线回归/失败属预期不拦截，唯一红线是 panic/挂起类性能问题）+ 未过非阻塞退回（prompt 内嵌 .types
-  首分歧区）。errors 回归与 anchor 总数变化由主 agent 合并后最终全量统一复核。依赖 tools/wave_verify.sh
-  --anchor / types_one_diff.py / corpus_go_types.csv。
-whenToUse: 按 AGENTS.md 飞轮分发 anchor 抹平波时使用（验收=.types 与 Go 全等，errors 回归预期内不拦截）。每波改
-  WAVE/CASES 常量按名运行并带 max_concurrency（协议当前 8）。subagent 模型按协议用 GLM-5.3-Flash max。
+description: 语料修复飞轮单波 workflow（anchor 抹平型）：修复波并发修复 anchor .types 首分歧（完成即入队）+ 串行
+  anchor 快检（tools/wave_verify.sh --anchor：.types 与 Go 参考全文一致即出队；errors
+  回归/失败属预期不拦截，红线仅 panic/挂起类性能问题）+ 未过非阻塞退回（无固定上限；退回后无新 commit 自动无进展留队，防认输例空转）+ 单例
+  turn 失败隔离留队。基线分支为工作 base ts2rust-port（波在飞期间冻结）。上报只留初始/退回/终态（256 条/运行上限教训）。
+whenToUse: 按 AGENTS.md 飞轮分发修复波时使用（anchor 波验收=.types 全等，errors 回归预期内不拦截）。**每波只填 4
+  例（2026-10-04 用户拍板上限，避免主 agent 合并压力）**：每波改 WAVE/CASES/BASE_REF 常量按名运行并带
+  max_concurrency（协议当前 8）。subagent 模型按协议用 GLM-5.3-Flash max。errors 基线波将验证调用改回
+  --single/全量模式并恢复 errors 验收口径。
 */
 // 修复波 fix37（anchor 抹平）：准备 → 修复波（20 例 anchor 分歧并发修复，max_concurrency=8）⇄ 串行验证（anchor 快检：errors PASS 且 .types 全等才出队）→ 汇总
 // 执行链：tools/wave_verify.sh（自适应：待验证>1 走 --single 单例快检；无排队全量+五份 CSV 刷新+回归归因。
@@ -15,7 +16,7 @@ const WAVE = "fix37";
 const MAIN = "/home/cqh/workspace/ts2rust-port";
 const WTROOT = "/home/cqh/worktrees";
 const VERIFY_SH = `${MAIN}/tools/wave_verify.sh`;
-const BASE_REF = "fix36/integrated";
+const BASE_REF = "ts2rust-port"; // 工作 base 分支；波在飞期间约定冻结（合入只在波收尾）
 
 /** 同代码两轮结果翻转的抖动例，不参与回归归因（基线两轮：1018→1019 的差异例）。 */
 const FLAKY: string[] = ["compiler/contextualTypeCaching.ts"];
@@ -276,6 +277,7 @@ const outcomes: CaseOutcome[] = [];
 let lastVerdict: Verdict | null = null;
 const commitCounts = new Map<string, number>();
 const retreatCounts = new Map<string, number>();
+const lastCommitCounts = new Map<string, number>();
 // 验证消费队列：fixer 完成即入队（commit 机械复核在内），验证侧单线程逐个消费，互不阻塞
 const ready: WaveCase[] = [];
 let producersDone = false;
@@ -287,6 +289,8 @@ const waitNext = (): Promise<void> => new Promise((res) => { wakeSignal = res; }
 
 const producers = Promise.all(
   CASES.map(async (c) => {
+   // 单例失败隔离：该例记留队，不连坐整波
+   try {
     const fixer = agent(`修复-${c.stem}`, {
       system:
         "你是 TypeScript→Rust 迁移工程中按 Go oracle 修语料用例的修复工程师。" +
@@ -307,7 +311,9 @@ const producers = Promise.all(
     // 机械复核 commit 数（不采信自报）：零 commit 例直接留队，不占验证槽
     const wt = `${WTROOT}/${WAVE}-${c.slot}`;
     const cnt = await world.run("git", ["-C", wt, "rev-list", "--count", `${BASE_REF}..HEAD`]);
-    const commitCount = Number(cnt.stdout.trim());
+    // fail-safe：复核命令失败（如基线分支缺失）不得误判为零 commit
+    const commitCount = cnt.exitCode === 0 ? Number(cnt.stdout.trim()) : NaN;
+    if (cnt.exitCode !== 0) log(`${c.slot} commit 复核失败（${cnt.stderr.trim().slice(0, 100)}），按有 commit 入队，波收尾复核`);
     commitCounts.set(c.key, commitCount);
     if (commitCount === 0) {
       outcomes.push({
@@ -320,8 +326,18 @@ const producers = Promise.all(
       return;
     }
     ready.push(c);
-    report({ case: c.key, state: "待验证" }, "wave-board");
     wake();
+   } catch (err) {
+    outcomes.push({
+      caseKey: c.key, slot: c.slot, family: c.family, outcome: "无改动留队",
+      verifies: 0, retreats: 0, finalStatus: `fixer turn 失败：${String(err).slice(0, 150)}`,
+      failCount: "-", anchorCount: "-", fixedCount: "-",
+      regressions: [], flakyHits: [], rootCause: "", functionTable: "",
+      commits: 0, handedOff: true, summary: "fixer turn 终态失败（provider 时段），worktree 可能已有部分 commit，波收尾复核",
+    });
+    report({ case: c.key, state: "留队" }, "wave-board");
+    log(`${c.slot} ${c.key} fixer turn 失败，记留队（worktree 分支保留供收尾复核）：${String(err).slice(0, 120)}`);
+   }
   }),
 );
 producers.then(
@@ -338,7 +354,21 @@ while (!producersDone || ready.length > 0 || pendingRetreats > 0) {
   const wt = `${WTROOT}/${WAVE}-${c.slot}`;
   const attempt = retreatCounts.get(c.key) ?? 0;
   const tag = `${c.slot}-a${attempt}`;
-  report({ case: c.key, state: "验证中" }, "wave-board");
+  const cntNow = Number((await world.run("git", ["-C", wt, "rev-list", "--count", `${BASE_REF}..HEAD`])).stdout.trim() || "-1");
+  const prevCnt = lastCommitCounts.get(c.key);
+  lastCommitCounts.set(c.key, cntNow);
+  if (prevCnt !== undefined && cntNow === prevCnt && attempt > 0) {
+    outcomes.push({
+      caseKey: c.key, slot: c.slot, family: c.family, outcome: "无改动留队",
+      verifies: attempt, retreats: attempt, finalStatus: "退回后无新 commit（认输/交接）",
+      failCount: "-", anchorCount: "-", fixedCount: "-",
+      regressions: [], flakyHits: [], rootCause: "", functionTable: "",
+      commits: cntNow, handedOff: true, summary: "退回轮无新 commit，按无进展留队（见 progress_notes）",
+    });
+    report({ case: c.key, state: "留队" }, "wave-board");
+    log(`${c.slot} ${c.key} 退回后无新 commit，无进展留队`);
+    continue;
+  }
   const run = await world.run("bash", [VERIFY_SH, "--anchor", wt, c.key, tag], { timeoutMs: 900_000 });
   const verdict = parseVerdict(run.stdout);
   lastVerdict = verdict;
@@ -369,8 +399,7 @@ while (!producersDone || ready.length > 0 || pendingRetreats > 0) {
       () => {
         retreatCounts.set(c.key, attempt + 1);
         ready.push(c);
-        report({ case: c.key, state: "待验证" }, "wave-board");
-        pendingRetreats -= 1;
+          pendingRetreats -= 1;
         wake();
       },
       (err: unknown) => {

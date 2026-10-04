@@ -36,7 +36,7 @@ flowchart TD
     DECIDE -->|是| END["结束 · 汇总报告"]
 ```
 
-- **选例**：从 `corpus_results.csv` 挑选 N 例（排除在飞/留队用例，同族错开或取代表例）启动单波 workflow。
+- **选例**：从 `corpus_results.csv` / `corpus_types_anchor.csv` 挑选 N 例（排除在飞/留队用例，同族错开或取代表例）启动单波 workflow。**波例数上限 4**（2026-10-04 用户拍板）：类型/anchor 修复是深水场景，单波 20 例会造成主 agent 合并端巨大压力（同族 cherry-pick 去重、跨例冲突、归因批量大），小批次快周转替代大批量慢整合。
 - **数据体系（仓库根 CSV，全量后同步刷新）**：
   - `corpus_results.csv` / `corpus_skips.csv`——FAIL 全量 / SKIP 全量（水位与选例出发点）；
   - `corpus_rust_trace.csv`——Rust 侧 FAIL 对齐函数调用序列（trace 中间产物在 `.traces/`，gitignore，每次全量重刷后由脚本汇总为本 CSV）；
