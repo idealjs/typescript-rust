@@ -96,13 +96,11 @@ impl Checker {
             self.resolve_structured_type_members(&base_constructor_type);
         }
         if !self.pop_type_resolution() {
+            // Go error(ValueDeclaration)→GetErrorRangeForNode：类声明报错定位到
+            // 声明名（checker.go getBaseConstructorTypeOfClass），与类构建侧的
+            // 环路报出同位诊断，由诊断收集去重合并为每类一条
             let declaration = symbol.value_declaration.clone().unwrap();
-            let name = self.symbol_to_string(&symbol);
-            self.error_message(
-                &declaration,
-                msg::X_0_IS_REFERENCED_DIRECTLY_OR_INDIRECTLY_IN_ITS_OWN_BASE_EXPRESSION,
-                &[name],
-            );
+            self.emit_ts2506(&declaration, &symbol);
             set_resolved_base_constructor_type(t, self.error_type());
             let error = self.error_type();
             self.base_ctor_type_cache.insert(t.id, Arc::clone(&error));
