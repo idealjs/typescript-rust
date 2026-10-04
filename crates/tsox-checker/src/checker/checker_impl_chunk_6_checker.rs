@@ -63,23 +63,17 @@ impl Checker {
             };
         }
         // Go getTypeOfNode（checker.go:33806）：既非类型节点也非表达式的类 extends
-        // 元素取宿主类首个基类型（包 this-type 实参，基类型解析只消费
-        // GetClassExtendsHeritageElement 首元素，多基类 extends 全部元素同取首基类型）；
-        // 无基类型时 errorType
-        if let Some(class_type) = heritage_host
-            .as_ref()
-            .filter(|(_, is_implements)| !*is_implements)
-            .and_then(|(class_decl, _)| self.get_symbol_of_declaration(class_decl))
-            .map(|symbol| self.get_declared_type_of_class_or_interface(&symbol))
-        {
-            let this_argument = class_type
-                .as_interface_type()
-                .and_then(|i| i.this_type.clone());
-            let base_types = self.get_base_types(&class_type);
-            if let Some(base_type) = base_types.first() {
-                return self.get_type_with_this_argument(base_type, this_argument.as_ref(), false);
-            }
-            return self.error_type();
+        // 元素取宿主类首个基类型（基类型解析只消费 GetClassExtendsHeritageElement
+        // 首元素，多基类 extends 全部元素同取首基类型），无基类型时 errorType；
+        // 本侧类实例型为 Object 壳（ObjectFlags::Anonymous，无 Interface 型数据），
+        // getBaseTypes 的 CLASS_OR_INTERFACE 守卫恒空表，首基型经
+        // resolve_base_class_instance_type 按首 extends 元素求值
+        //（Go resolveBaseTypesOfClass 的同一首元素消费点）
+        if let Some((class_decl, false)) = heritage_host.as_ref() {
+            let base_type = tsox_frontend::ast::get_class_extends_heritage_element(class_decl)
+                .map(|element| self.resolve_base_class_instance_type(&element))
+                .unwrap_or_else(|| self.error_type());
+            return self.get_type_with_this_argument(&base_type, None, false);
         }
         match node.kind {
             SyntaxKind::NumericLiteral => {
