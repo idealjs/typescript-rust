@@ -68,6 +68,11 @@ impl Checker {
                 .intersects(tsox_frontend::ast::SymbolFlags::EnumMember)
             && let Some(parent) = sym.parent()
         {
+            // Go nodebuilderimpl.go:3456：字面量型正是枚举符号的声明型时按枚举名呈现
+            let declared = self.get_declared_type_of_symbol(&parent);
+            if Arc::ptr_eq(&declared, t) {
+                return parent.name.clone();
+            }
             return format!("{}.{}", parent.name, sym.name);
         }
 

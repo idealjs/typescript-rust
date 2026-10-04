@@ -36,6 +36,21 @@ impl Checker {
         if tsox_frontend::ast::is_type_node(node) {
             return self.get_type_from_type_node(node);
         }
+        // Go getTypeOfNode 的 IsTypeDeclaration/IsTypeDeclarationName 前置分支：
+        // 类型声明节点（名）取 getDeclaredTypeOfSymbol 声明型（枚举名→成员字面量联合，
+        // 非经表达式链落 getTypeOfFuncClassEnumModule 的值侧对象型）
+        if tsox_frontend::ast::mig::m3g_2::is_type_declaration(node) {
+            return match self.get_symbol_of_declaration(node) {
+                Some(sym) => self.get_declared_type_of_symbol(&sym),
+                None => self.error_type(),
+            };
+        }
+        if tsox_frontend::ast::mig::m3g_2::is_type_declaration_name(node) {
+            return match self.get_symbol_at_location(node) {
+                Some(sym) => self.get_declared_type_of_symbol(&sym),
+                None => self.error_type(),
+            };
+        }
         match node.kind {
             SyntaxKind::NumericLiteral => {
                 if let tsox_frontend::ast::NodeData::NumericLiteral(data) = &node.data {

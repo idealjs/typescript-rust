@@ -79,8 +79,8 @@ impl Checker {
     }
 
     pub fn get_declared_type_of_symbol(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_symbol"); 
-        // Go tryGetDeclaredTypeOfSymbol 的 Class/Interface/TypeAlias 分支；
-        // TypeParameter/Enum/Alias 等其余形态维持 any（尚未接入）
+        // Class/Interface 维持既有实现：create_declared_type_of_class_or_interface
+        // 递归回本函数，走 try_get 分派会成环
         if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::Interface) {
             return self.resolve_interface_type_ex(symbol, None);
         }
@@ -100,12 +100,10 @@ impl Checker {
             }
             return self.resolve_interface_type_ex(symbol, None);
         }
-        if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::TypeAlias) {
-            if let Some(t) = self.type_alias_links.get(symbol).and_then(|l| l.declared_type.clone()) {
-                return t;
-            }
-        }
-        self.any_type()
+        // Go getDeclaredTypeOfSymbol：其余形态经 tryGetDeclaredTypeOfSymbol
+        // 分派（TypeParameter/TypeAlias/Enum/EnumMember/Alias），无接取 errorType
+        self.try_get_declared_type_of_symbol(symbol)
+            .unwrap_or_else(|| self.error_type())
     }
 
     pub fn get_resolution_mode_override(
