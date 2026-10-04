@@ -547,7 +547,7 @@ impl Checker {
         if let Some(structured) = callee_type.as_structured() {
             let construct_sigs = structured.construct_signatures();
             if construct_sigs.is_empty() {
-                return self.get_any_type();
+                return self.check_expression_ex(node, CheckMode::TypeOnly);
             }
             // 多构造重载按实参选择（对齐 call 路径 find_matching_signature）
             let matching_idx = if construct_sigs.len() == 1 {
