@@ -55,10 +55,20 @@ impl Checker {
             .into_iter()
             .next()
             .or_else(|| {
-                self.extends_base_class_node(class_decl).map(
-                    |(_, base_symbol, heritage_expr)| {
-                        self.get_type_from_class_or_interface_reference(&heritage_expr, &base_symbol)
-                    },
+                let heritage =
+                    crate::checker::checker_classes_ctor_super_calls::class_extends_heritage_element(
+                        class_decl,
+                    )?;
+                let base_expr =
+                    crate::checker::checker_classes_ctor_super_calls::expression_with_type_arguments_expression(
+                        &heritage,
+                    );
+                let base_symbol = self
+                    .get_symbol_at_location(&base_expr)
+                    .or_else(|| self.resolve_identifier(&base_expr))
+                    .filter(|s| s.flags.contains(tsox_frontend::ast::SymbolFlags::Class))?;
+                Some(
+                    self.get_type_from_class_or_interface_reference(&heritage, &base_symbol),
                 )
             });
         match base {
