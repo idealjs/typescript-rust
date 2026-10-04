@@ -34,8 +34,17 @@ impl Checker {
     }
 
     pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node"); 
-        // Go getTypeOfNode：类型节点整体委托 getTypeFromTypeNode（含 NamedTupleMember 等）
-        if tsox_frontend::ast::is_type_node(node) {
+        // Go getTypeOfNode（checker.go:33759）先解析 heritage 元素宿主类
+        let heritage_host =
+            tsox_frontend::ast::mig::m3g_3::try_get_class_implementing_or_extending_heritage_clause_element(node);
+        let class_extends_element = node.kind == SyntaxKind::ExpressionWithTypeArguments
+            && matches!(&heritage_host, Some((_, false)));
+        // Go getTypeOfNode（checker.go:33776）：类型节点整体委托
+        // getTypeFromTypeNode（含 NamedTupleMember 等）；类 extends 子句中的
+        // EWT 例外——IsPartOfTypeNode 对其返回 false
+        //（isPartOfTypeExpressionWithTypeArguments：宿主为类且 token 为 extends），
+        // 不走类型节点求值，落到下方宿主类分支取首个基类型
+        if !class_extends_element && tsox_frontend::ast::is_type_node(node) {
             return self.get_type_from_type_node(node);
         }
         // Go getTypeOfNode 的 IsTypeDeclaration/IsTypeDeclarationName 前置分支：
@@ -52,6 +61,25 @@ impl Checker {
                 Some(sym) => self.get_declared_type_of_symbol(&sym),
                 None => self.error_type(),
             };
+        }
+        // Go getTypeOfNode（checker.go:33806）：既非类型节点也非表达式的类 extends
+        // 元素取宿主类首个基类型（包 this-type 实参，基类型解析只消费
+        // GetClassExtendsHeritageElement 首元素，多基类 extends 全部元素同取首基类型）；
+        // 无基类型时 errorType
+        if let Some(class_type) = heritage_host
+            .as_ref()
+            .filter(|(_, is_implements)| !*is_implements)
+            .and_then(|(class_decl, _)| self.get_symbol_of_declaration(class_decl))
+            .map(|symbol| self.get_declared_type_of_class_or_interface(&symbol))
+        {
+            let this_argument = class_type
+                .as_interface_type()
+                .and_then(|i| i.this_type.clone());
+            let base_types = self.get_base_types(&class_type);
+            if let Some(base_type) = base_types.first() {
+                return self.get_type_with_this_argument(base_type, this_argument.as_ref(), false);
+            }
+            return self.error_type();
         }
         match node.kind {
             SyntaxKind::NumericLiteral => {
