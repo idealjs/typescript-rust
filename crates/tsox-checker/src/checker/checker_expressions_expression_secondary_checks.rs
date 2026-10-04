@@ -11,35 +11,6 @@ impl Checker {
                     self.check_call_arg_with_context(&data.expression, i, arg);
                 }
             }
-
-            let mut reported_abstract = false;
-            if data.expression.kind == SyntaxKind::Identifier {
-                if let Some(symbol) = self.resolve_identifier(&data.expression) {
-                    if self.symbol_is_abstract_class(&symbol) {
-                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                            self.current_file.clone(),
-                            node.loc,
-                            CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS,
-                            vec![],
-                        ));
-                        reported_abstract = true;
-                    }
-                }
-            }
-
-            self.check_new_expression_ctor_accessibility(node);
-
-            if !reported_abstract {
-                let callee_type = self.get_type_of_node(&data.expression);
-                if self.type_includes_abstract_constructor(&callee_type) {
-                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                        self.current_file.clone(),
-                        node.loc,
-                        CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS,
-                        vec![],
-                    ));
-                }
-            }
         }
         if !self.check_new_expression_ctor_accessibility(node) {
             self.check_call_arguments(node, true);
