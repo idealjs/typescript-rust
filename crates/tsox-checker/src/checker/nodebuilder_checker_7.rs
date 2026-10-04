@@ -103,12 +103,17 @@ impl Checker {
                 .intersects(tsox_frontend::ast::SymbolFlags::EnumMember)
             && let Some(parent) = sym.parent()
         {
-            // Go nodebuilderimpl.go:3456：字面量型正是枚举符号的声明型时按枚举名呈现
+            // Go nodebuilderimpl.go:3453-3456：父名经 symbolToTypeNode 取可及链
+            //（链头为 import 别名时按别名渲染，Outer.A → O.A）；字面量型正是
+            // 枚举符号的声明型时按父名呈现
+            let parent_name = self
+                .accessible_chain_full_name(&parent)
+                .unwrap_or_else(|| parent.name.clone());
             let declared = self.get_declared_type_of_symbol(&parent);
             if Arc::ptr_eq(&declared, t) {
-                return parent.name.clone();
+                return parent_name;
             }
-            return format!("{}.{}", parent.name, sym.name);
+            return format!("{}.{}", parent_name, sym.name);
         }
 
         if let Some(val) = t.literal_value() {
@@ -132,7 +137,11 @@ impl Checker {
             && let Some(sym) = &t.symbol
             && sym.flags.intersects(tsox_frontend::ast::SymbolFlags::ENUM)
         {
-            return sym.name.clone();
+            // Go typeToTypeNode EnumLike 非成员分支（nodebuilderimpl.go:3473-3474）
+            // → symbolToTypeNode：枚举名从渲染上下文取可及链
+            return self
+                .accessible_chain_full_name(sym)
+                .unwrap_or_else(|| sym.name.clone());
         }
 
         // Go typeToTypeNode：alias 可达时先于 union/intersection/类型参数/类接口

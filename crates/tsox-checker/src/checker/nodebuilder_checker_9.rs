@@ -539,10 +539,15 @@ impl Checker {
         flags: TypeFormatFlags,
     ) -> String { ::tsox_core::fntrace::enter("symbol_type_to_string"); 
         if sym.flags.intersects(SymbolFlags::ENUM) {
+            // Go symbolToTypeNode：枚举名从渲染上下文取可及链
+            //（import 别名就地可见时 Outer.A → O.A，nodebuilderimpl.go:1127-1135）
+            let name = self
+                .accessible_chain_full_name(sym)
+                .unwrap_or_else(|| self.namespace_qualified_name(sym));
             if matches!(&t.data, TypeData::Object(_) | TypeData::Interface(_)) {
-                return format!("typeof {}", self.namespace_qualified_name(sym));
+                return format!("typeof {name}");
             }
-            return self.namespace_qualified_name(sym);
+            return name;
         }
 
         let obj_data = match &t.data {
@@ -663,7 +668,12 @@ impl Checker {
                     );
                 }
             }
-            return format!("typeof {}", sym.name);
+            // Go symbolToTypeNode：模块名从渲染上下文取可及链（import O = Outer
+            // 就地可见时 typeof Outer → typeof O，nodebuilderimpl.go:1127-1135）
+            let name = self
+                .accessible_chain_full_name(sym)
+                .unwrap_or_else(|| sym.name.clone());
+            return format!("typeof {name}");
         }
 
         if sym.parent().clone().as_ref().is_some_and(|p| p.flags.contains(SymbolFlags::ValueModule)) {
@@ -711,6 +721,42 @@ impl Checker {
             return None;
         }
         Some(chain[0].name.clone())
+    }
+
+    // Go getSymbolChain（nodebuilderimpl.go:1127-1135）：符号显示名从渲染上下文
+    // 取可及链（getAccessibleSymbolChain），链头经 import 别名可见时按链渲染
+    //（Outer → O、Outer.A → O.A）；链头须无需再限定（needsQualification）。
+    // enclosing 以 .types 基线传入的 node.Parent（type_render_enclosing）优先
+    pub(crate) fn accessible_chain_full_name(&mut self, symbol: &Arc<Symbol>) -> Option<String> {
+        if symbol.flags.intersects(SymbolFlags::Alias) {
+            return None;
+        }
+        let enclosing = self
+            .type_render_enclosing
+            .clone()
+            .or_else(|| self.display_enclosing_node.clone());
+        let chain = self.get_accessible_symbol_chain(
+            symbol,
+            enclosing.as_ref(),
+            SymbolFlags::TYPE,
+            false,
+        );
+        if chain.is_empty() || (chain.len() == 1 && Arc::ptr_eq(&chain[0], symbol)) {
+            return None;
+        }
+        if !chain[0].flags.intersects(SymbolFlags::Alias) {
+            return None;
+        }
+        if self.needs_qualification(&chain[0], enclosing.as_ref(), SymbolFlags::TYPE) {
+            return None;
+        }
+        Some(
+            chain
+                .iter()
+                .map(|s| s.name.clone())
+                .collect::<Vec<_>>()
+                .join("."),
+        )
     }
 
     fn declared_type_param_suffix(&self, t: &Arc<Type>, sym: &Arc<Symbol>) -> String { ::tsox_core::fntrace::enter("declared_type_param_suffix"); 
