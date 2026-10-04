@@ -293,6 +293,7 @@ pub struct Checker {
     pub display_enclosing_file: Option<Arc<SourceFile>>,
     pub module_display_specifiers: std::collections::HashMap<u64, String>,
     pub display_enclosing_node: Option<Arc<Node>>,
+    pub access_location: Option<Arc<Node>>,
     pub current_file_symbol: Option<Arc<Symbol>>,
     pub scope_stack: Vec<u64>,
     pub function_scope_count: usize,

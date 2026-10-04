@@ -280,8 +280,12 @@ impl Checker {
             {
                 break;
             }
-            // hover 在该命名空间声明内：符号就地可访问，无需限定
-            if let Some(enclosing) = self.display_enclosing_node.clone()
+            // hover 在该命名空间声明内：符号就地可访问，无需限定；
+            // 位置查询（get_type_at_location）同样记录可达性位置
+            if let Some(enclosing) = self
+                .display_enclosing_node
+                .clone()
+                .or_else(|| self.access_location.clone())
                 && ns
                     .declarations
                     .iter()

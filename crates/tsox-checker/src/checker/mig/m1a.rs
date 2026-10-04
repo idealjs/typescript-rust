@@ -70,7 +70,12 @@ impl Checker {
         self.diagnostics.get_global_diagnostics()
     }
 
-    pub fn get_type_at_location(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_at_location"); 
+    pub fn get_type_at_location(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_at_location");
+        // Go 基线/LS 的名字可达性按查询位置判定（tsbaseline writeTypeOrSymbol 的
+        // TypeToTypeNode(t, node.Parent, …) → useFullyQualifiedType →
+        // IsSymbolAccessible(symbol, enclosingDeclaration)），查询入口记录位置，
+        // 供 namespace_qualifier_of 判「符号在位置所属容器内可不加限定」
+        self.access_location = Some(Arc::clone(node));
         let reparsed = tsox_frontend::ast::mig::m3f::get_reparsed_node_for_node(node);
         self.get_type_of_node(&reparsed)
     }
