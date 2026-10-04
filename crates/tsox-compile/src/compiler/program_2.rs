@@ -495,6 +495,16 @@ impl Program {
             diagnostics.push(Arc::new(err.clone()));
         }
 
+        let mut files_by_path: HashMap<String, Arc<SourceFile>> = HashMap::new();
+        for file in &source_files {
+            let path = tsox_core::tspath::to_path(
+                &file.file_name,
+                host.current_directory(),
+                host.use_case_sensitive_file_names(),
+            );
+            files_by_path.insert(path.0, Arc::clone(file));
+        }
+
         apply_module_detection_force(&options, host.as_ref(), &source_files);
 
         let mut binder = Binder::new();
@@ -536,7 +546,7 @@ impl Program {
             checker_pool: std::sync::OnceLock::new(),
             compiler_checker_pool: std::sync::OnceLock::new(),
             compare_paths_options,
-            files_by_path: HashMap::new(),
+            files_by_path,
             project_reference_file_mapper: Arc::new(
                 crate::mig::m4x_2::ProjectReferenceFileMapper {
                     opts: program_opts.clone(),
