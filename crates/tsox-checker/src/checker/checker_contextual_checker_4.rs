@@ -129,7 +129,7 @@ impl Checker {
             tsox_core::diagnostics::messages_generated::CLASS_0_USED_BEFORE_ITS_DECLARATION
         } else if symbol.flags.intersects(SymbolFlags::RegularEnum)
             || (symbol.flags.intersects(SymbolFlags::ConstEnum)
-                && self.compiler_options.isolated_modules.is_true())
+                && self.compiler_options.get_isolated_modules())
         {
             tsox_core::diagnostics::messages_generated::ENUM_0_USED_BEFORE_ITS_DECLARATION
         } else {
