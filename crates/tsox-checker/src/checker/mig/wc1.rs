@@ -266,12 +266,12 @@ impl Checker {
         {
             if let Some(const_enum_declaration) = t.symbol().and_then(|s| s.value_declaration.clone())
             {
-                let redirect_preserves_const_enums = self.compiler_options.should_preserve_const_enums();
+                // Go: redirect == nil || !redirect.Resolved.CompilerOptions()
+                //     .ShouldPreserveConstEnums()
                 if const_enum_declaration
                     .flags
                     .intersects(tsox_frontend::ast::NodeFlags::Ambient)
                     && !tsox_frontend::ast::mig::m3g_3::is_valid_type_only_alias_use_site(node)
-                    && !redirect_preserves_const_enums
                 {
                     let flag_name = self.get_isolated_modules_like_flag_name();
                     self.error_message(
