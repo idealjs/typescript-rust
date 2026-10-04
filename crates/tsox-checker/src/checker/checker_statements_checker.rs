@@ -488,6 +488,18 @@ impl Checker {
                             }
                             valid_bases.push(base_type);
                         }
+                        let source_generic = sym.declarations.iter().any(|d| {
+                            matches!(
+                                &d.data,
+                                tsox_frontend::ast::NodeData::InterfaceDeclaration(dd)
+                                    if dd.type_parameters.is_some()
+                            )
+                        });
+                        let bases_generic = valid_bases.iter().any(|b| {
+                            b.flags.contains(TypeFlags::TypeParameter)
+                                || b.as_object()
+                                    .is_some_and(|o| !o.type_arguments.is_empty())
+                        });
                         let inherited_identical = if valid_bases.len() < 2 {
                             true
                         } else {
@@ -529,7 +541,10 @@ impl Checker {
                             }
                             identical
                         };
-                        if inherited_identical {
+                        if !source_generic
+                            && !bases_generic
+                            && inherited_identical
+                        {
                             for base_type in &valid_bases {
                                 let base_with_this = self.get_type_with_this_argument(
                                     base_type,
