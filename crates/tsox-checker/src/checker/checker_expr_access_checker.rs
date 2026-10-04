@@ -1,7 +1,10 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_expr_access::*;
-use crate::checker::types_type_id::{TYPE_FLAGS_ANY_OR_UNKNOWN, TYPE_FLAGS_BIG_INT_LIKE};
+use crate::checker::types_type_id::{
+    TYPE_FLAGS_ANY_OR_UNKNOWN, TYPE_FLAGS_BIG_INT_LIKE, TYPE_FLAGS_NUMBER_LIKE,
+    TYPE_FLAGS_STRING_LIKE,
+};
 
 impl Checker {
     pub(crate) fn get_type_of_binary_expression(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_binary_expression"); 
@@ -9,19 +12,40 @@ impl Checker {
         if let tsox_frontend::ast::NodeData::BinaryExpression(data) = &node.data {
             match data.operator_token.kind {
                 PlusToken => {
-                    let lt = self.get_type_of_node(&data.left);
-                    let rt = self.get_type_of_node(&data.right);
-                    let string_like = |t: &Arc<Type>| {
-                        t.flags
-                            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
-                    };
-                    if string_like(&lt) || string_like(&rt) {
-                        self.string_type()
-                    } else if lt.flags.contains(TypeFlags::Any) || rt.flags.contains(TypeFlags::Any)
+                    let mut lt = self.get_type_of_node(&data.left);
+                    let mut rt = self.get_type_of_node(&data.right);
+                    let silent_never = self.silent_never_type();
+                    if Arc::ptr_eq(&lt, &silent_never) || Arc::ptr_eq(&rt, &silent_never) {
+                        return silent_never;
+                    }
+                    if !self.is_type_assignable_to_kind(&lt, TYPE_FLAGS_STRING_LIKE)
+                        && !self.is_type_assignable_to_kind(&rt, TYPE_FLAGS_STRING_LIKE)
                     {
-                        self.get_any_type()
-                    } else {
+                        lt = self.check_non_null_type(&lt, &data.left);
+                        rt = self.check_non_null_type(&rt, &data.right);
+                    }
+                    if self.is_type_assignable_to_kind_ex(&lt, TYPE_FLAGS_NUMBER_LIKE, true)
+                        && self.is_type_assignable_to_kind_ex(&rt, TYPE_FLAGS_NUMBER_LIKE, true)
+                    {
                         self.number_type()
+                    } else if self.is_type_assignable_to_kind_ex(&lt, TYPE_FLAGS_BIG_INT_LIKE, true)
+                        && self.is_type_assignable_to_kind_ex(&rt, TYPE_FLAGS_BIG_INT_LIKE, true)
+                    {
+                        self.bigint_type()
+                    } else if self.is_type_assignable_to_kind_ex(&lt, TYPE_FLAGS_STRING_LIKE, true)
+                        || self.is_type_assignable_to_kind_ex(&rt, TYPE_FLAGS_STRING_LIKE, true)
+                    {
+                        self.string_type()
+                    } else if lt.flags.intersects(TypeFlags::Any)
+                        || rt.flags.intersects(TypeFlags::Any)
+                    {
+                        if self.is_error_type(&lt) || self.is_error_type(&rt) {
+                            self.error_type()
+                        } else {
+                            self.get_any_type()
+                        }
+                    } else {
+                        self.get_any_type()
                     }
                 }
 
@@ -132,20 +156,40 @@ impl Checker {
                 EqualsToken => self.get_type_of_node(&data.right),
 
                 PlusEqualsToken => {
-                    let left_type = self.get_type_of_node(&data.left);
-                    let lt = self.get_base_type_of_literal_type(&left_type);
-                    let rt = self.get_type_of_node(&data.right);
-                    let string_like = |t: &Arc<Type>| {
-                        t.flags
-                            .intersects(TypeFlags::String | TypeFlags::StringLiteral)
-                    };
-                    if string_like(&lt) || string_like(&rt) {
-                        self.string_type()
-                    } else if lt.flags.contains(TypeFlags::Any) || rt.flags.contains(TypeFlags::Any)
+                    let mut lt = self.get_type_of_node(&data.left);
+                    let mut rt = self.get_type_of_node(&data.right);
+                    let silent_never = self.silent_never_type();
+                    if Arc::ptr_eq(&lt, &silent_never) || Arc::ptr_eq(&rt, &silent_never) {
+                        return silent_never;
+                    }
+                    if !self.is_type_assignable_to_kind(&lt, TYPE_FLAGS_STRING_LIKE)
+                        && !self.is_type_assignable_to_kind(&rt, TYPE_FLAGS_STRING_LIKE)
                     {
-                        self.get_any_type()
-                    } else {
+                        lt = self.check_non_null_type(&lt, &data.left);
+                        rt = self.check_non_null_type(&rt, &data.right);
+                    }
+                    if self.is_type_assignable_to_kind_ex(&lt, TYPE_FLAGS_NUMBER_LIKE, true)
+                        && self.is_type_assignable_to_kind_ex(&rt, TYPE_FLAGS_NUMBER_LIKE, true)
+                    {
                         self.number_type()
+                    } else if self.is_type_assignable_to_kind_ex(&lt, TYPE_FLAGS_BIG_INT_LIKE, true)
+                        && self.is_type_assignable_to_kind_ex(&rt, TYPE_FLAGS_BIG_INT_LIKE, true)
+                    {
+                        self.bigint_type()
+                    } else if self.is_type_assignable_to_kind_ex(&lt, TYPE_FLAGS_STRING_LIKE, true)
+                        || self.is_type_assignable_to_kind_ex(&rt, TYPE_FLAGS_STRING_LIKE, true)
+                    {
+                        self.string_type()
+                    } else if lt.flags.intersects(TypeFlags::Any)
+                        || rt.flags.intersects(TypeFlags::Any)
+                    {
+                        if self.is_error_type(&lt) || self.is_error_type(&rt) {
+                            self.error_type()
+                        } else {
+                            self.get_any_type()
+                        }
+                    } else {
+                        self.get_any_type()
                     }
                 }
 
