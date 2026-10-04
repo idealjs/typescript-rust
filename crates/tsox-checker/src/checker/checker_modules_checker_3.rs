@@ -100,29 +100,38 @@ impl Checker {
             .text()
             .trim_matches(['"', '\'', '`'])
             .to_string();
-        if let Some(sym) = self.resolve_module_file_symbol(&module_reference)
-            && sym
-                .declarations
-                .iter()
-                .any(|dd| matches!(&dd.data, NodeData::ModuleDeclaration(_)))
-        {
-            return;
-        }
-        let Some(resolved_module) = self
-            .program
-            .get_resolved_modules()
-            .get(&file.file_name)
-            .and_then(|entries| {
-                entries
-                    .iter()
-                    .find(|(name, _)| name == &module_reference)
-                    .and_then(|(_, rm)| rm.clone())
-            })
-        else {
+        // Go resolveExternalModule：程序级解析（GetResolvedModule）+
+        // GetResolutionDiagnostic 决定 TS7016；程序级记录尚未经 trait 暴露，
+        // 用同一解析器按需解析（与 fileloader 同参同果）
+        let Some(path) = self.program.resolve_external_module_path(
+            &module_reference,
+            &file.file_name,
+            tsox_core::core::compiler_options::ModuleKind::None,
+        ) else {
             return;
         };
-        if !resolved_module.is_resolved() {
-            return;
+        let resolved_module = tsox_tsoptions::module::ResolvedModule {
+            resolved_file_name: path.clone(),
+            extension: tsox_core::tspath::try_get_extension_from_path(&path).to_string(),
+            ..Default::default()
+        };
+        if !module_reference.starts_with("./") && !module_reference.starts_with("../") {
+            let ambient_hit = self.program.source_files().iter().any(|f| {
+                if f.external_module_indicator.is_some() {
+                    return false;
+                }
+                let NodeData::SourceFile(sf) = &f.node.data else {
+                    return false;
+                };
+                sf.statements.iter().any(|stmt| {
+                    matches!(&stmt.data, NodeData::ModuleDeclaration(md)
+                        if md.name.kind == SyntaxKind::StringLiteral
+                            && md.name.text().trim_matches(['"', '\'']) == module_reference)
+                })
+            });
+            if ambient_hit {
+                return;
+            }
         }
         let resolution_diagnostic = tsox_tsoptions::module::mig::m3i::get_resolution_diagnostic(
             &self.compiler_options,
