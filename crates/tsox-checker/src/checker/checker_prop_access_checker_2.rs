@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_prop_access::*;
+use crate::checker::mig::wc3_2::is_const_enum_object_type;
 use tsox_frontend::ast::mig::m3b::is_write_access;
 
 impl Checker {
@@ -23,6 +24,11 @@ impl Checker {
             lookup_type = obj_type;
         }
         let obj_type = lookup_type;
+
+        // Go checkExpressionEx 尾部：const enum 对象类型的 left 触发访问检查
+        if is_const_enum_object_type(&obj_type) {
+            self.check_const_enum_access(obj_expr, &obj_type);
+        }
 
         if name_text.is_empty() {
             return;
