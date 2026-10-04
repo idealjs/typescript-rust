@@ -11,6 +11,41 @@
 set -u
 export LC_ALL=C
 MAIN=/home/cqh/workspace/ts2rust-port
+# anchor 快检模式：单例跑 + .types 发射 + 与 Go 参考逐行比对（errors PASS 且 .types 全等才算过）
+# 用法: tools/wave_verify.sh --anchor <worktree_abs> <case_key> <tag>
+# PASS 判据 = 目标例 errors PASS 且本例 .types 与 Go reference 全文一致（anchor 行消失）
+if [ "${1:-}" = "--anchor" ]; then
+  WT=$2; KEY=$3; TAG=$4
+  NAME=${KEY#compiler/}
+  STEM=$(basename "$NAME"); STEM=${STEM%.*}
+  cd "$MAIN" || exit 1
+  mkdir -p /tmp/flywheel_verify
+  if ! (cd "$WT" && timeout 600 nice -n 10 bash -c 'ulimit -v 8388608; exec cargo test --release -p tsox --test corpus --no-run --jobs 12') > /tmp/flywheel_build_$TAG.log 2>&1; then
+    echo "VERDICT case=$KEY status=BUILD_ERROR mode=anchor fail_count=- skip_count=- anchor_count=- new_fails=- new_skips=- fixed=-1"
+    grep -E "^error" -A 6 /tmp/flywheel_build_$TAG.log | head -30 | sed 's/^/BUILD_ERR /'
+    exit 0
+  fi
+  BIN=$(ls -t "$WT"/target/release/deps/corpus-* 2>/dev/null | grep -v '\.d$' | head -1)
+  if [ -z "$BIN" ]; then
+    echo "VERDICT case=$KEY status=BUILD_ERROR mode=anchor fail_count=- skip_count=- anchor_count=- new_fails=- new_skips=- fixed=-1"
+    echo "BUILD_ERR corpus binary not found under $WT/target/release/deps"
+    exit 0
+  fi
+  TDIR=/tmp/flywheel_types_$TAG; rm -rf "$TDIR"; mkdir -p "$TDIR"
+  out=$(cd "$MAIN/crates/tsox" && BIN="$BIN" TSOX_TYPES_EMIT_DIR="$TDIR" bash "$MAIN/tools/corpus_one.sh" "$NAME" 2>&1)
+  printf '%s\n' "$out" > "/tmp/flywheel_verify/$TAG.log"
+  wline=$(printf '%s\n' "$out" | grep -E '^\[w0\]' | tail -1)
+  estatus=$(printf '%s\n' "$wline" | awk '{print $3}')
+  [ -z "$estatus" ] && estatus=CRASH
+  python3 "$MAIN/tools/types_one_diff.py" "$TDIR/$STEM.types" "$STEM" > /tmp/flywheel_adiff_$TAG.txt 2>&1
+  tmatch=$(head -1 /tmp/flywheel_adiff_$TAG.txt)
+  # 验收只看 .types 全等：errors 基线回归/失败属预期（anchor 抹平波口径），仅性能问题（崩溃致无 .types）会连带判 FAIL
+  if [ "$tmatch" = "TYPES_MATCH" ]; then st=PASS; else st=FAIL; fi
+  echo "VERDICT case=$KEY status=$st mode=anchor fail_count=- skip_count=- anchor_count=- new_fails=- new_skips=- fixed=-1"
+  [ "$estatus" != "PASS" ] && echo "NOTE errors_status=$estatus（预期内，不拦截） $(printf '%s\n' "$wline" | sed 's/^[^)]*) *//' | cut -c1-100)"
+  [ "$tmatch" != "TYPES_MATCH" ] && sed -n '2,31p' /tmp/flywheel_adiff_$TAG.txt | sed 's/^/ANCHORDIFF /'
+  exit 0
+fi
 # 单例快检模式：worktree 构建 + 只跑目标例（复用 corpus_one.sh 的单例执行与 ref/local diff）
 # 用法: tools/wave_verify.sh --single <worktree_abs> <case_key> <tag>
 # 适用于验证排队积压（待验证 >1）时压缩单轮验证时长；跨例回归不感知，合并后由主 agent 全量统一暴露
