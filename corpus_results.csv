@@ -24,7 +24,6 @@ compiler/classFieldSuperAccessible.ts
 compiler/classFieldSuperAccessibleJs1.ts
 compiler/classFieldSuperNotAccessibleJs.ts
 compiler/classFieldsBrokenConstructorEmitNoCrash1.ts
-compiler/classInheritence.ts
 compiler/classMemberInitializerWithLamdaScoping4.ts
 compiler/classNameReferencesInStaticElements.ts
 compiler/classReferencedInContextualParameterWithinItsOwnBaseExpression.ts
@@ -54,7 +53,6 @@ compiler/conflictMarkerTrivia3.tsx
 compiler/conflictingDeclarationsImportFromNamespace1.ts
 compiler/conflictingDeclarationsImportFromNamespace2.ts
 compiler/constAssertionInLoop.ts
-compiler/constEnumBadPropertyNames.ts
 compiler/constEnumErrors.ts
 compiler/constraintWithIndexedAccess.ts
 compiler/contentMapperDeclarationEmit.ts
@@ -81,8 +79,6 @@ compiler/contextualTypingGenericFunction2.ts
 compiler/contextualTypingWithFixedTypeParameters1.ts
 compiler/contextuallyTypeAsyncFunctionReturnTypeFromUnion.ts
 compiler/contextuallyTypedJsxAttribute.ts
-compiler/contextuallyTypedJsxAttribute2.tsx
-compiler/contextuallyTypedJsxChildren.tsx
 compiler/contextuallyTypedJsxChildren2.tsx
 compiler/contextuallyTypedOptionalProperty.ts
 compiler/contextuallyTypedParametersOptionalInJSDoc.ts
@@ -119,11 +115,9 @@ compiler/declarationEmitComputedPropertyNameSymbol2.ts
 compiler/declarationEmitDestructuringObjectLiteralPattern.ts
 compiler/declarationEmitDestructuringObjectLiteralPattern1.ts
 compiler/declarationEmitDestructuringWithOptionalBindingParameters.ts
-compiler/declarationEmitExpandoArrowFunctionParameter.ts
 compiler/declarationEmitExpandoPropertyPrivateName.ts
 compiler/declarationEmitExportAliasVisibiilityMarking.ts
 compiler/declarationEmitExpressionInExtends4.ts
-compiler/declarationEmitExpressionInExtends7.ts
 compiler/declarationEmitExpressionWithNonlocalPrivateUniqueSymbol.ts
 compiler/declarationEmitForMixinsWithStaticAccessors1.ts
 compiler/declarationEmitHigherOrderRetainedGenerics.ts
@@ -175,11 +169,9 @@ compiler/defaultArgsInFunctionExpressions.ts
 compiler/defaultDeclarationEmitShadowedNamedCorrectly.ts
 compiler/defaultParameterAddsUndefinedWithStrictNullChecks.ts
 compiler/definiteAssignmentOfClosedOverVariable.ts
-compiler/definiteAssignmentWithErrorStillStripped.ts
 compiler/deleteReadonlyInStrictNullChecks.ts
 compiler/dependentDestructuringDeferredCallback.ts
 compiler/deprecatedCompilerOptions2.ts
-compiler/derivedTypeIncompatibleSignatures.ts
 compiler/destructionAssignmentError.ts
 compiler/destructureCatchClause.ts
 compiler/destructureComputedProperty.ts
@@ -247,10 +239,8 @@ compiler/errorElaboration.ts
 compiler/errorForUsingPropertyOfTypeAsType01.ts
 compiler/errorForUsingPropertyOfTypeAsType02.ts
 compiler/errorForUsingPropertyOfTypeAsType03.ts
-compiler/errorInfoForRelatedIndexTypesNoConstraintElaboration.ts
 compiler/errorMessagesIntersectionTypes03.ts
 compiler/errorOnEnumReferenceInCondition.ts
-compiler/errorOnInitializerInObjectTypeLiteralProperty.ts
 compiler/errorSpanForUnclosedJsxTag.tsx
 compiler/errorsForCallAndAssignmentAreSimilar.ts
 compiler/es5-asyncFunctionBinaryExpressions.ts
@@ -277,7 +267,6 @@ compiler/exhaustiveSwitchTupleLengthFallthrough.ts
 compiler/expandoFunctionBlockShadowing.ts
 compiler/expandoNoInferredIndex.ts
 compiler/expandoObjectIndexSignatures.ts
-compiler/exportAsNamespaceConflict.ts
 compiler/exportAssignmentExpressionIsExpressionNode.ts
 compiler/exportAssignmentMembersVisibleInAugmentation.ts
 compiler/exportAssignmentMerging10.ts
@@ -347,10 +336,8 @@ compiler/genericFunctionsWithOptionalParameters1.ts
 compiler/genericIndexedAccessMethodIntersectionCanBeAccessed.ts
 compiler/genericIndexedAccessVarianceComparisonResultCorrect.ts
 compiler/genericInferenceDefaultTypeParameter.ts
-compiler/genericInferenceDefaultTypeParameterJsxReact.tsx
 compiler/genericIsNeverEmptyObject.ts
 compiler/genericMappedTypeAsClause.ts
-compiler/genericMethodOverspecialization.ts
 compiler/genericPrototypeProperty3.ts
 compiler/genericRecursiveImplicitConstructorErrors1.ts
 compiler/genericRecursiveImplicitConstructorErrors3.ts
@@ -363,8 +350,6 @@ compiler/genericTypeAssertions2.ts
 compiler/genericTypeConstraints.ts
 compiler/genericTypeWithNonGenericBaseMisMatch.ts
 compiler/getterControlFlowStrictNull.ts
-compiler/gettersAndSettersAccessibility.ts
-compiler/gettersAndSettersErrors.ts
 compiler/giant.ts
 compiler/globalArrayAugmentationWithAmbientModuleReexportMerge1.ts
 compiler/globalThisDeclarationEmit.ts
@@ -372,13 +357,11 @@ compiler/heterogeneousArrayAndOverloads.ts
 compiler/hugeDeclarationOutputGetsTruncatedWithError.ts
 compiler/identicalTypesNoDifferByCheckOrder.ts
 compiler/identityAndDivergentNormalizedTypes.ts
-compiler/ignoredJsxAttributes.tsx
 compiler/implementArrayInterface.ts
 compiler/implementGenericWithMismatchedTypes.ts
 compiler/implementsIncorrectlyNoAssertion.ts
 compiler/implicitAnyDeclareVariablesWithoutTypeAndInit.ts
 compiler/implicitAnyGetAndSetAccessorWithAnyReturnType.ts
-compiler/implicitAnyNewExprLackConstructorSignature.ts
 compiler/implicitEmptyObjectType.ts
 compiler/importAliasFromNamespace.ts
 compiler/importAliasInModuleAugmentation.ts
@@ -426,7 +409,6 @@ compiler/indexedAccessWithFreshObjectLiteral.ts
 compiler/indexedAccessWithVariableElement.ts
 compiler/indirectDiscriminantAndExcessProperty.ts
 compiler/indirectSelfReference.ts
-compiler/indirectSelfReferenceGeneric.ts
 compiler/inferFromAnnotatedReturn1.ts
 compiler/inferFromGenericFunctionReturnTypes1.ts
 compiler/inferFromGenericFunctionReturnTypes2.ts
@@ -463,7 +445,6 @@ compiler/inheritedConstructorWithRestParams2.ts
 compiler/inheritedMembersAndIndexSignaturesFromDifferentBases.ts
 compiler/inheritedModuleMembersForClodule.ts
 compiler/inheritedOverloadedSpecializedSignatures.ts
-compiler/inheritedStringIndexersFromDifferentBaseTypes.ts
 compiler/initializedDestructuringAssignmentTypes.ts
 compiler/inlineConditionalHasSimilarAssignability.ts
 compiler/inlinedAliasAssignableToConstraintSameAsAlias.ts
@@ -481,7 +462,6 @@ compiler/interfaceDeclaration4.ts
 compiler/interfaceMemberValidation.ts
 compiler/interfaceMergeWithNonGenericTypeArguments.ts
 compiler/interfaceWithMultipleDeclarations.ts
-compiler/intersectionConstructorReductionCrash.ts
 compiler/intersectionTypeNormalization.ts
 compiler/intersectionType_useDefineForClassFields.ts
 compiler/intersectionsAndOptionalProperties.ts
@@ -506,9 +486,7 @@ compiler/isolatedDeclarationErrorsReturnTypes.ts
 compiler/isolatedDeclarationLazySymbols.ts
 compiler/isolatedDeclarationsAddUndefined.ts
 compiler/isolatedDeclarationsTypePredicate.ts
-compiler/isolatedModulesAmbientConstEnum.ts
 compiler/isolatedModulesExportDeclarationType.ts
-compiler/isolatedModulesExportImportUninstantiatedNamespace.ts
 compiler/isolatedModulesGlobalNamespacesAndEnums.ts
 compiler/isolatedModulesReExportType.ts
 compiler/isolatedModulesShadowGlobalTypeNotValue.ts
@@ -528,14 +506,11 @@ compiler/jsxAttributeMissingInitializer.tsx
 compiler/jsxAttributeValueBinaryExpression.tsx
 compiler/jsxAttributeWithoutExpressionReact.tsx
 compiler/jsxCallElaborationCheckNoCrash1.tsx
-compiler/jsxChildWrongType.tsx
 compiler/jsxChildrenArrayWrongType.tsx
-compiler/jsxChildrenIndividualErrorElaborations.tsx
 compiler/jsxChildrenWrongType.tsx
 compiler/jsxClassAttributeResolution.tsx
 compiler/jsxElementTypeLiteral.tsx
 compiler/jsxElementTypeLiteralWithGeneric.tsx
-compiler/jsxExcessPropsAndAssignability.tsx
 compiler/jsxFactoryAndJsxFragmentFactoryErrorNotIdentifier.tsx
 compiler/jsxFactoryAndReactNamespace.ts
 compiler/jsxFactoryButNoJsxFragmentFactory.tsx
@@ -547,9 +522,7 @@ compiler/jsxFragmentFactoryReference.tsx
 compiler/jsxFragmentWrongType.tsx
 compiler/jsxInferenceProducesLiteralAsExpected.tsx
 compiler/jsxIntrinsicDeclaredUsingTemplateLiteralTypeSignatures.tsx
-compiler/jsxIntrinsicElementsTypeArgumentErrorSkipsTrivia.tsx
 compiler/jsxIntrinsicElementsTypeArgumentErrors.tsx
-compiler/jsxIssuesErrorWhenTagExpectsTooManyArguments.tsx
 compiler/jsxLibraryManagedAttributesUnusedGeneric.tsx
 compiler/jsxLocalNamespaceIndexSignatureNoCrash.tsx
 compiler/jsxNamespaceGlobalReexport.tsx
@@ -559,7 +532,6 @@ compiler/jsxNamespaceImplicitImportJSXNamespaceFromPragmaPickedOverGlobalOne.tsx
 compiler/jsxNamespacePrefixInName.tsx
 compiler/jsxNamespacePrefixInNameReact.tsx
 compiler/jsxNamespacePrefixIntrinsics.tsx
-compiler/jsxRuntimePragma.ts
 compiler/keyRemappingKeyofResult.ts
 compiler/keyRemappingKeyofResult2.ts
 compiler/keyofIsLiteralContexualType.ts
@@ -601,13 +573,11 @@ compiler/mergedInstantiationAssignment.ts
 compiler/metadataImportType.ts
 compiler/missingDomElements.ts
 compiler/missingImportAfterModuleImport.ts
-compiler/mixedExports.ts
 compiler/mixinOverMappedTypeNoCrash.ts
 compiler/mixinPrivateAndProtected.ts
 compiler/modularizeLibrary_Dom.asynciterable.ts
 compiler/modularizeLibrary_ErrorFromUsingWellknownSymbolWithOutES6WellknownSymbolLib.ts
 compiler/modularizeLibrary_Worker.asynciterable.ts
-compiler/moduleAsBaseType.ts
 compiler/moduleAugmentationDoesNamespaceEnumMergeOfReexport.ts
 compiler/moduleAugmentationEnumClassMergeOfReexportIsError.ts
 compiler/moduleElementsInWrongContext.ts
@@ -619,7 +589,6 @@ compiler/moduleResolutionNoTsESM.ts
 compiler/moduleResolutionWithExtensions_notSupported.ts
 compiler/moduleResolutionWithSymlinks_preserveSymlinks.ts
 compiler/moduleResolution_automaticTypeDirectiveNames.ts
-compiler/moduleResolution_relativeImportJsFile_noImplicitAny.ts
 compiler/moduleSharesNameWithImportDeclarationInsideIt5.ts
 compiler/moduleSymbolMerging.ts
 compiler/moduleVisibilityTest3.ts
@@ -658,7 +627,6 @@ compiler/neverNullishThroughParentheses.ts
 compiler/newAbstractInstance.ts
 compiler/newAbstractInstance2.ts
 compiler/newExpressionWithCast.ts
-compiler/newFunctionImplicitAny.ts
 compiler/newMap.ts
 compiler/newOperator.ts
 compiler/noCrashOnMixin.ts
@@ -718,7 +686,6 @@ compiler/overloadModifiersMustAgree.ts
 compiler/overloadingOnConstants2.ts
 compiler/overloadresolutionWithConstraintCheckingDeferred.ts
 compiler/overloadsAndTypeArgumentArityErrors.ts
-compiler/overloadsInDifferentContainersDisagreeOnAmbient.ts
 compiler/overloadsWithComputedNames.ts
 compiler/overloadsWithProvisionalErrors.ts
 compiler/overshifts.ts
@@ -731,7 +698,6 @@ compiler/parametersSyntaxErrorNoCrash2.ts
 compiler/parametersSyntaxErrorNoCrash3.ts
 compiler/paramsOnlyHaveLiteralTypesWhenAppropriatelyContextualized.ts
 compiler/parseAssertEntriesError.ts
-compiler/parseErrorInHeritageClause1.ts
 compiler/parseGenericArrowRatherThanLeftShift.ts
 compiler/parseImportAttributesError.ts
 compiler/parseInvalidNonNullableTypes.ts
@@ -770,7 +736,6 @@ compiler/reachabilityChecks11.ts
 compiler/reachabilityChecks11_promoted.ts
 compiler/reachabilityChecks4.ts
 compiler/reachabilityChecksNoCrash1.ts
-compiler/reactDefaultPropsInferenceSuccess.tsx
 compiler/reactNamespaceInvalidInput.tsx
 compiler/reactReduxLikeDeferredInferenceAllowsAssignment.ts
 compiler/readonlyAssignmentInSubclassOfClassExpression.ts
@@ -790,8 +755,6 @@ compiler/recursiveConditionalCrash4.ts
 compiler/recursiveConditionalTypes.ts
 compiler/recursiveFunctionTypes.ts
 compiler/recursiveIndexedAccessSimplification.ts
-compiler/recursiveInheritance.ts
-compiler/recursiveInheritanceGeneric.ts
 compiler/recursiveLetConst.ts
 compiler/recursiveResolveTypeMembers.ts
 compiler/recursiveTupleTypeInference.ts
@@ -835,7 +798,6 @@ compiler/reverseMappedIntersectionInference1.ts
 compiler/reverseMappedIntersectionInference2.ts
 compiler/reverseMappedPartiallyInferableTypes.ts
 compiler/reverseMappedTupleContext.ts
-compiler/reverseMappedTypeContextualTypesPerElementOfTupleConstraint.ts
 compiler/reverseMappedTypeIntersectionConstraint.ts
 compiler/reverseMappedTypeLimitedConstraint.ts
 compiler/reverseMappedUnionInference.ts
@@ -876,7 +838,6 @@ compiler/strictSubtypeAndNarrowing.ts
 compiler/stringLiteralPropertyNameWithLineContinuation1.ts
 compiler/stripMembersOptionality.ts
 compiler/stripMembersOptionality2.ts
-compiler/styledComponentsInstantiaionLimitNotReached.ts
 compiler/subpathImportDeclarationEmit.ts
 compiler/subtypeReductionWithAnyFunctionType.ts
 compiler/subtypeReductionWithAnyFunctionType_promoted.ts
@@ -917,8 +878,6 @@ compiler/tslibMissingHelper.ts
 compiler/tslibMultipleMissingHelper.ts
 compiler/tslibNotFoundDifferentModules.ts
 compiler/tsxDiscriminantPropertyInference.tsx
-compiler/tsxInvokeComponentType.tsx
-compiler/tsxNotUsingApparentTypeOfSFC.tsx
 compiler/tsxTypeArgumentPartialDefinitionStillErrors.ts
 compiler/tupleTypes.ts
 compiler/typeAliasDeclarationEmit.ts
@@ -953,7 +912,6 @@ compiler/typeUsedAsTypeLiteralIndex.ts
 compiler/typeVariableConstraintIntersections.ts
 compiler/typeVariableConstraintedToAliasNotAssignableToUnion.ts
 compiler/typedArraysCrossAssignability01.ts
-compiler/typeofEnum.ts
 compiler/unclosedExportClause01.ts
 compiler/unclosedExportClause02.ts
 compiler/undeclaredModuleError.ts
@@ -971,7 +929,6 @@ compiler/unionTypeWithRecursiveSubtypeReduction1.ts
 compiler/unionTypeWithRecursiveSubtypeReduction2.ts
 compiler/unionTypeWithRecursiveSubtypeReduction3.ts
 compiler/uniqueSymbolAllowsIndexInObjectWithIndexSignature.ts
-compiler/unknownSymbolOffContextualType1.ts
 compiler/unparenthesizedConstructorTypeInUnionOrIntersection.ts
 compiler/unparenthesizedFunctionTypeInUnionOrIntersection.ts
 compiler/unreachableSwitchTypeofAny.ts

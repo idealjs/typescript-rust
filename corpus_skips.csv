@@ -66,6 +66,7 @@ compiler/cachedModuleResolution3.ts
 compiler/cachedModuleResolution4.ts
 compiler/cachedModuleResolution8.ts
 compiler/cachedModuleResolution9.ts
+compiler/callsOnComplexSignatures.tsx
 compiler/capturedLetConstInLoop4.ts
 compiler/capturedParametersInInitializers1.ts
 compiler/capturedParametersInInitializers2.ts
@@ -133,6 +134,7 @@ compiler/classExpressionExtendingAbstractClass.ts
 compiler/classExpressionNames.ts
 compiler/classExtendingAny.ts
 compiler/classExtendingQualifiedName.ts
+compiler/classExtendsInterface.ts
 compiler/classExtendsInterface_not.ts
 compiler/classImplementsPrimitive.ts
 compiler/classUsedBeforeInitializedVariables.ts
@@ -156,6 +158,9 @@ compiler/constructorPropertyJs.ts
 compiler/constructorWithIncompleteTypeAnnotation.ts
 compiler/contextualTypeForInitalizedVariablesFiltersUndefined.ts
 compiler/contextuallyTypeArgumentsKeyword.ts
+compiler/contextuallyTypedJsxAttribute2.tsx
+compiler/contextuallyTypedJsxChildren.tsx
+compiler/contextuallyTypedParametersWithInitializers1.ts
 compiler/controlFlowInstanceof.ts
 compiler/controlFlowInstanceofWithSymbolHasInstance.ts
 compiler/controlFlowJavascript.ts
@@ -171,6 +176,7 @@ compiler/declarationEmitDestructuring3.ts
 compiler/declarationEmitDestructuring4.ts
 compiler/declarationEmitDestructuring5.ts
 compiler/declarationEmitDestructuringArrayPattern2.ts
+compiler/declarationEmitExpandoArrowFunctionParameter.ts
 compiler/declarationEmitExportValueSymbolWithTsIgnore.ts
 compiler/declarationEmitExpressionInExtends6.ts
 compiler/declarationEmitForGlobalishSpecifierSymlink.ts
@@ -223,6 +229,7 @@ compiler/enumWithNonLiteralStringInitializer.ts
 compiler/erasableSyntaxOnlyJS.ts
 compiler/errorInUnnamedClassExpression.ts
 compiler/errorInUnnamedClassExpression_promoted.ts
+compiler/errorInfoForRelatedIndexTypesNoConstraintElaboration.ts
 compiler/errorsWithInvokablesInUnions01.ts
 compiler/es5-system.ts
 compiler/es5-system2.ts
@@ -235,6 +242,7 @@ compiler/es6-umd2.ts
 compiler/es6ImportWithJsDocTags.ts
 compiler/esDecoratorsClassFieldsCrash.ts
 compiler/excessPropertyErrorsSuppressed.ts
+compiler/expandoContextualTypes.tsx
 compiler/expandoFunctionContextualTypesJs.ts
 compiler/expandoFunctionSymbolPropertyJs.ts
 compiler/exportClassExtendingIntersection.ts
@@ -253,7 +261,11 @@ compiler/extendsJavaScript.ts
 compiler/fillInMissingTypeArgsOnJSConstructCalls.ts
 compiler/functionExpressionNames.ts
 compiler/functionsInClassExpressions.ts
+compiler/genericCallInferenceInConditionalTypes1.ts
 compiler/genericDefaultsJs.ts
+compiler/genericInferenceDefaultTypeParameterJsxReact.tsx
+compiler/genericMethodOverspecialization.ts
+compiler/ignoredJsxAttributes.tsx
 compiler/implementsInClassExpression.ts
 compiler/impliedNodeFormatEmit1.ts
 compiler/impliedNodeFormatEmit2.ts
@@ -277,7 +289,9 @@ compiler/importNonExportedMember8.ts
 compiler/importNonExportedMember9.ts
 compiler/importTypeResolutionJSDocEOF.ts
 compiler/importUsedInExtendsList1.ts
+compiler/inferenceContextualReturnTypeUnion2.ts
 compiler/instanceofOperator.ts
+compiler/intersectionConstructorReductionCrash.ts
 compiler/intersectionWithConflictingPrivates.ts
 compiler/invalidJsdocType.ts
 compiler/invalidUnicodeEscapeSequance.ts
@@ -286,6 +300,7 @@ compiler/invalidUnicodeEscapeSequance3.ts
 compiler/invalidUnicodeEscapeSequance4.ts
 compiler/isolatedDeclarationErrorsClassesExpressions.ts
 compiler/isolatedDeclarationsAllowJs.ts
+compiler/isolatedModulesExportImportUninstantiatedNamespace.ts
 compiler/isolatedModulesImportExportElision.ts
 compiler/isolatedModulesPlainFile-System.ts
 compiler/isolatedModulesPlainFile-UMD.ts
@@ -455,14 +470,26 @@ compiler/jsdocTypedef_propertyWithNoType.ts
 compiler/jsdocUnexpectedCharacter.ts
 compiler/jsonFileImportChecksCallCorrectlyTwice.ts
 compiler/jsonImportMultipleTopLevelObjects.ts
+compiler/jsxChildWrongType.tsx
+compiler/jsxChildrenIndividualErrorElaborations.tsx
 compiler/jsxChildrenSingleChildConfusableWithMultipleChildrenNoError.tsx
 compiler/jsxComplexSignatureHasApplicabilityError.tsx
 compiler/jsxComponentTypeErrors.tsx
 compiler/jsxDeclarationsWithEsModuleInteropNoCrash.tsx
 compiler/jsxElementType.tsx
+compiler/jsxEmptyExpressionNotCountedAsChild.tsx
+compiler/jsxExcessPropsAndAssignability.tsx
+compiler/jsxFragmentFactoryNoUnusedLocals.tsx
+compiler/jsxFunctionTypeChildren_promoted.tsx
 compiler/jsxHasLiteralType.tsx
 compiler/jsxImportSourceCheckJs.ts
+compiler/jsxIntrinsicElementsTypeArgumentErrorSkipsTrivia.tsx
+compiler/jsxIssuesErrorWhenTagExpectsTooManyArguments.tsx
+compiler/jsxNamespacedNameNotComparedToNonMatchingIndexSignature.tsx
+compiler/jsxPartialSpread.tsx
 compiler/jsxPreserveWithJsInput.ts
+compiler/jsxRuntimePragma.ts
+compiler/jsxUnicodeEscapeSequence.tsx
 compiler/keyofDoesntContainSymbols.ts
 compiler/largeControlFlowGraph.ts
 compiler/lateBoundAssignmentCandidateJS1.ts
@@ -471,6 +498,7 @@ compiler/lateBoundAssignmentCandidateJS3.ts
 compiler/lateBoundConstraintTypeChecksCorrectly.ts
 compiler/lateBoundMethodNameAssigmentJS.ts
 compiler/localRequireFunction.ts
+compiler/mappedTypeRecursiveInference.ts
 compiler/mappedTypeUnionConstraintInferences.ts
 compiler/maxNodeModuleJsDepthDefaultsToZero.ts
 compiler/missingMemberErrorHasShortPath.ts
@@ -484,6 +512,7 @@ compiler/modulePrologueSystem.ts
 compiler/modulePrologueUmd.ts
 compiler/moduleResolutionWithExtensions_notSupported2.ts
 compiler/moduleResolutionWithExtensions_withPaths.ts
+compiler/moduleResolutionWithModule.ts
 compiler/moduleResolutionWithSuffixes_empty.ts
 compiler/moduleResolutionWithSuffixes_notSpecified.ts
 compiler/moduleResolutionWithSuffixes_one.ts
@@ -523,6 +552,8 @@ compiler/noImplicitUseStrict_umd.ts
 compiler/noParameterReassignmentIIFEAnnotated.ts
 compiler/noParameterReassignmentJSIIFE.ts
 compiler/noStrictGenericChecks.ts
+compiler/nonNullReferenceMatching.ts
+compiler/nonnullAssertionPropegatesContextualType.ts
 compiler/numericExportNameDeclaration.ts
 compiler/objectPropertyAsClass.ts
 compiler/optionalParamReferencingOtherParams3.ts
@@ -578,9 +609,13 @@ compiler/protectedMembers.ts
 compiler/protectedMembersThisParameter.ts
 compiler/publicGetterProtectedSetterFromThisParameter.ts
 compiler/pushTypeGetTypeOfAlias.ts
+compiler/reactDefaultPropsInferenceSuccess.tsx
 compiler/reactHOCSpreadprops.tsx
 compiler/reactImportDropped.ts
+compiler/reactImportUnusedInNewJSXEmit.tsx
 compiler/reactReadonlyHOCAssignabilityReal.tsx
+compiler/reactTagNameComponentWithPropsNoOOM.tsx
+compiler/reactTagNameComponentWithPropsNoOOM2.tsx
 compiler/recursiveResolveDeclaredMembers.ts
 compiler/reexportMissingDefault5.ts
 compiler/regexInvalidUtf8WithUnicodeFlag.ts
@@ -619,6 +654,7 @@ compiler/requireOfJsonFile_PathMapping.ts
 compiler/resolveNameWithNamspace.ts
 compiler/resolvingClassDeclarationWhenInBaseTypeResolution.ts
 compiler/returnTypePredicateIsInstantiateInContextOfTarget.tsx
+compiler/reverseMappedTypeContextualTypesPerElementOfTupleConstraint.ts
 compiler/selfReferencesInFunctionParameters.ts
 compiler/selfReferentialDefaultNoStackOverflow.ts
 compiler/settingsSimpleTest.ts
@@ -632,6 +668,7 @@ compiler/spellingSuggestionJSXAttribute.tsx
 compiler/staticFieldWithInterfaceContext.ts
 compiler/strictOptionalProperties3.ts
 compiler/strictOptionalProperties4.ts
+compiler/styledComponentsInstantiaionLimitNotReached.ts
 compiler/subclassThisTypeAssignable01.ts
 compiler/subclassThisTypeAssignable02.ts
 compiler/superCallInsideClassExpression.ts
@@ -682,6 +719,10 @@ compiler/truthinessCallExpressionCoercion4.ts
 compiler/tsCheckPreservedAfterReference.ts
 compiler/tslibInJs.ts
 compiler/tsxFragmentChildrenCheck.ts
+compiler/tsxInvokeComponentType.tsx
+compiler/tsxNotUsingApparentTypeOfSFC.tsx
+compiler/tsxReactPropsInferenceSucceedsOnIntersections.tsx
+compiler/tsxStatelessComponentDefaultProps.tsx
 compiler/typeValueConflict1.ts
 compiler/typeValueConflict2.ts
 compiler/typedefHoisting.ts
@@ -691,6 +732,7 @@ compiler/unicodeIdentifierNames.ts
 compiler/unionSubtypeReductionErrors.ts
 compiler/uniqueSymbolJs.ts
 compiler/uniqueSymbolJs2.ts
+compiler/unknownSymbolOffContextualType1.ts
 compiler/unmetTypeConstraintInJSDocImportCall.ts
 compiler/unreachableJavascriptChecked.ts
 compiler/unreachableJavascriptUnchecked.ts

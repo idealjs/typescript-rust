@@ -12,21 +12,21 @@
 
 **修复模型**：GLM-5.3-Flash · max 思考档。
 
-**架构约束**：一个 workflow = **修复波 + 波内串行验证**两段。修复波是唯一并发段——N 个并发位 = N 个用例，每个 subagent 只修一个用例；验证段串行——逐 worktree 在其上直接跑全量校验（不 pick、不建整合分支、无任何合并），一次只跑一个（一个校验命令或一个退回 subagent）。回归退回在**同 run 内**以对原 agent 的后续 ask 完成（同名 agent 上下文延续；原 agent 即 workflow 开头修复波所创建，退回后该例**回到开头的修复段**续修，随后再入串行验证），无需 amend；停止退回与留队由 workflow 自身判定。波收尾的线性整合与下波分发在主 agent，不在 workflow 内跨波循环。
+**架构约束**：一个 workflow = **修复波 + 波内串行验证**两段。修复波是唯一并发段——N 个并发位 = N 个用例（并发上限由提交参数 `max_concurrency` 控制，协议当前 8，超出者排队滚动进入），每个 subagent 只修一个用例，**完成即入队**（`git rev-list` 机械复核 commit 数，零 commit 直接留队，有 commit 立即进验证队列，不设整波栅栏）；验证段串行——单线程消费队列，一次只跑一个校验命令，**自适应**：待验证队列长度 >1（有排队积压）走单例快检（`tools/wave_verify.sh --single`，约 1 分钟，不感知跨例回归），无排队走全量（含相对波起点回归归因）。回归退回**非阻塞**：未过时把退回信息作为后续 ask 派发给原 agent（同名 agent 上下文延续）后，消费者继续验证下一个 worktree，修完自动重新入队复验；**退回无固定次数上限**，停止由用户叫停或 amend 控制，留队仅「无 commit」一种来源。workflow 脚本入库 `.zcode/workflows/corpus-fix-wave.dwf.ts`（每波改 `WAVE`/`CASES` 常量按名运行）。波收尾的线性整合与下波分发在主 agent，不在 workflow 内跨波循环。
 
 ```mermaid
 flowchart TD
     START["波入口（主 agent）<br/>全量基线就绪（五份 CSV 最新）· 挑选 N 例分发"]
-    subgraph WFBOX["workflow 内（修复并发；验证与退回串行；无 pick · 无合并）"]
-        WF["修复波（并发）：N 个 subagent<br/>每人一例 · 隔离 worktree · 纯文本禁测"]
-        WF --> VERIFY
-        VERIFY["串行验证：逐个 worktree 在其上直接跑全量<br/>约 2 分钟 · 同步刷新五份 CSV"]
+    subgraph WFBOX["workflow 内（修复并发；验证单线程消费；无 pick · 无合并）"]
+        WF["修复波（并发）：N 个 subagent<br/>每人一例 · 隔离 worktree · 纯文本禁测<br/>完成即入队（commit 机械复核）"]
+        WF -->|"fixer 完成"| VERIFY
+        VERIFY["串行验证（自适应）：待验证>1 单例快检约 1 分钟<br/>无排队全量约 6 分钟 · 刷新五份 CSV + 回归归因"]
         VERIFY --> VERDICT{"验证结果"}
-        VERDICT -->|"目标例通过且无回归"| MORE{"还有未处理的 worktree？"}
-        VERDICT -->|"回归 / 未过"| REG["记录归因<br/>回归例信息退回原 agent，在原 worktree 续修"]
+        VERDICT -->|"目标例通过且无回归"| MORE{"队列还有待验证/退回未决？"}
+        VERDICT -->|"未过（快检轮只看目标例）"| REG["退回信息派发原 agent（非阻塞）<br/>消费者继续验证下一个 worktree"]
         MORE -->|"是"| VERIFY
         MORE -->|"否"| DONE["波产出：已验证分支 + 归因记录 + 留队清单"]
-        REG -->|"回到 workflow 开头"| WF
+        REG -->|"原 agent 续修完成，重新入队"| VERIFY
     end
     START --> WF
     DONE --> INTEG["波收尾整合（主 agent）：新建干净分支<br/>各分支 commit 按处理序 cherry-pick（禁 merge）<br/>最终全量一次，检查各分支合并后的整体效果"]
@@ -46,10 +46,10 @@ flowchart TD
   - `corpus_types_anchor.csv`——每例 .types **首分歧锚点**（本地 vs Go reference 的第一个类型分歧行+两侧上下文），由 `tools/types_anchor.py` 从两侧 types CSV 提取，与 trace 同级；
   - `corpus_stack_diff.csv`——两侧执行栈差集（go_only / rust_only），由 `tools/stack_diff.py` 产出。
   分片 `/tmp/flywheel_shards/` 汇总以上数据供 subagent 直接读取。
-- **波内串行验证（workflow 内，逐 worktree）**：修复波整波完成后，脚本进入串行段——逐个 worktree 直接在其上跑全量（带 `TSOX_FN_TRACE_DIR` + `TSOX_TYPES_EMIT_DIR`，约 2 分钟）→ 刷新五份 CSV → 判定，处理完一个再取下一个。每个 worktree 分支只含本例改动，**回归天然归因到该分支的 commit**（N 个改动不混批）；编译失败同样逐例暴露（机械错可最小修复并标注，逻辑错原样记录）。**回归退回（串行）**：回归/未过时记录归因后，把回归例信息（新 FAIL 清单 + anchor/trace 位移）作为后续 ask 退回该 worktree 的原 agent——同名 agent 上下文延续，该轮唯一在跑的 subagent——退回后该例**回到 workflow 开头的修复段**：原 agent 在原 worktree 续修追加 commit，随后再次进入串行验证；按最新水位更新各例回归清单（已消化项移除）。停止退回与留队由 workflow 自身判定，留队例随波产出交主 agent 入留队池。**波收尾整合（主 agent，workflow 外）**：全部验证完后新建干净分支，各分支按处理序逐 commit cherry-pick 线性化（禁 merge，同「产出整合纪律」），最终全量一次以暴露跨例互斥。
-- **回归处置**：某 commit 引入回归时**只记录归因、不当场修**——按「回归-改动相关分析」锁定到该 commit（真回归 vs 假绿暴露、波及例清单），该 commit 可保留或回退由归因结论决定；修复动作经**波内串行退回**原 agent 在原 worktree 续修（见架构约束），不再顺延到后续波次。
+- **波内串行验证（workflow 内，单线程消费队列）**：fixer 完成→commit 机械复核→有 commit 即入队。验证**自适应**：待验证队列长度 >1（有排队积压）走单例快检（`tools/wave_verify.sh --single`：worktree 增量构建 + 只跑目标例 + ref/local 基线 diff，约 1 分钟，不感知跨例回归）；无排队走全量（6820 例，带 `TSOX_FN_TRACE_DIR` + `TSOX_TYPES_EMIT_DIR`，刷新五份 CSV，含相对波起点回归归因，约 6 分钟）。每个 worktree 分支只含本例改动，全量轮**回归天然归因到该分支的 commit**（N 个改动不混批）；编译失败同样逐例暴露（机械错可最小修复并标注，逻辑错原样记录）。**退回（非阻塞）**：判定未过把退回信息（全量轮：新 FAIL 清单 + 水位；快检轮：单例基线 diff）作为后续 ask 派发给该 worktree 的原 agent——同名 agent 上下文延续——消费者继续取下一个 worktree，原 agent 续修追加 commit 后该例自动重新入队复验；**退回无固定次数上限**（停止由用户叫停或 amend 控制），留队仅「无 commit」一种来源，随波产出交主 agent 入留队池。验证脚本带资源护栏：构建 `-j 12` + 每进程 `ulimit -v 8GB` + `nice -n 10` + 内部超时（单例 600s / 全量 1200s，外层 world.run 900s / 3600s），语料执行 `ulimit -v 4GB` + `nice`。**波收尾整合（主 agent，workflow 外）**：全部验证完后新建干净分支，各分支按处理序逐 commit cherry-pick 线性化（禁 merge，同「产出整合纪律」），最终全量一次以暴露跨例互斥。**最终全量发现大量回归时的两步归因**：①查 workflow 验证归档 `/tmp/flywheel_verify/`（全量轮含 `6820 cases done` 汇总行，单例快检轮为 `#1/1` 形态），得出各 worktree 有无完整全量记录，波内拿到全量轮的分支直接引用其归档回归数据；②对无完整全量记录的 worktree 逐个**串行**跑全量（`tools/wave_verify.sh` 全量模式，对波起点 base 快照输出该分支新增 FAIL/SKIP），单 worktree 直跑保证归因纯净——回归只能来自该分支自身 commit。base 快照与各 worktree 保留至归因完成后方可清理。
+- **回归处置**：某 commit 引入回归时**只记录归因、不当场修**——按「回归-改动相关分析」锁定到该 commit（真回归 vs 假绿暴露、波及例清单），该 commit 可保留或回退由归因结论决定；修复动作经**波内非阻塞退回**原 agent 在原 worktree 续修（见架构约束），不再顺延到后续波次。
 - **subagent 契约（单例分片）**：隔离 worktree；只读 repo / Go oracle（`/home/cqh/workspace/typescript-go`）/ 分片失败信息（三层锚点：.types 首分歧 → 错误 diff → 执行栈对照，见 `/tmp/flywheel_shards/` 与仓库根 trace CSV）；禁止任何 cargo/编译/测试/探针；禁止 skip/改断言/改基线消错与空壳实现；符号不存在三选一（grep 等价接线 / 按 Go 最小真实实现 / 保留错误记交接）；按根因独立 commit（只 add crates/ 生产路径）；汇报 rootCause（双侧源码行号）与**函数变更表**（缺表打回）。时限为期望值（目标 30 分钟级，非硬截点），单根因约 10 分钟无进展换思路或收尾交接。
-- **异常路由**：深水例（两轮不收敛）入留队池待人工或主 agent 插桩通道；新增 skip / 基线变更必须人工确认。
+- **异常路由**：深水例（长期不收敛）由用户叫停波次或 amend 处置，不自动留队；新增 skip / 基线变更必须人工确认。
 - **收敛**：FAIL = 0 + 回归归零 + `corpus_types_anchor.csv` 差异抹平（全量 .types 与 Go reference 零首分歧，含已 PASS 用例的隐藏类型分歧）+ 汇总报告。
 
 函数靠齐追踪表：`python3 tools/gen_func_alignment.py` 生成仓库根 `func_alignment.csv`（静态抓取 Go/Rust 两侧全部函数名，camelCase↔snake_case 由脚本归一为 `norm_name` 排序键，单表左右对照）。该表与仓库根 CSV 同为 subagent 只读。
@@ -107,7 +107,7 @@ flowchart TD
 
 ### 测试运行规范
 
-- Rust 全量/批量测试：`(ulimit -v 4194304; cargo test --release --no-fail-fast)`，内存限制必须保留（RLIMIT_AS 4GB——2026-09-29 用户指示由 8GB 降档：语料 worker 每用例独立进程实际峰值远低于此，fourslash OOM 的瓶颈是套件累计驻留而非单限值，降档防宿主内存压力）；release 相对 debug 有 5 倍执行提速（fourslash 4471 用例单二进制约 60s，构建成本远小于收益）
+- Rust 全量/批量测试：`(ulimit -v 4194304; cargo test --release --no-fail-fast)`，内存限制必须保留（RLIMIT_AS 4GB——2026-09-29 用户指示由 8GB 降档：语料 worker 每用例独立进程实际峰值远低于此，fourslash OOM 的瓶颈是套件累计驻留而非单限值，降档防宿主内存压力）；release 相对 debug 有 5 倍执行提速（fourslash 4471 用例单二进制约 60s，构建成本远小于收益）；**全量语料必须加 `TSOX_SUBMODULE_LIMIT=0`**——runner 默认只跑前 1000 例，日志计数出现 `#/1000` 即被截断，`#/6820` 才是全量
 - Rust 单条用例调试迭代：debug 构建可接受（编译快，单条秒级），同样保留内存限制
 - Go oracle：`GOMEMLIMIT=4GiB go test -count=1 ./...`（Go 运行时对 RLIMIT_AS 敏感，用软限）
 - 全量语料的内存护栏脚本 `tools/fourslash_shard.py`（分片 + 单线程 + RSS 采样 + 断点续跑），批量回归异常排查时启用

@@ -11,6 +11,37 @@
 set -u
 export LC_ALL=C
 MAIN=/home/cqh/workspace/ts2rust-port
+# 单例快检模式：worktree 构建 + 只跑目标例（复用 corpus_one.sh 的单例执行与 ref/local diff）
+# 用法: tools/wave_verify.sh --single <worktree_abs> <case_key> <tag>
+# 适用于验证排队积压（待验证 >1）时压缩单轮验证时长；跨例回归不感知，合并后由主 agent 全量统一暴露
+if [ "${1:-}" = "--single" ]; then
+  WT=$2; KEY=$3; TAG=$4
+  NAME=${KEY#compiler/}
+  cd "$MAIN" || exit 1
+  mkdir -p /tmp/flywheel_verify
+  # 资源护栏：-j 12 限并行（24 核取半）、每进程 AS 8GB 兜底、nice 降优先级、600s 内部超时（外层 world.run 900s）
+  if ! (cd "$WT" && timeout 600 nice -n 10 bash -c 'ulimit -v 8388608; exec cargo test --release -p tsox --test corpus --no-run --jobs 12') > /tmp/flywheel_build_$TAG.log 2>&1; then
+    echo "VERDICT case=$KEY status=BUILD_ERROR mode=single fail_count=- skip_count=- anchor_count=- new_fails=- new_skips=- fixed=-1"
+    grep -E "^error" -A 6 /tmp/flywheel_build_$TAG.log | head -30 | sed 's/^/BUILD_ERR /'
+    exit 0
+  fi
+  BIN=$(ls -t "$WT"/target/release/deps/corpus-* 2>/dev/null | grep -v '\.d$' | head -1)
+  if [ -z "$BIN" ]; then
+    echo "VERDICT case=$KEY status=BUILD_ERROR mode=single fail_count=- skip_count=- anchor_count=- new_fails=- new_skips=- fixed=-1"
+    echo "BUILD_ERR corpus binary not found under $WT/target/release/deps"
+    exit 0
+  fi
+  out=$(BIN="$BIN" bash "$MAIN/tools/corpus_one.sh" "$NAME" 2>&1)
+  printf '%s\n' "$out" > "/tmp/flywheel_verify/$TAG.log"
+  wline=$(printf '%s\n' "$out" | grep -E '^\[w0\]' | tail -1)
+  status=$(printf '%s\n' "$wline" | awk '{print $3}')
+  [ -z "$status" ] && status=CRASH
+  echo "VERDICT case=$KEY status=$status mode=single fail_count=- skip_count=- anchor_count=- new_fails=- new_skips=- fixed=-1"
+  reason=$(printf '%s\n' "$wline" | sed 's/^[^)]*) *//' | cut -c1-200)
+  [ -n "$reason" ] && echo "REASON $reason"
+  printf '%s\n' "$out" | sed -n '/^--- diff/,$p' | head -40 | sed 's/^/CASEDIFF /'
+  exit 0
+fi
 if [ "${1:-}" = "--snapshot" ]; then
   cd "$MAIN" || exit 1
   # 幂等：波起点基线已存在则跳过（amend 重放/波收尾前不得覆盖真基线；波收尾由主 agent 删除）
@@ -37,7 +68,8 @@ emit_verdict() { # $1=status $2=new_fails $3=new_skips $4=fixed
 }
 
 # 1) worktree 内构建语料二进制（worktree 本地 target：退回归增量；构建失败逐例暴露）
-if ! (cd "$WT" && cargo test --release -p tsox --test corpus --no-run) > /tmp/flywheel_build_$TAG.log 2>&1; then
+#    资源护栏：-j 12 限并行、每进程 AS 8GB 兜底、nice 降优先级、1200s 内部超时（外层 world.run 3600s）
+if ! (cd "$WT" && timeout 1200 nice -n 10 bash -c 'ulimit -v 8388608; exec cargo test --release -p tsox --test corpus --no-run --jobs 12') > /tmp/flywheel_build_$TAG.log 2>&1; then
   echo "VERDICT case=$KEY status=BUILD_ERROR fail_count=-1 skip_count=-1 anchor_count=-1 new_fails=- new_skips=- fixed=-1"
   grep -E "^error" -A 6 /tmp/flywheel_build_$TAG.log | head -30 | sed 's/^/BUILD_ERR /'
   exit 0
@@ -56,7 +88,7 @@ mkdir -p /tmp/rust_trace "$MAIN/.traces/types"
 mkdir -p /tmp/flywheel_verify
 cd "$MAIN/crates/tsox" || exit 1
 TSOX_SUBMODULE_LIMIT=0 TSOX_FN_TRACE_DIR=/tmp/rust_trace TSOX_TYPES_EMIT_DIR="$MAIN/.traces/types" \
-  timeout 2400 bash -c 'ulimit -v 4194304; exec "$0" --exact submodule_compiler::submodule_compiler_cases' "$BIN" \
+  timeout 2400 nice -n 10 bash -c 'ulimit -v 4194304; exec "$0" --exact submodule_compiler::submodule_compiler_cases' "$BIN" \
   > "$MAIN/fullrun.log" 2>&1
 cp "$MAIN/fullrun.log" "/tmp/flywheel_verify/$TAG.log"
 
