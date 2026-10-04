@@ -184,6 +184,30 @@ impl Checker {
         if type_node_and_init.0.is_none() && type_node_and_init.1.is_none() {
             // 无注解参数：上下文定型（IIFE 实参 / 调用上下文签名），rest 参数优先走上下文
             if decl.kind == SyntaxKind::Parameter {
+                // Go getTypeForVariableLikeDeclaration（checker.go:17694-17709）：
+                // set 访问器值参数无注解时取 getter 签名返回型；签名基础设施
+                // 未建（get_signature_from_declaration 空壳）时按 getter 注解 →
+                // 体推断的最小等价实现取读型
+                if let Some(fn_node) = decl.parent()
+                    && tsox_frontend::ast::node_data_generated::is_set_accessor_declaration(&fn_node)
+                    && self.has_bindable_name(&fn_node)
+                    && let Some(parent_symbol) = self.get_symbol_of_declaration(&fn_node)
+                    && let Some(getter) =
+                        self.get_declaration_of_kind(&parent_symbol, SyntaxKind::GetAccessor)
+                {
+                    let this_parameter = self.get_accessor_this_parameter(&fn_node);
+                    if this_parameter.as_ref().is_some_and(|tp| Arc::ptr_eq(tp, &decl)) {
+                        // Go：declaration == this 参数时取 getter 的 this 型
+                        //（getterSignature.thisParameter 的符号型）
+                        if let Some(getter_this) = self.get_accessor_this_parameter(&getter)
+                            && let Some(sym) = self.get_symbol_of_declaration(&getter_this)
+                        {
+                            return Some(self.get_type_of_symbol(&sym));
+                        }
+                        return Some(self.get_any_type());
+                    }
+                    return Some(self.getter_signature_return_type(&getter));
+                }
                 // JS 无注解形参：@param 标签充当注解
                 //（Go getTypeForVariableLikeDeclaration 的 jsdoc 通道）
                 if let Some(t) = self.jsdoc_type_annotation(&decl) {
@@ -1431,5 +1455,20 @@ impl Checker {
             .get_or_default(symbol)
             .declared_type = Some(Arc::clone(&merged));
         merged
+    }
+
+    // Go getReturnTypeOfSignature(getter 签名) 的最小等价：注解优先，
+    // 无注解有体走体返回推断，均无落 any
+    fn getter_signature_return_type(&mut self, getter: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("getter_signature_return_type");
+        let tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) = &getter.data else {
+            return self.get_any_type();
+        };
+        if let Some(tn) = &gd.type_node {
+            return self.get_type_from_type_node(tn);
+        }
+        if let Some(body) = gd.body.clone() {
+            return self.infer_method_return_type(getter, &Some(body));
+        }
+        self.get_any_type()
     }
 }
