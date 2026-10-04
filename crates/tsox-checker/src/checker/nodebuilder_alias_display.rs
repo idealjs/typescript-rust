@@ -40,17 +40,9 @@ impl Checker {
         let Some(alias_sym) = self.alias_symbol_for_type_node(node) else {
             return;
         };
-        let args = match &result.data {
-            TypeData::Mapped(_) | TypeData::Conditional(_) | TypeData::Union(_)
-            | TypeData::Intersection(_) => {
-                let (tp_symbols, _) = self.collect_alias_type_params_and_body(&alias_sym);
-                tp_symbols
-                    .iter()
-                    .map(|tp| self.get_type_parameter_from_symbol(tp))
-                    .collect()
-            }
-            _ => Vec::new(),
-        };
+        // Go getAliasForTypeNode（tsc/internal/checker/checker.go:25100-25108）：
+        // typeArguments 统一取 getTypeArgumentsForAliasSymbol（别名声明的局部类型参数）
+        let args = self.get_type_arguments_for_alias_symbol(Some(&alias_sym));
         let ptr = Arc::as_ptr(result) as *mut crate::checker::types::Type;
         unsafe {
             if (*ptr).alias.is_none() {
