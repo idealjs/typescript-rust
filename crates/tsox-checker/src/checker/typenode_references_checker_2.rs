@@ -519,7 +519,7 @@ impl Checker {
             return self.error_type();
         }
 
-        self.resolve_type_alias_reference(&symbol, type_arguments)
+        self.resolve_type_alias_reference_with_node(&symbol, type_arguments, Some(node))
     }
 
     pub(crate) fn interface_default_type_arguments(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("interface_default_type_arguments"); 

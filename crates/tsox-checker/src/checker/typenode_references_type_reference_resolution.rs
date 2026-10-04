@@ -1,6 +1,9 @@
 #![allow(unused_imports)]
 
 use crate::checker::typenode_references::*;
+use crate::checker::mig::wc3_3::is_local_type_alias;
+use crate::checker::mig::m2a::r20k6_defs::R20K6CheckerExt;
+use tsox_frontend::ast::mig::m3g_2::is_type_reference_type;
 
 impl Checker {
     pub(crate) fn resolve_type_parameter_reference(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_parameter_reference"); 
@@ -78,6 +81,15 @@ impl Checker {
         symbol: &Arc<Symbol>,
         type_arguments: Option<Arc<NodeList>>,
     ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_alias_reference"); 
+        self.resolve_type_alias_reference_with_node(symbol, type_arguments, None)
+    }
+
+    pub(crate) fn resolve_type_alias_reference_with_node(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        type_arguments: Option<Arc<NodeList>>,
+        reference_node: Option<&Arc<Node>>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_alias_reference_with_node"); 
         // Go getNoInferType（checker.go 27744）：NoInfer 实参为 isNoInferTargetType
         // 时包装为 unknown 约束的 Substitution（推断期候选被 is_no_infer_type 拦截，
         // 关系/显示按 base 展开）；实参具体且非目标形态时走常规别名展开。base 取
@@ -162,7 +174,7 @@ impl Checker {
             if tp_symbols.is_empty() {
                 declared
             } else {
-                self.instantiate_alias_from_types(symbol, Vec::new())
+                self.instantiate_alias_from_types_with_node(symbol, Vec::new(), reference_node)
             }
         } else {
             // Go getTypeAliasInstantiation：取声明型（声明上下文一次解析、缓存），
@@ -174,7 +186,7 @@ impl Checker {
                     .collect(),
                 None => Vec::new(),
             };
-            self.instantiate_alias_from_types(symbol, arg_types)
+            self.instantiate_alias_from_types_with_node(symbol, arg_types, reference_node)
         };
         if args_frame.is_some() {
             self.alias_args_resolution_stack.pop();
@@ -189,6 +201,15 @@ impl Checker {
         symbol: &Arc<Symbol>,
         arg_types: Vec<Arc<Type>>,
     ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_alias_from_types"); 
+        self.instantiate_alias_from_types_with_node(symbol, arg_types, None)
+    }
+
+    pub(crate) fn instantiate_alias_from_types_with_node(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        arg_types: Vec<Arc<Type>>,
+        reference_node: Option<&Arc<Node>>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_alias_from_types_with_node"); 
         let key = Arc::as_ptr(symbol) as *const tsox_frontend::ast::Symbol;
         let frame = (key as usize, arg_types.iter().map(|t| t.id).collect::<Vec<_>>());
         if let Some(cached) = self.alias_instantiation_cache.get(&frame).cloned() {
@@ -205,7 +226,8 @@ impl Checker {
             return self.error_type();
         }
         self.alias_type_instantiation_stack.push(frame.clone());
-        let result = self.instantiate_alias_from_types_inner(symbol, arg_types, frame);
+        let result =
+            self.instantiate_alias_from_types_inner(symbol, arg_types, frame, reference_node);
         self.alias_type_instantiation_stack.pop();
         result
     }
@@ -215,6 +237,7 @@ impl Checker {
         symbol: &Arc<Symbol>,
         arg_types: Vec<Arc<Type>>,
         frame: (usize, Vec<u32>),
+        reference_node: Option<&Arc<Node>>,
     ) -> Arc<Type> { ::tsox_core::fntrace::enter("instantiate_alias_from_types_inner"); 
         let declared = {
             let cached = self
@@ -263,30 +286,83 @@ impl Checker {
                 if c.resolved_true_type.get().is_none() && c.resolved_false_type.get().is_none()
         );
         if !declared_is_conditional || found_is_deferred_conditional {
-            // Go instantiateTypeWithAlias：泛型别名实例化仅当声明体本身
-            // 携带 alias（对象字面量/union/intersection/mapped/挂起条件/
-            // deferred 引用体）时传播实例化后的 alias；indexed access 等
-            // 无 alias 声明体（Go getAliasForTypeNode 不附着）不传播
-            if !tp_types.is_empty()
-                && declared
+            if !tp_types.is_empty() {
+                // Go getTypeFromTypeAliasReference（checker.go 24997-25021）：
+                // 泛型别名引用实例化结果的 alias 取引用级符号——宿主别名声明
+                // （getAliasSymbolForTypeNode）或引用名 resolveAlias 后的
+                // TypeAlias 符号；instantiateAnonymousType（checker.go 23788）
+                // 对结果无条件赋 alias，覆写体内既有标注
+                if let Some(alias) =
+                    self.alias_attach_for_type_reference(reference_node, symbol, &arg_types)
+                {
+                    // 替换无效果时 found 即缓存声明类型本体：Go
+                    // instantiateTypeWithAlias（checker.go 23411）对不含类型
+                    // 变量的目标原样返回不落 alias，共享 Arc 不得覆写
+                    if !Arc::ptr_eq(&found, &declared) {
+                        let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;
+                        unsafe {
+                            (*ptr).alias = Some(Box::new(alias));
+                        }
+                    }
+                } else if declared
                     .alias
                     .as_ref()
                     .is_some_and(|a| a.symbol.is_some())
-            {
-                let alias = crate::checker::types::TypeAlias::new(
-                    declared.alias.as_ref().and_then(|a| a.symbol.clone()),
-                    arg_types,
-                );
-                let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;
-                unsafe {
-                    if (*ptr).alias.is_none() {
-                        (*ptr).alias = Some(Box::new(alias));
+                {
+                    // Go instantiateTypeWithAlias：声明体本身携带 alias
+                    // （对象字面量/union/intersection/mapped/挂起条件/
+                    // deferred 引用体）时传播实例化后的 alias；indexed
+                    // access 等无 alias 声明体不传播
+                    let alias = crate::checker::types::TypeAlias::new(
+                        declared.alias.as_ref().and_then(|a| a.symbol.clone()),
+                        arg_types,
+                    );
+                    let ptr = Arc::as_ptr(&found) as *mut crate::checker::types::Type;
+                    unsafe {
+                        if (*ptr).alias.is_none() {
+                            (*ptr).alias = Some(Box::new(alias));
+                        }
                     }
                 }
             }
         }
         self.alias_instantiation_cache.insert(frame, Arc::clone(&found));
         found
+    }
+
+    fn alias_attach_for_type_reference(
+        &mut self,
+        reference_node: Option<&Arc<Node>>,
+        symbol: &Arc<Symbol>,
+        arg_types: &[Arc<Type>>,
+    ) -> Option<crate::checker::types::TypeAlias> { ::tsox_core::fntrace::enter("alias_attach_for_type_reference"); 
+        let node = reference_node?;
+        let host_alias_symbol = self.get_alias_symbol_for_type_node(node);
+        let mut new_alias_symbol: Option<Arc<Symbol>> = None;
+        if let Some(host) = &host_alias_symbol {
+            if is_local_type_alias(symbol) || !is_local_type_alias(host) {
+                new_alias_symbol = Some(Arc::clone(host));
+            }
+        }
+        let mut alias_type_arguments: Vec<Arc<Type>> = Vec::new();
+        if let Some(sym) = &new_alias_symbol {
+            alias_type_arguments = self.get_type_arguments_for_alias_symbol(Some(sym));
+        } else if is_type_reference_type(node) {
+            let resolved_alias_symbol =
+                self.resolve_type_reference_name(node, SymbolFlags::Alias, true);
+            if let Some(alias_sym) = resolved_alias_symbol {
+                if !Arc::ptr_eq(&alias_sym, &self.unknown_symbol()) {
+                    let resolved = self.resolve_alias(&alias_sym);
+                    if resolved.flags.contains(SymbolFlags::TypeAlias) {
+                        new_alias_symbol = Some(resolved);
+                        alias_type_arguments = arg_types.to_vec();
+                    }
+                }
+            }
+        }
+        new_alias_symbol.map(|sym| {
+            crate::checker::types::TypeAlias::new(Some(sym), alias_type_arguments)
+        })
     }
 
 }
