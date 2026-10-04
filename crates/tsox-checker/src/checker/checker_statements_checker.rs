@@ -453,9 +453,50 @@ impl Checker {
 
                 let iface_sym = self.program.symbol_map().symbol_of(node).cloned();
                 if let Some(sym) = iface_sym {
-                    let iface_type = self.resolve_interface_type(&sym, None);
-
-                    self.check_index_constraints(&iface_type, node);
+                    if !self.declared_type_links.get_or_default(&sym).interface_checked {
+                        self.declared_type_links.get_or_default(&sym).interface_checked = true;
+                        let iface_type = self.resolve_interface_type(&sym, None);
+                        let type_with_this = self.get_type_with_this_argument(&iface_type, None, false);
+                        let this_type =
+                            crate::checker::mig::wc2::r22k3_defs::interface_this_type(&iface_type);
+                        let name_node = match &node.data {
+                            tsox_frontend::ast::NodeData::InterfaceDeclaration(d) => {
+                                Arc::clone(&d.name)
+                            }
+                            _ => Arc::clone(node),
+                        };
+                        let merged_sym = self.get_merged_symbol(&sym);
+                        for heritage_element in
+                            tsox_frontend::ast::get_extends_heritage_clause_elements(node)
+                                .iter()
+                        {
+                            if self.interface_extends_reported.contains(&(
+                                Arc::as_ptr(&merged_sym),
+                                Arc::as_ptr(heritage_element),
+                            )) {
+                                continue;
+                            }
+                            let node_type = self.get_type_from_type_node(heritage_element);
+                            let base_type = self.get_reduced_type(&node_type);
+                            if self.is_error_type(&base_type)
+                                || !self.is_valid_base_type(&base_type)
+                                || Arc::ptr_eq(&iface_type, &base_type)
+                                || self.has_base_type(&base_type, &iface_type)
+                            {
+                                continue;
+                            }
+                            let base_with_this = self
+                                .get_type_with_this_argument(&base_type, this_type.as_ref(), false);
+                            self.check_type_assignable_to(
+                                &type_with_this,
+                                &base_with_this,
+                                Some(&name_node),
+                                Some(&tsox_core::diagnostics::messages_generated::
+                                    INTERFACE_0_INCORRECTLY_EXTENDS_INTERFACE_1),
+                            );
+                        }
+                        self.check_index_constraints(&iface_type, node);
+                    }
                 }
                 if let tsox_frontend::ast::NodeData::InterfaceDeclaration(data) = &node.data {
                     self.check_property_signature_member_types(&data.members);
