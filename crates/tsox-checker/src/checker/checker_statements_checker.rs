@@ -466,6 +466,7 @@ impl Checker {
                             _ => Arc::clone(node),
                         };
                         let merged_sym = self.get_merged_symbol(&sym);
+                        let mut valid_bases: Vec<Arc<Type>> = Vec::new();
                         for heritage_element in
                             tsox_frontend::ast::get_extends_heritage_clause_elements(node)
                                 .iter()
@@ -485,15 +486,64 @@ impl Checker {
                             {
                                 continue;
                             }
-                            let base_with_this = self
-                                .get_type_with_this_argument(&base_type, this_type.as_ref(), false);
-                            self.check_type_assignable_to(
-                                &type_with_this,
-                                &base_with_this,
-                                Some(&name_node),
-                                Some(&tsox_core::diagnostics::messages_generated::
-                                    INTERFACE_0_INCORRECTLY_EXTENDS_INTERFACE_1),
+                            valid_bases.push(base_type);
+                        }
+                        let inherited_identical = if valid_bases.len() < 2 {
+                            true
+                        } else {
+                            let mut seen: Vec<(String, Arc<Symbol>, bool)> = Vec::new();
+                            let own_members = self.get_resolved_members_or_exports_of_symbol(
+                                &merged_sym,
+                                crate::checker::types_alias_symbol_links::MembersOrExportsResolutionKind::ResolvedMembers,
                             );
+                            for (name, p) in own_members.iter() {
+                                if self.is_named_member(p, name) {
+                                    seen.push((name.clone(), Arc::clone(p), false));
+                                }
+                            }
+                            let mut identical = true;
+                            for base in &valid_bases {
+                                let base_with_this = self.get_type_with_this_argument(
+                                    base,
+                                    this_type.as_ref(),
+                                    false,
+                                );
+                                for prop in self.get_properties_of_type(&base_with_this) {
+                                    let existing =
+                                        seen.iter().find(|(n, _, _)| n == &prop.name).cloned();
+                                    match existing {
+                                        None => {
+                                            seen.push((prop.name.clone(), Arc::clone(&prop), true));
+                                        }
+                                        Some((_, existing_prop, is_inherited)) => {
+                                            if is_inherited
+                                                && !self.is_property_identical_to(
+                                                    &existing_prop, &prop,
+                                                )
+                                            {
+                                                identical = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            identical
+                        };
+                        if inherited_identical {
+                            for base_type in &valid_bases {
+                                let base_with_this = self.get_type_with_this_argument(
+                                    base_type,
+                                    this_type.as_ref(),
+                                    false,
+                                );
+                                self.check_type_assignable_to(
+                                    &type_with_this,
+                                    &base_with_this,
+                                    Some(&name_node),
+                                    Some(&tsox_core::diagnostics::messages_generated::
+                                        INTERFACE_0_INCORRECTLY_EXTENDS_INTERFACE_1),
+                                );
+                            }
                         }
                         self.check_index_constraints(&iface_type, node);
                     }
