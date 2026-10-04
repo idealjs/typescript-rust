@@ -399,6 +399,16 @@ impl Checker {
 
         let node_id = node.id();
         if self.class_type_resolution_stack.contains(&node_id) {
+            // Go getTypeOfFuncClassEnumModuleWorker：类符号型在建期重入先经
+            // getBaseTypeVariableOfClass → getBaseConstructorTypeOfClass 重推
+            // (symbol, ResolvedBaseConstructorType) 帧，pushTypeResolution 发现
+            // 同帧在途即抓环标记（checker.go:19867），外层 popTypeResolution
+            // 失败后发 TS2506（checker.go:17965）
+            if let Some(sym) = self.program.symbol_map().symbol_of(node) {
+                if sym.flags.contains(tsox_frontend::ast::SymbolFlags::Class) {
+                    let _ = self.get_base_type_variable_of_class(sym);
+                }
+            }
             return self.get_any_type();
         }
         self.class_type_resolution_stack.push(node_id);
