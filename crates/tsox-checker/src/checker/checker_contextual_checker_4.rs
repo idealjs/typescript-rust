@@ -141,12 +141,30 @@ impl Checker {
             .iter()
             .any(|d| d.code == message.code && d.loc == node.loc);
         if !already {
-            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            let mut diagnostic = tsox_frontend::ast::Diagnostic::new(
                 file,
                 node.loc,
                 message,
                 vec![name.to_string()],
-            ));
+            );
+            // Go checkResolvedBlockScopedVariable：主诊断挂声明的 TS2728
+            // related info（createDiagnosticForNode → GetErrorRangeForNode 名区间）
+            let related_file = self
+                .get_source_file_of_node(declaration)
+                .or_else(|| self.current_file.clone());
+            let related_loc = declaration
+                .name()
+                .map(|n| n.loc)
+                .unwrap_or(declaration.loc);
+            diagnostic
+                .related_information
+                .push(tsox_frontend::ast::Diagnostic::new(
+                    related_file,
+                    related_loc,
+                    tsox_core::diagnostics::messages_generated::X_0_IS_DECLARED_HERE,
+                    vec![name.to_string()],
+                ));
+            self.diagnostics.add(diagnostic);
         }
     }
 
