@@ -149,7 +149,92 @@ pub fn is_unterminated_literal(node: &Node) -> bool { ::tsox_core::fntrace::ente
     }
 }
 
-pub fn is_valid_type_only_alias_use_site(use_site: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_valid_type_only_alias_use_site"); 
+fn is_in_expression_context(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_expression_context");
+    let Some(parent) = node.parent() else {
+        return false;
+    };
+    let same = |n: &Option<Arc<Node>>| n.as_ref().is_some_and(|n| std::ptr::eq(n.as_ref(), node));
+    match parent.kind {
+        SyntaxKind::VariableDeclaration
+        | SyntaxKind::ParameterDeclaration
+        | SyntaxKind::PropertyDeclaration
+        | SyntaxKind::PropertySignature
+        | SyntaxKind::EnumMember
+        | SyntaxKind::PropertyAssignment
+        | SyntaxKind::BindingElement => match &parent.data {
+            NodeData::VariableDeclaration(d) => same(&d.initializer),
+            NodeData::ParameterDeclaration(d) => same(&d.initializer),
+            NodeData::PropertyDeclaration(d) => same(&d.initializer),
+            NodeData::PropertySignatureDeclaration(d) => std::ptr::eq(d.initializer.as_ref(), node),
+            NodeData::EnumMember(d) => same(&d.initializer),
+            NodeData::PropertyAssignment(d) => std::ptr::eq(d.initializer.as_ref(), node),
+            NodeData::BindingElement(d) => same(&d.initializer),
+            _ => false,
+        },
+        SyntaxKind::ExpressionStatement
+        | SyntaxKind::IfStatement
+        | SyntaxKind::DoStatement
+        | SyntaxKind::WhileStatement
+        | SyntaxKind::ReturnStatement
+        | SyntaxKind::WithStatement
+        | SyntaxKind::SwitchStatement
+        | SyntaxKind::CaseClause
+        | SyntaxKind::DefaultClause
+        | SyntaxKind::ThrowStatement
+        | SyntaxKind::TypeAssertionExpression
+        | SyntaxKind::AsExpression
+        | SyntaxKind::TemplateSpan
+        | SyntaxKind::ComputedPropertyName
+        | SyntaxKind::SatisfiesExpression => parent
+            .expression()
+            .is_some_and(|e| std::ptr::eq(e.as_ref(), node)),
+        SyntaxKind::ForStatement => match &parent.data {
+            NodeData::ForStatement(s) => {
+                (same(&s.initializer)
+                    && s
+                        .initializer
+                        .as_ref()
+                        .is_some_and(|i| i.kind != SyntaxKind::VariableDeclarationList))
+                    || s
+                        .condition
+                        .as_ref()
+                        .is_some_and(|c| std::ptr::eq(c.as_ref(), node))
+                    || s
+                        .incrementor
+                        .as_ref()
+                        .is_some_and(|i| std::ptr::eq(i.as_ref(), node))
+            }
+            _ => false,
+        },
+        SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement => match &parent.data {
+            NodeData::ForInOrOfStatement(s) => {
+                (std::ptr::eq(s.initializer.as_ref(), node)
+                    && s.initializer.kind != SyntaxKind::VariableDeclarationList)
+                    || std::ptr::eq(s.expression.as_ref(), node)
+            }
+            _ => false,
+        },
+        SyntaxKind::Decorator
+        | SyntaxKind::JsxExpression
+        | SyntaxKind::JsxSpreadAttribute
+        | SyntaxKind::SpreadAssignment => true,
+        SyntaxKind::ExpressionWithTypeArguments => matches!(
+            &parent.data,
+            NodeData::ExpressionWithTypeArguments(d)
+                if std::ptr::eq(d.expression.as_ref(), node)
+        ) && !is_part_of_type_node(&parent),
+        SyntaxKind::ShorthandPropertyAssignment => matches!(
+            &parent.data,
+            NodeData::ShorthandPropertyAssignment(d)
+                if d.object_assignment_initializer
+                    .as_ref()
+                    .is_some_and(|i| std::ptr::eq(i.as_ref(), node))
+        ),
+        _ => is_expression_node(&parent),
+    }
+}
+
+pub fn is_valid_type_only_alias_use_site(use_site: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_valid_type_only_alias_use_site");
     use_site.flags.intersects(NodeFlags::Ambient | NodeFlags::JSDoc)
         || is_part_of_type_query(use_site)
         || is_identifier_in_non_emitting_heritage_clause(use_site)
@@ -716,6 +801,51 @@ pub fn is_expression_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is
                     .expression()
                     .is_some_and(|e| std::ptr::eq(e.as_ref(), node)))
         }),
+        SyntaxKind::ExpressionWithTypeArguments => {
+            node.parent()
+                .as_ref()
+                .is_some_and(|p| !is_heritage_clause(p))
+        }
+        SyntaxKind::QualifiedName => {
+            let mut current = node.parent();
+            while current.as_ref().is_some_and(|p| p.kind == SyntaxKind::QualifiedName) {
+                current = current.and_then(|p| p.parent());
+            }
+            match current {
+                Some(p) => {
+                    is_type_query_node(&p)
+                        || crate::ast::utilities_types::is_jsdoc_link_like(&p)
+                        || is_jsdoc_name_reference(&p)
+                        || crate::ast::utilities_misc::is_jsx_tag_name(&p)
+                }
+                None => false,
+            }
+        }
+        SyntaxKind::PrivateIdentifier => {
+            node.parent().as_ref().is_some_and(|p| {
+                matches!(
+                    &p.data,
+                    NodeData::BinaryExpression(be)
+                        if std::sync::Arc::ptr_eq(&be.left, node)
+                            && be.operator == SyntaxKind::InKeyword
+                )
+            })
+        }
+        SyntaxKind::Identifier => {
+            if node.parent().as_ref().is_some_and(|p| {
+                is_type_query_node(p)
+                    || crate::ast::utilities_types::is_jsdoc_link_like(p)
+                    || is_jsdoc_name_reference(p)
+            }) {
+                return true;
+            }
+            is_in_expression_context(node)
+        }
+        SyntaxKind::NumericLiteral
+        | SyntaxKind::BigIntLiteral
+        | SyntaxKind::StringLiteral
+        | SyntaxKind::NoSubstitutionTemplateLiteral
+        | SyntaxKind::ThisKeyword => is_in_expression_context(node),
         _ => false,
     }
 }
