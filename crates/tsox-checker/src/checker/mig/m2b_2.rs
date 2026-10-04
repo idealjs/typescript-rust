@@ -102,7 +102,16 @@ impl Checker {
         let declaration_name = if tsox_frontend::ast::is_identifier(error_location)
             && error_location.text() == name
         {
-            declaration_name_to_string(Some(error_location))
+            // Go DeclarationNameToString（scanner/utilities.go:132）→GetTextOfNode
+            //（utilities.go:110）：取节点在源文件中的原文（保留 \u 转义），
+            // 源文本必须来自 source file；get_text_of_node 误以节点自身 text
+            // 作源文本，节点 pos>0 时按绝对偏移切片必越界
+            self.get_source_file_of_node(error_location)
+                .map(|f| {
+                    tsox_frontend::scanner::mig::m3i::
+                        get_source_text_of_node_from_source_file(&f, error_location, false)
+                })
+                .unwrap_or_else(|| name.to_string())
         } else {
             name.to_string()
         };
