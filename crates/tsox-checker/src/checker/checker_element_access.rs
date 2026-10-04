@@ -3,6 +3,7 @@ use std::sync::Arc;
 use tsox_frontend::ast::Node;
 
 use crate::checker::checker::*;
+use crate::checker::mig::wc3_2::is_const_enum_object_type;
 use crate::checker::utilities_has_only_expression_initialization::get_assignment_target_kind;
 use crate::checker::utilities_token_is_identifier_or_keyword::AssignmentKind;
 
@@ -364,6 +365,11 @@ impl Checker {
         }
 
         if report_nia {
+            // Go getPropertyTypeForIndexType（checker.go:28746/28771-28793）：
+            // const enum 对象类型跳过 noImplicitAny 错误块，落尾按索引类型分派
+            if is_const_enum_object_type(obj_type) {
+                return self.const_enum_element_access_fallthrough(obj_type, arg_expr, effective_arg);
+            }
             self.report_element_access_implicit_any(node, obj_type, arg_expr, effective_arg);
         }
         self.get_any_type()

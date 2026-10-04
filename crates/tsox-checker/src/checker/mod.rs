@@ -78,6 +78,7 @@ pub(crate) mod checker_contextual_scope_exemption;
 pub(crate) mod checker_circularity;
 pub(crate) mod checker_contextual_used_before_declaration_guards;
 pub(crate) mod checker_element_access;
+pub(crate) mod checker_element_access_const_enum;
 pub(crate) mod checker_element_access_nia;
 pub(crate) mod checker_enum_entity;
 pub(crate) mod checker_enums;
