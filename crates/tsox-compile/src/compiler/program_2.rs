@@ -86,22 +86,11 @@ impl Program {
             );
             let mut stack: Vec<Arc<SourceFile>> = Vec::new();
 
-            let expanded_types: Vec<String> = if options.types.iter().any(|t| t == "*") {
-                let (type_roots, _from_config) =
-                    tsox_tsoptions::module::resolver::get_effective_type_roots(
-                        &options,
-                        host.current_directory(),
-                    );
-                let mut names: Vec<String> = Vec::new();
-                for root in &type_roots {
-                    for entry in host.fs().get_accessible_entries(root).directories {
-                        names.push(entry);
-                    }
-                }
-                names
-            } else {
-                options.types.clone()
-            };
+            let expanded_types: Vec<String> =
+                tsox_tsoptions::module::mig::m3i::get_automatic_type_directive_names(
+                    &options,
+                    resolver.host(),
+                );
             let containing_directory = if !options.config_file_path.is_empty() {
                 tsox_core::tspath::get_directory_path(&options.config_file_path)
             } else {
