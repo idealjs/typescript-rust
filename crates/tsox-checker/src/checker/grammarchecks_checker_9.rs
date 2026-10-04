@@ -357,6 +357,15 @@ impl Checker {
                         );
                     }
                 }
+            } else if tsox_frontend::ast::is_type_literal_node(&parent) {
+                if let Some(initializer) = tsox_frontend::ast::mig::m3b::initializer(node) {
+                    if !tsox_frontend::astnav::is_missing_node(initializer) {
+                        return self.grammar_error_on_node(
+                            initializer,
+                            &A_TYPE_LITERAL_PROPERTY_CANNOT_HAVE_AN_INITIALIZER,
+                        );
+                    }
+                }
             }
         }
         false
