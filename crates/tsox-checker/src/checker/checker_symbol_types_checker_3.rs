@@ -26,6 +26,31 @@ impl Checker {
             }
         }
 
+        // Go getTypeOfFuncClassEnumModuleWorker（checker.go:17908-17914）：类
+        // 符号值型是构造签名对象型（含隐式 new () => 实例），不依赖检查期
+        // 缓存；类+namespace 合并符号的 valueDeclaration 是模块声明，缓存
+        // 未命中时按类声明构建
+        if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::Class) {
+            if let Some(decl) = symbol
+                .declarations
+                .iter()
+                .find(|d| {
+                    matches!(
+                        d.kind,
+                        tsox_frontend::ast::SyntaxKind::ClassDeclaration
+                            | tsox_frontend::ast::SyntaxKind::ClassExpression
+                    )
+                })
+                .cloned()
+            {
+                let t = self.get_type_of_class_declaration(&decl);
+                self.value_symbol_links
+                    .get_or_default(symbol)
+                    .resolved_type = Some(Arc::clone(&t));
+                return t;
+            }
+        }
+
         // 合并 function+namespace 的调用签名来源：未缓存时按需建
         // 函数型（过载走 build_overload_function_type）
         let fn_decl_count = symbol
