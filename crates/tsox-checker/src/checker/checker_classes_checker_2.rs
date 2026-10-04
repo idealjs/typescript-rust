@@ -160,15 +160,35 @@ impl Checker {
                 | SyntaxKind::PropertyAccessExpression
                 | SyntaxKind::QualifiedName
         ) {
-            if let Some(symbol) =
-                self.resolve_entity_name(expr, SymbolFlags::VALUE, true, false, Some(expr))
-            {
-                let is_unknown = self
-                    .unknown_symbol
-                    .as_ref()
-                    .is_some_and(|u| Arc::ptr_eq(u, &symbol));
-                if !is_unknown {
-                    return self.get_type_of_symbol(&symbol);
+            let resolved = self
+                .resolve_entity_name(expr, SymbolFlags::VALUE, true, false, Some(expr))
+                .filter(|symbol| {
+                    !self
+                        .unknown_symbol
+                        .as_ref()
+                        .is_some_and(|u| Arc::ptr_eq(u, symbol))
+                });
+            if let Some(symbol) = resolved {
+                return self.get_type_of_symbol(&symbol);
+            }
+            if expr.kind == SyntaxKind::Identifier {
+                let already_reported = self.get_resolved_symbol(expr).is_some_and(|s| {
+                    self.unknown_symbol
+                        .as_ref()
+                        .is_some_and(|u| Arc::ptr_eq(u, &s))
+                });
+                if !already_reported {
+                    let message = self.get_cannot_find_name_diagnostic_for_name(expr);
+                    self.on_failed_to_resolve_symbol(
+                        expr,
+                        expr.text(),
+                        SymbolFlags::VALUE,
+                        message,
+                    );
+                }
+                if let Some(u) = self.unknown_symbol.as_ref() {
+                    self.symbol_node_links.get_or_default(expr).resolved_symbol =
+                        Some(Arc::clone(u));
                 }
             }
         }
