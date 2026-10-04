@@ -110,7 +110,20 @@ impl Checker {
             }
             SyntaxKind::RegularExpressionLiteral => self.global_regexp_type(),
             SyntaxKind::FunctionDeclaration => self.get_type_of_function_like(node),
-            SyntaxKind::Identifier => self.get_type_of_identifier(node),
+            SyntaxKind::Identifier => {
+                // Go getTypeOfNode：IsTypeDeclarationName → getSymbolAtLocation + getDeclaredTypeOfSymbol
+                //（getSymbolAtLocation 对声明名取 getSymbolOfDeclaration(parent)）
+                if tsox_frontend::ast::mig::m3g_2::is_type_declaration_name(node) {
+                    let symbol = node
+                        .parent()
+                        .and_then(|parent| self.get_symbol_of_declaration(&parent));
+                    return match symbol {
+                        Some(symbol) => self.get_declared_type_of_symbol(&symbol),
+                        None => self.error_type(),
+                    };
+                }
+                self.get_type_of_identifier(node)
+            }
             SyntaxKind::MetaProperty => self.get_type_of_meta_property(node),
 
             SyntaxKind::BinaryExpression => self.get_type_of_binary_expression(node),
