@@ -94,10 +94,20 @@ fn write_type_line(checker: &mut Checker, node: &Arc<Node>, file_text: &str) -> 
     // 以 InTypeAlias 重渲染（Go nodebuilderimpl.go:3443 InTypeAlias 单层跳过 alias gate）
     let type_flags =
         TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE.union(TypeFormatFlags::NO_TRUNCATION);
-    let mut type_string = checker.type_to_string_ex(&t, type_flags);
+    // Go type_symbol_baseline.go:407-409：TypeToTypeNode 以 node.Parent 为
+    // enclosingDeclaration，限定名按其可及性判定
+    //（nodebuilderimpl.go:1110/1127-1135）——命名空间内短名、顶层带前缀
+    let mut type_string = checker.type_to_string_ex_with_enclosing(
+        &t,
+        node.parent().as_ref(),
+        type_flags,
+    );
     if is_alias_declaration_name(node) && type_string == node.text() {
-        type_string =
-            checker.type_to_string_ex(&t, type_flags.union(TypeFormatFlags::IN_TYPE_ALIAS));
+        type_string = checker.type_to_string_ex_with_enclosing(
+            &t,
+            node.parent().as_ref(),
+            type_flags.union(TypeFormatFlags::IN_TYPE_ALIAS),
+        );
     }
     let pos = (node.loc.pos as usize).min(file_text.len());
     let end = (node.loc.end as usize).min(file_text.len());

@@ -12,7 +12,24 @@ impl Checker {
         )
     }
 
-    pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("type_to_string_ex"); 
+    // Go TypeToStringEx(t, enclosingDeclaration, flags)（printer.go:64-102）：
+    // enclosingDeclaration 经 nodeBuilder.TypeToTypeNode 传入，限定名按其判定
+    // （nodebuilderimpl.go:1110/1127-1135）；Rust 以 type_render_enclosing
+    // 承载，仅 namespace_qualifier_of 的命名空间内就地判定消费
+    pub fn type_to_string_ex_with_enclosing(
+        &mut self,
+        t: &Arc<Type>,
+        enclosing_declaration: Option<&Arc<tsox_frontend::ast::Node>>,
+        flags: TypeFormatFlags,
+    ) -> String { ::tsox_core::fntrace::enter("type_to_string_ex_with_enclosing");
+        let saved = self.type_render_enclosing.take();
+        self.type_render_enclosing = enclosing_declaration.cloned();
+        let result = self.type_to_string_ex(t, flags);
+        self.type_render_enclosing = saved;
+        result
+    }
+
+    pub fn type_to_string_ex(&mut self, t: &Arc<Type>, flags: TypeFormatFlags) -> String { ::tsox_core::fntrace::enter("type_to_string_ex");
         let reduced = self.get_reduced_type(t);
         let t: &Arc<Type> = &reduced;
         let key = Arc::as_ptr(t) as usize;
