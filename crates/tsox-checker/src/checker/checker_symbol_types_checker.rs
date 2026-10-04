@@ -115,9 +115,17 @@ impl Checker {
             }
         }
 
+        if symbol.flags.contains(SymbolFlags::ValueModule)
+            && symbol.flags.contains(SymbolFlags::Class)
+        {
+            // Go getTypeOfSymbol：Function|Method|Class|Enum|ValueModule 任一位
+            // 即 getTypeOfFuncClassEnumModule（checker.go:17482-17484），无
+            // namespace 合并特判；返回匿名静态侧对象（typeof m 的实体）
+            return self.get_type_of_func_class_enum_module(symbol);
+        }
+
         if (symbol.flags.contains(SymbolFlags::ValueModule)
             && (symbol.flags.contains(SymbolFlags::Function)
-                || symbol.flags.contains(SymbolFlags::Class)
                 || symbol.flags.contains(SymbolFlags::RegularEnum)
                 || symbol.flags.contains(SymbolFlags::ConstEnum)))
             || (symbol.flags.contains(SymbolFlags::NamespaceModule)

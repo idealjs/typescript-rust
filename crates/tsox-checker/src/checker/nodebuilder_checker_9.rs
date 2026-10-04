@@ -618,14 +618,13 @@ impl Checker {
         }
 
         if sym.flags.contains(SymbolFlags::Class) {
-            if let Some(structured) = t.as_structured() {
-                if !structured.construct_signatures().is_empty() {
-                    return format!("typeof {}", self.symbol_display_name_for_print(sym));
-                }
+            // Go createAnonymousTypeNodeEx：静态/实例侧按 isClassInstanceSide
+            // 判定（nodebuilderimpl.go:3031-3036、349-352），实例侧裸名、静态侧
+            // typeof；不以构造签名有无判定（ambient class 无构造签名但仍是
+            // 静态侧）。命名空间内类同尾部分支给限定名（d.D）
+            if !crate::checker::mig::m2f_3::is_class_instance_side(self, t) {
+                return format!("typeof {}", self.symbol_display_name_for_print(sym));
             }
-            // 类实例（含与命名空间合并的类）：typeof 前缀只给静态侧（构造
-            // 签名所在），实例侧按符号名显示（Go typeToString 同）；命名空间
-            // 内类同尾部分支给限定名（d.D）
             let display_name = self
                 .alias_chain_qualified_type_name(sym)
                 .unwrap_or_else(|| self.symbol_display_name_for_print(sym));
