@@ -189,7 +189,7 @@ impl Parser {
         } else {
             None
         };
-        let end = arguments.as_ref().map_or(expression.end(), |a| a.end());
+        let end = self.node_pos();
         Arc::new(Node::with_loc(
             SyntaxKind::NewExpression,
             NodeData::NewExpression(NewExpressionData {
