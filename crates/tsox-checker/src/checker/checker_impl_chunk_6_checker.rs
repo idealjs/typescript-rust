@@ -1,9 +1,11 @@
 #![allow(unused_imports)]
 
+use crate::checker::checker_get_excluded_symbol_flags::is_declaration_name;
 use crate::checker::checker_impl_chunk_6::*;
 use crate::checker::mig::m1b::jsnum_from_string;
 use crate::checker::mig::m1b::parse_pseudo_big_int;
 use crate::checker::mig::m1b_4::jsnum_negate;
+use crate::checker::mig::m1f::r24k9b_expression_context::is_in_expression_context;
 use tsox_core::diagnostics::messages_generated::OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1;
 
 impl Checker {
@@ -58,6 +60,20 @@ impl Checker {
                     return self.get_fresh_type_of_literal_type(&lit);
                 }
                 self.number_type()
+            }
+            SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral
+                if !is_in_expression_context(node) =>
+            {
+                // Go getTypeOfNode：非表达式上下文的字面量（声明名，如
+                // declare module "m" 的模块名）不走表达式求值，落
+                // IsDeclarationNameOrImportPropertyName → getSymbolOfDeclaration → getTypeOfSymbol
+                if is_declaration_name(node)
+                    && let Some(parent) = node.parent()
+                    && let Some(sym) = self.program.symbol_map().symbol_of(&parent).cloned()
+                {
+                    return self.get_type_of_symbol(&sym);
+                }
+                self.error_type()
             }
             SyntaxKind::StringLiteral => {
                 if let tsox_frontend::ast::NodeData::StringLiteral(data) = &node.data {
