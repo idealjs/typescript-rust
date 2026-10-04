@@ -4,6 +4,7 @@ use crate::checker::typenode_references::*;
 use crate::checker::mig::wc3_3::is_local_type_alias;
 use crate::checker::mig::m2a::r20k6_defs::R20K6CheckerExt;
 use tsox_frontend::ast::mig::m3g_2::is_type_reference_type;
+use tsox_frontend::ast::SymbolFlags;
 
 impl Checker {
     pub(crate) fn resolve_type_parameter_reference(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_type_parameter_reference"); 
@@ -334,7 +335,7 @@ impl Checker {
         &mut self,
         reference_node: Option<&Arc<Node>>,
         symbol: &Arc<Symbol>,
-        arg_types: &[Arc<Type>>,
+        arg_types: &[Arc<Type>],
     ) -> Option<crate::checker::types::TypeAlias> { ::tsox_core::fntrace::enter("alias_attach_for_type_reference"); 
         let node = reference_node?;
         let host_alias_symbol = self.get_alias_symbol_for_type_node(node);
