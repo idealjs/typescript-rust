@@ -285,16 +285,6 @@ cloned.set_parent(&symbol);
             return Some(Arc::clone(sym));
         }
 
-        if node.kind == tsox_frontend::ast::SyntaxKind::Identifier {
-            let mut current = node.parent();
-            while let Some(parent) = current {
-                if let Some(sym) = self.program.symbol_map().symbol_of(&parent) {
-                    return Some(Arc::clone(sym));
-                }
-                current = parent.parent();
-            }
-        }
-
         if node.kind == tsox_frontend::ast::SyntaxKind::PropertyAccessExpression {
             if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &node.data {
                 if let Some(links) = self.type_node_links.get(&data.expression) {
