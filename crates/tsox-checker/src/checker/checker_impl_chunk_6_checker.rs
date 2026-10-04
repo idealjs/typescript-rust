@@ -365,6 +365,19 @@ impl Checker {
     }
 
     pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_identifier");
+        // Go getTypeOfNode（checker.go:33826-33832）：类型声明名走
+        // IsTypeDeclarationName → getDeclaredTypeOfSymbol，先于
+        // IsDeclarationNameOrImportPropertyName 的 getTypeOfSymbol（后者对
+        // class 给出构造器型 typeof A）。getDeclaredTypeOfSymbol 目前只接入
+        // Class/Interface/TypeAlias，其余声明名维持既有求值路径
+        if tsox_frontend::ast::mig::m3g_2::is_type_declaration_name(node)
+            && let Some(symbol) = self.resolve_identifier(node)
+            && symbol
+                .flags
+                .intersects(SymbolFlags::Class | SymbolFlags::Interface)
+        {
+            return self.get_declared_type_of_symbol(&symbol);
+        }
         if let Some(parent) = node.parent()
             && parent.kind == SyntaxKind::MetaProperty
             && tsox_frontend::ast::mig::m3g_2::is_right_side_of_qualified_name_or_property_access(node)
