@@ -40,7 +40,7 @@ impl Checker {
     pub(crate) fn resolve_import_alias_target_symbol(
         &mut self,
         alias: &Arc<Symbol>,
-    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_alias_target_symbol"); 
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("resolve_import_alias_target_symbol");
         // import X = require("./m") 形式：目标 = 模块的 export= 符号
         if let Some(decl) = alias
             .declarations
@@ -48,6 +48,17 @@ impl Checker {
             .find(|d| matches!(d.data, NodeData::ImportEqualsDeclaration(_)))
         {
             if let tsox_frontend::ast::NodeData::ImportEqualsDeclaration(data) = &decl.data {
+                // Go getTargetOfImportEqualsDeclaration（checker.go:15254）内部
+                // 实体名引用（import O = Outer）经
+                // getSymbolOfPartOfRightHandSideOfImportEquals（checker.go:15272-
+                // 15291）resolveEntityName 解目标符号；别名链递归由调用侧
+                // resolve_alias_base 承担
+                if matches!(
+                    data.module_reference.kind,
+                    SyntaxKind::Identifier | SyntaxKind::QualifiedName
+                ) {
+                    return self.resolve_qualified_symbol(&data.module_reference);
+                }
                 let spec = self.module_specifier_of_external_ref(&data.module_reference)?;
                 let spec_loc = match &data.module_reference.data {
                     NodeData::ExternalModuleReference(ext) => ext.expression.loc,
