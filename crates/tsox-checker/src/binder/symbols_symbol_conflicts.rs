@@ -22,9 +22,9 @@ impl Binder {
         name: Option<&str>,
         message: &'static tsox_core::diagnostics::Message,
     ) { ::tsox_core::fntrace::enter("report_declaration_conflict_all"); 
-        let push = |b: &mut Self, decl: &Arc<Node>| {
-            let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(decl)
-                .unwrap_or_else(|| Arc::clone(decl));
+        let push = |b: &mut Self, n: &Arc<Node>| {
+            let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(n)
+                .unwrap_or_else(|| Arc::clone(n));
             if b
                 .symbol_map
                 .binder_diagnostics
@@ -33,7 +33,7 @@ impl Binder {
             {
                 return;
             }
-            let args = name.map(|n| vec![b.get_display_name(decl)]);
+            let args = name.map(|n| vec![Self::declaration_name_display(b, &name_node, n)]);
             b.symbol_map.binder_diagnostics.push(Diagnostic::new(
                 b.current_source_file.clone(),
                 name_node.loc,
@@ -47,11 +47,25 @@ impl Binder {
         push(self, node);
     }
 
+    // Go DeclarationNameToString：名字按源文本展示（字符串字面量名带引号）
+    fn declaration_name_display(b: &Binder, name_node: &Arc<Node>, fallback: &str) -> String { ::tsox_core::fntrace::enter("declaration_name_display"); 
+        if name_node.loc.end() == name_node.loc.pos() {
+            return "(Missing)".to_string();
+        }
+        if let Some(sf) = b.current_source_file.as_ref()
+            && name_node.loc.end() > name_node.loc.pos()
+            && name_node.loc.end() <= sf.text.len()
+        {
+            return sf.text[name_node.loc.pos()..name_node.loc.end()].to_string();
+        }
+        crate::checker::property_name_for_display(fallback)
+    }
+
     pub(crate) fn report_symbol_conflict(
         &mut self,
         node: &Arc<Node>,
         existing: &Arc<Symbol>,
-        _name: &str,
+        name: &str,
         includes: SymbolFlags,
     ) -> bool { ::tsox_core::fntrace::enter("report_symbol_conflict"); 
         let mut conflicted = false;
@@ -76,11 +90,11 @@ impl Binder {
                 for d in &existing.declarations {
                     let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(d)
                         .unwrap_or_else(|| Arc::clone(d));
-                    push(b, name_node.loc, b.get_display_name(d));
+                    push(b, name_node.loc, Self::declaration_name_display(b, &name_node, name));
                 }
                 let name_node = tsox_frontend::ast::utilities::get_name_of_declaration(node)
                     .unwrap_or_else(|| Arc::clone(node));
-                push(b, name_node.loc, b.get_display_name(node));
+                push(b, name_node.loc, Self::declaration_name_display(b, &name_node, name));
             };
             // Go declareSymbol 冲突路径：existing 带 BlockScoped → 2451；
             // 变量对变量的其余冲突（var-then-let）→ 2300
