@@ -85,17 +85,22 @@ impl Checker {
             return self.resolve_interface_type_ex(symbol, None);
         }
         if symbol.flags.contains(tsox_frontend::ast::SymbolFlags::Class) {
+            // Go tryGetDeclaredTypeOfSymbol 只按符号 flags 分流
+            //（checker.go:25072-25073）；class 声明节点从 declarations 按形态
+            // 取：合并符号的 valueDeclaration 可能是先声明的 namespace 件
+            //（binder merge 仅在为空时设置）
             let class_node = symbol
-                .value_declaration
-                .clone()
-                .or_else(|| symbol.declarations.first().cloned());
-            if let Some(d) = class_node
-                && matches!(
-                    d.kind,
-                    tsox_frontend::ast::SyntaxKind::ClassDeclaration
-                        | tsox_frontend::ast::SyntaxKind::ClassExpression
-                )
-            {
+                .declarations
+                .iter()
+                .find(|d| {
+                    matches!(
+                        d.kind,
+                        tsox_frontend::ast::SyntaxKind::ClassDeclaration
+                            | tsox_frontend::ast::SyntaxKind::ClassExpression
+                    )
+                })
+                .cloned();
+            if let Some(d) = class_node {
                 return self.build_class_instance_type_with_base(&d);
             }
             return self.resolve_interface_type_ex(symbol, None);
