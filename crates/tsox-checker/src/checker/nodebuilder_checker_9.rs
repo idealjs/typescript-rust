@@ -639,6 +639,14 @@ impl Checker {
                 .iter()
                 .any(|d| d.kind == SyntaxKind::SourceFile)
             {
+                // Go symbolToTypeNode（nodebuilderimpl.go）：显示上下文文件内
+                // 存在解析到该模块的 import 别名时链根为别名，按 typeof 别名
+                // 呈现；无别名/无上下文时模块为链根，按说明符呈现
+                if let Some(file) = self.display_enclosing_file.clone()
+                    && let Some(alias_name) = self.alias_name_of_namespace_in_file(sym, &file)
+                {
+                    return format!("typeof {alias_name}");
+                }
                 let recorded = self.module_display_specifiers.get(&sym.id()).cloned();
                 if let Some(spec) = recorded {
                     return format!("typeof import(\"{spec}\")");
