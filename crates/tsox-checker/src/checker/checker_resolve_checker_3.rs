@@ -57,7 +57,14 @@ impl Checker {
                     || target.declarations.iter().any(|d| {
                         d.kind == tsox_frontend::ast::SyntaxKind::NamespaceExportDeclaration
                     }) {
-                    self.resolve_alias_base(Arc::clone(target))
+                    let resolved = self.resolve_alias_base(Arc::clone(target));
+                    // Go mergeSymbol：resolveSymbol 解析结果为 unknownSymbol
+                    //（别名环，resolveAlias 环检测失败）时直接返回 source，
+                    // 不做克隆合并
+                    if self.alias_circular_reported.contains(&resolved.id()) {
+                        return Arc::clone(source);
+                    }
+                    resolved
                 } else {
                     self.resolve_symbol(target)
                 };
