@@ -284,4 +284,4 @@ impl SourceFileMayBeEmittedHost for EmitHostImpl {
     }
 }
 
-mod outputpaths;
+pub(crate) mod outputpaths;

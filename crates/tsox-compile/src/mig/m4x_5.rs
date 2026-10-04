@@ -936,19 +936,21 @@ impl Program {
 
             let source_files_to_emit =
                 ctx.program.get_source_files_to_emit(None, false, false);
-            let common_dir = ctx.program.common_source_directory();
-            let current_dir = ctx.program.get_current_directory().to_string();
-            let case_sensitive = ctx.program.use_case_sensitive_file_names();
             for file in &source_files_to_emit {
-                for output_name in emitted_output_file_names(
-                    &file.file_name,
+                let paths = super::m4u_3::outputpaths::get_output_paths_for(
+                    file,
                     &options,
-                    &common_dir,
-                    &current_dir,
-                    case_sensitive,
-                ) {
-                    verify_emit_file_path(&mut ctx, &output_name);
-                }
+                    &*ctx.program,
+                    super::m4u_3::outputpaths::ForceEmitPaths {
+                        dts: false,
+                        js: false,
+                        declaration_map: false,
+                    },
+                );
+                verify_emit_file_path(&mut ctx, &paths.js_path);
+                verify_emit_file_path(&mut ctx, &paths.source_map_path);
+                verify_emit_file_path(&mut ctx, &paths.declaration_path);
+                verify_emit_file_path(&mut ctx, &paths.declaration_map_path);
             }
             let build_info_file_name = ctx.program.opts.config.get_build_info_file_name();
             verify_emit_file_path(&mut ctx, &build_info_file_name);
@@ -1035,99 +1037,6 @@ fn processing_diagnostic_explaining_file_include(
             },
         )),
     })
-}
-
-fn output_extension(file_name: &str) -> &'static str { ::tsox_core::fntrace::enter("output_extension"); 
-    if tspath::file_extension_is(file_name, ".json") {
-        return ".json";
-    }
-    if tspath::file_extension_is_one_of(file_name, &[".mts", ".mjs"]) {
-        return ".mjs";
-    }
-    if tspath::file_extension_is_one_of(file_name, &[".cts", ".cjs"]) {
-        return ".cjs";
-    }
-    ".js"
-}
-
-fn declaration_extension(file_name: &str) -> &'static str { ::tsox_core::fntrace::enter("declaration_extension"); 
-    if tspath::file_extension_is_one_of(file_name, &[".mts", ".mjs"]) {
-        return ".d.mts";
-    }
-    if tspath::file_extension_is_one_of(file_name, &[".cts", ".cjs"]) {
-        return ".d.cts";
-    }
-    ".d.ts"
-}
-
-fn emitted_output_file_names(
-    file_name: &str,
-    options: &tsox_core::core::compiler_options::CompilerOptions,
-    common_source_directory: &str,
-    current_directory: &str,
-    use_case_sensitive_file_names: bool,
-) -> Vec<String> { ::tsox_core::fntrace::enter("emitted_output_file_names"); 
-    if !options.out_file.is_empty() {
-        let out_file = &options.out_file;
-        let js_path = if tspath::file_extension_is(out_file, ".js") {
-            out_file.clone()
-        } else {
-            format!("{}.js", tspath::remove_file_extension(out_file))
-        };
-        let mut names = vec![js_path.clone()];
-        if options.source_map.is_true() && !options.inline_source_map.is_true() {
-            names.push(format!("{js_path}.map"));
-        }
-        if options.get_emit_declarations() {
-            let dts_path = format!("{}.d.ts", tspath::remove_file_extension(out_file));
-            names.push(dts_path.clone());
-            if options.get_are_declaration_maps_enabled() {
-                names.push(format!("{dts_path}.map"));
-            }
-        }
-        return names;
-    }
-
-    let path_in_new_dir = |new_dir: &str| -> String {
-        super::m4v::get_source_file_path_in_new_dir(
-            file_name,
-            new_dir,
-            current_directory,
-            common_source_directory,
-            use_case_sensitive_file_names,
-        )
-    };
-
-    let output_ext = output_extension(file_name);
-    let js_path = if !options.out_dir.is_empty() {
-        let without_ext = tspath::remove_file_extension(&path_in_new_dir(&options.out_dir));
-        format!("{without_ext}{output_ext}")
-    } else {
-        format!("{}{output_ext}", tspath::remove_file_extension(file_name))
-    };
-
-    let mut names = vec![js_path.clone()];
-    if options.source_map.is_true() && !options.inline_source_map.is_true() {
-        names.push(format!("{js_path}.map"));
-    }
-
-    if options.get_emit_declarations() && !file_name.ends_with(".json") {
-        let decl_ext = declaration_extension(file_name);
-        let dts_path = if !options.declaration_dir.is_empty() {
-            let without_ext =
-                tspath::remove_file_extension(&path_in_new_dir(&options.declaration_dir));
-            format!("{without_ext}{decl_ext}")
-        } else if !options.out_dir.is_empty() {
-            format!("{}{decl_ext}", tspath::remove_file_extension(&js_path))
-        } else {
-            format!("{}{decl_ext}", tspath::remove_file_extension(file_name))
-        };
-        names.push(dts_path.clone());
-        if options.get_are_declaration_maps_enabled() {
-            names.push(format!("{dts_path}.map"));
-        }
-    }
-    names
 }
 
 fn compute_common_source_directory_of_filenames(

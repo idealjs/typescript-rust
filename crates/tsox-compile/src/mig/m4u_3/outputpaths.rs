@@ -10,17 +10,32 @@ use super::*;
     }
 
     impl OutputPathsHost for EmitHostImpl {
-        fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory"); 
+        fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory");
             EmitHostImpl::common_source_directory(self)
         }
-        fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions"); 
+        fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions");
             EmitHostImpl::content_mapper_extensions(self)
         }
-        fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory"); 
+        fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory");
             EmitHostImpl::get_current_directory(self)
         }
-        fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names"); 
+        fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names");
             EmitHostImpl::use_case_sensitive_file_names(self)
+        }
+    }
+
+    impl OutputPathsHost for Program {
+        fn common_source_directory(&self) -> String { ::tsox_core::fntrace::enter("common_source_directory");
+            <Program as tsox_checker::checker::Program>::common_source_directory(self)
+        }
+        fn content_mapper_extensions(&self) -> Vec<String> { ::tsox_core::fntrace::enter("content_mapper_extensions");
+            Program::content_mapper_extensions(self)
+        }
+        fn get_current_directory(&self) -> String { ::tsox_core::fntrace::enter("get_current_directory");
+            Program::get_current_directory(self).to_string()
+        }
+        fn use_case_sensitive_file_names(&self) -> bool { ::tsox_core::fntrace::enter("use_case_sensitive_file_names");
+            Program::use_case_sensitive_file_names(self)
         }
     }
 
