@@ -772,7 +772,8 @@ impl Checker {
     ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("append_type_parameters"); 
         for parameter in &parameters {
             if let Some(symbol) = self.symbol_of_node(parameter) {
-                types.push(self.get_type_of_symbol(&symbol));
+                // Go appendTypeParameters（checker.go:25237）取类型参数声明类型
+                types.push(self.get_declared_type_of_type_parameter(&symbol));
             }
         }
         types
