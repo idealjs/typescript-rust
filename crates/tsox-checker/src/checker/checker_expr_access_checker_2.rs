@@ -182,6 +182,44 @@ impl Checker {
             .map_or(0, |callback_sig| callback_sig.parameters.len())
     }
 
+    pub(crate) fn symbol_is_abstract_class(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_abstract_class"); 
+        for decl in &symbol.declarations {
+            if decl.kind == SyntaxKind::ClassDeclaration
+                && decl.has_syntactic_modifier(ModifierFlags::Abstract)
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub(crate) fn type_includes_abstract_constructor(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_includes_abstract_constructor"); 
+        if t.flags.contains(TypeFlags::Any) {
+            return false;
+        }
+        if let Some(u) = t.as_union_or_intersection() {
+            return u
+                .types
+                .iter()
+                .any(|m| self.type_includes_abstract_constructor(m));
+        }
+
+        if t.flags.contains(TypeFlags::Object) {
+            if let Some(s) = t.as_structured()
+                && s.construct_signatures().iter().any(|sig| {
+                    sig.flags
+                        .contains(crate::checker::types::SignatureFlags::Abstract)
+                })
+            {
+                return true;
+            }
+        }
+        if let Some(symbol) = &t.symbol {
+            return self.symbol_is_abstract_class(symbol);
+        }
+        false
+    }
+
     pub(crate) fn declaring_class_of_member(
         &self,
         member_symbol: &Arc<Symbol>,

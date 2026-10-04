@@ -1,8 +1,6 @@
 #![allow(unused_imports)]
 
 use crate::checker::checker_calls::*;
-use crate::checker::mig::m1e::r20k2_defs::has_syntactic_modifier;
-use crate::checker::mig::m2c::r21k2_defs::get_class_like_declaration_of_symbol;
 
 impl Checker {
     pub(crate) fn check_call_arguments_against(
@@ -35,37 +33,6 @@ impl Checker {
             return;
         };
         let new_call_fallback = std::mem::take(&mut self.new_call_fallback_signature);
-        if is_new && !new_call_fallback {
-            if signatures
-                .iter()
-                .any(|sig| sig.flags.intersects(SignatureFlags::Abstract))
-            {
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS,
-                    Vec::new(),
-                ));
-                return;
-            }
-            let apparent = self.get_apparent_type(callee_type);
-            if let Some(symbol) = &apparent.symbol
-                && let Some(value_decl) = get_class_like_declaration_of_symbol(symbol)
-                && has_syntactic_modifier(&value_decl, ModifierFlags::Abstract)
-            {
-                let file = self.current_file.clone();
-                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
-                    file,
-                    node.loc,
-                    tsox_core::diagnostics::messages_generated::
-                        CANNOT_CREATE_AN_INSTANCE_OF_AN_ABSTRACT_CLASS,
-                    Vec::new(),
-                ));
-                return;
-            }
-        }
 
         let type_arg_filtered: Vec<Arc<Signature>>;
         let signatures: &[Arc<Signature>] = {
