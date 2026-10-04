@@ -267,8 +267,16 @@ impl Checker {
             .iter()
             .find(|d| is_type_or_js_type_alias_declaration(d))
             .cloned();
-        let type_node = declaration.as_ref().and_then(|d| d.type_node());
-        let t = self.get_type_from_type_node(type_node.unwrap());
+        // Go declaration.Type()（checker.go:25261）：泛型 type_node() 访问器无
+        // TypeAliasDeclaration 臂恒返 None，按别名声明 data 直取体类型节点
+        let type_node = declaration.as_ref().and_then(|d| match &d.data {
+            NodeData::TypeAliasDeclaration(ta) => Some(Arc::clone(&ta.type_node)),
+            _ => None,
+        });
+        let t = match type_node {
+            Some(type_node) => self.get_type_from_type_node(&type_node),
+            None => self.error_type(),
+        };
         if self.pop_type_resolution() {
             let type_parameters =
                 self.get_local_type_parameters_of_class_or_interface_or_type_alias(symbol);
