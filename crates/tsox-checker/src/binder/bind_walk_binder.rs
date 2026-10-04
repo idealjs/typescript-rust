@@ -226,9 +226,9 @@ impl Binder {
             SyntaxKind::EnumDeclaration => {
                 // Go bindEnumDeclaration：isEnumConst 分 ConstEnum/RegularEnum
                 if tsox_frontend::ast::mig::x6a::is_enum_const(node) {
-                    self.declare_symbol(node, SymbolFlags::ConstEnum, SymbolFlags::ConstEnumExcludes);
+                    self.declare_symbol(node, SymbolFlags::ConstEnum, SymbolFlags::VALUE | SymbolFlags::TYPE);
                 } else {
-                    self.declare_symbol(node, SymbolFlags::RegularEnum, SymbolFlags::RegularEnumExcludes);
+                    self.declare_symbol(node, SymbolFlags::RegularEnum, SymbolFlags::VALUE | SymbolFlags::TYPE);
                 }
             }
             SyntaxKind::ModuleDeclaration => {
