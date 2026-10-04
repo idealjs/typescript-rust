@@ -218,7 +218,13 @@ impl Checker {
             SyntaxKind::PostfixUnaryExpression => self.number_type(),
             SyntaxKind::CallExpression => self.get_return_type_of_call_expression(node),
             SyntaxKind::NewExpression => self.get_return_type_of_new_expression(node),
-            SyntaxKind::PropertyAccessExpression => self.get_type_of_property_access(node),
+            SyntaxKind::PropertyAccessExpression => {
+                // Go getTypeOfNode → IsExpressionNode → getRegularTypeOfExpression
+                //（checker.go:33806/33967-33972）：表达式查询型把 fresh 字面量
+                // 解包为 regular（枚举成员访问表达式 O.A.X 呈声明型 O.A）
+                let t = self.get_type_of_property_access(node);
+                self.get_regular_type_of_literal_type(&t)
+            }
             SyntaxKind::ElementAccessExpression => self.get_type_of_element_access(node),
             SyntaxKind::ParenthesizedExpression => {
                 if let tsox_frontend::ast::NodeData::ParenthesizedExpression(data) = &node.data {
@@ -412,6 +418,16 @@ impl Checker {
     }
 
     pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_identifier");
+        // Go getTypeOfNode → IsExpressionNode(identifier) →
+        // getRegularTypeOfExpression（checker.go:33806/33967-33972）：属性访问/
+        // 限定名右侧的标识符取宿主表达式类型，并将 fresh 字面量解包为 regular
+        //（O.A.X 的 X 随宿主呈枚举声明型，O.x 的 x 呈 number）
+        if tsox_frontend::ast::mig::m3g_2::is_right_side_of_qualified_name_or_property_access(node)
+            && let Some(parent) = node.parent()
+        {
+            let t = self.get_type_of_expression(&parent);
+            return self.get_regular_type_of_literal_type(&t);
+        }
         // Go getTypeOfNode：IsTypeDeclarationName → getDeclaredTypeOfSymbol(
         // getSymbolAtLocation)——类/接口/枚举/别名/类型参数的声明名取声明型
         //（类名是实例型 C，而非值路径的构造型 typeof C）
@@ -448,13 +464,6 @@ impl Checker {
                 return self.error_type();
             }
             return self.get_type_of_symbol(&sym);
-        }
-        if let Some(parent) = node.parent()
-            && parent.kind == SyntaxKind::MetaProperty
-            && tsox_frontend::ast::mig::m3g_2::is_right_side_of_qualified_name_or_property_access(node)
-        {
-            let t = self.get_type_of_expression(&parent);
-            return self.get_regular_type_of_literal_type(&t);
         }
         if let Some(symbol) = self.resolve_identifier(node) {
             let module_without_value = if symbol.flags.intersects(SymbolFlags::Alias) {
