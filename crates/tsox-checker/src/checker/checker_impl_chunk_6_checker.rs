@@ -46,7 +46,10 @@ impl Checker {
     }
 
     pub(crate) fn type_of_class_extends_element(&mut self, class_decl: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_class_extends_element");
-        let Some(symbol) = self.symbol_of_node(class_decl) else {
+        // Go getSymbolOfDeclaration：声明节点经 binder 符号表直查；Checker::
+        // symbol_of_node 走 symbol_node_links 解析缓存，类声明节点从不作为
+        // 解析目标，该缓存恒空
+        let Some(symbol) = self.program.symbol_map().symbol_of(class_decl).cloned() else {
             return self.error_type();
         };
         let class_type = self.get_declared_type_of_class_or_interface(&symbol);
