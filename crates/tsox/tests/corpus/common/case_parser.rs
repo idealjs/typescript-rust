@@ -91,8 +91,8 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
         }
     };
 
-    for line in content.split_inclusive('\n') {
-        let line_no_nl = line.trim_end_matches('\n').trim_end_matches('\r');
+    for line in content.split('\n') {
+        let line_no_nl = line.trim_end_matches('\r');
         if let Some((name, value)) = parse_directive_line(line_no_nl) {
             let lower = name.to_ascii_lowercase();
             match lower.as_str() {
@@ -143,7 +143,13 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
             if current_body.is_empty() && line_no_nl.is_empty() {
                 continue;
             }
-            current_body.push_str(line);
+            // Go ParseTestFilesAndSymlinksWithOptions（test_case_parser.go:19
+            // lineDelimiter=/\r?\n/ 切行丢终止符、248-265 以 '\n' 重拼，末尾
+            // 空行片同样写入）：单元内容行尾形态与 Go Split 逐片一致
+            if !current_body.is_empty() {
+                current_body.push('\n');
+            }
+            current_body.push_str(line_no_nl);
         }
     }
 
@@ -152,15 +158,18 @@ pub fn split_units(content: &str, default_name: &str) -> ParsedCase {
     } else {
 
         let mut body = String::new();
-        for line in content.split_inclusive('\n') {
-            let line_no_nl = line.trim_end_matches('\n').trim_end_matches('\r');
+        for line in content.split('\n') {
+            let line_no_nl = line.trim_end_matches('\r');
             if parse_directive_line(line_no_nl).is_some() {
                 continue;
             }
             if body.is_empty() && line_no_nl.is_empty() {
                 continue;
             }
-            body.push_str(line);
+            if !body.is_empty() {
+                body.push('\n');
+            }
+            body.push_str(line_no_nl);
         }
         units.push(TestUnit {
             name: default_name.to_string(),
