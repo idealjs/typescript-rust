@@ -123,6 +123,7 @@ impl Checker {
             }
         }
         if let Some(base) = base_type {
+            self.class_first_base_cache.insert(node_id, Arc::clone(&base));
             let base_still_building = base
                 .symbol
                 .as_ref()
