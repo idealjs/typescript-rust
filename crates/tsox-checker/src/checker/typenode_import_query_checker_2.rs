@@ -448,6 +448,12 @@ impl Checker {
         {
             return self.get_type_of_symbol(&symbol);
         }
+        // Go checkExpressionWithTypeArguments→checkIdentifier（checker.go:11242→11683）：
+        // typeof 实体按表达式取 getTypeOfSymbol，enum 符号即时落
+        // getTypeOfFuncClassEnumModule 匿名对象，不要求值类型先经他路驻留
+        if symbol.flags.intersects(SymbolFlags::ENUM) {
+            return self.get_type_of_symbol(&symbol);
+        }
         if symbol.flags.contains(SymbolFlags::Function)
             && !symbol
                 .flags
