@@ -368,6 +368,45 @@ impl Checker {
                 }
             }
         }
+
+        if node.flags.contains(NodeFlags::Ambient) {
+            self.check_ambient_initializer(node);
+        }
+
+        if tsox_frontend::ast::is_property_declaration(node) {
+            if let NodeData::PropertyDeclaration(prop_decl) = &node.data {
+                if let Some(postfix_token) = &prop_decl.postfix_token {
+                    if postfix_token.kind == SyntaxKind::ExclamationToken {
+                        if prop_decl.initializer.is_some() {
+                            return self.grammar_error_on_node(
+                                postfix_token,
+                                &DECLARATIONS_WITH_INITIALIZERS_CANNOT_ALSO_HAVE_DEFINITE_ASSIGNMENT_ASSERTIONS,
+                            );
+                        }
+                        if prop_decl.type_node.is_none() {
+                            return self.grammar_error_on_node(
+                                postfix_token,
+                                &DECLARATIONS_WITH_DEFINITE_ASSIGNMENT_ASSERTIONS_MUST_ALSO_HAVE_TYPE_ANNOTATIONS,
+                            );
+                        }
+                        if node.parent().is_none_or(|parent| {
+                            !tsox_frontend::ast::is_class_like(&parent)
+                        }) || node.flags.contains(NodeFlags::Ambient)
+                            || tsox_frontend::ast::is_static(node)
+                            || tsox_frontend::ast::has_syntactic_modifier(
+                                node,
+                                ModifierFlags::Abstract,
+                            )
+                        {
+                            return self.grammar_error_on_node(
+                                postfix_token,
+                                &A_DEFINITE_ASSIGNMENT_ASSERTION_IS_NOT_PERMITTED_IN_THIS_CONTEXT,
+                            );
+                        }
+                    }
+                }
+            }
+        }
         false
     }
 
