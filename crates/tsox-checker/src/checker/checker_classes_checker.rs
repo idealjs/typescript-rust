@@ -4,7 +4,7 @@ use crate::checker::checker_classes::*;
 
 impl Checker {
     pub(crate) fn check_class_member(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_class_member"); 
-        self.check_grammar_modifiers(node);
+        let modifiers_errored = self.check_grammar_modifiers(node);
         self.check_node_decorators(node);
         if node.kind == SyntaxKind::IndexSignature {
             self.check_grammar_index_signature(node);
@@ -33,7 +33,11 @@ impl Checker {
                             Vec::new(),
                         ));
                     }
-                    self.check_computed_property_name(&data.name);
+                    // Go checkPropertyDeclaration（checker.go:2821）：
+                    // if !checkGrammarModifiers && !checkGrammarProperty 才查 computed-name
+                    if !modifiers_errored && !self.check_grammar_property(node) {
+                        self.check_computed_property_name(&data.name);
+                    }
 
                     let ambient = self.ambient_context_depth > 0
                         || node.has_syntactic_modifier(ModifierFlags::Ambient)
