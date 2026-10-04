@@ -251,13 +251,23 @@ impl Checker {
         t
     }
 
-    pub(crate) fn get_declared_type_of_type_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_type_alias"); 
+    pub(crate) fn get_declared_type_of_type_alias(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_declared_type_of_type_alias");
         if let Some(t) = self
             .type_alias_links
             .get(symbol)
             .and_then(|l| l.declared_type.clone())
         {
-            return t;
+            // 检查期环窗口曾把 error 驻留进 declared_type（resolve_alias_body
+            // 的窗口产物）：发射期读到即渲染 any。对齐本仓三处既有 error 不
+            // 驻留纪律（resolve_type_alias_reference / try_get_type_alias_
+            // declared_type / alias_instantiation_cache）：缓存 error 视同
+            // 未解析，清掉走重算；真循环由 push_type_resolution 守卫
+            if !crate::checker::utilities::is_type_error(&t) {
+                return t;
+            }
+            self.type_alias_links
+                .get_or_default(symbol)
+                .declared_type = None;
         }
         if !self.push_type_resolution(Arc::as_ptr(symbol), TypeResolutionProperty::DeclaredType) {
             return self.error_type();
