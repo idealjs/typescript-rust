@@ -142,6 +142,31 @@ impl Checker {
                             ));
                     }
 
+                    let getter_protected = node.has_syntactic_modifier(ModifierFlags::Protected);
+                    let getter_private = node.has_syntactic_modifier(ModifierFlags::Private);
+                    let setter_protected =
+                        setter_node.has_syntactic_modifier(ModifierFlags::Protected);
+                    let setter_private = setter_node.has_syntactic_modifier(ModifierFlags::Private);
+                    if (getter_protected && !(setter_protected || setter_private))
+                        || (getter_private && !setter_private)
+                    {
+                        let file = self.current_file.clone();
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file.clone(),
+                                gd.name.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    A_GET_ACCESSOR_MUST_BE_AT_LEAST_AS_ACCESSIBLE_AS_THE_SETTER,
+                                vec![],
+                            ));
+                        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                setter_name_loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    A_GET_ACCESSOR_MUST_BE_AT_LEAST_AS_ACCESSIBLE_AS_THE_SETTER,
+                                vec![],
+                            ));
+                    }
+
                     let setter_param_type_node =
                         if let tsox_frontend::ast::NodeData::SetAccessorDeclaration(sd) =
                             &setter_node.data
