@@ -290,6 +290,17 @@ cloned.set_parent(&symbol);
             return Some(Arc::clone(sym));
         }
 
+        // Go getSymbolAtLocation（checker.go:33445-33452）：声明名回溯父声明
+        // 取 getSymbolOfDeclaration(parent)（接口成员名/类型参数名等符号挂在
+        // 成员节点而非名字节点）
+        if tsox_frontend::ast::mig::m3f_4::is_declaration_name_or_import_property_name(node) {
+            if let Some(parent) = node.parent()
+                && let Some(sym) = self.get_symbol_of_declaration(&parent)
+            {
+                return Some(sym);
+            }
+        }
+
         if node.kind == tsox_frontend::ast::SyntaxKind::PropertyAccessExpression {
             if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &node.data {
                 if let Some(links) = self.type_node_links.get(&data.expression) {
