@@ -164,7 +164,6 @@ impl Checker {
             type_alias_links: LinkStore::new(),
             declared_type_links: LinkStore::new(),
             class_instance_type_cache: HashMap::new(),
-            class_first_base_cache: HashMap::new(),
             base_ctor_type_cache: HashMap::new(),
             this_type_cache: HashMap::new(),
             type_resolution_stack: Vec::new(),

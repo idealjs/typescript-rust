@@ -46,7 +46,16 @@ impl Checker {
                         .get_base_types(&class_type)
                         .into_iter()
                         .next()
-                        .or_else(|| self.class_first_base_cache.get(&class_decl.id()).cloned());
+                        .or_else(|| {
+                            self.extends_base_class_node(&class_decl).map(
+                                |(_, base_symbol, heritage_expr)| {
+                                    self.get_type_from_class_or_interface_reference(
+                                        &heritage_expr,
+                                        &base_symbol,
+                                    )
+                                },
+                            )
+                        });
                     if let Some(base) = base {
                         let this_argument =
                             crate::checker::mig::wc2::r22k3_defs::interface_this_type(&class_type);

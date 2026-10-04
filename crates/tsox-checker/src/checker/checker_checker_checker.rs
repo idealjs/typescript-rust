@@ -114,7 +114,6 @@ pub struct Checker {
     pub type_alias_links: LinkStore<Symbol, TypeAliasLinks>,
     pub declared_type_links: LinkStore<Symbol, DeclaredTypeLinks>,
     pub class_instance_type_cache: HashMap<u64, Arc<Type>>,
-    pub class_first_base_cache: HashMap<u64, Arc<Type>>,
     pub base_ctor_type_cache: HashMap<u32, Arc<Type>>,
     pub this_type_cache: HashMap<u64, Arc<Type>>,
     pub type_resolution_stack: Vec<TypeResolutionEntry>,
