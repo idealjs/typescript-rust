@@ -123,11 +123,19 @@ impl Checker {
         self.error_message(node, message, &[]);
     }
 
-    pub fn report_circular_base_type(&mut self, node: &Arc<Node>, t: &Arc<Type>) { ::tsox_core::fntrace::enter("report_circular_base_type"); 
-        let type_string = self.type_to_string_ex(
-            t,
-            crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::WRITE_ARRAY_AS_GENERIC,
-        );
+    pub fn report_circular_base_type(&mut self, node: &Arc<Node>, t: &Arc<Type>) { ::tsox_core::fntrace::enter("report_circular_base_type");
+        let format_flags =
+            crate::checker::nodebuilder_type_format_flags_2::TypeFormatFlags::WRITE_ARRAY_AS_GENERIC;
+        let type_string = match t.symbol.as_ref() {
+            Some(sym)
+                if sym.flags.intersects(
+                    tsox_frontend::ast::SymbolFlags::Class | tsox_frontend::ast::SymbolFlags::Interface,
+                ) =>
+            {
+                self.symbol_type_to_string(t, sym, format_flags)
+            }
+            _ => self.type_to_string_ex(t, format_flags),
+        };
         self.error_message(
             node,tsox_core::diagnostics::messages_generated::TYPE_0_RECURSIVELY_REFERENCES_ITSELF_AS_A_BASE_TYPE,
             &[type_string],

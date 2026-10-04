@@ -117,8 +117,13 @@ impl Checker {
                 }
 
                 let mut heritage_base_degraded = false;
-                let base_types = self
-                    .collect_interface_base_types(&interface_decls, &mut heritage_base_degraded);
+                let mut circular_base_decls: Vec<Arc<Node>> = Vec::new();
+                let base_types = self.collect_interface_base_types(
+                    symbol,
+                    &interface_decls,
+                    &mut heritage_base_degraded,
+                    &mut circular_base_decls,
+                );
                 // 基类是空壳（解析重入期产物）时合并结果只有自有成员：按 degraded
                 // 处理——结果不进缓存、标 degraded，后续引用重建拿完整版
                 let mut base_shell = false;
@@ -177,6 +182,11 @@ impl Checker {
                             o.type_arguments = arg_types.clone();
                         }
                     }
+                }
+                for declaration in &circular_base_decls {
+                    let error_node =
+                        crate::checker::mig::m1d_2::get_adjusted_node_for_error(declaration);
+                    self.report_circular_base_type(&error_node, &result);
                 }
                 InterfacePassOutcome {
                     result,

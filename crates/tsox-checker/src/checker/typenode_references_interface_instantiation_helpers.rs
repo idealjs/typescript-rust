@@ -1,6 +1,8 @@
 #![allow(unused_imports)]
 
+use crate::checker::mig::m2a::r20k6_defs::R20K6CheckerExt;
 use crate::checker::typenode_references::*;
+use std::collections::HashSet;
 
 impl Checker {
     pub(crate) fn push_interface_type_argument_mapping(
@@ -124,9 +126,11 @@ impl Checker {
 
     pub(crate) fn collect_interface_base_types(
         &mut self,
+        symbol: &Arc<Symbol>,
         interface_decls: &[Arc<Node>],
         heritage_degraded: &mut bool,
-    ) -> Vec<(Arc<Node>, Arc<Type>)> { ::tsox_core::fntrace::enter("collect_interface_base_types"); 
+        circular_decls: &mut Vec<Arc<Node>>,
+    ) -> Vec<(Arc<Node>, Arc<Type>)> { ::tsox_core::fntrace::enter("collect_interface_base_types");
         let mut base_types: Vec<(Arc<Node>, Arc<Type>)> = Vec::new();
         for decl in interface_decls {
             if let NodeData::InterfaceDeclaration(d) = &decl.data {
@@ -143,6 +147,10 @@ impl Checker {
                                     *heritage_degraded = true;
                                     self.heritage_degraded_events += 1;
                                 }
+                                if self.interface_base_type_is_circular(symbol, &bt) {
+                                    circular_decls.push(Arc::clone(decl));
+                                    continue;
+                                }
                                 base_types.push((Arc::clone(type_ref), bt));
                             }
                         }
@@ -151,5 +159,50 @@ impl Checker {
             }
         }
         base_types
+    }
+
+    pub(crate) fn interface_base_type_is_circular(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        base: &Arc<Type>,
+    ) -> bool { ::tsox_core::fntrace::enter("interface_base_type_is_circular");
+        let Some(base_symbol) = base.symbol.as_ref() else {
+            return false;
+        };
+        if Arc::ptr_eq(base_symbol, symbol) {
+            return true;
+        }
+        let mut visited: HashSet<usize> = HashSet::new();
+        self.interface_heritage_chain_reaches(base_symbol, symbol, &mut visited)
+    }
+
+    pub(crate) fn interface_heritage_chain_reaches(
+        &mut self,
+        from: &Arc<Symbol>,
+        target: &Arc<Symbol>,
+        visited: &mut HashSet<usize>,
+    ) -> bool { ::tsox_core::fntrace::enter("interface_heritage_chain_reaches");
+        let key = Arc::as_ptr(from) as *const tsox_frontend::ast::Symbol as usize;
+        if !visited.insert(key) {
+            return false;
+        }
+        for decl in from.declarations.iter() {
+            for element in tsox_frontend::ast::get_extends_heritage_clause_elements(decl) {
+                let Some(next) =
+                    self.resolve_type_reference_name(&element, tsox_frontend::ast::SymbolFlags::TYPE, true)
+                else {
+                    continue;
+                };
+                if Arc::ptr_eq(&next, &self.unknown_symbol()) {
+                    continue;
+                }
+                if Arc::ptr_eq(&next, target)
+                    || self.interface_heritage_chain_reaches(&next, target, visited)
+                {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
