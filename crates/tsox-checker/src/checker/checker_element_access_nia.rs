@@ -180,7 +180,7 @@ impl Checker {
         self.diagnostics.add(diag);
     }
 
-    fn emit_index_diagnostic(
+    pub(crate) fn emit_index_diagnostic(
         &mut self,
         loc: tsox_core::core::text::TextRange,
         message: tsox_core::diagnostics::Message,
