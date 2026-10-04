@@ -11,6 +11,7 @@ use tsox_checker::checker::mig::m1f::r24k9_defs::is_expression_node;
 use tsox_checker::checker::nodebuilder_type_format_flags_2::TypeFormatFlags;
 use tsox_checker::checker::types_type_id::TypeFlags;
 use tsox_checker::checker::Checker;
+use tsox_frontend::ast::mig::m3e_4::{get_meaning_from_declaration, SemanticMeaning};
 use tsox_frontend::ast::mig::m3g_3::is_part_of_type_node;
 use tsox_frontend::ast::mig::w3::for_each_child_and_js_doc;
 use tsox_frontend::ast::node_data_generated::node_name;
@@ -45,8 +46,19 @@ fn is_alias_declaration_name(node: &Arc<Node>) -> bool {
 }
 
 fn write_type_line(checker: &mut Checker, node: &Arc<Node>, file_text: &str) -> Option<Row> {
-    if is_part_of_type_node(node) && !is_alias_declaration_name(node) {
+    // Go writeTypeOrSymbol（tsc/internal/testutil/tsbaseline/type_symbol_baseline.go:372-382）：
+    // identifier 的声明宿主无 value meaning 不发射（如 type A<T> 的 T，宿主
+    // TypeParameter 的 meaning 为 Type），唯类型别名自己的名字例外
+    if is_part_of_type_node(node) {
         return None;
+    }
+    if node.kind == SyntaxKind::Identifier {
+        let value_meaning = node
+            .parent()
+            .is_some_and(|p| get_meaning_from_declaration(&p).contains(SemanticMeaning::VALUE));
+        if !value_meaning && !is_alias_declaration_name(node) {
+            return None;
+        }
     }
     if let Some(p) = node.parent() {
         if matches!(p.kind, SyntaxKind::InterfaceDeclaration | SyntaxKind::TypeReference) {
@@ -55,13 +67,6 @@ fn write_type_line(checker: &mut Checker, node: &Arc<Node>, file_text: &str) -> 
     }
     if node.kind == SyntaxKind::OmittedExpression {
         return None;
-    }
-
-    if is_alias_declaration_name(node) {
-        let name = node.text().to_string();
-        let pos = (node.loc.pos as usize).min(file_text.len());
-        let line = file_text[..pos].matches('\n').count();
-        return Some(Row { line, source_text: name.clone(), typ: name });
     }
 
     let own = checker.get_type_at_location(node);
@@ -85,10 +90,15 @@ fn write_type_line(checker: &mut Checker, node: &Arc<Node>, file_text: &str) -> 
         }
     }
 
-    let type_string = checker.type_to_string_ex(
-        &t,
-        TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE.union(TypeFormatFlags::NO_TRUNCATION),
-    );
+    // Go type_symbol_baseline.go:410-414：类型别名名字渲染成同名裸 identifier 时，
+    // 以 InTypeAlias 重渲染（Go nodebuilderimpl.go:3443 InTypeAlias 单层跳过 alias gate）
+    let type_flags =
+        TypeFormatFlags::ALLOW_UNIQUE_ES_SYMBOL_TYPE.union(TypeFormatFlags::NO_TRUNCATION);
+    let mut type_string = checker.type_to_string_ex(&t, type_flags);
+    if is_alias_declaration_name(node) && type_string == node.text() {
+        type_string =
+            checker.type_to_string_ex(&t, type_flags.union(TypeFormatFlags::IN_TYPE_ALIAS));
+    }
     let pos = (node.loc.pos as usize).min(file_text.len());
     let end = (node.loc.end as usize).min(file_text.len());
     let raw: String = if end > pos { file_text[pos..end].to_string() } else { String::new() };
