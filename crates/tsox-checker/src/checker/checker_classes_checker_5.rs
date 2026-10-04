@@ -185,6 +185,17 @@ impl Checker {
                         if let Some(id) = suppressed_id {
                             self.namespace_value_suppressed_nodes.remove(&id);
                         }
+                    } else if let tsox_frontend::ast::NodeData::Identifier(id_data) =
+                        &ewa.expression.data
+                    {
+                        // Go checkIdentifier→resolveName(Value) 失败进
+                        // onFailedToResolveSymbol：NamespaceModule 含义命中时
+                        // checkAndReportErrorForUsingNamespaceAsTypeOrValue 报 TS2708
+                        self.check_and_report_error_for_using_namespace_as_type_or_value(
+                            &ewa.expression,
+                            id_data.text.as_str(),
+                            SymbolFlags::VALUE | SymbolFlags::ExportValue,
+                        );
                     }
 
                     self.push_ts2304_suppression();
