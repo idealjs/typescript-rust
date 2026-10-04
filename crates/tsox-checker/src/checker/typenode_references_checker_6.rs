@@ -34,7 +34,15 @@ impl Checker {
             props.push(Arc::clone(prop));
         }
         let mut index_infos = derived_data.index_infos.clone();
-        index_infos.extend(base_data.index_infos.iter().cloned());
+        for info in &base_data.index_infos {
+            let duplicated = info
+                .key_type
+                .as_ref()
+                .is_some_and(|key| self.find_index_info(&index_infos, key).is_some());
+            if !duplicated {
+                index_infos.push(Arc::clone(info));
+            }
+        }
 
         let mut call_signatures: Vec<Arc<Signature>> = derived_data.call_signatures().to_vec();
         let derived_call_count = call_signatures.len();
