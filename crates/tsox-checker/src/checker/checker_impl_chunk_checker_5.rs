@@ -93,6 +93,8 @@ impl Checker {
                 && candidate.flags.intersects(TypeFlags::BigIntLiteral))
             || (contextual.flags.intersects(TypeFlags::BooleanLiteral)
                 && candidate.flags.intersects(TypeFlags::BooleanLiteral))
+            || (contextual.flags.contains(TypeFlags::Boolean)
+                && candidate.flags.intersects(TypeFlags::BooleanLiteral))
             || (contextual.flags.intersects(TypeFlags::UniqueESSymbol)
                 && candidate.flags.intersects(TypeFlags::UniqueESSymbol))
     }
