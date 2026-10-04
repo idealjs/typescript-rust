@@ -7,9 +7,23 @@ use crate::checker::mig::m1b_4::jsnum_negate;
 use tsox_core::diagnostics::messages_generated::OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1;
 
 impl Checker {
-    pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_node"); 
+    pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_node");
         if node.kind == SyntaxKind::ThisKeyword {
             return self.compute_type_of_node(node);
+        }
+
+        // Go getTypeOfNode（checker.go:33787-33818）：class extends 的 EWT 既非
+        // type node 也非 expression node，落 classType 分支取 getBaseTypes 首基型。
+        // 该分支先于节点级缓存：Go 此查询无缓存，check 期经 check_heritage_clause
+        // 系写入 type_node_links 的静态侧产物不得遮蔽
+        if node.kind == SyntaxKind::ExpressionWithTypeArguments {
+            if let Some((class_decl, false)) =
+                tsox_frontend::ast::mig::m3g_3::try_get_class_implementing_or_extending_heritage_clause_element(node)
+            {
+                let result = self.type_of_class_extends_element(&class_decl);
+                self.type_node_links.get_or_default(node).resolved_type = Some(result.clone());
+                return result;
+            }
         }
 
         if let Some(cached) = self
@@ -31,40 +45,33 @@ impl Checker {
         result
     }
 
-    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node");
-        // Go getTypeOfNode（checker.go:33787-33818）：class extends 的 EWT 既非
-        // type node 也非 expression node，落 classType 分支取第一个基类型
-        if node.kind == SyntaxKind::ExpressionWithTypeArguments {
-            if let Some((class_decl, is_implements)) = tsox_frontend::ast::mig::m3g_3::try_get_class_implementing_or_extending_heritage_clause_element(node)
-            {
-                if !is_implements {
-                    let Some(symbol) = self.symbol_of_node(&class_decl) else {
-                        return self.error_type();
-                    };
-                    let class_type = self.get_declared_type_of_class_or_interface(&symbol);
-                    let base = self
-                        .get_base_types(&class_type)
-                        .into_iter()
-                        .next()
-                        .or_else(|| {
-                            self.extends_base_class_node(&class_decl).map(
-                                |(_, base_symbol, heritage_expr)| {
-                                    self.get_type_from_class_or_interface_reference(
-                                        &heritage_expr,
-                                        &base_symbol,
-                                    )
-                                },
-                            )
-                        });
-                    if let Some(base) = base {
-                        let this_argument =
-                            crate::checker::mig::wc2::r22k3_defs::interface_this_type(&class_type);
-                        return self.get_type_with_this_argument(&base, this_argument.as_ref(), false);
-                    }
-                    return self.error_type();
-                }
+    pub(crate) fn type_of_class_extends_element(&mut self, class_decl: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_class_extends_element");
+        let Some(symbol) = self.symbol_of_node(class_decl) else {
+            return self.error_type();
+        };
+        let class_type = self.get_declared_type_of_class_or_interface(&symbol);
+        let base = self
+            .get_base_types(&class_type)
+            .into_iter()
+            .next()
+            .or_else(|| {
+                self.extends_base_class_node(class_decl).map(
+                    |(_, base_symbol, heritage_expr)| {
+                        self.get_type_from_class_or_interface_reference(&heritage_expr, &base_symbol)
+                    },
+                )
+            });
+        match base {
+            Some(base) => {
+                let this_argument =
+                    crate::checker::mig::wc2::r22k3_defs::interface_this_type(&class_type);
+                self.get_type_with_this_argument(&base, this_argument.as_ref(), false)
             }
+            None => self.error_type(),
         }
+    }
+
+    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node");
         // Go getTypeOfNode：类型节点整体委托 getTypeFromTypeNode（含 NamedTupleMember 等）
         if tsox_frontend::ast::is_type_node(node) {
             return self.get_type_from_type_node(node);
