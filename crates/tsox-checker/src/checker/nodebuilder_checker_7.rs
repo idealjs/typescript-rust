@@ -48,11 +48,29 @@ impl Checker {
         let outermost = self.type_print_stack.len() == 1;
         let saved_length = self.display_approximate_length;
         let saved_truncating = self.display_truncating;
+        // Go 显示入口带 enclosingDeclaration（.types 基线 harness 传 node.Parent，
+        // type_symbol_baseline.go:409）；无 hover/relater 显示上下文时以上一次
+        // 类型查询节点的父声明补位，限定名可及性判定随上下文收敛
+        let saved_display_enclosing_node = if outermost
+            && self.display_enclosing_node.is_none()
+            && self.display_enclosing_file.is_none()
+        {
+            let from_query = self
+                .last_type_query_node
+                .as_ref()
+                .and_then(|n| n.parent());
+            from_query.map(|p| self.display_enclosing_node.replace(p))
+        } else {
+            None
+        };
         if outermost {
             self.display_approximate_length = 0;
             self.display_truncating = false;
         }
         let result = self.type_to_string_ex_worker(t, flags);
+        if let Some(saved) = saved_display_enclosing_node {
+            self.display_enclosing_node = saved;
+        }
         if outermost {
             self.display_approximate_length = saved_length;
             self.display_truncating = saved_truncating;
