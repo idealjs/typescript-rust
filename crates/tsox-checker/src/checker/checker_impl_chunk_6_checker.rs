@@ -7,23 +7,9 @@ use crate::checker::mig::m1b_4::jsnum_negate;
 use tsox_core::diagnostics::messages_generated::OPERATOR_0_CANNOT_BE_APPLIED_TO_TYPE_1;
 
 impl Checker {
-    pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_node");
+    pub fn get_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_node"); 
         if node.kind == SyntaxKind::ThisKeyword {
             return self.compute_type_of_node(node);
-        }
-
-        // Go getTypeOfNode（checker.go:33787-33818）：class extends 的 EWT 既非
-        // type node 也非 expression node，落 classType 分支取 getBaseTypes 首基型。
-        // 该分支先于节点级缓存：Go 此查询无缓存，check 期经 check_heritage_clause
-        // 系写入 type_node_links 的静态侧产物不得遮蔽
-        if node.kind == SyntaxKind::ExpressionWithTypeArguments {
-            if let Some((class_decl, false)) =
-                tsox_frontend::ast::mig::m3g_3::try_get_class_implementing_or_extending_heritage_clause_element(node)
-            {
-                let result = self.type_of_class_extends_element(&class_decl);
-                self.type_node_links.get_or_default(node).resolved_type = Some(result.clone());
-                return result;
-            }
         }
 
         if let Some(cached) = self
@@ -45,46 +31,7 @@ impl Checker {
         result
     }
 
-    pub(crate) fn type_of_class_extends_element(&mut self, class_decl: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("type_of_class_extends_element");
-        // Go getSymbolOfDeclaration：声明节点经 binder 符号表直查；Checker::
-        // symbol_of_node 走 symbol_node_links 解析缓存，类声明节点从不作为
-        // 解析目标，该缓存恒空
-        let Some(symbol) = self.program.symbol_map().symbol_of(class_decl).cloned() else {
-            return self.error_type();
-        };
-        let class_type = self.get_declared_type_of_class_or_interface(&symbol);
-        let base = self
-            .get_base_types(&class_type)
-            .into_iter()
-            .next()
-            .or_else(|| {
-                let heritage =
-                    crate::checker::checker_classes_ctor_super_calls::class_extends_heritage_element(
-                        class_decl,
-                    )?;
-                let base_expr =
-                    crate::checker::checker_classes_ctor_super_calls::expression_with_type_arguments_expression(
-                        &heritage,
-                    );
-                let base_symbol = self
-                    .get_symbol_at_location(&base_expr)
-                    .or_else(|| self.resolve_identifier(&base_expr))
-                    .filter(|s| s.flags.contains(tsox_frontend::ast::SymbolFlags::Class))?;
-                Some(
-                    self.get_type_from_class_or_interface_reference(&heritage, &base_symbol),
-                )
-            });
-        match base {
-            Some(base) => {
-                let this_argument =
-                    crate::checker::mig::wc2::r22k3_defs::interface_this_type(&class_type);
-                self.get_type_with_this_argument(&base, this_argument.as_ref(), false)
-            }
-            None => self.error_type(),
-        }
-    }
-
-    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node");
+    pub(crate) fn compute_type_of_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("compute_type_of_node"); 
         // Go getTypeOfNode：类型节点整体委托 getTypeFromTypeNode（含 NamedTupleMember 等）
         if tsox_frontend::ast::is_type_node(node) {
             return self.get_type_from_type_node(node);
@@ -399,18 +346,42 @@ impl Checker {
     }
 
     pub(crate) fn get_type_of_identifier(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_identifier");
-        // Go getTypeOfNode（checker.go:33826-33832）：类型声明名走
-        // IsTypeDeclarationName → getDeclaredTypeOfSymbol，先于
-        // IsDeclarationNameOrImportPropertyName 的 getTypeOfSymbol（后者对
-        // class 给出构造器型 typeof A）。getDeclaredTypeOfSymbol 目前只接入
-        // Class/Interface/TypeAlias，其余声明名维持既有求值路径
-        if tsox_frontend::ast::mig::m3g_2::is_type_declaration_name(node)
-            && let Some(symbol) = self.resolve_identifier(node)
-            && symbol
-                .flags
-                .intersects(SymbolFlags::Class | SymbolFlags::Interface)
-        {
-            return self.get_declared_type_of_symbol(&symbol);
+        // Go getTypeOfNode：IsTypeDeclarationName → getDeclaredTypeOfSymbol(
+        // getSymbolAtLocation)——类/接口/枚举/别名/类型参数的声明名取声明型
+        //（类名是实例型 C，而非值路径的构造型 typeof C）
+        if tsox_frontend::ast::mig::m3g_2::is_type_declaration_name(node) {
+            let sym = node
+                .parent()
+                .and_then(|parent| self.get_symbol_of_declaration(&parent));
+            return match sym {
+                Some(sym) => self.get_declared_type_of_symbol(&sym),
+                None => self.error_type(),
+            };
+        }
+        // Go getTypeOfNode：IsDeclarationNameOrImportPropertyName →
+        // getTypeOfSymbol(getSymbolAtLocation(node))——声明名经声明符号取类型
+        //（访问器符号走 getTypeOfAccessors 等价路径，成员名不做作用域解析）
+        if tsox_frontend::ast::mig::m3f_4::is_declaration_name_or_import_property_name(node) {
+            let resolved = node
+                .parent()
+                .and_then(|parent| self.get_symbol_of_declaration(&parent));
+            let Some(sym) = resolved else {
+                return self.error_type();
+            };
+            // Go getTypeOfSymbol 分派无纯类型命名空间分支
+            //（NamespaceModule 无值位不进 FuncClassEnumModule），
+            // 落 errorType 渲染 any，与值路径 module_without_value 同源
+            let effective = if sym.flags.intersects(SymbolFlags::Alias) {
+                self.resolve_alias_base(Arc::clone(&sym))
+            } else {
+                Arc::clone(&sym)
+            };
+            if effective.flags.contains(SymbolFlags::NamespaceModule)
+                && !effective.flags.contains(SymbolFlags::ValueModule)
+            {
+                return self.error_type();
+            }
+            return self.get_type_of_symbol(&sym);
         }
         if let Some(parent) = node.parent()
             && parent.kind == SyntaxKind::MetaProperty
