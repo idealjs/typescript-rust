@@ -77,6 +77,12 @@ impl Checker {
         // 供 namespace_qualifier_of 判「符号在位置所属容器内可不加限定」
         self.access_location = Some(Arc::clone(node));
         let reparsed = tsox_frontend::ast::mig::m3f::get_reparsed_node_for_node(node);
+        // Go .types 基线（tsbaseline）以 TypeToTypeNode(t, node.Parent, ...) 的
+        // enclosingDeclaration 决定类型名限定形态：拉取点就地可见的命名空间
+        // 段不参与限定。挂 display_enclosing_node（与 hover 同源状态，
+        // namespace_qualifier_of 的 node_within 判定消费），sticky 保持到
+        // 紧随其后的 type_to_string_ex 渲染
+        self.display_enclosing_node = node.parent();
         self.get_type_of_node(&reparsed)
     }
 
