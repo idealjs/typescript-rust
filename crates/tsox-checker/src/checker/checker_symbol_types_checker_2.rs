@@ -21,6 +21,7 @@ impl Checker {
                 SyntaxKind::Parameter
                     | SyntaxKind::PropertyDeclaration
                     | SyntaxKind::PropertySignature
+                    | SyntaxKind::PropertyAssignment
                     | SyntaxKind::VariableDeclaration
                     | SyntaxKind::BindingElement
                     | SyntaxKind::ExportAssignment
@@ -70,6 +71,7 @@ impl Checker {
                     NodeData::VariableDeclaration(_)
                         | NodeData::PropertyDeclaration(_)
                         | NodeData::PropertySignatureDeclaration(_)
+                        | NodeData::PropertyAssignment(_)
                         | NodeData::ParameterDeclaration(_)
                         | NodeData::BindingElement(_)
                         | NodeData::EnumMember(_)
@@ -170,6 +172,15 @@ impl Checker {
                 };
                 self.value_symbol_links.get_or_default(symbol).resolved_type = Some(Arc::clone(&t));
                 self.type_node_links.get_or_default(&decl).resolved_type = Some(Arc::clone(&t));
+                return Some(t);
+            }
+            // Go getTypeOfVariableOrParameterOrPropertyWorker：PropertyAssignment
+            // 走 checkPropertyAssignment（checker.go:17587-17588）
+            NodeData::PropertyAssignment(_) => {
+                let t = self.check_property_assignment(
+                    &decl,
+                    crate::checker::types_alias_symbol_links::CheckMode::Normal,
+                );
                 return Some(t);
             }
             // Go getTypeOfSymbol 的 EnumMember 独立分支：getTypeOfEnumMember =
