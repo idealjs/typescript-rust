@@ -3674,6 +3674,7 @@ pub fn node_expression(node: &Node) -> Option<&Arc<Node>> { ::tsox_core::fntrace
         NodeData::SwitchStatement(d) => Some(&d.expression),
         NodeData::CaseOrDefaultClause(d) => Some(&d.expression),
         NodeData::ThrowStatement(d) => Some(&d.expression),
+        NodeData::ReturnStatement(d) => d.expression.as_ref(),
         NodeData::ExpressionStatement(d) => Some(&d.expression),
         NodeData::ExternalModuleReference(d) => Some(&d.expression),
         NodeData::ExportAssignment(d) => Some(&d.expression),
