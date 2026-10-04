@@ -155,6 +155,11 @@ impl Binder {
                     let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
                     (*symbol_mut).set_parent(parent_sym);
                 }
+                // Go addDeclarationToSymbol 给每个声明节点设 node.Symbol——
+                // Exports/Members 路径同样登记，getSymbolOfDeclaration 与
+                // 声明名臂的 getSymbolAtLocation 由此可达（checker.go
+                // getSymbolAtLocation 首臂即声明名→父声明符号）
+                self.symbol_map.set_symbol(node, Arc::clone(&symbol));
             }
             DeclareTarget::Locals(container) => {
                 let locals = self
