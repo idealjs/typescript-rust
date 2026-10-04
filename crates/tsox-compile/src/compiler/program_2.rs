@@ -86,11 +86,22 @@ impl Program {
             );
             let mut stack: Vec<Arc<SourceFile>> = Vec::new();
 
-            let expanded_types: Vec<String> =
-                tsox_tsoptions::module::mig::m3i::get_automatic_type_directive_names(
-                    &options,
-                    resolver.host(),
-                );
+            let expanded_types: Vec<String> = if options.types.iter().any(|t| t == "*") {
+                let (type_roots, _from_config) =
+                    tsox_tsoptions::module::resolver::get_effective_type_roots(
+                        &options,
+                        host.current_directory(),
+                    );
+                let mut names: Vec<String> = Vec::new();
+                for root in &type_roots {
+                    for entry in host.fs().get_accessible_entries(root).directories {
+                        names.push(entry);
+                    }
+                }
+                names
+            } else {
+                options.types.clone()
+            };
             let containing_directory = if !options.config_file_path.is_empty() {
                 tsox_core::tspath::get_directory_path(&options.config_file_path)
             } else {
@@ -287,9 +298,24 @@ impl Program {
                         // createResolvedModuleHandlingSymlink（resolver.go:1193-1206）
                         // 按 isExternalLibraryImport 完成，此处直接取 resolved_file_name
                         let resolved_path = resolved_module.resolved_file_name.clone();
-                        if !allow_js
-                            && tsox_core::tspath::has_js_file_extension(&resolved_path)
-                        {
+                        // Go fileloader shouldAddFile（fileloader.go:926-937）：解析
+                        // 诊断非空或 JS 文件未开 allowJs 时不入程序。file.imports
+                        // 均为真实 import/export/require 节点，Go 的 JSDoc-import
+                        // 排除项在此恒为真，不单列
+                        let is_js_file = !resolved_module.resolved_using_extra_extensions
+                            && !tsox_core::tspath::file_extension_is_one_of(
+                                &resolved_path,
+                                crate::mig::m4v_2::SUPPORTED_TS_EXTENSIONS_WITH_JSON_FL,
+                            );
+                        let should_add_file = tsox_tsoptions::module::mig::m3i::get_resolution_diagnostic(
+                            &options,
+                            &resolved_module,
+                            &file,
+                        )
+                        .is_none()
+                            && !options.no_resolve.is_true()
+                            && !(is_js_file && !allow_js);
+                        if !should_add_file {
                             continue;
                         }
                         if resolved_module.is_external_library_import {
@@ -462,11 +488,6 @@ impl Program {
                         resolver.resolve_module_name(&module_ref, &file.file_name, mode, None);
                     if resolved.as_ref().is_some_and(|m| m.is_resolved()) {
                         let resolved_path = resolved.as_ref().unwrap().resolved_file_name.as_str();
-                        if !allow_js
-                            && tsox_core::tspath::has_js_file_extension(resolved_path)
-                        {
-                            continue;
-                        }
                         if resolved
                             .as_ref()
                             .is_some_and(|m| m.is_external_library_import)
@@ -492,16 +513,6 @@ impl Program {
 
         for err in &opts.config.errors {
             diagnostics.push(Arc::new(err.clone()));
-        }
-
-        let mut files_by_path: HashMap<String, Arc<SourceFile>> = HashMap::new();
-        for file in &source_files {
-            let path = tsox_core::tspath::to_path(
-                &file.file_name,
-                host.current_directory(),
-                host.use_case_sensitive_file_names(),
-            );
-            files_by_path.insert(path.0, Arc::clone(file));
         }
 
         apply_module_detection_force(&options, host.as_ref(), &source_files);
@@ -545,7 +556,7 @@ impl Program {
             checker_pool: std::sync::OnceLock::new(),
             compiler_checker_pool: std::sync::OnceLock::new(),
             compare_paths_options,
-            files_by_path,
+            files_by_path: HashMap::new(),
             project_reference_file_mapper: Arc::new(
                 crate::mig::m4x_2::ProjectReferenceFileMapper {
                     opts: program_opts.clone(),
