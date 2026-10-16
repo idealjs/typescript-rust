@@ -1,0 +1,654 @@
+use std::sync::Arc;
+
+use tsox_core::core::text::TextRange;
+use tsox_frontend::ast::Node;
+use tsox_frontend::ast::NodeData;
+use tsox_frontend::ast::Symbol;
+use tsox_frontend::ast::SymbolFlags;
+use tsox_frontend::ast::SymbolTable;
+use tsox_frontend::ast::SyntaxKind;
+
+use crate::checker::checker::*;
+
+impl Checker {
+    pub fn get_widened_type_of_literal(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_widened_type_of_literal"); 
+        if t.flags.contains(crate::checker::TypeFlags::StringLiteral)
+            || t.flags.contains(crate::checker::TypeFlags::NumberLiteral)
+            || t.flags.contains(crate::checker::TypeFlags::BigIntLiteral)
+            || t.flags.contains(crate::checker::TypeFlags::BooleanLiteral)
+        {
+            return self.get_base_type_of_literal_type(t);
+        }
+        Arc::clone(t)
+    }
+
+    pub(crate) fn types_are_equal(&self, a: &Arc<Type>, b: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("types_are_equal"); 
+        if Arc::ptr_eq(a, b) {
+            return true;
+        }
+        if a.flags != b.flags {
+            return false;
+        }
+
+        match (&a.data, &b.data) {
+            (crate::checker::TypeData::Intrinsic(a), crate::checker::TypeData::Intrinsic(b)) => {
+                a.intrinsic_name == b.intrinsic_name
+            }
+            _ => false,
+        }
+    }
+
+    pub(crate) fn infer_number_literal_type(&mut self, text: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_number_literal_type"); 
+        let num = tsox_core::jsnum::Number::from_string(text);
+        if num.is_nan() {
+            return self.number_type();
+        }
+        self.get_number_literal_type(num)
+    }
+
+    pub(crate) fn infer_string_literal_type(&mut self, text: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("infer_string_literal_type"); 
+        self.get_string_literal_type(text)
+    }
+    pub(crate) fn find_object_literal_property_name_node(
+        &self,
+        init: &Arc<Node>,
+        prop_name: &str,
+    ) -> Option<TextRange> { ::tsox_core::fntrace::enter("find_object_literal_property_name_node"); 
+        let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &init.data else {
+            return None;
+        };
+        for prop in data.properties.iter() {
+            let name = match &prop.data {
+                NodeData::PropertyAssignment(p) => &p.name,
+                NodeData::ShorthandPropertyAssignment(p) => &p.name,
+                _ => continue,
+            };
+            if self.get_property_name_from_node(name) == prop_name {
+                return Some(name.loc);
+            }
+        }
+        None
+    }
+    pub(crate) fn get_const_assertion_type(&mut self, expr: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_const_assertion_type"); 
+        match expr.kind {
+            SyntaxKind::ArrayLiteralExpression => {
+                let elements = match &expr.data {
+                    tsox_frontend::ast::NodeData::ArrayLiteralExpression(data) => &data.elements,
+                    _ => return self.get_any_type(),
+                };
+                let mut element_types: Vec<Arc<Type>> = Vec::new();
+                let mut infos: Vec<crate::checker::types::TupleElementInfo> = Vec::new();
+                for elem in elements.iter() {
+                    // Go isConstContext：const 上下文递归传播，内层数组字面量
+                    // 同为 readonly 元组、标量保留字面型
+                    let t = if elem.kind == SyntaxKind::SpreadElement {
+                        self.get_type_of_node(elem)
+                    } else if elem.kind == SyntaxKind::ArrayLiteralExpression {
+                        self.get_const_assertion_type(elem)
+                    } else {
+                        self.get_type_of_node(elem)
+                    };
+                    element_types.push(t);
+                    infos.push(crate::checker::types::TupleElementInfo {
+                        flags: crate::checker::types::ElementFlags::Required,
+                        labeled_declaration: None,
+                        label: None,
+                        type_: None,
+                    });
+                }
+                self.create_tuple_type_ex(element_types, infos, true)
+            }
+            _ => self.get_type_of_node(expr),
+        }
+    }
+
+    /// Go checkPropertyAssignment：属性赋值类型 = 初始化式按可变位置检查，
+    /// 字面量视上下文属性类型保留 regular 字面量或拓宽
+    pub(crate) fn property_assignment_type(
+        &mut self,
+        prop: &Arc<Node>,
+        initializer: &Arc<Node>,
+        literal: &Arc<Node>,
+        name: &str,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("property_assignment_type"); 
+        let mut t = self.get_type_of_node(initializer);
+        let contextual = self.get_contextual_type(literal, ContextFlags::empty());
+        // Go checkExpressionForMutableLocation（checker.go:14641）默认臂取
+        // getContextualType（初始化式）→ getContextualTypeForObjectLiteralElement
+        // （checker.go:31663-31680）：属性上下文型 = getApparentTypeOfContextualType
+        //（checker.go:32471，联合先经 discriminateContextualTypeByObjectMembers
+        // 判别、类型参数经 get_apparent_type 收敛约束）上的
+        // getTypeOfPropertyOfContextualTypeEx noReductions 逐成分取型——
+        // 字面量成分不经并集归约吞并（'string'|'number'|string|undefined 若整体
+        // 归约成 string，判别上下文即失效）；apparent 不可得回落原属性查找
+        let usable_name_type = match &prop.data {
+            NodeData::PropertyAssignment(d) if d.name.kind == SyntaxKind::ComputedPropertyName => {
+                self.get_literal_type_from_property_name(&d.name).filter(|nt| {
+                    crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(nt)
+                })
+            }
+            _ => None,
+        };
+        let prop_ctx =
+            match self.get_apparent_type_of_contextual_type(literal, ContextFlags::empty()) {
+                Some(narrowed) => {
+                    self.get_type_of_property_of_contextual_type_ex(&narrowed, name, usable_name_type.as_ref())
+                }
+                None => contextual.as_ref().and_then(|c| match usable_name_type {
+                    Some(nt) => self.get_type_of_property_of_contextual_type_ex(c, name, Some(&nt)),
+                    None => self.get_type_of_property_of_contextual_type(c, name),
+                }),
+            };
+        // Go isLiteralOfContextualType（checker.go:27058）：并/交成分一致递归。
+        // 仅作用于 Ex 结果的浅层图，共享热路径 is_literal_of_contextual_type
+        // 维持仅并集递归不动（检查器字面量加宽处交叉型图过深，逐成分展开曾致
+        // jsx 用例逼近超时）
+        // Go checkPropertyAssignment → checkExpressionForMutableLocation
+        //（checker.go:14640-14649）：const 语境（含 isInlineImportAttributes）
+        // 与 as/satisfies 断言位直通，不经上下文加宽——with 内层字面量成员
+        // 保字面量型（"text" 不宽化为 string）
+        let initializer_in_const_context = self.is_const_context(initializer);
+        let literal_of_ctx = prop_ctx
+            .as_ref()
+            .is_some_and(|pc| self.prop_ctx_keeps_fresh_literal(&t, pc));
+        if !literal_of_ctx
+            && !initializer_in_const_context
+            && !tsox_frontend::ast::is_type_assertion(initializer)
+        {
+            t = self.get_widened_literal_type(&t);
+        }
+        t = self.get_regular_type_of_literal_type(&t);
+        if let Some(sym) = self.program.symbol_map().symbol_of(prop) {
+            let container = contextual.as_ref().and_then(|c| c.symbol.clone());
+            let links = self.value_symbol_links.get_or_default(&sym);
+            links.resolved_type = Some(Arc::clone(&t));
+            links.container_symbol = container;
+        }
+        t
+    }
+
+    /// Go isLiteralOfContextualType（checker.go:27058）：对象字面量属性拓宽判定
+    /// 专用——并/交成分一致递归，叶型回落共享判定；不动共享热路径版本
+    ///（检查器字面量加宽处交叉型图过深，逐成分展开曾致 jsx 用例逼近超时）
+    fn prop_ctx_keeps_fresh_literal(&mut self, candidate: &Arc<Type>, t: &Arc<Type>) -> bool {
+        if t
+            .flags
+            .intersects(crate::checker::TypeFlags::Union | crate::checker::TypeFlags::Intersection)
+        {
+            return t.types().is_some_and(|types| {
+                types
+                    .iter()
+                    .any(|c| self.prop_ctx_keeps_fresh_literal(candidate, c))
+            });
+        }
+        self.is_literal_of_contextual_type(candidate, t)
+    }
+
+    pub(crate) fn get_type_of_object_literal(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_object_literal");
+        let properties = match &node.data {
+            tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) => &data.properties,
+            _ => return self.get_any_type(),
+        };
+
+        let mut prop_pairs: Vec<(String, Arc<Type>, Vec<Arc<Node>>)> = Vec::new();
+        let mut fell_back_to_any = false;
+        let mut spread_acc: Option<Arc<Type>> = None;
+        let mut spread_error = false;
+        let mut computed_props: Vec<Arc<Symbol>> = Vec::new();
+        let mut has_computed_string_property = false;
+        let mut has_computed_number_property = false;
+        let mut has_computed_symbol_property = false;
+        let literal_symbol = self.program.symbol_map().symbol_of(node).map(Arc::clone);
+        // Go checkObjectLiteral（checker.go:13878-13881）：inConstContext 一次
+        // 判定（isConstContext 含 isInlineImportAttributes 臂），成员符号带
+        // CheckFlagsReadonly
+        let in_const_context = self.is_const_context(node);
+        let empty_snapshot =
+            self.object_literal_type_from_pairs(Vec::new(), literal_symbol.clone(), in_const_context);
+        self.in_flight_object_literal_types.insert(node.id(), empty_snapshot);
+        for prop in properties.iter() {
+            let snapshot =
+                self.object_literal_type_from_pairs(prop_pairs.clone(), literal_symbol.clone(), in_const_context);
+            self.in_flight_object_literal_types.insert(node.id(), snapshot);
+            let is_accessor = matches!(
+                &prop.data,
+                NodeData::GetAccessorDeclaration(_) | NodeData::SetAccessorDeclaration(_)
+            );
+            if is_accessor {
+                let name = self.get_property_name_for_property_name_node(
+                    &prop.name().expect("accessor member has name"),
+                );
+                if name.is_empty() {
+                    fell_back_to_any = true;
+                    break;
+                }
+                match prop_pairs.iter_mut().find(|(n, _, decls)| {
+                    n == &name
+                        && decls.iter().any(|d| {
+                            matches!(
+                                d.data,
+                                NodeData::GetAccessorDeclaration(_)
+                                    | NodeData::SetAccessorDeclaration(_)
+                            )
+                        })
+                }) {
+                    Some((_, _, decls)) => decls.push(Arc::clone(prop)),
+                    None => {
+                        prop_pairs.push((name, self.get_any_type(), vec![Arc::clone(prop)]));
+                    }
+                }
+                // Go getContextualThisParameterType 的 this 型取
+                // checkExpressionCached(containingLiteral)：成员已全数在表
+                //（accessor 成员占位先行入表，体推断延后），体期 this 可见
+                // 本成员名；占位空快照会把 this 缩成 {}
+                let snapshot =
+                    self.object_literal_type_from_pairs(prop_pairs.clone(), literal_symbol.clone(), in_const_context);
+                self.in_flight_object_literal_types.insert(node.id(), snapshot);
+                continue;
+            }
+            match &prop.data {
+                NodeData::PropertyAssignment(data) => {
+                    // Go checkObjectLiteral：bigint 名成员报 TS1539 后以
+                    // __missing 名入表（不可被属性查找命中、不参与显示），
+                    // 初始化式仍照常检查
+                    if data.name.kind == SyntaxKind::BigIntLiteral {
+                        self.property_assignment_type(
+                            prop,
+                            &data.initializer,
+                            node,
+                            crate::binder::symbols::INTERNAL_SYMBOL_NAME_MISSING,
+                        );
+                        continue;
+                    }
+                    let name = self.get_property_name_for_property_name_node(&data.name);
+                    if name.is_empty() {
+                        if data.name.kind == SyntaxKind::ComputedPropertyName {
+                            // Go checkObjectLiteral：非字面量计算名成员仍以初始
+                            // 化式加宽型入 propertiesArray，并按计算名型的可赋
+                            // 性归入 number/symbol/string 索引桶，最终型经
+                            // getObjectLiteralIndexInfo 带索引签名，不退化 any
+                            let name_type = self.check_computed_property_name_type(&data.name);
+                            let value_type =
+                                self.property_assignment_type(prop, &data.initializer, node, "");
+                            let mut prop_symbol = Symbol::new(SymbolFlags::Property, name.clone());
+                            prop_symbol.value_declaration = Some(Arc::clone(prop));
+                            prop_symbol
+                                .declarations
+                                .push(Arc::clone(prop));
+                            let prop_symbol = Arc::new(prop_symbol);
+                            self.value_symbol_links.insert(
+                                &prop_symbol,
+                                crate::checker::types::ValueSymbolLinks {
+                                    resolved_type: Some(Arc::clone(&value_type)),
+                                    ..Default::default()
+                                },
+                            );
+                            computed_props.push(prop_symbol);
+                            if self.is_type_assignable_to(&name_type, &self.number_type()) {
+                                has_computed_number_property = true;
+                            } else if self.is_type_assignable_to(&name_type, &self.es_symbol_type())
+                            {
+                                has_computed_symbol_property = true;
+                            } else if self.is_type_assignable_to(&name_type, &self.string_type()) {
+                                has_computed_string_property = true;
+                            }
+                            continue;
+                        }
+                        fell_back_to_any = true;
+                        break;
+                    }
+
+                    let t = self.property_assignment_type(prop, &data.initializer, node, &name);
+                    prop_pairs.push((name, t, vec![Arc::clone(prop)]));
+                }
+                NodeData::ShorthandPropertyAssignment(data) => {
+                    let name = self.get_property_name_from_node(&data.name);
+                    if name.is_empty() {
+                        fell_back_to_any = true;
+                        break;
+                    }
+
+                    let t = self.check_shorthand_property_assignment(
+                        prop,
+                        crate::checker::checker_object_literal_is_destructuring_target::
+                            is_assignment_target(node),
+                        crate::checker::types_alias_symbol_links::CheckMode::Normal,
+                    );
+                    // 回写变量符号类型（shorthand 引用的外层变量在字面量上下文中显示属性类型）
+                    if let Some(sym) = self.program.symbol_map().symbol_of(&data.name) {
+                        self.value_symbol_links
+                            .get_or_default(&sym)
+                            .resolved_type = Some(t.clone());
+                    }
+                    prop_pairs.push((name, t, vec![Arc::clone(prop)]));
+                }
+                NodeData::MethodDeclaration(data) => {
+                    let name = self.get_property_name_for_property_name_node(&data.name);
+                    if name.is_empty() {
+                        fell_back_to_any = true;
+                        break;
+                    }
+                    // 方法成员：符号类型（声明签名/体推断），类型容器挂字面量
+                    let sym = self
+                        .program
+                        .symbol_map()
+                        .symbol_of(prop)
+                        .map(Arc::clone);
+                    let t = match &sym {
+                        Some(sym) => {
+                            self.get_type_of_symbol(sym)
+                        }
+                        None => self.get_type_of_function_like(prop),
+                    };
+                    prop_pairs.push((name, t, vec![Arc::clone(prop)]));
+                }
+                NodeData::SpreadAssignment(data) => {
+                    if !self.fold_object_literal_spread(
+                        &mut prop_pairs,
+                        &mut spread_acc,
+                        &data.expression,
+                        prop,
+                        literal_symbol.clone(),
+                        in_const_context,
+                    ) {
+                        spread_error = true;
+                        break;
+                    }
+                }
+                NodeData::SpreadElement(data) => {
+                    if !self.fold_object_literal_spread(
+                        &mut prop_pairs,
+                        &mut spread_acc,
+                        &data.expression,
+                        prop,
+                        literal_symbol.clone(),
+                        in_const_context,
+                    ) {
+                        spread_error = true;
+                        break;
+                    }
+                }
+                _ => {
+                    fell_back_to_any = true;
+                    break;
+                }
+            }
+        }
+        let result = if spread_error {
+            self.error_type()
+        } else if let Some(spread) = spread_acc {
+            if !prop_pairs.is_empty() {
+                let segment =
+                    self.object_literal_type_from_pairs(prop_pairs, literal_symbol.clone(), in_const_context);
+                // Go checkObjectLiteral：spread 段边界先以当前桶物化段型
+                //（createObjectLiteralType 含计算名索引签名）再重置桶
+                let segment = self.attach_object_literal_computed_index_infos(
+                    segment,
+                    node,
+                    &computed_props,
+                    has_computed_string_property,
+                    has_computed_number_property,
+                    has_computed_symbol_property,
+                );
+                computed_props = Vec::new();
+                has_computed_string_property = false;
+                has_computed_number_property = false;
+                has_computed_symbol_property = false;
+                self.get_spread_type(
+                    &spread,
+                    &segment,
+                    literal_symbol,
+                    ObjectFlags::None,
+                    false,
+                )
+            } else {
+                spread
+            }
+        } else if fell_back_to_any {
+            self.get_any_type()
+        } else {
+            // Go getTypeOfAccessors 解析序：getter 注解 → setter 参数注解 →
+            // getter 体返回推断（加宽）
+            for idx in 0..prop_pairs.len() {
+                if !prop_pairs[idx].2.iter().any(|d| {
+                    matches!(
+                        d.data,
+                        NodeData::GetAccessorDeclaration(_) | NodeData::SetAccessorDeclaration(_)
+                    )
+                }) {
+                    continue;
+                }
+                let name = prop_pairs[idx].0.clone();
+                let t = self.object_literal_accessor_type(node, &name);
+                prop_pairs[idx].1 = t;
+                let snapshot =
+                    self.object_literal_type_from_pairs(prop_pairs.clone(), literal_symbol.clone(), in_const_context);
+                self.in_flight_object_literal_types.insert(node.id(), snapshot);
+            }
+
+            let built = self.object_literal_type_from_pairs(prop_pairs, literal_symbol, in_const_context);
+            self.attach_object_literal_computed_index_infos(
+                built,
+                node,
+                &computed_props,
+                has_computed_string_property,
+                has_computed_number_property,
+                has_computed_symbol_property,
+            )
+        };
+        self.in_flight_object_literal_types.remove(&node.id());
+        result
+    }
+
+    // Go createObjectLiteralType 尾段：hasComputed* 桶非空时经
+    // getObjectLiteralIndexInfo 生成 string/number/symbol 索引签名
+    fn attach_object_literal_computed_index_infos(
+        &mut self,
+        t: Arc<crate::checker::types::Type>,
+        node: &Arc<Node>,
+        computed_props: &[Arc<Symbol>],
+        has_computed_string_property: bool,
+        has_computed_number_property: bool,
+        has_computed_symbol_property: bool,
+    ) -> Arc<crate::checker::types::Type> { ::tsox_core::fntrace::enter("attach_object_literal_computed_index_infos");
+        if !has_computed_string_property
+            && !has_computed_number_property
+            && !has_computed_symbol_property
+        {
+            return t;
+        }
+        let obj = match &t.data {
+            crate::checker::types::TypeData::Object(o) => o.clone(),
+            _ => return t,
+        };
+        let is_readonly = self.is_const_context(node);
+        let mut index_infos: Vec<Arc<crate::checker::IndexInfo>> = Vec::new();
+        if has_computed_string_property {
+            let key = self.string_type();
+            index_infos.push(Arc::new(
+                self.get_object_literal_index_info(is_readonly, computed_props, &key),
+            ));
+        }
+        if has_computed_number_property {
+            let key = self.number_type();
+            index_infos.push(Arc::new(
+                self.get_object_literal_index_info(is_readonly, computed_props, &key),
+            ));
+        }
+        if has_computed_symbol_property {
+            let key = self.es_symbol_type();
+            index_infos.push(Arc::new(
+                self.get_object_literal_index_info(is_readonly, computed_props, &key),
+            ));
+        }
+        Arc::new(crate::checker::types::Type {
+            flags: t.flags,
+            object_flags: t.object_flags,
+            id: crate::checker::types::next_type_id(),
+            symbol: t.symbol.clone(),
+            alias: t.alias.clone(),
+            data: crate::checker::types::TypeData::Object(
+                crate::checker::types::ObjectTypeData {
+                    node: None,
+                    structured: crate::checker::types::StructuredTypeData {
+                        members: obj.structured.members.clone(),
+                        properties: obj.structured.properties.clone(),
+                        index_infos,
+                        ..Default::default()
+                    },
+                    target: None,
+                    mapper: None,
+                    type_arguments: Vec::new(),
+                },
+            ),
+        })
+    }
+
+    fn object_literal_accessor_type(&mut self, node: &Arc<Node>, name: &str) -> Arc<Type> { ::tsox_core::fntrace::enter("object_literal_accessor_type"); 
+        let properties = match &node.data {
+            NodeData::ObjectLiteralExpression(data) => &data.properties,
+            _ => return self.get_any_type(),
+        };
+        let getter = properties.iter().find(|p| {
+            p.kind == SyntaxKind::GetAccessor
+                && self.get_property_name_from_node(&p.name().expect("accessor has name")) == name
+        });
+        let setter = properties.iter().find(|p| {
+            p.kind == SyntaxKind::SetAccessor
+                && self.get_property_name_from_node(&p.name().expect("accessor has name")) == name
+        });
+        if let Some(g) = getter
+            && let NodeData::GetAccessorDeclaration(gd) = &g.data
+            && let Some(tn) = &gd.type_node
+        {
+            return self.get_type_from_type_node(tn);
+        }
+        if let Some(s) = setter
+            && let NodeData::SetAccessorDeclaration(sd) = &s.data
+            && let Some(param) = sd.parameters.iter().next()
+            && let NodeData::ParameterDeclaration(pd) = &param.data
+            && let Some(tn) = &pd.type_node
+        {
+            return self.get_type_from_type_node(tn);
+        }
+        if let Some(g) = getter
+            && let NodeData::GetAccessorDeclaration(gd) = &g.data
+            && let Some(body) = &gd.body
+        {
+            // Go getReturnTypeFromBody（checker.go:21374-21387）types 空分支：
+            // 体内无带表达式的 return 时空聚合落 voidType——语法判定短路，不经
+            // 推断器；有值 return 仍走体推断（环场景 Go 亦 any/循环型）
+            if Self::body_has_no_value_return(body) {
+                return self.void_type();
+            }
+            // Go checkObjectLiteral 对 accessor 成员一律 checkNodeDeferred：
+            // getter 体推断始终延后（不因外层调用位解析被强制）
+            let saved_depth = self.call_return_query_depth;
+            self.call_return_query_depth = 0;
+            let accessor = g.clone();
+            let inferred = self.infer_method_return_type(&accessor, &Some(Arc::clone(body)));
+            self.call_return_query_depth = saved_depth;
+            return self.get_widened_type(&inferred);
+        }
+        self.get_any_type()
+    }
+
+    pub(crate) fn get_excess_property_name(
+        &self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Option<String> { ::tsox_core::fntrace::enter("get_excess_property_name"); 
+        if !crate::checker::is_object_literal_type(source) {
+            return None;
+        }
+        let source_struct = source.as_structured()?;
+        let target_struct = target.as_structured()?;
+
+        if !target_struct.index_infos.is_empty() {
+            return None;
+        }
+        // Go hasExcessProperties：目标为 globalObjectType 的超集（含 Object 或
+        // object 非原始型成分）时跳过多余属性检查
+        if self.target_admits_any_properties(target) {
+            return None;
+        }
+        if self.is_empty_object_type(target) {
+            return None;
+        }
+        for prop in &source_struct.properties {
+            if !self.target_has_property(target, &prop.name) {
+                return Some(prop.name.clone());
+            }
+        }
+        None
+    }
+
+    // Go isTypeSubsetOf(globalObjectType, target)：Object/object 成分出现即
+    // 视为全局 Object 型的容器
+    pub(crate) fn target_admits_any_properties(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("target_admits_any_properties"); 
+        if t.flags.contains(TypeFlags::NonPrimitive) {
+            return true;
+        }
+        if let Some(sym) = &t.symbol
+            && sym.name == "Object"
+            && sym.flags.contains(SymbolFlags::Interface)
+        {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Union)
+            && let Some(members) = t.types()
+        {
+            return members.iter().any(|m| self.target_admits_any_properties(m));
+        }
+        false
+    }
+
+
+
+    fn target_has_property(&self, t: &Arc<Type>, name: &str) -> bool { ::tsox_core::fntrace::enter("target_has_property"); 
+        if matches!(&t.data, TypeData::Mapped(m) if m.type_parameter.is_some()) {
+            return true;
+        }
+        if let TypeData::Substitution(s) = &t.data
+            && let Some(base) = &s.base_type
+        {
+            return self.target_has_property(base, name);
+        }
+        if let Some(structured) = t.as_structured() {
+            if structured.members.get(name).is_some() {
+                return true;
+            }
+
+            if !structured.index_infos.is_empty() {
+                return true;
+            }
+        }
+
+        if t.flags.contains(TypeFlags::Union) {
+            if let TypeData::Union(u) = &t.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|ct| self.target_has_property(ct, name));
+            }
+        }
+
+        if t.flags.contains(TypeFlags::Intersection) {
+            if let TypeData::Intersection(i) = &t.data {
+                return i
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|ct| self.target_has_property(ct, name));
+            }
+        }
+        false
+    }
+    pub(crate) fn get_constant_numeric_value(&self, node: &Arc<Node>) -> Option<f64> { ::tsox_core::fntrace::enter("get_constant_numeric_value"); 
+        match &node.data {
+            tsox_frontend::ast::NodeData::NumericLiteral(data) => data.text.parse::<f64>().ok(),
+            _ => None,
+        }
+    }
+}

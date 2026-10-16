@@ -1,0 +1,21 @@
+/target
+
+# baseline test output: reference/ 入库为标准答案，local/ 是本次产出不入库
+crates/tsox/tests/baselines/local/
+
+# submodule 全量/验证跑日志：结论记入 TESTING.md，原始日志不入库
+*.log
+__pycache__/
+fullrun.log
+# 轮转备份不入库(水位 CSV 本体入库)
+data/*.csv.prev
+.traces/
+# xtask 数据产物:trace/types 聚合为一次性运行数据不入库(failures/skips/anchor/stack-diff/base 入库)
+data/rust-trace.csv
+data/rust-types.csv
+# 旧链 legacy CSV(2026-10-15 退跟踪;wave_verify 过渡期仍在本地产出)
+corpus_rust_trace.csv
+corpus_rust_types.csv
+
+# 语料测试用例与基线(本地保留,不入库)
+crates/tsox/tests/corpus/testdata/

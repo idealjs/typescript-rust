@@ -1,0 +1,254 @@
+use std::sync::Arc;
+
+use crate::lsp::lsproto_lsp::Position;
+use tsox_checker::checker::Checker;
+use tsox_compile::compiler::Program;
+use tsox_frontend::ast::Node;
+use tsox_frontend::ast::SourceFile;
+use tsox_frontend::ast::Symbol;
+use tsox_frontend::ast::SymbolFlags;
+use tsox_frontend::ast::SyntaxKind;
+use tsox_frontend::ast::node::LineMap;
+use tsox_frontend::ast::node_data_generated::for_each_child;
+
+use crate::ls::types::CompletionItem;
+
+pub(super) fn program_build_checker(program: &Arc<Program>) -> Checker { ::tsox_core::fntrace::enter("program_build_checker"); 
+    program.build_checker()
+}
+
+pub(super) fn symbol_to_completion_kind(flags: SymbolFlags) -> u32 { ::tsox_core::fntrace::enter("symbol_to_completion_kind"); 
+    const METHOD: u32 = 2;
+    const FUNCTION: u32 = 3;
+    const CONSTRUCTOR: u32 = 4;
+    const FIELD: u32 = 5;
+    const VARIABLE: u32 = 6;
+    const CLASS: u32 = 7;
+    const INTERFACE: u32 = 8;
+    const MODULE: u32 = 9;
+    pub(crate) const PROPERTY: u32 = 10;
+    const ENUM: u32 = 13;
+    const KEYWORD: u32 = 14;
+    const ENUM_MEMBER: u32 = 20;
+    const CONSTANT: u32 = 21;
+    const STRUCT: u32 = 22;
+    const TYPE_PARAMETER: u32 = 25;
+
+    if flags.contains(SymbolFlags::TypeParameter) {
+        return TYPE_PARAMETER;
+    }
+    if flags.contains(SymbolFlags::Class) {
+        return CLASS;
+    }
+    if flags.contains(SymbolFlags::Interface) {
+        return INTERFACE;
+    }
+    if flags.contains(SymbolFlags::TypeAlias) {
+        return STRUCT;
+    }
+    if flags.contains(SymbolFlags::ENUM) {
+        return ENUM;
+    }
+    if flags.contains(SymbolFlags::EnumMember) {
+        return ENUM_MEMBER;
+    }
+    if flags.contains(SymbolFlags::Function) {
+        return FUNCTION;
+    }
+    if flags.contains(SymbolFlags::Method) {
+        return METHOD;
+    }
+    if flags.contains(SymbolFlags::Constructor) {
+        return CONSTRUCTOR;
+    }
+    if flags.intersects(SymbolFlags::GetAccessor | SymbolFlags::SetAccessor) {
+        return PROPERTY;
+    }
+    if flags.contains(SymbolFlags::Property) {
+        return PROPERTY;
+    }
+    if flags.intersects(SymbolFlags::ValueModule | SymbolFlags::NamespaceModule) {
+        return MODULE;
+    }
+    if flags.contains(SymbolFlags::Alias) {
+        return VARIABLE;
+    }
+    if flags.contains(SymbolFlags::BlockScopedVariable) {
+        if flags.contains(SymbolFlags::BlockScopedVariable) {
+            return CONSTANT;
+        }
+        return VARIABLE;
+    }
+    if flags.contains(SymbolFlags::FunctionScopedVariable) {
+        return VARIABLE;
+    }
+    let _ = KEYWORD;
+    let _ = FIELD;
+    VARIABLE
+}
+
+pub(super) fn symbol_to_completion_item(symbol: &Arc<Symbol>) -> CompletionItem { ::tsox_core::fntrace::enter("symbol_to_completion_item"); 
+    CompletionItem {
+        label: symbol.name.clone(),
+        kind: Some(symbol_to_completion_kind(symbol.flags)),
+        detail: Some(flags_to_detail(&symbol.flags)),
+        documentation: None,
+        sort_text: None,
+        filter_text: None,
+        insert_text: Some(symbol.name.clone()),
+        insert_text_format: Some(1),
+        text_edit: None,
+        additional_text_edits: None,
+        commit_characters: None,
+        data: None,
+    }
+}
+
+/// Go createCompletionItem：成员补全中可选成员（声明名后紧跟 `?`）label 带 `?`
+pub(super) fn member_completion_label(symbol: &Arc<Symbol>, text: &str) -> String { ::tsox_core::fntrace::enter("member_completion_label"); 
+    let optional = symbol.declarations.iter().any(|d| {
+        if !matches!(
+            d.kind,
+            tsox_frontend::ast::SyntaxKind::MethodSignature
+                | tsox_frontend::ast::SyntaxKind::PropertySignature
+                | tsox_frontend::ast::SyntaxKind::MethodDeclaration
+                | tsox_frontend::ast::SyntaxKind::PropertyDeclaration
+        ) {
+            return false;
+        }
+        d.name()
+            .and_then(|n| text.get(n.end()..n.end() + 1))
+            .is_some_and(|t| t == "?")
+    });
+    if optional {
+        format!("{}?", symbol.name)
+    } else {
+        symbol.name.clone()
+    }
+}
+
+pub(super) fn flags_to_detail(flags: &SymbolFlags) -> String { ::tsox_core::fntrace::enter("flags_to_detail"); 
+    if flags.contains(SymbolFlags::Function) {
+        "function".to_string()
+    } else if flags.contains(SymbolFlags::Class) {
+        "class".to_string()
+    } else if flags.contains(SymbolFlags::Interface) {
+        "interface".to_string()
+    } else if flags.contains(SymbolFlags::TypeAlias) {
+        "type".to_string()
+    } else if flags.contains(SymbolFlags::ENUM) {
+        "enum".to_string()
+    } else if flags.contains(SymbolFlags::EnumMember) {
+        "enum member".to_string()
+    } else if flags.contains(SymbolFlags::Method) {
+        "method".to_string()
+    } else if flags.contains(SymbolFlags::MODULE) {
+        "module".to_string()
+    } else if flags.contains(SymbolFlags::VARIABLE) {
+        "variable".to_string()
+    } else {
+        "value".to_string()
+    }
+}
+
+pub(super) fn collect_scope_symbols_fallback(
+    checker: &Checker,
+    file: &Arc<SourceFile>,
+    _location: &Arc<Node>,
+) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("collect_scope_symbols_fallback"); 
+    let mut result: Vec<Arc<Symbol>> = Vec::new();
+    let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
+
+    let symbol_map = checker.program.symbol_map();
+    if let Some(locals) = symbol_map.locals_of(&file.node) {
+        for sym in locals.entries.values() {
+            if seen.insert(sym.id()) {
+                result.push(Arc::clone(sym));
+            }
+        }
+    }
+
+    collect_declaration_symbols(checker, &file.node, &mut seen, &mut result);
+
+    result
+}
+
+pub(super) fn collect_declaration_symbols(
+    checker: &Checker,
+    node: &Arc<Node>,
+    seen: &mut std::collections::HashSet<u64>,
+    result: &mut Vec<Arc<Symbol>>,
+) { ::tsox_core::fntrace::enter("collect_declaration_symbols"); 
+    if is_declaration_kind(node.kind) {
+        if let Some(sym) = checker.get_symbol_at_location(node) {
+            if seen.insert(sym.id()) {
+                result.push(sym);
+            }
+        }
+    }
+
+    for_each_child(node, |child| {
+        collect_declaration_symbols(checker, child, seen, result);
+        false
+    });
+}
+
+pub(super) fn is_declaration_kind(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_declaration_kind"); 
+    matches!(
+        kind,
+        SyntaxKind::VariableDeclaration
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::ClassDeclaration
+            | SyntaxKind::InterfaceDeclaration
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::EnumMember
+            | SyntaxKind::MethodDeclaration
+            | SyntaxKind::MethodSignature
+            | SyntaxKind::PropertyDeclaration
+            | SyntaxKind::PropertySignature
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor
+            | SyntaxKind::ModuleDeclaration
+            | SyntaxKind::Parameter
+            | SyntaxKind::ImportSpecifier
+            | SyntaxKind::ImportClause
+            | SyntaxKind::TypeParameter
+    )
+}
+
+pub(super) fn find_deepest_node(node: &Arc<Node>, offset: usize) -> Arc<Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
+    let mut deepest = Arc::clone(node);
+    loop {
+        let current = Arc::clone(&deepest);
+        let mut next: Option<Arc<Node>> = None;
+        let mut zero_width: Option<Arc<Node>> = None;
+        for_each_child(&current, |child| {
+            let (s, e) = (child.pos(), child.end());
+            if s <= offset && offset < e {
+                next = Some(Arc::clone(child));
+                true
+            } else {
+                // parser 缺失名等零宽节点（Go GetTokenAtPosition 端点含）：
+                // 无严格包含子节点时下沉
+                if s == offset && e == offset {
+                    zero_width = Some(Arc::clone(child));
+                }
+                false
+            }
+        });
+        match next.or(zero_width) {
+            Some(child) => deepest = child,
+            None => break,
+        }
+    }
+    deepest
+}
+
+pub(super) fn lsp_position_to_offset(line_map: &LineMap, position: &Position) -> usize { ::tsox_core::fntrace::enter("lsp_position_to_offset"); 
+    let line = position.line as usize;
+    let character = position.character as usize;
+    let line_start = line_map.line_starts.get(line).copied().unwrap_or(0) as usize;
+    line_start + character
+}
+

@@ -1,0 +1,71 @@
+# corpus 修复 subagent 派发模板
+
+> 供主 agent 编排语料修复循环时生成派发 prompt。占位符 `{{...}}` 由主 agent 填充。
+
+## 模板正文
+
+```
+# 任务：{{目标名}}（修复入口，目标：使其 PASS）
+
+## 目标
+用例：compiler/{{用例名}}.ts
+定位 Go/Rust 语义分歧，按 Go 修根因。验收 = 复跑 PASS（主 agent 执行，你禁测）。
+
+## 失败信息（三层锚点，按序使用）
+分片：/tmp/tsox-verify/latest/shards/ 下 grep 用例名（.types 首分歧锚点——已知偏差形态跳过——→ 错误 diff → 执行栈对照段）。
+完整序列：data/corpus_go_trace.csv / data/rust-trace.csv 按行首 case 名 grep。
+
+## 环境
+- Go oracle（只读）：/home/cqh/workspace/typescript-go
+- 你的 worktree：{{worktree}}（分支 {{branch}}）。开工 pwd 验证；git 一律 git -C {{worktree}} ...
+- 只改 crates/ 下生产代码；主仓绝对只读。
+
+## 参考数据（主仓根，只读）
+- data/corpus-failures.csv——FAIL 全量（水位）
+- data/rust-trace.csv / data/corpus_go_trace.csv——两侧函数调用序列
+- data/rust-types.csv / data/corpus_go_types.csv——两侧 .types 全量输出
+- data/types-anchor.csv——.types 首分歧锚点（按行首 case 名 grep）
+- data/stack-diff.csv——执行栈差集（go_only / rust_only）
+- 分片：/tmp/tsox-verify/latest/shards/<用例名>.md（本例汇总视图）
+
+## 收尾
+- 无法继续推进时：提交已有可信修改，写 progress_notes.md（worktree 根，不入库），按汇报结构收尾。
+
+## 禁止事项
+- 禁止执行任何测试、构建命令（cargo/rustc/跑用例）。验证由主 agent 统一执行。
+- 禁止探针式调试（插桩+跑用例）。
+- 禁改：data/ 全部 CSV（含 func_alignment.csv 与 corpus_go_*）/ AGENTS.md / tools/ / .traces/ / crates/tsox/tests/corpus/。
+- 禁止 skip、改断言、改基线、空壳实现（恒返 None/空函数/删真实逻辑换占位）。
+- 符号不存在时三选一：grep 等价符号改接线 / 按 Go 最小真实实现 / 保留错误记交接。
+
+## 提交
+- 每个独立修复立即 git commit，只 add crates/ 下生产路径。
+- progress_notes.md 不入库。
+
+## 故障退出
+- Bash 连续 3 次失败：写 progress_notes.md 后立即结束并汇报。
+
+## 汇报
+- rootCause 引用双侧源码 文件:行号；functionTable 必交：
+  | commit | 文件 | Rust 函数(增/改/删) | 对齐的 Go 函数 | 用例效果 |
+```
+
+## 退回模板正文（波内串行验证段使用：回归例信息退回原 agent 的后续 ask）
+
+```
+# 退回：{{用例名}}（原修复 commit {{原 commit 短 hash}} 引入回归）
+
+## 背景
+你此前在 {{worktree}}（分支 {{branch}}）修复 {{用例名}} 的 commit 已在波内串行验证：原例{{绿 / 未过}}，但波及回归 {{回归例清单}}（本轮 verdict.json new_fails 新增 FAIL）。
+本轮目标：在原 worktree 分支上**追加**修复 commit，使原例与全部回归例同时绿。你的首个任务上下文仍在，但主仓数据已刷新，先重读：git -C {{worktree}} log --oneline -5、最新 data/corpus-failures.csv / data/types-anchor.csv 中回归例行、分片 /tmp/tsox-verify/latest/shards/。
+
+## 回归例信息
+{{每例：例名 + 新 FAIL 摘要 + .types 首分歧锚点（本地 vs Go reference）+ 归因到本 commit 的依据}}
+
+## 纪律
+同首任务：纯文本禁测、只改 crates/ 生产代码、只 add crates/ 生产路径、progress_notes.md 不入库、Bash 连续 3 次失败即收尾汇报。
+
+## 汇报
+- rootCause：回归成因 + 与原修复的关系（真回归 / 假绿暴露）。
+- functionTable 同首任务格式；commit 填 git -C {{worktree}} rev-parse HEAD 完整 hash。
+```

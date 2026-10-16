@@ -1,0 +1,485 @@
+#![allow(unused_imports)]
+
+use crate::checker::relater_index_signatures::*;
+use crate::checker::nodecopy_property_name::is_numeric_literal_name;
+
+impl Checker {
+    pub fn index_signatures_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        source_is_primitive: bool,
+        relation: RelationKind,
+    ) -> Ternary { ::tsox_core::fntrace::enter("index_signatures_related_to"); 
+        if relation == RelationKind::Identity {
+            return self.index_signatures_identical_to(source, target);
+        }
+        let target_indexes = self.get_index_infos_of_type(target);
+        let target_has_string_index = target_indexes.iter().any(|info| {
+            info.key_type
+                .as_ref()
+                .map(|k| k.flags.contains(TypeFlags::String))
+                .unwrap_or(false)
+        });
+        let mut result = Ternary::True;
+        for target_info in &target_indexes {
+            let target_value_any = target_info
+                .value_type
+                .as_ref()
+                .map(|v| v.flags.contains(TypeFlags::Any))
+                .unwrap_or(false);
+            let target_key_is_string = target_info
+                .key_type
+                .as_ref()
+                .map(|k| k.flags.contains(TypeFlags::String))
+                .unwrap_or(false);
+            let related = if relation != RelationKind::StrictSubtype
+                && !source_is_primitive
+                && target_has_string_index
+                && target_key_is_string
+                && target_value_any
+            {
+                Ternary::True
+            } else if self.is_generic_mapped_type(source) && target_key_is_string {
+                let template = self.get_template_type_from_mapped_type(source);
+                match template {
+                    Some(template) => {
+                        let target_value = target_info
+                            .value_type
+                            .clone()
+                            .unwrap_or_else(|| self.any_type());
+                        self.compare_types(template, target_value, relation, false)
+                    }
+                    None => Ternary::False,
+                }
+            } else {
+                self.type_related_to_index_info(source, target_info, relation)
+            };
+            if related.is_false() {
+                return Ternary::False;
+            }
+            result = result.and(related);
+        }
+        result
+    }
+
+    pub fn type_related_to_index_info(
+        &mut self,
+        source: &Arc<Type>,
+        target_info: &IndexInfo,
+        relation: RelationKind,
+    ) -> Ternary { ::tsox_core::fntrace::enter("type_related_to_index_info"); 
+        let target_key = match &target_info.key_type {
+            Some(k) => k,
+            None => return Ternary::True,
+        };
+        let source_info = self.get_applicable_index_info(source, target_key);
+        if let Some(source_info) = source_info {
+            return self.index_info_related_to(&source_info, target_info, relation);
+        }
+
+        let is_fresh_literal = source.object_flags.contains(ObjectFlags::FreshLiteral);
+        if relation != RelationKind::StrictSubtype || is_fresh_literal {
+            if self.is_object_type_with_inferable_index(source) {
+                return self.members_related_to_index_info(source, target_info, relation);
+            }
+        }
+        Ternary::False
+    }
+
+    pub fn index_info_related_to(
+        &mut self,
+        source_info: &IndexInfo,
+        target_info: &IndexInfo,
+        relation: RelationKind,
+    ) -> Ternary { ::tsox_core::fntrace::enter("index_info_related_to"); 
+        let source_value = source_info
+            .value_type
+            .clone()
+            .unwrap_or_else(|| self.any_type());
+        let target_value = target_info
+            .value_type
+            .clone()
+            .unwrap_or_else(|| self.any_type());
+        self.compare_types(source_value, target_value, relation, false)
+    }
+
+    pub fn index_signatures_identical_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> Ternary { ::tsox_core::fntrace::enter("index_signatures_identical_to"); 
+        let source_infos = self.get_index_infos_of_type(source);
+        let target_infos = self.get_index_infos_of_type(target);
+        if source_infos.len() != target_infos.len() {
+            return Ternary::False;
+        }
+        for target_info in &target_infos {
+            let target_key = match &target_info.key_type {
+                Some(k) => Arc::clone(k),
+                None => continue,
+            };
+            let source_info = self.get_index_info_of_type(source, &target_key);
+            let related = match source_info {
+                Some(si) => {
+                    let sv = si.value_type.clone().unwrap_or_else(|| self.any_type());
+                    let tv = target_info
+                        .value_type
+                        .clone()
+                        .unwrap_or_else(|| self.any_type());
+                    let type_related = self.compare_types(sv, tv, RelationKind::Identity, false);
+                    let readonly_match = si.is_readonly == target_info.is_readonly;
+                    if type_related.is_true() && readonly_match {
+                        Ternary::True
+                    } else {
+                        Ternary::False
+                    }
+                }
+                None => Ternary::False,
+            };
+            if related.is_false() {
+                return Ternary::False;
+            }
+        }
+        Ternary::True
+    }
+
+    pub fn get_index_infos_of_type(&mut self, t: &Arc<Type>) -> Vec<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_infos_of_type"); 
+        // Go getIndexInfosOfType（checker.go:20096-20098）：
+        // getIndexInfosOfStructuredType(getReducedApparentType(t))，类型参数按约束取索引信息
+        let t = self.get_reduced_apparent_type(t);
+        if t.is_intersection()
+            && let Some(constituents) = t.types().map(|ts| ts.to_vec())
+        {
+            let mut merged: Vec<Arc<IndexInfo>> = Vec::new();
+            for c in &constituents {
+                for info in self.get_index_infos_of_type(c) {
+                    let pos = merged.iter().position(|m| {
+                        m.key_type
+                            .as_ref()
+                            .zip(info.key_type.as_ref())
+                            .is_some_and(|(a, b)| a.id == b.id)
+                    });
+                    match pos {
+                        Some(i) => {
+                            let value_type = match (
+                                merged[i].value_type.clone(),
+                                info.value_type.clone(),
+                            ) {
+                                (Some(a), Some(b)) => Some(self.get_intersection_type(vec![a, b])),
+                                (a, b) => a.or(b),
+                            };
+                            let is_readonly = merged[i].is_readonly && info.is_readonly;
+                            let mut combined = IndexInfo {
+                                key_type: merged[i].key_type.clone(),
+                                value_type,
+                                is_readonly,
+                                declaration: merged[i].declaration.clone(),
+                                index_symbol: merged[i].index_symbol.clone(),
+                                components: merged[i].components.clone(),
+                            };
+                            combined.components.extend(info.components.iter().cloned());
+                            merged[i] = Arc::new(combined);
+                        }
+                        None => merged.push(info),
+                    }
+                }
+            }
+            return merged;
+        }
+        // Go getIndexInfosOfStructuredType（checker.go:19297-19300）在成员未解析时
+        // 惰性 resolveStructuredTypeMembers；带实参的接口引用（如 string[] 的
+        // Array<string>）实例化索引信息来自 resolve_interface_type_ex，与
+        // get_property_of_type 的实例化引用分支同构
+        if let Some(obj) = t.as_object()
+            && !obj.type_arguments.is_empty()
+            && !matches!(&t.data, TypeData::Tuple(_))
+            && let Some(sym) = t.symbol.as_ref()
+            && sym.flags.contains(SymbolFlags::Interface)
+            && obj.structured.index_infos.is_empty()
+        {
+            let inst = self.resolve_interface_type_ex(sym, Some(obj.type_arguments.clone()));
+            if !Arc::ptr_eq(&inst, &t)
+                && let Some(infos) = inst.as_structured().map(|s| s.index_infos.clone())
+                && !infos.is_empty()
+            {
+                return infos;
+            }
+        }
+        let mut infos = t
+            .as_structured()
+            .map(|s| s.index_infos.clone())
+            .unwrap_or_default();
+        if let TypeData::Tuple(tuple) = &t.data {
+            let has_number_index = infos.iter().any(|info| {
+                info.key_type
+                    .as_ref()
+                    .is_some_and(|k| k.flags.contains(TypeFlags::Number))
+            });
+            if !has_number_index
+                && let Some(info) = self.tuple_number_index_info(&t, tuple)
+            {
+                infos.push(info);
+            }
+        }
+        infos
+    }
+
+    fn tuple_number_index_info(
+        &self,
+        t: &Arc<Type>,
+        tuple: &crate::checker::types::TupleTypeData,
+    ) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("tuple_number_index_info"); 
+        let elements: Vec<Arc<Type>> = tuple
+            .element_infos
+            .iter()
+            .filter_map(|e| {
+                let ty = e.type_.clone()?;
+                if e.flags
+                    .intersects(crate::checker::types::ElementFlags::Rest | crate::checker::types::ElementFlags::Variadic)
+                    && self.is_array_type(&ty)
+                {
+                    return Some(self.get_array_element_type(&ty));
+                }
+                Some(ty)
+            })
+            .collect();
+        if elements.is_empty() {
+            // Go 元组为 Tuple<...> extends Array<元素并集> 引用，空元组元素并集
+            // 为 never，number 索引信息恒存在（createUnionOrIntersectionProperty
+            // 缺失成分分支靠它判 WritePartial，否则 "0" 属性被 ReadPartial 过滤，
+            // 解构取型落数字索引兜底得全体元素并集）
+            return Some(Arc::new(IndexInfo {
+                key_type: Some(self.number_type()),
+                value_type: Some(self.never_type()),
+                is_readonly: tuple.readonly,
+                declaration: None,
+                index_symbol: None,
+                components: Vec::new(),
+            }));
+        }
+        let value = if elements.len() == 1 {
+            Arc::clone(&elements[0])
+        } else if elements.iter().all(|e| Arc::ptr_eq(e, &elements[0])) {
+            Arc::clone(&elements[0])
+        } else {
+            Arc::new(Type {
+                flags: TypeFlags::Union,
+                object_flags: ObjectFlags::None,
+                id: crate::checker::types::next_type_id(),
+                symbol: None,
+                alias: None,
+                data: TypeData::Union(UnionTypeData {
+                    union_or_intersection: UnionOrIntersectionTypeData {
+                        structured: StructuredTypeData::default(),
+                        types: elements,
+                    },
+                    resolved_reduced_type: std::sync::OnceLock::new(),
+                    regular_type: std::sync::OnceLock::new(),
+                    origin: None,
+                    key_property_name: None,
+                    constituent_map: std::collections::HashMap::new(),
+                }),
+            })
+        };
+        Some(Arc::new(IndexInfo {
+            key_type: Some(self.number_type()),
+            value_type: Some(value),
+            is_readonly: tuple.readonly,
+            declaration: None,
+            index_symbol: None,
+            components: Vec::new(),
+        }))
+    }
+
+    pub fn get_index_info_of_type(
+        &mut self,
+        t: &Arc<Type>,
+        key_type: &Arc<Type>,
+    ) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_index_info_of_type"); 
+        for info in self.get_index_infos_of_type(t) {
+            if let Some(info_key) = &info.key_type {
+                if Arc::ptr_eq(info_key, key_type) || info_key.flags == key_type.flags {
+                    return Some(info);
+                }
+            }
+        }
+
+        if key_type.flags.contains(TypeFlags::Number) {
+            if let TypeData::Tuple(tuple) = &t.data {
+                let elements: Vec<Arc<Type>> = tuple
+                    .element_infos
+                    .iter()
+                    .filter_map(|e| e.type_.clone())
+                    .collect();
+                if !elements.is_empty() {
+                    let value = if elements.len() == 1 {
+                        Arc::clone(&elements[0])
+                    } else if elements.iter().all(|e| Arc::ptr_eq(e, &elements[0])) {
+                        Arc::clone(&elements[0])
+                    } else {
+                        Arc::new(Type {
+                            flags: TypeFlags::Union,
+                            object_flags: ObjectFlags::None,
+                            id: crate::checker::types::next_type_id(),
+                            symbol: None,
+                            alias: None,
+                            data: TypeData::Union(UnionTypeData {
+                                union_or_intersection: UnionOrIntersectionTypeData {
+                                    structured: StructuredTypeData::default(),
+                                    types: elements,
+                                },
+                                resolved_reduced_type: std::sync::OnceLock::new(),
+                                regular_type: std::sync::OnceLock::new(),
+                                origin: None,
+                                key_property_name: None,
+                                constituent_map: std::collections::HashMap::new(),
+                            }),
+                        })
+                    };
+                    return Some(Arc::new(IndexInfo {
+                        key_type: Some(self.number_type()),
+                        value_type: Some(value),
+                        is_readonly: tuple.readonly,
+                        declaration: None,
+                        index_symbol: None,
+                        components: Vec::new(),
+                    }));
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_applicable_index_info(
+        &mut self,
+        source: &Arc<Type>,
+        key_type: &Arc<Type>,
+    ) -> Option<Arc<IndexInfo>> { ::tsox_core::fntrace::enter("get_applicable_index_info"); 
+        let infos = self.get_index_infos_of_type(source);
+        let string_type = self.string_type();
+        let mut string_index: Option<Arc<IndexInfo>> = None;
+        for info in infos {
+            let Some(info_key) = &info.key_type else {
+                continue;
+            };
+            if info_key.flags == TypeFlags::String {
+                string_index = Some(info);
+                continue;
+            }
+            if self.is_applicable_index_type(key_type, info_key) {
+                return Some(info);
+            }
+        }
+        if string_index.is_some() && self.is_applicable_index_type(key_type, &string_type) {
+            return string_index;
+        }
+        None
+    }
+
+    pub fn is_generic_mapped_type(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_generic_mapped_type"); 
+        if let TypeData::Mapped(m) = &t.data {
+            m.type_parameter.is_some() && m.template_type.is_some()
+        } else {
+            false
+        }
+    }
+
+    pub fn get_template_type_from_mapped_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_template_type_from_mapped_type"); 
+        if let TypeData::Mapped(m) = &t.data {
+            // 坏上下文（推断中空作用域）解析出的 error 不得驻留：视为未解析重试
+            if let Some(tpl) = &m.template_type
+                && tpl.intrinsic_name() != Some("error")
+            {
+                return Some(Arc::clone(tpl));
+            }
+            // 实例化壳（无模板/节点，object.target+mapper 在位）：模板 =
+            // 目标模板按壳 mapper 实例化（Go getTemplateTypeFromMappedType
+            // 的 reference-mapped 分支）
+            if m.template_node.is_none() {
+                let target = m.object.target.clone();
+                let mapper = m.object.mapper.clone();
+                if let Some(target) = target {
+                    // 壳链环守卫：模板解析在途时让位，阻断 target 链自环
+                    if !self.mapped_shell_resolving.insert(t.id) {
+                        return None;
+                    }
+                    let tpl = self.get_template_type_from_mapped_type(&target);
+                    self.mapped_shell_resolving.remove(&t.id);
+                    let tpl = tpl?;
+                    return Some(self.instantiate_type(&tpl, mapper.as_ref()));
+                }
+                return None;
+            }
+            // 惰性解析模板节点并回写（Go getTemplateTypeFromMappedType）。
+            // 空栈解析：按节点祖先链构造作用域（模板里的类型参数按声明处解析），
+            // 实例差异由替换链承担。解析中途的惰性重入直接让位（外层完成后有缓存）
+            let node = m.template_node.clone()?;
+            if !self.template_resolving_ids.insert(t.id) {
+                return None;
+            }
+            let chain = m.template_subst.as_ref().map(|c| c.as_ref().clone());
+            self.clear_type_node_cache_subtree(&node);
+            let saved_stack = std::mem::take(&mut self.type_argument_stack);
+            let saved_scopes = std::mem::take(&mut self.scope_stack);
+            let mut scope_chain: Vec<u64> = Vec::new();
+            let mut cur = node.parent();
+            while let Some(c) = cur {
+                scope_chain.push(c.id());
+                cur = c.parent();
+            }
+            scope_chain.reverse();
+            self.scope_stack = scope_chain;
+            // Go getTemplateTypeFromMappedType（checker.go 23042）：按声明符号直接
+            // 实例化别名，不走节点级解析（type_node_resolving 守卫会把外层对同一
+            // 模板节点的在途解析误判为循环）
+            let resolved = match &node.data {
+                tsox_frontend::ast::NodeData::TypeReferenceNode(tr) => {
+                    match self.resolve_identifier(&tr.type_name) {
+                        Some(symbol) if symbol.flags.intersects(SymbolFlags::TypeAlias) => {
+                            let args = tr.type_arguments.clone();
+                            self.resolve_type_alias_reference(&symbol, args)
+                        }
+                        _ => self.get_type_from_type_node(&node),
+                    }
+                }
+                _ => self.get_type_from_type_node(&node),
+            };
+            self.scope_stack = saved_scopes;
+            self.type_argument_stack = saved_stack;
+            let resolved = match &chain {
+                Some(chain) => self.apply_template_subst_chain(&resolved, chain),
+                None => resolved,
+            };
+            self.template_resolving_ids.remove(&t.id);
+            if resolved.intrinsic_name() == Some("error") {
+                // 外层对同一别名/节点的解析在途（符号级循环守卫）会产出 error；
+                // 让位不驻留：本次不回写，推断层也不缓存，待外层完成后重试
+                self.template_resolution_letway = true;
+                return None;
+            }
+            let ptr = Arc::as_ptr(t) as *mut crate::checker::types::Type;
+            unsafe {
+                if let TypeData::Mapped(m) = &mut (*ptr).data {
+                    m.template_type = Some(Arc::clone(&resolved));
+                }
+            }
+            return Some(resolved);
+        }
+        None
+    }
+
+    fn clear_type_node_cache_subtree(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("clear_type_node_cache_subtree"); 
+        if let Some(links) = self.type_node_links.get_mut(node) {
+            links.resolved_type = None;
+        }
+        let mut children = Vec::new();
+        tsox_frontend::ast::node_data_generated::for_each_child(node, |child| {
+            children.push(Arc::clone(child));
+            false
+        });
+        for child in children {
+            self.clear_type_node_cache_subtree(&child);
+        }
+    }
+}

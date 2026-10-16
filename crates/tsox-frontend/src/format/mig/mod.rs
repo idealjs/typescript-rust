@@ -1,0 +1,17 @@
+// 迁移批次模块接线(r 轮生成,构建修复阶段维护)
+pub mod m4o;
+pub mod m4o_2;
+pub mod m4o_3;
+pub mod m4o_4;
+pub mod m4t;
+pub mod m4t_2;
+pub mod m4t_3;
+pub mod m4t_4;
+pub mod m4t_5;
+pub mod m4t_6;
+pub mod m4t_fmt;
+pub mod m4u;
+pub mod w3;
+pub mod w5;
+pub mod x11a;
+pub mod x6a;

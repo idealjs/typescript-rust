@@ -1,0 +1,25 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn organize_imports14() {
+    let content = r#"// @filename: /a.ts
+export const foo = 1;
+// @filename: /b.ts
+/**
+ * Module doc comment
+ *
+ * @module
+ */
+
+// comment 1
+
+// comment 2
+
+import { foo } from "./a";
+import { foo } from "./a";
+import { foo } from "./a";"#;
+    let mut s = Session::new_for_test("organizeImports14", content);
+    fourslash::go_to_file(&mut s, "/b.ts");
+    // TODO: f.VerifyOrganizeImports(t,
+}

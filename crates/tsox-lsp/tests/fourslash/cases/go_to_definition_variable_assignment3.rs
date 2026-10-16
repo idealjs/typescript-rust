@@ -1,0 +1,13 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn go_to_definition_variable_assignment3() {
+    let content = r#"// @filename: foo.ts
+const Foo = module./*def*/exports = function () {}
+Foo.prototype.bar = function() {}
+new [|Foo/*ref*/|]();"#;
+    let mut s = Session::new_for_test("goToDefinitionVariableAssignment3", content);
+    fourslash::go_to_file(&mut s, "foo.ts");
+    // TODO: f.VerifyBaselineGoToDefinition(t, true, "ref")
+}

@@ -1,0 +1,560 @@
+#![allow(unused_imports)]
+
+use crate::checker::relater_probing::*;
+
+impl Checker {
+
+    /// Go instantiateSignatureEx（checker.go:21846-21857）不复制
+    /// resolvedTypePredicate：实例化签名的谓词经 target+组合 mapper 惰性重实例化。
+    /// 本结构替换路径无 mapper，按同一代入序列落位（外层 params/substitutions +
+    /// 组合 sig.type_parameters→new_tps，对齐 combineTypeMappers 语义）
+    fn substitute_signature_type_predicate(
+        &mut self,
+        sig: &Arc<Signature>,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+        new_tps: &[Arc<Type>],
+        tps_changed: bool,
+    ) -> (Option<TypePredicate>, bool) { ::tsox_core::fntrace::enter("substitute_signature_type_predicate");
+        let old = match sig.resolved_type_predicate.get() {
+            Some(p) => p.as_deref().cloned(),
+            None => self.get_type_predicate_of_signature(sig).cloned(),
+        };
+        let Some(old) = old else {
+            return (None, false);
+        };
+        let Some(t) = old.t.clone() else {
+            return (Some(old), false);
+        };
+        let mut new_t = self.substitute_infer_type_parameters(&t, params, substitutions);
+        if tps_changed {
+            new_t = self.substitute_infer_type_parameters(&new_t, &sig.type_parameters, new_tps);
+        }
+        if Arc::ptr_eq(&new_t, &t) {
+            return (Some(old), false);
+        }
+        (
+            Some(TypePredicate {
+                kind: old.kind,
+                parameter_index: old.parameter_index,
+                parameter_name: old.parameter_name.clone(),
+                t: Some(new_t),
+            }),
+            true,
+        )
+    }
+
+    fn substitute_type_parameter_constraints(
+        &mut self,
+        tps: &[Arc<Type>],
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Vec<Arc<Type>> { ::tsox_core::fntrace::enter("substitute_type_parameter_constraints"); 
+        tps.iter()
+            .map(|tp| {
+                let crate::checker::types::TypeData::TypeParameter(tpd) = &tp.data else {
+                    return Arc::clone(tp);
+                };
+                let new_constraint = tpd.constraint.as_ref().map(|c| {
+                    self.substitute_infer_type_parameters(c, params, substitutions)
+                });
+                let unchanged = tpd
+                    .constraint
+                    .as_ref()
+                    .zip(new_constraint.as_ref())
+                    .is_some_and(|(o, n)| Arc::ptr_eq(o, n))
+                    || tpd.constraint.is_none();
+                if unchanged {
+                    return Arc::clone(tp);
+                }
+                let mut rebuilt = Type::new(
+                    tp.flags,
+                    crate::checker::types::TypeData::TypeParameter(
+                        crate::checker::types::TypeParameterData {
+                            constrained: Default::default(),
+                            constraint: new_constraint,
+                            target: tpd.target.clone(),
+                            mapper: tpd.mapper.clone(),
+                            is_this_type: tpd.is_this_type,
+                            resolved_default_type: std::sync::RwLock::new(None),
+                        },
+                    ),
+                );
+                rebuilt.object_flags = tp.object_flags;
+                rebuilt.symbol = tp.symbol.clone();
+                Arc::new(rebuilt)
+            })
+            .collect()
+    }
+
+    fn instantiate_this_parameter_symbol(
+        &mut self,
+        this_param: &Option<Arc<Symbol>>,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("instantiate_this_parameter_symbol"); 
+        let original = this_param.as_ref()?;
+        let old = match self
+            .value_symbol_links
+            .get(original)
+            .and_then(|l| l.resolved_type.clone())
+        {
+            Some(t) => t,
+            None => self.get_type_of_symbol(original),
+        };
+        let new = self.substitute_infer_type_parameters(&old, params, substitutions);
+        if Arc::ptr_eq(&old, &new) {
+            return Some(Arc::clone(original));
+        }
+        let mut cloned = Symbol::new(original.flags, original.name.clone());
+        cloned.check_flags = original.check_flags;
+        cloned.declarations = original.declarations.clone();
+        cloned.value_declaration = original.value_declaration.clone();
+        if let Some(parent) = original.parent() {
+            cloned.set_parent(&parent);
+        }
+        let cloned = Arc::new(cloned);
+        self.value_symbol_links.insert(
+            &cloned,
+            crate::checker::types::ValueSymbolLinks {
+                resolved_type: Some(new),
+                target: Some(Arc::clone(original)),
+                ..Default::default()
+            },
+        );
+        Some(cloned)
+    }
+
+    pub(crate) fn substitute_infer_object(
+        &mut self,
+        t: &Arc<Type>,
+        o: &ObjectTypeData,
+        params: &[Arc<Type>],
+        substitutions: &[Arc<Type>],
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("substitute_infer_object"); 
+        if t.object_flags.contains(ObjectFlags::Reference)
+            && o.type_arguments.len() == 1
+            && t.symbol.as_ref().is_some_and(|s| {
+                self.globals
+                    .get("Array")
+                    .is_some_and(|arr| Arc::ptr_eq(arr, s))
+            })
+        {
+            let new_elem =
+                self.substitute_infer_type_parameters(&o.type_arguments[0], params, substitutions);
+
+            if Arc::ptr_eq(&new_elem, &o.type_arguments[0]) {
+                return Arc::clone(t);
+            }
+            // readonly 标志随实例重建保持（U | readonly U[] 代入 U 后仍是 readonly）
+            let readonly = t.object_flags.contains(ObjectFlags::IsReadonlyArray);
+            return self.create_array_type_ex(new_elem, readonly);
+        }
+
+        if !o.type_arguments.is_empty() {
+            let new_args: Vec<Arc<Type>> = o
+                .type_arguments
+                .iter()
+                .map(|arg| self.substitute_infer_type_parameters(arg, params, substitutions))
+                .collect();
+            let changed = o
+                .type_arguments
+                .iter()
+                .zip(new_args.iter())
+                .any(|(old, new)| !Arc::ptr_eq(old, new));
+            if changed {
+                let cache_key = (
+                    Arc::as_ptr(t) as usize,
+                    new_args.iter().map(|a| Arc::as_ptr(a) as usize).collect(),
+                );
+                if let Some(cached) = self.subst_reference_shell_cache.get(&cache_key) {
+                    return Arc::clone(cached);
+                }
+                let new_index_infos: Vec<Arc<crate::checker::IndexInfo>> = o
+                    .structured
+                    .index_infos
+                    .iter()
+                    .map(|info| {
+                        let new_value = info.value_type.as_ref().map(|v| {
+                            self.substitute_infer_type_parameters(v, params, substitutions)
+                        });
+                        if new_value.is_some()
+                            && !new_value.as_ref().is_some_and(|nv| {
+                                info.value_type
+                                    .as_ref()
+                                    .is_some_and(|ov| Arc::ptr_eq(nv, ov))
+                            })
+                        {
+                            Arc::new(crate::checker::IndexInfo {
+                                key_type: info.key_type.clone(),
+                                value_type: new_value,
+                                is_readonly: info.is_readonly,
+                                declaration: info.declaration.clone(),
+                                index_symbol: info.index_symbol.clone(),
+                                components: info.components.clone(),
+                            })
+                        } else {
+                            Arc::clone(info)
+                        }
+                    })
+                    .collect();
+                let new_signatures: Vec<Arc<Signature>> = o
+                    .structured
+                    .signatures
+                    .iter()
+                    .map(|sig| {
+                        let owned_inst: Vec<Arc<Type>>;
+                        let old_inst: &[Arc<Type>] = match sig.instantiated_parameter_types.as_ref()
+                        {
+                            Some(inst) => inst,
+                            None => {
+                                owned_inst = sig
+                                    .parameters
+                                    .iter()
+                                    .map(|p| self.get_type_of_symbol(p))
+                                    .collect();
+                                &owned_inst
+                            }
+                        };
+                        let new_inst: Vec<Arc<Type>> = old_inst
+                            .iter()
+                            .map(|pt| {
+                                self.substitute_infer_type_parameters(pt, params, substitutions)
+                            })
+                            .collect();
+                        let changed = old_inst
+                            .iter()
+                            .zip(new_inst.iter())
+                            .any(|(old, new)| !Arc::ptr_eq(old, new));
+                        let new_tps = self.substitute_type_parameter_constraints(
+                            &sig.type_parameters,
+                            params,
+                            substitutions,
+                        );
+                        let tps_changed = new_tps
+                            .iter()
+                            .zip(sig.type_parameters.iter())
+                            .any(|(new, old)| !Arc::ptr_eq(new, old));
+                        let return_changed = self
+                            .get_return_type_of_signature(sig)
+                            .is_some_and(|rt| {
+                                let sub = self.substitute_infer_type_parameters(
+                                    &rt, params, substitutions,
+                                );
+                                !Arc::ptr_eq(&sub, &rt)
+                            });
+                        let (new_pred, pred_changed) = self.substitute_signature_type_predicate(
+                            sig,
+                            params,
+                            substitutions,
+                            &new_tps,
+                            tps_changed,
+                        );
+                        if !changed && !return_changed && !tps_changed && !pred_changed {
+                            return Arc::clone(sig);
+                        }
+                        // Go instantiateSignatureEx（checker.go:20943）：克隆类型参数后
+                        // 参数/返回经组合 mapper（旧 tp→新 tp + 外层代入）实例化
+                        let final_inst: Vec<Arc<Type>> = if tps_changed {
+                            new_inst
+                                .iter()
+                                .map(|pt| {
+                                    self.substitute_infer_type_parameters(
+                                        pt,
+                                        &sig.type_parameters,
+                                        &new_tps,
+                                    )
+                                })
+                                .collect()
+                        } else {
+                            new_inst
+                        };
+                        let final_rt = self.get_return_type_of_signature(sig).map(|rt| {
+                            let sub =
+                                self.substitute_infer_type_parameters(&rt, params, substitutions);
+                            if tps_changed {
+                                self.substitute_infer_type_parameters(
+                                    &sub,
+                                    &sig.type_parameters,
+                                    &new_tps,
+                                )
+                            } else {
+                                sub
+                            }
+                        });
+                        let mut inst = Signature::new();
+                        inst.flags = sig.flags;
+                        inst.min_argument_count = sig.min_argument_count;
+                        inst.resolved_min_argument_count = sig.resolved_min_argument_count;
+                        inst.declaration = sig.declaration.clone();
+                        inst.target = sig.target.clone();
+                        inst.parameters = sig.parameters.clone();
+                        inst.this_parameter = self.instantiate_this_parameter_symbol(
+                            &sig.this_parameter,
+                            params,
+                            substitutions,
+                        );
+                        inst.type_parameters = new_tps;
+                        let _ = inst.resolved_type_predicate.set(new_pred.map(Box::new));
+                        inst.instantiated_parameter_types = Some(final_inst);
+                        if let Some(rt) = final_rt {
+                            let _ = inst.resolved_return_type.set(rt);
+                        }
+                        Arc::new(inst)
+                    })
+                    .collect();
+                let subbed_props = self.substitute_reference_property_symbols(o, params, substitutions);
+                let (new_members, new_props) = match subbed_props {
+                    Some((m, p)) => (m, p),
+                    None => (
+                        o.structured.members.clone(),
+                        o.structured.properties.clone(),
+                    ),
+                };
+                let mut rebuilt = Type::new(
+                    t.flags,
+                    TypeData::Object(ObjectTypeData { node: None,
+                        structured: StructuredTypeData {
+                            members: new_members,
+                            properties: new_props,
+                            signatures: new_signatures,
+                            call_signature_count: o.structured.call_signature_count,
+                            index_infos: new_index_infos,
+                            ..Default::default()
+                        },
+                        target: o.target.clone(),
+                        mapper: o.mapper.clone(),
+                        type_arguments: new_args,
+                    }),
+                );
+                rebuilt.object_flags = t.object_flags;
+                rebuilt.symbol = t.symbol.clone();
+                let rebuilt = Arc::new(rebuilt);
+                self.subst_reference_shell_cache
+                    .insert(cache_key, Arc::clone(&rebuilt));
+                return rebuilt;
+            }
+            return Arc::clone(t);
+        }
+
+        if t.object_flags.contains(ObjectFlags::Anonymous) && !o.structured.signatures.is_empty() {
+            let signatures = o.structured.signatures.clone();
+            let call_signature_count = o.structured.call_signature_count;
+            let mut changed = false;
+            let mut new_sigs: Vec<Arc<Signature>> = Vec::with_capacity(signatures.len());
+            for sig in &signatures {
+                let rest_offset = usize::from(sig.has_rest_parameter());
+                let fixed = sig.parameters.len().saturating_sub(rest_offset);
+                let mut new_params: Vec<Arc<Type>> = Vec::with_capacity(sig.parameters.len());
+                let mut old_params: Vec<Arc<Type>> = Vec::with_capacity(sig.parameters.len());
+                for i in 0..fixed {
+                    let pt = self
+                        .try_get_type_at_position(sig, i)
+                        .unwrap_or_else(|| self.any_type());
+                    old_params.push(Arc::clone(&pt));
+                    new_params.push(self.substitute_infer_type_parameters(
+                        &pt,
+                        params,
+                        substitutions,
+                    ));
+                }
+                if rest_offset == 1 {
+                    if let Some(rt) = self.get_effective_rest_type(sig) {
+                        old_params.push(Arc::clone(&rt));
+                        new_params.push(self.substitute_infer_type_parameters(
+                            &rt,
+                            params,
+                            substitutions,
+                        ));
+                    }
+                }
+                let new_return = self
+                    .get_return_type_of_signature(sig)
+                    .map(|rt| self.substitute_infer_type_parameters(&rt, params, substitutions));
+                let new_tps = self.substitute_type_parameter_constraints(
+                    &sig.type_parameters,
+                    params,
+                    substitutions,
+                );
+                let tps_changed = new_tps
+                    .iter()
+                    .zip(sig.type_parameters.iter())
+                    .any(|(new, old)| !Arc::ptr_eq(new, old));
+                let params_changed = old_params
+                    .iter()
+                    .zip(new_params.iter())
+                    .any(|(old, new)| !Arc::ptr_eq(old, new));
+                let return_changed = new_return.as_ref().is_some_and(|nr| {
+                    self.get_return_type_of_signature(sig)
+                        .is_some_and(|old| !Arc::ptr_eq(nr, &old))
+                });
+                let (new_pred, pred_changed) = self.substitute_signature_type_predicate(
+                    sig,
+                    params,
+                    substitutions,
+                    &new_tps,
+                    tps_changed,
+                );
+                if !params_changed && !return_changed && !tps_changed && !pred_changed {
+                    new_sigs.push(Arc::clone(sig));
+                    continue;
+                }
+                changed = true;
+                // 同 reference shell 路径：Go instantiateSignatureEx 组合 mapper
+                //（旧 tp→新 tp + 外层代入）一并作用于参数/返回
+                let final_params: Vec<Arc<Type>> = if tps_changed {
+                    new_params
+                        .iter()
+                        .map(|pt| {
+                            self.substitute_infer_type_parameters(
+                                pt,
+                                &sig.type_parameters,
+                                &new_tps,
+                            )
+                        })
+                        .collect()
+                } else {
+                    new_params
+                };
+                let final_return = new_return.map(|nr| {
+                    if tps_changed {
+                        self.substitute_infer_type_parameters(&nr, &sig.type_parameters, &new_tps)
+                    } else {
+                        nr
+                    }
+                });
+                let mut inst = Signature::new();
+                inst.flags = sig.flags;
+                inst.min_argument_count = sig.min_argument_count;
+                inst.resolved_min_argument_count = sig.resolved_min_argument_count;
+                inst.declaration = sig.declaration.clone();
+                inst.target = Some(Arc::clone(sig));
+                inst.parameters = sig.parameters.clone();
+                inst.this_parameter = self.instantiate_this_parameter_symbol(
+                    &sig.this_parameter,
+                    params,
+                    substitutions,
+                );
+                inst.type_parameters = new_tps;
+                let _ = inst.resolved_type_predicate.set(new_pred.map(Box::new));
+                inst.instantiated_parameter_types = Some(final_params);
+                if let Some(nr) = final_return {
+                    let _ = inst.resolved_return_type.set(nr);
+                }
+                new_sigs.push(Arc::new(inst));
+            }
+            // Go resolveAnonymousTypeMembers（checker.go:20971）：target+mapper 的
+            // 实例化匿名型成员表一律过 mapper（createInstantiatedSymbolTable），
+            // 签名未变不豁免属性/索引成员的代入
+            let has_members =
+                !o.structured.properties.is_empty() || !o.structured.index_infos.is_empty();
+            if !changed && !has_members {
+                return Arc::clone(t);
+            }
+            if has_members {
+                let fresh = self.subst_object_in_progress.is_empty();
+                let with_props = self.substitute_object_properties_deep(t, params, substitutions);
+                if fresh {
+                    self.subst_object_in_progress.clear();
+                }
+                let props_changed = !Arc::ptr_eq(&with_props, t);
+                if !changed && !props_changed {
+                    return Arc::clone(t);
+                }
+                let shell = if props_changed {
+                    with_props
+                } else {
+                    Arc::new(Type::new(
+                        t.flags,
+                        TypeData::Object(ObjectTypeData { node: None,
+                            structured: StructuredTypeData {
+                                members: o.structured.members.clone(),
+                                properties: o.structured.properties.clone(),
+                                call_signature_count: o.structured.call_signature_count,
+                                index_infos: o.structured.index_infos.clone(),
+                                ..Default::default()
+                            },
+                            target: o.target.clone(),
+                            mapper: o.mapper.clone(),
+                            type_arguments: o.type_arguments.clone(),
+                        }),
+                    ))
+                };
+                {
+                    let shell_mut = Arc::as_ptr(&shell) as *mut Type;
+                    unsafe {
+                        if let TypeData::Object(so) = &mut (*shell_mut).data {
+                            so.structured.signatures = new_sigs;
+                            so.structured.call_signature_count = o.structured.call_signature_count;
+                        }
+                    }
+                }
+                return shell;
+            }
+            let is_construct = call_signature_count == 0;
+            let instantiated = self.create_function_or_constructor_type(new_sigs, is_construct);
+            {
+                let t_mut = Arc::as_ptr(&instantiated) as *mut Type;
+                unsafe {
+                    (*t_mut).object_flags |= ObjectFlags::Instantiated;
+                    (*t_mut).symbol = t.symbol.clone();
+                }
+            }
+            return instantiated;
+        }
+
+        // Go instantiateType→getObjectTypeInstantiation：匿名对象类型的成员/索引签名按需实例化
+        // （签名实例化与泛型 owner 成员访问路径同样深入，不限 call-return）。
+        // Go couldContainTypeVariables 的对象分支：仅匿名且符号为
+        // Function/Method/Class/TypeLiteral/ObjectLiteral 的类型可含类型变量，
+        // 接口等解析型对象直接原样返回（否则推断探测会整图遍历 lib 接口）。
+        // 自带声明类型参数的符号型（类/接口）走下方 attach 分支
+        let deep_ok = match t.symbol.as_ref() {
+            None => true,
+            Some(sym) => {
+                t.object_flags.contains(ObjectFlags::Anonymous)
+                    && sym.flags.intersects(
+                        tsox_frontend::ast::SymbolFlags::Function
+                            | tsox_frontend::ast::SymbolFlags::Method
+                            | tsox_frontend::ast::SymbolFlags::Class
+                            | tsox_frontend::ast::SymbolFlags::TypeLiteral
+                            | tsox_frontend::ast::SymbolFlags::ObjectLiteral,
+                    )
+                    && self.declared_type_parameter_types(sym).is_empty()
+            }
+        };
+        if deep_ok
+            && (!o.structured.properties.is_empty() || !o.structured.index_infos.is_empty())
+        {
+            let fresh = self.subst_object_in_progress.is_empty();
+            let result = self.substitute_object_properties_deep(t, params, substitutions);
+            if fresh {
+                self.subst_object_in_progress.clear();
+            }
+            return result;
+        }
+
+        // Go instantiateType→getObjectTypeInstantiation：带声明类型参数的符号型
+        //（类/接口声明型）把类型参数过映射后挂为实参（C --{T→number}--> C<number>）
+        if o.type_arguments.is_empty()
+            && let Some(sym) = t.symbol.clone()
+        {
+            let tps = self.declared_type_parameter_types(&sym);
+            if !tps.is_empty() {
+                let mapped: Vec<Arc<Type>> = tps
+                    .iter()
+                    .map(|tp| self.substitute_infer_type_parameters(tp, params, substitutions))
+                    .collect();
+                let changed = tps
+                    .iter()
+                    .zip(mapped.iter())
+                    .any(|(a, b)| !Arc::ptr_eq(a, b));
+                if changed {
+                    return self.attach_explicit_type_arguments_cached(t, mapped);
+                }
+            }
+        }
+
+        Arc::clone(t)
+    }
+}

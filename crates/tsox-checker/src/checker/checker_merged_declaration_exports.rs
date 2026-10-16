@@ -1,0 +1,276 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker::*;
+use tsox_frontend::ast::utilities::get_module_instance_state;
+use tsox_frontend::ast::utilities::is_ambient_module;
+use tsox_frontend::ast::utilities::ModuleInstanceState;
+
+const SPACE_TYPE: u8 = 1 << 0;
+const SPACE_VALUE: u8 = 1 << 1;
+const SPACE_NAMESPACE: u8 = 1 << 2;
+
+impl Checker {
+    pub(crate) fn check_exports_on_merged_declarations(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_exports_on_merged_declarations");
+        // Go checkExportsOnMergedDeclarations（checker.go:7331-7340）：符号先取
+        // 节点 localSymbol（declareModuleMember binder.go:427-431 为 default
+        // 导出成员建的本地符号，声明集只含本声明，导出位混合判定不跨
+        // ExportAssignment/类声明集）；无 localSymbol 才落 getSymbolOfDeclaration。
+        // 本仓节点不挂 localSymbol，以直属容器 locals 表按声明名等价取
+        let symbol = self
+            .local_symbol_of_merged_check(node)
+            .or_else(|| self.program.symbol_map().symbol_of(node).cloned());
+        let Some(symbol) = symbol else {
+            return;
+        };
+        let declarations = self.merged_declaration_view(node, &symbol);
+        if !self.any_declaration_reached_binder_exported_branch(&declarations) {
+            return;
+        }
+        let first_of_kind = declarations
+            .iter()
+            .find(|d| d.kind == node.kind)
+            .is_some_and(|d| Arc::ptr_eq(d, node));
+        if !first_of_kind {
+            return;
+        }
+        let mut exported = 0u8;
+        let mut non_exported = 0u8;
+        let mut default_exported = 0u8;
+        for d in declarations.iter() {
+            let spaces = self.declaration_spaces(d);
+            let (is_export, is_default) = self.effective_export_default_flags(d);
+            if is_export {
+                if is_default {
+                    default_exported |= spaces;
+                } else {
+                    exported |= spaces;
+                }
+            } else {
+                non_exported |= spaces;
+            }
+        }
+        let common_exports_locals = exported & non_exported;
+        let common_default_non_default = default_exported & (exported | non_exported);
+        if common_exports_locals == 0 && common_default_non_default == 0 {
+            return;
+        }
+        for d in declarations.iter() {
+            let spaces = self.declaration_spaces(d);
+            let Some(name) = tsox_frontend::ast::utilities::get_name_of_declaration(d) else {
+                continue;
+            };
+            let display = self
+                .node_source_text(&name)
+                .unwrap_or_else(|| name.text().to_string());
+            if common_default_non_default != 0 && spaces & common_default_non_default != 0 {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        MERGED_DECLARATION_0_CANNOT_INCLUDE_A_DEFAULT_EXPORT_DECLARATION_CONSIDER_ADDING_A_SEPARATE_EXPORT_DEFAULT_0_DECLARATION_INSTEAD,
+                    vec![display.clone(), display],
+                ));
+            } else if spaces & common_exports_locals != 0 {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    name.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        INDIVIDUAL_DECLARATIONS_IN_MERGED_DECLARATION_0_MUST_BE_ALL_EXPORTED_OR_ALL_LOCAL,
+                    vec![display],
+                ));
+            }
+        }
+    }
+
+    // Go 节点 LocalSymbol 的 checker 侧等价：default 导出声明的本地符号按
+    // 直属容器 locals 表的声明名定位（binder local+export 对已插入该表）
+    fn local_symbol_of_merged_check(&self, node: &Arc<Node>) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("local_symbol_of_merged_check");
+        let container = self.binder_container_of_member(node)?;
+        let name = tsox_frontend::ast::utilities::get_name_of_declaration(node)?
+            .text()
+            .to_string();
+        if name.is_empty() {
+            return None;
+        }
+        self.program
+            .symbol_map()
+            .locals
+            .get(&container.id())?
+            .get(&name)
+            .cloned()
+    }
+
+    // Go declareModuleMember 分表：非导出成员进容器节点 locals、导出成员
+    // 额外在容器符号 exports 建导出符号；locals/exports 按容器节点隔离，
+    // 检查仅在节点直属容器的同名符号声明并集上进行（跨 namespace 块不合并）
+    fn merged_declaration_view(
+        &self,
+        node: &Arc<Node>,
+        symbol: &Arc<Symbol>,
+    ) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("merged_declaration_view"); 
+        let mut decls: Vec<Arc<Node>> = Vec::new();
+        let mut push_symbol = |s: &Arc<Symbol>, decls: &mut Vec<Arc<Node>>| {
+            for d in s.declarations.iter() {
+                if !decls.iter().any(|x| Arc::ptr_eq(x, d)) {
+                    decls.push(Arc::clone(d));
+                }
+            }
+        };
+        push_symbol(symbol, &mut decls);
+        let name = tsox_frontend::ast::utilities::get_name_of_declaration(node)
+            .map(|n| n.text().to_string())
+            .unwrap_or_else(|| symbol.name.clone());
+        if name.is_empty() {
+            return decls;
+        }
+        let Some(container) = self.binder_container_of_member(node) else {
+            return decls;
+        };
+        let same_container = |d: &Arc<Node>| {
+            self.binder_container_of_member(d)
+                .is_some_and(|c| c.id() == container.id())
+        };
+        decls.retain(|d| same_container(d));
+        if let Some(locals) = self.program.symbol_map().locals.get(&container.id())
+            && let Some(s) = locals.get(&name)
+        {
+            push_symbol(s, &mut decls);
+        }
+        if let Some(cs) = self.program.symbol_map().symbol_of(&container) {
+            for table in [&cs.exports, &cs.members] {
+                if let Some(s) = table.get(&name) {
+                    push_symbol(s, &mut decls);
+                }
+            }
+        }
+        decls.retain(|d| same_container(d));
+        decls
+    }
+
+    fn declaration_spaces(&mut self, node: &Arc<Node>) -> u8 { ::tsox_core::fntrace::enter("declaration_spaces"); 
+        match node.kind {
+            SyntaxKind::InterfaceDeclaration
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::JSDocTypedefTag
+            | SyntaxKind::JSDocCallbackTag => SPACE_TYPE,
+            SyntaxKind::ModuleDeclaration => {
+                if is_ambient_module(node)
+                    || get_module_instance_state(node) != ModuleInstanceState::NonInstantiated
+                {
+                    SPACE_NAMESPACE | SPACE_VALUE
+                } else {
+                    SPACE_NAMESPACE
+                }
+            }
+            SyntaxKind::ClassDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::EnumMember => SPACE_TYPE | SPACE_VALUE,
+            SyntaxKind::VariableDeclaration
+            | SyntaxKind::BindingElement
+            | SyntaxKind::FunctionDeclaration
+            | SyntaxKind::ImportSpecifier => SPACE_VALUE,
+            SyntaxKind::MethodSignature | SyntaxKind::PropertySignature => SPACE_TYPE,
+            SyntaxKind::ImportEqualsDeclaration
+                | SyntaxKind::NamespaceImport
+                | SyntaxKind::ImportClause => self.alias_declaration_spaces(node, 0),
+            SyntaxKind::ExportAssignment | SyntaxKind::BinaryExpression => {
+                let is_alias = match &node.data {
+                    tsox_frontend::ast::NodeData::ExportAssignment(e) => matches!(
+                        &e.expression.data,
+                        tsox_frontend::ast::NodeData::Identifier(_)
+                            | tsox_frontend::ast::NodeData::QualifiedName(_)
+                    ),
+                    tsox_frontend::ast::NodeData::BinaryExpression(_) => true,
+                    _ => false,
+                };
+                if is_alias {
+                    self.alias_declaration_spaces(node, 0)
+                } else {
+                    SPACE_VALUE
+                }
+            }
+            _ => 0,
+        }
+    }
+
+    // Go getDeclarationSpaces 别名穿透：resolveAlias 目标声明的空间并集；
+    // 自解析（非别名/回到自身）或超长链回退 VALUE 位，防环
+    fn alias_declaration_spaces(&mut self, node: &Arc<Node>, depth: u8) -> u8 { ::tsox_core::fntrace::enter("alias_declaration_spaces"); 
+        if depth > 8 {
+            return SPACE_VALUE;
+        }
+        let Some(s) = self.program.symbol_map().symbol_of(node).cloned() else {
+            return SPACE_VALUE;
+        };
+        if !s.flags.contains(SymbolFlags::Alias) {
+            return SPACE_VALUE;
+        }
+        let target = self.resolve_alias_base(Arc::clone(&s));
+        if Arc::ptr_eq(&target, &s) {
+            return SPACE_VALUE;
+        }
+        target
+            .declarations
+            .iter()
+            .fold(0u8, |acc, d| {
+                acc | match d.kind {
+                    SyntaxKind::ImportEqualsDeclaration
+                    | SyntaxKind::NamespaceImport
+                    | SyntaxKind::ImportClause
+                    | SyntaxKind::ImportSpecifier
+                    | SyntaxKind::ExportAssignment
+                    | SyntaxKind::BinaryExpression => self.alias_declaration_spaces(d, depth + 1),
+                    _ => self.declaration_spaces(d),
+                }
+            })
+    }
+
+    pub(crate) fn effective_export_default_flags(&mut self, node: &Arc<Node>) -> (bool, bool) { ::tsox_core::fntrace::enter("effective_export_default_flags"); 
+        let mut flags = self.get_combined_modifier_flags(node);
+        if !node
+            .parent()
+            .is_some_and(|p| {
+                matches!(
+                    p.kind,
+                    SyntaxKind::InterfaceDeclaration
+                        | SyntaxKind::ClassDeclaration
+                        | SyntaxKind::ClassExpression
+                )
+            })
+            && self.node_in_ambient_context(node)
+            && !flags.contains(ModifierFlags::Ambient)
+            && Self::enclosing_export_context_container(node)
+                .is_some_and(|c| c.flags.contains(tsox_frontend::ast::NodeFlags::ExportContext))
+            && !Self::in_global_scope_augmentation(node)
+        {
+            flags |= ModifierFlags::Export;
+        }
+        (
+            flags.contains(ModifierFlags::Export),
+            flags.contains(ModifierFlags::Default),
+        )
+    }
+
+    fn enclosing_export_context_container(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("enclosing_export_context_container"); 
+        let mut cur = node.parent();
+        while let Some(p) = cur {
+            if matches!(
+                p.kind,
+                SyntaxKind::SourceFile | SyntaxKind::ModuleDeclaration
+            ) {
+                return Some(p);
+            }
+            cur = p.parent();
+        }
+        None
+    }
+
+    fn in_global_scope_augmentation(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("in_global_scope_augmentation"); 
+        node.parent()
+            .is_some_and(|p| p.kind == SyntaxKind::ModuleBlock)
+            && node
+                .parent()
+                .and_then(|p| p.parent())
+                .is_some_and(|gp| tsox_frontend::ast::is_global_scope_augmentation(&gp))
+    }
+}

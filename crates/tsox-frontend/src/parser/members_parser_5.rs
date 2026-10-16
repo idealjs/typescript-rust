@@ -1,0 +1,207 @@
+#![allow(unused_imports)]
+
+use crate::parser::members::*;
+
+impl Parser {
+    pub(crate) fn parse_error_for_missing_semicolon_after(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("parse_error_for_missing_semicolon_after"); 
+        let expression_text = if node.kind == SyntaxKind::Identifier {
+            node.text().to_string()
+        } else {
+            String::new()
+        };
+        if expression_text.is_empty() {
+            self.parse_error_at_current_token(tsox_core::diagnostics::X_0_EXPECTED, &[";"]);
+            return;
+        }
+
+        let pos = node.loc.pos();
+        match expression_text.as_str() {
+            "const" | "let" | "var" => {
+                self.parse_error_at(
+                    pos,
+                    node.end(),
+                    tsox_core::diagnostics::VARIABLE_DECLARATION_NOT_ALLOWED_AT_THIS_LOCATION,
+                    &[],
+                );
+            }
+
+            "declare" => {}
+            "interface" => {
+                self.parse_error_for_invalid_name(
+                    tsox_core::diagnostics::INTERFACE_NAME_CANNOT_BE_0,
+                    tsox_core::diagnostics::INTERFACE_MUST_BE_GIVEN_A_NAME,
+                );
+            }
+            "is" => {
+                self.parse_error_at(
+                    pos,
+                    self.token_pos(),
+                    tsox_core::diagnostics::A_TYPE_PREDICATE_IS_ONLY_ALLOWED_IN_RETURN_TYPE_POSITION_FOR_FUNCTIONS_AND_METHODS,
+                    &[],
+                );
+            }
+            "module" | "namespace" => {
+                self.parse_error_for_invalid_name(
+                    tsox_core::diagnostics::NAMESPACE_NAME_CANNOT_BE_0,
+                    tsox_core::diagnostics::NAMESPACE_MUST_BE_GIVEN_A_NAME,
+                );
+            }
+            "type" => {
+                self.parse_error_for_invalid_name(
+                    tsox_core::diagnostics::TYPE_ALIAS_NAME_CANNOT_BE_0,
+                    tsox_core::diagnostics::TYPE_ALIAS_MUST_BE_GIVEN_A_NAME,
+                );
+            }
+            _ => {
+                if self.token == SyntaxKind::Unknown {
+                    return;
+                }
+                // Go GetSpellingSuggestion：精确匹配跳过，长度差超
+                // max(2, len*0.34) 跳过，距离预算 floor(len*0.4)+0.9
+                let runes = expression_text.chars().collect::<Vec<_>>();
+                let max_len_diff = std::cmp::max(2, (runes.len() as f64 * 0.34) as usize);
+                let mut best: Option<(usize, String)> = None;
+                if !expression_text.is_empty() {
+                    for kw in KEYWORD_SUGGESTIONS {
+                        let kw_runes = kw.chars().collect::<Vec<_>>();
+                        let max_len = kw_runes.len().max(runes.len());
+                        let min_len = kw_runes.len().min(runes.len());
+                        if max_len.saturating_sub(min_len) > max_len_diff {
+                            continue;
+                        }
+                        if *kw == expression_text {
+                            continue;
+                        }
+                        if kw_runes.len() < 3 {
+                            continue;
+                        }
+                        let d = tsox_core::stringutil::edit_distance(&expression_text, kw);
+                        let budget = (expression_text.len() as f64 * 0.4).floor() + 0.9;
+                        if d as f64 > budget {
+                            continue;
+                        }
+                        if best.as_ref().is_none_or(|(bd, _)| d < *bd) {
+                            best = Some((d, kw.to_string()));
+                        }
+                    }
+                }
+
+                let space_sugg = best
+                    .is_none()
+                    .then(|| {
+                        KEYWORD_SUGGESTIONS
+                            .iter()
+                            .find(|kw| {
+                                kw.len() > 2
+                                    && expression_text.len() > kw.len() + 2
+                                    && expression_text.starts_with(*kw)
+                            })
+                            .map(|kw| format!("{kw} {}", &expression_text[kw.len()..]))
+                    })
+                    .flatten();
+                if let Some((_, sugg)) = best {
+                    self.parse_error_at(
+                        pos,
+                        node.end(),
+                        tsox_core::diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
+                        &[&sugg],
+                    );
+                    return;
+                }
+                if let Some(sugg) = space_sugg {
+                    self.parse_error_at(
+                        pos,
+                        node.end(),
+                        tsox_core::diagnostics::UNKNOWN_KEYWORD_OR_IDENTIFIER_DID_YOU_MEAN_0,
+                        &[&sugg],
+                    );
+                    return;
+                }
+                self.parse_error_at(
+                    pos,
+                    node.end(),
+                    tsox_core::diagnostics::UNEXPECTED_KEYWORD_OR_IDENTIFIER,
+                    &[],
+                );
+            }
+        }
+    }
+
+    pub(crate) fn parse_error_for_invalid_name(
+        &mut self,
+        name_diagnostic: Message,
+        blank_diagnostic: Message,
+    ) { ::tsox_core::fntrace::enter("parse_error_for_invalid_name"); 
+        if self.token == SyntaxKind::OpenBraceToken {
+            self.parse_error_at_current_token(blank_diagnostic, &[]);
+        } else {
+            let arg = self.scanner.token_text().to_string();
+            self.parse_error_at_current_token(name_diagnostic, &[&arg]);
+        }
+    }
+
+    pub(crate) fn parse_accessor_declaration(
+        &mut self,
+        pos: usize,
+        modifiers: Option<Arc<ModifierList>>,
+        accessor_kind: SyntaxKind,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_accessor_declaration"); 
+        self.next_token();
+        let name = self.parse_property_name();
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = false;
+        self.await_context = false;
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_return_type();
+        let body = if self.token == SyntaxKind::OpenBraceToken {
+            Some(self.parse_block_ex(true))
+        } else {
+            self.parse_semicolon();
+            None
+        };
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
+
+        let end = body
+            .as_ref()
+            .map_or(self.scanner.full_start_pos(), |b| b.end());
+        let range = TextRange::new(pos, end);
+        let context_flags = self.context_flags_now();
+        match accessor_kind {
+            SyntaxKind::GetKeyword => Arc::new(Node::with_loc_flags(
+                SyntaxKind::GetAccessor,
+                NodeData::GetAccessorDeclaration(GetAccessorDeclarationData {
+                    modifiers,
+                    name,
+                    type_parameters,
+                    parameters,
+                    type_node,
+                    full_signature: None,
+                    body,
+                }),
+                range,
+                context_flags,
+            )),
+            _ => Arc::new(Node::with_loc_flags(
+                SyntaxKind::SetAccessor,
+                NodeData::SetAccessorDeclaration(SetAccessorDeclarationData {
+                    modifiers,
+                    name,
+                    type_parameters,
+                    parameters,
+                    type_node,
+                    full_signature: None,
+                    body,
+                }),
+                range,
+                context_flags,
+            )),
+        }
+    }
+
+    pub fn diagnostics(&self) -> &[ParserDiagnostic] { ::tsox_core::fntrace::enter("diagnostics"); 
+        &self.diagnostics
+    }
+}

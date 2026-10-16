@@ -1,0 +1,433 @@
+#![allow(unused_imports)]
+
+use crate::checker::services::*;
+use tsox_frontend::ast::{INTERNAL_SYMBOL_NAME_DEFAULT, INTERNAL_SYMBOL_NAME_EXPORT_STAR};
+
+impl Checker {
+    pub fn get_symbols_in_scope(
+        &self,
+        _location: &Arc<Node>,
+        _meaning: SymbolFlags,
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_symbols_in_scope"); 
+        Vec::new()
+    }
+
+    pub fn get_exports_of_module(&mut self, symbol: &Arc<Symbol>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_exports_of_module"); 
+        symbols_to_array(&self.get_exports_of_module_table(symbol))
+    }
+
+    pub fn get_exports_of_module_table(&mut self, module_symbol: &Arc<Symbol>) -> SymbolTable { ::tsox_core::fntrace::enter("get_exports_of_module_table"); 
+        if let Some(links) = self.module_symbol_links.get(module_symbol) {
+            if !links.resolved_exports.is_empty() {
+                return links.resolved_exports.clone();
+            }
+        }
+        let exports = self.get_exports_of_module_worker(module_symbol);
+        self.module_symbol_links.insert(
+            module_symbol,
+            ModuleSymbolLinks {
+                resolved_exports: exports.clone(),
+                ..Default::default()
+            },
+        );
+        exports
+    }
+
+    // Go getExportsOfModuleWorker：export= 先归一，visit 递归展开 export * 链
+    fn get_exports_of_module_worker(&mut self, module_symbol: &Arc<Symbol>) -> SymbolTable { ::tsox_core::fntrace::enter("get_exports_of_module_worker"); 
+        let module_symbol = self.resolve_external_module_symbol(module_symbol, false);
+        if let Some(t) = self.json_module_exports(&module_symbol) {
+            return t;
+        }
+        if let Some(t) = self.js_module_exports(&module_symbol) {
+            return t;
+        }
+        let mut visited: Vec<Arc<Symbol>> = Vec::new();
+        self.visit_module_exports(&module_symbol, &mut visited)
+    }
+
+    /// JS 模块 `module.exports = <非实体表达式>`（foo() 调用等）：named
+    /// exports = 右侧表达式类型的属性成员（Go 对 js export= 非别名右侧
+    /// 经其类型暴露成员；实体右侧仍走符号归一路径）
+    pub(crate) fn js_module_exports(&mut self, module_symbol: &Arc<Symbol>) -> Option<SymbolTable> { ::tsox_core::fntrace::enter("js_module_exports"); 
+        let file_node = module_symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::SourceFile)?;
+        let file = self.get_source_file_of_node(file_node)?;
+        if !tsox_frontend::ast::is_source_file_js(&file) {
+            return None;
+        }
+        let ee = module_symbol
+            .exports
+            .get(tsox_frontend::ast::INTERNAL_SYMBOL_NAME_EXPORT_EQUALS)?;
+        let right = ee.declarations.iter().find_map(|d| match &d.data {
+            NodeData::BinaryExpression(be) => Some(Arc::clone(&be.right)),
+            NodeData::ExportAssignment(ea) => Some(Arc::clone(&ea.expression)),
+            _ => None,
+        })?;
+        if matches!(
+            right.kind,
+            SyntaxKind::Identifier | SyntaxKind::QualifiedName | SyntaxKind::PropertyAccessExpression
+        ) {
+            return None;
+        }
+        let t = self.get_type_of_node(&right);
+        let mut table = SymbolTable::default();
+        for p in self.get_apparent_properties(&t) {
+            table.entries.insert(p.name.clone(), Arc::clone(&p));
+        }
+        if table.entries.is_empty() {
+            return None;
+        }
+        Some(table)
+    }
+
+    /// Go：resolveJsonModule 下 json 模块的 named exports = 顶层对象属性
+    ///（`import { j } from "./j.json"`；node16/next ESM 除外）。
+    /// 实现取 export= 目标类型的属性成员并驻 exports
+    pub(crate) fn json_module_exports(&mut self, module_symbol: &Arc<Symbol>) -> Option<SymbolTable> { ::tsox_core::fntrace::enter("json_module_exports"); 
+        let file_node = module_symbol
+            .declarations
+            .iter()
+            .find(|d| d.kind == SyntaxKind::SourceFile)?;
+        let file = self.get_source_file_of_node(file_node)?;
+        if !tsox_frontend::ast::is_json_source_file(&file) {
+            return None;
+        }
+        let target = self.resolve_external_module_symbol_go(module_symbol);
+        // json 文件无 export= 声明：顶层对象字面量表达式即模块的值，
+        // named exports = 其属性成员
+        let t = if Arc::ptr_eq(&target, module_symbol) {
+            let obj = match &file_node.data {
+                NodeData::SourceFile(sf) => sf.statements.iter().find_map(|s| match &s.data {
+                    NodeData::ExpressionStatement(es) => Some(Arc::clone(&es.expression)),
+                    _ => None,
+                }),
+                _ => None,
+            }?;
+            self.get_type_of_node(&obj)
+        } else {
+            self.get_type_of_symbol(&target)
+        };
+        let mut table = SymbolTable::default();
+        for p in self.get_apparent_properties(&t) {
+            table.entries.insert(p.name.clone(), Arc::clone(&p));
+        }
+        if table.entries.is_empty() {
+            return None;
+        }
+        Some(table)
+    }
+
+    fn visit_module_exports(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        visited: &mut Vec<Arc<Symbol>>,
+    ) -> SymbolTable { ::tsox_core::fntrace::enter("visit_module_exports"); 
+        if visited.iter().any(|s| Arc::ptr_eq(s, symbol)) {
+            return SymbolTable::default();
+        }
+        visited.push(Arc::clone(symbol));
+        let mut symbols = symbol.exports.clone();
+        let Some(export_stars) = symbols.get(INTERNAL_SYMBOL_NAME_EXPORT_STAR).cloned() else {
+            return symbols;
+        };
+        let mut nested = SymbolTable::default();
+        for node in export_stars.declarations.iter() {
+            let tsox_frontend::ast::NodeData::ExportDeclaration(d) = &node.data else {
+                continue;
+            };
+            let Some(spec) = &d.module_specifier else {
+                continue;
+            };
+            let spec_text = spec.text().trim_matches(['"', '\'', '`']).to_string();
+            let Some(file_module) = self
+                .get_source_file_of_node(node)
+                .and_then(|f| self.program.symbol_map().symbol_of(&f.node).cloned())
+            else {
+                continue;
+            };
+            let Some(resolved) = self.resolve_module_spec_from(&file_module, &spec_text) else {
+                continue;
+            };
+            let exported = self.visit_module_exports(&resolved, visited);
+            extend_export_symbols(&mut nested, &exported);
+        }
+        extend_export_symbols(&mut symbols, &nested);
+        symbols
+    }
+
+    pub fn for_each_export_and_property_of_module(
+        &mut self,
+        module_symbol: &Arc<Symbol>,
+        cb: &mut dyn FnMut(&Arc<Symbol>, &str),
+    ) { ::tsox_core::fntrace::enter("for_each_export_and_property_of_module"); 
+        for (key, exported_symbol) in self
+            .get_exports_of_module_table(module_symbol)
+            .entries
+            .iter()
+        {
+            if !is_reserved_member_name(key) {
+                cb(exported_symbol, key);
+            }
+        }
+
+        let export_equals = self.resolve_external_module_symbol(module_symbol, false);
+        if Arc::ptr_eq(&export_equals, module_symbol) {
+            return;
+        }
+        let type_of_symbol = self.get_type_of_symbol(&export_equals);
+        if !self.should_treat_properties_of_external_module_as_exports(&type_of_symbol) {
+            return;
+        }
+
+        let reduced_type = self.get_reduced_apparent_type(&type_of_symbol);
+        if !reduced_type.flags.intersects(TYPE_FLAGS_STRUCTURED_TYPE) {
+            return;
+        }
+        if let Some(structured) = reduced_type.as_structured() {
+            for (name, symbol) in structured.members.entries.iter() {
+                if self.is_named_member(symbol, name) {
+                    cb(symbol, name);
+                }
+            }
+        }
+    }
+
+    pub fn is_valid_property_access(&mut self, node: &Arc<Node>, property_name: &str) -> bool { ::tsox_core::fntrace::enter("is_valid_property_access"); 
+        match node.kind {
+            SyntaxKind::PropertyAccessExpression => {
+                let is_super = if let Some(expr) = node.expression() {
+                    expr.kind == SyntaxKind::SuperKeyword
+                } else {
+                    false
+                };
+                let t = if let Some(expr) = node.expression() {
+                    self.check_expression(expr);
+                    let widened = self.get_widened_type_of_expression(expr);
+                    widened
+                } else {
+                    self.any_type()
+                };
+                self.is_valid_property_access_with_type(node, is_super, property_name, &t)
+            }
+            SyntaxKind::QualifiedName => {
+                let t = if let NodeData::QualifiedName(data) = &node.data {
+                    self.check_expression(&data.left);
+                    self.get_widened_type_of_expression(&data.left)
+                } else {
+                    self.any_type()
+                };
+                self.is_valid_property_access_with_type(node, false, property_name, &t)
+            }
+            SyntaxKind::ImportType => {
+                let t = self.get_type_from_type_node(node);
+                self.is_valid_property_access_with_type(node, false, property_name, &t)
+            }
+            _ => {
+                panic!(
+                    "Unexpected node kind in isValidPropertyAccess: {:?}",
+                    node.kind
+                )
+            }
+        }
+    }
+
+    pub fn is_valid_property_access_with_type(
+        &self,
+        node: &Arc<Node>,
+        is_super: bool,
+        property_name: &str,
+        t: &Arc<Type>,
+    ) -> bool { ::tsox_core::fntrace::enter("is_valid_property_access_with_type"); 
+        if is_type_any(t) {
+            return true;
+        }
+        let prop = self.get_property_of_type_cached(t, property_name);
+        prop.is_some() && self.is_property_accessible(node, is_super, false, t, &prop.unwrap())
+    }
+
+    pub fn is_valid_property_access_for_completions(
+        &self,
+        node: &Arc<Node>,
+        t: &Arc<Type>,
+        property: &Arc<Symbol>,
+    ) -> bool { ::tsox_core::fntrace::enter("is_valid_property_access_for_completions"); 
+        let is_super = node.kind == SyntaxKind::PropertyAccessExpression
+            && node
+                .expression()
+                .map(|e| e.kind == SyntaxKind::SuperKeyword)
+                .unwrap_or(false);
+        self.is_property_accessible(node, is_super, false, t, property)
+    }
+
+    pub fn get_all_possible_properties_of_types(
+        &mut self,
+        types: &[Arc<Type>],
+    ) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_all_possible_properties_of_types"); 
+        let union_type = self.get_union_type(types.to_vec());
+        if !union_type.flags.contains(TypeFlags::Union) {
+            return self.get_augmented_properties_of_type(&union_type);
+        }
+
+        let mut props: std::collections::HashMap<String, Arc<Symbol>> =
+            std::collections::HashMap::new();
+        for member_type in types {
+            let augmented_props = self.get_augmented_properties_of_type(member_type);
+            for p in augmented_props {
+                if !props.contains_key(&p.name) {
+                    props.insert(p.name.clone(), Arc::clone(&p));
+                }
+            }
+        }
+        props.into_values().collect()
+    }
+
+    pub fn is_unknown_symbol(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_unknown_symbol"); 
+        self.unknown_symbol
+            .as_ref()
+            .map(|s| Arc::ptr_eq(s, symbol))
+            .unwrap_or(false)
+    }
+
+    pub fn is_undefined_symbol(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_undefined_symbol"); 
+        self.undefined_symbol
+            .as_ref()
+            .map(|s| Arc::ptr_eq(s, symbol))
+            .unwrap_or(false)
+    }
+
+    pub fn is_arguments_symbol(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("is_arguments_symbol"); 
+        self.arguments_symbol
+            .as_ref()
+            .map(|s| Arc::ptr_eq(s, symbol))
+            .unwrap_or(false)
+    }
+
+    pub fn get_non_optional_type(&self, t: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_optional_type"); 
+        self.remove_optional_type_marker(t)
+    }
+
+    pub fn get_string_index_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_string_index_type"); 
+        self.get_index_type_of_type(t, IndexKind::String)
+    }
+
+    pub fn get_number_index_type(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_number_index_type"); 
+        self.get_index_type_of_type(t, IndexKind::Number)
+    }
+
+    pub fn get_element_type_of_array_type(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_element_type_of_array_type"); 
+        let type_args = self.get_type_arguments(t);
+        if let Some(elem) = type_args.first() {
+            return Some(Arc::clone(elem));
+        }
+        None
+    }
+
+    pub fn get_call_signatures(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_call_signatures"); 
+        self.get_signatures_of_type(t, SignatureKind::Call)
+    }
+
+    pub fn get_construct_signatures(&self, t: &Arc<Type>) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_construct_signatures"); 
+        self.get_signatures_of_type(t, SignatureKind::Construct)
+    }
+
+    pub fn get_apparent_properties(&mut self, t: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_apparent_properties"); 
+        self.get_augmented_properties_of_type(t)
+    }
+
+    pub fn get_augmented_properties_of_type(&mut self, t: &Arc<Type>) -> Vec<Arc<Symbol>> { ::tsox_core::fntrace::enter("get_augmented_properties_of_type"); 
+        let apparent = self.get_apparent_type(t);
+        let props_list = self.get_properties_of_type(&apparent);
+        let mut props_by_name: std::collections::HashMap<String, Arc<Symbol>> =
+            std::collections::HashMap::new();
+        for p in &props_list {
+            props_by_name.insert(p.name.clone(), Arc::clone(p));
+        }
+
+        let call_sigs = self.get_signatures_of_type(&apparent, SignatureKind::Call);
+        let construct_sigs = self.get_signatures_of_type(&apparent, SignatureKind::Construct);
+        let function_type = if !call_sigs.is_empty() {
+            self.global_callable_function_type()
+        } else if !construct_sigs.is_empty() {
+            self.global_newable_function_type()
+        } else {
+            None
+        };
+
+        if let Some(ref ft) = function_type {
+            for p in self.get_properties_of_type(ft) {
+                if !props_by_name.contains_key(&p.name) {
+                    props_by_name.insert(p.name.clone(), Arc::clone(&p));
+                }
+            }
+        }
+
+        self.get_named_members(&props_by_name)
+    }
+
+    pub fn try_get_member_in_module_exports_and_properties(
+        &mut self,
+        member_name: &str,
+        module_symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_get_member_in_module_exports_and_properties"); 
+        if let Some(symbol) = self.try_get_member_in_module_exports(member_name, module_symbol) {
+            return Some(symbol);
+        }
+
+        let export_equals = self.resolve_external_module_symbol(module_symbol, false);
+        if Arc::ptr_eq(&export_equals, module_symbol) {
+            return None;
+        }
+
+        let t = self.get_type_of_symbol(&export_equals);
+        if self.should_treat_properties_of_external_module_as_exports(&t) {
+            return self.get_property_of_type(&t, member_name);
+        }
+        None
+    }
+
+    pub fn try_get_member_in_module_exports(
+        &mut self,
+        member_name: &str,
+        module_symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("try_get_member_in_module_exports"); 
+        let symbol_table = self.get_exports_of_module_table(module_symbol);
+        symbol_table.get(member_name).cloned()
+    }
+
+    pub fn should_treat_properties_of_external_module_as_exports(
+        &self,
+        resolved_external_module_type: &Arc<Type>,
+    ) -> bool { ::tsox_core::fntrace::enter("should_treat_properties_of_external_module_as_exports"); 
+        !resolved_external_module_type
+            .flags
+            .intersects(TYPE_FLAGS_PRIMITIVE)
+            || resolved_external_module_type
+                .object_flags
+                .contains(ObjectFlags::Class)
+            || self.is_array_type(resolved_external_module_type)
+            || is_tuple_type(resolved_external_module_type)
+    }
+
+    pub fn get_contextual_type_for_services(
+        &mut self,
+        node: &Arc<Node>,
+        context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_services"); 
+        self.get_contextual_type(node, context_flags)
+    }
+}
+
+// Go extendExportSymbols：default 不传递；已有名不覆盖（本地导出优先于星号导出）
+fn extend_export_symbols(target: &mut SymbolTable, source: &SymbolTable) { ::tsox_core::fntrace::enter("extend_export_symbols"); 
+    for (id, sym) in source.entries.iter() {
+        if id == INTERNAL_SYMBOL_NAME_DEFAULT {
+            continue;
+        }
+        if target.get(id).is_none() {
+            target.entries.insert(id.clone(), Arc::clone(sym));
+        }
+    }
+}

@@ -1,0 +1,10 @@
+[package]
+name = "tsox-frontend"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+bitflags = "2"
+tsox-core = { workspace = true }
+unicode-ident = "1"

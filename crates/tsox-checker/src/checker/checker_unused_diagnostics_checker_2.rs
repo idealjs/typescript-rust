@@ -1,0 +1,329 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_unused_diagnostics::*;
+
+impl Checker {
+    pub(crate) fn report_unused_binding_elements(&mut self, pattern: &Arc<Node>) { ::tsox_core::fntrace::enter("report_unused_binding_elements"); 
+        let elements: Vec<Arc<Node>> = match &pattern.data {
+            tsox_frontend::ast::NodeData::BindingPattern(d) => d.elements.iter().cloned().collect(),
+            _ => return,
+        };
+        if elements.len() > 1
+            && elements
+                .iter()
+                .all(|e| self.is_unreferenced_variable_declaration(e))
+        {
+            let root = Self::binding_root_declaration(pattern);
+            self.report_unused(
+                &root,
+                root.kind == SyntaxKind::Parameter,
+                pattern.loc,
+                &tsox_core::diagnostics::messages_generated::ALL_DESTRUCTURED_ELEMENTS_ARE_UNUSED,
+                vec![],
+            );
+        } else {
+            self.report_unused_variable_declarations(&elements);
+        }
+    }
+
+    pub(crate) fn is_unreferenced_variable_declaration(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_unreferenced_variable_declaration"); 
+        let name_node = match &node.data {
+            tsox_frontend::ast::NodeData::VariableDeclaration(d) => Some(Arc::clone(&d.name)),
+            tsox_frontend::ast::NodeData::ParameterDeclaration(d) => Some(Arc::clone(&d.name)),
+            tsox_frontend::ast::NodeData::BindingElement(d) => d.name.clone(),
+            _ => return true,
+        };
+        let Some(name_node) = name_node else {
+            return true;
+        };
+        if Self::is_binding_pattern(&name_node) {
+            let elements: Vec<Arc<Node>> = match &name_node.data {
+                tsox_frontend::ast::NodeData::BindingPattern(d) => {
+                    d.elements.iter().cloned().collect()
+                }
+                _ => return true,
+            };
+            return elements
+                .iter()
+                .all(|e| self.is_unreferenced_variable_declaration(e));
+        }
+
+        if let Some(sym) = self.program.symbol_map().symbol_of(node) {
+            if let Some(kinds) = self.symbol_reference_kinds.get(&sym.id()) {
+                if kinds.intersects(
+                    SymbolFlags::FunctionScopedVariable | SymbolFlags::BlockScopedVariable,
+                ) {
+                    return false;
+                }
+            }
+        }
+
+        if node.kind == SyntaxKind::BindingElement {
+            if let Some(parent) = node.parent().as_ref() {
+                if parent.kind == SyntaxKind::ObjectBindingPattern {
+                    let elements: Vec<Arc<Node>> = match &parent.data {
+                        tsox_frontend::ast::NodeData::BindingPattern(d) => {
+                            d.elements.iter().cloned().collect()
+                        }
+                        _ => Vec::new(),
+                    };
+                    let is_last = elements.last().is_some_and(|last| Arc::ptr_eq(last, node));
+                    let last_has_dots = elements.last().is_some_and(|last| {
+                        matches!(&last.data,
+                            tsox_frontend::ast::NodeData::BindingElement(d) if d.dot_dot_dot_token.is_some())
+                    });
+                    let has_property_name = matches!(&node.data,
+                        tsox_frontend::ast::NodeData::BindingElement(d) if d.property_name.is_some());
+                    if !is_last && last_has_dots && !has_property_name {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        let underscore_exempt = match node.kind {
+            SyntaxKind::Parameter => true,
+            SyntaxKind::VariableDeclaration => {
+                let mut in_for = false;
+                if let Some(parent) = node.parent().as_ref() {
+                    if parent.kind == SyntaxKind::VariableDeclarationList {
+                        if let Some(gp) = parent.parent().as_ref() {
+                            in_for = matches!(
+                                gp.kind,
+                                SyntaxKind::ForInStatement | SyntaxKind::ForOfStatement
+                            );
+                        }
+                    }
+                }
+                in_for || node.flags.contains(tsox_frontend::ast::NodeFlags::Using)
+            }
+            SyntaxKind::BindingElement => {
+                let parent_is_object_pattern = node
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|p| p.kind == SyntaxKind::ObjectBindingPattern);
+                let has_property_name = matches!(&node.data,
+                    tsox_frontend::ast::NodeData::BindingElement(d) if d.property_name.is_some());
+                !(parent_is_object_pattern && !has_property_name)
+            }
+            _ => false,
+        };
+        if underscore_exempt && Self::name_node_starts_with_underscore(&name_node) {
+            return false;
+        }
+        true
+    }
+
+    pub(crate) fn name_node_starts_with_underscore(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("name_node_starts_with_underscore"); 
+        let text = node.text();
+        !text.is_empty() && text.starts_with('_')
+    }
+
+    pub(crate) fn is_binding_pattern(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_binding_pattern"); 
+        matches!(
+            node.kind,
+            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+        )
+    }
+
+    pub(crate) fn name_or_node_loc(node: &Arc<Node>) -> tsox_core::core::text::TextRange { ::tsox_core::fntrace::enter("name_or_node_loc"); 
+        tsox_frontend::ast::utilities::get_name_of_declaration(node)
+            .map(|n| n.loc)
+            .unwrap_or(node.loc)
+    }
+
+    pub(crate) fn report_unused_imports(&mut self, clause: &Arc<Node>, unused: &[Arc<Node>]) { ::tsox_core::fntrace::enter("report_unused_imports"); 
+        let mut declaration_count = 0usize;
+        let named_bindings: Option<Arc<Node>> = match &clause.data {
+            tsox_frontend::ast::NodeData::ImportClause(d) => {
+                if d.name.is_some() {
+                    declaration_count += 1;
+                }
+                d.named_bindings.clone()
+            }
+            _ => None,
+        };
+        if let Some(nb) = &named_bindings {
+            if nb.kind == SyntaxKind::NamespaceImport {
+                declaration_count += 1;
+            } else {
+                let elements: Vec<Arc<Node>> = match &nb.data {
+                    tsox_frontend::ast::NodeData::NamedImports(d) => {
+                        d.elements.iter().cloned().collect()
+                    }
+                    _ => Vec::new(),
+                };
+                declaration_count += elements.len();
+            }
+        }
+        if declaration_count > 1 && declaration_count == unused.len() {
+            let loc = clause.parent().as_ref().map(|p| p.loc).unwrap_or(clause.loc);
+            self.report_unused(
+                clause,
+                false,
+                loc,
+                &tsox_core::diagnostics::messages_generated::
+                    ALL_IMPORTS_IN_IMPORT_DECLARATION_ARE_UNUSED,
+                vec![],
+            );
+        } else {
+            for u in unused {
+                let name = self
+                    .program
+                    .symbol_map()
+                    .symbol_of(u)
+                    .map(|s| s.name.clone())
+                    .unwrap_or_else(|| u.text().to_string());
+                let is_type_decl = false;
+                self.report_unused_local(u, &name, is_type_decl);
+            }
+        }
+    }
+
+    pub(crate) fn is_self_type_access(
+        &self,
+        receiver: &Arc<Node>,
+        object_type: &Arc<crate::checker::types::Type>,
+    ) -> bool { ::tsox_core::fntrace::enter("is_self_type_access"); 
+        if receiver.kind == SyntaxKind::ThisKeyword {
+            return true;
+        }
+        let Some(parent) = object_type.symbol.as_ref() else {
+            return false;
+        };
+        let mut first = receiver;
+        loop {
+            match &first.data {
+                tsox_frontend::ast::NodeData::Identifier(_) => break,
+                tsox_frontend::ast::NodeData::PropertyAccessExpression(d) => {
+                    first = &d.expression;
+                }
+                _ => return false,
+            }
+        }
+        self.resolve_identifier(first)
+            .is_some_and(|sym| sym.id() == parent.id())
+    }
+
+    pub(crate) fn mark_property_as_referenced(&self, prop: &Arc<Symbol>, node: Option<&Arc<Node>>) { ::tsox_core::fntrace::enter("mark_property_as_referenced"); 
+        self.mark_property_as_referenced_ex(prop, node, None);
+    }
+
+    pub(crate) fn mark_property_as_referenced_ex(
+        &self,
+        prop: &Arc<Symbol>,
+        node: Option<&Arc<Node>>,
+        self_type_access: Option<bool>,
+    ) { ::tsox_core::fntrace::enter("mark_property_as_referenced_ex"); 
+        let has_private_modifier = prop.declarations.iter().any(|d| {
+            d.has_syntactic_modifier(ModifierFlags::Private)
+        });
+        let has_private_identifier = prop
+            .declarations
+            .iter()
+            .any(|d| d.name().is_some_and(|n| n.kind == SyntaxKind::PrivateIdentifier));
+        if std::env::var_os("TSOX_DEBUG_UNUSED").is_some() {
+        }
+        if !has_private_modifier && !has_private_identifier {
+            return;
+        }
+        if let Some(n) = node {
+            if is_write_only_access(n) && !prop.flags.contains(SymbolFlags::SetAccessor) {
+                return;
+            }
+            let self_access = self_type_access.unwrap_or_else(|| {
+                matches!(
+                    &n.data,
+                    tsox_frontend::ast::NodeData::PropertyAccessExpression(d)
+                        if d.expression.kind == SyntaxKind::ThisKeyword
+                )
+            });
+            if self_access {
+                let mut prop_ids = std::collections::HashSet::new();
+                prop_ids.insert(prop.id());
+                for d in &prop.declarations {
+                    if let Some(ds) = self.program.symbol_map().symbol_of(d) {
+                        prop_ids.insert(ds.id());
+                    }
+                }
+                let mut ancestor = n.parent();
+                while let Some(a) = ancestor {
+                    if Self::function_like_has_body(&a)
+                        && let Some(sym) = self.program.symbol_map().symbol_of(&a)
+                        && prop_ids.contains(&sym.id())
+                    {
+                        return;
+                    }
+                    ancestor = a.parent();
+                }
+            }
+        }
+        self.record_symbol_reference(prop, SymbolFlags::all());
+        for d in &prop.declarations {
+            if let Some(decl_sym) = self.program.symbol_map().symbol_of(d)
+                && decl_sym.id() != prop.id()
+            {
+                self.record_symbol_reference(&decl_sym, SymbolFlags::all());
+            }
+        }
+    }
+
+    pub(crate) fn report_unused(
+        &mut self,
+        location: &Arc<Node>,
+        is_parameter: bool,
+        loc: tsox_core::core::text::TextRange,
+        message: &'static tsox_core::diagnostics::Message,
+        args: Vec<String>,
+    ) { ::tsox_core::fntrace::enter("report_unused"); 
+        let ambient = location
+            .flags
+            .contains(tsox_frontend::ast::NodeFlags::Ambient)
+            || self.ambient_ancestor(location)
+            || self
+                .get_source_file_of_node(location)
+                .is_some_and(|f| f.is_declaration_file);
+        if ambient {
+            return;
+        }
+        let is_error = if is_parameter {
+            self.compiler_options.no_unused_parameters.is_true()
+        } else {
+            self.compiler_options.no_unused_locals.is_true()
+        };
+        if !is_error {
+            return;
+        }
+        let file = self.current_file.clone();
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            file, loc, *message, args,
+        ));
+    }
+
+    pub(crate) fn set_parent_pointers(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_parent_pointers"); 
+        use tsox_frontend::ast::node_data_generated::for_each_child;
+
+        let mut children: Vec<Arc<Node>> = Vec::new();
+        for_each_child(node, |child| {
+            children.push(Arc::clone(child));
+            false
+        });
+        let parent_clone = Arc::clone(node);
+        for child in &children {
+            let child_mut = Arc::as_ptr(child) as *mut Node;
+
+            let already = unsafe {
+                (*child_mut)
+                    .parent()
+                    .as_ref()
+                    .map_or(false, |p| Arc::ptr_eq(p, &parent_clone))
+            };
+            if !already {
+                unsafe {
+                    (*child_mut).set_parent(&parent_clone);
+                }
+            }
+            self.set_parent_pointers(child);
+        }
+    }
+}

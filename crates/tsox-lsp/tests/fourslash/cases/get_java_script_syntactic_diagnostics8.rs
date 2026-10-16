@@ -1,0 +1,11 @@
+use tsox_lsp::fourslash::Session;
+
+
+#[test]
+fn get_java_script_syntactic_diagnostics8() {
+    let content = r#"// @allowJs: true
+// @Filename: a.js
+type a = b;"#;
+    let _s = Session::new_for_test("getJavaScriptSyntacticDiagnostics8", content);
+    // TODO: f.VerifyBaselineNonSuggestionDiagnostics(t)
+}

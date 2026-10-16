@@ -1,0 +1,805 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_classes::*;
+
+impl Checker {
+    pub(crate) fn check_indexed_access_index_type(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_indexed_access_index_type"); 
+        use crate::checker::types::{TypeData, TypeFlags};
+        let t = self.get_type_from_type_node(node);
+
+        if !self.type_argument_stack.is_empty() {
+            return;
+        }
+
+        if self
+            .current_file
+            .as_ref()
+            .is_some_and(|f| f.file_name.starts_with("bundled://"))
+        {
+            return;
+        }
+        let (object_type, index_type) = match &t.data {
+            TypeData::IndexedAccess(d) => match (&d.object_type, &d.index_type) {
+                (Some(o), Some(i)) => (Arc::clone(o), Arc::clone(i)),
+                _ => return,
+            },
+            _ => return,
+        };
+
+        if object_type
+            .flags
+            .intersects(TypeFlags::Any | TypeFlags::Unknown)
+        {
+            return;
+        }
+        let object_index_type = self.get_index_type(&object_type);
+        let apparent_object_type = self.get_reduced_apparent_type(&object_type);
+        let has_number_index_info = self
+            .get_index_info_of_type(&apparent_object_type, &self.number_type())
+            .is_some();
+
+        let constituents: Vec<Arc<Type>> = if index_type.flags.contains(TypeFlags::Union) {
+            match &index_type.data {
+                TypeData::Union(u) => u.union_or_intersection.types.clone(),
+                _ => vec![Arc::clone(&index_type)],
+            }
+        } else {
+            vec![Arc::clone(&index_type)]
+        };
+        for c in &constituents {
+            let mut ok = self.is_type_assignable_to(c, &object_index_type);
+            if !ok && has_number_index_info {
+                ok = self.is_applicable_index_type(c, &self.number_type());
+            }
+            if ok {
+                continue;
+            }
+            if object_type
+                .object_flags
+                .intersects(crate::checker::types::ObjectFlags::IsGenericObjectType)
+            {
+                if let Some(name) = self.property_name_from_index(c) {
+                    if let Some(sym) = self.get_constituent_property(&object_type, &name) {
+                        let non_public = sym
+                            .value_declaration
+                            .as_ref()
+                            .map(|d| {
+                                self.get_combined_modifier_flags(d).intersects(
+                                    tsox_frontend::ast::ModifierFlags::NonPublicAccessibilityModifier,
+                                )
+                            })
+                            .unwrap_or(false);
+                        if non_public {
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                node.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    PRIVATE_OR_PROTECTED_MEMBER_0_CANNOT_BE_ACCESSED_ON_A_TYPE_PARAMETER,
+                                vec![name],
+                            ));
+                            return;
+                        }
+                    }
+                }
+            }
+            let index_display = self.type_to_string(&index_type);
+            let object_display = self.type_to_string(&object_type);
+            let file = self.current_file.clone();
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::TYPE_0_CANNOT_BE_USED_TO_INDEX_TYPE_1,
+                vec![index_display, object_display],
+            ));
+            return;
+        }
+    }
+
+    pub(crate) fn property_name_from_index(&mut self, t: &Arc<Type>) -> Option<String> { ::tsox_core::fntrace::enter("property_name_from_index"); 
+        if crate::checker::utilities_token_is_identifier_or_keyword::is_type_usable_as_property_name(t)
+        {
+            let name = crate::checker::utilities_token_is_identifier_or_keyword::get_property_name_from_type(t);
+            if !name.is_empty() {
+                return Some(name);
+            }
+        }
+        None
+    }
+    pub(crate) fn check_heritage_clause(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_heritage_clause"); 
+        let data = match &node.data {
+            tsox_frontend::ast::NodeData::HeritageClause(d) => d,
+            _ => return,
+        };
+        if data.token == SyntaxKind::ExtendsKeyword {
+            if data.types.len() > 1 {
+                for type_ref in data.types.iter().skip(1) {
+                    let file = self.current_file.clone();
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        type_ref.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            CLASSES_CAN_ONLY_EXTEND_A_SINGLE_CLASS,
+                        Vec::new(),
+                    ));
+                }
+            }
+
+            for type_ref in data.types.iter() {
+                self.check_extends_private_ctor(type_ref);
+                if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ewa) =
+                    &type_ref.data
+                {
+                    // Go checkClassDeclaration：checkSourceElements(
+                    // baseTypeNode.TypeArguments()) 先于基类解析
+                    if let Some(args) = &ewa.type_arguments {
+                        self.check_call_type_argument_nodes(args);
+                    }
+                    if ewa.expression.kind == SyntaxKind::Identifier {
+                        if let Some(sym) = self.resolve_identifier(&ewa.expression) {
+                            // Go checkResolvedBlockScopedVariable：基类在声明前使用
+                            //（isBlockScopedNameDeclaredBeforeUse 判定）
+                            let name = ewa.expression.text().to_string();
+                            self.check_block_scoped_variable_used_before_declaration(
+                                &ewa.expression,
+                                &sym,
+                                &name,
+                            );
+                        }
+                    }
+                    if matches!(
+                        ewa.expression.kind,
+                        SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression
+                    ) {
+                        if let Some(sym) = self
+                            .resolve_entity_name_class_symbol(&ewa.expression)
+                            .filter(|s| s.flags == SymbolFlags::Interface)
+                        {
+                            let name = entity_name_text(&ewa.expression);
+                            let file = self.current_file.clone();
+                            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                                file,
+                                ewa.expression.loc,
+                                tsox_core::diagnostics::messages_generated::
+                                    CANNOT_EXTEND_AN_INTERFACE_0_DID_YOU_MEAN_IMPLEMENTS,
+                                vec![name],
+                            ));
+                        }
+                    }
+
+                    let base_has_value = ewa.expression.kind == SyntaxKind::Identifier
+                        && self
+                            .resolve_entity_name_class_symbol(&ewa.expression)
+                            .is_some_and(|s| s.flags.intersects(SymbolFlags::VALUE));
+                    if base_has_value || ewa.expression.kind != SyntaxKind::Identifier {
+                        // Go checkClassDeclaration：getBaseTypes 经
+                        // resolveQualifiedName 先以 Namespace 含义解析 heritage
+                        // 左端并缓存 symbolLinks.resolvedSymbol，随后值位
+                        // checkExpression 命中缓存不走解析失败路径，左端
+                        // namespace 不报 TS2708
+                        let suppressed_id = self.namespace_leftmost_suppress_id(&ewa.expression);
+                        if let Some(id) = suppressed_id {
+                            self.namespace_value_suppressed_nodes.insert(id);
+                        }
+                        self.check_expression(&ewa.expression);
+                        if let Some(id) = suppressed_id {
+                            self.namespace_value_suppressed_nodes.remove(&id);
+                        }
+                    } else if let tsox_frontend::ast::NodeData::Identifier(id_data) =
+                        &ewa.expression.data
+                    {
+                        // Go 仅当 getResolvedSymbol→resolveName(Value|ExportValue)
+                        // 返回 nil（getSymbol：flags 直配或 alias 目标
+                        // getSymbolFlags 命中，解析失败的别名按 All 视为命中）
+                        // 才进 onFailedToResolveSymbol 链，由
+                        // checkAndReportErrorForUsingNamespaceAsTypeOrValue 报
+                        // TS2708；import 别名（含解析失败模块）为非 nil 不报
+                        let name_text = id_data.text.as_str();
+                        if self
+                            .resolve_name(
+                                name_text,
+                                &ewa.expression,
+                                SymbolFlags::VALUE | SymbolFlags::ExportValue,
+                                false,
+                            )
+                            .is_none()
+                        {
+                            self.check_and_report_error_for_using_namespace_as_type_or_value(
+                                &ewa.expression,
+                                name_text,
+                                SymbolFlags::VALUE | SymbolFlags::ExportValue,
+                            );
+                        }
+                    }
+
+                    self.push_ts2304_suppression();
+                    // Go checkClassDeclaration：extends 基型走 getBaseTypes
+                    // （值位基构造类型解析），非 implements 的类型引用路径
+                    let base_type = self.resolve_base_class_instance_type(type_ref);
+                    self.pop_ts2304_suppression();
+
+                    self.check_base_constructor_type(&ewa.expression);
+
+                    // Go checkClassDeclaration：派生实例型须可赋给基类实例型，
+                    // 否则 TS2415（成员级错误链随附，含私有分离说明）
+                    if !base_type.flags.contains(TypeFlags::Any) {
+                        let class_node = node.parent();
+                        if let Some(class_node) = class_node
+                            && let tsox_frontend::ast::NodeData::ClassDeclaration(cd) =
+                                &class_node.data
+                        {
+                            let instance_type =
+                                self.build_class_instance_type_with_base(&class_node);
+                            let saved_chain = std::mem::take(&mut self.relater_error_chain);
+                            let was_active = self.relater_chain_active;
+                            self.relater_chain_active = true;
+                            let overall_ok =
+                                self.is_type_assignable_to(&instance_type, &base_type);
+                            let entries =
+                                std::mem::replace(&mut self.relater_error_chain, saved_chain);
+                            self.relater_chain_active = was_active;
+                            if !overall_ok {
+                                // Go issueMemberSpecificError：优先成员级 TS2416
+                                let mut issued_member_error = false;
+                                let instance_str = self.type_to_string(&instance_type);
+                                let base_str = self.type_to_string(&base_type);
+                                for member in cd.members.iter() {
+                                    if member.has_syntactic_modifier(ModifierFlags::Static) {
+                                        continue;
+                                    }
+                                    let Some(name_node) = member.name() else {
+                                        continue;
+                                    };
+                                    let prop_name = name_node.text().to_string();
+                                    if prop_name.is_empty() {
+                                        continue;
+                                    }
+                                    let Some(prop) =
+                                        self.get_property_of_type(&instance_type, &prop_name)
+                                    else {
+                                        continue;
+                                    };
+                                    let Some(base_prop) =
+                                        self.get_property_of_type(&base_type, &prop_name)
+                                    else {
+                                        continue;
+                                    };
+                                    let prop_t = self.get_type_of_symbol(&prop);
+                                    let base_t = self.get_type_of_symbol(&base_prop);
+                                    let saved_chain2 =
+                                        std::mem::take(&mut self.relater_error_chain);
+                                    let was_active2 = self.relater_chain_active;
+                                    self.relater_chain_active = true;
+                                    let member_ok =
+                                        self.is_type_assignable_to(&prop_t, &base_t);
+                                    let member_entries = std::mem::replace(
+                                        &mut self.relater_error_chain,
+                                        saved_chain2,
+                                    );
+                                    self.relater_chain_active = was_active2;
+                                    if !member_ok {
+                                        let _ = &member_entries;
+                                        // heritage 二次求值防护：同位同码已有 TS2416 不再发
+                                        let already = self.diagnostics.get_all().iter().any(
+                                            |d| d.code == 2416 && d.loc == name_node.loc,
+                                        );
+                                        if already {
+                                            continue;
+                                        }
+                                        let mut diag = tsox_frontend::ast::Diagnostic::new(
+                                            self.current_file.clone(),
+                                            name_node.loc,
+                                            tsox_core::diagnostics::messages_generated::
+                                                PROPERTY_0_IN_TYPE_1_IS_NOT_ASSIGNABLE_TO_THE_SAME_PROPERTY_IN_BASE_TYPE_2,
+                                            vec![prop_name.clone(), instance_str.clone(), base_str.clone()],
+                                        );
+                                        let dt_str = self.type_to_string(&prop_t);
+                                        let bt_str = self.type_to_string(&base_t);
+                                        self.relater_error_chain = member_entries;
+                                        self.relater_chain_active = true;
+                                        // Go reportErrorResults：包装对象对基元的
+                                        // 提示行先于头部入链（渲染为更深层）
+                                        self.try_elaborate_primitive_and_object(&prop_t, &base_t);
+                                        self.push_relation_head_with_tp_note(
+                                            &prop_t,
+                                            &base_t,
+                                            tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                            vec![dt_str, bt_str],
+                                        );
+                                        let final_entries =
+                                            std::mem::take(&mut self.relater_error_chain);
+                                        self.relater_chain_active = was_active2;
+                                        let mut child: Option<
+                                            tsox_frontend::ast::Diagnostic,
+                                        > = None;
+                                        for entry in final_entries
+                                            .iter()
+                                            .filter(|e| !e.message.elided_in_compatibility_pyramid)
+                                        {
+                                            let mut d = tsox_frontend::ast::Diagnostic::new(
+                                                None,
+                                                name_node.loc,
+                                                entry.message,
+                                                entry.args.clone(),
+                                            );
+                                            if let Some(c) = child.take() {
+                                                d.message_chain = vec![c];
+                                            }
+                                            child = Some(d);
+                                        }
+                                        if let Some(c) = child {
+                                            diag.message_chain = vec![c];
+                                        }
+                                        self.diagnostics.add(diag);
+                                        issued_member_error = true;
+                                    }
+                                }
+                                if !issued_member_error {
+                                    let error_loc = cd
+                                        .name
+                                        .as_ref()
+                                        .map(|n| n.loc)
+                                        .unwrap_or(class_node.loc);
+                                    let mut diag = tsox_frontend::ast::Diagnostic::new(
+                                        self.current_file.clone(),
+                                        error_loc,
+                                        tsox_core::diagnostics::messages_generated::
+                                            CLASS_0_INCORRECTLY_EXTENDS_BASE_CLASS_1,
+                                        vec![instance_str.clone(), base_str.clone()],
+                                    );
+                                    let mut child: Option<tsox_frontend::ast::Diagnostic> =
+                                        None;
+                                    for entry in entries
+                                        .iter()
+                                        .filter(|e| !e.message.elided_in_compatibility_pyramid)
+                                    {
+                                        let mut d = tsox_frontend::ast::Diagnostic::new(
+                                            None,
+                                            error_loc,
+                                            entry.message,
+                                            entry.args.clone(),
+                                        );
+                                        if let Some(c) = child.take() {
+                                            d.message_chain = vec![c];
+                                        }
+                                        child = Some(d);
+                                    }
+                                    if let Some(c) = child {
+                                        diag.message_chain = vec![c];
+                                    }
+                                    self.diagnostics.add(diag);
+                                }
+                            }
+
+                            // Go：实例可赋时才查静态侧（TS2417）
+                            if overall_ok {
+                                let base_node = base_type.symbol.as_ref().and_then(|sym| {
+                                    sym.declarations.iter().find(|d| {
+                                        matches!(
+                                            d.data,
+                                            tsox_frontend::ast::NodeData::ClassDeclaration(_)
+                                        )
+                                    }).cloned()
+                                });
+                                if let Some(base_node) = base_node {
+                                    let mut static_bad: Option<(
+                                        Arc<Node>,
+                                        String,
+                                        bool,
+                                        bool,
+                                        Arc<Type>,
+                                        Arc<Type>,
+                                    )> = None;
+                                    for member in cd.members.iter() {
+                                        if !member.has_syntactic_modifier(ModifierFlags::Static) {
+                                            continue;
+                                        }
+                                        let Some(name_node) = member.name() else {
+                                            continue;
+                                        };
+                                        let prop_name = name_node.text().to_string();
+                                        if prop_name.is_empty() {
+                                            continue;
+                                        }
+                                        let Some(own_sym) = self
+                                            .program
+                                            .symbol_map()
+                                            .symbol_of(member)
+                                            .cloned()
+                                        else {
+                                            continue;
+                                        };
+                                        let base_member_opt =
+                                            if let tsox_frontend::ast::NodeData::ClassDeclaration(
+                                                bd,
+                                            ) = &base_node.data
+                                            {
+                                                bd.members.iter().find(|m| {
+                                                    m.has_syntactic_modifier(
+                                                        ModifierFlags::Static,
+                                                    ) && m.name().is_some_and(|n| {
+                                                        n.kind == SyntaxKind::Identifier
+                                                            && n.text() == prop_name
+                                                    })
+                                                })
+                                                .cloned()
+                                            } else {
+                                                None
+                                            };
+                                        let Some(base_member) = base_member_opt else {
+                                            continue;
+                                        };
+                                        let own_t = self.get_type_of_symbol(&own_sym);
+                                        let base_sym = self
+                                            .program
+                                            .symbol_map()
+                                            .symbol_of(&base_member)
+                                            .cloned();
+                                        let Some(base_sym) = base_sym else {
+                                            continue;
+                                        };
+                                        let base_t = self.get_type_of_symbol(&base_sym);
+                                        let both_private = member
+                                            .has_syntactic_modifier(ModifierFlags::Private)
+                                            && base_member
+                                                .has_syntactic_modifier(ModifierFlags::Private);
+                                        // 静态可见性收窄：protected 覆盖 public 同报
+                                        let visibility_narrowed = member
+                                            .has_syntactic_modifier(ModifierFlags::Protected)
+                                            && !base_member
+                                                .has_syntactic_modifier(ModifierFlags::Protected);
+                                        let related =
+                                            self.is_type_assignable_to(&own_t, &base_t);
+                                        let identical_ok = if !both_private {
+                                            true
+                                        } else {
+                                            Arc::ptr_eq(&own_t, &base_t) || {
+                                                let a = self.type_to_string(&own_t);
+                                                let b = self.type_to_string(&base_t);
+                                                a == b
+                                            }
+                                        };
+                                        if !related || !identical_ok || visibility_narrowed {
+                                            static_bad = Some((
+                                                Arc::clone(&name_node),
+                                                prop_name,
+                                                visibility_narrowed,
+                                                both_private,
+                                                own_t,
+                                                base_t,
+                                            ));
+                                            break;
+                                        }
+                                    }
+                                    if let Some((name_node, prop_name, narrowed, both_private, own_t, base_t)) =
+                                        static_bad
+                                    {
+                                        let class_name = cd
+                                            .name
+                                            .as_ref()
+                                            .map(|n| n.text().to_string())
+                                            .unwrap_or_default();
+                                        let mut diag =
+                                            tsox_frontend::ast::Diagnostic::new(
+                                                self.current_file.clone(),
+                                                cd.name
+                                                    .as_ref()
+                                                    .map(|n| n.loc)
+                                                    .unwrap_or(class_node.loc),
+                                                tsox_core::diagnostics::messages_generated::
+                                                    CLASS_STATIC_SIDE_0_INCORRECTLY_EXTENDS_BASE_CLASS_STATIC_SIDE_1,
+                                                vec![
+                                                    format!("typeof {class_name}"),
+                                                    format!("typeof {}", self.type_to_string(&base_type)),
+                                                ],
+                                            );
+                                        if narrowed {
+                                            diag.message_chain = vec![
+                                                tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        PROPERTY_0_IS_PROTECTED_IN_TYPE_1_BUT_PUBLIC_IN_TYPE_2,
+                                                    vec![
+                                                        prop_name,
+                                                        format!("typeof {class_name}"),
+                                                        format!(
+                                                            "typeof {}",
+                                                            self.type_to_string(&base_type)
+                                                        ),
+                                                    ],
+                                                ),
+                                            ];
+                                        } else if both_private {
+                                            diag.message_chain = vec![
+                                                tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        TYPES_HAVE_SEPARATE_DECLARATIONS_OF_A_PRIVATE_PROPERTY_0,
+                                                    vec![prop_name],
+                                                ),
+                                            ];
+                                        } else {
+                                            let saved_chain =
+                                                std::mem::take(&mut self.relater_error_chain);
+                                            let was_active = self.relater_chain_active;
+                                            self.relater_error_chain.clear();
+                                            self.relater_chain_active = true;
+                                            let _ = self.is_type_assignable_to(&own_t, &base_t);
+                                            if self.relater_error_chain.is_empty() {
+                                                let s_str = self.type_to_string(&own_t);
+                                                let t_str = self.type_to_string(&base_t);
+                                                self.push_relation_head_with_tp_note(
+                                                    &own_t,
+                                                    &base_t,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                                                    vec![s_str, t_str],
+                                                );
+                                            }
+                                            let chain = std::mem::replace(
+                                                &mut self.relater_error_chain,
+                                                saved_chain,
+                                            );
+                                            self.relater_chain_active = was_active;
+                                            let mut child: Option<
+                                                tsox_frontend::ast::Diagnostic,
+                                            > = None;
+                                            for entry in chain
+                                                .iter()
+                                                .filter(|e| !e.message.elided_in_compatibility_pyramid)
+                                            {
+                                                let mut d = tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    entry.message,
+                                                    entry.args.clone(),
+                                                );
+                                                if let Some(c) = child.take() {
+                                                    d.message_chain = vec![c];
+                                                }
+                                                child = Some(d);
+                                            }
+                                            let mut prop_diag =
+                                                tsox_frontend::ast::Diagnostic::new(
+                                                    None,
+                                                    name_node.loc,
+                                                    tsox_core::diagnostics::messages_generated::
+                                                        TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                                                    vec![prop_name],
+                                                );
+                                            if let Some(c) = child {
+                                                prop_diag.message_chain = vec![c];
+                                            }
+                                            diag.message_chain = vec![prop_diag];
+                                        }
+                                        self.diagnostics.add(diag);
+                                    }
+                                } else if let Some(class_symbol) =
+                                    self.get_symbol_of_declaration(&class_node)
+                                {
+                                    let merged_interface_extends = class_symbol
+                                        .flags
+                                        .intersects(tsox_frontend::ast::SymbolFlags::Interface)
+                                        && class_symbol.declarations.iter().any(|d| {
+                                            tsox_frontend::ast::is_interface_declaration(d)
+                                                && !tsox_frontend::ast::get_extends_heritage_clause_elements(d).is_empty()
+                                        });
+                                    if merged_interface_extends {
+                                        let class_type =
+                                            self.get_declared_type_of_symbol(&class_symbol);
+                                        let base_constructor_type = self
+                                            .get_base_constructor_type_of_class(&class_type)
+                                            .unwrap_or_else(|| self.error_type());
+                                        let static_base_type =
+                                            self.get_apparent_type(&base_constructor_type);
+                                        let static_target = self
+                                            .get_type_without_signatures(&static_base_type);
+                                        let static_type = self.get_type_of_symbol(&class_symbol);
+                                        let name_node = class_node.name();
+                                        self.check_type_assignable_to(
+                                            &static_type,
+                                            &static_target,
+                                            name_node.or(Some(&class_node)),
+                                            Some(&tsox_core::diagnostics::messages_generated::
+                                                CLASS_STATIC_SIDE_0_INCORRECTLY_EXTENDS_BASE_CLASS_STATIC_SIDE_1),
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return;
+        }
+        if data.token != SyntaxKind::ImplementsKeyword {
+            return;
+        }
+
+        let class_node = match node.parent() {
+            Some(p) => p,
+            None => return,
+        };
+        let (class_members, class_name_node) = match &class_node.data {
+            tsox_frontend::ast::NodeData::ClassDeclaration(d) => {
+                (d.members.clone(), d.name.clone())
+            }
+            tsox_frontend::ast::NodeData::ClassExpression(d) => {
+                (d.members.clone(), d.name.clone())
+            }
+            _ => return,
+        };
+
+        let instance_type = self.build_class_instance_type_with_base(&class_node);
+        let class_name = self.type_to_string(&instance_type);
+
+        for type_ref in data.types.iter() {
+            // Go checkClassDeclaration：implements 走 checkTypeReferenceNode
+            // → checkSourceElements(TypeArguments)，先于接口型解析
+            if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ewa) = &type_ref.data
+                && let Some(args) = &ewa.type_arguments
+            {
+                self.check_call_type_argument_nodes(args);
+            }
+            let interface_type = self.get_type_from_heritage_type_reference(type_ref);
+            if interface_type.flags.contains(TypeFlags::Any) {
+                continue;
+            }
+            if !self.is_type_assignable_to(&instance_type, &interface_type) {
+                let mut issued_member_error = false;
+                for member in class_members.iter() {
+                    if member.has_syntactic_modifier(ModifierFlags::Static) {
+                        continue;
+                    }
+                    let name_node = match &member.data {
+                        tsox_frontend::ast::NodeData::PropertyDeclaration(d) => &d.name,
+                        tsox_frontend::ast::NodeData::MethodDeclaration(d) => &d.name,
+                        tsox_frontend::ast::NodeData::GetAccessorDeclaration(d) => &d.name,
+                        tsox_frontend::ast::NodeData::SetAccessorDeclaration(d) => &d.name,
+                        _ => continue,
+                    };
+                    let prop_name = name_node.text().to_string();
+                    if prop_name.is_empty() {
+                        continue;
+                    }
+                    let Some(prop) = self.get_property_of_type(&instance_type, &prop_name) else {
+                        continue;
+                    };
+                    let Some(base_prop) = self.get_property_of_type(&interface_type, &prop_name)
+                    else {
+                        continue;
+                    };
+                    let prop_type = self.get_type_of_symbol(&prop);
+                    let base_type = self.get_type_of_symbol(&base_prop);
+
+                    let saved_chain = std::mem::take(&mut self.relater_error_chain);
+                    let was_active = self.relater_chain_active;
+                    self.relater_chain_active = true;
+                    let assignable = self.is_type_assignable_to(&prop_type, &base_type);
+                    let captured = std::mem::replace(&mut self.relater_error_chain, saved_chain);
+                    self.relater_chain_active = was_active;
+                    if assignable {
+                        continue;
+                    }
+                    let class_str = self.type_to_string(&instance_type);
+                    let iface_str = self.type_to_string(&interface_type);
+                    let file = self.current_file.clone();
+                    let mut diag = tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        name_node.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            PROPERTY_0_IN_TYPE_1_IS_NOT_ASSIGNABLE_TO_THE_SAME_PROPERTY_IN_BASE_TYPE_2,
+                        vec![prop_name, class_str, iface_str],
+                    );
+
+                    let dt_str = self.type_to_string(&prop_type);
+                    let bt_str = self.type_to_string(&base_type);
+                    self.relater_error_chain = captured;
+                    self.relater_chain_active = true;
+                    self.try_elaborate_primitive_and_object(&prop_type, &base_type);
+                    self.push_relation_head_with_tp_note(
+                        &prop_type,
+                        &base_type,
+                        tsox_core::diagnostics::messages_generated::TYPE_0_IS_NOT_ASSIGNABLE_TO_TYPE_1,
+                        vec![dt_str, bt_str],
+                    );
+                    let entries = std::mem::take(&mut self.relater_error_chain);
+                    self.relater_chain_active = was_active;
+
+                    let mut child: Option<tsox_frontend::ast::Diagnostic> = None;
+                    for entry in entries
+                        .iter()
+                        .filter(|e| !e.message.elided_in_compatibility_pyramid)
+                    {
+                        let mut d = tsox_frontend::ast::Diagnostic::new(
+                            None,
+                            name_node.loc,
+                            entry.message,
+                            entry.args.clone(),
+                        );
+                        if let Some(c) = child.take() {
+                            d.message_chain = vec![c];
+                        }
+                        child = Some(d);
+                    }
+                    if let Some(c) = child {
+                        diag.message_chain = vec![c];
+                    }
+                    self.diagnostics.add(diag);
+                    issued_member_error = true;
+                }
+                if !issued_member_error {
+                    let iface_name = self.type_to_string(&interface_type);
+                    let saved_chain = std::mem::take(&mut self.relater_error_chain);
+                    let was_active = self.relater_chain_active;
+                    self.relater_chain_active = true;
+                    let _ = self.is_type_assignable_to(&instance_type, &interface_type);
+                    let entries = std::mem::replace(&mut self.relater_error_chain, saved_chain);
+                    self.relater_chain_active = was_active;
+
+                    let error_loc = class_name_node
+                        .as_ref()
+                        .map(|n| n.loc)
+                        .unwrap_or(class_node.loc);
+                    let file = self.current_file.clone();
+                    // Go checkClassDeclaration implements 分支：目标是 class 符号时
+                    // 报 TS2720（建议 extends 继承）而非 TS2420
+                    let implements_class = interface_type
+                        .symbol
+                        .as_ref()
+                        .is_some_and(|s| s.flags.contains(SymbolFlags::Class));
+                    let generic_message = if implements_class {
+                        tsox_core::diagnostics::messages_generated::
+                            CLASS_0_INCORRECTLY_IMPLEMENTS_CLASS_1_DID_YOU_MEAN_TO_EXTEND_1_AND_INHERIT_ITS_MEMBERS_AS_A_SUBCLASS
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            CLASS_0_INCORRECTLY_IMPLEMENTS_INTERFACE_1
+                    };
+                    let mut diag = tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        error_loc,
+                        generic_message,
+                        vec![class_name.clone(), iface_name],
+                    );
+                    let mut child: Option<tsox_frontend::ast::Diagnostic> = None;
+                    for entry in entries
+                        .iter()
+                        .filter(|e| !e.message.elided_in_compatibility_pyramid)
+                    {
+                        let mut d = tsox_frontend::ast::Diagnostic::new(
+                            None,
+                            error_loc,
+                            entry.message,
+                            entry.args.clone(),
+                        );
+                        if let Some(c) = child.take() {
+                            d.message_chain = vec![c];
+                        }
+                        child = Some(d);
+                    }
+                    if let Some(c) = child {
+                        diag.message_chain = vec![c];
+                    }
+                    self.diagnostics.add(diag);
+                }
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn build_class_instance_type(&mut self, members: &Arc<NodeList>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_class_instance_type"); 
+        self.build_interface_type_from_members(members)
+    }
+}
+
+fn entity_name_text(node: &Arc<Node>) -> String { ::tsox_core::fntrace::enter("entity_name_text"); 
+    match &node.data {
+        tsox_frontend::ast::NodeData::Identifier(id) => id.text.clone(),
+        tsox_frontend::ast::NodeData::PropertyAccessExpression(pa) => {
+            format!("{}.{}", entity_name_text(&pa.expression), pa.name.text())
+        }
+        _ => String::new(),
+    }
+}

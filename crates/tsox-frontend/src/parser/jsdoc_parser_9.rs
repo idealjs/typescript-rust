@@ -1,0 +1,270 @@
+#![allow(unused_imports)]
+
+use crate::parser::jsdoc::*;
+
+impl crate::parser::Parser {
+    pub(crate) fn skip_whitespace(&mut self) { ::tsox_core::fntrace::enter("skip_whitespace"); 
+        if self.token == SyntaxKind::WhitespaceTrivia || self.token == SyntaxKind::NewLineTrivia {
+            if self.is_next_nonwhitespace_token_eof() {
+                return;
+            }
+        }
+        while self.token == SyntaxKind::WhitespaceTrivia || self.token == SyntaxKind::NewLineTrivia
+        {
+            self.next_token_jsdoc();
+        }
+    }
+
+    pub(crate) fn is_next_nonwhitespace_token_eof(&mut self) -> bool { ::tsox_core::fntrace::enter("is_next_nonwhitespace_token_eof"); 
+        loop {
+            self.next_token_jsdoc();
+            if self.token == SyntaxKind::EndOfFile {
+                return true;
+            }
+            if self.token != SyntaxKind::WhitespaceTrivia && self.token != SyntaxKind::NewLineTrivia
+            {
+                return false;
+            }
+        }
+    }
+
+    pub(crate) fn skip_whitespace_or_asterisk(&mut self) -> String { ::tsox_core::fntrace::enter("skip_whitespace_or_asterisk"); 
+        let mut indents = String::new();
+        let mut preceding_line_break = self.scanner.has_preceding_line_break();
+        let mut seen_line_break = false;
+
+        // Go：星号仅在换行后（行首装饰）才被消费，标签名紧邻的 *
+        // 留给 trailing 注释按 SawAsterisk 规则记录
+        loop {
+            let consumes = match self.token {
+                SyntaxKind::AsteriskToken => preceding_line_break,
+                SyntaxKind::WhitespaceTrivia | SyntaxKind::NewLineTrivia => true,
+                _ => false,
+            };
+            if !consumes {
+                break;
+            }
+            match self.token {
+                SyntaxKind::NewLineTrivia => {
+                    preceding_line_break = true;
+                    seen_line_break = true;
+                    indents.clear();
+                }
+                SyntaxKind::AsteriskToken => {
+                    preceding_line_break = false;
+                    indents.push_str(self.scanner.token_text());
+                }
+                _ => {
+                    indents.push_str(self.scanner.token_text());
+                }
+            }
+            self.next_token_jsdoc();
+        }
+
+        if seen_line_break {
+            indents
+        } else {
+            String::new()
+        }
+    }
+}
+
+pub(crate) fn is_jsdoc_like_text(text: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_like_text"); 
+    text.starts_with("/**") && !text.starts_with("/**/")
+}
+
+pub(crate) fn is_jsdoc_link_tag(kind: &str) -> bool { ::tsox_core::fntrace::enter("is_jsdoc_link_tag"); 
+    matches!(kind, "link" | "linkcode" | "linkplain")
+}
+
+pub(crate) fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_identifier_or_keyword_token"); 
+    token == SyntaxKind::Identifier || crate::ast::is_keyword_kind(token)
+}
+
+pub(crate) fn push_comment(
+    comments: &mut Vec<String>,
+    indent: &mut usize,
+    margin: &mut i32,
+    text: &str,
+) { ::tsox_core::fntrace::enter("push_comment"); 
+    if *margin == -1 {
+        *margin = *indent as i32;
+    }
+    comments.push(text.to_string());
+    *indent += text.len();
+}
+
+pub(crate) fn remove_leading_newlines(mut comments: Vec<String>) -> Vec<String> { ::tsox_core::fntrace::enter("remove_leading_newlines"); 
+    let mut i = 0;
+    while i < comments.len()
+        && comments[i]
+            .trim_matches(|c| c == '\r' || c == '\n')
+            .is_empty()
+    {
+        i += 1;
+    }
+    comments.drain(..i);
+    comments
+}
+
+pub(crate) fn trim_end(s: &str) -> String { ::tsox_core::fntrace::enter("trim_end"); 
+    s.trim_end_matches(|c: char| c.is_whitespace() || c == '\u{2028}' || c == '\u{2029}')
+        .to_string()
+}
+
+pub(crate) fn remove_trailing_whitespace(mut comments: Vec<String>) -> Vec<String> { ::tsox_core::fntrace::enter("remove_trailing_whitespace"); 
+    let mut end = comments.len();
+    for i in (0..comments.len()).rev() {
+        let trimmed = trim_end(&comments[i]);
+        if trimmed.is_empty() {
+            end = i;
+        } else {
+            comments[i] = trimmed;
+            break;
+        }
+    }
+    comments.truncate(end);
+    comments
+}
+
+pub fn get_jsdoc_comment_ranges(text: &str, node: &Node) -> Vec<crate::scanner::CommentRange> { ::tsox_core::fntrace::enter("get_jsdoc_comment_ranges"); 
+    use crate::ast::SyntaxKind as SK;
+    use crate::scanner::{get_leading_comment_ranges, get_trailing_comment_ranges};
+
+    let token_pos = node.pos();
+
+    let full_start = find_full_start(text, token_pos);
+
+    let mut ranges = match node.kind {
+        SK::Parameter
+        | SK::TypeParameter
+        | SK::FunctionExpression
+        | SK::ArrowFunction
+        | SK::ParenthesizedExpression
+        | SK::VariableDeclaration
+        | SK::ExportSpecifier => {
+            let mut r = get_trailing_comment_ranges(text, token_pos);
+            r.extend(get_leading_comment_ranges(text, full_start));
+            r
+        }
+        _ => get_leading_comment_ranges(text, full_start),
+    };
+
+    let node_end = node.end();
+    ranges.retain(|c| {
+        let comment_start = c.pos;
+        let comment_len = c.end.saturating_sub(comment_start);
+        c.end <= node_end
+            && comment_len >= 4
+            && text.as_bytes().get(comment_start + 1) == Some(&b'*')
+            && text.as_bytes().get(comment_start + 2) == Some(&b'*')
+            && text.as_bytes().get(comment_start + 3) != Some(&b'/')
+    });
+    ranges
+}
+
+pub(crate) fn find_full_start(text: &str, token_pos: usize) -> usize { ::tsox_core::fntrace::enter("find_full_start"); 
+    let bytes = text.as_bytes();
+    let mut i = token_pos;
+
+    while i > 0 {
+        while i > 0
+            && (bytes[i - 1] == b' '
+                || bytes[i - 1] == b'\t'
+                || bytes[i - 1] == b'\n'
+                || bytes[i - 1] == b'\r')
+        {
+            i -= 1;
+        }
+
+        if i >= 2 && bytes[i - 2] == b'*' && bytes[i - 1] == b'/' {
+            let mut j = i - 2;
+            while j >= 2 {
+                if bytes[j - 2] == b'/' && bytes[j - 1] == b'*' {
+                    i = j - 2;
+                    break;
+                }
+                j -= 1;
+            }
+            if j < 2 {
+                break;
+            }
+        } else if i >= 2 && bytes[i - 2] == b'/' && bytes[i - 1] == b'/' {
+            while i > 0 && bytes[i - 1] != b'\n' {
+                i -= 1;
+            }
+        } else {
+            break;
+        }
+    }
+    i
+}
+
+thread_local! {
+    static JSDOC_PARSER: std::cell::RefCell<Option<((u64, u64, u64), crate::parser::Parser)>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+pub(crate) fn fnv1a(bytes: &[u8], seed: u64) -> u64 { ::tsox_core::fntrace::enter("fnv1a"); 
+    let mut hash = 0xcbf29ce484222325u64 ^ seed;
+    for &byte in bytes {
+        hash ^= byte as u64;
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    hash
+}
+
+pub(crate) fn jsdoc_parser_key(file_name: &str, text: &str) -> (u64, u64, u64) { ::tsox_core::fntrace::enter("jsdoc_parser_key"); 
+    let bytes = text.as_bytes();
+    let head = fnv1a(&bytes[..bytes.len().min(64)], 0x9e3779b9);
+    let tail = fnv1a(&bytes[bytes.len().saturating_sub(64)..], 0x85ebca6b);
+    (
+        fnv1a(file_name.as_bytes(), 0),
+        (text.len() as u64) ^ head,
+        tail,
+    )
+}
+
+/// 按给定注释区间解析 JSDoc（补全等位置驱动路径使用，不依附具体节点）
+pub fn parse_jsdoc_comment_range(
+    source_file: &crate::ast::SourceFile,
+    pos: usize,
+    end: usize,
+) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parse_jsdoc_comment_range"); 
+    let text = &source_file.text;
+    let key = jsdoc_parser_key(&source_file.file_name, text);
+    JSDOC_PARSER.with(|cell| {
+        let mut slot = cell.borrow_mut();
+        if slot.as_ref().map(|(k, _)| *k) != Some(key) {
+            *slot = Some((key, crate::parser::Parser::new(text.clone())));
+        }
+        let parser = &mut slot.as_mut().unwrap().1;
+        parser.parse_jsdoc_comment(pos, end, pos)
+    })
+}
+
+pub fn parse_jsdoc_for_node(source_file: &crate::ast::SourceFile, node: &Node) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("parse_jsdoc_for_node"); 
+    let text = &source_file.text;
+    let ranges = get_jsdoc_comment_ranges(text, node);
+    if ranges.is_empty() {
+        return Vec::new();
+    }
+
+    let key = jsdoc_parser_key(&source_file.file_name, text);
+    let mut jsdocs: Vec<Arc<Node>> = Vec::with_capacity(ranges.len());
+    let mut pos = ranges[0].pos;
+    JSDOC_PARSER.with(|cell| {
+        let mut slot = cell.borrow_mut();
+        if slot.as_ref().map(|(k, _)| *k) != Some(key) {
+            *slot = Some((key, crate::parser::Parser::new(text.clone())));
+        }
+        let parser = &mut slot.as_mut().unwrap().1;
+        for comment in &ranges {
+            if let Some(parsed) = parser.parse_jsdoc_comment(comment.pos, comment.end, pos) {
+                pos = parsed.end();
+                jsdocs.push(parsed);
+            }
+        }
+    });
+    jsdocs
+}

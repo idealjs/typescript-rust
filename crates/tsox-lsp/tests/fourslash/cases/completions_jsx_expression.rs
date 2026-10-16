@@ -1,0 +1,18 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn completions_jsx_expression() {
+    let content = r#"// @Filename: /a.tsx
+// @jsx: react
+declare namespace JSX {
+    interface IntrinsicElements {
+        div: { a: string, b: string }
+    }
+}
+const value = "test";
+<div a={v/**/} />"#;
+    let mut s = Session::new_with_capabilities(content, None);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+}

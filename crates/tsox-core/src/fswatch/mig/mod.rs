@@ -1,0 +1,10 @@
+// 迁移批次模块接线(r 轮生成,构建修复阶段维护)
+pub mod m5f;
+pub mod m5f_2;
+pub mod m5g;
+pub mod m5g_2;
+pub mod m5g_3;
+pub mod m5g_4;
+pub mod m5g_5;
+pub mod m5g_6;
+pub mod m5g_7;

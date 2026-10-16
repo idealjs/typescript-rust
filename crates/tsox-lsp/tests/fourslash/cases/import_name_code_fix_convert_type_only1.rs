@@ -1,0 +1,15 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn import_name_code_fix_convert_type_only1() {
+    let content = r#"// @Filename: /a.ts
+export class A {}
+export class B {}
+// @Filename: /b.ts
+import type { A } from './a';
+new B"#;
+    let mut s = Session::new_for_test("importNameCodeFixConvertTypeOnly1", content);
+    fourslash::go_to_file(&mut s, "/b.ts");
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+}

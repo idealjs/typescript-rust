@@ -1,0 +1,480 @@
+#![allow(unused_imports)]
+
+use crate::checker::relater_relate_impl_chunk::*;
+
+impl Checker {
+    pub(crate) fn is_tuple_type_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool { ::tsox_core::fntrace::enter("is_tuple_type_related_to"); 
+        let source_tuple = match &source.data {
+            TypeData::Tuple(t) => t,
+            _ => return false,
+        };
+        let target_tuple = match &target.data {
+            TypeData::Tuple(t) => t,
+            _ => return false,
+        };
+
+        // Go propertiesRelatedTo 元组目标分支：目标可变而源 readonly（元组或
+        // 数组）时直接拒绝，错误链走 TS4104
+        if !target_tuple.readonly {
+            let source_ro = source_tuple.readonly
+                || (self.is_array_type(source)
+                    && source
+                        .object_flags
+                        .contains(crate::checker::types::ObjectFlags::IsReadonlyArray));
+            if source_ro {
+                if self.relater_chain_active {
+                    let source_str = self.type_to_string(source);
+                    let target_str = self.type_to_string(target);
+                    self.relater_report_error(
+                        tsox_core::diagnostics::messages_generated::
+                            THE_TYPE_0_IS_READONLY_AND_CANNOT_BE_ASSIGNED_TO_THE_MUTABLE_TYPE_1,
+                        vec![source_str, target_str],
+                    );
+                }
+                return false;
+            }
+        }
+
+        let source_arity = source_tuple.fixed_length;
+        let target_arity = target_tuple.fixed_length;
+        let source_rest = source_tuple.combined_flags.intersects(ElementFlags::Rest);
+        let target_has_variable_element = target_tuple
+            .combined_flags
+            .intersects(crate::checker::types::ELEMENT_FLAGS_VARIABLE);
+        let source_min_length = source_tuple.min_length;
+        let target_min_length = target_tuple.min_length;
+
+        if !source_rest && source_arity < target_min_length {
+            return false;
+        }
+        if !target_has_variable_element && target_arity < source_min_length {
+            return false;
+        }
+        if !target_has_variable_element && (source_rest || target_arity < source_arity) {
+            return false;
+        }
+
+        let min_len = source_tuple
+            .element_infos
+            .len()
+            .min(target_tuple.element_infos.len());
+        for i in 0..min_len {
+            let source_elem = &source_tuple.element_infos[i];
+            let target_elem = &target_tuple.element_infos[i];
+
+            let source_type = self.get_tuple_element_type(source, i);
+            let target_type = self.get_tuple_element_type(target, i);
+
+            if let (Some(st), Some(tt)) = (source_type, target_type) {
+                if !self.is_type_related_to(&st, &tt, relation) {
+                    return false;
+                }
+            }
+
+            if !self.is_element_flags_compatible(source_elem.flags, target_elem.flags, relation) {
+                return false;
+            }
+        }
+
+        if source_tuple.element_infos.len() < target_tuple.element_infos.len() {
+            for i in source_tuple.element_infos.len()..target_tuple.element_infos.len() {
+                let flags = target_tuple.element_infos[i].flags;
+                if !flags.contains(ElementFlags::Optional)
+                    && !flags.contains(ElementFlags::Rest)
+                    && !flags.contains(ElementFlags::Variadic)
+                {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+
+    pub(crate) fn get_tuple_element_type(&self, t: &Arc<Type>, index: usize) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_tuple_element_type"); 
+        match &t.data {
+            TypeData::Tuple(tuple) => tuple
+                .element_infos
+                .get(index)
+                .and_then(|info| info.type_.clone()),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn is_element_flags_compatible(
+        &self,
+        source: ElementFlags,
+        target: ElementFlags,
+        _relation: RelationKind,
+    ) -> bool { ::tsox_core::fntrace::enter("is_element_flags_compatible"); 
+        if source.contains(ElementFlags::Required) {
+            target.contains(ElementFlags::Required) || target.contains(ElementFlags::Optional)
+        } else if source.contains(ElementFlags::Optional) {
+            target.contains(ElementFlags::Optional)
+        } else if source.contains(ElementFlags::Rest) {
+            target.contains(ElementFlags::Rest)
+        } else if source.contains(ElementFlags::Variadic) {
+            target.contains(ElementFlags::Variadic) || target.contains(ElementFlags::Rest)
+        } else {
+            true
+        }
+    }
+
+    pub(crate) fn is_union_or_intersection_related_to(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool { ::tsox_core::fntrace::enter("is_union_or_intersection_related_to"); 
+        let s = source.flags;
+        let t = target.flags;
+
+        if s.contains(TypeFlags::Union) {
+            if relation == RelationKind::Comparable {
+                return self.some_type_related_to_type(source, target, relation);
+            }
+            return self.each_type_related_to_type(source, target, relation);
+        }
+
+        if t.contains(TypeFlags::Union) {
+            if s == TypeFlags::Boolean
+                && target
+                    .as_union_or_intersection()
+                    .is_some_and(|ui| {
+                        ui.types.iter().any(|m| m.flags.contains(TypeFlags::BooleanLiteral))
+                    })
+            {
+                let false_t = self.false_type();
+                let true_t = self.true_type();
+                let saved_chain_active = self.relater_chain_active;
+                self.relater_chain_active = false;
+                let distributed = self.is_type_related_to(&false_t, target, relation)
+                    && self.is_type_related_to(&true_t, target, relation);
+                self.relater_chain_active = saved_chain_active;
+                if distributed {
+                    return true;
+                }
+            }
+            return self.type_related_to_some_type(source, target, relation);
+        }
+
+        if t.contains(TypeFlags::Intersection) {
+            let outer_depth = self.relater_intersection_target_depth;
+            let related = self.type_related_to_each_type(source, target, relation);
+            if related
+                && outer_depth == 0
+                && s.intersects(TypeFlags::Object | TypeFlags::Intersection)
+            {
+                return self.extra_intersection_properties_check(source, target, relation);
+            }
+            return related;
+        }
+
+        if s.contains(TypeFlags::Intersection) {
+            let save_len = self.relater_error_chain.len();
+            let mut immediately_related = false;
+            if let Some(ui) = source.as_union_or_intersection() {
+                for c in &ui.types {
+                    if self.is_type_related_to(c, target, relation) {
+                        immediately_related = true;
+                        break;
+                    }
+                }
+            }
+            self.relater_error_chain.truncate(save_len);
+            if immediately_related {
+                if self.source_intersection_needs_extra_check(source, target) {
+                    return self.source_intersection_extra_optionals_check(source, target, relation);
+                }
+                return true;
+            }
+
+            if t.contains(TypeFlags::Object) {
+                let related =
+                    self.intersection_source_structurally_related(source, target, relation);
+                if related && self.source_intersection_needs_extra_check(source, target) {
+                    return self
+                        .source_intersection_extra_optionals_check(source, target, relation);
+                }
+                return related;
+            }
+            if t.contains(TypeFlags::TypeParameter) {
+                if let Some(constraint) = self.get_constraint_of_type_parameter(target) {
+                    return self.is_type_related_to(source, &constraint, relation);
+                }
+            }
+            return false;
+        }
+
+        false
+    }
+
+    // Go isSourceIntersectionNeedingExtraCheck:source 为交集、apparent 为
+    // 结构型,且无成分等于目标或为 NonInferrableType
+    fn source_intersection_needs_extra_check(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> bool { ::tsox_core::fntrace::enter("source_intersection_needs_extra_check"); 
+        if !target.flags.contains(TypeFlags::Object)
+            || crate::checker::utilities_is_optional_symbol::is_array_or_tuple_type(target)
+            || self.is_generic_mapped_type(target)
+        {
+            return false;
+        }
+        let apparent = self.get_apparent_type(source);
+        if !apparent
+            .flags
+            .intersects(crate::checker::types_type_id::TYPE_FLAGS_STRUCTURED_TYPE)
+        {
+            return false;
+        }
+        !source.types().is_some_and(|types| {
+            types.iter().any(|t| {
+                t.id == target.id || t.object_flags.contains(ObjectFlags::NonInferrableType)
+            })
+        })
+    }
+
+    // Go structuredTypeRelatedTo 后置检查:source 交集相关成功后,对 target
+    // 可选属性逐一比较(propertiesRelatedTo optionalsOnly)
+    fn source_intersection_extra_optionals_check(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool { ::tsox_core::fntrace::enter("source_intersection_extra_optionals_check"); 
+        let target_props = self.get_properties_of_type(target);
+        for target_prop in target_props {
+            if target_prop.flags.contains(SymbolFlags::Prototype)
+                || !target_prop.flags.contains(SymbolFlags::Optional)
+            {
+                continue;
+            }
+            let Some(source_prop) = self.get_property_of_type(source, &target_prop.name) else {
+                continue;
+            };
+            let source_type = self.substituted_member_type_of(source, &source_prop);
+            let target_type = self.substituted_member_type_of(target, &target_prop);
+            if !self.is_type_related_to(&source_type, &target_type, relation) {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::
+                        TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                    vec![self.chain_property_arg_name(&target_prop)],
+                );
+                return false;
+            }
+        }
+        true
+    }
+
+    pub(crate) fn extra_intersection_properties_check(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool { ::tsox_core::fntrace::enter("extra_intersection_properties_check"); 
+        let saved_depth = self.relater_intersection_target_depth;
+        self.relater_intersection_target_depth = 0;
+        let ok = self
+            .extra_intersection_properties_check_inner(source, target, relation);
+        self.relater_intersection_target_depth = saved_depth;
+        ok
+    }
+
+    fn extra_intersection_properties_check_inner(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool { ::tsox_core::fntrace::enter("extra_intersection_properties_check_inner"); 
+        let source_props = self.get_properties_of_type(source);
+        if !source_props.is_empty()
+            && relation != RelationKind::Comparable
+            && self.is_weak_type(target)
+            && !self.has_common_properties(source, target, source.object_flags.contains(crate::checker::types::ObjectFlags::JsxAttributes))
+        {
+            if self.relater_chain_active {
+                self.relater_no_common_self_reports += 1;
+            }
+            let source_str = self.type_to_string(source);
+            let target_str = self.type_to_string(target);
+            self.relater_report_error(
+                tsox_core::diagnostics::messages_generated::TYPE_0_HAS_NO_PROPERTIES_IN_COMMON_WITH_TYPE_1,
+                vec![source_str, target_str],
+            );
+            return false;
+        }
+        let target_props = self.get_properties_of_type(target);
+        for target_prop in target_props {
+            let Some(source_prop) = self.get_property_of_type(source, &target_prop.name) else {
+                continue;
+            };
+            let source_type = self.substituted_member_type_of(source, &source_prop);
+            let target_type = self.substituted_member_type_of(target, &target_prop);
+            if !self.is_type_related_to(&source_type, &target_type, relation) {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                    vec![self.chain_property_arg_name(&target_prop)],
+                );
+                return false;
+            }
+        }
+        if crate::checker::is_object_literal_type(source)
+            && source.object_flags.contains(crate::checker::types::ObjectFlags::FreshLiteral)
+            && !self.is_index_signatures_related_to(source, target, relation, false)
+        {
+            return false;
+        }
+        true
+    }
+
+    pub(crate) fn intersection_source_structurally_related(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+        relation: RelationKind,
+    ) -> bool { ::tsox_core::fntrace::enter("intersection_source_structurally_related"); 
+        let Some(ui) = source.as_union_or_intersection() else {
+            return false;
+        };
+        let Some(target_struct) = target.as_structured() else {
+            return false;
+        };
+        let mut missing_props: Vec<String> = Vec::new();
+        let mut missing_prop_syms: Vec<Option<Arc<tsox_frontend::ast::Symbol>>> = Vec::new();
+        for target_prop in &target_struct.properties {
+            let found =
+                self.intersection_lookup_property(&ui.types, &target_prop.name, &mut Vec::new());
+            let Some(source_prop) = found else {
+                if target_prop.flags.contains(SymbolFlags::Optional) {
+                    continue;
+                }
+                missing_props.push(target_prop.name.clone());
+                missing_prop_syms.push(Some(Arc::clone(target_prop)));
+                continue;
+            };
+            let source_type = self.get_type_of_symbol(&source_prop);
+            let target_type = self.substituted_member_type_of(target, target_prop);
+            if !self.is_type_related_to(&source_type, &target_type, relation) {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::TYPES_OF_PROPERTY_0_ARE_INCOMPATIBLE,
+                    vec![self.chain_property_arg_name(target_prop)],
+                );
+                return false;
+            }
+        }
+        if !missing_props.is_empty() {
+            if !self.should_report_unmatched_property_error(source, target) {
+                return false;
+            }
+            let (source_str, target_str) = self.get_type_names_for_error_display(source, target);
+            if missing_props.len() == 1 {
+                let display = crate::checker::property_name_for_display(&missing_props[0]);
+                self.relater_report_error_with_related(
+                    tsox_core::diagnostics::messages_generated::
+                        PROPERTY_0_IS_MISSING_IN_TYPE_1_BUT_REQUIRED_IN_TYPE_2,
+                    vec![display.clone(), source_str, target_str],
+                    missing_prop_syms[0].as_ref().and_then(|sym| {
+                        sym.declarations.first().map(|d| {
+                            crate::checker::relater_relation::ChainRelated {
+                                file: self.get_source_file_of_node(d),
+                                loc: d.loc,
+                                message: tsox_core::diagnostics::messages_generated::
+                                    X_0_IS_DECLARED_HERE,
+                                args: vec![display],
+                            }
+                        })
+                    }),
+                );
+            } else if missing_props.len() <= 5 {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::
+                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2,
+                    vec![
+                        source_str,
+                        target_str,
+                        crate::checker::property_names_for_display(&missing_props),
+                    ],
+                );
+            } else {
+                self.relater_report_error(
+                    tsox_core::diagnostics::messages_generated::
+                        TYPE_0_IS_MISSING_THE_FOLLOWING_PROPERTIES_FROM_TYPE_1_COLON_2_AND_3_MORE,
+                    vec![
+                        source_str,
+                        target_str,
+                        crate::checker::property_names_for_display(&missing_props[..4]),
+                        (missing_props.len() - 4).to_string(),
+                    ],
+                );
+            }
+            return false;
+        }
+
+        let target_call = target_struct.call_signatures().to_vec();
+        let target_construct = target_struct.construct_signatures().to_vec();
+        for (kind, target_sigs) in [
+            (SignatureKind::Call, target_call),
+            (SignatureKind::Construct, target_construct),
+        ] {
+            if target_sigs.is_empty() {
+                continue;
+            }
+            let mut source_sigs: Vec<Arc<crate::checker::types::Signature>> = Vec::new();
+            for c in &ui.types {
+                if let Some(cs) = c.as_structured() {
+                    let sigs = match kind {
+                        SignatureKind::Call => cs.call_signatures(),
+                        SignatureKind::Construct => cs.construct_signatures(),
+                    };
+                    source_sigs.extend(sigs.iter().cloned());
+                }
+            }
+            if source_sigs.is_empty() {
+                continue;
+            }
+
+            let mut all_matched = true;
+            for t in &target_sigs {
+                let mut matched = false;
+                for s in &source_sigs {
+                    if !self
+                        .compare_signatures_related(s, t, SignatureCheckMode::empty(), relation)
+                        .is_false()
+                    {
+                        matched = true;
+                        break;
+                    }
+                }
+                if !matched {
+                    all_matched = false;
+                    break;
+                }
+            }
+            if !all_matched {
+                return false;
+            }
+        }
+        true
+    }
+
+    pub(crate) fn intersection_lookup_property(
+        &mut self,
+        constituents: &[Arc<Type>],
+        name: &str,
+        visited: &mut Vec<usize>,
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("intersection_lookup_property"); 
+        for c in constituents {
+            if let Some(sym) = self.lookup_property_on_single_type(c, name, visited) {
+                return Some(sym);
+            }
+        }
+        None
+    }
+}

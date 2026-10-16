@@ -1,0 +1,294 @@
+#![allow(unused_imports)]
+
+use super::*;
+
+pub(crate) fn import_resolution_mode_override(
+    import_node: &Arc<tsox_frontend::ast::Node>,
+) -> tsox_core::core::compiler_options::ModuleKind { ::tsox_core::fntrace::enter("import_resolution_mode_override"); 
+    use tsox_core::core::compiler_options::ModuleKind;
+    let Some(decl) = import_node.parent() else {
+        return ModuleKind::None;
+    };
+    let (attributes, type_only) = match &decl.data {
+        tsox_frontend::ast::NodeData::ImportDeclaration(d) => {
+            let type_only = d.import_clause.as_ref().is_some_and(|c| {
+                matches!(&c.data, tsox_frontend::ast::NodeData::ImportClause(ic)
+                    if ic.phase_modifier == Some(tsox_frontend::ast::SyntaxKind::TypeKeyword))
+            });
+            (d.attributes.as_ref(), type_only)
+        }
+        tsox_frontend::ast::NodeData::ExportDeclaration(d) => {
+            (d.attributes.as_ref(), d.is_type_only)
+        }
+        _ => return ModuleKind::None,
+    };
+    let Some(attrs) = attributes else {
+        return ModuleKind::None;
+    };
+    if !type_only {
+        return ModuleKind::None;
+    }
+    let tsox_frontend::ast::NodeData::ImportAttributes(data) = &attrs.data else {
+        return ModuleKind::None;
+    };
+    if data.attributes.len() != 1 {
+        return ModuleKind::None;
+    }
+    let tsox_frontend::ast::NodeData::ImportAttribute(attr) = &data.attributes.nodes[0].data else {
+        return ModuleKind::None;
+    };
+    if attr.name.text() != "resolution-mode" {
+        return ModuleKind::None;
+    }
+    match attr.value.text() {
+        "import" => ModuleKind::ESNext,
+        "require" => ModuleKind::CommonJS,
+        _ => ModuleKind::None,
+    }
+}
+
+pub fn is_external_library_file(file_name: &str) -> bool { ::tsox_core::fntrace::enter("is_external_library_file"); 
+    file_name.contains("/node_modules/") || file_name.contains("\\node_modules\\")
+}
+
+pub(crate) fn is_plain_js_file(file: &SourceFile, check_js: Tristate) -> bool { ::tsox_core::fntrace::enter("is_plain_js_file"); 
+    matches!(file.script_kind, ScriptKind::Js | ScriptKind::Jsx) && check_js.is_unknown()
+}
+
+pub(crate) const PLAIN_JS_ERROR_CODES: &[i32] = &[
+    2451, 2528, 2753, 2752, 1262, 1214, 1359, 18012, 1102, 1210, 1215, 1100, 1344, 1101, 1105,
+    1116, 1211, 1248, 1171, 1104, 1115, 1113, 1258, 1255, 1182, 1054, 2501, 2566, 1186, 2462, 1048,
+    1014, 1013, 18041, 1053, 1049, 1474, 1193, 1473, 1191, 1162, 1325, 2803, 2492, 1197, 18036,
+    1174, 18006, 1312, 1114, 1450, 18038, 17000, 17001, 18007, 2633, 1107, 1200, 1184, 1091, 1188,
+    18016, 1451, 18013, 1358, 1106, 1189, 1190, 1009, 1123, 5076, 1005, 17012, 1097, 1030, 1089,
+    1044, 1090, 1031, 1042, 1029, 1156, 1155, 1172, 2480, 1341, 1368, 1308, 2852, 1111, 2839,
+];
+
+pub(crate) fn should_skip_js_file(file_name: &str, allow_js: bool) -> bool { ::tsox_core::fntrace::enter("should_skip_js_file"); 
+    if allow_js || !is_external_library_file(file_name) {
+        return false;
+    }
+    matches!(
+        script_kind_from_file_name(file_name),
+        tsox_frontend::ast::ScriptKind::Js | tsox_frontend::ast::ScriptKind::Jsx
+    )
+}
+
+pub(crate) fn read_and_parse(
+    file_name: &str,
+    host: &dyn CompilerHost,
+) -> Result<
+    (
+        Arc<SourceFile>,
+        Vec<tsox_frontend::parser::ParserDiagnostic>,
+    ),
+    String,
+> { ::tsox_core::fntrace::enter("read_and_parse"); 
+    let text = host
+        .fs()
+        .read_file(file_name)
+        .ok_or_else(|| format!("Cannot read file '{file_name}'."))?;
+    read_and_parse_text(file_name, text)
+}
+
+pub(crate) fn cached_parse(
+    file_name: &str,
+    text: &str,
+) -> (
+    Arc<SourceFile>,
+    Vec<tsox_frontend::parser::ParserDiagnostic>,
+) { ::tsox_core::fntrace::enter("cached_parse"); 
+    // 只缓存 bundled lib 文件：内容稳定、被每个 Program 重复解析，
+    // 收益集中于此。用户/测试文件一律不缓存，否则每个唯一文件名都会
+    // 永久钉住一棵 AST（fourslash 每用例默认文件名唯一，全量跑即缓慢
+    // 泄漏至数十 GiB）。lib 文件版本替换与容量上限做双保险。
+    if !tsox_checker::bundled::is_bundled(file_name) {
+        let (file, diags) =
+            Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
+        let file = Arc::new(file);
+        tsox_checker::binder::wire_parent_pointers(&file);
+        return (file, diags);
+    }
+    static CACHE: std::sync::OnceLock<
+        Mutex<
+            HashMap<
+                String,
+                (
+                    Arc<SourceFile>,
+                    Vec<tsox_frontend::parser::ParserDiagnostic>,
+                ),
+            >,
+        >,
+    > = std::sync::OnceLock::new();
+    let cache = CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+    let key = file_name.to_string();
+    {
+        let map = cache.lock().unwrap();
+        if let Some(hit) = map.get(&key) {
+            if hit.0.text == text {
+                return (Arc::clone(&hit.0), hit.1.clone());
+            }
+        }
+    }
+    let (file, diags) =
+        Parser::parse_source_file_text_with_diagnostics(file_name, text.to_string());
+    let file = Arc::new(file);
+    tsox_checker::binder::wire_parent_pointers(&file);
+    cache
+        .lock()
+        .unwrap()
+        .insert(key, (Arc::clone(&file), diags.clone()));
+    (file, diags)
+}
+
+/// lib bind 产物缓存(镜像 Go SourceFile.bindOnce):cached_parse 命中的
+/// lib AST 全进程只 bind 一次,各 Program 并入产物而非重 bind。以
+/// SourceFile 指针身份校验,AST 被替换(文本变化重解析)时产物随之重算。
+/// binder 逐文件自洽(每文件独立 file_symbol,跨文件合并在 checker 侧
+/// per-checker links),共享产物不携带跨例状态;checker 对 binder 符号的
+/// 写路径均为 checker 自建符号,不触达 lib 产物。
+pub(crate) fn cached_bind_products(
+    file_name: &str,
+    file: &Arc<tsox_frontend::ast::SourceFile>,
+) -> Option<Arc<tsox_frontend::ast::NodeSymbolMap>> { ::tsox_core::fntrace::enter("cached_bind_products"); 
+    if !tsox_checker::bundled::is_bundled(file_name) {
+        return None;
+    }
+    static BIND_CACHE: std::sync::OnceLock<
+        Mutex<HashMap<String, (usize, Arc<tsox_frontend::ast::NodeSymbolMap>)>>,
+    > = std::sync::OnceLock::new();
+    let cache = BIND_CACHE.get_or_init(|| Mutex::new(HashMap::new()));
+    let key = file_name.to_string();
+    let identity = Arc::as_ptr(file) as usize;
+    let mut map = cache.lock().unwrap();
+    if let Some((cached_identity, products)) = map.get(&key) {
+        if *cached_identity == identity {
+            return Some(Arc::clone(products));
+        }
+    }
+    let products = Arc::new(tsox_checker::binder::bind_source_file(file));
+    map.insert(key, (identity, Arc::clone(&products)));
+    Some(products)
+}
+
+pub(crate) fn read_and_parse_text(
+    file_name: &str,
+    text: String,
+) -> Result<
+    (
+        Arc<SourceFile>,
+        Vec<tsox_frontend::parser::ParserDiagnostic>,
+    ),
+    String,
+> { ::tsox_core::fntrace::enter("read_and_parse_text"); 
+    let (file, diags) = cached_parse(file_name, &text);
+    Ok((file, diags))
+}
+
+pub(crate) fn load_source_file(
+    file_name: &str,
+    host: &dyn CompilerHost,
+    source_files: &mut Vec<Arc<SourceFile>>,
+    by_name: &mut HashMap<String, Arc<SourceFile>>,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+    allow_js: bool,
+) -> Option<Arc<SourceFile>> { ::tsox_core::fntrace::enter("load_source_file"); 
+    let normalized = tsox_core::tspath::normalize_path(file_name);
+    if let Some(existing) = by_name.get(&normalized) {
+        return Some(Arc::clone(existing));
+    }
+
+    if should_skip_js_file(&normalized, allow_js) {
+        return None;
+    }
+
+    let (file, parse_diags) = match read_and_parse(&normalized, host) {
+        Ok(result) => result,
+        Err(msg) => {
+            diagnostics.push(Arc::new(file_error_diagnostic(&normalized, &msg)));
+            return None;
+        }
+    };
+
+    for pd in &parse_diags {
+        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(
+            Arc::clone(&file),
+            pd,
+        )));
+    }
+
+    by_name.insert(normalized.clone(), Arc::clone(&file));
+    source_files.push(Arc::clone(&file));
+    Some(file)
+}
+
+pub(crate) fn load_source_file_with_references(
+    file_name: &str,
+    host: &dyn CompilerHost,
+    source_files: &mut Vec<Arc<SourceFile>>,
+    by_name: &mut HashMap<String, Arc<SourceFile>>,
+    diagnostics: &mut Vec<Arc<Diagnostic>>,
+    allow_js: bool,
+) { ::tsox_core::fntrace::enter("load_source_file_with_references"); 
+    let normalized = tsox_core::tspath::normalize_path(file_name);
+    if by_name.contains_key(&normalized) {
+        return;
+    }
+
+    if should_skip_js_file(&normalized, allow_js) {
+        return;
+    }
+
+    let (file, parse_diags) = match read_and_parse(&normalized, host) {
+        Ok(result) => result,
+        Err(msg) => {
+            diagnostics.push(Arc::new(file_error_diagnostic(&normalized, &msg)));
+            return;
+        }
+    };
+
+    for pd in &parse_diags {
+        diagnostics.push(Arc::new(parser_diagnostic_to_diagnostic(
+            Arc::clone(&file),
+            pd,
+        )));
+    }
+
+    by_name.insert(normalized.clone(), Arc::clone(&file));
+
+    let text = file.text.as_str();
+    let refs = extract_reference_path_directives(text, &normalized);
+    for ref_dir in &refs {
+        match resolve_reference_path(host, &ref_dir.resolved, &ref_dir.raw, &normalized) {
+            Err((message, args)) => {
+                diagnostics.push(Arc::new(Diagnostic::new(
+                    Some(Arc::clone(&file)),
+                    TextRange::new(ref_dir.value_range.0, ref_dir.value_range.1),
+                    message,
+                    args,
+                )));
+            }
+            Ok(load_path) => {
+                load_source_file_with_references(
+                    &load_path,
+                    host,
+                    source_files,
+                    by_name,
+                    diagnostics,
+                    allow_js,
+                );
+            }
+        }
+    }
+
+    source_files.push(file);
+}
+
+pub(crate) struct ReferenceTypesDirective {
+    pub name: String,
+    pub mode_value: Option<String>,
+    #[allow(dead_code)]
+    pub mode_value_range: (usize, usize),
+
+    pub types_value_range: (usize, usize),
+}

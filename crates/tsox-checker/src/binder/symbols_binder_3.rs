@@ -1,0 +1,559 @@
+#![allow(unused_imports)]
+
+use crate::binder::mig::m4a_4::{is_assignment_declaration, is_effective_module_declaration};
+use crate::binder::symbols::*;
+
+pub(crate) fn set_value_declaration(symbol: &Arc<Symbol>, node: &Arc<Node>) { ::tsox_core::fntrace::enter("set_value_declaration"); 
+    let replace = match &symbol.value_declaration {
+        None => true,
+        Some(vd) => {
+            (is_assignment_declaration(vd) && !is_assignment_declaration(node))
+                || (vd.kind != node.kind && is_effective_module_declaration(vd))
+        }
+    };
+    if replace {
+        let symbol_mut = Arc::as_ptr(symbol) as *mut Symbol;
+        unsafe {
+            (*symbol_mut).value_declaration = Some(Arc::clone(node));
+        }
+    }
+}
+
+impl Binder {
+    // Go declareModuleMember（binder.go:389-436）local+export 对的文件容器
+    // 具名 default 导出路径：local 符号（exportKind 位，binder.go:424-426，
+    // Interface 等纯类型声明为空位）挂声明名进容器 locals/members，导出符号
+    // 经 declareSymbolEx（binder.go:168-175）恒名 "default" 并入 exports——
+    // 与既有 default 导出符号按 excludes 合并（ClassExcludes 不含 Interface、
+    // InterfaceExcludes 不含 Class，类+接口合流不冲突），节点符号登记为合并
+    // 导出符号（addDeclarationToSymbol binder.go:2690 后写覆盖）。非文件容器/
+    // 匿名/非 default 返回 None 走原路径
+    pub(crate) fn declare_named_default_member_pair(
+        &mut self,
+        node: &Arc<Node>,
+        includes: SymbolFlags,
+        excludes: SymbolFlags,
+    ) -> Option<Arc<Symbol>> { ::tsox_core::fntrace::enter("declare_named_default_member_pair");
+        let decl_name = self.get_declaration_name(node);
+        if decl_name.is_empty()
+            || !node.has_syntactic_modifier(tsox_frontend::ast::ModifierFlags::Default)
+            || !self
+                .container
+                .as_ref()
+                .is_some_and(|c| c.kind == SyntaxKind::SourceFile)
+        {
+            return None;
+        }
+        let file_symbol = self.parent_symbol.clone()?;
+        let container = Arc::clone(self.container.as_ref()?);
+        let export_kind = if includes.intersects(SymbolFlags::VALUE) {
+            SymbolFlags::ExportValue
+        } else {
+            SymbolFlags::None
+        };
+        let local = self.declare_symbol_into(
+            node,
+            export_kind,
+            excludes,
+            DeclareTarget::Locals(container),
+        );
+        let exported = self.declare_symbol_into(
+            node,
+            includes,
+            excludes,
+            DeclareTarget::Exports(file_symbol),
+        );
+        let local_mut = Arc::as_ptr(&local) as *mut Symbol;
+        unsafe {
+            (*local_mut).export_symbol = Some(Arc::clone(&exported));
+        }
+        Some(local)
+    }
+
+    pub(crate) fn declare_symbol_into(
+        &mut self,
+        node: &Arc<Node>,
+        includes: SymbolFlags,
+        excludes: SymbolFlags,
+        target: DeclareTarget,
+    ) -> Arc<Symbol> { ::tsox_core::fntrace::enter("declare_symbol_into"); 
+        let mut name = self.get_declaration_name(node);
+        // Go declareSymbolEx：default 导出声明的导出符号恒名 "default"
+        //（isDefaultExport && parent != nil），local 符号 parent 为 nil 保留声明名
+        if has_syntactic_modifier(node, ModifierFlags::Default)
+            && !matches!(target, DeclareTarget::Locals(_))
+        {
+            name = INTERNAL_SYMBOL_NAME_DEFAULT.to_string();
+        }
+
+        let existing: Option<Arc<Symbol>> = match &target {
+            DeclareTarget::Exports(parent_sym) => parent_sym.exports.get(&name).cloned(),
+            DeclareTarget::Members(parent_sym) => parent_sym.members.get(&name).cloned(),
+            DeclareTarget::Locals(container) => {
+                let locals_hit = || {
+                    self.symbol_map
+                        .locals
+                        .get(&container.id())
+                        .and_then(|locals| locals.get(&name).cloned())
+                };
+                // 文件顶层的别名（import）与普通声明（typedef/class 等，经
+                // declare_symbol 进容器符号 members）必须互相可见才能合并
+                if container.kind == SyntaxKind::SourceFile {
+                    locals_hit().or_else(|| {
+                        self.symbol_map
+                            .symbol_of(container)
+                            .and_then(|sym| sym.members.get(&name).cloned())
+                    })
+                } else {
+                    locals_hit()
+                }
+            }
+        };
+
+        if let Some(existing) = existing {
+            // Go declareSymbol 冲突路径：existing 与 excludes 相交时报所有既有
+            // 声明 + 当前声明，且不合并、不替换表内既有符号
+            let assignment_merge_exception = (includes.contains(SymbolFlags::FunctionScopedVariable)
+                && existing.flags.contains(SymbolFlags::Assignment))
+                || (includes.contains(SymbolFlags::Assignment)
+                    && existing
+                        .flags
+                        .contains(SymbolFlags::FunctionScopedVariable));
+            if !excludes.is_empty()
+                && existing.flags.intersects(excludes)
+                && !assignment_merge_exception
+            {
+                // Go declareSymbolEx：exports 表内 default 导出冲突报 2528（multiple
+                // default exports），由 checker 的 check_external_module_export_duplicates
+                // 统一重放，binder 侧不报（EA 与具名 default 声明 alike）；locals/
+                // members 表冲突维持原有上报
+                let default_ea = matches!(&node.data, tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals);
+                // default 命名 export specifier（export { zzz as default }）的
+                // exports 表二次声明同样由 checker 的 2528 重放统一上报
+                let default_named_specifier = matches!(
+                    &node.data,
+                    tsox_frontend::ast::NodeData::ExportSpecifier(_)
+                ) && name == tsox_frontend::ast::INTERNAL_SYMBOL_NAME_DEFAULT;
+                if !default_ea
+                    && !default_named_specifier
+                    && !(matches!(target, DeclareTarget::Exports(_))
+                        && has_syntactic_modifier(node, ModifierFlags::Default))
+                {
+                    if existing.flags.intersects(SymbolFlags::ENUM)
+                        || includes.intersects(SymbolFlags::ENUM)
+                    {
+                        self.report_declaration_conflict_all(
+                            node,
+                            &existing,
+                            None,
+                            &tsox_core::diagnostics::messages_generated::ENUM_DECLARATIONS_CAN_ONLY_MERGE_WITH_NAMESPACE_OR_OTHER_ENUM_DECLARATIONS,
+                        );
+                    } else if existing.flags.contains(SymbolFlags::BlockScopedVariable) {
+                        self.report_declaration_conflict_all(
+                            node,
+                            &existing,
+                            Some(&name),
+                            &CANNOT_REDECLARE_BLOCK_SCOPED_VARIABLE_0,
+                        );
+                    } else {
+                        self.report_duplicate_identifier_all(node, &existing, &name);
+                    }
+                }
+                let symbol = self.new_symbol(includes, name.clone());
+                let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                unsafe {
+                    (*symbol_mut).declarations.push(Arc::clone(node));
+                }
+                if includes.intersects(SymbolFlags::VALUE) {
+                    set_value_declaration(&symbol, node);
+                }
+                self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+                return symbol;
+            }
+            if self.can_merge_symbols(existing.flags, includes) {
+                let existing_mut = Arc::as_ptr(&existing) as *mut Symbol;
+                unsafe {
+                    (*existing_mut).declarations.push(Arc::clone(node));
+                    (*existing_mut).flags |= includes;
+                }
+                if includes.intersects(SymbolFlags::VALUE) {
+                    set_value_declaration(&existing, node);
+                }
+                self.symbol_map.set_symbol(node, Arc::clone(&existing));
+                return existing;
+            }
+        }
+
+        let symbol = self.new_symbol(includes, name.clone());
+        {
+            let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+            unsafe {
+                (*symbol_mut).declarations.push(Arc::clone(node));
+            }
+        }
+        if includes.intersects(SymbolFlags::VALUE) {
+            set_value_declaration(&symbol, node);
+        }
+
+        match &target {
+            DeclareTarget::Exports(parent_sym) | DeclareTarget::Members(parent_sym) => {
+                let parent_mut = Arc::as_ptr(parent_sym) as *mut Symbol;
+                unsafe {
+                    if matches!(target, DeclareTarget::Members(_)) {
+                        (*parent_mut)
+                            .members
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    } else {
+                        (*parent_mut)
+                            .exports
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    }
+
+                    let symbol_mut = Arc::as_ptr(&symbol) as *mut Symbol;
+                    (*symbol_mut).set_parent(parent_sym);
+                }
+                // Go addDeclarationToSymbol 给每个声明节点设 node.Symbol——
+                // Exports/Members 路径同样登记，getSymbolOfDeclaration 与
+                // 声明名臂的 getSymbolAtLocation 由此可达（checker.go
+                // getSymbolAtLocation 首臂即声明名→父声明符号）
+                self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+            }
+            DeclareTarget::Locals(container) => {
+                let locals = self
+                    .symbol_map
+                    .locals
+                    .entry(container.id())
+                    .or_insert_with(SymbolTable::new);
+                locals.insert(name.clone(), Arc::clone(&symbol));
+                if container.kind == SyntaxKind::SourceFile
+                    && let Some(container_sym) = self.symbol_map.symbol_of(container)
+                {
+                    let container_sym_mut = Arc::as_ptr(&container_sym) as *mut Symbol;
+                    unsafe {
+                        (*container_sym_mut)
+                            .members
+                            .insert(name.clone(), Arc::clone(&symbol));
+                    }
+                }
+            }
+        }
+
+        self.symbol_map.set_symbol(node, Arc::clone(&symbol));
+        symbol
+    }
+
+    pub(crate) fn can_merge_symbols(
+        &self,
+        existing_flags: SymbolFlags,
+        new_flags: SymbolFlags,
+    ) -> bool { ::tsox_core::fntrace::enter("can_merge_symbols"); 
+        // Go bindExportDeclaration 以 excludes=None 声明 __export：多个
+        // export * 恒合并进同一符号的 declarations
+        if existing_flags.contains(SymbolFlags::ExportStar)
+            && new_flags.contains(SymbolFlags::ExportStar)
+        {
+            return true;
+        }
+        let existing_alias = existing_flags.contains(SymbolFlags::Alias);
+        let new_alias = new_flags.contains(SymbolFlags::Alias);
+        if existing_alias || new_alias {
+            return !(existing_alias && new_alias);
+        }
+
+        // Go declareSymbolEx（binder.go:283-290）：非冲突即无条件合并
+        //（addDeclarationToSymbol 的 symbol.Flags |= includes 无白名单）。
+        // declareModuleMember（binder.go:406-416）对模块内 export 声明以
+        // exportKind=ExportValue 元位声明 local 符号——与同名 interface
+        // 相遇时 excludes（ClassExcludes 排除 Interface）不冲突，Interface
+        // 位并入 ExportValue。漏并会使 locals 被无 Interface 位的孤儿
+        // ExportValue 符号顶替，needsQualification（symbolaccessibility.go
+        // :749-755）的 meaning&Type 判定失效，.types 退化裸名（
+        // mergedDeclarationExports >d : d ）；任一侧为 ExportValue 时同径
+        if existing_flags.contains(SymbolFlags::ExportValue)
+            || new_flags.contains(SymbolFlags::ExportValue)
+        {
+            return true;
+        }
+
+        // Go declareSymbol：var 的 excludes（Value & ^FunctionScopedVariable）
+        // 不含 var 自身，重复 var（含参数名）并入同一符号；类型一致性由
+        // checker 的 TS2403 按声明序比较。既有符号带其他值意义位
+        //（function/class/let 等）时不并入，走冲突报告
+        if existing_flags.contains(SymbolFlags::FunctionScopedVariable)
+            && new_flags == SymbolFlags::FunctionScopedVariable
+            && !existing_flags.intersects(SymbolFlags::VALUE & !SymbolFlags::FunctionScopedVariable)
+        {
+            return true;
+        }
+
+        // Go NamespaceModuleExcludes = None：非实例化 namespace 声明与任何既有符号合并且不冲突
+        if new_flags.contains(SymbolFlags::NamespaceModule) {
+            return true;
+        }
+        // 镜像：既有非实例化 namespace（纯类型导出）与任何后续声明合并
+        //（Go NamespaceModule 位不属于任何 excludes 集合：VALUE/TYPE 并集均
+        // 不含它，declareSymbol 无 excludes 冲突即无条件合并；interface/
+        // type alias/值声明与 namespace 的声明位互不重叠）
+        if existing_flags.contains(SymbolFlags::NamespaceModule)
+            && !existing_flags.contains(SymbolFlags::ValueModule)
+        {
+            return true;
+        }
+
+        if existing_flags.contains(SymbolFlags::Interface)
+            && new_flags.contains(SymbolFlags::Interface)
+        {
+            return true;
+        }
+
+        let existing_interface = existing_flags.contains(SymbolFlags::Interface);
+        let new_interface = new_flags.contains(SymbolFlags::Interface);
+        let existing_type_alias = existing_flags.contains(SymbolFlags::TypeAlias);
+        let new_type_alias = new_flags.contains(SymbolFlags::TypeAlias);
+        let _class_side = SymbolFlags::Class;
+
+        // Go TypeAliasExcludes = SymbolFlagsType（仅类型意义 class/interface/enum）：
+        // type alias 与 class/interface/enum 相遇是 TS2300；与纯值声明（var/let/const/
+        // function）合法合并（lib 形态：type NodeFilter + declare var NodeFilter）
+        if (existing_type_alias
+            && new_flags
+                .intersects(SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::ENUM))
+            || (new_type_alias
+                && existing_flags
+                    .intersects(SymbolFlags::Interface | SymbolFlags::Class | SymbolFlags::ENUM))
+        {
+            return false;
+        }
+        // type alias 与纯值声明合并
+        if (existing_type_alias && new_flags.intersects(SymbolFlags::VALUE))
+            || (new_type_alias && existing_flags.intersects(SymbolFlags::VALUE))
+        {
+            return true;
+        }
+
+        let enum_side = SymbolFlags::ENUM;
+        if (existing_flags.intersects(enum_side) && new_interface)
+            || (new_flags.intersects(enum_side) && existing_interface)
+        {
+            return false;
+        }
+        // Go InterfaceExcludes = Type & ^(Interface|Class)：interface 与 class/值意义
+        // （var/function 等）合法合并；type alias 冲突已由上方分支处理
+        if (existing_interface && new_flags.intersects(SymbolFlags::VALUE | SymbolFlags::Class))
+            || (new_interface && existing_flags.intersects(SymbolFlags::VALUE | SymbolFlags::Class))
+        {
+            return true;
+        }
+
+        let existing_class = existing_flags.contains(SymbolFlags::Class);
+        let new_class = new_flags.contains(SymbolFlags::Class);
+        let existing_fn = existing_flags.contains(SymbolFlags::Function);
+        let new_fn = new_flags.contains(SymbolFlags::Function);
+        if (existing_class && new_fn) || (existing_fn && new_class) {
+            return true;
+        }
+        // Go ClassExcludes 含 Class：同名 class 相交冲突（TS2300，含 ambient），
+        // 冲突符号另建、不合并 declarations
+        if existing_class && new_class {
+            return false;
+        }
+
+        let existing_ns = existing_flags.contains(SymbolFlags::ValueModule);
+        let new_ns = new_flags.contains(SymbolFlags::ValueModule);
+        if existing_ns || new_ns {
+            let other_existing = if existing_ns {
+                new_flags
+            } else {
+                existing_flags
+            };
+            let _other_new = if existing_ns {
+                existing_flags
+            } else {
+                new_flags
+            };
+
+            let can_merge_with_ns = other_existing.contains(SymbolFlags::ValueModule)
+                || other_existing.contains(SymbolFlags::Function)
+                || other_existing.contains(SymbolFlags::Class)
+                || other_existing.contains(SymbolFlags::RegularEnum)
+                || other_existing.contains(SymbolFlags::ConstEnum)
+                || other_existing.contains(SymbolFlags::Interface);
+            if can_merge_with_ns {
+                return true;
+            }
+        }
+
+        // Go declareSymbol：var 对 var（FSVExcludes 不含 FSV）、属性/访问器
+        // 同组（Property/Accessor excludes 互不含对方位）无冲突即合并
+        if existing_flags.intersects(SymbolFlags::VARIABLE)
+            && new_flags.intersects(SymbolFlags::VARIABLE)
+        {
+            return true;
+        }
+        if existing_flags.intersects(SymbolFlags::PROPERTY_OR_ACCESSOR)
+            && new_flags.intersects(SymbolFlags::PROPERTY_OR_ACCESSOR)
+        {
+            return true;
+        }
+
+        if existing_flags.contains(SymbolFlags::Function)
+            && new_flags.contains(SymbolFlags::Function)
+        {
+            return true;
+        }
+
+        // Go declareSymbol：Method excludes 不含 Method 位，同名方法过载
+        //（含 MethodSignature）合并进同一符号的 declarations
+        if existing_flags.contains(SymbolFlags::Method)
+            && new_flags.contains(SymbolFlags::Method)
+        {
+            return true;
+        }
+
+        if (existing_flags.contains(SymbolFlags::RegularEnum)
+            || existing_flags.contains(SymbolFlags::ConstEnum))
+            && (new_flags.contains(SymbolFlags::RegularEnum)
+                || new_flags.contains(SymbolFlags::ConstEnum))
+        {
+            return true;
+        }
+
+        let type_param_existing = existing_flags.contains(SymbolFlags::TypeParameter);
+        let type_param_new = new_flags.contains(SymbolFlags::TypeParameter);
+        if type_param_existing && type_param_new {
+            return true;
+        }
+        if (type_param_existing && !new_flags.intersects(SymbolFlags::TYPE))
+            || (type_param_new && !existing_flags.intersects(SymbolFlags::TYPE))
+        {
+            return true;
+        }
+        false
+    }
+
+    pub(crate) fn is_let_or_const_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_let_or_const_declaration"); 
+        // Go IsBlockOrCatchScoped：沿父链找变量声明列表的 let/const 位；
+        // 参数按 IsPartOfParameterDeclaration 归函数作用域，catch 变量按块作用域
+        let mut n = Arc::clone(node);
+        loop {
+            match n.kind {
+                SyntaxKind::VariableDeclaration => {
+                    return match n.parent() {
+                        Some(p) if p.kind == SyntaxKind::VariableDeclarationList => {
+                            p.flags.intersects(NodeFlags::Let | NodeFlags::Const)
+                        }
+                        Some(p) if p.kind == SyntaxKind::CatchClause => true,
+                        _ => false,
+                    };
+                }
+                SyntaxKind::Parameter => return false,
+                _ => match n.parent() {
+                    Some(p) => n = p,
+                    None => return true,
+                },
+            }
+        }
+    }
+
+    pub(crate) fn has_export_declarations(container: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_export_declarations"); 
+        let statements: &[Arc<Node>] = match &container.data {
+            tsox_frontend::ast::NodeData::SourceFile(sf) => &sf.statements.nodes,
+            tsox_frontend::ast::NodeData::ModuleDeclaration(md) => {
+                if let Some(body) = &md.body
+                    && body.kind == SyntaxKind::ModuleBlock
+                    && let tsox_frontend::ast::NodeData::ModuleBlock(block) = &body.data
+                {
+                    &block.statements.nodes
+                } else {
+                    &[]
+                }
+            }
+            _ => &[],
+        };
+        statements.iter().any(|s| {
+            s.kind == SyntaxKind::ExportDeclaration || s.kind == SyntaxKind::ExportAssignment
+        })
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_var_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_var_declaration"); 
+        if node.kind == SyntaxKind::VariableDeclaration {
+            if let Some(parent) = node.parent().as_ref() {
+                if parent.kind == SyntaxKind::VariableDeclarationList {
+                    return !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const);
+                }
+            }
+        }
+        false
+    }
+
+    // Go bindBlockScopedDeclaration 的声明集（binder.go:717/729/1000/1228/1242/
+    // 1289 调用点）：interface/typealias/class/enum/function 声明与 let/const
+    // 变量按 blockScopeContainer.Kind 分派；var/命名空间/别名等其余声明按
+    // container.Kind 分派（declareSymbolAndAddToSymbolTable binder.go:447-466）
+    pub(crate) fn is_block_scope_dispatched_declaration(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_block_scope_dispatched_declaration"); 
+        match node.kind {
+            SyntaxKind::InterfaceDeclaration
+            | SyntaxKind::TypeAliasDeclaration
+            | SyntaxKind::JSTypeAliasDeclaration
+            | SyntaxKind::ClassDeclaration
+            | SyntaxKind::EnumDeclaration
+            | SyntaxKind::FunctionDeclaration => true,
+            SyntaxKind::VariableDeclaration | SyntaxKind::BindingElement => {
+                !Self::declaration_is_var(node)
+            }
+            _ => false,
+        }
+    }
+
+    pub(crate) fn declaration_is_var(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_is_var"); 
+        let mut current = Arc::clone(node);
+        loop {
+            match current.kind {
+                SyntaxKind::VariableDeclaration => {
+                    return current.parent().is_some_and(|parent| {
+                        parent.kind == SyntaxKind::VariableDeclarationList
+                            && !parent.flags.intersects(NodeFlags::Let | NodeFlags::Const)
+                    });
+                }
+                SyntaxKind::BindingElement
+                | SyntaxKind::ObjectBindingPattern
+                | SyntaxKind::ArrayBindingPattern => match current.parent() {
+                    Some(parent) => current = parent,
+                    None => return false,
+                },
+                _ => return false,
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn symbol_is_var_declaration(symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_var_declaration"); 
+        let decl: Option<&Arc<Node>> = symbol
+            .value_declaration
+            .as_ref()
+            .or_else(|| symbol.declarations.first());
+        match decl {
+            Some(node) => Self::is_var_declaration(node),
+            None => false,
+        }
+    }
+
+    pub(crate) fn get_combined_modifier_flags(&self, node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("get_combined_modifier_flags"); 
+        let mut flags = node.syntactic_modifier_flags();
+        if node.kind == SyntaxKind::VariableDeclaration {
+            if let Some(parent) = node.parent() {
+                if parent.kind == SyntaxKind::VariableDeclarationList {
+                    flags |= parent.syntactic_modifier_flags();
+                    if let Some(gp) = parent.parent() {
+                        if gp.kind == SyntaxKind::VariableStatement {
+                            flags |= gp.syntactic_modifier_flags();
+                        }
+                    }
+                }
+            }
+        }
+        flags
+    }
+}
+

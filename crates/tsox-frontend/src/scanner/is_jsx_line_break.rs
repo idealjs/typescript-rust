@@ -1,0 +1,446 @@
+#![allow(unused_imports)]
+
+use super::*;
+
+pub(crate) fn is_jsx_line_break(c: char) -> bool { ::tsox_core::fntrace::enter("is_jsx_line_break"); 
+    matches!(c, '\n' | '\r' | '\u{2028}' | '\u{2029}')
+}
+
+pub(crate) fn is_jsx_whitespace_like(c: char) -> bool { ::tsox_core::fntrace::enter("is_jsx_whitespace_like"); 
+    matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
+}
+
+pub(crate) fn is_identifier_or_keyword_token(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_identifier_or_keyword_token"); 
+    token == SyntaxKind::Identifier || is_keyword(token)
+}
+
+pub(crate) fn is_keyword(token: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_keyword"); 
+    crate::ast::node_data_generated::is_keyword_kind(token)
+}
+
+pub(crate) fn is_whitespace(c: char) -> bool { ::tsox_core::fntrace::enter("is_whitespace"); 
+    matches!(
+        c,
+        ' ' | '\t'
+            | '\n'
+            | '\r'
+            | '\x0B'
+            | '\x0C'
+            | '\u{85}'
+            | '\u{A0}'
+            | '\u{1680}'
+            | '\u{2000}'
+            | '\u{2001}'
+            | '\u{2002}'
+            | '\u{2003}'
+            | '\u{2004}'
+            | '\u{2005}'
+            | '\u{2006}'
+            | '\u{2007}'
+            | '\u{2008}'
+            | '\u{2009}'
+            | '\u{200A}'
+            | '\u{200B}'
+            | '\u{202F}'
+            | '\u{205F}'
+            | '\u{3000}'
+            | '\u{FEFF}'
+    )
+}
+
+pub(crate) fn is_line_break(c: char) -> bool { ::tsox_core::fntrace::enter("is_line_break"); 
+    c == '\n' || c == '\r'
+}
+
+pub(crate) const REG_EXP_FLAG_G: u16 = 1 << 0;
+pub(crate) const REG_EXP_FLAG_I: u16 = 1 << 1;
+pub(crate) const REG_EXP_FLAG_M: u16 = 1 << 2;
+pub(crate) const REG_EXP_FLAG_S: u16 = 1 << 3;
+pub(crate) const REG_EXP_FLAG_U: u16 = 1 << 4;
+pub(crate) const REG_EXP_FLAG_Y: u16 = 1 << 5;
+pub(crate) const REG_EXP_FLAG_D: u16 = 1 << 6;
+pub(crate) const REG_EXP_FLAG_V: u16 = 1 << 7;
+
+pub(crate) fn reg_exp_flag_bit(c: char) -> Option<u16> { ::tsox_core::fntrace::enter("reg_exp_flag_bit"); 
+    match c {
+        'g' => Some(REG_EXP_FLAG_G),
+        'i' => Some(REG_EXP_FLAG_I),
+        'm' => Some(REG_EXP_FLAG_M),
+        's' => Some(REG_EXP_FLAG_S),
+        'u' => Some(REG_EXP_FLAG_U),
+        'y' => Some(REG_EXP_FLAG_Y),
+        'd' => Some(REG_EXP_FLAG_D),
+        'v' => Some(REG_EXP_FLAG_V),
+        _ => None,
+    }
+}
+
+pub(crate) fn is_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_digit"); 
+    c.is_ascii_digit()
+}
+
+pub(crate) fn is_hex_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_hex_digit"); 
+    c.is_ascii_hexdigit()
+}
+
+pub(crate) fn is_octal_digit(c: char) -> bool { ::tsox_core::fntrace::enter("is_octal_digit"); 
+    ('0'..='7').contains(&c)
+}
+
+pub(crate) fn is_identifier_start(c: char) -> bool { ::tsox_core::fntrace::enter("is_identifier_start"); 
+    c.is_ascii_alphabetic()
+        || c == '_'
+        || c == '$'
+        || (!c.is_ascii() && is_unicode_identifier_start(c))
+}
+
+pub fn is_identifier_part(c: char) -> bool { ::tsox_core::fntrace::enter("is_identifier_part"); 
+    c.is_ascii_alphanumeric()
+        || c == '_'
+        || c == '$'
+        || (!c.is_ascii() && is_unicode_identifier_part(c))
+}
+
+pub(crate) fn is_unicode_identifier_start(c: char) -> bool { ::tsox_core::fntrace::enter("is_unicode_identifier_start"); 
+    unicode_ident::is_xid_start(c)
+}
+
+pub(crate) fn is_unicode_identifier_part(c: char) -> bool { ::tsox_core::fntrace::enter("is_unicode_identifier_part"); 
+    unicode_ident::is_xid_continue(c) || c == '\u{200C}' || c == '\u{200D}'
+}
+
+fn push_unicode_escape(result: &mut String, hex: &str) { ::tsox_core::fntrace::enter("push_unicode_escape"); 
+    let Ok(n) = u32::from_str_radix(hex, 16) else {
+        return;
+    };
+    match char::from_u32(n) {
+        Some(c) => result.push(c),
+        None if (0xD800..=0xDBFF).contains(&n) => {
+            result.push_str(&format!("\\u{:04X}", n));
+        }
+        None if (0xDC00..=0xDFFF).contains(&n) => {
+            if !combine_trailing_high_surrogate(result, n) {
+                result.push_str(&format!("\\u{:04X}", n));
+            }
+        }
+        None => result.push('\u{FFFD}'),
+    }
+}
+
+fn combine_trailing_high_surrogate(result: &mut String, low: u32) -> bool { ::tsox_core::fntrace::enter("combine_trailing_high_surrogate"); 
+    let bytes = result.as_bytes();
+    if bytes.len() < 6 {
+        return false;
+    }
+    let tail = &result[result.len() - 6..];
+    let mut chars = tail.chars();
+    let Some('\\') = chars.next() else { return false };
+    let Some('u') = chars.next() else { return false };
+    let hex: String = chars.by_ref().collect();
+    if hex.len() != 4 || !hex.chars().all(|c| c.is_ascii_hexdigit()) {
+        return false;
+    }
+    let Ok(high) = u32::from_str_radix(&hex, 16) else {
+        return false;
+    };
+    if !(0xD800..=0xDBFF).contains(&high) {
+        return false;
+    }
+    for _ in 0..6 {
+        result.pop();
+    }
+    let combined = 0x10000 + ((high - 0xD800) << 10) + (low - 0xDC00);
+    result.push(char::from_u32(combined).unwrap_or('\u{FFFD}'));
+    true
+}
+
+pub(crate) fn unescape_string(s: &str, cook_octal: bool) -> String { ::tsox_core::fntrace::enter("unescape_string");     let mut result = String::with_capacity(s.len());
+    let mut chars = s.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            match chars.next() {
+                Some('n') => result.push('\n'),
+                Some('r') => result.push('\r'),
+                Some('t') => result.push('\t'),
+                Some('b') => result.push('\u{0008}'),
+                Some('f') => result.push('\u{000C}'),
+                Some('v') => result.push('\u{000B}'),
+                Some(c @ '0'..='7') if cook_octal => {
+                    // Go scanEscapeSequence(report)：八进制 escape cook——
+                    // '0'-'3' 至多 3 位、'4'-'7' 至多 2 位（0o377 封顶）
+                    let max_extra = if c <= '3' { 2 } else { 1 };
+                    let mut digits = String::new();
+                    digits.push(c);
+                    for _ in 0..max_extra {
+                        match chars.peek() {
+                            Some(d) if ('0'..='7').contains(d) => {
+                                digits.push(*d);
+                                chars.next();
+                            }
+                            _ => break,
+                        }
+                    }
+                    let code = u32::from_str_radix(&digits, 8).unwrap_or(0);
+                    result.push(char::from_u32(code).unwrap_or('\u{FFFD}'));
+                }
+                Some(c @ ('8' | '9')) if cook_octal => {
+                    // Go scanEscapeSequence(report)：\8 \9 cook 为字面数字
+                    result.push(c);
+                }
+                Some(c @ '0') if !cook_octal => {
+                    // Go scanEscapeSequence 非 report（scanner.go:1778-1785）：
+                    // \0 后无数字 cook 为 NUL；\0 后有数字走 fallthrough 保 raw
+                    if chars.peek().is_some_and(|d| d.is_ascii_digit()) {
+                        let mut digits = String::from("0");
+                        for _ in 0..2 {
+                            match chars.peek() {
+                                Some(d) if ('0'..='7').contains(d) => {
+                                    digits.push(*d);
+                                    chars.next();
+                                }
+                                _ => break,
+                            }
+                        }
+                        result.push('\\');
+                        result.push_str(&digits);
+                    } else {
+                        result.push('\0');
+                    }
+                }
+                Some(c @ '1'..='7') if !cook_octal => {
+                    // Go scanEscapeSequence 非 report（scanner.go:1786-1801）：
+                    // 非法八进制转义保 raw 文本，'1'-'3' 至多再吃 2 位、
+                    // '4'-'7' 至多 1 位
+                    let max_extra = if c <= '3' { 2 } else { 1 };
+                    let mut digits = String::new();
+                    digits.push(c);
+                    for _ in 0..max_extra {
+                        match chars.peek() {
+                            Some(d) if ('0'..='7').contains(d) => {
+                                digits.push(*d);
+                                chars.next();
+                            }
+                            _ => break,
+                        }
+                    }
+                    result.push('\\');
+                    result.push_str(&digits);
+                }
+                Some(c @ ('8' | '9')) if !cook_octal => {
+                    // Go scanEscapeSequence 非 report（scanner.go:1802-1811）：
+                    // \8 \9 保 raw
+                    result.push('\\');
+                    result.push(c);
+                }
+                Some('x') => {
+                    // Go scanEscapeSequence 'x'：足两位 hex 才 cook，不足即
+                    // invalid 保留 raw（\x + 已消费 hex），停止字符留给主循环
+                    let mut hex = String::new();
+                    while hex.len() < 2 {
+                        match chars.peek() {
+                            Some(d) if d.is_ascii_hexdigit() => {
+                                hex.push(*d);
+                                chars.next();
+                            }
+                            _ => break,
+                        }
+                    }
+                    if hex.len() == 2 {
+                        let n = u32::from_str_radix(&hex, 16).unwrap_or(0);
+                        result.push(char::from_u32(n).unwrap_or('\u{FFFD}'));
+                    } else {
+                        result.push('\\');
+                        result.push('x');
+                        result.push_str(&hex);
+                    }
+                }
+                Some('u') => {
+                    if chars.peek() == Some(&'{') {
+                        chars.next();
+                        // Go scanUnicodeEscape extended：`{` 后至少一位 hex、
+                        // `}` 收尾、值 ≤ 0x10FFFF，否则 invalid 保留 raw
+                        let mut hex = String::new();
+                        while let Some(d) = chars.peek() {
+                            if d.is_ascii_hexdigit() {
+                                hex.push(*d);
+                                chars.next();
+                            } else {
+                                break;
+                            }
+                        }
+                        let closed = chars.peek() == Some(&'}');
+                        let in_range = u32::from_str_radix(&hex, 16)
+                            .map(|n| n <= 0x10FFFF)
+                            .unwrap_or(false);
+                        if !hex.is_empty() && closed && in_range {
+                            chars.next();
+                            push_unicode_escape(&mut result, &hex);
+                        } else {
+                            result.push('\\');
+                            result.push('u');
+                            result.push('{');
+                            result.push_str(&hex);
+                        }
+                    } else {
+                        // Go scanUnicodeEscape：非 extended 须足四位 hex，
+                        // 不足即 invalid 保留 raw（\u + 已消费 hex）
+                        let mut hex = String::new();
+                        while hex.len() < 4 {
+                            match chars.peek() {
+                                Some(d) if d.is_ascii_hexdigit() => {
+                                    hex.push(*d);
+                                    chars.next();
+                                }
+                                _ => break,
+                            }
+                        }
+                        if hex.len() == 4 {
+                            push_unicode_escape(&mut result, &hex);
+                        } else {
+                            result.push('\\');
+                            result.push('u');
+                            result.push_str(&hex);
+                        }
+                    }
+                }
+                Some('\\') => result.push('\\'),
+                Some('\'') => result.push('\''),
+                Some('"') => result.push('"'),
+                Some('`') => result.push('`'),
+                Some('\n') => {}
+                Some('\r') => {
+                    // Go scanEscapeSequence '\r'：行续接，\<CR><LF> 整体吞掉
+                    if chars.peek() == Some(&'\n') {
+                        chars.next();
+                    }
+                }
+                Some('\u{2028}' | '\u{2029}') => {}
+                // Go scanEscapeSequence default（scanner.go:1898-1914）：非特殊
+                // 转义丢弃反斜杠返回裸字符
+                Some(other) => {
+                    result.push(other);
+                }
+                // Go scanEscapeSequence：\ 后 EOF 消费反斜杠返回空串
+                None => {}
+            }
+        } else {
+            result.push(c);
+        }
+    }
+    result
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CommentRangeKind {
+    SingleLine,
+    MultiLine,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CommentRange {
+    pub pos: usize,
+    pub end: usize,
+    pub kind: CommentRangeKind,
+    pub has_trailing_new_line: bool,
+}
+
+pub(crate) fn decode_char(text: &str, pos: usize) -> (char, usize) { ::tsox_core::fntrace::enter("decode_char"); 
+    let c = text[pos..].chars().next().unwrap();
+    (c, c.len_utf8())
+}
+
+pub(crate) fn is_whitespace_like(c: char) -> bool { ::tsox_core::fntrace::enter("is_whitespace_like"); 
+    matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}') || c.is_whitespace()
+}
+
+pub(crate) fn is_whitespace_single_line(c: char) -> bool { ::tsox_core::fntrace::enter("is_whitespace_single_line"); 
+    matches!(c, '\t' | '\x0B' | '\x0C' | ' ' | '\u{A0}' | '\u{FEFF}')
+}
+
+pub(crate) fn has_jsdoc_tag(text: &str, names: &[&str]) -> bool { ::tsox_core::fntrace::enter("has_jsdoc_tag"); 
+    for &name in names {
+        if !text.starts_with(name) {
+            continue;
+        }
+        if text.len() == name.len() {
+            return true;
+        }
+        let ch = text.as_bytes()[name.len()] as char;
+        if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '}' || ch == '*' {
+            return true;
+        }
+    }
+    false
+}
+
+pub(crate) fn scan_jsdoc_comment_for_tags(comment_text: &str) -> TokenFlags { ::tsox_core::fntrace::enter("scan_jsdoc_comment_for_tags"); 
+    let mut flags = TOKEN_FLAGS_NONE;
+    let mut rest = comment_text;
+    loop {
+        let i = match rest.find('@') {
+            Some(i) => i,
+            None => return flags,
+        };
+        rest = &rest[i + 1..];
+        if !token_flags_contains(flags, TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED)
+            && has_jsdoc_tag(rest, &["deprecated"])
+        {
+            flags |= TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED;
+        }
+        if !token_flags_contains(flags, TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK)
+            && has_jsdoc_tag(rest, &["see", "link", "linkcode", "linkplain"])
+        {
+            flags |= TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK;
+        }
+        if token_flags_contains(
+            flags,
+            TOKEN_FLAGS_PRECEDING_JSDOC_WITH_DEPRECATED
+                | TOKEN_FLAGS_PRECEDING_JSDOC_WITH_SEE_OR_LINK,
+        ) {
+            return flags;
+        }
+    }
+}
+
+pub(crate) fn is_shebang_trivia(text: &str, pos: usize) -> bool { ::tsox_core::fntrace::enter("is_shebang_trivia"); 
+    if text.len() < 2 {
+        return false;
+    }
+    debug_assert_eq!(
+        pos, 0,
+        "shebangs check must only be done at the start of the file"
+    );
+    text.as_bytes()[0] == b'#' && text.as_bytes()[1] == b'!'
+}
+
+pub(crate) fn scan_shebang_trivia(text: &str, pos: usize) -> usize { ::tsox_core::fntrace::enter("scan_shebang_trivia"); 
+    let text_len = text.len();
+    let mut pos = pos + 2;
+    while pos < text_len {
+        let (ch, size) = decode_char(text, pos);
+        if is_line_break(ch) {
+            break;
+        }
+        pos += size;
+    }
+    pos
+}
+
+pub fn get_shebang(text: &str) -> &str { ::tsox_core::fntrace::enter("get_shebang"); 
+    if !is_shebang_trivia(text, 0) {
+        return "";
+    }
+    let end = scan_shebang_trivia(text, 0);
+    &text[..end]
+}
+
+#[derive(Debug, Clone, Copy, Default)]
+pub struct SkipTriviaOptions {
+    pub stop_after_line_break: bool,
+
+    pub stop_at_comments: bool,
+
+    pub in_jsdoc: bool,
+}
+
+pub(crate) const MERGE_CONFLICT_MARKER_LENGTH: usize = 7;

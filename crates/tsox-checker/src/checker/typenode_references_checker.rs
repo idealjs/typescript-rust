@@ -1,0 +1,333 @@
+#![allow(unused_imports)]
+
+use crate::checker::typenode_references::*;
+use crate::checker::mig::m1b::parse_pseudo_big_int;
+
+impl Checker {
+    pub(crate) fn get_type_from_this_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_this_type_node"); 
+        if let Some(t) = self.get_cached_type(node) {
+            return t;
+        }
+        let mut container: Option<Arc<Node>> = None;
+        let mut cur: Option<Arc<Node>> = Some(Arc::clone(node));
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ClassDeclaration
+                | SyntaxKind::ClassExpression
+                | SyntaxKind::InterfaceDeclaration => {
+                    container = Some(n);
+                    break;
+                }
+                _ => {}
+            }
+            cur = n.parent();
+        }
+        let result = match container {
+            Some(c) => {
+                let instance = self.container_instance_type_of(&c);
+                self.create_this_type(&c, instance)
+            }
+            None => {
+                let instance = self.container_instance_type_of(node);
+                self.create_this_type(node, instance)
+            }
+        };
+        self.cache_type(node, result.clone());
+        result
+    }
+
+    pub(crate) fn container_instance_type_of(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("container_instance_type_of"); 
+        // 从 container 自身查起：调用方传入的即是类/接口容器（顶层类的
+        // parent 是 SourceFile，跳过自身会一直走到 any）
+        let mut cur: Option<Arc<Node>> = Some(Arc::clone(node));
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
+                    return self.build_class_instance_type_with_base(&n);
+                }
+                SyntaxKind::InterfaceDeclaration => {
+                    return self.interface_declaration_type(&n);
+                }
+                _ => {}
+            }
+            cur = n.parent();
+        }
+        self.get_any_type()
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn polymorphic_this_of(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("polymorphic_this_of"); 
+        let mut cur = node.parent();
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ArrowFunction => {}
+                SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor
+                | SyntaxKind::MethodSignature => {
+                    let container = n.parent()?;
+                    match container.kind {
+                        SyntaxKind::ClassDeclaration
+                        | SyntaxKind::ClassExpression
+                        | SyntaxKind::InterfaceDeclaration => {
+                            let instance = self.container_instance_type_of(&container);
+                            return Some(self.create_this_type(&container, instance));
+                        }
+                        _ => return None,
+                    }
+                }
+                SyntaxKind::FunctionExpression | SyntaxKind::FunctionDeclaration => {
+                    return None;
+                }
+                _ => {}
+            }
+            cur = n.parent();
+        }
+        None
+    }
+
+    // 对象字面量方法的 this：取上下文签名 this 参数类型（Go getContextualThisParameterType 上下文敏感分支）；
+    // 多态 this 只在接口声明内有意义，字面量方法中转为其约束
+    #[allow(dead_code)]
+    pub(crate) fn object_literal_method_contextual_this(
+        &mut self,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("object_literal_method_contextual_this"); 
+        let mut cur = node.parent();
+        while let Some(n) = cur {
+            match n.kind {
+                SyntaxKind::ArrowFunction => {}
+                SyntaxKind::FunctionExpression | SyntaxKind::FunctionDeclaration => return None,
+                SyntaxKind::MethodDeclaration => {
+                    let container = n.parent()?;
+                    if container.kind != SyntaxKind::ObjectLiteralExpression {
+                        return None;
+                    }
+                    let name = match &n.data {
+                        NodeData::MethodDeclaration(d) => {
+                            self.get_property_name_from_node(&d.name)
+                        }
+                        _ => return None,
+                    };
+                    // 上下文签名带 this 参数：取其约束（多态 this）
+                    if let Some(ctx) = self.get_contextual_type(&container, ContextFlags::None) {
+                        if let Some(prop_type) =
+                            self.get_type_of_property_of_contextual_type(&ctx, &name)
+                        {
+                            if let Some(sig) = self
+                                .get_signatures_of_type(
+                                    &prop_type,
+                                    crate::checker::SignatureKind::Call,
+                                )
+                                .into_iter()
+                                .next()
+                            {
+                                if let Some(this_param) = sig.this_parameter.clone() {
+                                    let t = self.get_type_of_symbol(&this_param);
+                                    if crate::checker::utilities::is_this_type_parameter(&t)
+                                        && let Some(constraint) =
+                                            self.get_constraint_of_type_parameter(&t)
+                                    {
+                                        return Some(constraint);
+                                    }
+                                    return Some(t);
+                                }
+                            }
+                        }
+                    }
+                    // Go getContextualThisParameterType：无上下文时回退到
+                    // 对象字面量自身类型（widened），方法成员可经 this.test 解析
+                    let literal_type = self.get_type_of_object_literal(&container);
+                    return Some(self.get_widened_type(&literal_type));
+                }
+                _ => {}
+            }
+            cur = n.parent();
+        }
+        None
+    }
+
+    pub(crate) fn create_this_type(
+        &mut self,
+        container: &Arc<Node>,
+        instance: Arc<Type>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("create_this_type"); 
+        let key = container.id();
+        if let Some(t) = self.this_type_cache.get(&key) {
+            return Arc::clone(t);
+        }
+        let mut t = Type::new(
+            TypeFlags::TypeParameter,
+            TypeData::TypeParameter(TypeParameterData {
+                constrained: ConstrainedTypeData::default(),
+                constraint: Some(instance),
+                target: None,
+                mapper: None,
+                is_this_type: true,
+                resolved_default_type: std::sync::RwLock::new(None),
+            }),
+        );
+        t.symbol = self.program.symbol_map().symbol_of(container).cloned();
+        let t = Arc::new(t);
+        self.this_type_cache.insert(key, Arc::clone(&t));
+        t
+    }
+
+    fn interface_declaration_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("interface_declaration_type"); 
+        if let Some(sym) = self.program.symbol_map().symbol_of(node).cloned() {
+            if let Some(t) = self.type_alias_links.get(&sym).and_then(|l| l.declared_type.clone())
+            {
+                return t;
+            }
+            // 重入时 _ex 返回 pending 壳，不能作为声明类型缓存（_ex 内部按 cache_result 自管）
+            return self.resolve_interface_type_ex(&sym, None);
+        }
+        self.get_any_type()
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn explicit_this_parameter_type(&mut self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("explicit_this_parameter_type"); 
+        let mut cur = node.parent();
+        while let Some(n) = cur {
+            let params = match &n.data {
+                NodeData::MethodDeclaration(d) => Some(&d.parameters),
+                NodeData::FunctionExpression(d) => Some(&d.parameters),
+                NodeData::FunctionDeclaration(d) => Some(&d.parameters),
+                NodeData::ArrowFunction(d) => Some(&d.parameters),
+                _ => None,
+            };
+            if let Some(params) = params
+                && let Some(first) = params.iter().next()
+                && let NodeData::ParameterDeclaration(pd) = &first.data
+                && (matches!(&pd.name.data, NodeData::Identifier(id) if id.text == "this")
+                    || pd.name.kind == SyntaxKind::ThisKeyword)
+                && let Some(tn) = &pd.type_node
+            {
+                return Some(self.get_type_from_type_node(tn));
+            }
+            cur = n.parent();
+        }
+        None
+    }
+
+    pub(crate) fn get_type_from_literal_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_literal_type_node"); 
+        if let Some(t) = self.get_cached_type(node) {
+            return t;
+        }
+        let literal = match &node.data {
+            NodeData::LiteralTypeNode(data) => &data.literal,
+            _ => return self.error_type(),
+        };
+        if literal.kind == SyntaxKind::NullKeyword {
+            return self.null_type();
+        }
+        let result = self.literal_type_from_literal_node(literal);
+        self.cache_type(node, result.clone());
+        result
+    }
+
+    pub(crate) fn literal_type_from_literal_node(&mut self, literal: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("literal_type_from_literal_node"); 
+        match literal.kind {
+            SyntaxKind::StringLiteral | SyntaxKind::NoSubstitutionTemplateLiteral => {
+                self.get_string_literal_type(literal.text())
+            }
+            SyntaxKind::NumericLiteral => {
+                if let Ok(n) = literal.text().parse::<f64>() {
+                    self.get_number_literal_type(tsox_core::jsnum::Number::from(n))
+                } else {
+                    self.number_type()
+                }
+            }
+            SyntaxKind::BigIntLiteral => {
+                self.get_big_int_literal_type(tsox_core::jsnum::PseudoBigInt::parse(&literal.text()))
+            }
+            SyntaxKind::PrefixUnaryExpression => {
+                let NodeData::PrefixUnaryExpression(unary) = &literal.data else {
+                    return self.error_type();
+                };
+                match unary.operator {
+                    SyntaxKind::MinusToken => match unary.operand.kind {
+                        SyntaxKind::BigIntLiteral => {
+                            let positive = parse_pseudo_big_int(&unary.operand.text());
+                            let negative =
+                                tsox_core::jsnum::PseudoBigInt::new(&positive.to_string(), true);
+                            self.get_big_int_literal_type(negative)
+                        }
+                        SyntaxKind::NumericLiteral => {
+                            match unary.operand.text().parse::<f64>() {
+                                Ok(n) => self
+                                    .get_number_literal_type(tsox_core::jsnum::Number::from(-n)),
+                                Err(_) => self.number_type(),
+                            }
+                        }
+                        _ => self.error_type(),
+                    },
+                    SyntaxKind::PlusToken => match unary.operand.kind {
+                        SyntaxKind::NumericLiteral => {
+                            match unary.operand.text().parse::<f64>() {
+                                Ok(n) => self
+                                    .get_number_literal_type(tsox_core::jsnum::Number::from(n)),
+                                Err(_) => self.number_type(),
+                            }
+                        }
+                        _ => self.error_type(),
+                    },
+                    _ => self.error_type(),
+                }
+            }
+            SyntaxKind::TrueKeyword => self.true_type(),
+            SyntaxKind::FalseKeyword => self.false_type(),
+            _ => self.error_type(),
+        }
+    }
+
+    pub(crate) fn get_type_from_type_reference(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_reference"); 
+        if let Some(t) = self.get_cached_type(node) {
+            return t;
+        }
+        // Go getTypeFromTypeReference（checker.go:24359-24361）：`x as const` 的
+        // `const` 类型引用不解析实体名，取断言被检表达式缓存型
+        if crate::checker::utilities_get_assignment_target::is_const_type_reference(node)
+            && node
+                .parent()
+                .is_some_and(|p| tsox_frontend::ast::is_assertion_expression(&p))
+        {
+            let expr = node
+                .parent()
+                .and_then(|p| p.expression().cloned())
+                .expect("const type reference host assertion has expression");
+            return self.check_expression_cached(&expr);
+        }
+        let result = self.resolve_type_reference(node);
+        // 解析重入期返回的空壳（接口/类符号在册但成员空）不进节点缓存：
+        // 缓存会把残缺型钉死，后续引用全部拿到幻影（tsc 重试拿完整版）
+        let incomplete = result.as_structured().is_some_and(|s| {
+            s.members.entries.is_empty()
+        }) && result
+            .symbol
+            .as_ref()
+            .is_some_and(|sym| {
+                sym.flags.intersects(
+                    tsox_frontend::ast::SymbolFlags::Interface
+                        | tsox_frontend::ast::SymbolFlags::Class,
+                ) && !sym.declarations.is_empty()
+            });
+        // 环断路器 in-flight error 同样不缓存（Go 惰性求值下重入查询
+        // 不发生，直接别名环才产 error 并驻留声明型）：窗口内的 error 是
+        // 临时占位，别名/接口解析完成后重查应得完整型
+        let transient_cycle_error = crate::checker::utilities::is_type_error(&result)
+            && (!self.type_resolution_stack.is_empty()
+                || !self.alias_args_resolution_stack.is_empty()
+                || !self.alias_type_instantiation_stack.is_empty());
+        // 类成员填充窗口内的解析结果可能取到半成品 attach 快照，同样不缓存
+        // 类成员填充窗口内的解析结果可能取到半成品 attach 快照，同样不缓存
+        if !incomplete
+            && !transient_cycle_error
+            && self.filling_class_members.is_empty()
+        {
+            self.cache_type(node, result.clone());
+        }
+        result
+    }
+}

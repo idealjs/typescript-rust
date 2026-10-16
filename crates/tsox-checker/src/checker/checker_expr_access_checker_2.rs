@@ -1,0 +1,269 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_expr_access::*;
+
+impl Checker {
+    #[allow(dead_code)]
+    pub(crate) fn property_type_includes_undefined(
+        &mut self,
+        data: &tsox_frontend::ast::node_data_generated::PropertyDeclarationData,
+    ) -> bool { ::tsox_core::fntrace::enter("property_type_includes_undefined"); 
+        let Some(tn) = &data.type_node else {
+            return false;
+        };
+        let t = self.get_type_from_type_node(tn);
+        if t.flags.contains(TypeFlags::Undefined) {
+            return true;
+        }
+        if let Some(u) = t.as_union_or_intersection() {
+            return u
+                .types
+                .iter()
+                .any(|m| m.flags.contains(TypeFlags::Undefined));
+        }
+        false
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn class_constructor_assigns_property(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("class_constructor_assigns_property"); 
+        let Some(class) = self.enclosing_class_stack.last() else {
+            return false;
+        };
+        let tsox_frontend::ast::NodeData::ClassDeclaration(cd) = &class.data else {
+            return false;
+        };
+        cd.members.iter().any(|member| {
+            if member.kind != SyntaxKind::Constructor {
+                return false;
+            }
+            let tsox_frontend::ast::NodeData::ConstructorDeclaration(ctor) = &member.data else {
+                return false;
+            };
+            ctor.body
+                .as_ref()
+                .is_some_and(|body| body_assigns_this_property(body, name))
+        })
+    }
+
+    pub(crate) fn check_call_arg_with_context(
+        &mut self,
+        callee_expr: &Arc<Node>,
+        arg_index: usize,
+        arg: &Arc<Node>,
+    ) { ::tsox_core::fntrace::enter("check_call_arg_with_context"); 
+        let is_function_arg = matches!(
+            arg.kind,
+            SyntaxKind::ArrowFunction | SyntaxKind::FunctionExpression
+        );
+        // Go chooseOverload 的 SkipContextSensitive：泛型 callee 的上下文敏感实参
+        // 不做预先检查，待推断固定类型参数后重定型（否则参数以未固定 T 定型污染节点缓存）。
+        // Go isContextSensitive 递归覆盖对象/数组字面量（checker.go:32695+），
+        // 含未注解箭头的字面量实参同样豁免（checkExpressionWithContextualType
+        // 在该阶段对 CS 实参直接返 anyType，从不驻留节点型）
+        if self.is_context_sensitive(arg) && self.callee_has_generic_signature(callee_expr) {
+            return;
+        }
+        if is_function_arg {
+            let ctx = self.contextual_param_count_for_arg(callee_expr, arg_index);
+            self.call_arg_arrow_context.push(ctx);
+        }
+        self.check_expression(arg);
+        if is_function_arg {
+            self.call_arg_arrow_context.pop();
+        }
+    }
+
+    fn callee_has_generic_signature(&mut self, callee_expr: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("callee_has_generic_signature"); 
+        let callee_type = self.get_type_of_node(callee_expr);
+        self.get_signatures_of_type(&callee_type, crate::checker::SignatureKind::Call)
+            .first()
+            .is_some_and(|sig| !sig.type_parameters.is_empty())
+    }
+
+    pub(crate) fn contextual_signature_of_arrow(
+        &mut self,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("contextual_signature_of_arrow"); 
+        let t = self.get_contextual_type(node, ContextFlags::None)?;
+        if let TypeData::IndexedAccess(ia) = &t.data
+            && let (Some(o), Some(i)) = (&ia.object_type, &ia.index_type)
+            && o.flags.contains(TypeFlags::TypeParameter)
+        {
+            let resolved = self.get_indexed_access_type(o, i);
+            if !matches!(resolved.intrinsic_name(), Some("any") | Some("error")) {
+                return self.contextual_signature_of_type(&resolved, node);
+            }
+        }
+        // Go getContextualSignature：联合上下文型逐成分取签名、全同才用，
+        // 不再取首个含签名成分（string.normalize 与自定义 normalize 不同型
+        // 时须报 TS7006 而非错配首个）
+        self.contextual_signature_of_type(&t, node)
+    }
+
+    pub(crate) fn contextual_param_count_for_arg(
+        &mut self,
+        callee_expr: &Arc<Node>,
+        arg_index: usize,
+    ) -> usize {
+        let mut t = self.get_type_of_node(callee_expr);
+        // Go getSignaturesOfType：延迟条件型 callee 的签名经默认基约束取得
+        if t.flags.contains(TypeFlags::Conditional) {
+            match self.deferred_default_constraint_of_conditional(&t) {
+                Some(c) if !c.flags.contains(TypeFlags::Never) => t = c,
+                _ => {}
+            }
+        }
+        if t.flags.contains(TypeFlags::Any) {
+            if let tsox_frontend::ast::NodeData::PropertyAccessExpression(data) = &callee_expr.data
+            {
+                let method = data.name.text().to_string();
+                const ARRAY_CALLBACK_SIGS: &[(&str, usize)] = &[
+                    ("map", 3),
+                    ("filter", 3),
+                    ("forEach", 3),
+                    ("every", 3),
+                    ("some", 3),
+                    ("find", 3),
+                    ("findIndex", 3),
+                    ("findLast", 3),
+                    ("findLastIndex", 3),
+                    ("flatMap", 3),
+                    ("reduce", 4),
+                    ("reduceRight", 4),
+                    ("sort", 2),
+                ];
+                if let Some((_, count)) = ARRAY_CALLBACK_SIGS.iter().find(|(m, _)| *m == method) {
+                    let recv_type = self.get_type_of_node(&data.expression);
+                    if self.is_array_type(&recv_type) {
+                        return *count;
+                    }
+                }
+            }
+            return 0;
+        }
+
+        let t = if let TypeData::Union(u) = &t.data {
+            match u.union_or_intersection.types.iter().find(|c| {
+                !c.flags.intersects(TypeFlags::Undefined | TypeFlags::Null)
+                    && c.as_structured()
+                        .is_some_and(|s| !s.call_signatures().is_empty())
+            }) {
+                Some(c) => Arc::clone(c),
+                None => return 0,
+            }
+        } else {
+            t
+        };
+        let Some(structured) = t.as_structured() else {
+            return 0;
+        };
+
+        let Some(sig) = structured
+            .call_signatures()
+            .iter()
+            .find(|s| s.parameters.len() > arg_index)
+            .or_else(|| structured.call_signatures().first())
+        else {
+            return 0;
+        };
+        let Some(param) = sig.parameters.get(arg_index) else {
+            return 0;
+        };
+        let param_type = self.get_type_of_symbol(param);
+        if param_type.flags.contains(TypeFlags::Any) {
+            return 0;
+        }
+        let Some(param_structured) = param_type.as_structured() else {
+            return 0;
+        };
+        param_structured
+            .call_signatures()
+            .first()
+            .map_or(0, |callback_sig| callback_sig.parameters.len())
+    }
+
+    pub(crate) fn symbol_is_abstract_class(&self, symbol: &Arc<Symbol>) -> bool { ::tsox_core::fntrace::enter("symbol_is_abstract_class"); 
+        for decl in &symbol.declarations {
+            if decl.kind == SyntaxKind::ClassDeclaration
+                && decl.has_syntactic_modifier(ModifierFlags::Abstract)
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub(crate) fn type_includes_abstract_constructor(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_includes_abstract_constructor"); 
+        if t.flags.contains(TypeFlags::Any) {
+            return false;
+        }
+        if let Some(u) = t.as_union_or_intersection() {
+            return u
+                .types
+                .iter()
+                .any(|m| self.type_includes_abstract_constructor(m));
+        }
+
+        if t.flags.contains(TypeFlags::Object) {
+            if let Some(s) = t.as_structured()
+                && s.construct_signatures().iter().any(|sig| {
+                    sig.flags
+                        .contains(crate::checker::types::SignatureFlags::Abstract)
+                })
+            {
+                return true;
+            }
+        }
+        if let Some(symbol) = &t.symbol {
+            return self.symbol_is_abstract_class(symbol);
+        }
+        false
+    }
+
+    pub(crate) fn declaring_class_of_member(
+        &self,
+        member_symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaring_class_of_member"); 
+        self.declaring_class_of_private_member(member_symbol)
+            .or_else(|| {
+                for decl in &member_symbol.declarations {
+                    if matches!(
+                        decl.kind,
+                        SyntaxKind::PropertyDeclaration | SyntaxKind::MethodDeclaration
+                    ) {
+                        if let Some(parent) = decl.parent() {
+                            if parent.kind == SyntaxKind::ClassDeclaration {
+                                return Some(Arc::clone(&parent));
+                            }
+                        }
+                    }
+                }
+                None
+            })
+    }
+
+    pub(crate) fn declaring_class_of_private_member(
+        &self,
+        member_symbol: &Arc<Symbol>,
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("declaring_class_of_private_member"); 
+        for decl in &member_symbol.declarations {
+            if matches!(
+                decl.kind,
+                SyntaxKind::PropertyDeclaration
+                    | SyntaxKind::MethodDeclaration
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+            ) {
+                if let Some(parent) = decl.parent() {
+                    if matches!(
+                        parent.kind,
+                        SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+                    ) {
+                        return Some(Arc::clone(&parent));
+                    }
+                }
+            }
+        }
+        None
+    }
+}

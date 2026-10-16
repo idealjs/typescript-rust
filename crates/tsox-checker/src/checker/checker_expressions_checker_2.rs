@@ -1,0 +1,308 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_expressions::*;
+
+impl Checker {
+    pub(crate) fn collect_return_expressions(node: &Arc<Node>, out: &mut Vec<Arc<Node>>) { ::tsox_core::fntrace::enter("collect_return_expressions"); 
+        tsox_frontend::ast::node_data_generated::for_each_child(node, |child| match child.kind {
+            SyntaxKind::ReturnStatement => {
+                if let tsox_frontend::ast::NodeData::ReturnStatement(r) = &child.data
+                    && let Some(expr) = &r.expression
+                {
+                    out.push(Arc::clone(expr));
+                }
+                false
+            }
+            SyntaxKind::FunctionDeclaration
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::ArrowFunction
+            | SyntaxKind::MethodDeclaration
+            | SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor => false,
+            _ => {
+                Self::collect_return_expressions(child, out);
+                false
+            }
+        });
+    }
+
+    pub(crate) fn subtree_contains_this(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("subtree_contains_this"); 
+        let mut found = false;
+        fn walk(root: &Arc<Node>, n: &Arc<Node>, found: &mut bool) { ::tsox_core::fntrace::enter("walk"); 
+            if *found {
+                return;
+            }
+            if n.kind == SyntaxKind::ThisKeyword {
+                *found = true;
+                return;
+            }
+
+            if !Arc::ptr_eq(n, root)
+                && matches!(
+                    n.kind,
+                    SyntaxKind::FunctionDeclaration
+                        | SyntaxKind::FunctionExpression
+                        | SyntaxKind::ArrowFunction
+                )
+            {
+                return;
+            }
+            tsox_frontend::ast::node_data_generated::for_each_child(n, |c| {
+                walk(root, c, found);
+                *found
+            });
+        }
+
+        if matches!(
+            node.kind,
+            SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+        ) {
+            return false;
+        }
+        walk(node, node, &mut found);
+        found
+    }
+
+    pub(crate) fn getter_return_reaches_this(&mut self, accessor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("getter_return_reaches_this"); 
+        let tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) = &accessor.data else {
+            return false;
+        };
+        let Some(body) = &gd.body else {
+            return false;
+        };
+        let own_name = {
+            let name_node = &gd.name;
+            if tsox_frontend::ast::node_data_generated::is_computed_property_name(name_node) {
+                return false;
+            }
+            name_node.text().to_string()
+        };
+        let mut returns = Vec::new();
+        Self::collect_return_expressions(&body, &mut returns);
+        if returns.is_empty() {
+            return false;
+        }
+
+        let mut this_aliases: Vec<String> = Vec::new();
+        tsox_frontend::ast::node_data_generated::for_each_child(&body, |stmt| {
+            if stmt.kind == SyntaxKind::VariableStatement
+                && let tsox_frontend::ast::NodeData::VariableStatement(vs) = &stmt.data
+                && let tsox_frontend::ast::NodeData::VariableDeclarationList(vdl) =
+                    &vs.declaration_list.data
+            {
+                for decl in vdl.declarations.iter() {
+                    if let (Some(name), Some(init)) = (decl.name(), {
+                        match &decl.data {
+                            tsox_frontend::ast::NodeData::VariableDeclaration(vd) => {
+                                vd.initializer.clone()
+                            }
+                            _ => None,
+                        }
+                    }) {
+                        if name.kind == SyntaxKind::Identifier && Self::subtree_contains_this(&init)
+                        {
+                            this_aliases.push(name.text().to_string());
+                        }
+                    }
+                }
+            }
+            false
+        });
+        // Go 报 TS7023 仅在体推断真重入本符号 getTypeOfAccessors：返回链
+        // 经 this/别名读取同名成员；读取其他属性缺失时止于 TS2339，不入环
+        returns
+            .iter()
+            .any(|r| Self::subtree_reads_member_from_this(r, &this_aliases, &own_name))
+    }
+
+    fn subtree_reads_member_from_this(
+        node: &Arc<Node>,
+        aliases: &[String],
+        own_name: &str,
+    ) -> bool { ::tsox_core::fntrace::enter("subtree_reads_member_from_this"); 
+        let mut found = false;
+        fn walk(n: &Arc<Node>, aliases: &[String], own_name: &str, found: &mut bool) { ::tsox_core::fntrace::enter("walk"); 
+            if *found {
+                return;
+            }
+            if let tsox_frontend::ast::NodeData::PropertyAccessExpression(pd) = &n.data {
+                let object_is_thisish = pd.expression.kind == SyntaxKind::ThisKeyword
+                    || (pd.expression.kind == SyntaxKind::Identifier
+                        && aliases.iter().any(|a| *a == pd.expression.text()));
+                if object_is_thisish && pd.name.text() == own_name {
+                    *found = true;
+                    return;
+                }
+            }
+            tsox_frontend::ast::node_data_generated::for_each_child(n, |c| {
+                walk(c, aliases, own_name, found);
+                *found
+            });
+        }
+        walk(node, aliases, own_name, &mut found);
+        found
+    }
+
+    pub(crate) fn this_type_marker_argument(
+        &self,
+        t: &Arc<Type>,
+        depth: usize,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("this_type_marker_argument"); 
+        if depth > 4 {
+            return None;
+        }
+        let constituent_types: Option<Vec<Arc<Type>>> = match &t.data {
+            TypeData::Union(u) => Some(u.union_or_intersection.types.to_vec()),
+            TypeData::Intersection(i) => Some(i.union_or_intersection.types.to_vec()),
+            _ => None,
+        };
+        if let Some(types) = constituent_types {
+            return types
+                .iter()
+                .find_map(|c| self.this_type_marker_argument(c, depth + 1));
+        }
+        let obj = t.as_object()?;
+        if obj.type_arguments.len() == 1 && t.symbol.as_ref().is_some_and(|s| s.name == "ThisType")
+        {
+            return Some(Arc::clone(&obj.type_arguments[0]));
+        }
+        None
+    }
+
+    pub(crate) fn build_object_literal_this_type(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("build_object_literal_this_type"); 
+        let tsox_frontend::ast::NodeData::ObjectLiteralExpression(data) = &node.data else {
+            return self.get_any_type();
+        };
+        let mut symbol_table = tsox_frontend::ast::SymbolTable::new();
+        let mut props: Vec<Arc<tsox_frontend::ast::Symbol>> = Vec::new();
+        for prop in data.properties.iter() {
+            let Some(name_node) = Self::member_name_node(prop) else {
+                continue;
+            };
+            if !matches!(
+                name_node.kind,
+                SyntaxKind::Identifier | SyntaxKind::StringLiteral | SyntaxKind::NumericLiteral
+            ) {
+                continue;
+            }
+            let name = name_node.text().to_string();
+            let (member_type, readonly) = match &prop.data {
+                tsox_frontend::ast::NodeData::PropertyAssignment(pa) => {
+                    let t = self.get_type_of_node(&pa.initializer);
+                    (self.get_widened_type_of_literal(&t), false)
+                }
+                tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(sa) => {
+                    let t = self.get_type_of_node(&sa.name);
+                    (self.get_widened_type_of_literal(&t), false)
+                }
+                tsox_frontend::ast::NodeData::GetAccessorDeclaration(gd) => {
+                    let t = match &gd.type_node {
+                        Some(tn) => self.get_type_from_type_node(tn),
+                        None => self.get_any_type(),
+                    };
+                    (t, true)
+                }
+
+                tsox_frontend::ast::NodeData::MethodDeclaration(_) => {
+                    let mut method_sym = tsox_frontend::ast::Symbol::new(
+                        tsox_frontend::ast::SymbolFlags::Method,
+                        name.clone(),
+                    );
+                    method_sym.declarations = vec![Arc::clone(prop)];
+                    let method_sym = Arc::new(method_sym);
+                    symbol_table.insert(name, Arc::clone(&method_sym));
+                    props.push(method_sym);
+                    continue;
+                }
+                _ => continue,
+            };
+            let prop_sym = Arc::new(tsox_frontend::ast::Symbol::new(
+                tsox_frontend::ast::SymbolFlags::Property,
+                name.clone(),
+            ));
+            if readonly {
+                let sym_mut = Arc::as_ptr(&prop_sym) as *mut tsox_frontend::ast::Symbol;
+                unsafe {
+                    (*sym_mut).check_flags |= tsox_frontend::ast::CheckFlags::Readonly;
+                }
+            }
+            self.value_symbol_links.insert(
+                &prop_sym,
+                crate::checker::types::ValueSymbolLinks {
+                    resolved_type: Some(member_type),
+                    ..Default::default()
+                },
+            );
+            symbol_table.insert(name, Arc::clone(&prop_sym));
+            props.push(prop_sym);
+        }
+        Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: crate::checker::types::ObjectFlags::Anonymous
+                | crate::checker::types::ObjectFlags::ObjectLiteral,
+            id: crate::checker::types::next_type_id(),
+            symbol: None,
+            alias: None,
+            data: crate::checker::types::TypeData::Object(crate::checker::types::ObjectTypeData { node: None,
+                structured: crate::checker::types::StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        })
+    }
+
+    pub(crate) fn check_object_literal_element(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_object_literal_element"); 
+        if let Some(name) = node.name()
+            && name.kind == SyntaxKind::PrivateIdentifier
+        {
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    PRIVATE_IDENTIFIERS_ARE_NOT_ALLOWED_OUTSIDE_CLASS_BODIES,
+                vec![],
+            ));
+            return;
+        }
+
+        match node.kind {
+            SyntaxKind::PropertyAssignment => {
+                if let tsox_frontend::ast::NodeData::PropertyAssignment(data) = &node.data {
+                    self.check_expression(&data.initializer);
+                }
+            }
+            SyntaxKind::ShorthandPropertyAssignment => {
+                if let tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(data) = &node.data
+                {
+                    self.check_identifier_reference(&data.name);
+                }
+            }
+            SyntaxKind::SpreadAssignment => {
+                if let tsox_frontend::ast::NodeData::SpreadAssignment(data) = &node.data {
+                    self.check_expression(&data.expression);
+                }
+            }
+            SyntaxKind::MethodDeclaration | SyntaxKind::GetAccessor | SyntaxKind::SetAccessor => {
+                // 字面量位方法的参数上下文定型（Go checkFunctionLikeExpression 的
+                // contextuallyTypedParameterCount：经成员名查上下文签名）
+                if node.kind == SyntaxKind::MethodDeclaration
+                    && let tsox_frontend::ast::NodeData::MethodDeclaration(d) = &node.data
+                {
+                    let contextual_count = self
+                        .get_contextual_signature(node)
+                        .map_or(0, |sig| sig.parameters.len());
+                    self.check_parameter_implicit_any(node, &d.parameters, contextual_count);
+                }
+                self.check_class_member(node);
+            }
+            _ => {
+                self.walk_children_for_expressions(node);
+            }
+        }
+    }
+}

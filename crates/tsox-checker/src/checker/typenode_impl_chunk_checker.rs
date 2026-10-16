@@ -1,0 +1,302 @@
+#![allow(unused_imports)]
+
+use crate::checker::typenode_impl_chunk::*;
+
+impl Checker {
+    fn interface_shell_residue(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("interface_shell_residue"); 
+        let Some(st) = t.as_structured() else {
+            return false;
+        };
+        if !st.members.entries.is_empty()
+            || !st.index_infos.is_empty()
+            || !st.signatures.is_empty()
+        {
+            return false;
+        }
+        let Some(sym) = t.symbol.as_ref() else {
+            return false;
+        };
+        if !sym
+            .flags
+            .contains(tsox_frontend::ast::SymbolFlags::Interface)
+        {
+            return false;
+        }
+        sym.declarations.iter().any(|d| match &d.data {
+            NodeData::InterfaceDeclaration(i) => i.members.iter().next().is_some(),
+            _ => false,
+        })
+    }
+
+    pub fn get_type_from_type_node(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_node"); 
+        let key = (node.id() as usize, self.type_argument_stack_hash());
+        if let Some(t) = self.type_node_subst_cache.get(&key) {
+            let stale_shell = self
+                .pending_interface_shells
+                .values()
+                .any(|s| Arc::ptr_eq(s, t));
+            let shell_residue = self.interface_shell_residue(t);
+            if stale_shell || shell_residue {
+                self.type_node_subst_cache.remove(&key);
+            } else {
+                return Arc::clone(t);
+            }
+        }
+
+        let degraded_epoch = self.heritage_degraded_events;
+
+        // Go 无节点级重入守卫：typeof/数组/型参/复合型（union/intersection）的
+        // 递归重入在 Go 中经 getDeclaredTypeOfSymbol 的 pushTypeResolution 环检测
+        // 与类/接口声明型即时驻留终止（unionTypeWithIndexedLiteralType：
+        // type U = Idx | ... 别名体在接口成员求值窗内重入，静默 error 会把
+        // 索引签名值型永久染成 error）。重入层经深度护栏防失控，缓存与
+        // resolving key 清理仍归外层
+        let go_reentrant_resolves = matches!(
+            node.kind,
+            SyntaxKind::TypeQuery
+                | SyntaxKind::ArrayType
+                | SyntaxKind::TypeReference
+                | SyntaxKind::UnionType
+                | SyntaxKind::IntersectionType
+        );
+        let reentrant = !self.type_node_resolving.insert(key);
+        if reentrant && !go_reentrant_resolves {
+            return self.error_type();
+        }
+        self.type_node_query_epochs.push(degraded_epoch);
+
+        let over_budget = !self.type_argument_stack.is_empty() && {
+            self.type_instantiation_count += 1;
+            self.type_instantiation_count >= 5_000_000
+        };
+        let result = if self.type_resolution_depth >= 500 || over_budget {
+            if !self.type_instantiation_limit_reported {
+                self.type_instantiation_limit_reported = true;
+                let file = self.current_file.clone();
+                let loc = self
+                    .current_node
+                    .as_ref()
+                    .map(|n| n.loc)
+                    .unwrap_or(node.loc);
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    loc,
+                    tsox_core::diagnostics::messages_generated::
+                        TYPE_INSTANTIATION_IS_EXCESSIVELY_DEEP_AND_POSSIBLY_INFINITE,
+                    Vec::new(),
+                ));
+            }
+            self.error_type()
+        } else {
+            self.type_resolution_depth += 1;
+            let r = self.get_type_from_type_node_worker(node);
+            self.type_resolution_depth -= 1;
+            r
+        };
+        if reentrant {
+            self.type_node_query_epochs.pop();
+            return result;
+        }
+        self.type_node_resolving.remove(&key);
+        self.type_node_query_epochs.pop();
+        let result_pending_shell = self
+            .pending_interface_shells
+            .values()
+            .any(|s| Arc::ptr_eq(s, &result));
+        if self.heritage_degraded_events == degraded_epoch
+            && !result_pending_shell
+            && !self.interface_shell_residue(&result)
+            // Go 无节点级 subst 缓存；本缓存若驻留环窗口 error 会永久掩盖
+            // 窗口外的正确重解析（对齐 resolve_type_alias_reference_with_node /
+            // get_declared_type_of_type_alias 的 error 不驻留纪律）
+            && !crate::checker::utilities::is_type_error(&result)
+        {
+            if self.type_node_subst_cache.len() >= self.type_node_subst_cache_limit {
+                self.type_node_subst_cache.clear();
+            }
+            self.type_node_subst_cache.insert(key, Arc::clone(&result));
+        }
+        result
+    }
+
+    pub(crate) fn type_argument_stack_hash(&self) -> u64 { ::tsox_core::fntrace::enter("type_argument_stack_hash"); 
+        use std::hash::{Hash, Hasher};
+        if self.type_argument_stack.is_empty() {
+            return 0;
+        }
+        let mut h = std::collections::hash_map::DefaultHasher::new();
+        for map in &self.type_argument_stack {
+            let mut entries: Vec<(usize, usize)> = map
+                .iter()
+                .map(|(k, v)| (*k as usize, v.id as usize))
+                .collect();
+            entries.sort_unstable();
+            entries.len().hash(&mut h);
+            for e in entries {
+                e.hash(&mut h);
+            }
+        }
+        h.finish()
+    }
+
+    pub(crate) fn get_type_from_type_node_worker(&mut self, node: &Arc<Node>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_from_type_node_worker"); 
+        match node.kind {
+            SyntaxKind::AnyKeyword | SyntaxKind::JSDocAllType => self.any_type(),
+            SyntaxKind::JSDocNonNullableType => {
+                let inner = node
+                    .type_node()
+                    .expect("JSDocNonNullableType has type")
+                    .clone();
+                self.get_type_from_type_node(&inner)
+            }
+            SyntaxKind::JSDocNullableType => {
+                let inner = node
+                    .type_node()
+                    .expect("JSDocNullableType has type")
+                    .clone();
+                let t = self.get_type_from_type_node(&inner);
+                if self.strict_null_checks {
+                    self.get_nullable_type(&t, TypeFlags::Null)
+                } else {
+                    t
+                }
+            }
+            SyntaxKind::JSDocVariadicType => {
+                let inner = node
+                    .type_node()
+                    .expect("JSDocVariadicType has type")
+                    .clone();
+                let elem_type = self.get_type_from_type_node(&inner);
+                self.create_array_type(elem_type)
+            }
+            SyntaxKind::JSDocOptionalType => {
+                let inner = node
+                    .type_node()
+                    .expect("JSDocOptionalType has type")
+                    .clone();
+                let t = self.get_type_from_type_node(&inner);
+                self.add_optionality(&t)
+            }
+            SyntaxKind::UnknownKeyword => self.unknown_type(),
+            SyntaxKind::StringKeyword => self.string_type(),
+            SyntaxKind::NumberKeyword => self.number_type(),
+            SyntaxKind::BigIntKeyword => self.bigint_type(),
+            SyntaxKind::BooleanKeyword => self.boolean_type(),
+            SyntaxKind::SymbolKeyword => self.es_symbol_type(),
+            SyntaxKind::VoidKeyword => self.void_type(),
+            SyntaxKind::UndefinedKeyword => self.undefined_type(),
+            SyntaxKind::NullKeyword => self.null_type(),
+            SyntaxKind::NeverKeyword => self.never_type(),
+            SyntaxKind::ObjectKeyword => self.non_primitive_type(),
+
+            SyntaxKind::ConstKeyword => self.any_type(),
+            // Go getTypeFromTypeAlias(checker.go:24208)：BuiltinIteratorReturn
+            // 的 intrinsic 体按 strictBuiltinIteratorReturn 代入 any/undefined
+            SyntaxKind::IntrinsicKeyword => {
+                let in_builtin_iterator_return_alias = node
+                    .parent()
+                    .is_some_and(|p| {
+                        matches!(
+                            &p.data,
+                            NodeData::TypeAliasDeclaration(ta) if ta.name.text() == "BuiltinIteratorReturn"
+                        )
+                    });
+                if in_builtin_iterator_return_alias {
+                    self.builtin_iterator_return_type()
+                } else {
+                    self.intrinsic_marker_type()
+                }
+            }
+            SyntaxKind::ThisType | SyntaxKind::ThisKeyword => {
+                self.get_type_from_this_type_node(node)
+            }
+            SyntaxKind::LiteralType => self.get_type_from_literal_type_node(node),
+            SyntaxKind::TypeReference | SyntaxKind::ExpressionWithTypeArguments => {
+                self.get_type_from_type_reference(node)
+            }
+            SyntaxKind::TypePredicate => {
+                if let NodeData::TypePredicateNode(data) = &node.data {
+                    if data.asserts_modifier.is_some() {
+                        return self.void_type();
+                    }
+                }
+                self.boolean_type()
+            }
+            SyntaxKind::TypeQuery => self.get_type_from_type_query_node(node),
+            SyntaxKind::ArrayType | SyntaxKind::TupleType => {
+                self.get_type_from_array_or_tuple_type_node(node)
+            }
+            SyntaxKind::OptionalType => self.get_type_from_optional_type_node(node),
+            SyntaxKind::UnionType => self.get_type_from_union_type_node(node),
+            SyntaxKind::IntersectionType => self.get_type_from_intersection_type_node(node),
+            SyntaxKind::NamedTupleMember => self.get_type_from_named_tuple_type_node(node),
+            SyntaxKind::ParenthesizedType => {
+                let inner = node
+                    .type_node()
+                    .expect("ParenthesizedType has type")
+                    .clone();
+                self.get_type_from_type_node(&inner)
+            }
+            SyntaxKind::RestType => self.get_type_from_rest_type_node(node),
+            SyntaxKind::FunctionType | SyntaxKind::ConstructorType | SyntaxKind::TypeLiteral => {
+                self.get_type_from_type_literal_or_function_or_constructor_type_node(node)
+            }
+            SyntaxKind::TypeOperator => self.get_type_from_type_operator_node(node),
+            SyntaxKind::IndexedAccessType => self.get_type_from_indexed_access_type_node(node),
+            SyntaxKind::TemplateLiteralType => self.get_type_from_template_type_node(node),
+            SyntaxKind::MappedType => self.get_type_from_mapped_type_node(node),
+            SyntaxKind::ConditionalType => self.get_type_from_conditional_type_node(node),
+            SyntaxKind::InferType => self.get_type_from_infer_type_node(node),
+            SyntaxKind::ImportType => self.get_type_from_import_type_node(node),
+            _ => self.error_type(),
+        }
+    }
+
+    pub(crate) fn get_cached_type(&self, node: &Arc<Node>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_cached_type"); 
+        if !self.type_argument_stack.is_empty() {
+            return None;
+        }
+        self.type_node_links
+            .get(node)
+            .and_then(|l| l.resolved_type.clone())
+    }
+
+    pub(crate) fn cache_type(&mut self, node: &Arc<Node>, t: Arc<Type>) { ::tsox_core::fntrace::enter("cache_type"); 
+        if !self.type_argument_stack.is_empty() {
+            return;
+        }
+        if let Some(epoch) = self.type_node_query_epochs.last()
+            && *epoch != self.heritage_degraded_events
+        {
+            return;
+        }
+        self.type_node_links.get_or_default(node).resolved_type = Some(t);
+    }
+
+    /// 环断路器补写：预缓存 error 后解析途中 shell 让位会 bump
+    /// heritage_degraded_events，常规 cache_type 的 epoch 守卫会跳过最终
+    /// 写回，error 永驻；最终结果非 error 时强制落盘
+    pub(crate) fn cache_type_overwrite_error(&mut self, node: &Arc<Node>, t: Arc<Type>) { ::tsox_core::fntrace::enter("cache_type_overwrite_error"); 
+        if !self.type_argument_stack.is_empty() {
+            return;
+        }
+        let is_error_new = crate::checker::utilities::is_type_error(&t);
+        let existing_is_error = self
+            .type_node_links
+            .get(node)
+            .and_then(|l| l.resolved_type.as_ref())
+            .is_some_and(|t| crate::checker::utilities::is_type_error(t));
+        if is_error_new && !existing_is_error {
+            return;
+        }
+        self.type_node_links.get_or_default(node).resolved_type = Some(t);
+    }
+
+    /// 环断路窗口内预缓存的 error 会永久掩盖窗口外的正确重解析；
+    /// 别名/接口解析层发现 error 结果时清节点缓存放行后续重算
+    pub(crate) fn uncache_type_node(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("uncache_type_node"); 
+        if let Some(links) = self.type_node_links.get_mut(node) {
+            links.resolved_type = None;
+        }
+    }
+}

@@ -1,0 +1,350 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_union_signatures::*;
+
+fn same_signature_slice(a: &[Arc<Signature>], b: &[Arc<Signature>]) -> bool { ::tsox_core::fntrace::enter("same_signature_slice"); 
+    a.len() == b.len() && a.iter().zip(b.iter()).all(|(x, y)| Arc::ptr_eq(x, y))
+}
+
+impl Checker {
+    /// Go getUnionSignatures 空结果判定（checker.go:22349）：任一成分签
+    /// 名表为空、跨成分匹配全无命中、且兜底分支（至多一个成分多重载、
+    /// 类型参数同一守卫）被否决时结果为空
+    pub(crate) fn union_call_signatures_empty(
+        &mut self,
+        signature_lists: &[Vec<Arc<Signature>>],
+    ) -> bool { ::tsox_core::fntrace::enter("union_call_signatures_empty"); 
+        let mut index_with_length_over_one = 0usize;
+        let mut count_length_over_one = 0usize;
+        for (i, list) in signature_lists.iter().enumerate() {
+            if list.is_empty() {
+                return true;
+            }
+            if list.len() > 1 {
+                index_with_length_over_one = i;
+                count_length_over_one += 1;
+            }
+            for signature in list {
+                if !self
+                    .find_matching_signatures(signature_lists, signature, i)
+                    .is_empty()
+                {
+                    return false;
+                }
+            }
+        }
+        if count_length_over_one > 1 {
+            return true;
+        }
+        let master_list = &signature_lists[index_with_length_over_one];
+        let mut results_type_parameters: Vec<Vec<Arc<Type>>> = master_list
+            .iter()
+            .map(|sig| sig.type_parameters.clone())
+            .collect();
+        for signatures in signature_lists {
+            if same_signature_slice(signatures, master_list) {
+                continue;
+            }
+            let Some(signature) = signatures.first() else {
+                return true;
+            };
+            let guarded = !signature.type_parameters.is_empty()
+                && results_type_parameters.iter().any(|type_parameters| {
+                    !type_parameters.is_empty()
+                        && !self.compare_type_parameters_identical(
+                            &signature.type_parameters,
+                            type_parameters,
+                        )
+                });
+            if guarded {
+                return true;
+            }
+            for type_parameters in results_type_parameters.iter_mut() {
+                if type_parameters.is_empty() {
+                    *type_parameters = signature.type_parameters.clone();
+                }
+            }
+        }
+        false
+    }
+
+    /// Go resolveUnionTypeMembers（checker.go:22289）：globalFunctionType
+    /// 成分贡献 unknownSignature，其余成分贡献各自调用签名表
+    pub(crate) fn union_leaf_call_signature_lists(
+        &mut self,
+        leaves: &[Arc<Type>],
+    ) -> Vec<Vec<Arc<Signature>>> { ::tsox_core::fntrace::enter("union_leaf_call_signature_lists"); 
+        leaves
+            .iter()
+            .map(|m| {
+                if self.is_global_function_type(m) {
+                    vec![self.untyped_call_signature()]
+                } else {
+                    m.as_structured()
+                        .map(|s| s.call_signatures().to_vec())
+                        .unwrap_or_default()
+                }
+            })
+            .collect()
+    }
+
+    pub fn get_union_signatures(
+        &mut self,
+        signature_lists: &[Vec<Arc<Signature>>],
+    ) -> Vec<Arc<Signature>> { ::tsox_core::fntrace::enter("get_union_signatures"); 
+        if signature_lists.is_empty() || signature_lists.iter().any(|l| l.is_empty()) {
+            return Vec::new();
+        }
+        let mut index_with_length_over_one = 0;
+        let mut count_length_over_one = 0;
+        for (i, list) in signature_lists.iter().enumerate() {
+            if list.len() > 1 {
+                index_with_length_over_one = i;
+                count_length_over_one += 1;
+            }
+        }
+        if count_length_over_one > 1 {
+            return Vec::new();
+        }
+        let mut results = signature_lists[index_with_length_over_one].clone();
+        for (i, list) in signature_lists.iter().enumerate() {
+            if i == index_with_length_over_one {
+                continue;
+            }
+            let signature = Arc::clone(&list[0]);
+            results = results
+                .iter()
+                .map(|sig| self.combine_union_member_signature(sig, &signature, true))
+                .collect();
+        }
+        results
+    }
+
+    pub(crate) fn combine_union_member_signature(
+        &mut self,
+        left: &Arc<Signature>,
+        right: &Arc<Signature>,
+        is_union: bool,
+    ) -> Arc<Signature> { ::tsox_core::fntrace::enter("combine_union_member_signature"); 
+        let (params, overrides) = self.combine_union_parameters(left, right, is_union);
+        let mut flags = left.flags | right.flags;
+        flags.remove(SignatureFlags::HasRestParameter);
+        if params.last().is_some_and(|_| self.combined_has_rest_tail(left, right)) {
+            flags.insert(SignatureFlags::HasRestParameter);
+        }
+        let min_arg = left.min_argument_count.max(right.min_argument_count);
+        let mut s = Signature::new();
+        s.flags = flags;
+        s.min_argument_count = min_arg;
+        s.resolved_min_argument_count = -1;
+        s.declaration = left.declaration.clone().or_else(|| right.declaration.clone());
+        s.type_parameters = if left.type_parameters.is_empty() {
+            right.type_parameters.clone()
+        } else {
+            left.type_parameters.clone()
+        };
+        s.parameters = params;
+        s.instantiated_parameter_types = Some(overrides);
+        let left_ret = self
+            .get_return_type_of_signature(left)
+            .unwrap_or_else(|| self.any_type());
+        let right_ret = self
+            .get_return_type_of_signature(right)
+            .unwrap_or_else(|| self.any_type());
+        // Go combineUnionOrIntersectionMemberSignatures（checker.go:22413-22415,
+        // 22443-22453）：双方各有型参时右成员型参经 paramMapper 映到左型参，
+        // 返回联合先经 mapper 实例化（getReturnTypeOfSignature composite 臂
+        // checker.go:21201-21202 用 sig.mapper 实例化各成员返回）
+        let param_mapper = if !left.type_parameters.is_empty() && !right.type_parameters.is_empty()
+        {
+            Some(Arc::new(crate::checker::mig::w9a::new_type_mapper(
+                right.type_parameters.clone(),
+                left.type_parameters.clone(),
+            )))
+        } else {
+            None
+        };
+        let right_ret = match &param_mapper {
+            Some(m) => self.instantiate_type(&right_ret, Some(m)),
+            None => right_ret,
+        };
+        if is_union {
+            // Go getUnionOrIntersectionType（checker.go:21201-21202）
+            // UnionReductionSubtype：Q[]→P[] 映射后与左返回恒等，归约为单一
+            // 成员（U[]），调用推断实例化后得 string[] 而非 U[] | U_1[]。
+            // Go removeSubtypes 对互为子类型且独立声明的具名类（structural
+            // identical 但各自 symbol）互移除后原样保留（removeSubtypesWorker
+            // utilities.go 的 result 为空回落 types），oracle 输出
+            // ConcreteA | ConcreteB——identical 短路仅限共享符号（同一
+            // Array 符号的 Q[]/U[]）或无符号成分。
+            // error/any 返回型不参与并集：本侧 declared type 解析重入窗口
+            // （is_resolving 守卫）会以 error_type 占位成员签名返回型，其
+            // flags 含 Any 会把整个联合染成 any（get_union_type 首个 Any
+            // 成员即返回 anyType）；Go checker 单实例无此重入窗口，成员恒
+            // 为正常类实例型
+            let is_error_or_any = |t: &Arc<Type>| {
+                self.is_error_type(t) || t.flags.contains(TypeFlags::Any)
+            };
+            let members: Vec<Arc<Type>> = vec![left_ret.clone(), right_ret.clone()]
+                .into_iter()
+                .filter(|t| !is_error_or_any(t))
+                .collect();
+            let symbols_distinct = match (&left_ret.symbol, &right_ret.symbol) {
+                (Some(a), Some(b)) => !Arc::ptr_eq(a, b),
+                _ => false,
+            };
+            let union_ret = if members.len() == 2
+                && !symbols_distinct
+                && self.is_type_identical_to(&members[0], &members[1])
+            {
+                members[0].clone()
+            } else if members.is_empty() {
+                self.any_type()
+            } else if members.len() == 1 {
+                members[0].clone()
+            } else {
+                self.get_union_type(members)
+            };
+            let _ = s.resolved_return_type.set(union_ret);
+        } else {
+            let _ = s
+                .resolved_return_type
+                .set(self.get_intersection_type(vec![left_ret, right_ret]));
+        }
+        Arc::new(s)
+    }
+
+    fn combined_has_rest_tail(&mut self, left: &Arc<Signature>, right: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("combined_has_rest_tail"); 
+        self.has_effective_rest_parameter(left) || self.has_effective_rest_parameter(right)
+    }
+
+    pub(crate) fn get_intersected_signatures(
+        &mut self,
+        signatures: &[Arc<Signature>],
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("get_intersected_signatures"); 
+        if !self.no_implicit_any {
+            return None;
+        }
+        let mut combined: Option<Arc<Signature>> = None;
+        for sig in signatures {
+            match &combined {
+                None => combined = Some(Arc::clone(sig)),
+                Some(c) if Arc::ptr_eq(c, sig) => {}
+                Some(c) => {
+                    if self.compare_type_parameters_identical(
+                        &c.type_parameters,
+                        &sig.type_parameters,
+                    ) {
+                        combined = Some(self.combine_union_member_signature(c, sig, false));
+                    } else {
+                        return None;
+                    }
+                }
+            }
+        }
+        combined
+    }
+
+    fn combine_union_parameters(
+        &mut self,
+        left: &Arc<Signature>,
+        right: &Arc<Signature>,
+        is_union: bool,
+    ) -> (Vec<Arc<Symbol>>, Vec<Arc<Type>>) { ::tsox_core::fntrace::enter("combine_union_parameters"); 
+        let left_count = self.get_parameter_count(left);
+        let right_count = self.get_parameter_count(right);
+        let (longest, shorter, longest_count) = if left_count >= right_count {
+            (left, right, left_count)
+        } else {
+            (right, left, right_count)
+        };
+        let either_has_rest =
+            self.has_effective_rest_parameter(left) || self.has_effective_rest_parameter(right);
+        let longest_has_rest = self.has_effective_rest_parameter(longest);
+        let needs_extra_rest = either_has_rest && !longest_has_rest;
+        let total = longest_count + usize::from(needs_extra_rest);
+        let left_min = self.get_min_argument_count(longest);
+        let right_min = self.get_min_argument_count(shorter);
+        let mut params: Vec<Arc<Symbol>> = Vec::with_capacity(total);
+        let mut overrides: Vec<Arc<Type>> = Vec::with_capacity(total);
+        for i in 0..longest_count {
+            let longest_ty = self.combined_param_type_at(longest, i);
+            let shorter_ty = self.combined_param_type_at(shorter, i);
+            let stripped_longest = self.strip_optional_undefined(&longest_ty);
+            let stripped_shorter = self.strip_optional_undefined(&shorter_ty);
+            let members: Vec<Arc<Type>> = vec![stripped_longest, stripped_shorter]
+                .into_iter()
+                .filter(|m| !m.flags.contains(TypeFlags::Unknown))
+                .collect();
+            let combined = if members.is_empty() {
+                self.unknown_type()
+            } else if is_union {
+                self.get_intersection_type(members)
+            } else {
+                self.get_union_type(members)
+            };
+            let is_rest = either_has_rest && !needs_extra_rest && i == longest_count - 1;
+            let is_optional = i >= left_min && i >= right_min;
+            let left_name = self.parameter_name_at_position(left, i);
+            let right_name = self.parameter_name_at_position(right, i);
+            let name = if left_name == right_name {
+                left_name
+            } else if left_name.is_empty() {
+                right_name
+            } else if right_name.is_empty() {
+                left_name
+            } else {
+                format!("arg{i}")
+            };
+            let mut sym_flags = SymbolFlags::FunctionScopedVariable;
+            if is_optional && !is_rest {
+                sym_flags.insert(SymbolFlags::Optional);
+            }
+            let stored = if is_rest {
+                self.create_array_type(combined)
+            } else {
+                combined
+            };
+            let sym = Arc::new(Symbol::new(sym_flags, name));
+            self.value_symbol_links.insert(
+                &sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(Arc::clone(&stored)),
+                    ..Default::default()
+                },
+            );
+            params.push(sym);
+            overrides.push(stored);
+        }
+        if needs_extra_rest {
+            let elem = self.combined_param_type_at(shorter, longest_count);
+            let arr = self.create_array_type(elem);
+            let sym = Arc::new(Symbol::new(
+                SymbolFlags::FunctionScopedVariable,
+                "args".to_string(),
+            ));
+            self.value_symbol_links.insert(
+                &sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(Arc::clone(&arr)),
+                    ..Default::default()
+                },
+            );
+            params.push(sym);
+            overrides.push(arr);
+        }
+        (params, overrides)
+    }
+
+    fn combined_param_type_at(&mut self, sig: &Arc<Signature>, i: usize) -> Arc<Type> { ::tsox_core::fntrace::enter("combined_param_type_at"); 
+        self.try_get_type_at_position(sig, i)
+            .unwrap_or_else(|| self.unknown_type())
+    }
+
+    fn parameter_name_at_position(&mut self, sig: &Arc<Signature>, i: usize) -> String { ::tsox_core::fntrace::enter("parameter_name_at_position"); 
+        sig.parameters
+            .get(i)
+            .map(|p| p.name.clone())
+            .unwrap_or_default()
+    }
+}

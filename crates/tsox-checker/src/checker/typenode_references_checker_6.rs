@@ -1,0 +1,165 @@
+#![allow(unused_imports)]
+
+use crate::checker::typenode_references::*;
+
+impl Checker {
+    pub(crate) fn merge_interface_type_with_base(
+        &mut self,
+        derived: &Arc<Type>,
+        base: &Arc<Type>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("merge_interface_type_with_base"); 
+        if base.flags.contains(TypeFlags::Any) {
+            return Arc::clone(derived);
+        }
+        let derived_data = match &derived.data {
+            TypeData::Object(o) => &o.structured,
+            _ => return Arc::clone(derived),
+        };
+        let base_data = match &base.data {
+            TypeData::Object(o) => &o.structured,
+            _ => return Arc::clone(derived),
+        };
+        let mut symbol_table = SymbolTable::new();
+        let mut props: Vec<Arc<Symbol>> = Vec::new();
+
+        for prop in &derived_data.properties {
+            symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+            props.push(Arc::clone(prop));
+        }
+        for prop in &base_data.properties {
+            if symbol_table.get(&prop.name).is_some() {
+                continue;
+            }
+            symbol_table.insert(prop.name.clone(), Arc::clone(prop));
+            props.push(Arc::clone(prop));
+        }
+        let mut index_infos = derived_data.index_infos.clone();
+        for info in &base_data.index_infos {
+            let duplicated = info
+                .key_type
+                .as_ref()
+                .is_some_and(|key| self.find_index_info(&index_infos, key).is_some());
+            if !duplicated {
+                index_infos.push(Arc::clone(info));
+            }
+        }
+
+        let mut call_signatures: Vec<Arc<Signature>> = derived_data.call_signatures().to_vec();
+        let derived_call_count = call_signatures.len();
+        call_signatures.extend(base_data.call_signatures().iter().cloned());
+        let mut signatures = call_signatures;
+        signatures.extend(derived_data.construct_signatures().iter().cloned());
+        signatures.extend(base_data.construct_signatures().iter().cloned());
+        let merged = Arc::new(Type {
+            flags: TypeFlags::Object,
+            object_flags: ObjectFlags::Anonymous | ObjectFlags::Interface,
+            id: crate::checker::types::next_type_id(),
+            symbol: None,
+            alias: None,
+            data: TypeData::Object(ObjectTypeData { node: None,
+                structured: StructuredTypeData {
+                    members: symbol_table,
+                    properties: props,
+                    index_infos,
+                    signatures,
+                    call_signature_count: derived_call_count + base_data.call_signatures().len(),
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        });
+
+        let merged_degraded = self.degraded_type_ptrs.contains(&base.id)
+            || self.degraded_type_ptrs.contains(&derived.id);
+        if merged_degraded {
+            self.degraded_type_ptrs.insert(merged.id);
+        }
+        merged
+    }
+
+    pub(crate) fn resolve_enum_type(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("resolve_enum_type"); 
+        // Go getDeclaredTypeOfEnum（checker.go:25292-25323）：枚举声明型只落
+        // declaredTypeLinks；不再写 type_alias_links——该槽是 namespace 实例型
+        // （resolve_namespace_type）缓存，混写会让合并符号的 ns_type 取到枚举声明型
+        self.get_declared_type_of_enum(symbol)
+    }
+
+    pub(crate) fn get_type_of_prototype_property(&mut self, symbol: &Arc<Symbol>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_type_of_prototype_property"); 
+        let Some(parent) = symbol.parent().clone() else {
+            return self.get_any_type();
+        };
+        let Some(class_decl) = parent
+            .declarations
+            .iter()
+            .find(|d| matches!(d.data, NodeData::ClassDeclaration(_)))
+            .cloned()
+        else {
+            return self.get_any_type();
+        };
+        let ctor_type = self.get_type_of_class_declaration(&class_decl);
+        let instance_type = ctor_type
+            .as_structured()
+            .and_then(|s| s.construct_signatures().first().cloned())
+            .and_then(|sig| self.get_return_type_of_signature(&sig))
+            .unwrap_or_else(|| self.get_any_type());
+        let tp_types: Vec<Arc<Type>> = match &class_decl.data {
+            NodeData::ClassDeclaration(d) => match &d.type_parameters {
+                Some(tps) => {
+                    let sym_map = self.program.symbol_map();
+                    let tp_syms: Vec<Arc<Symbol>> = tps
+                        .iter()
+                        .filter_map(|tp| sym_map.symbol_of(tp).map(Arc::clone))
+                        .collect();
+                    tp_syms
+                        .iter()
+                        .map(|s| self.get_type_parameter_from_symbol(s))
+                        .collect()
+                }
+                None => Vec::new(),
+            },
+            _ => Vec::new(),
+        };
+        if tp_types.is_empty() {
+            return instance_type;
+        }
+        let any_t = self.get_any_type();
+        let anys: Vec<Arc<Type>> = tp_types.iter().map(|_| Arc::clone(&any_t)).collect();
+        let substituted = self.substitute_infer_type_parameters(&instance_type, &tp_types, &anys);
+        self.rebuild_with_type_arguments(&substituted, anys)
+    }
+
+    pub(crate) fn rebuild_with_type_arguments(
+        &self,
+        base: &Arc<Type>,
+        args: Vec<Arc<Type>>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("rebuild_with_type_arguments"); 
+        if args.is_empty() {
+            return Arc::clone(base);
+        }
+        if let TypeData::Object(o) = &base.data {
+            if !o.type_arguments.is_empty() {
+                return Arc::clone(base);
+            }
+            let mut rebuilt = Type::new(
+                base.flags,
+                TypeData::Object(ObjectTypeData { node: None,
+                    structured: StructuredTypeData {
+                        members: o.structured.members.clone(),
+                        properties: o.structured.properties.clone(),
+                        signatures: o.structured.signatures.clone(),
+                        call_signature_count: o.structured.call_signature_count,
+                        index_infos: o.structured.index_infos.clone(),
+                        ..Default::default()
+                    },
+                    target: o.target.clone(),
+                    mapper: o.mapper.clone(),
+                    type_arguments: args,
+                }),
+            );
+            rebuilt.object_flags = base.object_flags | ObjectFlags::Reference;
+            rebuilt.symbol = base.symbol.clone();
+            return Arc::new(rebuilt);
+        }
+        Arc::clone(base)
+    }
+}

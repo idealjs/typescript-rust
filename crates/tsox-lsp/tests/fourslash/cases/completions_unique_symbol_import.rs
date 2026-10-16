@@ -1,0 +1,27 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
+#[test]
+fn completions_unique_symbol_import() {
+    let content = r#"// @noLib: true
+// @Filename: /globals.d.ts
+declare const Symbol: () => symbol;
+// @Filename: /a.ts
+const privateSym = Symbol();
+export const publicSym = Symbol();
+export interface I {
+    [privateSym]: number;
+    [publicSym]: number;
+    [defaultPublicSym]: number;
+    n: number;
+}
+export const i: I;
+// @Filename: /user.ts
+import { i } from "./a";
+i[|./**/|];"#;
+    let mut s = Session::new_for_test("completionsUniqueSymbol_import", content);
+    fourslash::go_to_marker(&mut s, "");
+    // TODO: f.VerifyCompletions(t, "", &fourslash.CompletionsExpectedList{
+    // TODO: f.VerifyApplyCodeActionFromCompletion(t, new(""), &fourslash.ApplyCodeActionFromCompletionOptions{
+}

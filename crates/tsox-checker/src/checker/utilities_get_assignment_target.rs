@@ -1,0 +1,352 @@
+#![allow(unused_imports)]
+
+use crate::checker::utilities::*;
+
+pub(crate) fn get_assignment_target(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_assignment_target"); 
+    pub(crate) fn is_assignment_operator(kind: SyntaxKind) -> bool { ::tsox_core::fntrace::enter("is_assignment_operator"); 
+        use SyntaxKind::*;
+        matches!(
+            kind,
+            EqualsToken
+                | PlusEqualsToken
+                | MinusEqualsToken
+                | AsteriskEqualsToken
+                | SlashEqualsToken
+                | PercentEqualsToken
+                | AsteriskAsteriskEqualsToken
+                | LessThanLessThanEqualsToken
+                | GreaterThanGreaterThanEqualsToken
+                | GreaterThanGreaterThanGreaterThanEqualsToken
+                | AmpersandEqualsToken
+                | BarEqualsToken
+                | CaretEqualsToken
+                | AmpersandAmpersandEqualsToken
+                | BarBarEqualsToken
+                | QuestionQuestionEqualsToken
+        )
+    }
+    let mut current = Arc::clone(node);
+    loop {
+        let parent = current.parent()?;
+        match &parent.data {
+            tsox_frontend::ast::NodeData::BinaryExpression(bin) => {
+                let on_path = Arc::as_ptr(&bin.left) == Arc::as_ptr(&current);
+                return if on_path && is_assignment_operator(bin.operator_token.kind) {
+                    Some(parent)
+                } else {
+                    None
+                };
+            }
+            tsox_frontend::ast::NodeData::PrefixUnaryExpression(pre) => {
+                let incdec = matches!(
+                    pre.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                );
+                let on_path = Arc::as_ptr(&pre.operand) == Arc::as_ptr(&current);
+                return if incdec && on_path {
+                    Some(parent)
+                } else {
+                    None
+                };
+            }
+            tsox_frontend::ast::NodeData::PostfixUnaryExpression(post) => {
+                let incdec = matches!(
+                    post.operator,
+                    SyntaxKind::PlusPlusToken | SyntaxKind::MinusMinusToken
+                );
+                let on_path = Arc::as_ptr(&post.operand) == Arc::as_ptr(&current);
+                return if incdec && on_path {
+                    Some(parent)
+                } else {
+                    None
+                };
+            }
+            tsox_frontend::ast::NodeData::ForInOrOfStatement(for_stmt) => {
+                let on_path = Arc::as_ptr(&for_stmt.initializer) == Arc::as_ptr(&current);
+                return if on_path { Some(parent) } else { None };
+            }
+            tsox_frontend::ast::NodeData::ParenthesizedExpression(_)
+            | tsox_frontend::ast::NodeData::ArrayLiteralExpression(_)
+            | tsox_frontend::ast::NodeData::SpreadElement(_)
+            | tsox_frontend::ast::NodeData::NonNullExpression(_) => {
+                current = parent;
+            }
+            tsox_frontend::ast::NodeData::SpreadAssignment(_) => {
+                current = parent.parent()?;
+            }
+            tsox_frontend::ast::NodeData::ShorthandPropertyAssignment(sa) => {
+                if !std::ptr::eq(sa.name.as_ref() as *const Node, current.as_ref() as *const Node)
+                {
+                    return None;
+                }
+                current = parent.parent()?;
+            }
+            tsox_frontend::ast::NodeData::PropertyAssignment(pa) => {
+                if std::ptr::eq(pa.name.as_ref() as *const Node, current.as_ref() as *const Node) {
+                    return None;
+                }
+                current = parent.parent()?;
+            }
+            _ => return None,
+        }
+    }
+}
+
+pub fn is_compound_like_assignment(assignment: &Node) -> bool { ::tsox_core::fntrace::enter("is_compound_like_assignment"); 
+    let tsox_frontend::ast::NodeData::BinaryExpression(bin) = &assignment.data else {
+        return false;
+    };
+    if bin.operator_token.kind != SyntaxKind::EqualsToken {
+        return false;
+    }
+    let mut right = &bin.right;
+    while let tsox_frontend::ast::NodeData::ParenthesizedExpression(p) = &right.data {
+        right = &p.expression;
+    }
+    matches!(&right.data, tsox_frontend::ast::NodeData::BinaryExpression(rhs)
+        if is_shift_operator_or_higher(rhs.operator_token.kind))
+}
+
+pub fn is_in_compound_like_assignment(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_in_compound_like_assignment"); 
+    let Some(target) = get_assignment_target(node) else {
+        return false;
+    };
+
+    let tsox_frontend::ast::NodeData::BinaryExpression(bin) = &target.data else {
+        return false;
+    };
+    bin.operator_token.kind == SyntaxKind::EqualsToken && is_compound_like_assignment(&target)
+}
+
+pub fn is_delete_target(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_delete_target"); 
+    if !tsox_frontend::ast::is_access_expression(node) {
+        return false;
+    }
+    node.parent()
+        .as_ref()
+        .map(|p| p.kind == SyntaxKind::DeleteExpression)
+        .unwrap_or(false)
+}
+
+pub fn is_right_side_of_access_expression(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_right_side_of_access_expression"); 
+    if let Some(parent) = node.parent() {
+        if is_property_access_expression(&parent) {
+            return parent
+                .name()
+                .map(|n| std::ptr::eq(n.as_ref(), node))
+                .unwrap_or(false);
+        }
+        if is_element_access_expression(&parent) {
+            return parent
+                .expression()
+                .map(|e| std::ptr::eq(e.as_ref(), node))
+                .unwrap_or(false);
+        }
+    }
+    false
+}
+
+pub fn is_top_level_in_external_module_augmentation(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_top_level_in_external_module_augmentation"); 
+    let Some(parent) = node.parent() else {
+        return false;
+    };
+    if parent.kind != SyntaxKind::ModuleBlock {
+        return false;
+    }
+    let Some(grandparent) = parent.parent() else {
+        return false;
+    };
+    if !tsox_frontend::ast::is_ambient_module(&grandparent) {
+        return false;
+    }
+    match grandparent.parent().map(|g| g.kind) {
+        Some(SyntaxKind::SourceFile) => crate::checker::Checker::is_external_or_common_js_module(
+            &grandparent.parent().unwrap(),
+        ),
+        Some(SyntaxKind::ModuleBlock) => {
+            let gp2 = grandparent.parent().unwrap();
+            gp2.parent().is_some_and(|outer| tsox_frontend::ast::is_ambient_module(&outer))
+                && matches!(gp2.parent().and_then(|o| o.parent()), Some(f) if f.kind == SyntaxKind::SourceFile)
+                && !gp2
+                    .parent()
+                    .and_then(|o| o.parent())
+                    .is_some_and(|f| crate::checker::Checker::is_external_or_common_js_module(&f))
+        }
+        _ => false,
+    }
+}
+
+pub fn is_syntactic_default(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_syntactic_default"); 
+    matches!(
+        &node.data,
+        tsox_frontend::ast::NodeData::ExportAssignment(d) if !d.is_export_equals
+    ) || matches!(
+        node.kind,
+        SyntaxKind::ExportSpecifier | SyntaxKind::NamespaceExportDeclaration
+    )
+        || node.has_syntactic_modifier(ModifierFlags::Default)
+}
+
+pub fn is_type_reference_identifier(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_type_reference_identifier"); 
+    node.parent()
+        .as_ref()
+        .map(|p| tsox_frontend::ast::is_type_reference_node(p))
+        .unwrap_or(false)
+}
+
+pub fn is_in_type_query(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_type_query"); 
+    let _ = node;
+    false
+}
+
+pub fn is_side_effect_import(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_side_effect_import"); 
+    let _ = node;
+    false
+}
+
+pub fn get_external_module_require_argument(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_external_module_require_argument"); 
+    let _ = node;
+    None
+}
+
+pub fn is_shorthand_ambient_module(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_shorthand_ambient_module"); 
+    node.kind == SyntaxKind::ModuleDeclaration
+        && matches!(
+            &node.data,
+            tsox_frontend::ast::NodeData::ModuleDeclaration(d) if d.body.is_none()
+        )
+}
+
+pub fn is_shorthand_ambient_module_symbol(module_symbol: &Symbol) -> bool { ::tsox_core::fntrace::enter("is_shorthand_ambient_module_symbol"); 
+    module_symbol
+        .value_declaration
+        .as_ref()
+        .map(|d| is_shorthand_ambient_module(d))
+        .unwrap_or(false)
+}
+
+pub fn entity_name_to_string(name: &Node) -> String { ::tsox_core::fntrace::enter("entity_name_to_string"); 
+    name.text().to_string()
+}
+
+pub fn get_containing_qualified_name_node(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_containing_qualified_name_node"); 
+    let mut result = Arc::clone(node);
+    let mut current = node.parent();
+    while let Some(ref parent) = current {
+        if is_qualified_name(parent) {
+            result = Arc::clone(parent);
+            current = parent.parent();
+        } else {
+            break;
+        }
+    }
+    result
+}
+
+pub fn is_const_type_reference(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_const_type_reference");
+    crate::checker::utilities_has_only_expression_initialization::is_const_type_reference(node)
+}
+
+pub fn get_single_variable_of_variable_statement(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_single_variable_of_variable_statement"); 
+    let _ = node;
+    None
+}
+
+pub fn is_jsx_intrinsic_tag_name(tag_name: &Node) -> bool { ::tsox_core::fntrace::enter("is_jsx_intrinsic_tag_name"); 
+    tsox_frontend::ast::is_identifier(tag_name)
+        || tsox_frontend::ast::is_jsx_namespaced_name(tag_name)
+}
+
+pub fn walk_up_outer_expressions(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("walk_up_outer_expressions"); 
+    node.parent()
+}
+
+pub fn get_containing_function_or_class_static_block(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_containing_function_or_class_static_block"); 
+    node.parent().as_ref().and_then(|parent| {
+        tsox_frontend::ast::find_ancestor(parent, |n| {
+            tsox_frontend::ast::is_function_like_or_class_static_block_declaration(n)
+        })
+    })
+}
+
+pub fn get_enclosing_container(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_enclosing_container"); 
+    node.parent().as_ref().and_then(|parent| {
+        tsox_frontend::ast::find_ancestor(parent, |n| {
+            matches!(
+                n.kind,
+                SyntaxKind::FunctionDeclaration
+                    | SyntaxKind::FunctionExpression
+                    | SyntaxKind::ArrowFunction
+                    | SyntaxKind::MethodDeclaration
+                    | SyntaxKind::GetAccessor
+                    | SyntaxKind::SetAccessor
+                    | SyntaxKind::Constructor
+                    | SyntaxKind::ClassDeclaration
+                    | SyntaxKind::ClassExpression
+                    | SyntaxKind::ModuleDeclaration
+                    | SyntaxKind::SourceFile
+            )
+        })
+    })
+}
+
+pub fn is_this_initialized_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_this_initialized_declaration"); 
+    tsox_frontend::ast::is_variable_declaration(node)
+        && node
+            .expression()
+            .map(|e| e.kind == SyntaxKind::ThisKeyword)
+            .unwrap_or(false)
+}
+
+pub fn is_declaration_readonly(declaration: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_declaration_readonly");
+    get_combined_modifier_flags(declaration).contains(ModifierFlags::Readonly)
+        && !declaration.parent().is_some_and(|parent| {
+            tsox_frontend::ast::mig::m3g_2::is_parameter_property_declaration(declaration, &parent)
+        })
+}
+
+pub fn get_binding_element_property_name(node: &Node) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_binding_element_property_name"); 
+    // Go getBindingElementPropertyName（utilities.go:1204-1207）=
+    // node.PropertyNameOrName()：显式属性名（{ p: x } / { [k]: x } 形式）
+    // 优先，回落绑定目标名（{ p } 简写）；仅取 name 使非简写形态拿到
+    // 绑定目标名当属性名，计算属性名（{ [itemId]: x }）取不到
+    tsox_frontend::ast::mig::m3b::property_name_or_name(node).cloned()
+}
+
+pub fn is_valid_number_string(s: &str, round_trip_only: bool) -> bool { ::tsox_core::fntrace::enter("is_valid_number_string"); 
+    if s.is_empty() {
+        return false;
+    }
+    let n = tsox_core::jsnum::Number::from_string(s);
+    !n.is_nan() && !n.is_inf() && (!round_trip_only || n.to_string() == s)
+}
+
+pub fn is_valid_big_int_string(_s: &str, _round_trip_only: bool) -> bool { ::tsox_core::fntrace::enter("is_valid_big_int_string"); 
+    false
+}
+
+pub fn is_valid_es_symbol_declaration(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_valid_es_symbol_declaration"); 
+    let _ = node;
+    false
+}
+
+pub fn is_variable_declaration_in_variable_statement(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_variable_declaration_in_variable_statement"); 
+    node.parent()
+        .as_ref()
+        .map(|p| is_variable_declaration_list(p))
+        .unwrap_or(false)
+        && node
+            .parent()
+            .as_ref()
+            .and_then(|p| p.parent())
+            .map(|gp| is_variable_statement(&gp))
+            .unwrap_or(false)
+}
+
+pub fn is_in_ambient_or_type_node(node: &Node) -> bool { ::tsox_core::fntrace::enter("is_in_ambient_or_type_node"); 
+    if node.flags.contains(NodeFlags::Ambient) {
+        return true;
+    }
+
+    false
+}

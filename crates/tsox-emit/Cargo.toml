@@ -1,0 +1,14 @@
+[package]
+name = "tsox-emit"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+base64 = "0.22"
+bitflags = "2"
+serde = { version = "1", features = ["derive"] }
+tsox-checker = { workspace = true }
+tsox-core = { workspace = true }
+tsox-frontend = { workspace = true }
+tsox-tsoptions = { workspace = true }

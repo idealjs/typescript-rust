@@ -1,0 +1,231 @@
+#![allow(unused_imports)]
+
+use crate::scanner::impl_chunk::*;
+
+impl Scanner {
+    pub(crate) fn scan_string(&mut self, quote: char) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_string"); 
+        self.scan_string_ex(quote, false)
+    }
+
+    /// Go scanString(jsxAttributeString)：JSX 属性值字符串允许裸换行
+    pub(crate) fn scan_string_ex(&mut self, quote: char, jsx_attribute: bool) -> SyntaxKind { ::tsox_core::fntrace::enter("scan_string_ex"); 
+        if quote == '\'' {
+            self.token_flags |= TOKEN_FLAGS_SINGLE_QUOTE;
+        }
+        self.pos += 1;
+        let mut terminated = false;
+        while self.pos < self.end {
+            let c = self.text.as_bytes()[self.pos] as char;
+            if c == quote {
+                self.pos += 1;
+                terminated = true;
+                break;
+            }
+            if c == '\\' {
+                self.scan_escape_sequence(!jsx_attribute);
+                continue;
+            }
+            if c == '\n' || c == '\r' {
+                if jsx_attribute {
+                    self.pos += 1;
+                    continue;
+                }
+                break;
+            }
+            self.pos += 1;
+        }
+        if !terminated {
+            self.token_flags |= TOKEN_FLAGS_UNTERMINATED;
+            self.report_error(DiagnosticKind::UnterminatedStringLiteral, self.pos, 0);
+        }
+        self.token_end = self.pos;
+        self.token = SyntaxKind::StringLiteral;
+        self.token
+    }
+
+    pub(crate) fn scan_escape_sequence(&mut self, report_errors: bool) { ::tsox_core::fntrace::enter("scan_escape_sequence"); 
+        let escape_start = self.pos;
+        self.pos += 1;
+        if self.pos >= self.end {
+            self.report_error(DiagnosticKind::UnexpectedEndOfText, self.pos, 0);
+            return;
+        }
+        let c = self.text.as_bytes()[self.pos] as char;
+        self.pos += 1;
+        match c {
+            '0' => {
+                if self.pos < self.end && is_digit(self.text.as_bytes()[self.pos] as char) {
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+
+                    for _ in 0..2 {
+                        if self.pos < self.end
+                            && is_octal_digit(self.text.as_bytes()[self.pos] as char)
+                        {
+                            self.pos += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    // Go scanEscapeSequence：八进制转义在字符串内报 TS1487
+                    if report_errors {
+                        self.octal_cook_escapes = true;
+                        self.report_error(
+                            DiagnosticKind::OctalEscapeSequenceNotAllowed,
+                            escape_start,
+                            self.pos - escape_start,
+                        );
+                    }
+                }
+            }
+            '1'..='3' => {
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                for _ in 0..2 {
+                    if self.pos < self.end && is_octal_digit(self.text.as_bytes()[self.pos] as char)
+                    {
+                        self.pos += 1;
+                    } else {
+                        break;
+                    }
+                }
+                if report_errors {
+                    self.octal_cook_escapes = true;
+                    self.report_error(
+                        DiagnosticKind::OctalEscapeSequenceNotAllowed,
+                        escape_start,
+                        self.pos - escape_start,
+                    );
+                }
+            }
+            '4'..='7' => {
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                if self.pos < self.end && is_octal_digit(self.text.as_bytes()[self.pos] as char) {
+                    self.pos += 1;
+                }
+                if report_errors {
+                    self.octal_cook_escapes = true;
+                    self.report_error(
+                        DiagnosticKind::OctalEscapeSequenceNotAllowed,
+                        escape_start,
+                        self.pos - escape_start,
+                    );
+                }
+            }
+            '8' | '9' => {
+                self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                // Go scanEscapeSequence：\8 \9 转义报 TS1488
+                if report_errors {
+                    self.octal_cook_escapes = true;
+                    self.report_error(
+                        DiagnosticKind::EscapeSequenceNotAllowed,
+                        escape_start,
+                        self.pos - escape_start,
+                    );
+                }
+            }
+            'x' => {
+                let mut digit_count = 0;
+                for _ in 0..2 {
+                    if self.pos < self.end && is_hex_digit(self.text.as_bytes()[self.pos] as char) {
+                        self.pos += 1;
+                        digit_count += 1;
+                    } else {
+                        break;
+                    }
+                }
+                if digit_count == 2 {
+                    self.token_flags |= TOKEN_FLAGS_HEX_ESCAPE;
+                } else {
+                    self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                    if report_errors {
+                        self.report_error(DiagnosticKind::HexadecimalDigitExpected, self.pos, 0);
+                    }
+                }
+            }
+            'u' => {
+                if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '{' {
+                    self.pos += 1;
+                    let hex_start = self.pos;
+                    while self.pos < self.end
+                        && is_hex_digit(self.text.as_bytes()[self.pos] as char)
+                    {
+                        self.pos += 1;
+                    }
+                    let has_hex = self.pos > hex_start;
+                    if !has_hex {
+                        self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                        if report_errors {
+                            self.report_error(DiagnosticKind::HexadecimalDigitExpected, self.pos, 0);
+                        }
+                    } else {
+                        let digits = &self.text[hex_start..self.pos];
+                        let value = u64::from_str_radix(digits, 16).unwrap_or(u64::MAX);
+                        let mut invalid = false;
+                        if value > 0x10FFFF {
+                            if report_errors {
+                                self.report_error(
+                                    DiagnosticKind::UnicodeEscapeOutOfRange,
+                                    hex_start,
+                                    self.pos - hex_start,
+                                );
+                            }
+                            invalid = true;
+                        }
+                        if self.pos >= self.end {
+                            if report_errors {
+                                self.report_error(
+                                    DiagnosticKind::UnexpectedEndOfText,
+                                    self.pos,
+                                    0,
+                                );
+                            }
+                            invalid = true;
+                        } else if self.text.as_bytes()[self.pos] as char == '}' {
+                            self.pos += 1;
+                        } else {
+                            if report_errors {
+                                self.report_error(
+                                    DiagnosticKind::UnterminatedUnicodeEscape,
+                                    self.pos,
+                                    0,
+                                );
+                            }
+                            invalid = true;
+                        }
+                        if invalid {
+                            self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                        } else {
+                            self.token_flags |= TOKEN_FLAGS_EXTENDED_UNICODE_ESCAPE;
+                        }
+                    }
+                } else {
+                    let mut digit_count = 0;
+                    for _ in 0..4 {
+                        if self.pos < self.end
+                            && is_hex_digit(self.text.as_bytes()[self.pos] as char)
+                        {
+                            self.pos += 1;
+                            digit_count += 1;
+                        } else {
+                            break;
+                        }
+                    }
+                    if digit_count == 4 {
+                        self.token_flags |= TOKEN_FLAGS_UNICODE_ESCAPE;
+                    } else {
+                        self.token_flags |= TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE;
+                        if report_errors {
+                            self.report_error(DiagnosticKind::HexadecimalDigitExpected, self.pos, 0);
+                        }
+                    }
+                }
+            }
+            '\r' => {
+                if self.pos < self.end && self.text.as_bytes()[self.pos] as char == '\n' {
+                    self.pos += 1;
+                }
+            }
+
+            _ => {}
+        }
+    }
+}

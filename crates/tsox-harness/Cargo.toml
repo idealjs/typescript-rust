@@ -1,0 +1,15 @@
+[package]
+name = "tsox-harness"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tsox-core = { workspace = true }
+tsox-frontend = { workspace = true }
+tsox-checker = { workspace = true }
+tsox-compile = { workspace = true }
+tsox-tsoptions = { workspace = true }
+serde_json = "1"
+libc = "0.2"
+mimalloc = "0.1"

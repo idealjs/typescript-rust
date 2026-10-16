@@ -1,0 +1,130 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_impl_chunk::*;
+
+impl Checker {
+    pub fn any_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("any_type"); 
+        self.any_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Any,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "any".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
+    pub fn unknown_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("unknown_type"); 
+        self.unknown_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Unknown,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "unknown".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
+    pub fn empty_object_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("empty_object_type"); 
+        self.empty_object_type
+            .get_or_init(|| {
+                Arc::new(Type {
+                    flags: TypeFlags::Object,
+                    object_flags: crate::checker::types::ObjectFlags::Anonymous,
+                    id: crate::checker::types::next_type_id(),
+                    symbol: None,
+                    alias: None,
+                    data: TypeData::Object(ObjectTypeData { node: None,
+                        structured: StructuredTypeData::default(),
+                        target: None,
+                        mapper: None,
+                        type_arguments: Vec::new(),
+                    }),
+                })
+            })
+            .clone()
+    }
+
+    pub fn undefined_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("undefined_type"); 
+        self.undefined_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Undefined,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "undefined".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
+    pub(crate) fn nullish_widening_type(&self, base: Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("nullish_widening_type"); 
+        if self.strict_null_checks {
+            return base;
+        }
+        let mut t = Type::new(
+            base.flags,
+            TypeData::Intrinsic(IntrinsicTypeData {
+                intrinsic_name: base.intrinsic_name().unwrap_or("undefined").to_string(),
+            }),
+        );
+        t.object_flags |= crate::checker::types::ObjectFlags::ContainsWideningType;
+        Arc::new(t)
+    }
+
+    pub fn null_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("null_type"); 
+        self.null_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Null,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "null".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
+    pub fn string_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("string_type"); 
+        self.string_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::String,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "string".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
+    pub fn number_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("number_type"); 
+        self.number_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::Number,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "number".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+
+    pub fn bigint_type(&self) -> Arc<Type> { ::tsox_core::fntrace::enter("bigint_type"); 
+        self.bigint_type
+            .get_or_init(|| {
+                Arc::new(Type::new(
+                    TypeFlags::BigInt,
+                    TypeData::Intrinsic(IntrinsicTypeData {
+                        intrinsic_name: "bigint".to_string(),
+                    }),
+                ))
+            })
+            .clone()
+    }
+}

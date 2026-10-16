@@ -1,0 +1,293 @@
+#![allow(unused_imports)]
+
+use crate::checker::jsx_impl_chunk_2::*;
+
+impl Checker {
+    pub fn get_jsx_namespace(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_namespace"); 
+        let file_id = self.current_file_id as usize;
+        if let Some(cached) = self.jsx_implicit_namespace.get(&file_id)
+            && let Some(ns) = cached
+        {
+            return Some(Arc::clone(ns));
+        }
+        self.globals.get(JsxNames::JSX).cloned()
+    }
+
+    pub fn get_jsx_type(&self, name: &str) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_type"); 
+        let ns = self.get_jsx_namespace()?;
+        ns.members
+            .get(name)
+            .or_else(|| ns.exports.get(name))
+            .cloned()
+            .or_else(|| self.ambient_namespace_local(&ns, name))
+    }
+
+    pub fn get_jsx_element_type(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_element_type"); 
+        self.get_jsx_type(JsxNames::ELEMENT)
+    }
+
+    pub fn get_jsx_intrinsic_elements(&self) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("get_jsx_intrinsic_elements"); 
+        self.get_jsx_type(JsxNames::INTRINSIC_ELEMENTS)
+    }
+
+    pub fn is_jsx_enabled(&self) -> bool { ::tsox_core::fntrace::enter("is_jsx_enabled"); 
+        self.compiler_options.jsx != tsox_core::core::compiler_options::JsxEmit::None
+    }
+
+    pub fn check_jsx_preconditions(&mut self, error_node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_preconditions"); 
+        if !self.is_jsx_enabled() {
+            self.grammar_error_on_node(error_node, &CANNOT_USE_JSX_UNLESS_THE_JSX_FLAG_IS_PROVIDED);
+        }
+    }
+
+    // Go getJSXNamespaceAt→resolveName：容器 exports 表的 JSX 成员可为
+    // export { JSX } 说明符别名符号（说明符符号独立化后 exports 条目恒可
+    // 为纯别名），取 IntrinsicElements 等成员前经 resolveAlias 穿透至
+    // 命名空间符号；非别名条目 merged 原样返回
+    fn resolve_jsx_namespace_symbol(
+        &mut self,
+        ns: Option<Arc<tsox_frontend::ast::Symbol>>,
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("resolve_jsx_namespace_symbol");
+        let ns = ns?;
+        Some(self.resolve_alias(&ns))
+    }
+
+    pub(crate) fn ensure_jsx_implicit_container(&mut self, error_node: &Arc<Node>) { ::tsox_core::fntrace::enter("ensure_jsx_implicit_container"); 
+        use tsox_core::core::compiler_options::JsxEmit;
+        let file_id = self.current_file_id as usize;
+        if self.jsx_implicit_namespace.contains_key(&file_id) {
+            return;
+        }
+        let resolved: Option<std::sync::Arc<tsox_frontend::ast::Symbol>> =
+            if let Some(source) = self.jsx_implicit_import_base() {
+                let module_ref = if self.compiler_options.jsx == JsxEmit::ReactJSXDev {
+                    format!("{source}/jsx-dev-runtime")
+                } else {
+                    format!("{source}/jsx-runtime")
+                };
+                    match self
+                        .resolve_module_file_symbol(&module_ref)
+                        .or_else(|| self.resolve_jsx_runtime_by_path(&module_ref))
+                    {
+                        Some(module_sym) => {
+                            let ns = module_sym
+                                .exports
+                                .get(JsxNames::JSX)
+                                .or_else(|| module_sym.members.get(JsxNames::JSX))
+                                .cloned();
+                            self.resolve_jsx_namespace_symbol(ns)
+                        }
+                        None => {
+                            let mut span = error_node.loc;
+                            let mut node = Arc::clone(error_node);
+                            while let Some(parent) = node.parent() {
+                                match parent.kind {
+                                    tsox_frontend::ast::SyntaxKind::JsxElement
+                                    | tsox_frontend::ast::SyntaxKind::JsxSelfClosingElement
+                                    | tsox_frontend::ast::SyntaxKind::JsxFragment => {
+                                        span = parent.loc;
+                                        node = parent;
+                                    }
+                                    _ => break,
+                                }
+                            }
+                            self.pending_jsx_2875 = Some((span, module_ref));
+                            None
+                        }
+                }
+            } else {
+                // Go getJsxNamespace：经典模式的命名空间名 = jsxFactory
+                //（pragma/选项）首段，否则 reactNamespace；解析该名字取其
+                // JSX 成员（import 别名/合并命名空间皆可命中）
+                let namespace_name = self
+                    .local_jsx_pragma_factory("jsx")
+                    .or_else(|| self.local_jsx_pragma_factory("jsxFactory"))
+                    .and_then(|f| f.split('.').next().map(str::to_string))
+                    .or_else(|| {
+                        let factory = self.compiler_options.jsx_factory.clone();
+                        (!factory.is_empty()).then(|| {
+                            factory.split('.').next().unwrap_or_default().to_string()
+                        })
+                    })
+                    .or_else(|| {
+                        let ns = self.compiler_options.react_namespace.clone();
+                        (!ns.is_empty()).then_some(ns)
+                    });
+                match namespace_name.and_then(|ns| self.jsx_namespace_container_symbol(&ns)) {
+                    Some(container) => self.resolve_jsx_namespace_symbol(
+                        container
+                            .exports
+                            .get(JsxNames::JSX)
+                            .or_else(|| container.members.get(JsxNames::JSX))
+                            .cloned(),
+                    ),
+                    None => None,
+                }
+            };
+        self.jsx_implicit_namespace.insert(file_id, resolved);
+    }
+
+    fn jsx_namespace_container_symbol(
+        &mut self,
+        name: &str,
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("jsx_namespace_container_symbol"); 
+        let symbol_map = self.program.symbol_map();
+        for &container_id in self.scope_stack.iter().rev() {
+            let found = symbol_map
+                .locals
+                .get(&container_id)
+                .and_then(|locals| locals.get(name))
+                .or_else(|| {
+                    symbol_map
+                        .symbols
+                        .get(&container_id)
+                        .and_then(|cs| cs.members.get(name))
+                })
+                .cloned();
+            if let Some(sym) = found {
+                return Some(self.resolve_alias_base(sym));
+            }
+        }
+        None
+    }
+
+    pub(crate) fn resolve_jsx_runtime_by_path(
+        &self,
+        module_ref: &str,
+    ) -> Option<Arc<tsox_frontend::ast::Symbol>> { ::tsox_core::fntrace::enter("resolve_jsx_runtime_by_path"); 
+        let containing = self
+            .current_file
+            .as_ref()
+            .map(|f| f.file_name.clone())
+            .unwrap_or_default();
+
+        let mode = tsox_tsoptions::tsoptions::implied_node_format_of_file(&containing, &|p| {
+            self.program.read_file(p)
+        });
+        let path = self
+            .program
+            .resolve_external_module_path(module_ref, &containing, mode)?;
+        let sf = self.program.get_source_file(&path)?;
+        self.program.symbol_map().symbol_of(&sf.node).cloned()
+    }
+
+    pub fn check_jsx_intrinsic_element(&mut self, opening: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_intrinsic_element"); 
+        let tag_name = match jsx_tag_name(opening) {
+            Some(t) => t,
+            None => return,
+        };
+        let tag_text = tag_name.text().to_string();
+
+        let intrinsic_elements = match self.get_jsx_intrinsic_elements() {
+            Some(sym) => sym,
+            None => {
+                if self.no_implicit_any {
+                    self.grammar_error_on_node_with_args(
+                        opening,
+                        &JSX_ELEMENT_IMPLICITLY_HAS_TYPE_ANY_BECAUSE_NO_INTERFACE_JSX_0_EXISTS,
+                        &[JsxNames::INTRINSIC_ELEMENTS.to_string()],
+                    );
+                }
+                return;
+            }
+        };
+
+        let member = intrinsic_elements
+            .members
+            .get(&tag_text)
+            .or_else(|| intrinsic_elements.exports.get(&tag_text));
+
+        if member.is_none() {
+            // Go getApplicableIndexInfo：接口解析合并基类型索引签名
+            //（IntrinsicElements extends Record<string, any> 命中 string 键）
+            let resolved = self.resolve_interface_type(&intrinsic_elements, None);
+            let intrinsic_type = if resolved.flags.contains(crate::checker::types::TypeFlags::Any)
+                || resolved.as_structured().is_none()
+            {
+                self.get_type_of_symbol(&intrinsic_elements)
+            } else {
+                resolved
+            };
+            let has_index_signature = !self
+                .get_index_infos_of_type(&intrinsic_type)
+                .is_empty();
+            if intrinsic_elements.members.is_empty()
+                && intrinsic_elements.exports.is_empty()
+                && !has_index_signature
+            {
+                if self.no_implicit_any {
+                    self.grammar_error_on_node_with_args(
+                        opening,
+                        &JSX_ELEMENT_IMPLICITLY_HAS_TYPE_ANY_BECAUSE_NO_INTERFACE_JSX_0_EXISTS,
+                        &[JsxNames::INTRINSIC_ELEMENTS.to_string()],
+                    );
+                }
+            }
+        }
+    }
+
+    pub fn check_jsx_component(&mut self, opening: &Arc<Node>) { ::tsox_core::fntrace::enter("check_jsx_component"); 
+        let tag_name = match jsx_tag_name(opening) {
+            Some(t) => t,
+            None => return,
+        };
+
+        self.check_expression(&tag_name);
+
+        let tag_type = self.get_type_of_node(&tag_name);
+
+        if tag_type
+            .flags
+            .contains(crate::checker::types::TypeFlags::Any)
+        {
+            return;
+        }
+
+        let has_signatures = !self
+            .get_uninstantiated_jsx_signatures_of_type(&tag_type, &tag_name)
+            .is_empty();
+
+        if !has_signatures {
+            let text = tag_name.text().to_string();
+            self.grammar_error_on_node_with_args(
+                &tag_name,
+                &JSX_ELEMENT_TYPE_0_DOES_NOT_HAVE_ANY_CONSTRUCT_OR_CALL_SIGNATURES,
+                &[text],
+            );
+        }
+    }
+
+    pub(crate) fn jsx_factory_namespace_in_scope(&self, name: &str) -> bool { ::tsox_core::fntrace::enter("jsx_factory_namespace_in_scope"); 
+        self.jsx_factory_namespace_symbol(name).is_some()
+    }
+
+    pub(crate) fn local_jsx_pragma_factory(&self, pragma: &str) -> Option<String> { ::tsox_core::fntrace::enter("local_jsx_pragma_factory"); 
+        let file = self.current_file.as_ref()?;
+        let ranges = tsox_frontend::scanner::get_leading_comment_ranges(&file.text, 0);
+        let mut result = None;
+        for r in ranges {
+            if r.kind != tsox_frontend::scanner::CommentRangeKind::MultiLine {
+                continue;
+            }
+            let comment = &file.text[r.pos..r.end];
+            let comment = comment.strip_suffix("*/").unwrap_or(comment);
+            for line in comment.split('\n') {
+                let Some(at) = line.find('@') else {
+                    continue;
+                };
+                let after = &line[at + 1..];
+                let name_end = after.find(char::is_whitespace).unwrap_or(after.len());
+                let name = &after[..name_end];
+                if !name.eq_ignore_ascii_case(pragma) {
+                    continue;
+                }
+                let args = after[name_end..].trim_start();
+                let arg_end = args.find(char::is_whitespace).unwrap_or(args.len());
+                if arg_end > 0 {
+                    result = Some(args[..arg_end].to_string());
+                }
+            }
+        }
+        result
+    }
+}

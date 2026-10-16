@@ -1,0 +1,298 @@
+use crate::lsp::lsproto_lsp::FormattingOptions;
+use tsox_core::core::tristate::Tristate;
+use tsox_core::core::tristate::bool_to_tristate;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[repr(i32)]
+pub enum IndentStyle {
+    #[default]
+    None = 0,
+    Block = 1,
+    Smart = 2,
+}
+
+impl IndentStyle {
+    pub fn parse(value: &serde_json::Value) -> IndentStyle { ::tsox_core::fntrace::enter("parse"); 
+        match value {
+            serde_json::Value::String(s) => match s.to_ascii_lowercase().as_str() {
+                "none" => IndentStyle::None,
+                "block" => IndentStyle::Block,
+                "smart" => IndentStyle::Smart,
+                _ => IndentStyle::Smart,
+            },
+            serde_json::Value::Number(n) => n.as_i64().map_or(IndentStyle::Smart, |i| match i {
+                0 => IndentStyle::None,
+                1 => IndentStyle::Block,
+                2 => IndentStyle::Smart,
+                _ => IndentStyle::Smart,
+            }),
+            _ => IndentStyle::Smart,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum SemicolonPreference {
+    #[default]
+    Ignore,
+    Insert,
+    Remove,
+}
+
+impl SemicolonPreference {
+    pub const IGNORE: &'static str = "ignore";
+    pub const INSERT: &'static str = "insert";
+    pub const REMOVE: &'static str = "remove";
+
+    pub fn parse(value: &serde_json::Value) -> SemicolonPreference { ::tsox_core::fntrace::enter("parse"); 
+        if let serde_json::Value::String(s) = value {
+            match s.to_ascii_lowercase().as_str() {
+                "ignore" => return SemicolonPreference::Ignore,
+                "insert" => return SemicolonPreference::Insert,
+                "remove" => return SemicolonPreference::Remove,
+                _ => {}
+            }
+        }
+        SemicolonPreference::Ignore
+    }
+
+    pub fn as_str(self) -> &'static str { ::tsox_core::fntrace::enter("as_str"); 
+        match self {
+            SemicolonPreference::Ignore => "ignore",
+            SemicolonPreference::Insert => "insert",
+            SemicolonPreference::Remove => "remove",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct EditorSettings {
+    pub base_indent_size: i32,
+    pub indent_size: i32,
+    pub tab_size: i32,
+    pub new_line_character: String,
+    pub convert_tabs_to_spaces: Tristate,
+    pub indent_style: IndentStyle,
+    pub trim_trailing_whitespace: Tristate,
+}
+
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
+pub struct FormatCodeSettings {
+    pub base_indent_size: i32,
+    pub indent_size: i32,
+    pub tab_size: i32,
+    pub new_line_character: String,
+    pub convert_tabs_to_spaces: Tristate,
+    pub indent_style: IndentStyle,
+    pub trim_trailing_whitespace: Tristate,
+
+    pub insert_space_after_comma_delimiter: Tristate,
+    pub insert_space_after_semicolon_in_for_statements: Tristate,
+    pub insert_space_before_and_after_binary_operators: Tristate,
+    pub insert_space_after_constructor: Tristate,
+    pub insert_space_after_keywords_in_control_flow_statements: Tristate,
+    pub insert_space_after_function_keyword_for_anonymous_functions: Tristate,
+    pub insert_space_after_opening_and_before_closing_nonempty_parenthesis: Tristate,
+    pub insert_space_after_opening_and_before_closing_nonempty_brackets: Tristate,
+    pub insert_space_after_opening_and_before_closing_nonempty_braces: Tristate,
+    pub insert_space_after_opening_and_before_closing_empty_braces: Tristate,
+    pub insert_space_after_opening_and_before_closing_template_string_braces: Tristate,
+    pub insert_space_after_opening_and_before_closing_jsx_expression_braces: Tristate,
+    pub insert_space_after_type_assertion: Tristate,
+    pub insert_space_before_function_parenthesis: Tristate,
+    pub place_open_brace_on_new_line_for_functions: Tristate,
+    pub place_open_brace_on_new_line_for_control_blocks: Tristate,
+    pub insert_space_before_type_annotation: Tristate,
+    pub indent_multi_line_object_literal_beginning_on_blank_line: Tristate,
+    pub semicolons: SemicolonPreference,
+    pub indent_switch_case: Tristate,
+}
+
+impl FormatCodeSettings {
+    pub fn editor_settings(&self) -> EditorSettings { ::tsox_core::fntrace::enter("editor_settings"); 
+        EditorSettings {
+            base_indent_size: self.base_indent_size,
+            indent_size: self.indent_size,
+            tab_size: self.tab_size,
+            new_line_character: self.new_line_character.clone(),
+            convert_tabs_to_spaces: self.convert_tabs_to_spaces,
+            indent_style: self.indent_style,
+            trim_trailing_whitespace: self.trim_trailing_whitespace,
+        }
+    }
+}
+
+pub fn get_default_format_code_settings() -> FormatCodeSettings { ::tsox_core::fntrace::enter("get_default_format_code_settings"); 
+    FormatCodeSettings {
+        base_indent_size: 0,
+        indent_size: default_indent_size(),
+        tab_size: default_indent_size(),
+        new_line_character: "\n".to_string(),
+        convert_tabs_to_spaces: Tristate::True,
+        indent_style: IndentStyle::Smart,
+        trim_trailing_whitespace: Tristate::True,
+
+        insert_space_after_constructor: Tristate::False,
+        insert_space_after_comma_delimiter: Tristate::True,
+        insert_space_after_semicolon_in_for_statements: Tristate::True,
+        insert_space_before_and_after_binary_operators: Tristate::True,
+        insert_space_after_keywords_in_control_flow_statements: Tristate::True,
+        insert_space_after_function_keyword_for_anonymous_functions: Tristate::False,
+        insert_space_after_opening_and_before_closing_nonempty_parenthesis: Tristate::False,
+        insert_space_after_opening_and_before_closing_nonempty_brackets: Tristate::False,
+        insert_space_after_opening_and_before_closing_nonempty_braces: Tristate::True,
+        insert_space_after_opening_and_before_closing_template_string_braces: Tristate::False,
+        insert_space_after_opening_and_before_closing_jsx_expression_braces: Tristate::False,
+        insert_space_before_function_parenthesis: Tristate::False,
+        place_open_brace_on_new_line_for_functions: Tristate::False,
+        place_open_brace_on_new_line_for_control_blocks: Tristate::False,
+        semicolons: SemicolonPreference::Ignore,
+        indent_switch_case: Tristate::True,
+        ..FormatCodeSettings::default()
+    }
+}
+
+fn default_indent_size() -> i32 { ::tsox_core::fntrace::enter("default_indent_size"); 
+    4
+}
+
+pub fn from_ls_format_options(
+    f: &FormatCodeSettings,
+    opt: &FormattingOptions,
+) -> FormatCodeSettings { ::tsox_core::fntrace::enter("from_ls_format_options"); 
+    let mut updated = f.clone();
+    updated.tab_size = opt.tab_size as i32;
+    updated.indent_size = opt.tab_size as i32;
+    updated.convert_tabs_to_spaces = bool_to_tristate(opt.insert_spaces);
+    if let Some(trim) = opt.trim_trailing_whitespace {
+        updated.trim_trailing_whitespace = bool_to_tristate(trim);
+    }
+    updated
+}
+
+pub fn to_ls_format_options(settings: &FormatCodeSettings) -> FormattingOptions { ::tsox_core::fntrace::enter("to_ls_format_options"); 
+    FormattingOptions {
+        tab_size: settings.tab_size as u32,
+        insert_spaces: settings.convert_tabs_to_spaces.is_true(),
+        trim_trailing_whitespace: Some(settings.trim_trailing_whitespace.is_true()),
+    }
+}
+
+/// fourslash Configure 用：按 raw 字段名覆盖 FormatCodeSettings 单项。
+pub fn set_format_code_setting(
+    settings: &mut FormatCodeSettings,
+    name: &str,
+    tristate: Tristate,
+    raw_value: &str,
+) { ::tsox_core::fntrace::enter("set_format_code_setting"); 
+    match name {
+        "base_indent_size" => settings.base_indent_size = raw_value.parse().unwrap_or(0),
+        "indent_size" => settings.indent_size = raw_value.parse().unwrap_or(4),
+        "tab_size" => settings.tab_size = raw_value.parse().unwrap_or(4),
+        "new_line_character" => settings.new_line_character = raw_value.to_string(),
+        "convert_tabs_to_spaces" => settings.convert_tabs_to_spaces = tristate,
+        "indent_style" => {
+            settings.indent_style = match raw_value {
+                "none" => IndentStyle::None,
+                "block" => IndentStyle::Block,
+                _ => IndentStyle::Smart,
+            }
+        }
+        "trim_trailing_whitespace" => settings.trim_trailing_whitespace = tristate,
+        "insert_space_after_comma_delimiter" => {
+            settings.insert_space_after_comma_delimiter = tristate
+        }
+        "insert_space_after_semicolon_in_for_statements" => {
+            settings.insert_space_after_semicolon_in_for_statements = tristate
+        }
+        "insert_space_before_and_after_binary_operators" => {
+            settings.insert_space_before_and_after_binary_operators = tristate
+        }
+        "insert_space_after_constructor" => settings.insert_space_after_constructor = tristate,
+        "insert_space_after_keywords_in_control_flow_statements" => {
+            settings.insert_space_after_keywords_in_control_flow_statements = tristate
+        }
+        "insert_space_after_function_keyword_for_anonymous_functions" => {
+            settings.insert_space_after_function_keyword_for_anonymous_functions = tristate
+        }
+        "insert_space_after_opening_and_before_closing_nonempty_parenthesis" => {
+            settings.insert_space_after_opening_and_before_closing_nonempty_parenthesis = tristate
+        }
+        "insert_space_after_opening_and_before_closing_nonempty_brackets" => {
+            settings.insert_space_after_opening_and_before_closing_nonempty_brackets = tristate
+        }
+        "insert_space_after_opening_and_before_closing_nonempty_braces" => {
+            settings.insert_space_after_opening_and_before_closing_nonempty_braces = tristate
+        }
+        "insert_space_after_opening_and_before_closing_empty_braces" => {
+            settings.insert_space_after_opening_and_before_closing_empty_braces = tristate
+        }
+        "insert_space_after_opening_and_before_closing_template_string_braces" => {
+            settings
+                .insert_space_after_opening_and_before_closing_template_string_braces = tristate
+        }
+        "insert_space_after_opening_and_before_closing_jsx_expression_braces" => {
+            settings
+                .insert_space_after_opening_and_before_closing_jsx_expression_braces = tristate
+        }
+        "insert_space_after_type_assertion" => {
+            settings.insert_space_after_type_assertion = tristate
+        }
+        "insert_space_before_function_parenthesis" => {
+            settings.insert_space_before_function_parenthesis = tristate
+        }
+        "place_open_brace_on_new_line_for_functions" => {
+            settings.place_open_brace_on_new_line_for_functions = tristate
+        }
+        "place_open_brace_on_new_line_for_control_blocks" => {
+            settings.place_open_brace_on_new_line_for_control_blocks = tristate
+        }
+        "insert_space_before_type_annotation" => {
+            settings.insert_space_before_type_annotation = tristate
+        }
+        "indent_multi_line_object_literal_beginning_on_blank_line" => {
+            settings.indent_multi_line_object_literal_beginning_on_blank_line = tristate
+        }
+        "indent_switch_case" => settings.indent_switch_case = tristate,
+        "semicolons" => {
+            settings.semicolons = match raw_value {
+                "insert" => SemicolonPreference::Insert,
+                "remove" => SemicolonPreference::Remove,
+                _ => SemicolonPreference::Ignore,
+            }
+        }
+        _ => {}
+    }
+}
+
+impl serde::Serialize for SemicolonPreference {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
+        serializer.serialize_str(self.as_str())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for SemicolonPreference {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
+        Ok(match String::deserialize(deserializer)?.to_ascii_lowercase().as_str() {
+            "insert" => Self::Insert,
+            "remove" => Self::Remove,
+            _ => Self::Ignore,
+        })
+    }
+}
+
+impl serde::Serialize for IndentStyle {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> { ::tsox_core::fntrace::enter("serialize"); 
+        serializer.serialize_i32(*self as i32)
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for IndentStyle {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> { ::tsox_core::fntrace::enter("deserialize"); 
+        Ok(match i32::deserialize(deserializer)? {
+            1 => Self::Block,
+            2 => Self::Smart,
+            _ => Self::None,
+        })
+    }
+}

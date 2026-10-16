@@ -1,0 +1,188 @@
+use crate::ast::node_data_generated::NodeData;
+use crate::ast::node_flags::{ModifierFlags, NodeFlags};
+use crate::ast::node_node_list::ModifierList;
+use crate::ast::node_source_file::SourceFile;
+use crate::ast::syntax_kind_generated::SyntaxKind;
+use std::sync::{Arc, OnceLock, Weak};
+use std::sync::atomic::{AtomicU64, Ordering};
+use tsox_core::core::text::TextRange;
+
+static NEXT_NODE_ID: AtomicU64 = AtomicU64::new(1);
+
+#[derive(Debug)]
+pub struct Node {
+    pub kind: SyntaxKind,
+    pub flags: NodeFlags,
+    pub loc: TextRange,
+    id: AtomicU64,
+    /// Go Node.Parent 是非持有回指针（ast.go），所有权只沿父到子方向；
+    /// 这里以 Weak 表达，避免 parent/child 强引用环令整棵 AST 永不释放
+    pub(crate) parent: OnceLock<Weak<Node>>,
+    pub data: NodeData,
+}
+
+impl Node {
+    pub fn new(kind: SyntaxKind, data: NodeData) -> Self { ::tsox_core::fntrace::enter("new"); 
+        Self {
+            kind,
+            flags: NodeFlags::empty(),
+            loc: TextRange::undefined(),
+            id: AtomicU64::new(0),
+            parent: OnceLock::new(),
+            data,
+        }
+    }
+
+    pub fn with_loc(kind: SyntaxKind, data: NodeData, loc: TextRange) -> Self { ::tsox_core::fntrace::enter("with_loc"); 
+        Self {
+            kind,
+            flags: NodeFlags::empty(),
+            loc,
+            id: AtomicU64::new(0),
+            parent: OnceLock::new(),
+            data,
+        }
+    }
+
+    pub fn with_loc_flags(
+        kind: SyntaxKind,
+        data: NodeData,
+        loc: TextRange,
+        flags: NodeFlags,
+    ) -> Self { ::tsox_core::fntrace::enter("with_loc_flags"); 
+        Self {
+            kind,
+            flags,
+            loc,
+            id: AtomicU64::new(0),
+            parent: OnceLock::new(),
+            data,
+        }
+    }
+
+    /// Go node.Parent：非持有回指针，树存活期内 upgrade 恒成功
+    pub fn parent(&self) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("parent"); 
+        self.parent.get().and_then(|w| w.upgrade())
+    }
+
+    /// binder 的 setParentPointers 在 parse 后一次性回填
+    pub fn set_parent(&self, parent: &Arc<Node>) { ::tsox_core::fntrace::enter("set_parent"); 
+        let _ = self.parent.set(Arc::downgrade(parent));
+    }
+
+    #[inline]
+    pub fn pos(&self) -> usize { ::tsox_core::fntrace::enter("pos"); 
+        self.loc.pos()
+    }
+
+    #[inline]
+    pub fn end(&self) -> usize { ::tsox_core::fntrace::enter("end"); 
+        self.loc.end()
+    }
+
+    pub fn id(&self) -> u64 { ::tsox_core::fntrace::enter("id"); 
+        let mut id = self.id.load(Ordering::Relaxed);
+        if id == 0 {
+            id = NEXT_NODE_ID.fetch_add(1, Ordering::Relaxed);
+            self.id.store(id, Ordering::Relaxed);
+        }
+        id
+    }
+
+    pub fn text(&self) -> &str { ::tsox_core::fntrace::enter("text"); 
+        crate::ast::node_data_generated::node_text(self)
+    }
+
+    pub fn expression(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("expression"); 
+        crate::ast::node_data_generated::node_expression(self)
+    }
+
+    pub fn type_node(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("type_node"); 
+        crate::ast::node_data_generated::node_type(self)
+    }
+
+    pub fn name(&self) -> Option<&Arc<Node>> { ::tsox_core::fntrace::enter("name"); 
+        crate::ast::node_data_generated::node_name(self)
+    }
+
+    pub fn modifiers(&self) -> Option<&Arc<ModifierList>> { ::tsox_core::fntrace::enter("modifiers"); 
+        crate::ast::node::node_modifiers(self)
+    }
+
+    pub fn modifier_nodes(&self) -> &[Arc<Node>] { ::tsox_core::fntrace::enter("modifier_nodes"); 
+        match self.modifiers() {
+            Some(ml) => &ml.list.nodes,
+            None => &[],
+        }
+    }
+
+    pub fn syntactic_modifier_flags(&self) -> ModifierFlags { ::tsox_core::fntrace::enter("syntactic_modifier_flags"); 
+        match self.modifiers() {
+            Some(ml) => ml.modifier_flags,
+            None => ModifierFlags::empty(),
+        }
+    }
+
+    pub fn has_syntactic_modifier(&self, flags: ModifierFlags) -> bool { ::tsox_core::fntrace::enter("has_syntactic_modifier"); 
+        self.syntactic_modifier_flags().intersects(flags)
+    }
+
+    pub fn jsdoc(&self, file: &SourceFile) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("jsdoc"); 
+        if !self.flags.contains(NodeFlags::HasJSDoc) {
+            return Vec::new();
+        }
+        if file.has_lazy_jsdoc() {
+            file.resolve_jsdoc(self)
+        } else {
+            file.eager_jsdoc(self)
+        }
+    }
+}
+
+pub fn node_modifiers(node: &Node) -> Option<&Arc<ModifierList>> { ::tsox_core::fntrace::enter("node_modifiers"); 
+    use crate::ast::node_data_generated::*;
+    match &node.data {
+        NodeData::VariableStatement(d) => d.modifiers.as_ref(),
+        NodeData::ParameterDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::MissingDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::FunctionDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ClassDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ClassExpression(d) => d.modifiers.as_ref(),
+        NodeData::InterfaceDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::TypeAliasDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::EnumDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ImportDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ExportAssignment(d) => d.modifiers.as_ref(),
+        NodeData::NamespaceExportDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ConstructorDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::GetAccessorDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::SetAccessorDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::IndexSignatureDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::MethodSignatureDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::MethodDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::PropertySignatureDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::PropertyDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ClassStaticBlockDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::BinaryExpression(d) => d.modifiers.as_ref(),
+        NodeData::ArrowFunction(d) => d.modifiers.as_ref(),
+        NodeData::FunctionExpression(d) => d.modifiers.as_ref(),
+        NodeData::PropertyAssignment(d) => d.modifiers.as_ref(),
+        NodeData::ShorthandPropertyAssignment(d) => d.modifiers.as_ref(),
+        NodeData::ConstructorTypeNode(d) => d.modifiers.as_ref(),
+        NodeData::ModuleDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ImportEqualsDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::ExportDeclaration(d) => d.modifiers.as_ref(),
+        NodeData::TypeParameterDeclaration(d) => d.modifiers.as_ref(),
+        _ => None,
+    }
+}
+
+impl Node {
+    /// JsxNamespacedName 的合成文本 namespace:name（Go ast.Text 同源）
+    pub fn jsx_namespaced_name_text(&self) -> Option<String> { ::tsox_core::fntrace::enter("jsx_namespaced_name_text"); 
+        if let crate::ast::NodeData::JsxNamespacedName(d) = &self.data {
+            return Some(format!("{}:{}", d.namespace.text(), d.name.text()));
+        }
+        None
+    }
+}

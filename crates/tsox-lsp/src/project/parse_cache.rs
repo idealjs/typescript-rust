@@ -1,0 +1,71 @@
+#![allow(dead_code)]
+
+use std::sync::Arc;
+
+use tsox_core::tspath::Path;
+use tsox_frontend::ast::SourceFile;
+
+use super::overlay_fs::FileHandle;
+use super::refcount_cache::{RefCountCache, RefCountCacheOptions};
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ParseCacheKey {
+    pub file_name: String,
+    pub path: Path,
+    pub hash_lo: u64,
+    pub hash_hi: u64,
+    pub script_kind: i32,
+}
+
+impl ParseCacheKey {
+    pub fn new(
+        file_name: String,
+        path: Path,
+        hash_lo: u64,
+        hash_hi: u64,
+        script_kind: i32,
+    ) -> Self { ::tsox_core::fntrace::enter("new"); 
+        ParseCacheKey {
+            file_name,
+            path,
+            hash_lo,
+            hash_hi,
+            script_kind,
+        }
+    }
+}
+
+pub struct ParseCache {
+    inner: RefCountCache<ParseCacheKey, Arc<SourceFile>>,
+}
+
+impl ParseCache {
+    pub fn new(options: RefCountCacheOptions) -> Self { ::tsox_core::fntrace::enter("new"); 
+        ParseCache {
+            inner: RefCountCache::new(options),
+        }
+    }
+
+    pub fn acquire<F>(&self, key: &ParseCacheKey, _fh: &dyn FileHandle, parse: F) -> Arc<SourceFile>
+    where
+        F: FnOnce(&ParseCacheKey) -> Arc<SourceFile>,
+    { ::tsox_core::fntrace::enter("acquire"); 
+        self.inner.acquire(key.clone(), parse)
+    }
+
+    pub fn has(&self, key: &ParseCacheKey) -> bool { ::tsox_core::fntrace::enter("has"); 
+        self.inner.has(key)
+    }
+
+    pub fn len(&self) -> usize { ::tsox_core::fntrace::enter("len"); 
+        self.inner.len()
+    }
+
+    pub fn r#ref(&self, key: &ParseCacheKey) {
+        self.inner.r#ref(key);
+    }
+
+    pub fn deref(&self, key: &ParseCacheKey) { ::tsox_core::fntrace::enter("deref"); 
+        self.inner.deref(key);
+    }
+}

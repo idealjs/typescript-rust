@@ -1,0 +1,287 @@
+#![allow(unused_imports)]
+
+use crate::parser::expressions::*;
+
+impl Parser {
+    pub(crate) fn parse_primary_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_primary_expression"); 
+        match self.token {
+            SyntaxKind::Identifier => {
+                let text = self.scanner.token_text().to_string();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                self.next_token();
+                Arc::new(Node::with_loc_flags(
+                    SyntaxKind::Identifier,
+                    NodeData::Identifier(IdentifierData { text }),
+                    TextRange::new(pos, end),
+                    self.context_flags_now(),
+                ))
+            }
+            SyntaxKind::NumericLiteral => {
+                // Go parseLiteralExpression：节点文本取 TokenValue（legacy
+                // 八进制为扫描期换算的十进制串）
+                let text = self.scanner.token_value();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                // Go parseLiteralLikeNode（parser.go:6197-6209）：扫描器
+                // token 旗标原样入节点（引号风格等）
+                let token_flags = self.scanner.token_flags();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::NumericLiteral,
+                    NodeData::NumericLiteral(NumericLiteralData {
+                        text,
+                        token_flags,
+                    }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            SyntaxKind::BigIntLiteral => {
+                let text = self.scanner.token_text().to_string();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                let token_flags = self.scanner.token_flags();
+                self.next_token();
+                Arc::new(Node::with_loc_flags(
+                    SyntaxKind::BigIntLiteral,
+                    NodeData::BigIntLiteral(BigIntLiteralData {
+                        text,
+                        token_flags,
+                    }),
+                    TextRange::new(pos, end),
+                    self.context_flags_now(),
+                ))
+            }
+            SyntaxKind::StringLiteral => {
+                let text = self.scanner.token_value();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                // Go parseLiteralLikeNode（parser.go:6197-6209）：扫描器
+                // token 旗标原样入节点（引号风格等），next_token 前捕获
+                let token_flags = self.scanner.token_flags();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::StringLiteral,
+                    NodeData::StringLiteral(StringLiteralData {
+                        text,
+                        token_flags,
+                    }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            SyntaxKind::NoSubstitutionTemplateLiteral => {
+                // Go parseTemplateLiteral(isTaggedTemplate=false)：非法转义
+                // 存在时重扫报告 TS1487/1488
+                if crate::scanner::token_flags_intersects(
+                    self.scanner.token_flags(),
+                    crate::scanner::TOKEN_FLAGS_CONTAINS_INVALID_ESCAPE,
+                ) {
+                    self.scanner.re_scan_template_head_token(false);
+                    self.drain_scanner_errors();
+                }
+                let text = self.scanner.token_value();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                let template_flags = self.scanner.token_flags();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::NoSubstitutionTemplateLiteral,
+                    NodeData::NoSubstitutionTemplateLiteral(NoSubstitutionTemplateLiteralData {
+                        text,
+                        template_flags,
+                    }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            SyntaxKind::NullKeyword => self.parse_keyword_expression(SyntaxKind::NullKeyword),
+            SyntaxKind::TrueKeyword => self.parse_keyword_expression(SyntaxKind::TrueKeyword),
+            SyntaxKind::FalseKeyword => self.parse_keyword_expression(SyntaxKind::FalseKeyword),
+            SyntaxKind::ThisKeyword => self.parse_keyword_expression(SyntaxKind::ThisKeyword),
+            SyntaxKind::SuperKeyword => self.parse_super_expression(),
+            SyntaxKind::OpenParenToken => self.parse_parenthesized_expression(),
+            SyntaxKind::OpenBracketToken => self.parse_array_literal(),
+            SyntaxKind::OpenBraceToken => self.parse_object_literal(),
+            SyntaxKind::LessThanToken if self.language_variant == LanguageVariant::Jsx => {
+                self.parse_jsx_element_or_fragment(true)
+            }
+            SyntaxKind::AtToken => self.parse_decorated_expression(),
+            SyntaxKind::FunctionKeyword => self.parse_function_expression(),
+            SyntaxKind::ClassKeyword => self.parse_class_expression(),
+
+            SyntaxKind::ImportKeyword => {
+                if matches!(
+                    self.look_ahead_token(),
+                    SyntaxKind::OpenParenToken | SyntaxKind::LessThanToken
+                ) {
+                    self.parse_keyword_expression(SyntaxKind::ImportKeyword)
+                } else if self.is_import_meta() {
+                    self.parse_import_meta()
+                } else {
+                    self.parse_fallback_identifier_or_error()
+                }
+            }
+
+            SyntaxKind::AsyncKeyword if self.is_async_function_expression() => {
+                self.parse_async_function_expression()
+            }
+            SyntaxKind::TemplateHead => self.parse_template_expression(),
+
+            SyntaxKind::PrivateIdentifier => {
+                let text = self.scanner.token_text().to_string();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::PrivateIdentifier,
+                    NodeData::PrivateIdentifier(PrivateIdentifierData { text }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            SyntaxKind::SlashToken | SyntaxKind::SlashEqualsToken => {
+                self.re_scan_slash_token();
+                let text = self.scanner.token_text().to_string();
+                let pos = self.token_pos();
+                let end = self.token_end();
+                let token_flags = self.scanner.token_flags();
+                self.next_token();
+                Arc::new(Node::with_loc(
+                    SyntaxKind::RegularExpressionLiteral,
+                    NodeData::RegularExpressionLiteral(RegularExpressionLiteralData {
+                        text,
+                        token_flags,
+                    }),
+                    TextRange::new(pos, end),
+                ))
+            }
+            _ => self.parse_fallback_identifier_or_error(),
+        }
+    }
+
+    pub(crate) fn parse_fallback_identifier_or_error(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_fallback_identifier_or_error"); 
+        // Go parseIdentifierWithDiagnostic：保留字不作表达式标识符（报错且不消费）
+        if self.is_identifier()
+            && self.token != SyntaxKind::InKeyword
+            && self.token != SyntaxKind::InstanceOfKeyword
+        {
+            let text = self.scanner.token_text().to_string();
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            Arc::new(Node::with_loc_flags(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData { text }),
+                TextRange::new(pos, end),
+                self.context_flags_now(),
+            ))
+        } else {
+            // Go createIdentifierWithDiagnostic：报 Expression expected 后返回
+            // 零宽 missing，不消费当前 token（由外层 expect/列表恢复推进）；
+            // EOF 时报错取零宽 fullStart（与后续 expect 的 token 位错开，
+            // 避免位置去重吞掉两条诊断）
+            if self.token == SyntaxKind::EndOfFile {
+                let p = self.node_pos();
+                self.parse_error_at(p, p, tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            } else {
+                self.parse_error_at_current_token(tsox_core::diagnostics::EXPRESSION_EXPECTED, &[]);
+            }
+            // Go createMissingIdentifier 经 SkipTrivia 补偿后才可文本对齐：
+            // pos 取 token 起点，fullStart 的前导 trivia 会带进 .types 源文本
+            let pos = self.token_pos();
+            Arc::new(Node::with_loc(
+                SyntaxKind::Identifier,
+                NodeData::Identifier(IdentifierData {
+                    text: String::new(),
+                }),
+                TextRange::new(pos, pos),
+            ))
+        }
+    }
+
+    pub(crate) fn parse_keyword_expression(&mut self, kind: SyntaxKind) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_keyword_expression"); 
+        let pos = self.token_pos();
+        let end = self.token_end();
+        self.next_token();
+        Arc::new(Node::with_loc(
+            kind,
+            NodeData::Token,
+            TextRange::new(pos, end),
+        ))
+    }
+
+    /// Go parseParenthesizedExpression：主表达式位置的 `(` 一律按括号表达式
+    /// 解析，`(` 箭头函数只由 parseAssignmentExpressionOrHigher 入口尝试
+    /// （Go parsePrimaryExpression case OpenParenToken → parseParenthesizedExpression）
+    pub(crate) fn parse_parenthesized_expression(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_parenthesized_expression"); 
+        let pos = self.token_pos();
+        self.next_token();
+
+        let expr = self.allow_in(|p| p.parse_expression());
+        self.expect(SyntaxKind::CloseParenToken);
+        let end = self.node_pos();
+
+        Arc::new(Node::with_loc(
+            SyntaxKind::ParenthesizedExpression,
+            NodeData::ParenthesizedExpression(ParenthesizedExpressionData { expression: expr }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    pub(crate) fn parse_array_literal(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_array_literal"); 
+        let pos = self.token_pos();
+        self.expect(SyntaxKind::OpenBracketToken);
+        let elements = self.parse_delimited_list(
+            ParsingContext::ArrayLiteralMembers,
+            Parser::parse_array_literal_element,
+        );
+        self.expect(SyntaxKind::CloseBracketToken);
+        let end = self.node_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::ArrayLiteralExpression,
+            NodeData::ArrayLiteralExpression(ArrayLiteralExpressionData {
+                elements: Arc::new(elements),
+                multi_line: false,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    pub(crate) fn parse_array_literal_element(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_array_literal_element");
+        let pos = self.token_pos();
+        if self.parse_optional(SyntaxKind::DotDotDotToken) {
+            let expression = self.allow_in(|p| p.parse_assignment_expression());
+            let end = expression.end();
+            return Arc::new(Node::with_loc(
+                SyntaxKind::SpreadElement,
+                NodeData::SpreadElement(SpreadElementData { expression }),
+                TextRange::new(pos, end),
+            ));
+        }
+        if self.token == SyntaxKind::CommaToken {
+            return Arc::new(Node::with_loc(
+                SyntaxKind::OmittedExpression,
+                NodeData::OmittedExpression,
+                TextRange::new(pos, pos),
+            ));
+        }
+        self.allow_in(|p| p.parse_assignment_expression())
+    }
+
+    pub(crate) fn parse_object_literal(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_object_literal"); 
+        let pos = self.token_pos();
+        self.expect(SyntaxKind::OpenBraceToken);
+        let members = self.parse_delimited_list(
+            ParsingContext::ObjectLiteralMembers,
+            Parser::parse_object_literal_element,
+        );
+        self.expect(SyntaxKind::CloseBraceToken);
+        let end = self.node_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::ObjectLiteralExpression,
+            NodeData::ObjectLiteralExpression(ObjectLiteralExpressionData {
+                properties: Arc::new(members),
+                multi_line: false,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+}

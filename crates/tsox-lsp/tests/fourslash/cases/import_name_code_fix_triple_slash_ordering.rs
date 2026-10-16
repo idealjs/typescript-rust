@@ -1,0 +1,55 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[test]
+fn import_name_code_fix_triple_slash_ordering() {
+    let content = r#"// @Filename: /tsconfig.json
+{
+    "compilerOptions": {
+        "skipDefaultLibCheck": false
+    }
+}
+// @Filename: /a.ts
+export const x = 0;
+// @Filename: /b.ts
+// some comment
+
+/// <reference lib="es2017.string" />
+
+const y = x + 1;
+// @Filename: /c.ts
+// some comment
+
+/// <reference path="jquery-1.8.3.js" />
+
+const y = x + 1;
+// @Filename: /d.ts
+// some comment
+
+/// <reference types="node" />
+
+const y = x + 1;
+// @Filename: /f.ts
+// some comment
+
+/// <amd-module name="NamedModule" />
+
+const y = x + 1;
+// @Filename: /g.ts
+// some comment
+
+/// <amd-dependency path="legacy/moduleA" name="moduleA" />
+
+const y = x + 1;"#;
+    let mut s = Session::new_for_test("importNameCodeFix_tripleSlashOrdering", content);
+    fourslash::go_to_file(&mut s, "/b.ts");
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+    fourslash::go_to_file(&mut s, "/c.ts");
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+    fourslash::go_to_file(&mut s, "/d.ts");
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+    fourslash::go_to_file(&mut s, "/f.ts");
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+    fourslash::go_to_file(&mut s, "/g.ts");
+    // TODO: f.VerifyImportFixAtPosition(t, []string{
+}

@@ -1,0 +1,13 @@
+[package]
+name = "tsox-checker"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+bitflags = "2"
+dashmap = "6"
+tsox-core = { workspace = true }
+tsox-frontend = { workspace = true }
+tsox-ts-libs = { workspace = true }
+tsox-tsoptions = { workspace = true }

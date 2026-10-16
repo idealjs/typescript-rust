@@ -1,0 +1,596 @@
+#![allow(unused_imports)]
+
+use crate::checker::inference::*;
+
+impl Checker {
+    pub fn iife_contextual_signature(
+        &mut self,
+        node: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Signature>> { ::tsox_core::fntrace::enter("iife_contextual_signature"); 
+        let mut parent = node.parent()?;
+        while parent.kind == SyntaxKind::ParenthesizedExpression {
+            parent = parent.parent()?;
+        }
+        let tsox_frontend::ast::NodeData::CallExpression(call) = &parent.data else {
+            return None;
+        };
+        if !Arc::ptr_eq(&call.expression, node) {
+            return None;
+        }
+        let arg_count = call.arguments.len();
+        if arg_count == 0 {
+            return None;
+        }
+
+        let key = node.id();
+        if !self.resolving_function_like.insert(key) {
+            return None;
+        }
+        let mut params: Vec<Arc<tsox_frontend::ast::Symbol>> = Vec::with_capacity(arg_count);
+        for (i, arg) in call.arguments.iter().enumerate() {
+            let t = self.get_type_of_node(arg);
+            let sym = Arc::new(tsox_frontend::ast::Symbol::new(
+                tsox_frontend::ast::SymbolFlags::Property,
+                format!("__iife{}", i),
+            ));
+            self.value_symbol_links.insert(
+                &sym,
+                ValueSymbolLinks {
+                    resolved_type: Some(t),
+                    ..Default::default()
+                },
+            );
+            params.push(sym);
+        }
+        self.resolving_function_like.remove(&key);
+        Some(Arc::new(Signature {
+            id: 0,
+            flags: SignatureFlags::None,
+            min_argument_count: 0,
+            resolved_min_argument_count: -1,
+            declaration: None,
+            type_parameters: Vec::new(),
+            parameters: params,
+            this_parameter: None,
+            resolved_return_type: std::sync::OnceLock::new(),
+            resolved_type_predicate: std::sync::OnceLock::new(),
+            target: None,
+            mapper: None,
+            isolated_signature_type: std::sync::OnceLock::new(),
+            instantiated_parameter_types: None,
+        }))
+    }
+
+    pub(crate) fn get_contextual_type_for_initializer_expression(
+        &mut self,
+        node: &Arc<tsox_frontend::ast::Node>,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_initializer_expression"); 
+        use tsox_frontend::ast::NodeData;
+
+        let declaration = node.parent()?;
+
+        let is_initializer = match &declaration.data {
+            NodeData::VariableDeclaration(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::ParameterDeclaration(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::PropertyDeclaration(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
+            NodeData::BindingElement(data) => data
+                .initializer
+                .as_ref()
+                .map_or(false, |init| Arc::ptr_eq(init, node)),
+            _ => false,
+        };
+        if !is_initializer {
+            return None;
+        }
+
+        let type_node = match &declaration.data {
+            NodeData::VariableDeclaration(data) => data.type_node.as_ref(),
+            NodeData::ParameterDeclaration(data) => data.type_node.as_ref(),
+            NodeData::PropertyDeclaration(data) => data.type_node.as_ref(),
+            NodeData::PropertySignatureDeclaration(data) => Some(&data.type_node),
+            NodeData::BindingElement(_) => None,
+            _ => None,
+        };
+
+        if let Some(type_node) = type_node {
+            return Some(self.get_type_from_type_node(type_node));
+        }
+
+        // JS 文件：JSDoc @type 标签充当类型注解（Go getEffectiveTypeAnnotationNode
+        // 的 reparse 通道等价物）
+        if let Some(t) = self.jsdoc_type_annotation(&declaration) {
+            return Some(t);
+        }
+
+        if let NodeData::BindingElement(_) = &declaration.data {
+            if let Some(ctx) = self.get_contextual_type_from_binding_element(&declaration) {
+                return Some(ctx);
+            }
+        }
+
+        let pattern_name = match &declaration.data {
+            NodeData::VariableDeclaration(d) => Some(&d.name),
+            NodeData::ParameterDeclaration(d) => Some(&d.name),
+            NodeData::PropertyDeclaration(d) => Some(&d.name),
+            NodeData::BindingElement(d) => d.name.as_ref(),
+            _ => None,
+        };
+        if let Some(name) = pattern_name {
+            if name.kind == SyntaxKind::ArrayBindingPattern {
+                if let Some(implied) = self.implied_type_of_array_binding_pattern(name) {
+                    return Some(implied);
+                }
+            } else if name.kind == SyntaxKind::ObjectBindingPattern
+                && matches!(&name.data, NodeData::BindingPattern(p) if !p.elements.nodes.is_empty())
+            {
+                return Some(self.get_type_from_binding_pattern(name, true, false));
+            }
+        }
+
+        None
+    }
+
+    fn implied_type_of_array_binding_pattern(
+        &mut self,
+        pattern: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("implied_type_of_array_binding_pattern"); 
+        use tsox_frontend::ast::NodeData;
+
+        let elements = match &pattern.data {
+            NodeData::BindingPattern(d) => &d.elements,
+            _ => return None,
+        };
+        if elements.nodes.is_empty() {
+            return None;
+        }
+        let last = elements.nodes.last()?;
+        let last_is_rest = matches!(
+            &last.data,
+            NodeData::BindingElement(b) if b.dot_dot_dot_token.is_some()
+        );
+        if elements.nodes.len() == 1 && last_is_rest {
+            return None;
+        }
+
+        let has_default =
+            |e: &Arc<tsox_frontend::ast::Node>| matches!(&e.data, NodeData::BindingElement(b) if b.initializer.is_some());
+        let has_name = |e: &Arc<tsox_frontend::ast::Node>| {
+            matches!(&e.data, NodeData::BindingElement(b) if b.name.is_some())
+        };
+        let min_length = elements
+            .nodes
+            .iter()
+            .rposition(|e| has_name(e) && !has_default(e))
+            .map_or(0, |i| i + 1);
+
+        let mut element_types: Vec<Arc<Type>> = Vec::with_capacity(elements.nodes.len());
+        let mut element_infos: Vec<crate::checker::types::TupleElementInfo> =
+            Vec::with_capacity(elements.nodes.len());
+        for (i, e) in elements.nodes.iter().enumerate() {
+            let b = match &e.data {
+                NodeData::BindingElement(b) => b,
+                _ => {
+                    element_types.push(self.any_type());
+                    element_infos.push(crate::checker::types::TupleElementInfo {
+                        label: None,
+                        flags: crate::checker::types::ElementFlags::Required,
+                        labeled_declaration: None,
+                        type_: None,
+                    });
+                    continue;
+                }
+            };
+            let t = if let Some(init) = &b.initializer {
+                let t = self.get_type_of_node(init);
+                self.get_widened_literal_type(&t)
+            } else if let Some(name) = &b.name {
+                if name.kind == SyntaxKind::ArrayBindingPattern {
+                    self.implied_type_of_array_binding_pattern(name)
+                        .unwrap_or_else(|| self.any_type())
+                } else {
+                    self.any_type()
+                }
+            } else {
+                self.any_type()
+            };
+            let flags = if b.dot_dot_dot_token.is_some() {
+                crate::checker::types::ElementFlags::Rest
+            } else if i >= min_length {
+                crate::checker::types::ElementFlags::Optional
+            } else {
+                crate::checker::types::ElementFlags::Required
+            };
+            element_types.push(t);
+            element_infos.push(crate::checker::types::TupleElementInfo {
+                label: None,
+                flags,
+                labeled_declaration: None,
+                type_: None,
+            });
+        }
+        Some(self.create_tuple_type_ex(element_types, element_infos, false))
+    }
+
+    pub(crate) fn get_contextual_type_from_binding_element(
+        &mut self,
+        binding_element: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_from_binding_element"); 
+        use tsox_frontend::ast::NodeData;
+
+        let binding_pattern = binding_element.parent()?;
+        let var_declaration = binding_pattern.parent()?;
+
+        let var_data = match &var_declaration.data {
+            NodeData::VariableDeclaration(d) => d,
+            _ => return None,
+        };
+
+        let initializer = var_data.initializer.as_ref()?;
+        let init_type = self.get_type_of_node(initializer);
+
+        match binding_pattern.kind {
+            SyntaxKind::ArrayBindingPattern => {
+                let elements = match &binding_pattern.data {
+                    NodeData::BindingPattern(d) => &d.elements,
+                    _ => return None,
+                };
+                let idx = elements
+                    .nodes
+                    .iter()
+                    .position(|e| Arc::ptr_eq(e, binding_element))?;
+
+                self.get_element_type_of_array(&init_type, idx)
+            }
+            SyntaxKind::ObjectBindingPattern => {
+                let be_data = match &binding_element.data {
+                    NodeData::BindingElement(d) => d,
+                    _ => return None,
+                };
+                let property_name = be_data.property_name.as_ref().unwrap_or_else(|| {
+                    be_data
+                        .name
+                        .as_ref()
+                        .expect("binding element has name or property_name")
+                });
+                let name = property_name.text();
+                self.property_type_of_type(&init_type, &name)
+            }
+            _ => None,
+        }
+    }
+
+    pub(crate) fn get_element_type_of_array(
+        &mut self,
+        t: &Arc<Type>,
+        index: usize,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_element_type_of_array"); 
+        if let TypeData::Tuple(tuple) = &t.data {
+            if index < tuple.element_infos.len() {
+                if let Some(ref elem) = tuple.element_infos[index].type_ {
+                    return Some(Arc::clone(elem));
+                }
+            }
+        }
+
+        if self.is_array_type(t) || matches!(t.data, TypeData::EvolvingArray(_)) {
+            return Some(self.get_array_element_type(t));
+        }
+        None
+    }
+
+    pub(crate) fn property_type_of_type(&mut self, t: &Arc<Type>, name: &str) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("property_type_of_type"); 
+        let prop = self.get_property_of_type(t, name)?;
+        Some(self.get_type_of_symbol(&prop))
+    }
+
+    pub(crate) fn get_contextual_type_for_call_or_new(
+        &mut self,
+        node: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_call_or_new"); 
+        use tsox_frontend::ast::NodeData;
+
+        let parent = node.parent()?;
+        let direct = match &parent.data {
+            NodeData::VariableDeclaration(data) => data
+                .type_node
+                .as_ref()
+                .map(|tn| self.get_type_from_type_node(tn)),
+            NodeData::ReturnStatement(_) => {
+                let fn_node = parent.parent()?;
+                self.get_return_type_annotation_of_function(&fn_node)
+            }
+            _ => None,
+        };
+        direct.or_else(|| {
+            // Go inferTypeArguments 的 contextualType 来自 getContextualType 全量分发；
+            // 无类型注解的解构声明走 getContextualTypeForInitializerExpression 的
+            // binding pattern 隐含类型（checker.go:29782）
+            self.get_contextual_type(node, ContextFlags::None)
+        })
+    }
+
+    /// Go inferTypeArguments 的 isFromBindingPattern（checker.go:9585）：
+    /// 上下文型仅来自声明名 binding pattern 的隐含类型（无类型注解时
+    /// SkipBindingPatterns 通道返回 nil 与全量通道不同）
+    pub(crate) fn contextual_type_from_binding_pattern(
+        &self,
+        node: &Arc<tsox_frontend::ast::Node>,
+    ) -> bool { ::tsox_core::fntrace::enter("contextual_type_from_binding_pattern"); 
+        use tsox_frontend::ast::NodeData;
+
+        let Some(parent) = node.parent() else {
+            return false;
+        };
+        let (type_node, name): (bool, Option<&Arc<tsox_frontend::ast::Node>>) = match &parent.data
+        {
+            NodeData::VariableDeclaration(d) => (d.type_node.is_some(), Some(&d.name)),
+            NodeData::ParameterDeclaration(d) => (d.type_node.is_some(), Some(&d.name)),
+            NodeData::PropertyDeclaration(d) => (d.type_node.is_some(), Some(&d.name)),
+            NodeData::PropertySignatureDeclaration(d) => (true, Some(&d.name)),
+            NodeData::BindingElement(d) => (false, d.name.as_ref()),
+            _ => (false, None),
+        };
+        if type_node {
+            return false;
+        }
+        let Some(name) = name else {
+            return false;
+        };
+        if !matches!(
+            name.kind,
+            SyntaxKind::ArrayBindingPattern | SyntaxKind::ObjectBindingPattern
+        ) {
+            return false;
+        }
+        matches!(&name.data, NodeData::BindingPattern(p) if !p.elements.nodes.is_empty())
+    }
+
+    pub(crate) fn get_return_type_annotation_of_function(
+        &mut self,
+        node: &tsox_frontend::ast::Node,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_return_type_annotation_of_function"); 
+        use tsox_frontend::ast::NodeData;
+
+        let type_node = match &node.data {
+            NodeData::FunctionDeclaration(d) => d.type_node.as_ref(),
+            NodeData::FunctionExpression(d) => d.type_node.as_ref(),
+            NodeData::ArrowFunction(d) => d.type_node.as_ref(),
+            NodeData::MethodDeclaration(d) => d.type_node.as_ref(),
+            NodeData::MethodSignatureDeclaration(d) => d.type_node.as_ref(),
+            NodeData::GetAccessorDeclaration(d) => d.type_node.as_ref(),
+            NodeData::SetAccessorDeclaration(_) => None,
+            _ => None,
+        };
+        type_node.map(|tn| self.get_type_from_type_node(tn))
+    }
+
+    pub(crate) fn get_contextual_type_for_return_expression(
+        &mut self,
+        _node: &Arc<tsox_frontend::ast::Node>,
+        _context_flags: ContextFlags,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_contextual_type_for_return_expression"); 
+        let mut current = _node.parent().as_ref()?.clone();
+        loop {
+            match current.kind {
+                SyntaxKind::FunctionDeclaration
+                | SyntaxKind::FunctionExpression
+                | SyntaxKind::ArrowFunction
+                | SyntaxKind::MethodDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::GetAccessor
+                | SyntaxKind::SetAccessor => break,
+                SyntaxKind::SourceFile => return None,
+                _ => {
+                    current = current.parent().as_ref()?.clone();
+                }
+            }
+        }
+        let contextual = self.contextual_return_type_of(&current)?;
+        let function_flags = tsox_frontend::ast::mig::m3e::get_function_flags(Some(&current));
+        let is_generator = function_flags
+            .contains(tsox_frontend::ast::mig::m3e::FunctionFlags::GENERATOR);
+        let is_async = function_flags
+            .contains(tsox_frontend::ast::mig::m3e::FunctionFlags::ASYNC);
+        let contextual = if is_generator {
+            let filtered = if contextual.flags.contains(TypeFlags::Union) {
+                let constituents = contextual.types().map(|ts| ts.to_vec()).unwrap_or_default();
+                let kept: Vec<Arc<Type>> = constituents
+                    .into_iter()
+                    .filter(|t| {
+                        self.get_iteration_type_of_generator_function_return_type(
+                            IterationTypeKind::RETURN,
+                            t,
+                            is_async,
+                        )
+                        .is_some()
+                    })
+                    .collect();
+                if kept.is_empty() {
+                    self.never_type()
+                } else {
+                    self.get_union_type(kept)
+                }
+            } else {
+                contextual
+            };
+            self.get_iteration_type_of_generator_function_return_type(
+                IterationTypeKind::RETURN,
+                &filtered,
+                is_async,
+            )?
+        } else {
+            contextual
+        };
+        // Go getContextualTypeForReturnExpression：async 容器将上下文返回型
+        // 逐成分取 awaited 无别名型，再与 PromiseLike<该型> 取并
+        if is_async {
+            let awaited = self.get_awaited_type(&contextual)?;
+            let promise_like = self.create_promise_like_type(&awaited);
+            return Some(self.get_union_type(vec![awaited, promise_like]));
+        }
+        Some(contextual)
+    }
+
+    pub fn contextual_return_type_of(
+        &mut self,
+        fn_node: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("contextual_return_type_of"); 
+        use tsox_frontend::ast::NodeData;
+
+        let type_node = match &fn_node.data {
+            NodeData::FunctionDeclaration(data) => data.type_node.clone(),
+            NodeData::FunctionExpression(data) => data.type_node.clone(),
+            NodeData::ArrowFunction(data) => data.type_node.clone(),
+            NodeData::MethodDeclaration(data) => data.type_node.clone(),
+            NodeData::ConstructorDeclaration(data) => data.type_node.clone(),
+            NodeData::GetAccessorDeclaration(data) => data.type_node.clone(),
+            NodeData::SetAccessorDeclaration(data) => data.type_node.clone(),
+            _ => None,
+        };
+        if let Some(type_node) = type_node {
+            return Some(self.get_type_from_type_node(&type_node));
+        }
+
+        if let Some(signature) = self.get_contextual_signature(fn_node) {
+            if let Some(return_type) = self.get_return_type_of_signature(&signature) {
+                return Some(return_type);
+            }
+        }
+
+        // Go GetImmediatelyInvokedFunctionExpression：向上最多两层（括号/
+        // 调用），调用目标为该函数本身时取该调用表达式的上下文型
+        let mut prev = Arc::clone(fn_node);
+        let mut current = fn_node.parent()?;
+        for _ in 0..2 {
+            match &current.data {
+                NodeData::ParenthesizedExpression(_) => {}
+                NodeData::CallExpression(call) => {
+                    if Arc::ptr_eq(&call.expression, &prev) {
+                        return self.get_contextual_type(&current, ContextFlags::None);
+                    }
+                }
+                _ => return None,
+            }
+            prev = Arc::clone(&current);
+            current = current.parent()?;
+        }
+        None
+    }
+
+    pub(crate) fn create_promise_like_type(&mut self, promised_type: &Arc<Type>) -> Arc<Type> { ::tsox_core::fntrace::enter("create_promise_like_type"); 
+        let Some(promise_like_sym) = self.globals.get("PromiseLike").cloned() else {
+            return self.unknown_type();
+        };
+        let declared = self.get_declared_type_of_symbol(&promise_like_sym);
+        let promised = self
+            .get_awaited_type(promised_type)
+            .unwrap_or_else(|| self.unknown_type());
+        self.rebuild_with_type_arguments(&declared, vec![promised])
+    }
+}
+
+impl Checker {
+    /// 声明 JSDoc @type 标签的类型（仅 JS 文件）
+    pub(crate) fn jsdoc_type_annotation(
+        &mut self,
+        declaration: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("jsdoc_type_annotation"); 
+        use tsox_frontend::ast::NodeData;
+        let file = self.get_source_file_of_node(declaration)?;
+        if !file.file_name.ends_with(".js")
+            && !file.file_name.ends_with(".jsx")
+            && !file.file_name.ends_with(".mjs")
+        {
+            return None;
+        }
+        let mut jsdocs = tsox_frontend::parser::parse_jsdoc_for_node(&file, declaration);
+        if jsdocs.is_empty() {
+            // 文档挂在语句层（const obj 的 @type 挂 VariableStatement）
+            if let Some(stmt) = declaration
+                .parent()
+                .and_then(|p| p.parent())
+                .filter(|n| matches!(n.kind, tsox_frontend::ast::SyntaxKind::VariableStatement))
+                .or_else(|| {
+                    declaration
+                        .parent()
+                        .filter(|n| matches!(n.kind, tsox_frontend::ast::SyntaxKind::VariableStatement))
+                })
+            {
+                jsdocs = tsox_frontend::parser::parse_jsdoc_for_node(&file, &stmt);
+            }
+        }
+        for jd in jsdocs.iter() {
+            let NodeData::JSDoc(d) = &jd.data else {
+                continue;
+            };
+            let Some(tags) = &d.tags else {
+                continue;
+            };
+            for tag in tags.nodes.iter() {
+                let NodeData::JSDocTypeTag(t) = &tag.data else {
+                    continue;
+                };
+                let NodeData::JSDocTypeExpression(e) = &t.type_expression.data else {
+                    continue;
+                };
+                let t = self.get_type_from_type_node(&e.type_node);
+                return Some(t);
+            }
+        }
+
+        // JS 形参无注解：@param 标签充当类型注解（Go reparseHosted 的
+        // JSDocParameterTag 通道，含宿主语句上挂的 @param）
+        if let NodeData::ParameterDeclaration(pd) = &declaration.data {
+            let param_name = pd.name.text().to_string();
+            let func = self.enclosing_function_of(declaration)?;
+            let tag =
+                crate::checker::checker_parameter_implicit_any::jsdoc_param_tag_of_function(
+                    &file, &func, &param_name,
+                )?;
+            let NodeData::JSDocParameterOrPropertyTag(pt) = &tag.data else {
+                return None;
+            };
+            let Some(te) = &pt.type_expression else {
+                return None;
+            };
+            let NodeData::JSDocTypeExpression(e) = &te.data else {
+                return None;
+            };
+            return Some(self.get_type_from_type_node(&e.type_node));
+        }
+        None
+    }
+
+    fn enclosing_function_of(
+        &self,
+        node: &Arc<tsox_frontend::ast::Node>,
+    ) -> Option<Arc<tsox_frontend::ast::Node>> { ::tsox_core::fntrace::enter("enclosing_function_of"); 
+        let mut cur = node.parent();
+        while let Some(n) = cur {
+            if matches!(
+                n.kind,
+                tsox_frontend::ast::SyntaxKind::FunctionDeclaration
+                    | tsox_frontend::ast::SyntaxKind::FunctionExpression
+                    | tsox_frontend::ast::SyntaxKind::ArrowFunction
+                    | tsox_frontend::ast::SyntaxKind::MethodDeclaration
+                    | tsox_frontend::ast::SyntaxKind::Constructor
+                    | tsox_frontend::ast::SyntaxKind::GetAccessor
+                    | tsox_frontend::ast::SyntaxKind::SetAccessor
+            ) {
+                return Some(n);
+            }
+            cur = n.parent();
+        }
+        None
+    }
+}

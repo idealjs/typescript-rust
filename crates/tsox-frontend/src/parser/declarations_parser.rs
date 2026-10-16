@@ -1,0 +1,328 @@
+#![allow(unused_imports)]
+
+use crate::parser::declarations::*;
+
+impl Parser {
+    pub(crate) fn parse_declaration_with_modifiers(
+        &mut self,
+        mut modifiers: Vec<(SyntaxKind, usize, usize)>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_declaration_with_modifiers"); 
+        let mut decorators: Vec<Arc<Node>> = Vec::new();
+        loop {
+            if self.token == SyntaxKind::AtToken {
+                decorators.push(self.parse_decorator());
+                continue;
+            }
+            if !matches!(
+                self.token,
+                SyntaxKind::ExportKeyword
+                    | SyntaxKind::DeclareKeyword
+                    | SyntaxKind::DefaultKeyword
+                    | SyntaxKind::AbstractKeyword
+                    | SyntaxKind::AsyncKeyword
+                    | SyntaxKind::ReadonlyKeyword
+                    | SyntaxKind::PublicKeyword
+                    | SyntaxKind::PrivateKeyword
+                    | SyntaxKind::ProtectedKeyword
+                    | SyntaxKind::StaticKeyword
+                    | SyntaxKind::ConstKeyword
+                    | SyntaxKind::AccessorKeyword
+                    | SyntaxKind::OverrideKeyword
+            ) {
+                break;
+            }
+
+            let mut s = self.scanner.clone();
+            s.scan();
+            let can_follow = if self.token == SyntaxKind::ConstKeyword {
+                s.token() == SyntaxKind::EnumKeyword
+            } else {
+                !s.has_preceding_line_break() && Self::token_can_follow_modifier(s.token())
+            };
+            if !can_follow {
+                break;
+            }
+            let kind = self.token;
+            let pos = self.token_pos();
+            let end = self.token_end();
+            self.next_token();
+            modifiers.push((kind, pos, end));
+        }
+
+        let pre_modifiers = modifiers.clone();
+        let modifiers = Some(if decorators.is_empty() {
+            self.make_modifier_list(modifiers)
+        } else {
+            self.make_modifier_list_with_decorators(modifiers, decorators)
+        });
+        // Go parseDeclaration：declare 修饰的声明在解析期间置 Ambient 上下文
+        let saved_ambient = self.ambient_context;
+        if modifiers
+            .as_ref()
+            .is_some_and(|m| m.flags().contains(ModifierFlags::Ambient))
+        {
+            self.ambient_context = true;
+        }
+        let result = match self.token {
+            SyntaxKind::FunctionKeyword => {
+                self.parse_function_declaration_with_modifiers(modifiers)
+            }
+            SyntaxKind::ClassKeyword => self.parse_class_declaration_with_modifiers(modifiers),
+            SyntaxKind::InterfaceKeyword => {
+                self.parse_interface_declaration_with_modifiers(modifiers)
+            }
+            SyntaxKind::TypeKeyword => self.parse_type_alias_declaration_with_modifiers(modifiers),
+            SyntaxKind::EnumKeyword => self.parse_enum_declaration_with_modifiers(modifiers),
+            SyntaxKind::NamespaceKeyword | SyntaxKind::ModuleKeyword => {
+                self.parse_namespace_declaration_with_modifiers(modifiers)
+            }
+            SyntaxKind::GlobalKeyword => self.parse_namespace_declaration_with_modifiers(modifiers),
+            SyntaxKind::VarKeyword | SyntaxKind::LetKeyword | SyntaxKind::ConstKeyword => {
+                self.parse_variable_statement_with_modifiers(modifiers)
+            }
+            // Go parseDeclarationWorker：export/declare 修饰后允许 using 与
+            // await using 声明（await 仅在 await using 形态时作声明头）
+            SyntaxKind::UsingKeyword => {
+                self.parse_variable_statement_with_modifiers(modifiers)
+            }
+            SyntaxKind::AwaitKeyword if self.is_await_using_declaration() => {
+                self.parse_variable_statement_with_modifiers(modifiers)
+            }
+            SyntaxKind::ImportKeyword => {
+                let pos = Self::declaration_start(&modifiers, self.token_pos());
+                self.parse_import_declaration_with_modifiers(pos, modifiers)
+            }
+            SyntaxKind::ExportKeyword => {
+                self.parse_export_declaration_with_pre(pre_modifiers)
+            }
+            _ => {
+                // Go parseDeclarationWorker：装饰器/修饰符后无声明 → 保留在
+                // MissingDeclaration（装饰器表达式仍供补全/诊断使用）
+                if modifiers.as_ref().is_some_and(|m| !m.nodes.is_empty()) {
+                    self.parse_error_at_current_token(
+                        tsox_core::diagnostics::DECLARATION_EXPECTED,
+                        &[],
+                    );
+                    // 起点含装饰器（Go finishNode(pos)），span 覆盖装饰器
+                    // 表达式，补全/诊断可定位其中的节点
+                    let start = modifiers
+                        .as_ref()
+                        .and_then(|m| m.nodes.first())
+                        .map(|n| n.pos())
+                        .unwrap_or_else(|| self.token_pos());
+                    let end = self.token_pos();
+                    Arc::new(Node::with_loc(
+                        SyntaxKind::MissingDeclaration,
+                        NodeData::MissingDeclaration(MissingDeclarationData { modifiers }),
+                        TextRange::new(start, end),
+                    ))
+                } else {
+                    self.parse_expression_statement()
+                }
+            }
+        };
+        self.ambient_context = saved_ambient;
+        result
+    }
+
+    pub(crate) fn parse_function_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_declaration"); 
+        self.parse_function_declaration_with_modifiers(None)
+    }
+
+    pub(crate) fn parse_function_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_declaration_with_modifiers"); 
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
+        self.next_token();
+        let asterisk_token = self.parse_optional_token(SyntaxKind::AsteriskToken);
+        let is_generator = asterisk_token.is_some();
+        let is_async = modifiers
+            .as_ref()
+            .map(|m| m.flags().contains(ModifierFlags::Async))
+            .unwrap_or(false);
+        let name = if modifiers
+            .as_ref()
+            .is_none_or(|m| !m.flags().contains(ModifierFlags::Default))
+            || self.is_binding_identifier()
+        {
+            Some(self.parse_binding_identifier_with_private_diagnostic(None))
+        } else {
+            None
+        };
+        let type_parameters = self.parse_optional_type_parameters();
+        let parameters = self.parse_parameter_list();
+        let type_node = self.parse_optional_return_type();
+        let body = if self.token == SyntaxKind::OpenBraceToken {
+            Some(self.parse_function_block(is_generator, is_async))
+        } else if self.can_parse_semicolon() {
+            self.parse_semicolon();
+            None
+        } else {
+            Some(self.parse_function_block(is_generator, is_async))
+        };
+        let end = body.as_ref().map_or(self.token_pos(), |b| b.end());
+        Arc::new(Node::with_loc(
+            SyntaxKind::FunctionDeclaration,
+            NodeData::FunctionDeclaration(FunctionDeclarationData {
+                modifiers,
+                asterisk_token,
+                name,
+                type_parameters,
+                parameters,
+                type_node,
+                full_signature: None,
+                body,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    pub(crate) fn parse_function_block(&mut self, is_generator: bool, is_async: bool) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_block"); 
+        self.parse_function_block_ex(is_generator, is_async, false)
+    }
+
+    pub(crate) fn parse_function_block_ex(
+        &mut self,
+        is_generator: bool,
+        is_async: bool,
+        ignore_missing_open_brace: bool,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_function_block_ex"); 
+        let saved_yield = self.yield_context;
+        let saved_await = self.await_context;
+        self.yield_context = is_generator;
+        self.await_context = is_async;
+        let block = self.parse_block_ex(ignore_missing_open_brace);
+        self.yield_context = saved_yield;
+        self.await_context = saved_await;
+        block
+    }
+
+    pub(crate) fn parse_class_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_declaration"); 
+        self.parse_class_declaration_with_modifiers(None)
+    }
+
+    pub(crate) fn parse_class_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_class_declaration_with_modifiers"); 
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
+        self.next_token();
+        let name = if self.is_binding_identifier() {
+            Some(self.parse_binding_identifier_with_private_diagnostic(None))
+        } else {
+            None
+        };
+        let type_parameters = self.parse_optional_type_parameters();
+        let heritage_clauses = self.parse_heritage_clauses();
+        let members = self.parse_class_members();
+        let end = self.node_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::ClassDeclaration,
+            NodeData::ClassDeclaration(ClassDeclarationData {
+                modifiers,
+                name,
+                type_parameters,
+                heritage_clauses,
+                members: Arc::new(members),
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    pub(crate) fn parse_interface_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_interface_declaration"); 
+        self.parse_interface_declaration_with_modifiers(None)
+    }
+
+    pub(crate) fn parse_interface_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_interface_declaration_with_modifiers"); 
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
+        self.next_token();
+        let name = self.parse_identifier();
+        let type_parameters = self.parse_optional_type_parameters();
+        let heritage_clauses = self.parse_heritage_clauses_is_interface(true);
+        self.expect(SyntaxKind::OpenBraceToken);
+        let members = self.parse_list(ParsingContext::TypeMembers, Parser::parse_type_member);
+        self.expect(SyntaxKind::CloseBraceToken);
+        let end = self.node_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::InterfaceDeclaration,
+            NodeData::InterfaceDeclaration(InterfaceDeclarationData {
+                modifiers,
+                name,
+                type_parameters,
+                heritage_clauses,
+                members: Arc::new(members),
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    pub(crate) fn parse_type_alias_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_alias_declaration"); 
+        self.parse_type_alias_declaration_with_modifiers(None)
+    }
+
+    pub(crate) fn parse_type_alias_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_type_alias_declaration_with_modifiers"); 
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
+        self.next_token();
+        if self.has_preceding_line_break() {
+            self.parse_error_at_current_token(
+                tsox_core::diagnostics::LINE_BREAK_NOT_PERMITTED_HERE,
+                &[],
+            );
+        }
+        let name = self.parse_identifier();
+        let type_parameters = self.parse_optional_type_parameters();
+        self.expect(SyntaxKind::EqualsToken);
+        let type_node = self.parse_type();
+        self.parse_semicolon();
+        let end = self.node_pos();
+        Arc::new(Node::with_loc(
+            SyntaxKind::TypeAliasDeclaration,
+            NodeData::TypeAliasDeclaration(TypeAliasDeclarationData {
+                modifiers,
+                name,
+                type_parameters,
+                type_node,
+            }),
+            TextRange::new(pos, end),
+        ))
+    }
+
+    pub(crate) fn parse_enum_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_enum_declaration"); 
+        self.parse_enum_declaration_with_modifiers(None)
+    }
+
+    pub(crate) fn parse_enum_declaration_with_modifiers(
+        &mut self,
+        modifiers: Option<Arc<ModifierList>>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_enum_declaration_with_modifiers"); 
+        let pos = Self::declaration_start(&modifiers, self.token_pos());
+        self.next_token();
+        let name = self.parse_identifier();
+        self.expect(SyntaxKind::OpenBraceToken);
+        let members =
+            self.parse_delimited_list(ParsingContext::EnumMembers, Self::parse_enum_member);
+        self.expect(SyntaxKind::CloseBraceToken);
+        let end = self.node_pos();
+        Arc::new(Node::with_loc_flags(
+            SyntaxKind::EnumDeclaration,
+            NodeData::EnumDeclaration(EnumDeclarationData {
+                modifiers,
+                name,
+                members: Arc::new(members),
+            }),
+            TextRange::new(pos, end),
+            self.context_flags_now(),
+        ))
+    }
+
+    pub(crate) fn parse_namespace_declaration(&mut self) -> Arc<Node> { ::tsox_core::fntrace::enter("parse_namespace_declaration");
+        self.parse_namespace_declaration_with_modifiers(None)
+    }
+}

@@ -1,0 +1,468 @@
+#![allow(unused_imports)]
+
+use crate::checker::flow_impl_chunk::*;
+use tsox_frontend::ast::is_function_expression_or_arrow_function;
+use tsox_frontend::ast::mig::m3g_2::is_object_literal_or_class_expression_method_or_accessor;
+
+impl Checker {
+    pub fn get_narrowed_type_of_symbol(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        flow: Option<&Arc<FlowNode>>,
+        location: Option<&Arc<Node>>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowed_type_of_symbol");
+        let declared = self.get_type_of_symbol(symbol);
+        self.get_narrowed_type_of_symbol_with_declared(symbol, flow, declared, location, None)
+    }
+
+    pub fn get_narrowed_type_of_symbol_with_declared(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        flow: Option<&Arc<FlowNode>>,
+        declared: Arc<Type>,
+        location: Option<&Arc<Node>>,
+        initial_override: Option<Arc<Type>>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowed_type_of_symbol_with_declared");
+        let frame_type = self
+            .logical_rhs_narrowing_frames
+            .iter()
+            .rev()
+            .find(|(s, _)| Arc::ptr_eq(s, symbol))
+            .map(|(_, t)| Arc::clone(t));
+        let Some(flow) = flow else {
+            return frame_type.unwrap_or(declared);
+        };
+        if self.flow_analysis_disabled {
+            return frame_type.unwrap_or(declared);
+        }
+        let overridden = frame_type.is_none() && initial_override.is_some();
+        let declared = match frame_type {
+            Some(t) => t,
+            None => declared,
+        };
+        let destructured = if let Some(location) = location {
+            self.narrow_destructured_symbol_type(symbol, location, flow)
+        } else {
+            None
+        };
+        let overridden = overridden && destructured.is_none();
+        let declared = destructured.unwrap_or(declared);
+        let initial = match (overridden.then_some(()), initial_override) {
+            (Some(()), Some(t)) if !Arc::ptr_eq(&t, &declared) => t,
+            _ => Arc::clone(&declared),
+        };
+        let target = FlowRef::Symbol(Arc::clone(symbol));
+        // initial≠declared 的查询须与 initial=declared 的历史缓存条目区分
+        //（键第三参实为 declared，initial 不参与），否则检查期以
+        // (symbol, flow, auto) 落的条目会把发射期 initial=undefined 的查询
+        // 短路回 declared
+        let mut key = self.flow_cache_key(&target, flow, &declared);
+        if initial.id != declared.id {
+            key ^= (initial.id as u64).rotate_left(7);
+        }
+        let cached_hit = self.flow_type_cache.get(&key).cloned();
+        if let Some(cached) = cached_hit {
+            if self.flow_type_cache_inflight.contains(&key) {
+                let open_loop_types = self
+                    .flow_loop_stack
+                    .iter()
+                    .rev()
+                    .find(|info| !info.types.is_empty())
+                    .map(|info| info.types.clone());
+                if let Some(types) = open_loop_types {
+                    return self.get_union_type(types);
+                }
+                return Arc::clone(&declared);
+            }
+            return cached;
+        }
+        self.flow_type_cache.insert(key, Arc::clone(&declared));
+        self.flow_type_cache_inflight.insert(key);
+        let mut query = FlowQuery {
+            reference: location.map(Arc::clone),
+            flow_container: location.map(|loc| {
+                self.extended_flow_container(symbol, loc, &declared)
+            }),
+            ..FlowQuery::default()
+        };
+        let narrowed = self.type_at_flow_node(&declared, &initial, flow, &target, 0, &mut query);
+        self.flow_type_cache_inflight.remove(&key);
+        self.flow_type_cache.insert(key, Arc::clone(&narrowed));
+        narrowed
+    }
+
+    fn extended_flow_container(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        reference: &Arc<Node>,
+        declared: &Arc<Type>,
+    ) -> Arc<Node> { ::tsox_core::fntrace::enter("extended_flow_container"); 
+        let Some(value_declaration) = symbol.value_declaration.clone() else {
+            return self.get_control_flow_container(reference);
+        };
+        let declaration_container = self.get_control_flow_container(&value_declaration);
+        let mut flow_container = self.get_control_flow_container(reference);
+        while !Arc::ptr_eq(&flow_container, &declaration_container)
+            && (is_function_expression_or_arrow_function(&flow_container)
+                || is_object_literal_or_class_expression_method_or_accessor(
+                    &flow_container,
+                ))
+            && (self.is_constant_variable(symbol)
+                && !Arc::ptr_eq(declared, &self.auto_array_type())
+                || self.is_parameter_or_mutable_local_variable(symbol)
+                    && self.is_past_last_assignment(symbol, Some(reference)))
+        {
+            flow_container = self.get_control_flow_container(&flow_container);
+        }
+        flow_container
+    }
+
+    pub fn get_narrowable_type_for_reference(
+        &mut self,
+        t: &Arc<Type>,
+        node: &Arc<Node>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_narrowable_type_for_reference");
+        if self.narrowable_reference_query_stack.len() >= 4 {
+            return Arc::clone(t);
+        }
+        if t.flags.intersects(TypeFlags::Any | TypeFlags::Unknown) {
+            return Arc::clone(t);
+        }
+        let generic_with_union = self.has_generic_with_union_constraint(t);
+        if !generic_with_union {
+            return Arc::clone(t);
+        }
+        if self.is_constraint_position_for_reference(t, node)
+            || self.has_contextual_type_with_no_generic_types(node)
+        {
+            let constituents = self.constituent_types(t);
+            let mapped: Vec<Arc<Type>> = constituents
+                .into_iter()
+                .map(|c| self.get_base_constraint_or_type_resolved(&c))
+                .collect();
+            if mapped.len() == 1 {
+                return mapped.into_iter().next().expect("exactly one");
+            }
+            return self.get_union_type(mapped);
+        }
+        Arc::clone(t)
+    }
+
+    /// Go getBaseConstraintOfType（checker.go:29064-29074）：InstantiableNonPrimitive
+    /// /UnionOrIntersection/TemplateLiteral/StringMapping/Index 位或泛型 tuple 命中
+    /// 时经 getResolvedBaseConstraint 现算（含 IndexedAccess 的
+    /// isMappedTypeGenericIndexedAccess → substituteIndexedMappedType 分支，
+    /// checker.go:29181-29196），noConstraint/circular 视为无约束。
+    /// 现算面收敛：仅 IndexedAccess 形态走现算（本仓 compute 的
+    /// conditional/substitution/type-parameter 臂尚有保真缺口，narrowable
+    /// 全量激活触发 awaitedType/correlatedUnions panic 与
+    /// recursiveConditionalTypes 深递归崩溃），其余形态维持缓存读语义
+    pub fn get_base_constraint_of_type_resolved(&mut self, t: &Arc<Type>) -> Option<Arc<Type>> {
+        if !t.flags.intersects(TypeFlags::IndexedAccess) {
+            return self.get_base_constraint_of_type(t);
+        }
+        let constraint = self.get_resolved_base_constraint(t, &[]);
+        let no_constraint = self.no_constraint_type();
+        let circular = self.circular_constraint_type();
+        if !Arc::ptr_eq(&constraint, &no_constraint) && !Arc::ptr_eq(&constraint, &circular) {
+            return Some(constraint);
+        }
+        None
+    }
+
+    /// Go getBaseConstraintOrType（checker.go:29055-29062）
+    pub fn get_base_constraint_or_type_resolved(&mut self, t: &Arc<Type>) -> Arc<Type> {
+        self.get_base_constraint_of_type_resolved(t).unwrap_or_else(|| Arc::clone(t))
+    }
+
+    fn has_generic_with_union_constraint(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_generic_with_union_constraint");
+        if t.flags.contains(TypeFlags::Intersection) {
+            if let crate::checker::types::TypeData::Intersection(i) = &t.data {
+                return i
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|c| self.has_generic_with_union_constraint(c));
+            }
+            return false;
+        }
+        if t.flags.contains(TypeFlags::Union) {
+            if let crate::checker::types::TypeData::Union(u) = &t.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|c| self.has_generic_with_union_constraint(c));
+            }
+            return false;
+        }
+        t.flags.intersects(TYPE_FLAGS_INSTANTIABLE)
+            && self
+                .get_base_constraint_of_type_resolved(t)
+                .is_some_and(|c| {
+                    c.flags.intersects(TypeFlags::Union | TypeFlags::Null | TypeFlags::Undefined)
+                })
+    }
+
+    fn is_constraint_position_for_reference(&mut self, t: &Arc<Type>, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_constraint_position_for_reference"); 
+        let Some(parent) = node.parent() else {
+            return false;
+        };
+        match parent.kind {
+            SyntaxKind::PropertyAccessExpression | SyntaxKind::QualifiedName => true,
+            SyntaxKind::CallExpression | SyntaxKind::NewExpression => match &parent.data {
+                tsox_frontend::ast::NodeData::CallExpression(d) => {
+                    Arc::ptr_eq(&d.expression, node)
+                }
+                tsox_frontend::ast::NodeData::NewExpression(d) => Arc::ptr_eq(&d.expression, node),
+                _ => false,
+            },
+            SyntaxKind::ElementAccessExpression => {
+                let is_expr = match &parent.data {
+                    tsox_frontend::ast::NodeData::ElementAccessExpression(d) => {
+                        Arc::ptr_eq(&d.expression, node)
+                    }
+                    _ => false,
+                };
+                if !is_expr {
+                    return false;
+                }
+                let generic_object = self.constituent_types(t).iter().all(|c| {
+                    c.flags.intersects(TYPE_FLAGS_INSTANTIABLE)
+                        && !self
+                            .get_base_constraint_of_type_resolved(c)
+                            .is_some_and(|bc| {
+                                bc.flags.intersects(TypeFlags::Null | TypeFlags::Undefined)
+                            })
+                });
+                if !generic_object {
+                    return true;
+                }
+                let arg_generic = match &parent.data {
+                    tsox_frontend::ast::NodeData::ElementAccessExpression(d) => self
+                        .get_type_of_node(&d.argument_expression)
+                        .flags
+                        .intersects(TYPE_FLAGS_INSTANTIABLE),
+                    _ => false,
+                };
+                !arg_generic
+            }
+            _ => false,
+        }
+    }
+
+    fn has_contextual_type_with_no_generic_types(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_contextual_type_with_no_generic_types"); 
+        if !matches!(node.kind, SyntaxKind::Identifier | SyntaxKind::PropertyAccessExpression | SyntaxKind::ElementAccessExpression) {
+            return false;
+        }
+        if self.narrowable_reference_query_stack.contains(&node.id()) {
+            return false;
+        }
+        self.narrowable_reference_query_stack.push(node.id());
+        let result = self.has_contextual_type_with_no_generic_types_inner(node);
+        self.narrowable_reference_query_stack.pop();
+        result
+    }
+
+    fn has_contextual_type_with_no_generic_types_inner(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("has_contextual_type_with_no_generic_types_inner"); 
+        if let Some(parent) = node.parent()
+            && let tsox_frontend::ast::NodeData::VariableDeclaration(d) = &parent.data
+            && d.initializer.as_ref().is_some_and(|init| Arc::ptr_eq(init, node))
+            && matches!(
+                d.name.kind,
+                SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+            )
+            && pattern_element_count(&d.name) > 0
+        {
+            return true;
+        }
+        let Some(contextual) = self.get_contextual_type(node, ContextFlags::None) else {
+            return false;
+        };
+        !self
+            .constituent_types(&contextual)
+            .iter()
+            .any(|c| c.flags.intersects(TYPE_FLAGS_INSTANTIABLE))
+    }
+
+    pub fn get_flow_type_of_reference(
+        &mut self,
+        reference: &Arc<Node>,
+        declared: &Arc<Type>,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_flow_type_of_reference"); 
+        self.get_flow_type_of_reference_ex(reference, declared, None, None)
+    }
+
+    pub(crate) fn type_is_never_after_removing_nullable(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_is_never_after_removing_nullable"); 
+        if !self.strict_null_checks {
+            return false;
+        }
+        if t.is_union() {
+            return self
+                .constituent_types(t)
+                .iter()
+                .all(|c| c.flags.intersects(TypeFlags::Null | TypeFlags::Undefined));
+        }
+        t.flags.intersects(TypeFlags::Null | TypeFlags::Undefined)
+    }
+
+    pub fn get_definite_assignment_flow_type(
+        &mut self,
+        symbol: &Arc<Symbol>,
+        node: &Arc<Node>,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_definite_assignment_flow_type"); 
+        if self.flow_analysis_disabled {
+            return None;
+        }
+        let flow = self
+            .program
+            .symbol_map()
+            .flow_node_of(node)
+            .map(Arc::clone)?;
+        let declared = self.get_type_of_symbol(symbol);
+        let undefined = self.undefined_type();
+        let initial = if self.type_contains_undefined_local(&declared) {
+            Arc::clone(&declared)
+        } else {
+            self.get_union_type(vec![Arc::clone(&declared), undefined])
+        };
+        let target = FlowRef::Symbol(Arc::clone(symbol));
+        let key = self.flow_cache_key(&target, &flow, &initial);
+        if let Some(cached) = self.flow_type_cache.get(&key) {
+            return Some(Arc::clone(cached));
+        }
+        self.flow_type_cache.insert(key, Arc::clone(&declared));
+        let mut query = FlowQuery {
+            reference: Some(Arc::clone(node)),
+            ..FlowQuery::default()
+        };
+        let narrowed = self.type_at_flow_node(&declared, &initial, &flow, &target, 0, &mut query);
+        self.flow_type_cache.insert(key, Arc::clone(&narrowed));
+        Some(narrowed)
+    }
+
+    pub(crate) fn type_contains_undefined_local(&self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("type_contains_undefined_local"); 
+        if t.flags.contains(TypeFlags::Undefined) {
+            return true;
+        }
+        if t.is_union() {
+            if let TypeData::Union(u) = &t.data {
+                return u
+                    .union_or_intersection
+                    .types
+                    .iter()
+                    .any(|c| c.flags.contains(TypeFlags::Undefined));
+            }
+        }
+        false
+    }
+
+    pub(crate) fn flow_cache_key(
+        &self,
+        target: &FlowRef,
+        flow: &Arc<FlowNode>,
+        initial: &Arc<Type>,
+    ) -> u64 { ::tsox_core::fntrace::enter("flow_cache_key"); 
+        let ref_part = match target {
+            FlowRef::Symbol(symbol) => symbol.id(),
+            FlowRef::Node(node) => node.id(),
+        };
+        let flow_ptr = Arc::as_ptr(flow) as *const FlowNode as u64;
+        let initial_ptr = initial.id as u64;
+
+        (ref_part.rotate_left(17) ^ flow_ptr).rotate_left(29) ^ initial_ptr
+    }
+
+    pub(crate) fn type_at_flow_node(
+        &mut self,
+        declared: &Arc<Type>,
+        initial: &Arc<Type>,
+        flow: &Arc<FlowNode>,
+        target: &FlowRef,
+        depth: u32,
+        query: &mut FlowQuery,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("type_at_flow_node"); 
+        let key = Arc::as_ptr(flow) as usize;
+        if let Some(t) = query.memo.get(&key) {
+            return Arc::clone(t);
+        }
+        if !query.on_path.insert(key) {
+            for (_, types) in query.loop_stack.iter().rev() {
+                if !types.is_empty() {
+                    if types.len() == 1 {
+                        return Arc::clone(&types[0]);
+                    }
+                    return self.get_union_type(types.clone());
+                }
+            }
+            query.memo.insert(key, Arc::clone(initial));
+            return Arc::clone(initial);
+        }
+        let result = if depth >= FLOW_MAX_DEPTH {
+            if !self.flow_analysis_disabled {
+                self.flow_analysis_disabled = true;
+                self.report_flow_control_error(target);
+            }
+
+            self.error_type()
+        } else {
+            self.compute_type_at_flow_node(declared, initial, flow, target, depth, query)
+        };
+        query.on_path.remove(&key);
+        query.memo.insert(key, Arc::clone(&result));
+        result
+    }
+
+    pub(crate) fn report_flow_control_error(&mut self, target: &FlowRef) { ::tsox_core::fntrace::enter("report_flow_control_error"); 
+        use tsox_frontend::ast::SyntaxKind;
+        let Some(anchor) = target.anchor_node() else {
+            return;
+        };
+        let mut block: Option<Arc<Node>> = None;
+        let mut cur = anchor.parent();
+        while let Some(n) = cur {
+            let is_function_or_module_block = match n.kind {
+                SyntaxKind::SourceFile | SyntaxKind::ModuleBlock => true,
+                SyntaxKind::Block => n
+                    .parent()
+                    .as_ref()
+                    .is_some_and(|p| tsox_frontend::ast::utilities::is_function_like_kind(p.kind)),
+                _ => false,
+            };
+            if is_function_or_module_block {
+                block = Some(Arc::clone(&n));
+                break;
+            }
+            cur = n.parent();
+        }
+        let Some(block) = block else { return };
+
+        let mut loc = block.loc;
+        if let Some(stmts) = match &block.data {
+            tsox_frontend::ast::NodeData::SourceFile(d) => Some(&d.statements),
+            tsox_frontend::ast::NodeData::ModuleBlock(d) => Some(&d.statements),
+            tsox_frontend::ast::NodeData::Block(d) => Some(&d.statements),
+            _ => None,
+        } && let Some(first) = stmts.nodes.first()
+        {
+            loc = tsox_core::core::text::TextRange::new(
+                first.loc.pos as usize,
+                first.loc.pos as usize + 1,
+            );
+        }
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            loc,
+            tsox_core::diagnostics::messages_generated::
+                THE_CONTAINING_FUNCTION_OR_MODULE_BODY_IS_TOO_LARGE_FOR_CONTROL_FLOW_ANALYSIS,
+            Vec::new(),
+        ));
+    }
+}
+
+fn pattern_element_count(pattern: &Arc<Node>) -> usize { ::tsox_core::fntrace::enter("pattern_element_count"); 
+    match &pattern.data {
+        tsox_frontend::ast::NodeData::BindingPattern(d) => d.elements.len(),
+        _ => 0,
+    }
+}

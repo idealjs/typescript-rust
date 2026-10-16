@@ -1,0 +1,156 @@
+use crate::ast::*;
+use std::sync::Arc;
+
+pub fn find_ancestor<F>(node: &Arc<Node>, callback: F) -> Option<Arc<Node>>
+where
+    F: Fn(&Node) -> bool,
+{ ::tsox_core::fntrace::enter("find_ancestor"); 
+    let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
+    while let Some(n) = current {
+        if callback(&n) {
+            return Some(n);
+        }
+        current = n.parent();
+    }
+    None
+}
+
+pub fn find_ancestor_kind(node: &Arc<Node>, kind: SyntaxKind) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_ancestor_kind"); 
+    find_ancestor(node, |n| n.kind == kind)
+}
+
+pub fn get_source_file_of_node(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_source_file_of_node"); 
+    find_ancestor_kind(node, SyntaxKind::SourceFile)
+}
+
+pub fn is_node_descendant_of(node: &Arc<Node>, ancestor: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_node_descendant_of"); 
+    let mut current: Option<Arc<Node>> = Some(Arc::clone(node));
+    while let Some(n) = current {
+        if Arc::ptr_eq(&n, ancestor) {
+            return true;
+        }
+        current = n.parent();
+    }
+    false
+}
+
+pub fn get_root_declaration(node: &Arc<Node>) -> Arc<Node> { ::tsox_core::fntrace::enter("get_root_declaration"); 
+    let mut current = Arc::clone(node);
+    while current.kind == SyntaxKind::BindingElement {
+        let Some(parent) = current.parent() else {
+            break;
+        };
+        match parent.parent() {
+            Some(grandparent) => current = Arc::clone(&grandparent),
+            None => break,
+        }
+    }
+    current
+}
+
+pub fn get_combined_modifier_flags(node: &Arc<Node>) -> ModifierFlags { ::tsox_core::fntrace::enter("get_combined_modifier_flags"); 
+    get_combined_flags(node, |n| n.syntactic_modifier_flags())
+}
+
+pub fn get_combined_node_flags(node: &Arc<Node>) -> NodeFlags { ::tsox_core::fntrace::enter("get_combined_node_flags"); 
+    get_combined_flags(node, |n| n.flags)
+}
+
+fn get_combined_flags<F, T: std::ops::BitOr<Output = T>>(node: &Arc<Node>, get_flags: F) -> T
+where
+    F: Fn(&Node) -> T,
+{ ::tsox_core::fntrace::enter("get_combined_flags"); 
+    let root = get_root_declaration(node);
+    let mut flags = get_flags(&root);
+    let mut current = if root.kind == SyntaxKind::VariableDeclaration {
+        root.parent()
+    } else {
+        None
+    };
+    if let Some(parent) = &current {
+        if parent.kind == SyntaxKind::VariableDeclarationList {
+            flags = flags | get_flags(parent);
+            current = parent.parent();
+        }
+    }
+    if let Some(parent) = &current {
+        if parent.kind == SyntaxKind::VariableStatement {
+            flags = flags | get_flags(parent);
+        }
+    }
+    flags
+}
+
+pub fn get_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_name_of_declaration"); 
+    let non_assigned = get_non_assigned_name_of_declaration(declaration);
+    if non_assigned.is_some() {
+        return non_assigned;
+    }
+    if is_function_expression(declaration)
+        || is_arrow_function(declaration)
+        || is_class_expression(declaration)
+    {
+        return get_assigned_name(declaration);
+    }
+    None
+}
+
+pub(crate) fn get_non_assigned_name_of_declaration(declaration: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_non_assigned_name_of_declaration"); 
+    match declaration.kind {
+        SyntaxKind::ExportAssignment => {
+            if let Some(expr) = declaration.expression() {
+                if is_identifier(expr) {
+                    return Some(Arc::clone(expr));
+                }
+            }
+            None
+        }
+        _ => declaration.name().map(Arc::clone),
+    }
+}
+
+fn get_assigned_name(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("get_assigned_name");
+    let parent = node.parent()?;
+    match parent.kind {
+        SyntaxKind::PropertyAssignment => parent.name().map(Arc::clone),
+        SyntaxKind::BindingElement => parent.name().map(Arc::clone),
+        SyntaxKind::BinaryExpression => {
+            let NodeData::BinaryExpression(d) = &parent.data else {
+                return None;
+            };
+            if !Arc::ptr_eq(node, &d.right) {
+                return None;
+            }
+            match d.left.kind {
+                SyntaxKind::Identifier => Some(Arc::clone(&d.left)),
+                SyntaxKind::PropertyAccessExpression => {
+                    let NodeData::PropertyAccessExpression(p) = &d.left.data else {
+                        return None;
+                    };
+                    Some(Arc::clone(&p.name))
+                }
+                SyntaxKind::ElementAccessExpression => {
+                    let NodeData::ElementAccessExpression(e) = &d.left.data else {
+                        return None;
+                    };
+                    let arg = skip_parentheses(&e.argument_expression);
+                    if crate::ast::utilities_expressions::is_string_or_numeric_literal_like(&arg) {
+                        Some(arg)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            }
+        }
+        SyntaxKind::VariableDeclaration => {
+            if let NodeData::VariableDeclaration(d) = &parent.data {
+                if is_identifier(&d.name) {
+                    return Some(Arc::clone(&d.name));
+                }
+            }
+            None
+        }
+        _ => None,
+    }
+}

@@ -1,0 +1,788 @@
+#![allow(unused_imports)]
+
+use crate::checker::grammarchecks::*;
+
+impl Checker {
+    pub fn check_grammar_jsx_element(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_jsx_element"); 
+        let tag_name = match crate::checker::jsx::jsx_tag_name(node) {
+            Some(t) => t,
+            None => return false,
+        };
+
+        if self.check_grammar_jsx_name(&tag_name) {
+            return true;
+        }
+
+        let type_args: Option<Vec<Arc<Node>>> = match &node.data {
+            NodeData::JsxOpeningElement(data) => data
+                .type_arguments
+                .as_ref()
+                .map(|l| l.iter().cloned().collect()),
+            NodeData::JsxSelfClosingElement(data) => data
+                .type_arguments
+                .as_ref()
+                .map(|l| l.iter().cloned().collect()),
+            _ => None,
+        };
+        if let Some(args) = type_args {
+            if !args.is_empty() {
+                let count = args.len().to_string();
+                return self.grammar_error_on_node_with_args(
+                    node,
+                    &EXPECTED_0_TYPE_ARGUMENTS_BUT_GOT_1,
+                    &["0".to_string(), count],
+                );
+            }
+        }
+
+        let attrs = match crate::checker::jsx::jsx_attributes(node) {
+            Some(a) => a,
+            None => return false,
+        };
+        let properties: Vec<Arc<Node>> = match &attrs.data {
+            NodeData::JsxAttributes(data) => data.properties.iter().cloned().collect(),
+            _ => return false,
+        };
+
+        let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for attr in &properties {
+            if attr.kind == SyntaxKind::JsxSpreadAttribute {
+                continue;
+            }
+            let (name_node, initializer) = match &attr.data {
+                NodeData::JsxAttribute(d) => (Arc::clone(&d.name), d.initializer.clone()),
+                _ => continue,
+            };
+            let text = name_node.text().to_string();
+            if !seen.insert(text.clone()) {
+                return self.grammar_error_on_node(
+                    &name_node,
+                    &JSX_ELEMENTS_CANNOT_HAVE_MULTIPLE_ATTRIBUTES_WITH_THE_SAME_NAME,
+                );
+            }
+            if let Some(init) = initializer {
+                if init.kind == SyntaxKind::JsxExpression {
+                    if let NodeData::JsxExpression(d) = &init.data {
+                        if d.expression.is_none() {
+                            return self.grammar_error_on_node(
+                                &init,
+                                &JSX_ATTRIBUTES_MUST_ONLY_BE_ASSIGNED_A_NON_EMPTY_EXPRESSION,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        false
+    }
+
+    pub fn check_grammar_jsx_name(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_jsx_name"); 
+        if node.kind == SyntaxKind::PropertyAccessExpression {
+            if let NodeData::PropertyAccessExpression(data) = &node.data {
+                let expr = &data.expression;
+                if is_jsx_namespaced_name(expr) {
+                    return self.grammar_error_on_node(
+                        expr,
+                        &JSX_PROPERTY_ACCESS_EXPRESSIONS_CANNOT_INCLUDE_JSX_NAMESPACE_NAMES,
+                    );
+                }
+            }
+        }
+
+        if is_jsx_namespaced_name(node) && self.is_jsx_transform_enabled() {
+            let namespace_text = match &node.data {
+                NodeData::JsxNamespacedName(data) => data.namespace.text().to_string(),
+                _ => String::new(),
+            };
+            if !crate::checker::jsx::is_intrinsic_jsx_name(&namespace_text) {
+                return self.grammar_error_on_node(
+                    node,
+                    &REACT_COMPONENTS_CANNOT_INCLUDE_JSX_NAMESPACE_NAMES,
+                );
+            }
+        }
+        false
+    }
+
+    pub fn check_grammar_jsx_expression(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_jsx_expression"); 
+        let expr = match &node.data {
+            NodeData::JsxExpression(data) => &data.expression,
+            _ => return false,
+        };
+        let Some(expr) = expr else { return false };
+
+        if is_comma_sequence(expr) {
+            return self.grammar_error_on_node(
+                expr,
+                &JSX_EXPRESSIONS_MAY_NOT_USE_THE_COMMA_OPERATOR_DID_YOU_MEAN_TO_WRITE_AN_ARRAY,
+            );
+        }
+        false
+    }
+
+    pub(crate) fn is_jsx_transform_enabled(&self) -> bool { ::tsox_core::fntrace::enter("is_jsx_transform_enabled"); 
+        self.compiler_options.jsx != tsox_core::core::compiler_options::JsxEmit::None
+    }
+
+    pub fn grammar_error_on_node_skipped_on_no_emit(
+        &mut self,
+        node: &Arc<Node>,
+        message: &Message,
+    ) -> bool { ::tsox_core::fntrace::enter("grammar_error_on_node_skipped_on_no_emit"); 
+        self.grammar_error_on_node(node, message)
+    }
+
+    pub fn check_grammar_regular_expression_literal(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_regular_expression_literal"); 
+        false
+    }
+
+    pub fn check_grammar_private_identifier_expression(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_private_identifier_expression"); 
+        false
+    }
+
+    pub fn check_grammar_mapped_type(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_mapped_type"); 
+        false
+    }
+
+    pub fn check_grammar_decorator(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_decorator"); 
+        false
+    }
+
+    pub fn check_grammar_export_declaration(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_export_declaration"); 
+        false
+    }
+
+    pub fn check_grammar_module_element_context(
+        &mut self,
+        _node: &Arc<Node>,
+        _error_message: &Message,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_module_element_context"); 
+        false
+    }
+
+    pub fn report_obvious_modifier_errors(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("report_obvious_modifier_errors"); 
+        let Some(modifier) = self.find_first_illegal_modifier(node) else {
+            return false;
+        };
+        self.grammar_error_on_first_token(&modifier, &MODIFIERS_CANNOT_APPEAR_HERE)
+    }
+
+    fn modifier_nodes_of(node: &Arc<Node>) -> Vec<Arc<Node>> { ::tsox_core::fntrace::enter("modifier_nodes_of"); 
+        node.modifiers()
+            .map(|ml| ml.list.nodes.iter().cloned().collect())
+            .unwrap_or_default()
+    }
+
+    fn first_modifier(node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("first_modifier"); 
+        Self::modifier_nodes_of(node)
+            .into_iter()
+            .find(|m| m.kind != SyntaxKind::Decorator)
+    }
+
+    pub fn find_first_modifier_except(
+        &self,
+        node: &Arc<Node>,
+        allowed_modifier: SyntaxKind,
+    ) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_modifier_except"); 
+        Self::modifier_nodes_of(node)
+            .into_iter()
+            .find(|m| m.kind != SyntaxKind::Decorator && m.kind != allowed_modifier)
+    }
+
+    pub fn find_first_illegal_modifier(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_illegal_modifier"); 
+        match node.kind {
+            SyntaxKind::GetAccessor
+            | SyntaxKind::SetAccessor
+            | SyntaxKind::Constructor
+            | SyntaxKind::PropertyDeclaration
+            | SyntaxKind::PropertySignature
+            | SyntaxKind::MethodDeclaration
+            | SyntaxKind::MethodSignature
+            | SyntaxKind::IndexSignature
+            | SyntaxKind::ModuleDeclaration
+            | SyntaxKind::ImportDeclaration
+            | SyntaxKind::ImportEqualsDeclaration
+            | SyntaxKind::ExportDeclaration
+            | SyntaxKind::ExportAssignment
+            | SyntaxKind::FunctionExpression
+            | SyntaxKind::ArrowFunction
+            | SyntaxKind::Parameter
+            | SyntaxKind::TypeParameter
+            | SyntaxKind::JSTypeAliasDeclaration => None,
+            SyntaxKind::ClassStaticBlockDeclaration
+            | SyntaxKind::PropertyAssignment
+            | SyntaxKind::ShorthandPropertyAssignment
+            | SyntaxKind::NamespaceExportDeclaration
+            | SyntaxKind::MissingDeclaration => Self::first_modifier(node),
+            _ => {
+                if node.parent().is_some_and(|p| {
+                    matches!(p.kind, SyntaxKind::ModuleBlock | SyntaxKind::SourceFile)
+                }) {
+                    return None;
+                }
+                match node.kind {
+                    SyntaxKind::FunctionDeclaration => {
+                        self.find_first_modifier_except(node, SyntaxKind::AsyncKeyword)
+                    }
+                    SyntaxKind::ClassDeclaration | SyntaxKind::ConstructorType => {
+                        self.find_first_modifier_except(node, SyntaxKind::AbstractKeyword)
+                    }
+                    SyntaxKind::ClassExpression
+                    | SyntaxKind::InterfaceDeclaration
+                    | SyntaxKind::TypeAliasDeclaration => Self::first_modifier(node),
+                    SyntaxKind::VariableStatement => {
+                        let is_using = matches!(
+                            &node.data,
+                            NodeData::VariableStatement(d)
+                                if d.declaration_list.flags.contains(NodeFlags::Using)
+                        );
+                        if is_using {
+                            self.find_first_modifier_except(node, SyntaxKind::AwaitKeyword)
+                        } else {
+                            Self::first_modifier(node)
+                        }
+                    }
+                    SyntaxKind::EnumDeclaration => {
+                        self.find_first_modifier_except(node, SyntaxKind::ConstKeyword)
+                    }
+                    _ => None,
+                }
+            }
+        }
+    }
+
+    pub fn report_obvious_decorator_errors(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("report_obvious_decorator_errors"); 
+        let Some(decorator) = self.find_first_illegal_decorator(node) else {
+            return false;
+        };
+        self.grammar_error_on_first_token(&decorator, &DECORATORS_ARE_NOT_VALID_HERE)
+    }
+
+    pub fn find_first_illegal_decorator(&self, node: &Arc<Node>) -> Option<Arc<Node>> { ::tsox_core::fntrace::enter("find_first_illegal_decorator"); 
+        // Go ast.CanHaveIllegalDecorators
+        let can_have_illegal = matches!(
+            node.kind,
+            SyntaxKind::PropertyAssignment
+                | SyntaxKind::ShorthandPropertyAssignment
+                | SyntaxKind::FunctionDeclaration
+                | SyntaxKind::Constructor
+                | SyntaxKind::IndexSignature
+                | SyntaxKind::ClassStaticBlockDeclaration
+                | SyntaxKind::MissingDeclaration
+                | SyntaxKind::VariableStatement
+                | SyntaxKind::InterfaceDeclaration
+                | SyntaxKind::TypeAliasDeclaration
+                | SyntaxKind::EnumDeclaration
+                | SyntaxKind::ModuleDeclaration
+                | SyntaxKind::ImportEqualsDeclaration
+                | SyntaxKind::ImportDeclaration
+                | SyntaxKind::JSImportDeclaration
+        );
+        if !can_have_illegal {
+            return None;
+        }
+        Self::modifier_nodes_of(node)
+            .into_iter()
+            .find(|m| m.kind == SyntaxKind::Decorator)
+    }
+
+    pub fn check_grammar_async_modifier(
+        &mut self,
+        _node: &Arc<Node>,
+        _async_modifier: &Arc<Node>,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_async_modifier"); 
+        false
+    }
+
+    pub fn check_grammar_for_disallowed_trailing_comma(
+        &mut self,
+        _list: &tsox_frontend::ast::NodeList,
+        _diag: &Message,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_disallowed_trailing_comma"); 
+        false
+    }
+
+    pub fn check_grammar_type_parameter_list(
+        &mut self,
+        _type_parameters: &tsox_frontend::ast::NodeList,
+        _file: &Arc<tsox_frontend::ast::SourceFile>,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_type_parameter_list"); 
+        false
+    }
+
+    pub fn check_grammar_for_use_strict_simple_parameter_list(
+        &mut self,
+        _node: &Arc<Node>,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_use_strict_simple_parameter_list"); 
+        false
+    }
+
+    pub fn check_grammar_function_like_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_function_like_declaration"); 
+        use crate::checker::types::NodeCheckFlags;
+        if self
+            .node_links
+            .get_or_default(node)
+            .flags
+            .contains(NodeCheckFlags::FunctionLikeGrammarChecked)
+        {
+            return false;
+        }
+        self.node_links
+            .get_or_default(node)
+            .flags
+            .insert(NodeCheckFlags::FunctionLikeGrammarChecked);
+        let file = self
+            .get_source_file_of_node(node)
+            .or_else(|| self.current_file.clone());
+        let (type_parameters, parameters) = function_like_data_lists(node);
+        self.check_grammar_modifiers(node)
+            || match (&file, &type_parameters) {
+                (Some(file), Some(type_parameters)) => {
+                    self.check_grammar_type_parameter_list(type_parameters, file)
+                }
+                _ => false,
+            }
+            || self.check_grammar_parameter_list(&parameters)
+            || match &file {
+                Some(file) => self.check_grammar_arrow_function(node, file),
+                None => false,
+            }
+            || (tsox_frontend::ast::is_function_like_declaration(node)
+                && self.check_grammar_for_use_strict_simple_parameter_list(node))
+    }
+
+    pub fn check_grammar_class_like_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_like_declaration");
+        if self.check_grammar_class_declaration_heritage_clauses(node) {
+            return true;
+        }
+        let type_parameters: Option<&tsox_frontend::ast::NodeList> = match &node.data {
+            NodeData::ClassDeclaration(d) => d.type_parameters.as_deref(),
+            NodeData::ClassExpression(d) => d.type_parameters.as_deref(),
+            _ => None,
+        };
+        let Some(type_parameters) = type_parameters else {
+            return false;
+        };
+        let file = self
+            .get_source_file_of_node(node)
+            .or_else(|| self.current_file.clone());
+        match file {
+            Some(file) => self.check_grammar_type_parameter_list(type_parameters, &file),
+            None => false,
+        }
+    }
+
+    pub fn check_grammar_arrow_function(
+        &mut self,
+        node: &Arc<Node>,
+        file: &Arc<tsox_frontend::ast::SourceFile>,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_arrow_function"); 
+        use tsox_core::diagnostics::messages_generated as msg;
+        if !tsox_frontend::ast::is_arrow_function(node) {
+            return false;
+        }
+        let NodeData::ArrowFunction(arrow_func) = &node.data else {
+            return false;
+        };
+        if let Some(type_parameters) = &arrow_func.type_parameters {
+            let type_param_nodes = &type_parameters.nodes;
+            let has_constraint = type_param_nodes.first().is_some_and(|first| {
+                matches!(
+                    &first.data,
+                    NodeData::TypeParameterDeclaration(tp) if tp.constraint.is_some()
+                )
+            });
+            let has_trailing_comma = type_param_nodes
+                .last()
+                .is_some_and(|last| last.loc.end() < type_parameters.loc.end());
+            if !(type_param_nodes.len() > 1 || has_trailing_comma || has_constraint)
+                && tsox_core::tspath::file_extension_is_one_of(
+                    &file.file_name,
+                    &[tsox_core::tspath::EXTENSION_MTS, tsox_core::tspath::EXTENSION_CTS],
+                )
+                && let Some(first) = type_param_nodes.first()
+            {
+                self.grammar_error_on_node(
+                    first,
+                    &msg::THIS_SYNTAX_IS_RESERVED_IN_FILES_WITH_THE_MTS_OR_CTS_EXTENSION_ADD_A_TRAILING_COMMA_OR_EXPLICIT_CONSTRAINT,
+                );
+            }
+        }
+        let equals_greater_than_token = &arrow_func.equals_greater_than_token;
+        let head_end = arrow_func
+            .type_node
+            .as_ref()
+            .map(|tn| tn.loc.end())
+            .unwrap_or(0)
+            .max(arrow_func
+                .type_parameters
+                .as_ref()
+                .map(|tp| tp.loc.end())
+                .unwrap_or(0))
+            .max(arrow_func.parameters.loc.end());
+        let arrow_end = equals_greater_than_token.loc.end();
+        let arrow_text_includes_line_break = head_end <= arrow_end
+            && arrow_end <= file.text.len()
+            && file.text[head_end..arrow_end]
+                .chars()
+                .any(tsox_core::stringutil::is_line_break);
+        arrow_text_includes_line_break
+            && self.grammar_error_on_node(
+                equals_greater_than_token,
+                &msg::LINE_TERMINATOR_NOT_PERMITTED_BEFORE_ARROW,
+            )
+    }
+
+    pub fn check_grammar_index_signature_parameters(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_index_signature_parameters"); 
+        use tsox_core::diagnostics::messages_generated as msg;
+        let NodeData::IndexSignatureDeclaration(data) = &node.data else {
+            return false;
+        };
+        let params = &data.parameters;
+        if params.nodes.is_empty() {
+            return self.grammar_error_on_node(node, &msg::AN_INDEX_SIGNATURE_MUST_HAVE_EXACTLY_ONE_PARAMETER);
+        }
+        let parameter = Arc::clone(&params.nodes[0]);
+        if params.nodes.len() != 1 {
+            let name = parameter.name().cloned().unwrap_or_else(|| Arc::clone(&parameter));
+            return self.grammar_error_on_node(&name, &msg::AN_INDEX_SIGNATURE_MUST_HAVE_EXACTLY_ONE_PARAMETER);
+        }
+        let NodeData::ParameterDeclaration(pd) = &parameter.data else {
+            return false;
+        };
+        // Go checkGrammarForDisallowedTrailingComma
+        if let Some(last) = params.nodes.last()
+            && let Some(file) = self.current_file.clone()
+        {
+            let comma_pos =
+                tsox_frontend::scanner::skip_trivia(&file.text, last.loc.end());
+            if comma_pos < params.loc.end()
+                && file.text.as_bytes().get(comma_pos) == Some(&b',')
+            {
+                self.grammar_error_at_pos(
+                    &params.nodes[0],
+                    params.loc.end() - 1,
+                    1,
+                    &msg::AN_INDEX_SIGNATURE_CANNOT_HAVE_A_TRAILING_COMMA,
+                );
+            }
+        }
+        if let Some(rest) = &pd.dot_dot_dot_token {
+            return self.grammar_error_on_node(rest, &msg::AN_INDEX_SIGNATURE_CANNOT_HAVE_A_REST_PARAMETER);
+        }
+        if let Some(modifiers) = &pd.modifiers
+            && modifiers.modifier_flags.intersects(
+                ModifierFlags::Public
+                    | ModifierFlags::Private
+                    | ModifierFlags::Protected
+                    | ModifierFlags::Readonly,
+            )
+        {
+            // Go checkParameter：非构造器实现的参数属性先报 TS2369（param 节点位）
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                parameter.loc,
+                msg::A_PARAMETER_PROPERTY_IS_ONLY_ALLOWED_IN_A_CONSTRUCTOR_IMPLEMENTATION,
+                Vec::new(),
+            ));
+            return self.grammar_error_on_node(
+                &pd.name,
+                &msg::AN_INDEX_SIGNATURE_PARAMETER_CANNOT_HAVE_AN_ACCESSIBILITY_MODIFIER,
+            );
+        }
+        if pd.modifiers.is_some() {
+            return self.grammar_error_on_node(
+                &pd.name,
+                &msg::AN_INDEX_SIGNATURE_PARAMETER_CANNOT_HAVE_AN_ACCESSIBILITY_MODIFIER,
+            );
+        }
+        if let Some(question) = &pd.question_token {
+            return self.grammar_error_on_node(
+                question,
+                &msg::AN_INDEX_SIGNATURE_PARAMETER_CANNOT_HAVE_A_QUESTION_MARK,
+            );
+        }
+        if pd.initializer.is_some() {
+            return self.grammar_error_on_node(
+                &pd.name,
+                &msg::AN_INDEX_SIGNATURE_PARAMETER_CANNOT_HAVE_AN_INITIALIZER,
+            );
+        }
+        let Some(type_node) = &pd.type_node else {
+            return self.grammar_error_on_node(
+                &pd.name,
+                &msg::AN_INDEX_SIGNATURE_PARAMETER_MUST_HAVE_A_TYPE_ANNOTATION,
+            );
+        };
+        let t = self.get_type_from_type_node(type_node);
+        // Go checkGrammarIndexSignatureParameters（grammarchecks.go:853-855）：
+        // someType 谓词用 TypeFlagsStringOrNumberLiteralOrUnique（types.go:475
+        // = StringLiteral|NumberLiteral|UniqueESSymbol，不含 BooleanLiteral/
+        // BigIntLiteral）——boolean 联合化后（checker.go:1013）成分是
+        // BooleanLiteral，按全量 LITERAL 旗标会误落 TS1337，Go 对 boolean 型
+        // 走 someType 不中→everyType isValidIndexKeyType 不中→TS1268
+        let literal_or_generic = if t.is_union() {
+            t.types().is_some_and(|parts| {
+                parts.iter().any(|c| {
+                    c.flags
+                        .intersects(crate::checker::types::TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE)
+                        || self.is_generic_type(c)
+                })
+            })
+        } else {
+            t.flags
+                .intersects(crate::checker::types::TYPE_FLAGS_STRING_OR_NUMBER_LITERAL_OR_UNIQUE)
+                || self.is_generic_type(&t)
+        };
+        if literal_or_generic {
+            return self.grammar_error_on_node(
+                &pd.name,
+                &msg::AN_INDEX_SIGNATURE_PARAMETER_TYPE_CANNOT_BE_A_LITERAL_TYPE_OR_GENERIC_TYPE_CONSIDER_USING_A_MAPPED_OBJECT_TYPE_INSTEAD,
+            );
+        }
+        let valid_key = if t.is_union() {
+            t.types().is_some_and(|parts| {
+                parts.iter().all(|c| self.index_key_type_is_valid(c))
+            })
+        } else {
+            self.index_key_type_is_valid(&t)
+        };
+        if !valid_key {
+            return self.grammar_error_on_node(
+                &pd.name,
+                &msg::AN_INDEX_SIGNATURE_PARAMETER_TYPE_MUST_BE_STRING_NUMBER_SYMBOL_OR_A_TEMPLATE_LITERAL_TYPE,
+            );
+        }
+        if data.type_node.kind == SyntaxKind::MissingDeclaration {
+            return self.grammar_error_on_node(
+                node,
+                &msg::AN_INDEX_SIGNATURE_MUST_HAVE_A_TYPE_ANNOTATION,
+            );
+        }
+        false
+    }
+
+    fn index_key_type_is_valid(&self, t: &Arc<crate::checker::types::Type>) -> bool { ::tsox_core::fntrace::enter("index_key_type_is_valid"); 
+        t.flags.intersects(crate::checker::types::TYPE_FLAGS_STRING_LIKE) || t.intrinsic_name() == Some("string")
+            || t.intrinsic_name() == Some("number")
+            || t.intrinsic_name() == Some("symbol")
+    }
+
+    pub fn check_grammar_index_signature(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_index_signature"); 
+        if self.check_grammar_modifiers(node) {
+            return true;
+        }
+        self.check_grammar_index_signature_parameters(node)
+    }
+
+    pub fn check_grammar_for_at_least_one_type_argument(
+        &mut self,
+        node: &Arc<Node>,
+        type_arguments: &tsox_frontend::ast::NodeList,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_at_least_one_type_argument"); 
+        use tsox_core::diagnostics::messages_generated as msg;
+        if !type_arguments.nodes.is_empty() {
+            return false;
+        }
+        let Some(file) = self
+            .get_source_file_of_node(node)
+            .or_else(|| self.current_file.clone())
+        else {
+            return false;
+        };
+        if file.has_parse_diagnostics {
+            return false;
+        }
+        // 解析器空列表 loc 从 `<` 起（Go 从 `<` 后起，Pos-len("<") 同位）
+        let start = type_arguments.loc.pos();
+        let end = tsox_frontend::scanner::skip_trivia(&file.text, type_arguments.loc.end()) + 1;
+        self.grammar_error_at_pos(
+            &file.node,
+            start,
+            end.saturating_sub(start),
+            &msg::TYPE_ARGUMENT_LIST_CANNOT_BE_EMPTY,
+        )
+    }
+
+    pub fn check_grammar_type_arguments(
+        &mut self,
+        node: &Arc<Node>,
+        type_arguments: &tsox_frontend::ast::NodeList,
+    ) -> bool { ::tsox_core::fntrace::enter("check_grammar_type_arguments"); 
+        self.check_grammar_for_at_least_one_type_argument(node, type_arguments)
+    }
+
+    pub fn check_grammar_tagged_template_chain(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_tagged_template_chain"); 
+        false
+    }
+
+    pub fn check_grammar_heritage_clause(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_heritage_clause"); 
+        use tsox_core::diagnostics::messages_generated as msg;
+        let NodeData::HeritageClause(h) = &node.data else {
+            return false;
+        };
+        let types = &h.types;
+        if !types.nodes.is_empty() && types.loc.end() > 0 {
+            if let Some(f) = self.current_file.as_ref() {
+                if let Some(comma) = trailing_comma_before(&f.text, types.loc.end()) {
+                    return self
+                        .grammar_error_at_pos(&types.nodes[0], comma, 1, &msg::TRAILING_COMMA_NOT_ALLOWED);
+                }
+            }
+        }
+        false
+    }
+
+    pub fn check_grammar_expression_with_type_arguments(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_expression_with_type_arguments"); 
+        false
+    }
+
+    pub fn check_grammar_class_declaration_heritage_clauses(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_class_declaration_heritage_clauses");
+        use tsox_core::diagnostics::messages_generated as msg;
+        let heritage = match &node.data {
+            NodeData::ClassDeclaration(d) => d.heritage_clauses.as_ref(),
+            NodeData::ClassExpression(d) => d.heritage_clauses.as_ref(),
+            _ => return false,
+        };
+        if self.check_grammar_modifiers(node) {
+            return false;
+        }
+        let Some(clauses) = heritage else {
+            return false;
+        };
+        let mut seen_extends = false;
+        let mut seen_implements = false;
+        for clause in clauses.iter() {
+            let NodeData::HeritageClause(h) = &clause.data else {
+                continue;
+            };
+            if h.token == SyntaxKind::ExtendsKeyword {
+                if seen_extends {
+                    return self.grammar_error_on_node(clause, &msg::X_EXTENDS_CLAUSE_ALREADY_SEEN);
+                }
+                if seen_implements {
+                    return self
+                        .grammar_error_on_node(clause, &msg::X_EXTENDS_CLAUSE_MUST_PRECEDE_IMPLEMENTS_CLAUSE);
+                }
+                if h.types.nodes.len() > 1 {
+                    return self.grammar_error_on_node(
+                        &h.types.nodes[1],
+                        &msg::CLASSES_CAN_ONLY_EXTEND_A_SINGLE_CLASS,
+                    );
+                }
+                seen_extends = true;
+            } else if h.token == SyntaxKind::ImplementsKeyword {
+                if seen_implements {
+                    return self
+                        .grammar_error_on_node(clause, &msg::X_IMPLEMENTS_CLAUSE_ALREADY_SEEN);
+                }
+                seen_implements = true;
+            }
+            self.check_grammar_heritage_clause(clause);
+        }
+        false
+    }
+
+    pub fn check_grammar_interface_declaration(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_interface_declaration"); 
+        use tsox_core::diagnostics::messages_generated as msg;
+        let heritage = match &node.data {
+            NodeData::InterfaceDeclaration(d) => d.heritage_clauses.as_ref(),
+            _ => return false,
+        };
+        let Some(clauses) = heritage else {
+            return false;
+        };
+        let mut seen_extends = false;
+        for clause in clauses.iter() {
+            let NodeData::HeritageClause(h) = &clause.data else {
+                continue;
+            };
+            match h.token {
+                SyntaxKind::ExtendsKeyword => {
+                    if seen_extends {
+                        return self
+                            .grammar_error_on_node(clause, &msg::X_EXTENDS_CLAUSE_ALREADY_SEEN);
+                    }
+                    seen_extends = true;
+                }
+                SyntaxKind::ImplementsKeyword => {
+                    return self.grammar_error_on_node(
+                        clause,
+                        &msg::INTERFACE_DECLARATION_CANNOT_HAVE_IMPLEMENTS_CLAUSE,
+                    );
+                }
+                _ => {}
+            }
+            self.check_grammar_heritage_clause(clause);
+        }
+        false
+    }
+
+    pub fn check_grammar_computed_property_name(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_computed_property_name"); 
+        false
+    }
+
+    pub fn check_grammar_for_generator(&mut self, _node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("check_grammar_for_generator"); 
+        false
+    }
+}
+
+/// 列表 end 前反向跳过空白/注释后是 ',' 则返回其位置（Go NodeList
+/// HasTrailingComma 的文本近似：trailing comma 会被收进列表 loc）
+pub(crate) fn trailing_comma_before(text: &str, end: usize) -> Option<usize> { ::tsox_core::fntrace::enter("trailing_comma_before"); 
+    let bytes = text.as_bytes();
+    let mut i = end.min(bytes.len());
+    while i > 0 {
+        let b = bytes[i - 1];
+        match b {
+            b' ' | b'\t' | b'\r' | b'\n' => i -= 1,
+            b'/' if i >= 2 && bytes[i - 2] == b'*' => {
+                i -= 2;
+                while i > 0 {
+                    if bytes[i - 1] == b'/' && i >= 2 && bytes[i - 2] == b'*' {
+                        i -= 2;
+                        break;
+                    }
+                    i -= 1;
+                }
+            }
+            b',' => return Some(i - 1),
+            _ => return None,
+        }
+    }
+    None
+}
+
+fn function_like_data_lists(
+    node: &Node,
+) -> (
+    Option<Arc<tsox_frontend::ast::NodeList>>,
+    Arc<tsox_frontend::ast::NodeList>,
+) { ::tsox_core::fntrace::enter("function_like_data_lists"); 
+    let lists = |type_parameters: &Option<Arc<tsox_frontend::ast::NodeList>>,
+                 parameters: &Arc<tsox_frontend::ast::NodeList>| {
+        (type_parameters.clone(), Arc::clone(parameters))
+    };
+    match &node.data {
+        NodeData::FunctionDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::FunctionExpression(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::MethodDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ConstructorDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::GetAccessorDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::SetAccessorDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::MethodSignatureDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::CallSignatureDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ConstructSignatureDeclaration(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::FunctionTypeNode(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ConstructorTypeNode(d) => lists(&d.type_parameters, &d.parameters),
+        NodeData::ArrowFunction(d) => lists(&d.type_parameters, &d.parameters),
+        _ => (
+            None,
+            Arc::new(tsox_frontend::ast::NodeList {
+                loc: tsox_core::core::text::TextRange::undefined(),
+                nodes: Vec::new(),
+            }),
+        ),
+    }
+}

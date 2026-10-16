@@ -1,0 +1,226 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_statements::*;
+
+impl Checker {
+    pub(crate) fn declaration_is_ambient(&self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("declaration_is_ambient"); 
+        if self.ambient_context_depth > 0 {
+            return true;
+        }
+
+        if self
+            .get_source_file_of_node(node)
+            .or(self.current_file.clone())
+            .is_some_and(|f| f.is_declaration_file)
+        {
+            return true;
+        }
+        let mut cur = Some(Arc::clone(node));
+        while let Some(n) = cur {
+            if n.has_syntactic_modifier(ModifierFlags::Ambient) {
+                return true;
+            }
+
+            if matches!(
+                n.kind,
+                SyntaxKind::ClassDeclaration | SyntaxKind::FunctionDeclaration | SyntaxKind::Block
+            ) {
+                break;
+            }
+            cur = n.parent();
+        }
+        false
+    }
+
+    // Go shouldCheckErasableSyntax + c.error：erasableSyntaxOnly 且非 JS 文件时
+    // 在指定 span 报 TS1294
+    pub(crate) fn erasable_syntax_error(
+        &mut self,
+        node: &Arc<Node>,
+        loc: tsox_core::core::text::TextRange,
+    ) { ::tsox_core::fntrace::enter("erasable_syntax_error"); 
+        if !self.compiler_options.erasable_syntax_only.is_true()
+            || tsox_frontend::ast::is_in_js_file(node)
+        {
+            return;
+        }
+        self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+            self.current_file.clone(),
+            loc,
+            tsox_core::diagnostics::messages_generated::
+                THIS_SYNTAX_IS_NOT_ALLOWED_WHEN_ERASABLESYNTAXONLY_IS_ENABLED,
+            Vec::new(),
+        ));
+    }
+
+    pub(crate) fn check_cjs_reserved_top_level_name(&mut self, node: &Arc<Node>, name: &Arc<Node>) { ::tsox_core::fntrace::enter("check_cjs_reserved_top_level_name"); 
+        use tsox_core::core::compiler_options::ModuleKind;
+        if !matches!(name.kind, SyntaxKind::Identifier) {
+            return;
+        }
+
+        if self.compiler_options.no_emit.is_true() {
+            return;
+        }
+        let Some(file) = self.current_file.clone() else {
+            return;
+        };
+        let is_module =
+            file.external_module_indicator.is_some() || file.common_js_module_indicator.is_some();
+        if !is_module {
+            return;
+        }
+
+        let mut top_level = false;
+        let mut p = node.parent();
+        while let Some(parent) = p {
+            match parent.kind {
+                SyntaxKind::SourceFile => {
+                    top_level = true;
+                    break;
+                }
+                SyntaxKind::VariableDeclarationList | SyntaxKind::VariableStatement => {
+                    p = parent.parent();
+                }
+                _ => break,
+            }
+        }
+        if !top_level {
+            return;
+        }
+
+        if self.declaration_is_ambient(node) {
+            return;
+        }
+        // Go：非实例化 namespace 不做此检查
+        if node.kind == SyntaxKind::ModuleDeclaration
+            && tsox_frontend::ast::utilities::get_module_instance_state(node)
+                != tsox_frontend::ast::utilities::ModuleInstanceState::Instantiated
+        {
+            return;
+        }
+        let emit_format = self.program.get_emit_module_format_of_file(&file.file_name);
+        let text = name.text().to_string();
+        if text == "require" || text == "exports" {
+            if emit_format >= ModuleKind::ES2015 {
+                return;
+            }
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    DUPLICATE_IDENTIFIER_0_COMPILER_RESERVES_NAME_1_IN_TOP_LEVEL_SCOPE_OF_A_MODULE,
+                vec![text.clone(), text],
+            ));
+        } else if text == "__esModule" {
+            let var_stmt = node
+                .parent()
+                .as_ref()
+                .and_then(|list| list.parent())
+                .filter(|stmt| stmt.kind == SyntaxKind::VariableStatement);
+            let exported =
+                var_stmt.is_some_and(|stmt| stmt.has_syntactic_modifier(ModifierFlags::Export));
+            if !exported || emit_format >= ModuleKind::System {
+                return;
+            }
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    IDENTIFIER_EXPECTED_ESMODULE_IS_RESERVED_AS_AN_EXPORTED_MARKER_WHEN_TRANSFORMING_ECMASCRIPT_MODULES,
+                Vec::new(),
+            ));
+        } else if text == "Object"
+            && !matches!(
+                node.kind,
+                SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression
+            )
+        {
+            // Go checkCollisionWithGlobalObjectInGeneratedCode：CommonJS 下
+            // 顶层 Object 名保留
+            if emit_format != ModuleKind::CommonJS {
+                return;
+            }
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    DUPLICATE_IDENTIFIER_0_COMPILER_RESERVES_NAME_1_IN_TOP_LEVEL_SCOPE_OF_A_MODULE,
+                vec![text.clone(), text],
+            ));
+        } else if text == "Object" && node.kind == SyntaxKind::ClassDeclaration {
+            if emit_format != ModuleKind::CommonJS {
+                return;
+            }
+            let module_str = match self.compiler_options.module {
+                ModuleKind::Node16 => "Node16".to_string(),
+                ModuleKind::Node18 => "Node18".to_string(),
+                ModuleKind::Node20 => "Node20".to_string(),
+                ModuleKind::NodeNext => "NodeNext".to_string(),
+                ModuleKind::CommonJS => "CommonJS".to_string(),
+                ModuleKind::AMD => "AMD".to_string(),
+                ModuleKind::UMD => "UMD".to_string(),
+                ModuleKind::System => "System".to_string(),
+                ModuleKind::ES2015 => "es2015".to_string(),
+                ModuleKind::ES2020 => "es2020".to_string(),
+                ModuleKind::ES2022 => "es2022".to_string(),
+                _ => "esnext".to_string(),
+            };
+            self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                self.current_file.clone(),
+                name.loc,
+                tsox_core::diagnostics::messages_generated::
+                    CLASS_NAME_CANNOT_BE_OBJECT_WHEN_TARGETING_ES5_AND_ABOVE_WITH_MODULE_0,
+                vec![module_str],
+            ));
+        }
+    }
+
+    pub(crate) fn check_for_initializer(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_for_initializer"); 
+        match node.kind {
+            SyntaxKind::VariableDeclarationList => {
+                self.check_variable_declaration_list(node);
+            }
+            _ => self.check_expression(node),
+        }
+    }
+
+    pub(crate) fn check_binding_pattern_computed_names(&mut self, name: &Arc<Node>) { ::tsox_core::fntrace::enter("check_binding_pattern_computed_names"); 
+        if !matches!(
+            name.kind,
+            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+        ) {
+            return;
+        }
+        let mut stack = vec![Arc::clone(name)];
+        while let Some(n) = stack.pop() {
+            match &n.data {
+                tsox_frontend::ast::NodeData::BindingPattern(data) => {
+                    for element in data.elements.iter() {
+                        stack.push(Arc::clone(element));
+                    }
+                }
+                tsox_frontend::ast::NodeData::BindingElement(data) => {
+                    if let Some(pn) = &data.property_name {
+                        if pn.kind == SyntaxKind::ComputedPropertyName {
+                            self.check_computed_property_name(pn);
+                            if let tsox_frontend::ast::NodeData::ComputedPropertyName(cd) = &pn.data
+                            {
+                                self.check_expression(&cd.expression);
+                            }
+                        }
+                    }
+                    if let Some(inner) = &data.name {
+                        if matches!(
+                            inner.kind,
+                            SyntaxKind::ObjectBindingPattern | SyntaxKind::ArrayBindingPattern
+                        ) {
+                            stack.push(Arc::clone(inner));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+}

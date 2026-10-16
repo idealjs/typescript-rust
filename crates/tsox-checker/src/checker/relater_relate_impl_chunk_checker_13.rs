@@ -1,0 +1,256 @@
+#![allow(unused_imports)]
+
+use crate::checker::relater_relate_impl_chunk::*;
+
+impl Checker {
+    pub fn try_get_type_at_position(
+        &mut self,
+        sig: &Arc<Signature>,
+        pos: usize,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("try_get_type_at_position"); 
+        if let Some(overrides) = &sig.instantiated_parameter_types {
+            let rest_offset = if sig.has_rest_parameter() { 1 } else { 0 };
+            let param_count = overrides.len().saturating_sub(rest_offset);
+            if pos < param_count {
+                return Some(Arc::clone(&overrides[pos]));
+            }
+            if sig.has_rest_parameter() {
+                let rest_type = Arc::clone(&overrides[param_count]);
+                if !is_tuple_type(&rest_type) {
+                    let index_literal =
+                        self.get_number_literal_type(tsox_core::jsnum::Number(
+                            (pos - param_count) as f64,
+                        ));
+                    return Some(self.get_indexed_access_type(&rest_type, &index_literal));
+                }
+                if let TypeData::Tuple(t) = &rest_type.data {
+                    let index = pos - param_count;
+                    let has_variadic = t.combined_flags.contains(ElementFlags::Variadic);
+                    if index < t.fixed_length || has_variadic {
+                        return t
+                            .element_infos
+                            .get(index)
+                            .and_then(|info| info.type_.clone())
+                            .or_else(|| Some(self.any_type()));
+                    }
+                }
+            }
+            // 覆盖表短于声明参数（失衡实例化签名）时固定位不就此判死，回落
+            // 声明参数符号路由——Go tryGetTypeAtPosition（relater.go:1893-1902）
+            // 无 instantiatedParameterTypes，pos < paramCount 恒走
+            // getTypeOfParameter（checker.go:18034），范围内固定位不产 any
+        }
+        let rest_offset = if sig.has_rest_parameter() { 1 } else { 0 };
+        let param_count = sig.parameters.len() - rest_offset;
+        if pos < param_count {
+            return Some(self.get_type_of_parameter(&sig.parameters[pos]));
+        }
+        if sig.has_rest_parameter() {
+            let rest_param = &sig.parameters[param_count];
+            let rest_type = self.get_type_of_symbol(rest_param);
+
+            if !is_tuple_type(&rest_type) {
+                let index_literal =
+                    self.get_number_literal_type(tsox_core::jsnum::Number((pos - param_count) as f64));
+                return Some(self.get_indexed_access_type(&rest_type, &index_literal));
+            }
+            if let TypeData::Tuple(t) = &rest_type.data {
+                let index = pos - param_count;
+                let has_variadic = t.combined_flags.contains(ElementFlags::Variadic);
+                if index < t.fixed_length || has_variadic {
+                    return t
+                        .element_infos
+                        .get(index)
+                        .and_then(|info| info.type_.clone())
+                        .or_else(|| Some(self.any_type()));
+                }
+            }
+        }
+        None
+    }
+
+    pub fn get_rest_or_any_type_at_position(
+        &mut self,
+        sig: &Arc<Signature>,
+        pos: usize,
+    ) -> Arc<Type> { ::tsox_core::fntrace::enter("get_rest_or_any_type_at_position"); 
+        let rest_type = self.get_rest_type_at_position(sig, pos);
+        if let Some(rt) = &rest_type {
+            if self.is_array_type(rt) {
+                let elem = self.get_type_arguments(rt).into_iter().next();
+                if let Some(elem) = elem {
+                    if elem.flags.contains(TypeFlags::Any) {
+                        return self.any_type();
+                    }
+                }
+            }
+        }
+        rest_type.unwrap_or_else(|| self.any_type())
+    }
+
+    pub fn get_rest_type_at_position(
+        &mut self,
+        sig: &Arc<Signature>,
+        pos: usize,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_rest_type_at_position"); 
+        let parameter_count = self.get_parameter_count(sig);
+        let has_rest = sig.has_rest_parameter();
+        // Go getRestTypeAtPosition：rest 位本身返回 rest 数组；越过后返回
+        // rest[number][]；rest 位之前（或无 rest 签名）返回剩余参数的（含
+        // variadic 尾部的）元组
+        if has_rest && pos >= parameter_count.saturating_sub(1) {
+            let rest = self.get_effective_rest_type(sig)?;
+            if pos == parameter_count.saturating_sub(1) {
+                return Some(rest);
+            }
+            let indexed = self.get_indexed_access_type(&rest, &self.number_type());
+            return Some(self.create_array_type(indexed));
+        }
+        if pos >= parameter_count {
+            return Some(self.create_tuple_type_ex(Vec::new(), Vec::new(), false));
+        }
+        let min_argument_count = self.get_min_argument_count(sig).max(0) as usize;
+        let mut element_types: Vec<Arc<Type>> = Vec::new();
+        let mut infos: Vec<crate::checker::types::TupleElementInfo> = Vec::new();
+        for i in pos..parameter_count {
+            if has_rest && i == parameter_count - 1 {
+                let rest = self.get_effective_rest_type(sig)?;
+                element_types.push(rest);
+                infos.push(crate::checker::types::TupleElementInfo {
+                    flags: ElementFlags::Variadic,
+                    labeled_declaration: None,
+                    label: None,
+                    type_: None,
+                });
+            } else {
+                element_types.push(self.get_type_at_position(sig, i));
+                let label = sig
+                    .parameters
+                    .get(i)
+                    .map(|p| p.name.clone())
+                    .filter(|n| !n.is_empty());
+                infos.push(crate::checker::types::TupleElementInfo {
+                    flags: if i < min_argument_count {
+                        ElementFlags::Required
+                    } else {
+                        ElementFlags::Optional
+                    },
+                    labeled_declaration: None,
+                    label,
+                    type_: None,
+                });
+            }
+        }
+        Some(self.create_tuple_type_ex(element_types, infos, false))
+    }
+
+    pub fn get_effective_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_effective_rest_type"); 
+        if !sig.has_rest_parameter() {
+            return None;
+        }
+        if let Some(overrides) = &sig.instantiated_parameter_types {
+            return overrides.last().cloned();
+        }
+        let last = sig.parameters.last()?;
+        let rest_type = self.get_type_of_symbol(last);
+
+        Some(rest_type)
+    }
+
+    pub fn get_non_array_rest_type(&mut self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_non_array_rest_type"); 
+        if !sig.has_rest_parameter() {
+            return None;
+        }
+        let rest_type = if let Some(overrides) = &sig.instantiated_parameter_types {
+            overrides.last().cloned()?
+        } else {
+            let last = sig.parameters.last()?;
+            self.get_type_of_symbol(last)
+        };
+        if let TypeData::Tuple(t) = &rest_type.data
+            && !t.combined_flags.contains(ElementFlags::Variadic)
+        {
+            return None;
+        }
+        if !self.is_array_type(&rest_type) && !rest_type.flags.intersects(TypeFlags::Any) {
+            return Some(rest_type);
+        }
+        None
+    }
+
+    pub(crate) fn get_array_element_type_of(&self, t: &Arc<Type>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_array_element_type_of"); 
+        if self.is_array_type(t) {
+            return Some(self.get_array_element_type(t));
+        }
+        None
+    }
+
+    pub fn is_top_signature(&mut self, sig: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("is_top_signature"); 
+        if !sig.type_parameters.is_empty() {
+            return false;
+        }
+
+        if let Some(this_param) = &sig.this_parameter {
+            let this_type = self.get_type_of_symbol(this_param);
+            if !this_type.flags.contains(TypeFlags::Any) {
+                return false;
+            }
+        }
+        if sig.parameters.len() != 1 || !sig.has_rest_parameter() {
+            return false;
+        }
+        let Some(param) = sig.parameters.first() else {
+            return false;
+        };
+        let param_type = self.get_type_of_symbol(param);
+        let rest_type = if self.is_array_type(&param_type) {
+            self.get_type_arguments(&param_type).into_iter().next()
+        } else {
+            Some(param_type)
+        };
+        match rest_type {
+            Some(rt) => {
+                if !rt.flags.intersects(TypeFlags::Any | TypeFlags::Never) {
+                    return false;
+                }
+                let return_type = self.get_return_type_of_signature(sig);
+                match return_type {
+                    Some(rt) => rt.flags.intersects(TYPE_FLAGS_ANY_OR_UNKNOWN),
+                    None => false,
+                }
+            }
+            None => false,
+        }
+    }
+
+    pub fn get_this_type_of_signature(&self, sig: &Arc<Signature>) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_this_type_of_signature"); 
+        let this_param = sig.this_parameter.as_ref()?;
+        let links = self.value_symbol_links.get(this_param)?;
+        links.resolved_type.clone()
+    }
+
+    pub fn get_non_circular_return_type_of_signature(&self, sig: &Arc<Signature>) -> Arc<Type> { ::tsox_core::fntrace::enter("get_non_circular_return_type_of_signature"); 
+        self.get_return_type_of_signature(sig)
+            .unwrap_or_else(|| self.any_type())
+    }
+
+    pub fn get_erased_signature(&mut self, sig: &Arc<Signature>) -> Arc<Signature> { ::tsox_core::fntrace::enter("get_erased_signature"); 
+        if sig.type_parameters.is_empty() {
+            return Arc::clone(sig);
+        }
+        let args: Vec<Arc<Type>> = sig
+            .type_parameters
+            .iter()
+            .map(|_| self.any_type())
+            .collect();
+        // Go getErasedSignature 的 newArrayToSingleTypeMapper 按类型实例匹配：
+        // 只擦签名自身类型参数实例，同符号的其它实例（外层推断变量经容器
+        // 实参代入流入）不被误擦
+        let saved = self.erase_signature_strict;
+        self.erase_signature_strict = true;
+        let erased = self.get_signature_instantiation(sig, &args, &[]);
+        self.erase_signature_strict = saved;
+        erased
+    }
+
+}

@@ -1,0 +1,95 @@
+use std::sync::Arc;
+
+use tsox_frontend::ast::Node;
+use tsox_frontend::ast::SyntaxKind;
+use tsox_frontend::ast::node_data_generated::NodeData;
+
+pub(crate) fn type_node_references_names(node: &Arc<Node>, names: &[String]) -> bool { ::tsox_core::fntrace::enter("type_node_references_names"); 
+    let mut found = false;
+    NodeWalker {
+        names,
+        found: &mut found,
+    }
+    .walk(node);
+    found
+}
+
+pub(crate) struct NodeWalker<'a> {
+    pub(crate) names: &'a [String],
+    pub(crate) found: &'a mut bool,
+}
+
+impl<'a> NodeWalker<'a> {
+    pub(crate) fn walk(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("walk"); 
+        if *self.found {
+            return;
+        }
+        if node.kind == SyntaxKind::Identifier && names_contain(self.names, node.text()) {
+            *self.found = true;
+            return;
+        }
+        tsox_frontend::ast::node_data_generated::for_each_child(node, |c| {
+            self.walk(c);
+            *self.found
+        });
+    }
+}
+
+pub(crate) fn names_contain(names: &[String], text: &str) -> bool { ::tsox_core::fntrace::enter("names_contain"); 
+    names.iter().any(|n| n == text)
+}
+
+pub(crate) fn type_name_inside_conditional_branch(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_name_inside_conditional_branch"); 
+    let mut cur = node.parent();
+    while let Some(a) = cur {
+        if matches!(&a.data, NodeData::ConditionalTypeNode(_)) {
+            if let NodeData::ConditionalTypeNode(c) = &a.data {
+                if node_inside(node, &c.check_type) || node_inside(node, &c.extends_type) {
+                    cur = a.parent();
+                    continue;
+                }
+            }
+            return true;
+        }
+        cur = a.parent();
+    }
+    false
+}
+
+pub(crate) fn node_inside(node: &Arc<Node>, root: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("node_inside"); 
+    if Arc::ptr_eq(node, root) {
+        return true;
+    }
+    let mut cur = node.parent();
+    while let Some(a) = cur {
+        if Arc::ptr_eq(&a, root) {
+            return true;
+        }
+        cur = a.parent();
+    }
+    false
+}
+
+pub(crate) fn type_name_shadowed_by_type_parameter(type_name: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("type_name_shadowed_by_type_parameter"); 
+    let name = type_name.text();
+    let mut cur = type_name.parent();
+    while let Some(a) = cur {
+        let tps = match &a.data {
+            NodeData::TypeAliasDeclaration(t) => t.type_parameters.as_ref(),
+            NodeData::InterfaceDeclaration(i) => i.type_parameters.as_ref(),
+            NodeData::ClassDeclaration(c) => c.type_parameters.as_ref(),
+            NodeData::MethodDeclaration(m) => m.type_parameters.as_ref(),
+            NodeData::FunctionDeclaration(f) => f.type_parameters.as_ref(),
+            _ => None,
+        };
+        if let Some(list) = tps
+            && list
+                .iter()
+                .any(|p| p.name().is_some_and(|n| n.text() == name))
+        {
+            return true;
+        }
+        cur = a.parent();
+    }
+    false
+}

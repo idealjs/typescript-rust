@@ -1,0 +1,74 @@
+use crate::ast::Node;
+use std::sync::Arc;
+use tsox_core::jsnum::Number;
+use tsox_core::jsnum::PseudoBigInt;
+
+pub type EvaluateEntity<'a> = &'a mut dyn FnMut(&Arc<Node>, Option<&Arc<Node>>) -> EvalResult;
+
+#[derive(Clone, Debug, Default)]
+pub struct EvalResult {
+    pub value: Option<EvalValue>,
+    pub is_syntactically_string: bool,
+    pub resolved_other_files: bool,
+    pub has_external_references: bool,
+}
+
+impl EvalResult {
+    pub fn new(
+        value: Option<EvalValue>,
+        is_syntactically_string: bool,
+        resolved_other_files: bool,
+        has_external_references: bool,
+    ) -> EvalResult { ::tsox_core::fntrace::enter("new"); 
+        EvalResult {
+            value,
+            is_syntactically_string,
+            resolved_other_files,
+            has_external_references,
+        }
+    }
+
+    pub fn none() -> EvalResult { ::tsox_core::fntrace::enter("none"); 
+        EvalResult {
+            value: None,
+            is_syntactically_string: false,
+            resolved_other_files: false,
+            has_external_references: false,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum EvalValue {
+    Number(Number),
+    String(String),
+    Bool(bool),
+    BigInt(PseudoBigInt),
+}
+
+impl EvalValue {
+    pub fn to_string(&self) -> String { ::tsox_core::fntrace::enter("to_string"); 
+        match self {
+            EvalValue::String(s) => s.clone(),
+            EvalValue::Number(n) => n.to_string(),
+            EvalValue::Bool(b) => {
+                if *b {
+                    "true".to_string()
+                } else {
+                    "false".to_string()
+                }
+            }
+            EvalValue::BigInt(b) => b.to_string(),
+        }
+    }
+
+    pub fn is_truthy(&self) -> bool { ::tsox_core::fntrace::enter("is_truthy"); 
+        match self {
+            EvalValue::String(s) => !s.is_empty(),
+            EvalValue::Number(n) => n.0 != 0.0 && !n.is_nan(),
+            EvalValue::Bool(b) => *b,
+            EvalValue::BigInt(b) => !b.is_zero(),
+        }
+    }
+}
+

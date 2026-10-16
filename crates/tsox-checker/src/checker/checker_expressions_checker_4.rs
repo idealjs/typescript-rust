@@ -1,0 +1,449 @@
+#![allow(unused_imports)]
+
+use crate::checker::checker_expressions::*;
+
+impl Checker {
+    pub(crate) fn check_identifier_reference(&mut self, node: &Arc<Node>) { ::tsox_core::fntrace::enter("check_identifier_reference"); 
+        let name = match &node.data {
+            tsox_frontend::ast::NodeData::Identifier(data) => data.text.as_str(),
+            _ => return,
+        };
+
+        if name.is_empty() {
+            return;
+        }
+
+        if !is_valid_identifier_text(name) {
+            return;
+        }
+
+        if is_declaration_name(node) {
+            return;
+        }
+
+        if is_property_access_name(node) {
+            return;
+        }
+
+        if self.check_invalid_initializer_reference(node, name) {
+            return;
+        }
+
+        if !self.ts2304_reporting_allowed_for(node) {
+            return;
+        }
+
+        // Go isExportAssignmentExpressionName：沿 PropertyAccess/QualifiedName
+        // 上溯到顶层后判 ExportAssignment 表达式位置
+        let is_export_assignment_name = Self::is_export_assignment_expression_name(node);
+
+        if let Some(symbol) = self.resolve_identifier_use(node, SymbolFlags::VALUE | SymbolFlags::ExportValue) {
+            if name == "arguments"
+                && self.arguments_symbol.is_some()
+                && Arc::ptr_eq(&symbol, self.arguments_symbol.as_ref().unwrap())
+            {
+                let mut cur = node.parent();
+                let mut in_initializer_or_static_block = false;
+                while let Some(a) = cur {
+                    match a.kind {
+                        SyntaxKind::FunctionDeclaration
+                        | SyntaxKind::FunctionExpression
+                        | SyntaxKind::MethodDeclaration
+                        | SyntaxKind::Constructor
+                        | SyntaxKind::GetAccessor
+                        | SyntaxKind::SetAccessor => break,
+                        SyntaxKind::ArrowFunction => {
+                            cur = a.parent();
+                            continue;
+                        }
+                        SyntaxKind::PropertyDeclaration
+                        | SyntaxKind::ClassStaticBlockDeclaration => {
+                            in_initializer_or_static_block = true;
+                            break;
+                        }
+                        _ => {}
+                    }
+                    cur = a.parent();
+                }
+                if in_initializer_or_static_block {
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        node.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            X_ARGUMENTS_CANNOT_BE_REFERENCED_IN_PROPERTY_INITIALIZERS_OR_CLASS_STATIC_INITIALIZATION_BLOCKS,
+                        Vec::new(),
+                    ));
+                    return;
+                }
+            }
+
+            // Go resolveEntityName 尾段：值位引用 type-only 别名报 TS1362/1363
+            //（getTypeOnlyAliasDeclarationEx 沿别名链回溯，export-star 中转亦可命中）
+            if symbol.flags.contains(SymbolFlags::Alias)
+                && !symbol.flags.contains(SymbolFlags::VALUE)
+                && !is_type_position_use_site(node)
+            {
+                if let Some((type_only_decl, is_export_form)) =
+                    self.type_only_alias_value_declaration(&symbol)
+                {
+                    let message = if is_export_form {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_CANNOT_BE_USED_AS_A_VALUE_BECAUSE_IT_WAS_EXPORTED_USING_EXPORT_TYPE
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_CANNOT_BE_USED_AS_A_VALUE_BECAUSE_IT_WAS_IMPORTED_USING_IMPORT_TYPE
+                    };
+                    let mut diag = tsox_frontend::ast::Diagnostic::new(
+                        self.current_file.clone(),
+                        node.loc,
+                        message,
+                        vec![name.to_string()],
+                    );
+                    let related_message = if is_export_form {
+                        tsox_core::diagnostics::messages_generated::X_0_WAS_EXPORTED_HERE
+                    } else {
+                        tsox_core::diagnostics::messages_generated::X_0_WAS_IMPORTED_HERE
+                    };
+                    let related_file = self
+                        .get_source_file_of_node(&type_only_decl)
+                        .or_else(|| self.current_file.clone());
+                    diag.related_information
+                        .push(tsox_frontend::ast::Diagnostic::new(
+                            related_file,
+                            type_only_decl.loc,
+                            related_message,
+                            vec![name.to_string()],
+                        ));
+                    self.diagnostics.add(diag);
+                    return;
+                }
+            }
+
+            let base = self.resolve_alias_base(Arc::clone(&symbol));
+
+            let is_true_namespace = base.declarations.iter().any(|d| {
+                d.kind == SyntaxKind::ModuleDeclaration
+                    && d.name()
+                        .is_some_and(|n| !matches!(n.kind, SyntaxKind::StringLiteral))
+            });
+            // Go 值位语义：符号无 Value 含义的 namespace（Class/Function 合并含 Value 位）不可作值
+            let module_without_value_meaning = base.flags.contains(SymbolFlags::NamespaceModule)
+                && !base.flags.intersects(SymbolFlags::VALUE);
+            if !is_export_assignment_name
+                && is_true_namespace
+                && module_without_value_meaning
+                && !self.namespace_value_suppressed_nodes.contains(&node.id())
+            {
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::CANNOT_USE_NAMESPACE_0_AS_A_VALUE,
+                    vec![name.to_string()],
+                ));
+                return;
+            }
+
+            // Go checkAndReportErrorForUsingTypeAsValue：值位按 Value 含义解析失败
+            // 而全含义解析到类型符号（interface/type alias 等）报 TS2693；
+            // bundled lib 的同名 var+interface 合并解析有分叉，先不做此检查。
+            // `export = SomeType` 可合法引用纯类型名，由 checkExportAssignment
+            // 决定是否报错（isExportAssignmentExpressionName 抑制）
+            if !is_export_assignment_name
+                && !base.flags.intersects(SymbolFlags::VALUE)
+                && base.flags.intersects(SymbolFlags::TYPE)
+                && self
+                    .current_file
+                    .as_ref()
+                    .is_some_and(|f| !f.file_name.starts_with("bundled://"))
+                && !self.value_meaning_resolves(node)
+            {
+                let message =
+                    if Self::is_es2015_or_later_constructor_name(name) {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
+                let file = self.current_file.clone();
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    message,
+                    vec![name.to_string()],
+                ));
+                return;
+            }
+
+            self.check_block_scoped_variable_used_before_declaration(node, &symbol, name);
+
+            self.check_parameter_initializer_reference(node, &symbol);
+
+            self.check_variable_used_before_assigned(node, &symbol, name);
+
+            let in_bundled_lib = self
+                .get_source_file_of_node(node)
+                .is_some_and(|f| crate::bundled::is_bundled(&f.file_name));
+            // Go 2693 仅在 onFailedToResolveSymbol（值位解析失败）后报告；
+            // 未解析出目标的别名对应 unknownSymbol（全含义），不作值不报错
+            if !in_bundled_lib
+                && !is_export_assignment_name
+                && !base.flags.intersects(SymbolFlags::VALUE)
+                && base.flags.intersects(SymbolFlags::TYPE)
+                && !self.value_meaning_resolves(node)
+            {
+                let message =
+                    if Self::is_es2015_or_later_constructor_name(name) {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                    } else {
+                        tsox_core::diagnostics::messages_generated::
+                            X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                    };
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    self.current_file.clone(),
+                    node.loc,
+                    message,
+                    vec![name.to_string()],
+                ));
+            }
+            return;
+        }
+
+        let file = self.current_file.clone();
+
+        {
+            let is_primitive_type_name = matches!(
+                name,
+                "any" | "string" | "number" | "boolean" | "never" | "unknown"
+            );
+            let reported = if is_primitive_type_name {
+                self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                    file.clone(),
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::
+                        X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE,
+                    vec![name.to_string()],
+                ));
+                true
+            } else {
+                let in_bundled_lib = self
+                    .get_source_file_of_node(node)
+                    .is_some_and(|f| crate::bundled::is_bundled(&f.file_name));
+                let type_hit = self
+                    .resolve_identifier_with_meaning(node, SymbolFlags::TYPE)
+                    .map(|s| self.resolve_alias_base(s));
+                if let Some(sym) = type_hit
+                    && !in_bundled_lib
+                    && !is_export_assignment_name
+                    && !sym.flags.intersects(SymbolFlags::VALUE)
+                {
+                    let message =
+                        if Self::is_es2015_or_later_constructor_name(name) {
+                            tsox_core::diagnostics::messages_generated::
+                                X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_ES2015_OR_LATER
+                        } else {
+                            tsox_core::diagnostics::messages_generated::
+                                X_0_ONLY_REFERS_TO_A_TYPE_BUT_IS_BEING_USED_AS_A_VALUE_HERE
+                        };
+                    self.diagnostics.add(tsox_frontend::ast::Diagnostic::new(
+                        file.clone(),
+                        node.loc,
+                        message,
+                        vec![name.to_string()],
+                    ));
+                    true
+                } else {
+                    false
+                }
+            };
+            if reported {
+                return;
+            }
+        }
+
+        let diagnostic = if let Some(class) = self.enclosing_class_stack.last().cloned() {
+            let class_name = Self::class_name_text(&class);
+            if let Some(is_member_static) = self.class_member_static_by_name(&class, name) {
+                if is_member_static {
+                    tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            CANNOT_FIND_NAME_0_DID_YOU_MEAN_THE_STATIC_MEMBER_1_0,
+                        vec![name.to_string(), class_name],
+                    )
+                } else if self.this_container_stack.last()
+                    == Some(&ThisContainerKind::InstanceMember)
+                {
+                    tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        tsox_core::diagnostics::messages_generated::
+                            CANNOT_FIND_NAME_0_DID_YOU_MEAN_THE_INSTANCE_MEMBER_THIS_0,
+                        vec![name.to_string()],
+                    )
+                } else if let Some(suggestion) = self.find_name_suggestion(name, SymbolFlags::VALUE)
+                {
+                    tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1,
+                        vec![name.to_string(), suggestion],
+                    )
+                } else if let Some(suggestion) = self.find_name_suggestion(name, SymbolFlags::VALUE)
+                {
+                    tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1,
+                        vec![name.to_string(), suggestion],
+                    )
+                } else {
+                    tsox_frontend::ast::Diagnostic::new(
+                        file,
+                        node.loc,
+                        CANNOT_FIND_NAME_0,
+                        vec![name.to_string()],
+                    )
+                }
+            } else if let Some(suggestion) = self.find_name_suggestion(name, SymbolFlags::VALUE) {
+                tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1,
+                    vec![name.to_string(), suggestion],
+                )
+            } else {
+                tsox_frontend::ast::Diagnostic::new(
+                    file,
+                    node.loc,
+                    CANNOT_FIND_NAME_0,
+                    vec![name.to_string()],
+                )
+            }
+        } else if let Some(msg) = Self::cannot_find_name_message_for(name, Some(node)) {
+            tsox_frontend::ast::Diagnostic::new(file, node.loc, *msg, vec![name.to_string()])
+        } else if let Some(lib) =
+            crate::checker::checker_lib_feature_map::suggested_lib_for_name(name)
+        {
+            tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::
+                    CANNOT_FIND_NAME_0_DO_YOU_NEED_TO_CHANGE_YOUR_TARGET_LIBRARY_TRY_CHANGING_THE_LIB_COMPILER_OPTION_TO_1_OR_LATER,
+                vec![name.to_string(), lib.to_string()],
+            )
+        } else if let Some(suggestion) = self.find_name_suggestion(name, SymbolFlags::VALUE) {
+            tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                tsox_core::diagnostics::messages_generated::CANNOT_FIND_NAME_0_DID_YOU_MEAN_1,
+                vec![name.to_string(), suggestion],
+            )
+        } else {
+            tsox_frontend::ast::Diagnostic::new(
+                file,
+                node.loc,
+                *Self::cannot_find_name_message_for(name, Some(node)).unwrap_or(&CANNOT_FIND_NAME_0),
+                vec![name.to_string()],
+            )
+        };
+        self.diagnostics.add(diagnostic);
+    }
+}
+
+impl Checker {
+    fn value_meaning_resolves(&mut self, node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("value_meaning_resolves"); 
+        let Some(mut s) = self.resolve_identifier_with_meaning(node, SymbolFlags::VALUE) else {
+            return false;
+        };
+        // Go resolveEntityName 尾段（checker.go）：按 Value 含义沿 resolveAlias
+        // 链逐级解析，含义命中即停；import 与 interface 合并的双意义符号的
+        // 值含义在链上更深处，不是链终点
+        for _ in 0..4 {
+            if s.flags.intersects(SymbolFlags::VALUE) || !s.flags.intersects(SymbolFlags::Alias) {
+                break;
+            }
+            let next = self.resolve_alias_base(Arc::clone(&s));
+            if Arc::ptr_eq(&next, &s) {
+                break;
+            }
+            s = next;
+        }
+        s.flags.intersects(SymbolFlags::VALUE)
+    }
+
+    pub(crate) fn is_es2015_or_later_constructor_name(name: &str) -> bool { ::tsox_core::fntrace::enter("is_es2015_or_later_constructor_name"); 
+        matches!(
+            name,
+            "Promise" | "Symbol" | "Map" | "WeakMap" | "Set" | "WeakSet"
+        )
+    }
+}
+
+fn is_type_position_use_site(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_type_position_use_site"); 
+    let mut cur = node.parent();
+    while let Some(p) = cur {
+        match p.kind {
+            SyntaxKind::TypeReference
+            | SyntaxKind::TypeQuery
+            | SyntaxKind::ImportType
+            | SyntaxKind::QualifiedName => return true,
+            _ => break,
+        }
+    }
+    false
+}
+
+impl Checker {
+    // Go isExportAssignmentExpressionName（utilities.go）
+    pub(crate) fn is_export_assignment_expression_name(node: &Arc<Node>) -> bool { ::tsox_core::fntrace::enter("is_export_assignment_expression_name"); 
+        let mut current = Some(Arc::clone(node));
+        while let Some(c) = &current
+            && matches!(
+                c.parent().map(|p| p.kind),
+                Some(SyntaxKind::PropertyAccessExpression) | Some(SyntaxKind::QualifiedName)
+            )
+        {
+            current = c.parent();
+        }
+        current
+            .and_then(|c| c.parent())
+            .is_some_and(|p| p.kind == SyntaxKind::ExportAssignment)
+    }
+}
+
+impl Checker {
+    // Go checkAndReportErrorForUsingTypeAsValue 原生类型 heritage 分支：
+    // interface extends 报 2840，class extends 报 2863，class implements 报 2862
+    pub(crate) fn primitive_heritage_message(
+        node: &Arc<Node>,
+        name: &str,
+    ) -> Option<tsox_core::diagnostics::Message> { ::tsox_core::fntrace::enter("primitive_heritage_message"); 
+        let primitive = matches!(name, "any" | "string" | "number" | "boolean" | "never" | "unknown");
+        if !primitive {
+            return None;
+        }
+        let heritage = node.parent().filter(|p| p.kind == SyntaxKind::HeritageClause)?;
+        let container = heritage.parent()?;
+        let extends = matches!(
+            &heritage.data,
+            tsox_frontend::ast::NodeData::HeritageClause(h) if h.token == SyntaxKind::ExtendsKeyword
+        );
+        use tsox_core::diagnostics::messages_generated as mg;
+        match container.kind {
+            SyntaxKind::InterfaceDeclaration if extends => {
+                Some(mg::AN_INTERFACE_CANNOT_EXTEND_A_PRIMITIVE_TYPE_LIKE_0_IT_CAN_ONLY_EXTEND_OTHER_NAMED_OBJECT_TYPES)
+            }
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression if extends => {
+                Some(mg::A_CLASS_CANNOT_EXTEND_A_PRIMITIVE_TYPE_LIKE_0_CLASSES_CAN_ONLY_EXTEND_CONSTRUCTABLE_VALUES)
+            }
+            SyntaxKind::ClassDeclaration | SyntaxKind::ClassExpression => {
+                Some(mg::A_CLASS_CANNOT_IMPLEMENT_A_PRIMITIVE_TYPE_LIKE_0_IT_CAN_ONLY_IMPLEMENT_OTHER_NAMED_OBJECT_TYPES)
+            }
+            _ => None,
+        }
+    }
+}

@@ -1,0 +1,19 @@
+use tsox_lsp::fourslash::{self, Session};
+
+
+#[ignore = "go: t.Skip('Known failing fourslash test')"]
+#[test]
+fn completion_list_in_named_function_expression_with_shadowing() {
+    let content = r#"function foo() {}
+/*0*/
+var x = function foo() {
+   /*1*/
+}
+var y = function () {
+   /*2*/
+}"#;
+    let mut s = Session::new_for_test("completionListInNamedFunctionExpressionWithShadowing", content);
+    // TODO: f.VerifyCompletions(t, []string{"0", "2"}, &fourslash.CompletionsExpectedList{
+    fourslash::go_to_marker(&mut s, "1");
+    // TODO: f.VerifyCompletions(t, "1", &fourslash.CompletionsExpectedList{
+}

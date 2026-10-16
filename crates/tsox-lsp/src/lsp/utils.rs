@@ -1,0 +1,187 @@
+use serde_json::{Value, json};
+use std::collections::HashMap;
+use std::sync::Arc;
+
+pub(super) fn build_program(path: &str, content: &str) -> Arc<tsox_compile::compiler::Program> { ::tsox_core::fntrace::enter("build_program"); 
+    let fs = Arc::new(tsox_tsoptions::vfs::InMemoryFS::new());
+    let parent = std::path::Path::new(path)
+        .parent()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_else(|| "/".to_string());
+    fs.insert_dir(&parent);
+    fs.insert_file(path, content);
+
+    let host = tsox_compile::compiler::CompilerHostImpl::new(
+        fs,
+        parent,
+        tsox_checker::bundled::lib_path(),
+    );
+    let host: Arc<dyn tsox_compile::compiler::CompilerHost> = Arc::new(host);
+
+    let mut config = tsox_tsoptions::tsoptions::ParsedCommandLine::default();
+    config.file_names = vec![path.to_string()];
+    config.compiler_options.no_lib = tsox_core::core::tristate::Tristate::True;
+
+    tsox_compile::compiler::Program::new(
+        tsox_compile::compiler::ProgramOptions {
+                config,
+                host,
+                use_source_of_project_reference: false,
+                single_threaded: tsox_core::core::tristate::Tristate::Unknown,
+                create_checker_pool: None,
+                typings_location: String::new(),
+                project_name: String::new(),
+                tracing: None,
+                skip_module_resolution: false,
+            },
+    )
+}
+
+pub(super) fn display_parts_to_string(
+    parts: &[tsox_checker::checker::nodebuilder::SymbolDisplayPart],
+) -> String { ::tsox_core::fntrace::enter("display_parts_to_string"); 
+    parts.iter().map(|p| p.text.as_str()).collect()
+}
+
+pub(super) fn find_deepest_node(
+    node: &Arc<tsox_frontend::ast::Node>,
+    offset: usize,
+) -> Arc<tsox_frontend::ast::Node> { ::tsox_core::fntrace::enter("find_deepest_node"); 
+    let mut deepest = Arc::clone(node);
+    loop {
+        let current = Arc::clone(&deepest);
+        let mut next: Option<Arc<tsox_frontend::ast::Node>> = None;
+        tsox_frontend::ast::for_each_child(&current, |child| {
+            if child.loc.pos() <= offset && offset < child.loc.end() {
+                next = Some(Arc::clone(child));
+                true
+            } else {
+                false
+            }
+        });
+        match next {
+            Some(child) => deepest = child,
+            None => break,
+        }
+    }
+    deepest
+}
+
+pub(super) fn position_to_offset(params: &Value, content: &str) -> usize { ::tsox_core::fntrace::enter("position_to_offset"); 
+    let line = params
+        .get("position")
+        .and_then(|p| p.get("line"))
+        .and_then(|v| v.as_u64())
+        .unwrap_or(0) as usize;
+    let character = params
+        .get("position")
+        .and_then(|p| p.get("character"))
+        .and_then(|v| v.as_u64())
+        .unwrap_or(0) as usize;
+    let line_map = tsox_frontend::ast::LineMap::from_text(content);
+    line_map.line_starts.get(line).copied().unwrap_or(0) as usize + character
+}
+
+pub(super) fn build_program_from_documents(
+    documents: &HashMap<String, String>,
+) -> Option<Arc<tsox_compile::compiler::Program>> { ::tsox_core::fntrace::enter("build_program_from_documents"); 
+    if documents.is_empty() {
+        return None;
+    }
+    let fs = Arc::new(tsox_tsoptions::vfs::InMemoryFS::new());
+    fs.insert_dir("/");
+    let mut file_names = Vec::with_capacity(documents.len());
+    for (uri, content) in documents {
+        let path = uri.strip_prefix("file://").unwrap_or(uri);
+        fs.insert_file(path, content);
+        file_names.push(path.to_string());
+    }
+    let host = tsox_compile::compiler::CompilerHostImpl::new(
+        fs,
+        "/".to_string(),
+        tsox_checker::bundled::lib_path(),
+    );
+    let host: Arc<dyn tsox_compile::compiler::CompilerHost> = Arc::new(host);
+
+    let mut config = tsox_tsoptions::tsoptions::ParsedCommandLine::default();
+    config.file_names = file_names;
+    config.compiler_options.no_lib = tsox_core::core::tristate::Tristate::True;
+
+    Some(tsox_compile::compiler::Program::new(
+        tsox_compile::compiler::ProgramOptions {
+                config,
+                host,
+                use_source_of_project_reference: false,
+                single_threaded: tsox_core::core::tristate::Tristate::Unknown,
+                create_checker_pool: None,
+                typings_location: String::new(),
+                project_name: String::new(),
+                tracing: None,
+                skip_module_resolution: false,
+            },
+    ))
+}
+
+pub(super) fn path_to_uri(path: &str) -> String { ::tsox_core::fntrace::enter("path_to_uri"); 
+    if path.starts_with('/') {
+        format!("file://{path}")
+    } else {
+        format!("file:///{path}")
+    }
+}
+
+pub(super) fn diagnostic_to_lsp(
+    diag: &tsox_frontend::ast::diagnostic::Diagnostic,
+    content: &str,
+) -> Value { ::tsox_core::fntrace::enter("diagnostic_to_lsp"); 
+    let (line, col) = if let Some(file) = &diag.file {
+        tsox_frontend::diagnosticwriter::line_and_character(
+            &file.line_map,
+            &file.text,
+            diag.loc.pos(),
+        )
+    } else {
+        let line_map = tsox_frontend::ast::LineMap::from_text(content);
+        let pos = diag.loc.pos().min(content.len());
+        tsox_frontend::diagnosticwriter::line_and_character(&line_map, content, pos)
+    };
+
+    let severity = match diag.category {
+        tsox_core::diagnostics::Category::Error => 1,
+        tsox_core::diagnostics::Category::Warning => 2,
+        tsox_core::diagnostics::Category::Suggestion => 3,
+        tsox_core::diagnostics::Category::Message => 3,
+    };
+
+    let message = tsox_frontend::diagnosticwriter::message_text(diag, None);
+
+    json!({
+        "range": {
+            "start": {"line": line, "character": col},
+            "end": {"line": line, "character": col + diag.loc.len().max(1)}
+        },
+        "severity": severity,
+        "code": diag.code,
+        "source": "tsox",
+        "message": message
+    })
+}
+
+pub(super) fn make_response(id: Option<Value>, result: Value) -> Value { ::tsox_core::fntrace::enter("make_response"); 
+    json!({
+        "jsonrpc": "2.0",
+        "id": id,
+        "result": result
+    })
+}
+
+pub(super) fn make_error_response(id: Option<Value>, code: i32, message: &str) -> Value { ::tsox_core::fntrace::enter("make_error_response"); 
+    json!({
+        "jsonrpc": "2.0",
+        "id": id,
+        "error": {
+            "code": code,
+            "message": message
+        }
+    })
+}

@@ -1,0 +1,282 @@
+#![allow(unused_imports)]
+
+use crate::checker::relater_compare::*;
+
+impl Checker {
+    pub fn instantiate_type_predicate(
+        &mut self,
+        predicate: &TypePredicate,
+        mapper: &Arc<TypeMapper>,
+    ) -> Option<Box<TypePredicate>> { ::tsox_core::fntrace::enter("instantiate_type_predicate");
+        let Some(t) = predicate.t.as_ref() else {
+            return Some(Box::new(predicate.clone()));
+        };
+        let instantiated = self.instantiate_type(t, Some(mapper));
+        if Arc::ptr_eq(&instantiated, t) {
+            return Some(Box::new(predicate.clone()));
+        }
+        Some(self.new_type_predicate(
+            predicate.kind,
+            predicate.parameter_name.clone(),
+            predicate.parameter_index,
+            instantiated,
+        ))
+    }
+
+    pub fn new_type_predicate(
+        &mut self,
+        kind: TypePredicateKind,
+        parameter_name: String,
+        parameter_index: i32,
+        t: Arc<Type>,
+    ) -> Box<TypePredicate> { ::tsox_core::fntrace::enter("new_type_predicate"); 
+        Box::new(TypePredicate {
+            kind,
+            parameter_name,
+            parameter_index,
+            t: Some(t),
+        })
+    }
+
+    pub fn is_resolving_return_type_of_signature(&mut self, _signature: &Arc<Signature>) -> bool { ::tsox_core::fntrace::enter("is_resolving_return_type_of_signature"); 
+        false
+    }
+
+    pub fn is_matching_signature(
+        &mut self,
+        source: &Arc<Signature>,
+        target: &Arc<Signature>,
+        partial_match: bool,
+    ) -> bool { ::tsox_core::fntrace::enter("is_matching_signature"); 
+        self.compare_signatures_identical(source, target, partial_match, false, false)
+            != Ternary::False
+    }
+
+    pub fn compare_type_predicates_identical(
+        &mut self,
+        source: &TypePredicate,
+        target: &TypePredicate,
+        _compare_types: &dyn Fn(&Arc<Type>, &Arc<Type>) -> Ternary,
+    ) -> Ternary { ::tsox_core::fntrace::enter("compare_type_predicates_identical"); 
+        if source.kind != target.kind {
+            return Ternary::False;
+        }
+        if source.parameter_name != target.parameter_name {
+            return Ternary::False;
+        }
+        Ternary::True
+    }
+
+    pub fn get_effective_constraint_of_intersection(
+        &mut self,
+        _types: &[Arc<Type>],
+        _target_is_union: bool,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_effective_constraint_of_intersection"); 
+        None
+    }
+
+    pub fn is_member_of_string_mapping(
+        &mut self,
+        _source: &Arc<Type>,
+        _target: &Arc<Type>,
+    ) -> bool { ::tsox_core::fntrace::enter("is_member_of_string_mapping"); 
+        false
+    }
+
+    pub fn apply_target_string_mapping_to_source(
+        &mut self,
+        source: &Arc<Type>,
+        target: &Arc<Type>,
+    ) -> (Arc<Type>, Arc<Type>) { ::tsox_core::fntrace::enter("apply_target_string_mapping_to_source"); 
+        (Arc::clone(source), Arc::clone(target))
+    }
+
+    pub fn get_type_of_property_in_types(
+        &mut self,
+        _types: &[Arc<Type>],
+        _name: &str,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_in_types"); 
+        None
+    }
+
+    pub fn get_type_of_property_in_type(
+        &mut self,
+        _t: &Arc<Type>,
+        _name: &str,
+    ) -> Option<Arc<Type>> { ::tsox_core::fntrace::enter("get_type_of_property_in_type"); 
+        None
+    }
+
+    pub fn is_type_subset_of_union(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_subset_of_union");
+        if source.flags.contains(TypeFlags::Union) {
+            return source.types().is_some_and(|source_types| {
+                source_types.iter().all(|t| {
+                    target
+                        .types()
+                        .is_some_and(|target_types| target_types.iter().any(|u| u.id == t.id))
+                })
+            });
+        }
+        if source.flags.intersects(crate::checker::types::TYPE_FLAGS_ENUM_LIKE)
+            && Arc::ptr_eq(&self.get_base_type_of_enum_like_type(source), target)
+        {
+            return true;
+        }
+        target
+            .types()
+            .is_some_and(|target_types| target_types.iter().any(|u| u.id == source.id))
+    }
+
+    pub fn is_type_derived_from(&mut self, source: &Arc<Type>, target: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_type_derived_from"); 
+        if source.flags.contains(TypeFlags::Union) {
+            return source
+                .types()
+                .is_some_and(|ts| ts.iter().all(|t| self.is_type_derived_from(t, target)));
+        }
+        if target.flags.contains(TypeFlags::Union) {
+            return source
+                .types()
+                .is_some_and(|ts| ts.iter().any(|t| self.is_type_derived_from(source, t)));
+        }
+        if source.flags.contains(TypeFlags::Intersection) {
+            return source
+                .types()
+                .is_some_and(|ts| ts.iter().any(|t| self.is_type_derived_from(t, target)));
+        }
+        if source
+            .flags
+            .intersects(crate::checker::types_type_flags_instantiable_non_primitive::TYPE_FLAGS_INSTANTIABLE_NON_PRIMITIVE)
+        {
+            let constraint = self
+                .get_base_constraint_of_type(source)
+                .unwrap_or_else(|| self.get_unknown_type());
+            return self.is_type_derived_from(&constraint, target);
+        }
+        if self.is_empty_anonymous_object_type(target) {
+            return source
+                .flags
+                .intersects(TypeFlags::Object | TypeFlags::NonPrimitive);
+        }
+        if let Some(global_object) = self.get_global_type_by_name("Object")
+            && Arc::ptr_eq(target, &global_object)
+        {
+            return source.flags.intersects(TypeFlags::Object | TypeFlags::NonPrimitive)
+                && !self.is_empty_anonymous_object_type(source);
+        }
+        if let Some(global_function) = self.get_global_type_by_name("Function")
+            && Arc::ptr_eq(target, &global_function)
+        {
+            return source.flags.contains(TypeFlags::Object)
+                && self.is_function_object_type(source);
+        }
+        let target = target.target().cloned().unwrap_or_else(|| Arc::clone(target));
+        if self.has_base_type(source, &target) {
+            return true;
+        }
+        if !self.is_array_type(&target)
+            || target
+                .object_flags
+                .contains(crate::checker::types::ObjectFlags::IsReadonlyArray)
+        {
+            return false;
+        }
+        match self.global_readonly_array_type.get().cloned() {
+            Some(ro) => self.is_type_derived_from(source, &ro),
+            None => false,
+        }
+    }
+
+    // Go hasBaseType：名义基类型链。本仓类/接口实例型是携带声明符号的
+    // Anonymous 结构型（无 Class/Reference 位），恒等按符号 Arc 判等，
+    // 基链沿声明 heritage 递归
+    pub(crate) fn has_base_type(&mut self, t: &Arc<Type>, check_base: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("has_base_type"); 
+        if Arc::ptr_eq(t, check_base) || t.id == check_base.id {
+            return true;
+        }
+        if let (Some(s1), Some(s2)) = (t.symbol.as_ref(), check_base.symbol.as_ref())
+            && s1.flags.intersects(tsox_frontend::ast::SymbolFlags::Class)
+            && s2.flags.intersects(tsox_frontend::ast::SymbolFlags::Class)
+            && Arc::ptr_eq(s1, s2)
+        {
+            return true;
+        }
+        if t.flags.contains(TypeFlags::Intersection) {
+            return t
+                .types()
+                .is_some_and(|ts| ts.iter().any(|x| self.has_base_type(x, check_base)));
+        }
+        let Some(sym) = t.symbol.clone() else {
+            return false;
+        };
+        let mut heritage: Vec<Arc<Node>> = Vec::new();
+        for decl in sym.declarations.iter() {
+            match &decl.data {
+                tsox_frontend::ast::NodeData::ClassDeclaration(d) => {
+                    if let Some(clauses) = &d.heritage_clauses {
+                        for c in clauses.iter() {
+                            if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &c.data {
+                                for h in hc.types.iter() {
+                                    if let tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ed) = &h.data {
+                                        heritage.push(Arc::clone(&ed.expression));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                tsox_frontend::ast::NodeData::InterfaceDeclaration(d) => {
+                    if let Some(clauses) = &d.heritage_clauses {
+                        for c in clauses.iter() {
+                            if let tsox_frontend::ast::NodeData::HeritageClause(hc) = &c.data {
+                                for h in hc.types.iter() {
+                                    match &h.data {
+                                        tsox_frontend::ast::NodeData::TypeReferenceNode(tr) => {
+                                            heritage.push(Arc::clone(&tr.type_name));
+                                        }
+                                        tsox_frontend::ast::NodeData::ExpressionWithTypeArguments(ed) => {
+                                            heritage.push(Arc::clone(&ed.expression));
+                                        }
+                                        _ => {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => continue,
+            }
+        }
+        for e in heritage {
+            let bt = self.get_type_of_node(&e);
+            let bt = self.get_instance_type_of_constructor(&bt).unwrap_or(bt);
+            if self.has_base_type(&bt, check_base) {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn is_function_object_type(&mut self, t: &Arc<Type>) -> bool { ::tsox_core::fntrace::enter("is_function_object_type");
+        if t.object_flags.contains(crate::checker::types::ObjectFlags::EvolvingArray) {
+            return false;
+        }
+        let resolved = self.resolve_structured_type_members(t);
+        let Some(structured) = resolved.as_structured() else {
+            return false;
+        };
+        if !structured.signatures.is_empty() {
+            return true;
+        }
+        if structured.members.get("bind").is_none() {
+            return false;
+        }
+        match self.global_function_type.get().cloned() {
+            Some(global_function) => self.is_type_subtype_of(t, &global_function),
+            None => false,
+        }
+    }
+
+    pub fn is_distribution_dependent(&mut self, _root: &ConditionalRoot) -> bool { ::tsox_core::fntrace::enter("is_distribution_dependent"); 
+        false
+    }
+}
